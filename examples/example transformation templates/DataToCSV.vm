@@ -1,0 +1,11 @@
+## Example transformation template for converting data to CSV format
+## sources loop
+#foreach($sourceName in $sources.keySet())
+    ## source values loop
+    #foreach($valueName in $sources[$sourceName]["values"].keySet())
+        ## get the node for the value, contains the actual value and the timestamp
+        #set( $value = $sources[$sourceName]["values"][$valueName])
+    "$sourceName","$valueName",$value["value"],"$value["timestamp"]"
+    #end
+#end
+

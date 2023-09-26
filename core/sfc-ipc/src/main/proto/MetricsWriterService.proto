@@ -1,0 +1,44 @@
+/*
+ Copyright (c) 2021. Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ Licensed under the Amazon Software License (the "License"). You may not use this file except in
+ compliance with the License. A copy of the License is located at :
+
+     http://aws.amazon.com/asl/
+
+ or in the "license" file accompanying this file. This file is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES  OR CONDITIONS OF ANY KIND, express or implied. See the License for the specific
+ language governing permissions and limitations under the License.
+
+ */
+
+// SFC target service
+
+syntax = "proto3";
+
+import "google/protobuf/empty.proto";
+import "Metrics.proto";
+
+package com.amazonaws.sfc.ipc;
+
+option java_multiple_files = true;
+
+// Service to stream output values from SFC core to target services
+service MetricsWriterService{
+  // Client side streaming of values to target service
+  rpc WriteMetrics(stream MetricsDataMessage) returns (google.protobuf.Empty);
+  rpc InitializeMetricsWriter(InitializeMetricsWriterRequest) returns (InitializeMetricsWriterResponse){}
+}
+
+
+message InitializeMetricsWriterRequest{
+  string metricsConfiguration = 1;
+}
+
+message InitializeMetricsWriterResponse{
+  bool initialized = 1;
+  string error = 2;
+}
+
+
+
+

@@ -1,0 +1,205 @@
+/*
+ Copyright (c) 2021. Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ Licensed under the Amazon Software License (the "License"). You may not use this file except in
+ compliance with the License. A copy of the License is located at :
+
+     http://aws.amazon.com/asl/
+
+ or in the "license" file accompanying this file. This file is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES  OR CONDITIONS OF ANY KIND, express or implied. See the License for the specific
+ language governing permissions and limitations under the License.
+
+ */
+
+// SFC target service
+
+syntax = "proto3";
+
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+import "Types.proto";
+import "Metrics.proto";
+
+package com.amazonaws.sfc.ipc;
+
+option java_multiple_files = true;
+
+// Service to stream output values from SFC core to target services
+service TargetAdapterService{
+  // Client side streaming of values to target service
+  rpc WriteValues(stream WriteValuesRequest) returns (stream TargetResultResponse) {}
+  rpc ReadMetrics(ReadMetricsRequest) returns(stream MetricsDataMessage){}
+  rpc InitializeTarget(InitializeTargetRequest) returns (InitializeTargetResponse){}
+}
+
+enum MessageData{
+  NONE = 0;
+  SERIALS = 1;
+  MESSAGES = 2;
+}
+
+
+message InitializeTargetRequest{
+  string targetID = 1;
+  string targetConfiguration = 2;
+  ReturnedDataMessage returnedData = 3;
+  map<string, AuxiliarySettings> auxiliary_settings = 4;
+}
+
+message InitializeTargetResponse{
+  bool initialized = 1;
+  string error = 2;
+}
+
+message TargetResultResponse{
+  string target = 1;
+  repeated string ackSerials = 10;
+  repeated WriteValuesRequest ackRequests = 11;
+  repeated string nackSerials = 20;
+  repeated WriteValuesRequest  nackRequests = 21;
+  repeated string errorSerials = 30;
+  repeated WriteValuesRequest errorRequests = 31;
+}
+
+
+message ReturnedDataMessage{
+  MessageData ack = 1;
+  MessageData nack = 2;
+  MessageData error = 3;
+}
+
+
+// Request for WriteValues service call
+message WriteValuesRequest{
+  // Name of the schedule
+  string schedule = 1;
+  map<string, SourceValues> values = 2;
+  Metadata metadata = 3;
+  string serial = 4;
+  google.protobuf.Timestamp created_timestamp = 5;
+  bool noBuffering = 6;
+
+  bytes compressed = 100;
+}
+
+// Values to write
+message SourceValues{
+  oneof value {
+    // map of values source/channels
+    TargetChannelValuesMap values = 1;
+    // map of source/channel/aggregations
+    TargetChannelValueAggregationMap aggregated_values = 2;
+  }
+  Metadata metadata = 3;
+  google.protobuf.Timestamp source_timestamp = 4;
+
+}
+
+// Map of channel values
+message TargetChannelValuesMap{
+  map<string, TargetChannelValue> value = 1;
+}
+
+// List of channel values
+message TargetChannelValuesList{
+  repeated TargetChannelValue items = 1;
+}
+
+// Map of source/channel/aggregations
+message TargetChannelValueAggregationMap{
+  map<string, TargetChannelValuesMap> values = 1;
+  map<string, Metadata> metadata = 2;
+}
+
+message Metadata{
+  map<string, string> metadata = 1;
+}
+
+message TypedTargetChannelValueMap {
+  map<string, TargetChannelValue> entries = 1;
+}
+
+message TypedTargetChannelValueMapArray{
+  repeated TypedTargetChannelValueMap items = 1;
+}
+
+
+// Contains the actual value. Each datatype has designated field in order to keep data type fidelity
+message TargetChannelValue{
+
+  google.protobuf.Timestamp value_timestamp = 1;
+  Metadata metadata = 2;
+
+
+  oneof value {
+
+    // byte
+    int32  signed_byte = 101;
+    bytes  signed_byte_array = 201;
+    SignedByteArrayArray signed_byte_array_array = 301;
+
+    // unsigned byte
+    uint32 unsigned_byte = 102;
+    bytes unsigned_byte_array = 202;
+    UnsignedByteArrayArray unsigned_byte_array_array = 302;
+
+    // integers
+    sint32 signed_int16 = 111;
+    sint32 signed_int32 = 112;
+    sint64 signed_int64 = 113;
+    uint32 unsigned_int16 = 114;
+    uint32 unsigned_int32 = 115;
+    uint64 unsigned_int64 = 116;
+
+    // array of integers
+    SignedInt16Array signed_int16_array = 211;
+    SignedInt32Array signed_int32_array = 212;
+    SignedInt64Array signed_int64_array = 213;
+    UnsignedInt16Array unsigned_int16_array = 214;
+    UnsignedInt32Array unsigned_int32_array = 215;
+    UnsignedInt64Array unsigned_int64_array = 216;
+
+    // array of arrays of integers
+    SignedInt16ArrayArray signed_int16array_array = 311;
+    SignedInt32ArrayArray signed_int32array_array = 312;
+    SignedInt64ArrayArray signed_int64array_array = 313;
+    UnsignedInt16ArrayArray unsigned_int16_array_array = 314;
+    UnsignedInt32ArrayArray unsigned_int32_array_array = 315;
+    UnsignedInt64ArrayArray unsigned_int64_array_array = 316;
+
+    // boolean
+    bool bool = 121;
+    BoolArray  bool_array = 221;
+    BoolArrayArray  bool_array_array = 321;
+
+    // float and double
+    float float = 131;
+    double double = 132;
+
+    FloatArray float_array = 231;
+    DoubleArray double_array = 232;
+    FloatArrayArray float_array_array = 331;
+    DoubleArrayArray double_array_array = 332;
+
+    // strings
+    string string = 141;
+    StringArray string_array = 241;
+    StringArrayArray string_array_array = 341;
+
+    // timestamp
+    google.protobuf.Timestamp timestamp = 151;
+    TimestampArray timestamp_array = 251;
+
+    // custom encoded as JSON
+    string custom = 161;
+    string custom_array = 261;
+
+    // maps
+    TypedTargetChannelValueMap typed_hash_map = 171;
+    TypedTargetChannelValueMapArray typed_hash_map_array = 271;
+
+    TargetChannelValuesList values_list = 400;
+
+  }
+
+}

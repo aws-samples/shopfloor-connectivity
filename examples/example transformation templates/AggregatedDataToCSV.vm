@@ -1,0 +1,18 @@
+## Example transformation template for converting aggregated data to CSV format
+## sources loop
+#foreach($sourceName in $sources.keySet())
+    ## source values loop
+    #foreach($valueName in $sources[$sourceName]["values"].keySet())
+        ## values node, contains a set of aggregated values
+        #set( $values = $sources[$sourceName]["values"][$valueName])
+        ## collect data for selected aggregated values
+        #set($aggregatedValues="")
+        #foreach($aggrName in ["count", "avg", "min", "max", "stddev"])
+            #set($aggregatedValues = $aggregatedValues + "," + $values["value"][$aggrName]["value"])
+        #end
+        ## output csv line of data
+    "$sourceName","$valueName"$aggregatedValues
+        #set($aggregatedValues="")
+    #end
+#end
+

@@ -1,0 +1,1 @@
+rootProject.name "example-custom-log-writer"

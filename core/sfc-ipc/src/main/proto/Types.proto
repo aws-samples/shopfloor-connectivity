@@ -1,0 +1,203 @@
+/*
+ Copyright (c) 2021. Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ Licensed under the Amazon Software License (the "License"). You may not use this file except in
+ compliance with the License. A copy of the License is located at :
+
+     http://aws.amazon.com/asl/
+
+ or in the "license" file accompanying this file. This file is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES  OR CONDITIONS OF ANY KIND, express or implied. See the License for the specific
+ language governing permissions and limitations under the License.
+
+ */
+
+// SFC type for arrays and arrays of arrays of values
+
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+
+package com.amazonaws.sfc.ipc;
+
+option java_multiple_files = true;
+
+message AuxiliarySettings{
+  map<string, string > settings = 1;
+}
+
+message InitializeAdapterRequest{
+  string adapterConfiguration = 1;
+  map<string, AuxiliarySettings> auxiliary_settings = 2;
+
+}
+
+message SignedByteArrayArray{
+  repeated bytes items = 1;
+}
+
+message UnsignedByteArrayArray{
+  repeated bytes items = 1;
+}
+
+message SignedInt16Array{
+  repeated sint32 items = 1;
+}
+
+message SignedInt16ArrayArray{
+  repeated SignedInt16Array items = 1;
+}
+
+message UnsignedInt16Array{
+  repeated uint32 items = 1;
+}
+
+message UnsignedInt16ArrayArray{
+  repeated UnsignedInt16Array items = 1;
+}
+
+message SignedInt32Array{
+  repeated sint32 items = 1;
+}
+
+message SignedInt32ArrayArray{
+  repeated SignedInt32Array items = 1;
+}
+
+message UnsignedInt32Array{
+  repeated uint32 items = 1;
+}
+
+message UnsignedInt32ArrayArray{
+  repeated UnsignedInt32Array items = 1;
+}
+
+message SignedInt64Array{
+  repeated sint64 items = 1;
+}
+
+message SignedInt64ArrayArray{
+  repeated SignedInt64Array items = 1;
+}
+
+
+message UnsignedInt64Array{
+  repeated uint64 items = 1;
+}
+
+message UnsignedInt64ArrayArray{
+  repeated UnsignedInt64Array items = 1;
+}
+
+message BoolArray{
+  repeated bool items = 1;
+}
+
+message BoolArrayArray{
+  repeated BoolArray items = 1;
+}
+
+message StringArray{
+  repeated string items = 1;
+}
+
+message StringArrayArray{
+  repeated StringArray items = 1;
+}
+
+message FloatArray{
+  repeated float items = 1;
+}
+
+message FloatArrayArray{
+  repeated FloatArray items = 1;
+}
+
+message DoubleArray{
+  repeated double items = 1;
+}
+
+message DoubleArrayArray{
+  repeated DoubleArray items = 1;
+}
+
+message TimestampArray{
+  repeated  google.protobuf.Timestamp timestamp = 1;
+}
+
+message CustomArray{
+  repeated string items = 1;
+}
+
+message MapArray{
+  repeated string items = 1;
+}
+
+message TypedMap {
+  map<string, ChannelValue> entries = 1;
+}
+
+message TypedMapArray{
+  repeated TypedMap items = 1;
+}
+
+// Contains the value for a channel with an optional timestamp
+// Each data type is stored in a designated field in order to maintain datatype fidelity
+message ChannelValue{
+  oneof value {
+
+    // byte and byte
+    int32  signed_byte = 1;
+    bytes  signed_byte_array = 101;
+
+    // unsigned byte
+    uint32 unsigned_byte = 2;
+    bytes unsigned_byte_array = 102;
+
+    // integers
+    sint32 signed_int16 = 11;
+    sint32 signed_int32 = 12;
+    sint64 signed_int64 = 13;
+    uint32 unsigned_int16 = 14;
+    uint32 unsigned_int32 = 15;
+    uint64 unsigned_int64 = 16;
+
+    // integer arrays
+    SignedInt16Array signed_int16_array = 111;
+    SignedInt32Array signed_int32_array = 112;
+    SignedInt64Array signed_int64_array = 113;
+    UnsignedInt16Array unsigned_int16_array = 114;
+    UnsignedInt32Array unsigned_int32_array = 115;
+    UnsignedInt64Array unsigned_int64_array = 116;
+
+    // boolean
+    bool bool = 21;
+    BoolArray  bool_array = 121;
+
+    // float and double
+    float float = 31;
+    double double = 32;
+    FloatArray float_array = 131;
+    DoubleArray double_array = 132;
+
+    // string
+    string string = 41;
+    StringArray string_array = 141;
+
+    // timestamps
+    google.protobuf.Timestamp datetime = 51;
+    TimestampArray datetime_array = 151;
+
+    // custom and structured datatype encoded as JSON strings
+    string custom = 61;
+    string custom_array = 161;
+
+    TypedMap typed_hash_map = 71;
+    TypedMapArray typed_has_map_array = 171;
+
+  }
+
+  // timestamp for the value
+  google.protobuf.Timestamp timestamp = 1000;
+
+}
+

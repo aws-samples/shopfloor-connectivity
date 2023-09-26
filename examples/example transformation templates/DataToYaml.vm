@@ -1,0 +1,55 @@
+## example template to cobvert output data to YAML format
+---
+## schedule root
+$schedule:
+sources:
+## sources loop
+#foreach($sourceName in $sources.keySet())
+    #set( $source = $sources[$sourceName])
+    $sourceName:
+values:
+    ## source values loop
+    #foreach($valueName in $source["values"].keySet())
+        #set($value = $source["values"][$valueName])
+        ## the value
+        $valueName:
+    value: $value["value"]
+        #set($val_timestamp = $value["timestamp"])
+        ## optional value timestamp
+        #if ($val_timestamp != "")
+        timestamp: $val_timestamp
+        #end
+        ## optional value metadata
+        #set($val_metadata = $value["metadata"])
+        #if( $val_metadata != "")
+        metadata:
+            #foreach($key in $val_metadata.keySet())
+                $key: $val_metadata[$key]
+            #end
+        #end
+        #set($val_metadata = "")
+    #end
+    ## optional source metadata
+    #set($src_timestamp = $source["timestamp"])
+    #if ($src_timestamp != "")
+    timestamp: $src_timestamp
+    #end
+    ## optional source metadata
+    #set($src_metadata = $source["metadata"])
+    #if( $src_metadata != "")
+    metadata:
+        #foreach($key in $src_metadata.keySet())
+            $key: $src_metadata[$key]
+        #end
+    #end
+    #set($src_metadata = "")
+    #set($src_timestamp = "")
+#end
+#if( $metadata != "")
+metadata:
+    #foreach($key in $metadata.keySet())
+        $key: $metadata[$key]
+    #end
+#end
+
+

@@ -1,0 +1,82 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+
+package com.amazonaws.sfc.ipc;
+
+message ReadMetricsRequest{
+  int64 interval = 1;
+}
+
+message MetricsDataMessage{
+  string source = 1;
+  MetricsSourceType sourceType = 2;
+  map<string, string> commonDimensions = 3;
+  repeated MetricsDataPoint dataPoints = 4;
+}
+
+message MetricsStatistics {
+  double maximum = 1;
+  double minimum = 2;
+  double sampleCount = 3;
+  double sum = 4;
+}
+
+enum MetricsSourceType {
+  UNDEFINED = 0;
+  SFC_CORE = 1;
+  PROTOCOL_ADAPTER = 2;
+  TARGET_WRITER = 3;
+}
+
+enum MetricUnits{
+  UNITS_NONE = 0;
+  SECONDS = 1;
+  MICROSECONDS = 2;
+  MILLISECONDS = 3;
+  BYTES = 10;
+  KILOBYTES = 11;
+  MEGABYTES = 12;
+  GIGABYTES = 13;
+  TERABYTES = 14;
+  BITS = 20;
+  KILOBITS = 21;
+  MEGABITS = 22;
+  GIGABITS = 23;
+  TERABITS = 24;
+  PERCENT = 30;
+  COUNT = 31;
+  BYTES_SECOND = 40;
+  KILOBYTES_SECOND = 41;
+  MEGABYTES_SECOND = 42;
+  GIGABYTES_SECOND = 43;
+  TERABYTES_SECOND = 44;
+  BITS_SECOND = 50;
+  KILOBITS_SECOND = 51;
+  MEGABITS_SECOND = 52;
+  GIGABITS_SECOND = 53;
+  TERABITS_SECOND = 54;
+  COUNT_SECOND = 60;
+}
+
+message ValueList{
+  repeated double values = 1;
+  repeated double count = 2;
+}
+
+
+message MetricsDataPoint{
+
+  string name = 1;
+  map<string, string> dimensions = 2;
+  MetricUnits units = 3;
+  google.protobuf.Timestamp timestamp = 4;
+
+  oneof value{
+    double singleValue = 10;
+    ValueList values = 11;
+    MetricsStatistics statistics = 12;
+  }
+
+}
+

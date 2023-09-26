@@ -1,0 +1,31 @@
+## Example transformation template for converting data to XML format
+## root node for schedule
+<schedule id="$schedule" #metadata_attributes($metadata)>
+    ## child nodes for sources
+    #foreach($sourceName in $sources.keySet())
+        #set( $source = $sources[$sourceName])
+        <source name="sourceName" #metadata_attributes($source) #timestamp_attr($source)>
+        ## choild nodes for source values
+        #foreach($valueName in $source["values"].keySet())
+            #set($value = $source["values"][$valueName])
+            <value name="$valueName" #metadata_attributes($value)#timestamp_attr($value)>$value["value"]</value>
+        #end
+        </source>
+    #end
+</schedule>
+## macro to output optional metadata
+#macro(metadata_attributes $item)
+    #set($attrs = "")
+    #set($metadata=$item["metadata"])
+    #foreach($key in $metadata.keySet())
+        #set( $attrs = $attrs + $key + "=""" + $metadata[$key] +  """ " )
+    #end
+    $attrs#end
+## macro to output optional timestamp
+#macro(timestamp_attr $item)
+    #set($timestamp=$item["timestamp"])
+    #if ($timestamp != "")
+        #set($timestamp = "timestamp=""" + $timestamp + """")
+        $timestamp#end
+    #set($timestamp = "")
+#end
