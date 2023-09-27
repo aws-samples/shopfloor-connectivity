@@ -1,0 +1,5 @@
+**/BuildConfig.kt
+
+build/
+.gradle/
+.idea/

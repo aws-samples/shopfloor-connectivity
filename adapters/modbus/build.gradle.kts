@@ -30,14 +30,11 @@ plugins {
 
 repositories {
     mavenCentral()
-    mavenLocal {
-        url = uri("file://tmp/repo")
-    }
 }
 
 dependencies {
 
-    implementation("com.amazonaws.sfc:sfc-core:1.0.0")
+    implementation(project(":core:sfc-core"))
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinCoroutinesVersion")
 

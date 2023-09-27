@@ -22,9 +22,6 @@ val sfcCoreVersion = "1.0.0"
 
 repositories {
     mavenCentral()
-    mavenLocal {
-        url = uri("file://tmp/repo")
-    }
 }
 
 plugins {
@@ -35,7 +32,7 @@ plugins {
 
 dependencies {
 
-    implementation("com.amazonaws.sfc:sfc-core:$sfcCoreVersion")
+    implementation(project(":core:sfc-core"))
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion")
 
 }

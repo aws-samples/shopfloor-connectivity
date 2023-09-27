@@ -20,7 +20,7 @@ group = "com.amazonaws.sfc"
 version = "1.0.0"
 
 val protobufVersion = "3.21.2"
-val grpcKotlinVersion = "0.1.1"
+val grpcKotlinVersion = "1.3.0"
 val grpcVersion = "1.54.1"
 val reflectionVersion = "1.6.0"
 val kotlinAnnotationVersion = "1.3.2"
@@ -37,9 +37,6 @@ val kotlinVersion = "1.9.0"
 
 repositories {
     mavenCentral()
-    mavenLocal {
-        url = uri("file://tmp/repo")
-    }
 }
 
 plugins {
@@ -55,7 +52,7 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinCoroutinesVersion")
 
-    implementation("com.amazonaws.sfc:sfc-core:$sfcCoreVersion")
+    implementation(project(":core:sfc-core"))
 
     implementation("commons-cli:commons-cli:$commonsCliVersion")
 
@@ -114,7 +111,8 @@ protobuf {
 
         // Specify protoc to generate using our grpc kotlin plugin
         id("grpckt") {
-            artifact = "io.grpc:protoc-gen-grpc-kotlin:$grpcKotlinVersion"
+            artifact = "io.grpc:protoc-gen-grpc-kotlin:$grpcKotlinVersion:jdk8@jar"
+//            artifact = "io.grpc:protoc-gen-grpc-kotlin:$grpcKotlinVersion"
         }
     }
 

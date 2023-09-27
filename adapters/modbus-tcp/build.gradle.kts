@@ -32,9 +32,6 @@ val modbusVersion = "1.0.0"
 
 repositories {
     mavenCentral()
-    mavenLocal {
-        url = uri("file://tmp/repo")
-    }
 }
 
 plugins {
@@ -45,8 +42,8 @@ plugins {
 
 dependencies {
 
-    implementation("com.amazonaws.sfc:sfc-core:$sfcCoreVersion")
-    implementation("com.amazonaws.sfc:sfc-ipc:$sfcIpcVersion")
+    implementation(project(":core:sfc-core"))
+    implementation(project(":core:sfc-ipc"))
 
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinCoroutinesVersion")
@@ -54,7 +51,7 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-api:$junitVersion")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitVersion")
 
-    api("com.amazonaws.sfc:modbus:$modbusVersion")
+    api(project(":adapters:modbus"))
 
 }
 

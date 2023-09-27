@@ -30,9 +30,6 @@ val jvmTarget = "1.8"
 
 repositories {
     mavenCentral()
-    mavenLocal {
-        url = uri("file://tmp/repo")
-    }
 }
 
 plugins {
@@ -42,8 +39,8 @@ plugins {
 }
 
 dependencies {
-    implementation("com.amazonaws.sfc:sfc-core:$sfcCoreVersion")
-    implementation("com.amazonaws.sfc:sfc-ipc:$sfcIpcVersion")
+    implementation(project(":core:sfc-core"))
+    implementation(project(":core:sfc-ipc"))
     implementation("com.google.code.gson:gson:$gsonVersion")
 
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion")
