@@ -28,8 +28,8 @@ repositories {
 }
 
 plugins {
-    application
-    kotlin("jvm") version "1.8.10"
+    id("sfc.kotlin-application-conventions")
+    
 }
 
 group = "com.amazonaws.sfc"
@@ -47,12 +47,7 @@ dependencies {
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitVersion")
 }
 
-tasks.test {
-    useJUnitPlatform()
-    testLogging {
-        events("passed", "skipped", "failed")
-    }
-}
+
 
 
 application {
@@ -76,13 +71,8 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
     }
 }
 
-tasks.withType<JavaCompile> {
-    options.compilerArgs.addAll(listOf("-source", jvmTarget, "-target", jvmTarget))
-}
 
-kotlin {
-    jvmToolchain(8)
-}
+
 
 
 
@@ -114,12 +104,6 @@ tasks.named("build") {
     dependsOn("generateBuildConfig")
 }
 
-tasks.compileJava {
-    sourceCompatibility = jvmTarget
-    targetCompatibility = jvmTarget
-}
 
-tasks.compileTestJava {
-    sourceCompatibility = jvmTarget
-    targetCompatibility = jvmTarget
-}
+
+

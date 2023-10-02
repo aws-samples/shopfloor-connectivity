@@ -41,8 +41,8 @@ repositories {
 
 plugins {
     id("com.google.protobuf") version "0.8.18"
-    kotlin("jvm") version "1.8.10"
-    `java-library`
+    
+    id("sfc.kotlin-library-conventions")
     idea
     `maven-publish`
 }
@@ -73,16 +73,8 @@ dependencies {
     compileOnly("javax.annotation:javax.annotation-api:$kotlinAnnotationVersion")
 }
 
-tasks.test {
-    useJUnitPlatform()
-    testLogging {
-        events("passed", "skipped", "failed")
-    }
-}
 
-kotlin {
-    jvmToolchain(8)
-}
+
 tasks.withType<KotlinCompile> {
     kotlinOptions {
         jvmTarget = jvmTarget
@@ -159,15 +151,9 @@ publishing {
 }
 
 
-tasks.compileJava {
-    sourceCompatibility = jvmTarget
-    targetCompatibility = jvmTarget
-}
 
-tasks.compileTestJava {
-    sourceCompatibility = jvmTarget
-    targetCompatibility = jvmTarget
-}
+
+
 
 tasks.build {
     finalizedBy(tasks.publish)

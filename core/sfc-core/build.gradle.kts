@@ -13,17 +13,13 @@
 
 
 plugins {
-    `java-library`
+    id("sfc.kotlin-library-conventions")
     `maven-publish`
-    id("idea")
     jacoco
     java
-    kotlin("jvm") version "1.8.10"
+
 }
 
-repositories {
-    mavenCentral()
-}
 
 group = "com.amazonaws.sfc"
 version = "1.0.0"
@@ -52,11 +48,7 @@ val kotlinCoroutinesVersion = "1.6.2"
 val kotlinReflectionVersion = "1.6.0"
 val kotlinVersion = "1.9.0"
 
-val jvmTarget = "1.8"
 
-repositories {
-    mavenCentral()
-}
 
 dependencies {
 
@@ -96,41 +88,20 @@ dependencies {
     testImplementation("io.mockk:mockk:$mockkVersion")
 }
 
-tasks.test {
-    useJUnitPlatform()
-    testLogging {
-        events("passed", "skipped", "failed")
-    }
-}
-
-
-kotlin {
-    jvmToolchain(8)
-}
-
-tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-    kotlinOptions {
-        jvmTarget = jvmTarget
-        freeCompilerArgs = listOf("-opt-in=kotlin.time.ExperimentalTime", "-opt-in=kotlin.ExperimentalUnsignedTypes")
-    }
-}
 
 
 
-tasks.withType<JavaCompile> {
-    options.compilerArgs.addAll(listOf("-source", jvmTarget, "-target", jvmTarget))
-}
 
 
-tasks.compileJava {
-    sourceCompatibility = jvmTarget
-    targetCompatibility = jvmTarget
-}
 
-tasks.compileTestJava {
-    sourceCompatibility = jvmTarget
-    targetCompatibility = jvmTarget
-}
+
+
+
+
+
+
+
+
 
 publishing {
 

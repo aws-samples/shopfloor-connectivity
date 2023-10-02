@@ -30,10 +30,8 @@ val jvmTarget = "1.8"
 repositories {
     mavenCentral()
 }
-
 plugins {
-    application
-    kotlin("jvm") version "1.8.10"
+    id("sfc.kotlin-application-conventions")
     java
 }
 
@@ -50,12 +48,7 @@ dependencies {
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitVersion")
 }
 
-tasks.test {
-    useJUnitPlatform()
-    testLogging {
-        events("passed", "skipped", "failed")
-    }
-}
+
 
 application {
     mainClass.set("com.amazonaws.sfc.router.AwsRouterTargetService")
@@ -65,20 +58,10 @@ application {
 tasks.getByName<Zip>("distZip").enabled = false
 tasks.getByName<Tar>("distTar").archiveFileName.set("${project.name}.tar")
 
-kotlin {
-    jvmToolchain(8)
-}
 
-tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-    kotlinOptions {
-        jvmTarget = jvmTarget
-        freeCompilerArgs = listOf("-opt-in=kotlin.time.ExperimentalTime", "-opt-in=kotlin.ExperimentalUnsignedTypes")
-    }
-}
 
-tasks.withType<JavaCompile> {
-    options.compilerArgs.addAll(listOf("-source", jvmTarget, "-target", jvmTarget))
-}
+
+
 
 
 
@@ -90,7 +73,7 @@ task("generateBuildConfig") {
           |package com.amazonaws.sfc.$module
           |
           |object BuildConfig {
-          |  const val CORE_VERSION = "$sfcCoreVersion" 
+          |  const val CORE_VERSION = "$sfcCoreVersion"
           |  const val IPC_VERSION = "$sfcIpcVersion"
           |  const val VERSION = "$version"
           |    override fun toString() = "SFC_MODULE ${project.name.toUpperCaseAsciiOnly()}: VERSION=${'$'}VERSION, SFC_CORE_VERSION=${'$'}CORE_VERSION, SFC_IPC_VERSION=${'$'}IPC_VERSION, BUILD_DATE=${LocalDate.now()}"
@@ -110,15 +93,9 @@ tasks.named("build") {
     dependsOn("generateBuildConfig")
 }
 
-tasks.compileJava {
-    sourceCompatibility = jvmTarget
-    targetCompatibility = jvmTarget
-}
 
-tasks.compileTestJava {
-    sourceCompatibility = jvmTarget
-    targetCompatibility = jvmTarget
-}
+
+
 
 
 

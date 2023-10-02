@@ -31,8 +31,8 @@ repositories {
 }
 
 plugins {
-    application
-    kotlin("jvm") version "1.8.10"
+    id("sfc.kotlin-application-conventions")
+    
     java
 }
 
@@ -50,12 +50,7 @@ dependencies {
     implementation("software.amazon.awssdk:sqs:$awsSdkVersion")
 }
 
-tasks.test {
-    useJUnitPlatform()
-    testLogging {
-        events("passed", "skipped", "failed")
-    }
-}
+
 
 application {
     mainClass.set("com.amazonaws.sfc.awssqs.AwsSqsTargetService")
@@ -66,19 +61,9 @@ application {
 tasks.getByName<Zip>("distZip").enabled = false
 tasks.getByName<Tar>("distTar").archiveFileName.set("${project.name}.tar")
 
-kotlin {
-    jvmToolchain(8)
-}
-tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-    kotlinOptions {
-        jvmTarget = jvmTarget
-        freeCompilerArgs = listOf("-opt-in=kotlin.time.ExperimentalTime", "-opt-in=kotlin.ExperimentalUnsignedTypes")
-    }
-}
 
-tasks.withType<JavaCompile> {
-    options.compilerArgs.addAll(listOf("-source", jvmTarget, "-target", jvmTarget))
-}
+
+
 
 
 
@@ -111,15 +96,9 @@ tasks.named("build") {
 }
 
 
-tasks.compileJava {
-    sourceCompatibility = jvmTarget
-    targetCompatibility = jvmTarget
-}
 
-tasks.compileTestJava {
-    sourceCompatibility = jvmTarget
-    targetCompatibility = jvmTarget
-}
+
+
 
 
 
