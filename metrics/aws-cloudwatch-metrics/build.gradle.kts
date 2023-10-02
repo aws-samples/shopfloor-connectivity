@@ -26,8 +26,6 @@ val junitVersion = "5.6.0"
 val jvmTarget = "1.8"
 val awsSdkVersion = "2.17.209"
 
-
-
 plugins {
     id("sfc.kotlin-application-conventions")
     
@@ -46,23 +44,13 @@ dependencies {
     implementation("software.amazon.awssdk:cloudwatch:$awsSdkVersion")
 }
 
-
-
 application {
     mainClass.set("com.amazonaws.sfc.cloudwatch.AwsCloudWatchMetricsWriterService")
     applicationName = project.name
 }
 
-
 tasks.getByName<Zip>("distZip").enabled = false
 tasks.getByName<Tar>("distTar").archiveFileName.set("${project.name}.tar")
-
-
-
-
-
-
-
 
 task("generateBuildConfig") {
     val version = project.version.toString()
@@ -91,16 +79,4 @@ task("generateBuildConfig") {
 tasks.named("build") {
     dependsOn("generateBuildConfig")
 }
-
-
-
-
-
-
-
-
-
-
-
-
 

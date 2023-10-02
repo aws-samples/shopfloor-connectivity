@@ -15,7 +15,6 @@ import java.time.LocalDate
  *
  */
 
-
 group = "com.amazonaws.sfc"
 version = "1.0.0"
 
@@ -29,8 +28,6 @@ val junitVersion = "5.6.0"
 val jvmTarget = "1.8"
 
 val modbusVersion = "1.0.0"
-
-
 
 plugins {
     id("sfc.kotlin-application-conventions")
@@ -53,9 +50,6 @@ dependencies {
 
 }
 
-
-
-
 application {
     mainClass.set("com.amazonaws.sfc.modbus.tcp.ModbusTcpProtocolService")
     applicationName = project.name
@@ -63,13 +57,6 @@ application {
 
 tasks.getByName<Zip>("distZip").enabled = false
 tasks.getByName<Tar>("distTar").archiveFileName.set("${project.name}.tar")
-
-
-
-
-
-
-
 
 task("generateBuildConfig") {
     val version = project.version.toString()
@@ -98,11 +85,4 @@ task("generateBuildConfig") {
 tasks.named("build") {
     dependsOn("generateBuildConfig")
 }
-
-
-
-
-
-
-
 

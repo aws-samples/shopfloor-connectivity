@@ -10,10 +10,7 @@
  *
  */
 
-
-
 plugins {
-    
 
     id("java")
 }

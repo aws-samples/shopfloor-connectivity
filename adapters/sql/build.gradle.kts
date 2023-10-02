@@ -36,8 +36,6 @@ val oracleClientVersion = "23.2.0.0"
 val sqlServerClientVersion = "12.2.0.jre8"
 val mysqlClientVersion = "8.0.33"
 
-
-
 plugins {
     id("sfc.kotlin-application-conventions")
     
@@ -47,7 +45,6 @@ plugins {
 dependencies {
     implementation(project(":core:sfc-core"))
     implementation(project(":core:sfc-ipc"))
-
 
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinCoroutinesVersion")
@@ -59,27 +56,17 @@ dependencies {
     implementation("com.microsoft.sqlserver:mssql-jdbc:${sqlServerClientVersion}")
     implementation("mysql:mysql-connector-java:$mysqlClientVersion")
 
-
     implementation("com.google.code.gson:gson:$gsonVersion")
 
 }
-
-
 
 application {
     mainClass.set("com.amazonaws.sfc.sql.SqlProtocolService")
     applicationName = project.name
 }
 
-
 tasks.getByName<Zip>("distZip").enabled = false
 tasks.getByName<Tar>("distTar").archiveFileName.set("${project.name}.tar")
-
-
-
-
-
-
 
 task("generateBuildConfig") {
     val version = project.version.toString()
@@ -108,13 +95,4 @@ task("generateBuildConfig") {
 tasks.named("build") {
     dependsOn("generateBuildConfig")
 }
-
-
-
-
-
-
-
-
-
 

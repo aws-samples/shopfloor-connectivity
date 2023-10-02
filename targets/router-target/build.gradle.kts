@@ -27,7 +27,6 @@ val gsonVersion = "2.9.0"
 val junitVersion = "5.6.0"
 val jvmTarget = "1.8"
 
-
 plugins {
     id("sfc.kotlin-application-conventions")
     java
@@ -46,8 +45,6 @@ dependencies {
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitVersion")
 }
 
-
-
 application {
     mainClass.set("com.amazonaws.sfc.router.AwsRouterTargetService")
     applicationName = project.name
@@ -55,13 +52,6 @@ application {
 
 tasks.getByName<Zip>("distZip").enabled = false
 tasks.getByName<Tar>("distTar").archiveFileName.set("${project.name}.tar")
-
-
-
-
-
-
-
 
 task("generateBuildConfig") {
     val version = project.version.toString()
@@ -90,11 +80,4 @@ task("generateBuildConfig") {
 tasks.named("build") {
     dependsOn("generateBuildConfig")
 }
-
-
-
-
-
-
-
 

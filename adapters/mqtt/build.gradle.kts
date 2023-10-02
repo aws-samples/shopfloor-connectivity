@@ -30,8 +30,6 @@ val jmesPathVersion = "0.5.1"
 val pahoVersion = "1.2.4"
 val gsonVersion = "2.9.0"
 
-
-
 plugins {
     id("sfc.kotlin-application-conventions")
     
@@ -54,22 +52,13 @@ dependencies {
 
 }
 
-
-
 application {
     mainClass.set("com.amazonaws.sfc.mqtt.MqttProtocolService")
     applicationName = project.name
 }
 
-
 tasks.getByName<Zip>("distZip").enabled = false
 tasks.getByName<Tar>("distTar").archiveFileName.set("${project.name}.tar")
-
-
-
-
-
-
 
 task("generateBuildConfig") {
     val version = project.version.toString()
@@ -98,14 +87,4 @@ task("generateBuildConfig") {
 tasks.named("build") {
     dependsOn("generateBuildConfig")
 }
-
-
-
-
-
-
-
-
-
-
 

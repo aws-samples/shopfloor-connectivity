@@ -29,9 +29,6 @@ val awsSdkVersion = "2.17.209"
 val awsDeviceSdkVersion = "1.3.3"
 val log4jVersion = "2.17.2"
 
-
-
-
 plugins {
     id("sfc.kotlin-application-conventions")
     
@@ -59,8 +56,6 @@ dependencies {
 
 }
 
-
-
 application {
     mainClass.set("com.amazonaws.sfc.awsiot.mqtt.AwsMqttTargetService")
     applicationName = project.name
@@ -68,12 +63,6 @@ application {
 
 tasks.getByName<Zip>("distZip").enabled = false
 tasks.getByName<Tar>("distTar").archiveFileName.set("${project.name}.tar")
-
-
-
-
-
-
 
 task("generateBuildConfig") {
     val version = project.version.toString()
@@ -102,17 +91,4 @@ task("generateBuildConfig") {
 tasks.named("build") {
     dependsOn("generateBuildConfig")
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
 

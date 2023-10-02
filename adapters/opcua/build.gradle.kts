@@ -14,7 +14,6 @@ import java.time.LocalDate
  *
  */
 
-
 group = "com.amazonaws.sfc"
 version = "1.0.0"
 
@@ -30,8 +29,6 @@ val reflectionVersion = "1.6.0"
 val opcuaMiloVersion = "0.5.1"
 val jmesPathVersion = "0.5.1"
 val gsonVersion = "2.9.0"
-
-
 
 plugins {
     id("sfc.kotlin-application-conventions")
@@ -59,8 +56,6 @@ dependencies {
 
 }
 
-
-
 application {
     mainClass.set("com.amazonaws.sfc.opcua.OpcuaProtocolService")
     applicationName = project.name
@@ -68,12 +63,6 @@ application {
 
 tasks.getByName<Zip>("distZip").enabled = false
 tasks.getByName<Tar>("distTar").archiveFileName.set("${project.name}.tar")
-
-
-
-
-
-
 
 task("generateBuildConfig") {
     val version = project.version.toString()
@@ -102,11 +91,4 @@ task("generateBuildConfig") {
 tasks.named("build") {
     dependsOn("generateBuildConfig")
 }
-
-
-
-
-
-
-
 

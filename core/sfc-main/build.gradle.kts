@@ -23,8 +23,6 @@ val kotlinVersion = "1.9.0"
 val junitVersion = "5.6.0"
 val jvmTarget = "1.8"
 
-
-
 plugins {
     id("sfc.kotlin-application-conventions")
     
@@ -32,7 +30,6 @@ plugins {
 
 group = "com.amazonaws.sfc"
 version = "1.0.0"
-
 
 dependencies {
     implementation(project(":core:sfc-core"))
@@ -45,9 +42,6 @@ dependencies {
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitVersion")
 }
 
-
-
-
 application {
     // Define the main class for the application.
     mainClass.set("com.amazonaws.sfc.MainController")
@@ -57,10 +51,8 @@ application {
 tasks.getByName<Zip>("distZip").enabled = false
 tasks.getByName<Tar>("distTar").archiveFileName.set("${project.name}.tar")
 
-
 tasks.getByName<Zip>("distZip").enabled = false
 tasks.getByName<Tar>("distTar").archiveFileName.set("${project.name}.tar")
-
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
     kotlinOptions {
@@ -68,11 +60,6 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
         freeCompilerArgs = listOf("-opt-in=kotlin.time.ExperimentalTime", "-opt-in=kotlin.ExperimentalUnsignedTypes")
     }
 }
-
-
-
-
-
 
 task("generateBuildConfig") {
     val version = project.version.toString()
@@ -101,7 +88,4 @@ task("generateBuildConfig") {
 tasks.named("build") {
     dependsOn("generateBuildConfig")
 }
-
-
-
 

@@ -28,8 +28,6 @@ plugins {
     `maven-publish`
 }
 
-
-
 dependencies {
 
     implementation(project(":core:sfc-core"))
@@ -40,8 +38,6 @@ dependencies {
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitVersion")
 
 }
-
-
 
 publishing {
 
@@ -54,19 +50,7 @@ publishing {
         }
     }
 
-    
-
 }
-
-
-
-
-
-
-
-
-
-
 
 tasks.build {
     finalizedBy(tasks.publishToMavenLocal)

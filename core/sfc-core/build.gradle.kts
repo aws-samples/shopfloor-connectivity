@@ -11,14 +11,12 @@
  *
  */
 
-
 plugins {
     id("sfc.kotlin-library-conventions")
     `maven-publish`
     jacoco
     java
 }
-
 
 group = "com.amazonaws.sfc"
 version = "1.0.0"
@@ -46,8 +44,6 @@ val mockkVersion = "1.12.0"
 val kotlinCoroutinesVersion = "1.6.2"
 val kotlinReflectionVersion = "1.6.0"
 val kotlinVersion = "1.9.0"
-
-
 
 dependencies {
 
@@ -87,21 +83,6 @@ dependencies {
     testImplementation("io.mockk:mockk:$mockkVersion")
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 publishing {
 
     publications {
@@ -112,8 +93,6 @@ publishing {
             version = version
         }
     }
-
-    
 
 }
 
@@ -157,5 +136,4 @@ tasks {
         }
     }
 }
-
 

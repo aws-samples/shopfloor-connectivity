@@ -11,10 +11,8 @@
 
  */
 
-
 import com.google.protobuf.gradle.*
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
 
 group = "com.amazonaws.sfc"
 version = "1.0.0"
@@ -29,13 +27,10 @@ val jvmTarget = "1.8"
 
 val sfcCoreVersion = "1.0.0"
 
-
 val junitVersion = "5.6.0"
 val kotlinCoroutinesVersion = "1.6.2"
 val kotlinReflectionVersion = "1.6.0"
 val kotlinVersion = "1.9.0"
-
-
 
 plugins {
     id("com.google.protobuf") version "0.8.18"
@@ -70,8 +65,6 @@ dependencies {
     compileOnly("javax.annotation:javax.annotation-api:$kotlinAnnotationVersion")
 }
 
-
-
 tasks.withType<KotlinCompile> {
     kotlinOptions {
         jvmTarget = jvmTarget
@@ -85,7 +78,6 @@ tasks.withType<KotlinCompile> {
         freeCompilerArgs = listOf("-opt-in=kotlin.time.ExperimentalTime", "-opt-in=kotlin.ExperimentalUnsignedTypes")
     }
 }
-
 
 protobuf {
     protoc {
@@ -117,8 +109,6 @@ protobuf {
     }
 }
 
-
-
 idea {
     module {
         generatedSourceDirs.addAll(listOf(
@@ -141,11 +131,6 @@ publishing {
 
 }
 
-
-
-
-
-
 tasks.build {
     finalizedBy(tasks.publish)
 }
@@ -153,10 +138,4 @@ tasks.build {
 tasks.processResources {
     dependsOn("extractProto")
 }
-
-
-
-
-
-
 

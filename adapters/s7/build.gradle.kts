@@ -14,7 +14,6 @@ import java.time.LocalDate
  *
  */
 
-
 group = "com.amazonaws.sfc"
 version = "1.0.0"
 
@@ -34,9 +33,6 @@ val plc4jS7Version = "0.9.1"
 val slf4jApiVersion = "2.0.1"
 val nettyCodecVersion = "4.1.80.Final"
 val fasterXmlVersion = "2.14.2"
-
-
-
 
 plugins {
     id("sfc.kotlin-application-conventions")
@@ -59,8 +55,6 @@ dependencies {
     implementation("org.slf4j:slf4j-nop:${slf4jApiVersion}")
 }
 
-
-
 application {
     mainClass.set("com.amazonaws.sfc.s7.S7ProtocolService")
     applicationName = project.name
@@ -68,16 +62,6 @@ application {
 
 tasks.getByName<Zip>("distZip").enabled = false
 tasks.getByName<Tar>("distTar").archiveFileName.set("${project.name}.tar")
-
-
-
-
-
-
-
-
-
-
 
 task("generateBuildConfig") {
     val version = project.version.toString()
@@ -106,10 +90,4 @@ task("generateBuildConfig") {
 tasks.named("build") {
     dependsOn("generateBuildConfig")
 }
-
-
-
-
-
-
 

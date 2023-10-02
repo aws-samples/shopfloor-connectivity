@@ -19,9 +19,6 @@ val junitVersion = "5.6.0"
 val jvmTarget = "1.8"
 val sfcCoreVersion = "1.0.0"
 
-
-
-
 plugins {
     id("sfc.kotlin-application-conventions")
     
@@ -35,8 +32,6 @@ dependencies {
 
 }
 
-
-
 application {
     mainClass.set("com.amazonaws.sfc.SignConfig")
     applicationName = project.name
@@ -44,21 +39,4 @@ application {
 
 tasks.getByName<Zip>("distZip").enabled = false
 tasks.getByName<Tar>("distTar").archiveFileName.set("${project.name}.tar")
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

@@ -26,8 +26,6 @@ val sfcCoreVersion = "1.0.0"
 val sfcIpcVersion = "1.0.0"
 val awsSdkVersion = "2.17.209"
 
-
-
 plugins {
     id("sfc.kotlin-application-conventions")
     
@@ -48,8 +46,6 @@ dependencies {
     implementation("software.amazon.awssdk:s3:$awsSdkVersion")
 }
 
-
-
 application {
     mainClass.set("com.amazonaws.sfc.awss3.AwsS3TargetService")
     applicationName = project.name
@@ -57,12 +53,6 @@ application {
 
 tasks.getByName<Zip>("distZip").enabled = false
 tasks.getByName<Tar>("distTar").archiveFileName.set("${project.name}.tar")
-
-
-
-
-
-
 
 task("generateBuildConfig") {
     val version = project.version.toString()
@@ -91,17 +81,4 @@ task("generateBuildConfig") {
 tasks.named("build") {
     dependsOn("generateBuildConfig")
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
 

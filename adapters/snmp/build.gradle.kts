@@ -27,8 +27,6 @@ val junitVersion = "5.6.0"
 val jvmTarget = "1.8"
 val snmp4jVersion = "3.6.7"
 
-
-
 plugins {
     id("sfc.kotlin-application-conventions")
     
@@ -49,8 +47,6 @@ dependencies {
     implementation("org.snmp4j:snmp4j:${snmp4jVersion}")
 }
 
-
-
 application {
     mainClass.set("com.amazonaws.sfc.snmp.SnmpProtocolService")
     applicationName = project.name
@@ -58,13 +54,6 @@ application {
 
 tasks.getByName<Zip>("distZip").enabled = false
 tasks.getByName<Tar>("distTar").archiveFileName.set("${project.name}.tar")
-
-
-
-
-
-
-
 
 task("generateBuildConfig") {
     val version = project.version.toString()
@@ -93,15 +82,4 @@ task("generateBuildConfig") {
 tasks.named("build") {
     dependsOn("generateBuildConfig")
 }
-
-
-
-
-
-
-
-
-
-
-
 

@@ -14,8 +14,6 @@ import java.time.LocalDate
  *
  */
 
-
-
 group = "com.amazonaws.sfc"
 version = "1.0.0"
 
@@ -28,8 +26,6 @@ val sfcCoreVersion = "1.0.0"
 val sfcIpcVersion = "1.0.0"
 val awsServicesVersion = "1.0.0"
 val awsSdkVersion = "2.17.209"
-
-
 
 plugins {
     id("sfc.kotlin-application-conventions")
@@ -48,14 +44,11 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-api:$junitVersion")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitVersion")
 
-
     implementation("software.amazon.awssdk:aws-core:$awsSdkVersion")
     implementation("software.amazon.awssdk:iot:$awsSdkVersion")
     implementation("software.amazon.awssdk:iotdataplane:$awsSdkVersion")
     implementation("software.amazon.awssdk:bom:$awsSdkVersion")
 }
-
-
 
 application {
     mainClass.set("com.amazonaws.sfc.awsiot.http.AwsIotHttpTargetService")
@@ -64,12 +57,6 @@ application {
 
 tasks.getByName<Zip>("distZip").enabled = false
 tasks.getByName<Tar>("distTar").archiveFileName.set("${project.name}.tar")
-
-
-
-
-
-
 
 task("generateBuildConfig") {
     val version = project.version.toString()
@@ -98,13 +85,4 @@ task("generateBuildConfig") {
 tasks.named("build") {
     dependsOn("generateBuildConfig")
 }
-
-
-
-
-
-
-
-
-
 
