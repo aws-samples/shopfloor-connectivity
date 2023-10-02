@@ -36,9 +36,7 @@ val nettyCodecVersion = "4.1.80.Final"
 val fasterXmlVersion = "2.14.2"
 
 
-repositories {
-    mavenCentral()
-}
+
 
 plugins {
     id("sfc.kotlin-application-conventions")

@@ -10,9 +10,7 @@
  *
  */
 
-repositories {
-    mavenCentral()
-}
+
 
 plugins {
     

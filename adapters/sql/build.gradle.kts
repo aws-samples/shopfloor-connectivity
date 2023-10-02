@@ -36,9 +36,7 @@ val oracleClientVersion = "23.2.0.0"
 val sqlServerClientVersion = "12.2.0.jre8"
 val mysqlClientVersion = "8.0.33"
 
-repositories {
-    mavenCentral()
-}
+
 
 plugins {
     id("sfc.kotlin-application-conventions")

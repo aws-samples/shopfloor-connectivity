@@ -17,7 +17,6 @@ plugins {
     `maven-publish`
     jacoco
     java
-
 }
 
 

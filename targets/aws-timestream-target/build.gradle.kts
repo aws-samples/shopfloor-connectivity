@@ -26,9 +26,7 @@ val sfcCoreVersion = "1.0.0"
 val sfcIpcVersion = "1.0.0"
 val awsSdkVersion = "2.17.209"
 
-repositories {
-    mavenCentral()
-}
+
 
 plugins {
     id("sfc.kotlin-application-conventions")

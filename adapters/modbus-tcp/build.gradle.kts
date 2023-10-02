@@ -30,9 +30,7 @@ val jvmTarget = "1.8"
 
 val modbusVersion = "1.0.0"
 
-repositories {
-    mavenCentral()
-}
+
 
 plugins {
     id("sfc.kotlin-application-conventions")

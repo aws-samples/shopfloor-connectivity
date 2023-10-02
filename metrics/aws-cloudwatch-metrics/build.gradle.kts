@@ -26,9 +26,7 @@ val junitVersion = "5.6.0"
 val jvmTarget = "1.8"
 val awsSdkVersion = "2.17.209"
 
-repositories {
-    mavenCentral()
-}
+
 
 plugins {
     id("sfc.kotlin-application-conventions")

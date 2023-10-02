@@ -25,9 +25,7 @@ val kotlinVersion = "1.9.0"
 val junitVersion = "5.6.0"
 val jvmTarget = "1.8"
 
-repositories {
-    mavenCentral()
-}
+
 
 plugins {
     id("sfc.kotlin-application-conventions")

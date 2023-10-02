@@ -35,13 +35,10 @@ val kotlinCoroutinesVersion = "1.6.2"
 val kotlinReflectionVersion = "1.6.0"
 val kotlinVersion = "1.9.0"
 
-repositories {
-    mavenCentral()
-}
+
 
 plugins {
     id("com.google.protobuf") version "0.8.18"
-    
     id("sfc.kotlin-library-conventions")
     idea
     `maven-publish`

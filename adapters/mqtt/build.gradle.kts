@@ -30,9 +30,7 @@ val jmesPathVersion = "0.5.1"
 val pahoVersion = "1.2.4"
 val gsonVersion = "2.9.0"
 
-repositories {
-    mavenCentral()
-}
+
 
 plugins {
     id("sfc.kotlin-application-conventions")

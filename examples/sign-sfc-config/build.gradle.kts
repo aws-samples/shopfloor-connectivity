@@ -20,9 +20,7 @@ val jvmTarget = "1.8"
 val sfcCoreVersion = "1.0.0"
 
 
-repositories {
-    mavenCentral()
-}
+
 
 plugins {
     id("sfc.kotlin-application-conventions")

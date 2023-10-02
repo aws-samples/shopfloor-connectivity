@@ -29,9 +29,7 @@ val awsSdkVersion = "2.17.209"
 val awsDeviceSdkVersion = "1.3.3"
 val log4jVersion = "2.17.2"
 
-repositories {
-    mavenCentral()
-}
+
 
 
 plugins {
