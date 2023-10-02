@@ -6,9 +6,6 @@ plugins {
 
 repositories {
     mavenCentral()
-    mavenLocal {
-        url = uri("file://tmp/repo")
-    }
 }
 
 val jvmTarget = "1.8"

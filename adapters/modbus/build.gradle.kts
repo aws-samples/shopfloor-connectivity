@@ -54,11 +54,7 @@ publishing {
         }
     }
 
-    repositories {
-        maven {
-            url = uri("file://tmp/repo")
-        }
-    }
+    
 
 }
 
