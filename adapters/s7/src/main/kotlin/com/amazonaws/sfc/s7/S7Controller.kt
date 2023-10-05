@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2020. Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ Copyright (c) 2023. Amazon.com, Inc. or its affiliates. All Rights Reserved.
  Licensed under the Amazon Software License (the "License"). You may not use this file except in
  compliance with the License. A copy of the License is located at :
 
@@ -97,13 +97,8 @@ class S7Controller(private val adapterID: String,
     val lock by lazy { Mutex() }
 
     fun close() {
-        try {
-            if (connection.isConnected) {
-                connection.close()
-            }
-        } catch (e: Exception) {
-            logger.getCtxWarningLog("com.amazonaws.s7.S7Controller", "close")("Error closing controller")
-        }
+        // Do not explicitly close connection as the S7 driver implementation will terminate the S7 Protocol handling
+        // and will not read any data after a new adapter is used after reloading a new configuration
     }
 
     // from a list of PlcReadResponses find the one containing the specified name
@@ -165,10 +160,12 @@ class S7Controller(private val adapterID: String,
     // Gets a connection using an instance of a custom S7 driver that has a method to intercept the
     // actual parameters returned by the PLC
     private val connection by lazy {
-        val s7 = CustomS7Driver {
-            // Interceptor stores the driver context
-            _s7DriverContext = it
-        }
+
+           val s7 = CustomS7Driver {
+                // Interceptor stores the driver context
+                _s7DriverContext = it
+            }
+
         // get the connection using the custom driver
         s7.getConnection(connectString)
     }
