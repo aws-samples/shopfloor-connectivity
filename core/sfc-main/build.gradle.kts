@@ -49,10 +49,21 @@ application {
 }
 
 tasks.getByName<Zip>("distZip").enabled = false
-tasks.getByName<Tar>("distTar").archiveFileName.set("${project.name}.tar")
 
-tasks.getByName<Zip>("distZip").enabled = false
-tasks.getByName<Tar>("distTar").archiveFileName.set("${project.name}.tar")
+tasks.distTar {
+	project.version = ""
+	archiveBaseName = "${project.name}"
+	compression = Compression.GZIP
+	archiveExtension = "tar.gz"
+}
+
+
+tasks.register<Copy>("copyDist") {
+    from(layout.buildDirectory.dir("distributions"))
+    include("*.tar.gz")
+    into(layout.buildDirectory.dir("../../../build/distribution/"))
+}
+
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
     kotlinOptions {
@@ -87,5 +98,6 @@ task("generateBuildConfig") {
 
 tasks.named("build") {
     dependsOn("generateBuildConfig")
+    finalizedBy("copyDist")
 }
 
