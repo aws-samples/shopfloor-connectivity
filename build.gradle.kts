@@ -10,9 +10,9 @@
  *
  */
 
-val tag = "git describe --abbrev=0 --tags".runCommand(workingDir = rootDir)
-val ref = "git rev-parse --short HEAD".runCommand(workingDir = rootDir)
-version = tag+"-"+ref
+//val tag = "git describe --abbrev=0 --tags".runCommand(workingDir = rootDir)
+//val ref = "git rev-parse --short HEAD".runCommand(workingDir = rootDir)
+version = "1.0.0"
 
 plugins {
     id("java")
