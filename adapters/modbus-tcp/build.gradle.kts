@@ -24,14 +24,14 @@ val sfcIpcVersion = "1.0.0"
 
 val kotlinCoroutinesVersion = "1.6.2"
 val kotlinVersion = "1.9.0"
-val junitVersion = "5.6.0"
-val jvmTarget = "1.8"
+
+
 
 val modbusVersion = "1.0.0"
 
 plugins {
     id("sfc.kotlin-application-conventions")
-    
+
     java
 }
 
@@ -43,8 +43,7 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinCoroutinesVersion")
 
-    testImplementation("org.junit.jupiter:junit-jupiter-api:$junitVersion")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitVersion")
+
 
     api(project(":adapters:modbus"))
 

@@ -23,8 +23,8 @@ val sfcIpcVersion = "1.0.0"
 val module = "mqtt"
 val kotlinCoroutinesVersion = "1.6.2"
 val kotlinVersion = "1.9.0"
-val junitVersion = "5.6.0"
-val jvmTarget = "1.8"
+
+
 val reflectionVersion = "1.6.0"
 val jmesPathVersion = "0.5.1"
 val pahoVersion = "1.2.4"
@@ -32,7 +32,7 @@ val gsonVersion = "2.9.0"
 
 plugins {
     id("sfc.kotlin-application-conventions")
-    
+
     java
 }
 

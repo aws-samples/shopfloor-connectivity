@@ -20,8 +20,8 @@ version = "1.0.0"
 val module = "awsiot.http"
 val kotlinCoroutinesVersion = "1.6.2"
 val kotlinVersion = "1.9.0"
-val junitVersion = "5.6.0"
-val jvmTarget = "1.8"
+
+
 val sfcCoreVersion = "1.0.0"
 val sfcIpcVersion = "1.0.0"
 val awsServicesVersion = "1.0.0"
@@ -29,7 +29,7 @@ val awsSdkVersion = "2.17.209"
 
 plugins {
     id("sfc.kotlin-application-conventions")
-    
+
     java
 }
 
@@ -41,8 +41,7 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinCoroutinesVersion")
 
-    testImplementation("org.junit.jupiter:junit-jupiter-api:$junitVersion")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitVersion")
+
 
     implementation("software.amazon.awssdk:aws-core:$awsSdkVersion")
     implementation("software.amazon.awssdk:iot:$awsSdkVersion")
