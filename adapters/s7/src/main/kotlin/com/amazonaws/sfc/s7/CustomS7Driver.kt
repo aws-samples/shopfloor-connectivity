@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2020. Amazon.com, Inc. or its affiliates. All Rights Reserved.
+Copyright(c) 2023. Amazon.com, Inc. or its affiliates. All Rights Reserved.
  Licensed under the Amazon Software License (the "License"). You may not use this file except in
  compliance with the License. A copy of the License is located at :
 
@@ -25,6 +25,7 @@ import org.apache.plc4x.java.s7.readwrite.field.S7PlcFieldHandler
 import org.apache.plc4x.java.s7.readwrite.io.TPKTPacketIO
 import org.apache.plc4x.java.s7.readwrite.optimizer.S7Optimizer
 import org.apache.plc4x.java.s7.readwrite.protocol.S7ProtocolLogic
+import org.apache.plc4x.java.spi.ConversationContext
 import org.apache.plc4x.java.spi.configuration.Configuration
 import org.apache.plc4x.java.spi.connection.ProtocolStackConfigurer
 import org.apache.plc4x.java.spi.connection.SingleProtocolStackConfigurer

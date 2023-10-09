@@ -1,5 +1,6 @@
 /*
- Copyright (c) 2020. Amazon.com, Inc. or its affiliates. All Rights Reserved.
+
+Copyright (c) 2023 Amazon.com, Inc. or its affiliates. All Rights Reserved. 
  Licensed under the Amazon Software License (the "License"). You may not use this file except in
  compliance with the License. A copy of the License is located at :
 
@@ -34,6 +35,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withTimeoutOrNull
+import org.apache.plc4x.java.s7.readwrite.context.S7DriverContext
 import java.time.Instant
 import kotlin.time.Duration
 
@@ -199,9 +201,6 @@ class S7Adapter(private val adapterID: String, private val configuration: S7Conf
 
 
     companion object {
-
-        // needed to keep driver PLC4J driver loaded
-        private val _s7 = CustomS7Driver { }
 
         private val createInstanceMutex = Mutex()
 

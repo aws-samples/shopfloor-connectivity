@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2020. Amazon.com, Inc. or its affiliates. All Rights Reserved.
+Copyright(c) 2023. Amazon.com, Inc. or its affiliates. All Rights Reserved.
  Licensed under the Amazon Software License (the "License"). You may not use this file except in
  compliance with the License. A copy of the License is located at :
 
@@ -14,7 +14,7 @@
 package com.amazonaws.sfc.sql.config
 
 /*
- Copyright (c) 2020. Amazon.com, Inc. or its affiliates. All Rights Reserved.
+Copyright(c) 2023. Amazon.com, Inc. or its affiliates. All Rights Reserved.
  Licensed under the Amazon Software License (the "License"). You may not use this file except in
  compliance with the License. A copy of the License is located at :
 

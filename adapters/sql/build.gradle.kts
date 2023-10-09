@@ -2,7 +2,7 @@ import org.jetbrains.kotlin.util.capitalizeDecapitalize.toUpperCaseAsciiOnly
 import java.time.LocalDate
 
 /*
- * Copyright (c) 2021. Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ *Copyright(c) 2023. Amazon.com, Inc. or its affiliates. All Rights Reserved.
  * Licensed under the Amazon Software License (the "License"). You may not use this file except in
  * compliance with the License. A copy of the License is located at :
  *
@@ -66,7 +66,20 @@ application {
 }
 
 tasks.getByName<Zip>("distZip").enabled = false
-tasks.getByName<Tar>("distTar").archiveFileName.set("${project.name}.tar")
+tasks.distTar {
+	project.version = ""
+	archiveBaseName = "${project.name}"
+	compression = Compression.GZIP
+	archiveExtension = "tar.gz"
+}
+
+
+tasks.register<Copy>("copyDist") {
+    from(layout.buildDirectory.dir("distributions"))
+    include("*.tar.gz")
+    into(layout.buildDirectory.dir("../../../build/distribution/"))
+}
+
 
 task("generateBuildConfig") {
     val version = project.version.toString()
@@ -94,5 +107,6 @@ task("generateBuildConfig") {
 
 tasks.named("build") {
     dependsOn("generateBuildConfig")
+    finalizedBy("copyDist")
 }
 
