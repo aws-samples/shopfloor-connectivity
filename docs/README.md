@@ -2,17 +2,17 @@
   =================
 
   - [Introduction](#introduction)
-    - [SFC Components.](#sfc-components.)
+    - [SFC Components.](#sfc-components)
     - [Protocol Adapters](#protocol-adapters)
     - [Core](#core)
     - [Target Adapters](#target-adapters)
-    - [ SFC data collection](#-sfc-data-collection)
+    - [SFC data collection](#sfc-data-collection)
     - [Terminology and concepts](#terminology-and-concepts)
     - [Execution environments](#execution-environments)
   - [High level design overview and tenets](#high-level-design-overview-and-tenets)
     - [Execution environment and platform dependencies](#execution-environment-and-platform-dependencies)
     - [Extensibility](#extensibility)
-    - [Networking ](#networking-)
+    - [Networking ](#networking)
     - [Scalability](#scalability)
     - [Configuration](#configuration)
     - [Logging](#logging)
@@ -25,15 +25,16 @@
     - [In-process and IPC deployment models](#in-process-and-ipc-deployment-models)
     - [Mixed models](#mixed-models)
     - [Target chaining](#target-chaining)
-    - [Target chaining and buffering.](#target-chaining-and-buffering.)
+    - [Target chaining and buffering.](#target-chaining-and-buffering)
     - [Store and forward target.](#store-and-forward-target.)
     - [Retention strategies](#retention-strategies)
     - [Router Target](#router-target)
   - [Output data format ](#output-data-format-)
-  - [ Dataflow and processing](#-dataflow-and-processing)
+  - [Dataflow and processing](#-dataflow-and-processing)
   - [Data Filtering](#data-filtering)
     - [Data Change Filters](#data-change-filters)
     - [Value Change Filters](#value-change-filters)
+  - [Configuration](#configuration-1)
     - [Configuration placeholders](#configuration-placeholders)
     - [Configuration secrets](#configuration-secrets)
     - [Deferred placeholder replacement](#deferred-placeholder-replacement)
@@ -177,7 +178,6 @@
     - [Service ](#service-)
 
 
----
 # Introduction
 
 Shop Floor Connectivity (SFC) is a data ingestion technology that can deliver data to multiple AWS Services.
@@ -189,9 +189,7 @@ SFC addresses limitations of, and unifies data collection of our existing IoT da
 There are three main type of components that make up SFC.
 
 -   Protocol Adapters
-
 -   SFC Core
-
 -   Target Adapters
 
 <img src="img/fig01.png" alt="Factory" />
@@ -244,8 +242,6 @@ SFC data collection is based on the following concepts
 
 ## Execution environments
 
-## 
-
 Shop Floor Connectivity (SFC) is a versatile data ingestion solution that can be deployed in a variety of environments, including standalone applications, Docker containers, and Kubernetes pods. With no additional requirements beyond a Java JVM 1.8 runtime, SFC can be deployed on Linux and Windows systems. To optimize hardware utilization, SFC uses parallel and non-blocking async patterns in its software.
 
 SFC protocol and target adapters can be implemented as a JVM component or as an external microservices using the gRPC protocol for communication. When running as stand-alone services, protocol adapters can be deployed on separate machines from the SFC Core process, with secure communication facilitated by gRPC. The SFC Core provides a consistent infrastructure allowing all JVM based protocol and target adapters to run in the same process as the SFC Core or as a separate microservice.
@@ -265,12 +261,8 @@ Edge software in industrial environments is typically running on a mix of differ
 SFC components can be deployed and executed as:
 
 -   Standalone applications
-
 -   Containers in Docker or Kubernetes
-
 -   Greengrass components
-
-## 
 
 ## Extensibility
 
@@ -385,9 +377,7 @@ The framework contains classes that speed up the development of JVM protocol and
 The components don’t have any runtime environment-specific dependencies, they can be deployed as:
 
 -   Standalone applications on the target platform supporting the JVM or runtimes are used to implement additional adapters and targets.
-
 -   AWS Greengrass V2 components or containers
-
 -   Docker or Kubernetes containers
 
 ## In-process and IPC deployment models
@@ -492,9 +482,7 @@ Used cases for the router target are:
 
 -   Routing of data to a success target after it has been written to primary targets or their alternative targets. The success target can be used to archive delivered messages or a custom target van notify the source of the data that the data has been delivered.
 
-<img src="img/fig13.png" />
-
-
+<img src="img/fig13.png" /><br><br>
 <img src="img/fig14.png" />
 
 # Output data format 
@@ -584,8 +572,9 @@ A data change filter can be configured at source and channel values level. If a 
 
 ## Value Change Filters
 
-A value change filter will pass a value if it matches a filter expression. A filter expression can consist of one or more operators like ==,!=,\>,\>=,\<,\<=, combined in && and \|\| groups. For non-numeric values, only the == and != operators can be used<span id="_Securing_the_configuration" class="anchor"></span>  
-Configuration
+A value change filter will pass a value if it matches a filter expression. A filter expression can consist of one or more operators like ==,!=,\>,\>=,\<,\<=, combined in && and \|\| groups. For non-numeric values, only the == and != operators can be used.
+
+# Configuration
 
 As the core only is aware of its input sources and output targets by name. The parts of the configuration model which are used by the core do not contain any protocol or target-specific information. The core knows its input and outputs only by its identifiers.
 
