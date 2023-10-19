@@ -23,14 +23,14 @@ val grpcVersion = "1.54.1"
 val reflectionVersion = "1.6.0"
 val kotlinAnnotationVersion = "1.3.2"
 val commonsCliVersion = "1.5.0"
-val jvmTarget = "1.8"
+
 
 val sfcCoreVersion = "1.0.0"
 
-val junitVersion = "5.6.0"
+
 val kotlinCoroutinesVersion = "1.6.2"
 val kotlinReflectionVersion = "1.6.0"
-val kotlinVersion = "1.9.0"
+
 
 plugins {
     id("com.google.protobuf") version "0.8.18"
@@ -41,15 +41,14 @@ plugins {
 
 dependencies {
 
-    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion")
+
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinCoroutinesVersion")
 
     implementation(project(":core:sfc-core"))
 
     implementation("commons-cli:commons-cli:$commonsCliVersion")
 
-    testImplementation("org.junit.jupiter:junit-jupiter-api:$junitVersion")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitVersion")
+
 
     api("com.google.protobuf:protobuf-java:$protobufVersion")
     api("com.google.protobuf:protobuf-java-util:$protobufVersion")

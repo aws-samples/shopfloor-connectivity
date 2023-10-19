@@ -20,15 +20,15 @@ version = "1.0.0"
 val module = "awsfirehose"
 val kotlinCoroutinesVersion = "1.6.2"
 val kotlinVersion = "1.9.0"
-val junitVersion = "5.6.0"
-val jvmTarget = "1.8"
+
+
 val sfcCoreVersion = "1.0.0"
 val sfcIpcVersion = "1.0.0"
 val awsSdkVersion = "2.17.209"
 
 plugins {
     id("sfc.kotlin-application-conventions")
-    
+
     java
 }
 
@@ -40,8 +40,7 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinCoroutinesVersion")
 
-    testImplementation("org.junit.jupiter:junit-jupiter-api:$junitVersion")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitVersion")
+
 
     implementation("software.amazon.awssdk:firehose:$awsSdkVersion")
 }
@@ -52,7 +51,20 @@ application {
 }
 
 tasks.getByName<Zip>("distZip").enabled = false
-tasks.getByName<Tar>("distTar").archiveFileName.set("${project.name}.tar")
+tasks.distTar {
+	project.version = ""
+	archiveBaseName = "${project.name}"
+	compression = Compression.GZIP
+	archiveExtension = "tar.gz"
+}
+
+
+tasks.register<Copy>("copyDist") {
+    from(layout.buildDirectory.dir("distributions"))
+    include("*.tar.gz")
+    into(layout.buildDirectory.dir("../../../build/distribution/"))
+}
+
 
 task("generateBuildConfig") {
     val version = project.version.toString()
@@ -80,5 +92,6 @@ task("generateBuildConfig") {
 
 tasks.named("build") {
     dependsOn("generateBuildConfig")
+    finalizedBy("copyDist")
 }
 

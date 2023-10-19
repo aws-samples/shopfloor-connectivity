@@ -38,7 +38,7 @@ val jmesPathVersion = "0.5.1"
 val log4jVersion = "2.17.2"
 val velocityVersion = "2.3"
 
-val junitVersion = "5.6.0"
+
 val mockkVersion = "1.12.0"
 
 val kotlinCoroutinesVersion = "1.6.2"
@@ -77,9 +77,7 @@ dependencies {
     api("org.apache.logging.log4j:log4j-core:$log4jVersion")
     api("org.apache.logging.log4j:log4j-slf4j-impl:$log4jVersion")
 
-    testImplementation("org.junit.jupiter:junit-jupiter-api:$junitVersion")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitVersion")
-    testImplementation("org.junit.jupiter:junit-jupiter:$junitVersion")
+
     testImplementation("io.mockk:mockk:$mockkVersion")
 }
 
