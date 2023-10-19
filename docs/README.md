@@ -29,8 +29,8 @@
     - [Store and forward target.](#store-and-forward-target.)
     - [Retention strategies](#retention-strategies)
     - [Router Target](#router-target)
-  - [Output data format ](#output-data-format-)
-  - [Dataflow and processing](#-dataflow-and-processing)
+  - [Output data format ](#output-data-format)
+  - [Dataflow and processing](#dataflow-and-processing)
   - [Data Filtering](#data-filtering)
     - [Data Change Filters](#data-change-filters)
     - [Value Change Filters](#value-change-filters)
@@ -44,16 +44,17 @@
   - [Logging](#logging)
   - [Metrics collection](#metrics-collection)
   - [Securing Network Traffic between SFC components](#securing-network-traffic-between-sfc-components)
+    - [Plaintext](#plaintext)
     - [ServerSideTLS](#serversidetls)
     - [MutualTLS](#mutualtls)
   - [Providing session credentials for targets accessing AWS Services](#providing-session-credentials-for-targets-accessing-aws-services)
   - [Securing the configuration](#securing-the-configuration)
   - [Output Structure Transformation](#output-structure-transformation)
-    - [CSV output ](#csv-output-)
-    - [XML format ](#xml-format-)
-    - [YAML format ](#yaml-format-)
+    - [CSV output ](#csv-output)
+    - [XML format ](#xml-format)
+    - [YAML format ](#yaml-format)
   - [ Service Health Probes](#-service-health-probes)
-  - [OPCUA Alarm and Events types ](#opcua-alarm-and-events-types-)
+  - [OPCUA Alarm and Events types ](#opcua-alarm-and-events-types)
   - [ OPCUA security profiles and certificates](#-opcua-security-profiles-and-certificates)
   - [SFC configuration](#sfc-configuration)
     - [SFC top level configuration](#sfc-top-level-configuration)
@@ -155,27 +156,27 @@
   - [MetricsWriters](#metricswriters)
     - [AwsCloudWatchConfiguration](#awscloudwatchconfiguration)
   - [Running the SFC core process](#running-the-sfc-core-process)
-  - [Running the JVM protocol adapters as an IPC Service.](#running-the-jvm-protocol-adapters-as-an-ipc-service.)
-  - [Running targets and as an IPC Service.](#running-targets-and-as-an-ipc-service.)
+  - [Running the JVM protocol adapters as an IPC Service](#running-the-jvm-protocol-adapters-as-an-ipc-service)
+  - [Running targets and as an IPC Service](#running-targets-and-as-an-ipc-service)
   - [Running protocol adapters in-process](#running-protocol-adapters-in-process)
   - [Running targets in-process](#running-targets-in-process)
   - [Metrics Collection](#metrics-collection)
-    - [Running Metrics writers as an IPC service.](#running-metrics-writers-as-an-ipc-service.)
+    - [Running Metrics writers as an IPC service](#running-metrics-writers-as-an-ipc-service)
     - [Running metric writers in-process](#running-metric-writers-in-process)
   - [Extending the SFC Framework](#extending-the-sfc-framework)
-    - [Implementing a protocol adapter ](#implementing-a-protocol-adapter-)
+    - [Implementing a protocol adapter ](#implementing-a-protocol-adapter)
     - [Read function](#read-function)
-  - [Creating in-process adapter instances.](#creating-in-process-adapter-instances.)
+  - [Creating in-process adapter instances](#creating-in-process-adapter-instances)
     - [IPC service adapters](#ipc-service-adapters)
     - [Using JVM protocol adapter classes as IPC services](#using-jvm-protocol-adapter-classes-as-ipc-services)
   - [Custom Configuration Handlers](#custom-configuration-handlers)
   - [Custom Logging](#custom-logging)
   - [Custom Metric Writers](#custom-metric-writers)
-  - [.NET Core based protocol adapters](#.net-core-based-protocol-adapters)
-    - [Running the .NET Core protocol adapters as an IPC Service.](#running-the-.net-core-protocol-adapters-as-an-ipc-service.)
+  - [.NET Core based protocol adapters](#net-core-based-protocol-adapters)
+    - [Running the .NET Core protocol adapters as an IPC Service](#running-the-net-core-protocol-adapters-as-an-ipc-service)
     - [Output logging format](#output-logging-format)
-    - [Implementing a .NET Core Protocol adapter.](#implementing-a-.net-core-protocol-adapter.)
-    - [Service ](#service-)
+    - [Implementing a .NET Core Protocol adapter](#implementing-a-net-core-protocol-adapter)
+    - [Service ](#service)
 
 
 # Introduction
@@ -191,8 +192,14 @@ There are three main type of components that make up SFC.
 -   Protocol Adapters
 -   SFC Core
 -   Target Adapters
+<p align="center">
+  <img src="img/fig01.png" width="75%"/>
+</p>
+<p align="center">
+    <em>Fig 1: SFC components</em>
+</p>
 
-<img src="img/fig01.png" alt="Factory" />
+
 
 ## Protocol Adapters
 
@@ -287,9 +294,12 @@ OT (Operational Technology) networks, on the other hand, are used for controllin
 In reality in most industrial environments OT and IT networks are not directly connected. Industrial devices are unlikely to connect to the public internet. Solutions that retrieve data from these devices and submit this machine data to a cloud service must be capable of handling this network separation, restrictions due to firewalls, proxies, DMZ’s and offline and/or intermittent connectivity.
 
 SFC is designed so that protocol adapters, the SFC Core and target adapters can be deployed as separate services in different networking or cloud environments The diagrams below show some of the possible deployment scenarios.
-
-<img src="img/fig02.png" />
-
+<p align="center">
+<img src="img/fig02.png" width="75%" align="center"/>
+</p>
+<p align="center">
+    <em>Fig 2: SFC components in different OT/IT contexts</em>
+</p>
 SFC components running as microservices can explicitly specify which network interface to use for network connections to (OT) data sources and other components. By specifying the network interface, microservices can ensure that their network traffic flows through the desired network path, which can be important for optimizing network performance and ensuring network security.
 
 By configuring the required X509 certificates all network traffic can be secured using server side or mutual TLS.
@@ -308,11 +318,21 @@ This feature ensures that the SFC system is always up-to-date with the latest co
 
 The default SFC configuration provider is based on reading a JSON format configuration file. This file can contain placeholders for environment variables as well as secrets which are stored in the AWS Secrets Manager's secure store. The provider is constantly monitoring the actual configuration files, and environment variables for the used placeholders, and if the files or the environment variables are updated, will provide a new version of the configuration to the SFC Core.
 
-<img src="img/fig03.png" />
+<p align="center">
+<img src="img/fig03.png" width="50%"/>
+</p>
+<p align="center">
+    <em>Fig 3: SFC config provider</em>
+</p>
 
 As in customer environment configuration data may be managed and stored in external systems, it is possible to implement and configure a custom configuration provider to retrieve that data. An instance of a configured custom provider will be created by the SFC Core at startup. It will receive the content of the initial configuration file, which can be a subset of the SFC configuration, combined with (or just) custom provider specific configuration data it needs to obtain the data it will use to build the SFC configuration.
 
-<img src="img/fig04.png" />
+<p align="center">
+<img src="img/fig04.png" width="50%"/>
+</p>
+<p align="center">
+    <em>Fig 4: Extensible config providers</em>
+</p>
 
 As different protocol and target adapters need specific configuration data the SFC configuration data the SFC configuration consists of generic and non-adapter specific data which is abstract and used by the SFC Core, and extensions of the generic core data classes that contain additional and specific data for that adapter. The core will only use the generic configuration data and will pass the adapter specific configuration data to the adapters. The implementation of the adapters is responsible for handling the its specific configuration data. This separation of generic and specific data makes it possible to add new adapters, using their own specific configuration data, without the need to make changes to the SFC core. Additionally, the adapter can optionally implement specific logic to validate the provided configuration data. The SFC Core does provide a configuration reader, which is used by the core, as well as by the target adapters, to read, validate and replace placeholders in a consistent way.
 
@@ -333,8 +353,12 @@ Furthermore, the metrics collector automatically gathers warning and error messa
 ## Connectivity
 
 For targets that require network access to send the collected data to their destinations, it is possible to use intermediate store and forward targets. Intermediate targets can be configured in between the SFC Core and one or more target adapters by using target daisy-chaining. If the end target loses connectivity the intermediate target will store the data, optionally encrypted, for a configured amount of time, data volume or number of messages, and will resubmit the data when the target regains network connectivity, in either FIFO or LIFO mode.
-
-<img src="img/fig05.png" />
+<p align="center">
+<img src="img/fig05.png" width="75%"/>
+</p>
+<p align="center">
+    <em>Fig 5: Example of target daisy chaining</em>
+</p>
 
 Target chaining is generic mechanism in SFC for adding additional processing steps, like store and forwarding as described above, for target data without changes to the actual end targets.
 
@@ -364,7 +388,15 @@ Metadata at source-level will be added under a metadata node at source-level.
 
 Metadata at channel-level will be added to the values under a metadata-level node at value level.
 
-<img src="img/fig06.png" />
+<p align="center">
+<img src="img/fig06.png" width="75%"/>
+</p>
+<p align="center">
+    <em>Fig 6: SFC metadata concept</em>
+</p>
+
+## `TODO`: map SFC metadata approach to Unified Namespace (UNS) & IDF
+
 
 # Deployment
 
@@ -376,25 +408,27 @@ The framework contains classes that speed up the development of JVM protocol and
 
 The components don’t have any runtime environment-specific dependencies, they can be deployed as:
 
--   Standalone applications on the target platform supporting the JVM or runtimes are used to implement additional adapters and targets.
--   AWS Greengrass V2 components or containers
--   Docker or Kubernetes containers
+-   *Standalone applications* on the target platform supporting the JVM or runtimes are used to implement additional adapters and targets.
+-   *AWS IoT Greengrass v2 components* or containers
+-   *Docker* or *Kubernetes* containers
 
 ## In-process and IPC deployment models
 
 If implemented as jar files containing Java bytecode Protocol, adapters and targets can be configured to be loaded and executed in the SFC core process. The configuration for the adapter or target type contains a list of jar files, which are explicitly loaded by the SFC core process, as well as the name of a static factory class that implements a method, named newInstance, called by the core to create a new instance. The configuration is passed to this method and is used to initialize the adapter or the target instance.
 
-<img src="img/fig07.png" />
+<p align="center">
+<img src="img/fig07.png" width="35%"/>
+</p>
+<p align="center">
+    <em>Fig 7: SFC In-process deployment (e.g. in a single host context)</em>
+</p>
 
 As an alternative, they can be deployed to run in their processes and communicate with the core using GRPC. Use cases for this deployment model are to allow the following scenarios:
 
-Non-JVM execution environment or language to build/execute components
-
-Flexible deployment on IT/OT networks
-
-Distribute the load over multiple systems
-
-Apply lifecycle control with GreenGrass2 or Docker/Kubernetes.
+- Non-JVM execution environment or language to build/execute components
+- Flexible deployment on IT/OT networks
+- Distribute the load over multiple systems
+- Apply lifecycle control with GreenGrass2 or Docker/Kubernetes.
 
 When the processes running the adapter or target services are started, a port number is passed as a parameter on which the service is listening for requests from the core. Alternatively, the path to a configuration file can be used from which the process will retrieve just the port number (using an additional target identifier parameter if the configuration file does contain more than one target for a target type).
 
@@ -404,13 +438,23 @@ If an adapter or target server is stopped, it will be detected by the SFC Core. 
 
 As the SFC core acts as the provider for configuration data to the servers, these will always work with the latest and consistent configuration data from a single source. No additions configuration files need to be distributed to the protocol and adapter processes.
 
-<img src="img/fig08.png" />
+<p align="center">
+<img src="img/fig08.png" width="50%"/>
+</p>
+<p align="center">
+    <em>Fig 8: SFC IPC deployment (e.g. in a distributed OT/IT context)</em>
+</p>
 
 ## Mixed models
 
 It is possible to mix instances of in-process and IPC adapters and targets in a single configuration.
 
-<img src="img/fig09.png" />
+<p align="center">
+<img src="img/fig09.png" width="50%"/>
+</p>
+<p align="center">
+    <em>Fig 9: SFC Mixed deployment options</em>
+</p>
 
 
 ## Target chaining
@@ -427,7 +471,12 @@ In order to add functionality to the delivery of target data, special targets ca
 
 Using this strategy additional functionality can be added to delivering data to target destinations without making changes to the actual end-targets.
 
-<img src="img/fig10.png" />
+<p align="center">
+<img src="img/fig10.png" width="50%"/>
+</p>
+<p align="center">
+    <em>Fig 10: SFC Target Chaining</em>
+</p>
 
 Store and forwarding functionality for SFC targets is implemented using an intermediate target of type store-forward-target. It will use the returned results from the targets to buffer messages that could not be delivered to the destinations of the targets behind the store and forward target. When the targets can resume delivering data to their destinations the store and forward target will resubmit the data to these targets.
 
@@ -440,19 +489,12 @@ Buffering will also take place in situation where the next targets in the chain 
 The store and forward target using to following logic:
 
 -   In normal situations the target will forward the target data to the next targets.
-
 -   For messages that can be delivered to their destinations these targets will send ACKs containing the serial number of the delivered messages.
-
 -   When the targets cannot deliver messages, NACKS, including the full message will be returned.
-
 -   When receiving NACKs the store and forward target will go into buffering mode and will start buffering data received by the core to disk.
-
--   In buffering mode, the store and forward target will periodically send a buffered message, which is the oldest message that falls in the retention strategy (see below) of the buffer if the buffer is configured to operate in FIFI mode, which is the default. In LIFO mode the most recent message is used. An internal flag is set in the message to indicate to the target that this message should not be buffered but send directly to their destinations.
-
+-   In buffering mode, the store and forward target will periodically send a buffered message, which is the oldest message that falls in the retention strategy (see below) of the buffer if the buffer is configured to operate in FIFO mode, which is the default. In LIFO mode the most recent message is used. An internal flag is set in the message to indicate to the target that this message should not be buffered but send directly to their destinations.
 -   The target will try to deliver this message to the destination and report an ACK or NACK for that message.
-
 -   When an ACK is received the store and forward target will switch back from buffering mode into normal mode after submitting the buffered data. This will happen in FIFO or LIFO mode based on configuration.
-
 -   Messages for which an ERROR is received are not stored and in case they are buffered removed from the store as this means they cannot be processed by the target.
 
 ## Retention strategies
@@ -461,7 +503,7 @@ In order to prevent running out of disk space of the device that is used to stor
 
 In order to reduce the storage of buffered messages the target will try to use hard links for messages that need to be stored for multiple end targets, if the file system of that device supports it.
 
-PLEASE NOTE  
+*PLEASE NOTE*  
 Storing messages to a physical device can reduce the throughput of the SFC deployment. It is strongly recommended to run process that contains the store and forward target, in memory or as an IPC service, on a device that has a fast storage device.
 
 ## Router Target
@@ -474,16 +516,36 @@ Used cases for the router target are:
 
 -   Bundling of (compressed) message data over a network to a system on which a group of targets, running as external services, are hosted.
 
-<img src="img/fig11.png" />
-
+<p align="center">
+<img src="img/fig11.png" width="50%"/>
+</p>
+<p align="center">
+    <em>Fig 11: SFC Router target - bundling data</em>
+</p>
 -   Routing of data to alternative targets if data cannot be written to primary targets
 
-<img src="img/fig12.png" />
+<p align="center">
+<img src="img/fig12.png" width="50%"/>
+</p>
+<p align="center">
+    <em>Fig 12: SFC Router target - failover target</em>
+</p>
 
 -   Routing of data to a success target after it has been written to primary targets or their alternative targets. The success target can be used to archive delivered messages or a custom target van notify the source of the data that the data has been delivered.
 
-<img src="img/fig13.png" /><br><br>
-<img src="img/fig14.png" />
+<p align="center">
+<img src="img/fig13.png" width="50%"/>
+</p>
+<p align="center">
+    <em>Fig 13: SFC Router target - routing to a final `success` target</em>
+</p>
+
+<p align="center">
+<img src="img/fig14.png" width="50%"/>
+</p>
+<p align="center">
+    <em>Fig 14: SFC Router target - routing to a final `success` target</em>
+</p>
 
 # Output data format 
 
@@ -548,9 +610,9 @@ The data collected by the SFC source connector is processed by an internal data 
 
 -   Data change filtering is applied at value or source level. Data change filters only let values pass if the new value differs from a previously passed value with at least a configured percentage or absolute value, or when a configured time period has passed since passing the last value. If a change filter is configured at source and value level, then the filter at value level takes precedence.
 
--   Data value filter is applied at value level is applied if a filter has been configured for that value. The value is passed if it matches the filter expression which can consist of a combination of one or more ==,!=,\>,\>=,\<,\<=,&&,\|\| operators. For non-numeric values only the == and != operators van be used.
+-   Data value filter is applied at value level is applied if a filter has been configured for that value. The value is passed if it matches the filter expression which can consist of a combination of one or more `==`, `!=`, `>`, `>=`, `<`, `<=`, `&&`, `||` operators. For non-numeric values only the `==` and `!=` operators van be used.
 
--   If data aggregation is specified the values are buffered until the specified aggregation size is reached. The output of an aggregation can be one or more output values from an aggregation (avg, min, max, etc.) on the collected values and/or the collected values.
+-   If data aggregation is specified the values are buffered until the specified aggregation size is reached. The output of an aggregation can be one or more output values from an aggregation (`avg`, `min`, `max`, etc.) on the collected values and/or the collected values.
 
 -   Data transformations are applied on the aggregated data output values if a transformation is configured for that specific output.
 
@@ -558,9 +620,10 @@ The data collected by the SFC source connector is processed by an internal data 
 
 -   The data is transmitted to the configured targets where additional buffering or target specific processing is done. Selected targets support the transformation of the data submitted to their destinations by configuring an Apache Velocity template that is applied on that data.
 
-Source data -\> Transformation(value)^(\*)^ -\> Change Filter ^(\*)^ -\> Value Filter^(\*)^ -\> Aggregation^(\*)^ -\> Transformation (value)^(\*)^ -\> Naming of data and adding timestamp and metadata -\> Transformation template (structure) ^(\*)^ -\> Data to Target
-
-^(\*)^ optional, only applied if configured
+```
+Source data -> Transformation(value)(*) -> Change Filter (*) -> Value Filter(*) -> Aggregation(*) -> Transformation (value)(*) -> Naming of data and adding timestamp and metadata -> Transformation template (structure) (*) ->  Data to Target
+```
+(`*`) optional, only applied if configured
 
 # Data Filtering
 
@@ -572,7 +635,7 @@ A data change filter can be configured at source and channel values level. If a 
 
 ## Value Change Filters
 
-A value change filter will pass a value if it matches a filter expression. A filter expression can consist of one or more operators like ==,!=,\>,\>=,\<,\<=, combined in && and \|\| groups. For non-numeric values, only the == and != operators can be used.
+A value change filter will pass a value if it matches a filter expression. A filter expression can consist of one or more operators like `==`,`!=`,`>`,`>=`,`<`,`<=`, combined in `&&` and `||` groups. For non-numeric values, only the == and != operators can be used.
 
 # Configuration
 
@@ -586,7 +649,7 @@ To load the configuration data from a JSON source, the consumer makes a call to 
 
 ## Configuration placeholders
 
-The JSON configuration can contain placeholders in the format **\${name}**. These placeholders are replaced by the value of environment variables with the specified name or a configured secret (see below). Using placeholders will help to keep consistency between (repeated) values in the configuration and values used in other configuration types.
+The JSON configuration can contain placeholders in the format **${name}**. These placeholders are replaced by the value of environment variables with the specified name or a configured secret (see below). Using placeholders will help to keep consistency between (repeated) values in the configuration and values used in other configuration types.
 
 ## Configuration secrets
 
@@ -602,7 +665,7 @@ Secrets which are stored locally are encrypted using a file with a secret key, w
 
 ## Deferred placeholder replacement
 
-In normal case placeholders for environment variables and secrets are resolved in the SFC core Configuration logic. When the core build subsets of the configuration, used to initialize external IPC servers for source protocol adapter or target IPC services, the placeholders are replaced with their environment variable or secret values. It is possible to defer the replacement of these placeholders on the receiving service, allowing to resolve environment variables by the system/process running the service or preventing secret values to be passed over the network. (please note that IPC traffic between the core and external services can be configured to be encrypted) Deferring placeholder can be done by using placeholders in the format **\${{name**}}. If the placeholders are used for replacement by configured secrets from AWS Systems Manager, all required configuration elements to resolve the secrets by the service process will be included in the configuration that is used to initialize it. (SecretsManager with selected configured secrets, credentials manager client etc.)
+In normal case placeholders for environment variables and secrets are resolved in the SFC core Configuration logic. When the core build subsets of the configuration, used to initialize external IPC servers for source protocol adapter or target IPC services, the placeholders are replaced with their environment variable or secret values. It is possible to defer the replacement of these placeholders on the receiving service, allowing to resolve environment variables by the system/process running the service or preventing secret values to be passed over the network. (please note that IPC traffic between the core and external services can be configured to be encrypted) Deferring placeholder can be done by using placeholders in the format **${{name}}**. If the placeholders are used for replacement by configured secrets from AWS Systems Manager, all required configuration elements to resolve the secrets by the service process will be included in the configuration that is used to initialize it. (SecretsManager with selected configured secrets, credentials manager client etc.)
 
 ## Configuration providers
 
@@ -622,7 +685,7 @@ If the configuration file specified by the -config parameter of any of its refer
 
 ## Configuration verification
 
-In order to secure the content of configuration data passed to the SFC Core the content can be digitally signed with a secret key. The digital signature, which is added to the configuration, will be checked using the public key related to the key that was used to sign the configuration data. See section [Securing the configuration](#_Securing_the_configuration) for details,
+In order to secure the content of configuration data passed to the SFC Core the content can be digitally signed with a secret key. The digital signature, which is added to the configuration, will be checked using the public key related to the key that was used to sign the configuration data. See section [Securing the configuration](#securing-the-configuration) for details.
 
 # Logging
 
@@ -648,21 +711,14 @@ Every 60 seconds, which is the default which can be modified by setting a proper
 For each metrics data point the following information is collected:
 
 -   name
-
 -   value
-
 -   units
-
 -   timestamp
-
 -   dimensions
 
 By default, the dimensions are:
-
 -   source: name of the component that generated the datapoint. For protocol adapters this is the identifier of the adapter or the adapter and the source (separated by a ":" ) from the configuration. For targets the source is the identifier of the target from the configuration. For the code it is "SfcCore".
-
 -   category: can be "Target", "Adapter" or "Core"
-
 -   type: the actual type of the connector (e.g., "OpcuaAdapter"), target (e.g., "AwsSqsTargetWriter") or "SfcCore"
 
 Additional dimensions can be added by adding a "CommonDimensions" property in the metrics section which is a map with name-value pairs.
@@ -671,12 +727,9 @@ Additionally, each adapter or target can have a Metrics section with an Enabled 
 
 Additional settings can be set for the actual configured writer. For the AWS CloudWatch Metrics writer, a section named "CloudWatch" can be added with the following properties:
 
--   CredentialProviderClient: name of a configured client in the AwsIotCredentialProviderClients section of the SFC configuration to use to obtain credentials to put metrics data. (The role used for the client must give permission for calls to the PutMetricData API call for the AWS CloudWatch service). If no client is configured the AWS Java SDK credential provider chain is used (<https://docs.aws.amazon.com/sdk-for-java/latest/developer-guide/credentials.html#credentials-chain>).
-
+-   CredentialProviderClient: name of a configured client in the AwsIotCredentialProviderClients section of the SFC configuration to use to obtain credentials to put metrics data. (The role used for the client must give permission for calls to the PutMetricData API call for the AWS CloudWatch service). If no client is configured the [AWS Java SDK credential provider chain is used](https://docs.aws.amazon.com/sdk-for-java/latest/developer-guide/credentials.html#credentials-chain).
 -   Region: Region used for the AWS CloudWatch Service
-
 -   Interval: Interval in seconds to write to AWS CloudWatch. Metrics are written at least once with this interval or earlies if the maximum of 1000 data points or the configured buffer size is reached.
-
 -   BatchSize: Size of the buffer used to store datapoints before these are written to CloudWatch, or earlier if the interval period is reached.
 
 The following metric values are collected:
@@ -707,7 +760,7 @@ The following metric values are collected:
 
 All network traffic between SFC components can be secured using encryption. The following options can be used
 
-PlainText
+## PlainText
 
 The network traffic between SFC components is not encrypted.
 
@@ -731,12 +784,10 @@ The address of the client must be present as DNS name or IP address as one of th
 
 The script below can be used to create the required keys and certificates to which can be used for ServerSideTLS and MutualTLS connections in test environments
 
-NOTE:
+*NOTE*:
 
 -   The script is provided to generate self-signed certificates for test purposed only and should not be used in production environments.
-
 -   For convenience the script includes the IP addresses of all available network interfaces as IP addresses, and the hostname (plus localhost) of the system on which the script is executed, in the as IP addresses of the sand DNS names as alternative subject names of the generated certificates. This assumes a test setup where both the SFC core and service are executed on the same system. When the SFC core and SFC services run on different systems the script must be executed on both of the systems and the relevant certificates must be used on that system as key and certificate parameters for the server, or configuration values used by the SFC core.
-
 -   In production environments the IP addresses and DNS names should be included in the certificate to the expected client and service addresses for that environment.
 
 ```sh
@@ -799,7 +850,7 @@ openssl x509 -in client-cert.pem -noout -text
 
 # Providing session credentials for targets accessing AWS Services
 
-Targets publishing their data to AWS services need credentials to get access to these services. Besides using the standard chain credential (environment variables, credentials files) used by the (Java) AWS SDK's, SFC has additional support for using device certificates to obtain session credentials from the AWS IoT Credentials Provider Service (<https://aws.amazon.com/blogs/security/how-to-eliminate-the-need-for-hardcoded-aws-credentials-in-devices-by-using-the-aws-iot-credentials-provider/>). Targets can refer to a client configuration that contains entries for the files with for the required device certificate, private key and root CA certificate. SFC provides helpers, that can be used by the targets, to obtain session credentials using these certificates and key files. These client configurations are in the AwsIotCredentialProviderClients section of the configuration file and are referred by the targets by setting the CredentialProviderClient to an entry in that section. If the CredentialProviderClient is not set then SFC will fall back on the default credentials provider chain as described at https://docs.aws.amazon.com/sdk-for-java/v1/developer-guide/credentials.html.
+Targets publishing their data to AWS services need credentials to get access to these services. Besides using the standard chain credential (environment variables, credentials files) used by the (Java) AWS SDK's, SFC has additional support for using device certificates to obtain session credentials from the [AWS IoT Credentials Provider Service](https://aws.amazon.com/blogs/security/how-to-eliminate-the-need-for-hardcoded-aws-credentials-in-devices-by-using-the-aws-iot-credentials-provider/). Targets can refer to a client configuration that contains entries for the files with for the required device certificate, private key and root CA certificate. SFC provides helpers, that can be used by the targets, to obtain session credentials using these certificates and key files. These client configurations are in the AwsIotCredentialProviderClients section of the configuration file and are referred by the targets by setting the CredentialProviderClient to an entry in that section. If the CredentialProviderClient is not set then SFC will fall back on the default credentials provider chain as described [here](https://docs.aws.amazon.com/sdk-for-java/v1/developer-guide/credentials.html).
 
 The logic for obtaining the session credentials is ported from Greengrass V2 into SFC and is fully compatible with, but not dependent on Greengrass. Certificates can be deployed manually to the device running SFC, or in case Greengrass is deployed on the same machine make use of the Greengrass certificate management and deployment functionality. The configuration provides a shortcut option to specify that the certificate and key files of a Greengrass deployment on that device can use, without the need to specify the location of each certificate or key file.
 
@@ -808,7 +859,6 @@ The SFC core will provide the content of the certificate and key files as part o
 In scenarios where a target is running as an IPC service on a different device as the device running the SFC core the configuration data, including the device certificate and private key, over the network, this data needs to be protected. This can be done using the following methods:
 
 -   Protect all data exchanged between the SFC core and the target over the network by specifying a certificate and key for that IPC server. If these are used the traffic is encrypted using TLS/SSL.
-
 -   Per client configuration, there is the option to set the CertificatesAndKeysByFileReference option to true. When this option is set for a target the SFC core will not pass the content of the certificate and key files over the network, but only the configured paths for these files. This means that these files should either be accessible in a secure way from the device running the target or physically be deployed to that device, manually or using Greengrass certificate management.
 
 As targets may need to access the internet over a proxy server, to obtain the session credentials as described above, and to make the required AWS service calls, the client configuration referred by the target can also include proxy configuration information.
@@ -880,15 +930,13 @@ fun verify(configJson: String, publicKey: PublicKey): Boolean
 
 # Output Structure Transformation
 
-For situations where the structure of the data needs to be converted, this can be another JSON format, XML, CSV etc., targets can have a configurable template. This template is the name of an Apache Velocity template file (https://velocity.apache.org/engine/2.3/user-guide.html). Before the data is transmitted the actual destination of the target the template is applied to transform the data.
+For situations where the structure of the data needs to be converted, this can be another JSON format, XML, CSV etc., targets can have a configurable template. This template is the name of an [Apache Velocity template file](https://velocity.apache.org/engine/2.3/user-guide.html). Before the data is transmitted the actual destination of the target the template is applied to transform the data.
 
 The context of the input data contains 3 variables:
 
-"\$schedule": Only contains the name of the schedule
-
-"\$sources": Map with an element for each source containing all its values
-
-"\$metadata": Metadata at (schedule) top-level.
+- "$schedule": Only contains the name of the schedule
+- "$sources": Map with an element for each source containing all its values
+- "$metadata": Metadata at (schedule) top-level.
 
 Below are examples of templates that transform the data (not-aggregated) into different formats.
 
@@ -905,7 +953,7 @@ This template flattens the data into CSV format. Each line consists of the name 
 #end
 ```
 
-The template below flattens the values for the "count", "avg", "min", "max", "stddev" aggregations of a dataset into CSV format.
+The template below flattens the values for the "`count`", "`avg`", "`min`", "`max`", "`stddev`" aggregations of a dataset into CSV format.
 
 ```java
 #foreach($sourceName in $sources.keySet())
@@ -1013,18 +1061,15 @@ The health probe endpoints of the adapter, target and metric services, become ac
 
 Optionally the health probe can be configured use a different network adapter/network as used by the data streams between the core process and the service.
 
-After receiving the initialization data, the health probe will listen for HTTP GET and HEAD requests on the configured port on the default or explicit configured network interface (http://address:port/) . Optionally a path can be configured to be appended to the endpoint address ([http://address:port/path](http://address:port/path))
+After receiving the initialization data, the health probe will listen for HTTP GET and HEAD requests on the configured port on the default or explicit configured network interface (`http://address:port/`) . Optionally a path can be configured to be appended to the endpoint address (`http://address:port/path`)
 
 Optionally a period can be configured after which repeated health probe requests did not return a positive result the process will be stopped. This option can be used if the environment which is controlling the instances does not try to stop the unhealthy service instances itself before a new instance is started.
 
 In order to protect the service from extensive load and unwanted the request the handler for this service:
 
 -   A configurable rate limiter is used to limit the number of calls per second (default is 10 request/second)
-
 -   The status of the service is cached by the probe handler and retained for a configurable period before being re-evaluated (default is 1000 milliseconds)
-
 -   A list of IP filters can be configured to restrict the IP addresses from which requests can be made
-
 -   The handler is restricted to only use a single thread for handling probe requests
 
 Health probe endpoints for SFC service are configured by adding a HealthProbe configuration sections at the following locations:
@@ -1244,17 +1289,11 @@ A number of optional checks (see <https://reference.opcfoundation.org/v104/Core/
 Validation options:
 
 -   HostOrIP: End certificates must contain their host name or IP address in the Subject Alternate Names which will be validated
-
 -   Validity: Checks certificate expiry
-
 -   KeyUsageEndEntity: Key usage extensions for end entity certificates must be present and will be checked.
-
 -   ExtKeyUsageEndEntity: : Extended key usage extensions for end entity certificates must be present and will be checked.
-
 -   KeyUsageIssuer: Key usage extensions must be present and will be checked for CA certificates.
-
 -   Revocation: Revocation will be checked against CLRs.
-
 -   ApplicationUri: Checks the Application name in the Subject Alternative Names against the Application description.
 
 Example of OPCUA server configuration using Basic256Sha256 security profile for signed and encrypted traffic using a X509 certificate and private key, which can be generated by the adapter as a self-signed certificated which is valid for 365 days. A daily warning and metric value will be generated staring 30 days before the certificate expires. Server certificates will be checked using certificates and certificate revocation lists stored in sub directories under the specified base directory for that server.
@@ -3426,8 +3465,7 @@ This section describes the configuration types for the OPCUA protocol adapter an
 | Revocation                                | Revocation checking                                                                            | Boolean  | Default is true |
 | ApplicarionUri                            | Check Application description against the ApplicationUri from Subject Alternative Names        | Boolean  | Default is true |
 
-**  
-**
+
 
 # OPCDA Protocol Configuration
 
@@ -4015,8 +4053,6 @@ This section describes the configuration types for the MQTT protocol adapter and
 | ConnectTimeout                                                            | Timeout period in milliseconds to connect to the broker.                | Integer  | Default is 10000, the minimum value is 1000                                    |
 | WaitAfterConnectError                                                     | The period in milliseconds to wait after a connection failure to retry. | Integer  | Default is 10000, the minimum value is 1000                                    |
 
-**  
-**
 
 # SQL Adapter Configuration
 
@@ -4238,8 +4274,6 @@ This section describes the configuration types for the SQL adapter and contains 
 </tbody>
 </table>
 
-**  
-**
 
 # Modbus TCP Protocol Configuration
 
@@ -5642,11 +5676,11 @@ aws iot describe-endpoint --endpoint-type iot:Data-ATS</p>
 
 # Running the SFC core process
 
-The main class for running the SFC core process is com.amazonaws.sfc.MainController. The build process creates a sfc-main application in the sfc-main/build/distributions directory. The sfc-main.tar file contains script files (bin/sfc-main and bin/sfc-main.bat) to launch the applications, and all required libraries (/lib/\*.jar)
+The main class for running the SFC core process is `com.amazonaws.sfc.MainController`. The build process creates a sfc-main application in the sfc-main/build/distributions directory. The sfc-main.tar.gz file contains script files (**bin/sfc-main** and **bin/sfc-main.bat**) to launch the applications, and all required libraries (/lib/*.jar)
 
-The main class for running the SFC core is com.amazonaws.sfc.MainController.
+The main class for running the SFC core is `com.amazonaws.sfc.MainController`
 
-The sfc-main application has the following command-line arguments.
+The `sfc-main` application has the following command-line arguments:
 
 | **Parameter**           | **Description**                                                                                                                              |
 |-------------------------|----------------------------------------------------------------------------------------------------------------------------------------------|
@@ -5658,12 +5692,10 @@ The sfc-main application has the following command-line arguments.
 | -trace                  | Set log output level to most detailed trace level (Info, warning, error, and detailed trace messages)                                        |
 | -warning                | Set log output level to warning level. (Error and warning messages)                                                                          |
 
-**  
-**
 
-# Running the JVM protocol adapters as an IPC Service.
+# Running the JVM protocol adapters as an IPC Service
 
-The adapters have a service wrapper that enables these adapters can be executed as an IPC Service process. For each adapter, a tar file is generated by the build process that includes the application script file to start the service, as well as all required library files. The application tar file contains script files (bin/\<adapter type\> bin/ /\<adaptertype\>.bat) to launch the applications, and all required libraries (/lib/\*.jar).
+The adapters have a service wrapper that enables these adapters can be executed as an IPC Service process. For each adapter, a tar file is generated by the build process that includes the application script file to start the service, as well as all required library files. The application tar file contains script files (`bin/<adapter type>` *and* `bin/<adaptertype>.bat`) to launch the applications, and all required libraries (`/lib/*.jar`).
 
 | **Protocol** | **Application name** | **Main class**                                         |
 |--------------|----------------------|--------------------------------------------------------|
@@ -5765,10 +5797,7 @@ From the configuration file, specified by the -config parameter, the port number
 
 To protect the ICP traffic between the core and the adapter SSL can be used. For this, both the -cert and the -key parameter must be used to specify the pathname to the certificate and the key file. If the -conf parameter is used then the values of the Cert and Key elements of the server referred to in the ProtocolSource/Server element will be used.
 
-**  
-**
-
-# Running targets and as an IPC Service.
+# Running targets as an IPC Service
 
 The adapters have a service wrapper that enables these targets can be executed as an IPC Service process. For each target, a tar file is generated by the build process that includes the application script file to start the service, as well as all required library files. The application tar file contains script files (bin/\<targettype\> bin/ /\<targettype\>.bat) to launch the applications, and all required libraries (/lib/\*.jar)
 
@@ -5893,21 +5922,23 @@ To protect the ICP traffic between the core and the adapter SSL can be used. For
 
 To run protocol adapters in the same process as the SFC core, they need to be implemented for the same JDK as used for the core. To make it possible to add new adapters without making changes to the SFC code, there are no links in the core to the libraries that implement the adapters. In the configuration of an in-process adapter type, the pathnames of the jar files that contain the classes that implement the adapter need to be explicitly configured. When the SFC core creates an instance of the adapter, it loads the configured jar files and uses a static factory method to create the actual instance. The name of the factory class, which could be the actual adapter class itself, needs to be configured as well. The name of the factory method is "newInstance" and has 3 parameters:
 
-• configReader: ConfigReader, the reader used by the adapter to read its configuration
-
-• scheduleName: String, the schedule name that is using the adapter
-
-• logger: Logger, the logger for output of the newly created adapter instance
+- **configReader**: ConfigReader, the reader used by the adapter to read its configuration
+- **scheduleName**: String, the schedule name that is using the adapter
+- **logger**: Logger, the logger for output of the newly created adapter instance
 
 The jar files are part of the adapter deployment and can be found in the lib directory of the deployment package. To specify the path to the jar files it is recommended to use a placeholder, instead of hard-coding, the directory where the adapter, and targets, are deployed and set an environment variable for this directory.
 
-\${\<environment variable name\>}/adapter name/lib/\<jar file\>
+```sh
+${<environment variable name>}/adapter name/lib/<jar file>
+```
 
-e.g., if the adapter is deployment tar file for an adapter, mqtt in this example, is deployed in /sfc/mqtt the environment variable is set to "/sfc". In the configuration for the jar pathnames, this variable can be used as a placeholder in the pathname of the jar file.
+e.g., if the adapter is deployment tar file for an adapter, mqtt in this example, is deployed in `/sfc/mqtt` the environment variable is set to "/sfc". In the configuration for the jar pathnames, this variable can be used as a placeholder in the pathname of the jar file.
 
+```sh
 SFC_DEPLOYMENT_DIR=/sfc
+```
 
-In the configuration, the values for the jar files are "\${SFC_DEPLOYMENT_DIR}/mqtt/lib ".
+In the configuration, the values for the jar files are "${SFC_DEPLOYMENT_DIR}/mqtt/lib".
 
 Example AdapterTypes section, including all in-process protocol configuration with environment variable placeholders. Each adapter is in a subdirectory with the name of the adapter in the deployment directory. It is not required to include all adapter type, the ones that are not needed can be removed from this section.
 
@@ -5917,41 +5948,23 @@ SFC_DEPLOYMENT_DIR: Directory in which deployment packed is deployed, with the s
 
 ```json
 "AdapterTypes": {
-
-"MQTT": {
-
-"JarFiles": \["\${SFC_DEPLOYMENT_DIR}/mqtt/lib"\],
-
-"FactoryClassName": "com.amazonaws.sfc.mqtt.MqttAdapter"
-
-},
-
-"MODBUS-TCP" : {
-
-"JarFiles": \["\${SFC_DEPLOYMENT_DIR}/modbus-tcp/lib/"\],
-
-"FactoryClassName": "com.amazonaws.sfc.modbus.tcp.ModbusTcpAdapter"
-
-},
-
-"OPCUA": {
-
-"JarFiles": \["\${SFC_DEPLOYMENT_DIR}/opcua/lib"\],
-
-\],
-
-"FactoryClassName": "com.amazonaws.sfc.opcua.OpcuaAdapter"
-
-},
-
-"SNMP": {
-
-"JarFiles": \["\${SFC_DEPLOYMENT_DIR}/snmp/lib"\],
-
-"FactoryClassName": "com.amazonaws.sfc.snmp.SnmpAdapter"
-
-}
-
+    "MQTT": {
+      "JarFiles": ["${SFC_DEPLOYMENT_DIR}/mqtt/lib"],
+      "FactoryClassName": "com.amazonaws.sfc.mqtt.MqttAdapter"
+    },
+    "MODBUS-TCP" : {
+      "JarFiles": ["${SFC_DEPLOYMENT_DIR}/modbus-tcp/lib/"],
+      "FactoryClassName": "com.amazonaws.sfc.modbus.tcp.ModbusTcpAdapter"
+    },
+    "OPCUA": {
+      "JarFiles": ["${SFC_DEPLOYMENT_DIR}/opcua/lib"],
+],
+      "FactoryClassName": "com.amazonaws.sfc.opcua.OpcuaAdapter"
+    },
+    "SNMP": {
+      "JarFiles": ["${SFC_DEPLOYMENT_DIR}/snmp/lib"],
+      "FactoryClassName": "com.amazonaws.sfc.snmp.SnmpAdapter"
+    }
 }
 ```
 
@@ -5959,19 +5972,18 @@ SFC_DEPLOYMENT_DIR: Directory in which deployment packed is deployed, with the s
 
 To run targets in the same process as the SFC core, they need to be implemented for the same JDK as used for the core. To make it possible to add a new target without making changes to the SFC code, there are no links in the core to the libraries that implement the target. In the configuration of an in-process target type, the pathnames of the jar files that contain the classes that implement the target need to be explicitly configured. When the SFC core creates an instance of the target, it loads the configured jar files and uses a static factory method to create the actual instance. The name of the factory class, which could be the actual targer class itself, needs to be configured as well.
 
-The signature if the function is
+The signature if the function is:
 
+```java
 fun newInstance(vararg createParameters : Any?) : TargetWriter?
+```
 
 The core passes values to the function through the createParameters parameter.
 
--   configReader: ConfigReader, the reader used by the target to read its configuration
-
--   targetID: String, the target identifier
-
--   logger: Logger, the logger for output of the newly created target instance
-
--   resultHandler: TargetResultHandler?, an handler passed to the writer to pass the result of delivering the data by the data back to a previous target in a target chain.
+-   **configReader**: ConfigReader, the reader used by the target to read its configuration
+-   **targetID**: String, the target identifier
+-   **logger**: Logger, the logger for output of the newly created target instance
+-   **resultHandler**: TargetResultHandler?, an handler passed to the writer to pass the result of delivering the data by the data back to a previous target in a target chain.
 
 The jar files are part of the target deployment and can be found in the lib directory of the deployment package. To specify the path to the jar files it is recommended to use a placeholder, instead of hard-coding, the directory where the adapter, and targets, are deployed and set an environment variable for this directory.
 
@@ -5985,68 +5997,37 @@ SFC_DEPLOYMENT_DIR: Directory in which deployment packed is deployed, with a sub
 
 ```json
 "TargetTypes": {
-
-"DEBUG-TARGET": {
-
-"JarFiles": \["\${SFC_DEPLOYMENT_DIR}/debug-target/lib"\],
-
-"FactoryClassName": "com.amazonaws.sfc.debugtarget.DebugTargetWriter"
-
-},
-
-"AWS-FIREHOSE": {
-
-"JarFiles": \["\${SFC_DEPLOYMENT_DIR}/aws-kinesis-firehose-target/lib",
-
-"\${SFC_DEPLOYMENT_DIR}/aws-kinesis-firehose-target/lib/firehose-\${AWS_SDK_VERSION}.jar"
-
-\],
-
-"FactoryClassName": "com.amazonaws.sfc.awsfirehose.AwsFirehoseTargetWriter"
-
-},
-
-"AWS-IOT-HTTP": {
-
-"JarFiles": \["\${SFC_DEPLOYMENT_DIR}/aws-iot-http-target/lib"\],
-
-"FactoryClassName": "com.amazonaws.sfc.awsiot.http.AwsIotHttpTargetWriter"
-
-},
-
-"AWS-IOT-MQTT": {
-
-"JarFiles": \["\${SFC_DEPLOYMENT_DIR}/aws-iot-mqtt-target/lib/"\],
-
-"FactoryClassName": "com.amazonaws.sfc.awsiot.mqtt.AwsIotMqttTargetWriter"
-
-},
-
-"AWS-KINESIS": {
-
-"JarFiles": \["\${SFC_DEPLOYMENT_DIR}/aws-kinesis-target/lib"\],
-
-"FactoryClassName": "com.amazonaws.sfc.awskinesis.AwsKinesisTargetWriter"
-
-},
-
-"AWS-LAMBDA": {
-
-"JarFiles": ["SFC_DEPLOYMENT_DIR}/aws-lambda-target/lib"],
-
-"FactoryClassName": "com.amazonaws.sfc.awslambda.AwsLambdaTargetWriter"
-
-},
-
-"AWS-SQS": {
-
-"JarFiles": \["\${SFC_DEPLOYMENT_DIR}/aws-sqs-target/lib"\],
-
-"FactoryClassName": "com.amazonaws.sfc.awssqs.AwsSqsTargetWriter"
-
-}
-
-}
+    "DEBUG-TARGET": {
+      "JarFiles": ["${SFC_DEPLOYMENT_DIR}/debug-target/lib"],
+      "FactoryClassName": "com.amazonaws.sfc.debugtarget.DebugTargetWriter"
+    },
+    "AWS-FIREHOSE": {
+      "JarFiles": ["${SFC_DEPLOYMENT_DIR}/aws-kinesis-firehose-target/lib",
+        "${SFC_DEPLOYMENT_DIR}/aws-kinesis-firehose-target/lib/firehose-${AWS_SDK_VERSION}.jar"
+      ],
+      "FactoryClassName": "com.amazonaws.sfc.awsfirehose.AwsFirehoseTargetWriter"
+    },
+    "AWS-IOT-HTTP": {
+      "JarFiles": ["${SFC_DEPLOYMENT_DIR}/aws-iot-http-target/lib"],
+      "FactoryClassName": "com.amazonaws.sfc.awsiot.http.AwsIotHttpTargetWriter"
+    },
+    "AWS-IOT-MQTT": {
+      "JarFiles": ["${SFC_DEPLOYMENT_DIR}/aws-iot-mqtt-target/lib/"],
+      "FactoryClassName": "com.amazonaws.sfc.awsiot.mqtt.AwsIotMqttTargetWriter"
+    },
+    "AWS-KINESIS": {
+      "JarFiles": ["${SFC_DEPLOYMENT_DIR}/aws-kinesis-target/lib"],
+      "FactoryClassName": "com.amazonaws.sfc.awskinesis.AwsKinesisTargetWriter"
+    },
+    "AWS-LAMBDA": {
+      "JarFiles": ["${SFC_DEPLOYMENT_DIR}/aws-lambda-target/lib"],
+      "FactoryClassName": "com.amazonaws.sfc.awslambda.AwsLambdaTargetWriter"
+    },
+    "AWS-SQS": {
+      "JarFiles": ["${SFC_DEPLOYMENT_DIR}/aws-sqs-target/lib"],
+      "FactoryClassName": "com.amazonaws.sfc.awssqs.AwsSqsTargetWriter"
+    }
+  }
 ```
 
 # Metrics Collection
@@ -6135,7 +6116,6 @@ The writers do have all the following command line parameters in common.
 The port number, used by the service, can be specified using different methods which are applied in the following order
 
 -   The value of the -port command line parameter
-
 -   The value of the environment variable specified by the -envport parameter
 
 After the service is started is it waiting for an initialization call on the specified port. The core is using an IPC client to send the configuration data, which has common but also writer type specific elements, to the service that will use it to initialize the actual writer. The client will use a client streaming method call to stream the metrics data to the writer.
@@ -6179,9 +6159,7 @@ This method takes the source ID which refers to a protocol-specific source confi
 Examples of sources and channels for protocols are:
 
 -   OPCUA, sources are OPCUA server, channels are OPCUA nodes
-
 -   MODBUS, sources are MODBUS devices, channels are (ranges of) registers or discrete input or outputs
-
 -   MQTT, sources are brokers, channels are topic names
 
 The returned SourceReadResult can be an instance of either a SourceReadSuccess if the values were read successfully from the source, or a SourceReadError if the reading of the values failed.
@@ -6200,31 +6178,30 @@ The SFC core is responsible for creating and closing down instances of adapters 
 
 Each adapter implementation must implement a factory class that implements this method with the following signature:
 
+```java
 fun newInstance(vararg createParameters : Any?): SourceValuesReader?
+```
 
 4 values are passed through createParameters by the core when creating an in-process instance of the adapter.
 
 These values are:
 
 -   configReader: ConfigReader,
-
 -   scheduleName: String,
-
 -   logger: Logger
-
 -   resultHandler: TargetResultHandler
 
-The configReader is an abstraction of the SFC configuration, as each protocol implementation has, besides the common SFC core values, its specific configuration and overridden configuration types. The adapter implementation can simply obtain an instance of its configuration by calling the getConfig method, specifying configuration type to return parsed from the JSON data held by the configReader.
+The *configReader* is an abstraction of the SFC configuration, as each protocol implementation has, besides the common SFC core values, its specific configuration and overridden configuration types. The adapter implementation can simply obtain an instance of its configuration by calling the getConfig method, specifying configuration type to return parsed from the JSON data held by the configReader.
 
-The schedule name is the name of the schedule which is using the protocol adapter.
+The *scheduleName* is the name of the schedule which is using the protocol adapter.
 
-The logger is an abstraction for logging error, information, warning, and trace level messages.
+The *logger* is an abstraction for logging error, information, warning, and trace level messages.
 
-The resultHandler is an interface that can be passed by a previous intermediate target if the target is part of a chain of targets. The interface is used to return the results from delivering the data to the destination, e.g. a cloud service, of the target. The interface has two methods:
+The *resultHandler* is an interface that can be passed by a previous intermediate target if the target is part of a chain of targets. The interface is used to return the results from delivering the data to the destination, e.g. a cloud service, of the target. The interface has two methods:
 
-returnedData; which returns an instance of ResultHandlerData that contains information that the calling target expects to receive for acknowledged (ack), not acknowledged (nack) or error messages (error). This can either be the complete message, or just the serial number of the message or nothing.
+- *returnedData*: which returns an instance of ResultHandlerData that contains information that the calling target expects to receive for acknowledged (ack), not acknowledged (nack) or error messages (error). This can either be the complete message, or just the serial number of the message or nothing.
 
-handleResult: is called by the target to result of delivering the message to the previous target in a chain. An instance of the TargetResult class is passed a parameter that includes the ID of the target and a list of serials numbers , or complete messages (see returnedData above) for delivered messages (ack), messages that could not be delivered due to loss of network connection or the destination service not available (nack) or messages that could not be processed by the target (error).
+- *handleResult*: is called by the target to result of delivering the message to the previous target in a chain. An instance of the TargetResult class is passed a parameter that includes the ID of the target and a list of serials numbers , or complete messages (see returnedData above) for delivered messages (ack), messages that could not be delivered due to loss of network connection or the destination service not available (nack) or messages that could not be processed by the target (error).
 
 The TargetResultHelper and TargetBufferedResultHelper classes can be used to simplify reporting the result data by the target.
 
@@ -6321,9 +6298,7 @@ fun newInstance(vararg createParameters : Any?): ConfigProvider?
 These values are:
 
 -   configString : String containing the input data from the configuration file
-
 -   configVerificationKey : PublicKey? Used to verify the content of theconfiguration
-
 -   logger: Logger, Logger log results of handler
 
 
@@ -6469,7 +6444,7 @@ To protect the ICP traffic between the core and the adapter SSL can be used. For
 ## Output logging format
 
 In order to integrate with the Microsoft logging extensions, the command line  
-the parameters for logging (-trace, -info, -warning, -error) are not available for the .NET Core based adapter. (https://docs.microsoft.com/en-us/dotnet/core/extensions/logging?tabs=command-line)implementations. Instead of these parameters the level of output logging is configured in the appsettings.json file.
+the parameters for logging (-trace, -info, -warning, -error) are not available for the [.NET Core based adapter](https://docs.microsoft.com/en-us/dotnet/core/extensions/logging?tabs=command-line) implementations. Instead of these parameters the level of output logging is configured in the appsettings.json file.
 
 ## Implementing a .NET Core Protocol adapter.
 
@@ -6542,6 +6517,4 @@ public sealed class OpcdaProtocolService : ProtocolServiceMain
 
 ## Service 
 
-In order to integrate with the Microsoft logging extensions (https://docs.microsoft.com/en-us/dotnet/core/extensions/logging?tabs=command-line)the command line  
-parameters for logging (-trace, -info, -warning, -error) are not available for the .NET Core based adapter implementations. The level of the logging output  
-is configured in the appsettings.json file.
+In order to integrate with the [Microsoft logging extensions](https://docs.microsoft.com/en-us/dotnet/core/extensions/logging?tabs=command-line) the command line parameters for logging (-trace, -info, -warning, -error) are not available for the .NET Core based adapter implementations. The level of the logging output is configured in the appsettings.json file.
