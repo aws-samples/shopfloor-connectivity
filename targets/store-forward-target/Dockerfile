@@ -3,6 +3,6 @@ FROM ${baseimage}
 
 WORKDIR /sfc
 
-ADD build/distributions/store-forward-target.tar .
+ADD build/distributions/store-forward-target.tar.gz .
 
 CMD ["./store-forward-target/bin/store-forward-target",  "-envport", "PORT"]

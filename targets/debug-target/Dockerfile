@@ -3,6 +3,6 @@ FROM ${baseimage}
 
 WORKDIR /sfc
 
-ADD build/distributions/debug-target.tar .
+ADD build/distributions/debug-target.tar.gz .
 
 CMD ["./debug-target/bin/debug-target",  "-envport", "PORT"]

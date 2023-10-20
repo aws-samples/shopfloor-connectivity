@@ -3,6 +3,6 @@ FROM ${baseimage}
 
 WORKDIR /sfc
 
-ADD build/distributions/aws-iot-analytics-target.tar .
+ADD build/distributions/aws-iot-analytics-target.tar.gz .
 
 CMD ["./aws-iot-analytics-target/bin/aws-iot-analytics-target",  "-envport", "PORT", "-info"]

@@ -3,6 +3,6 @@ FROM ${baseimage}
 
 WORKDIR /sfc
 
-ADD build/distributions/snmp.tar .
+ADD build/distributions/snmp.tar.gz .
 
 CMD ["./snmp/bin/snmp",  "-envport", "PORT"]

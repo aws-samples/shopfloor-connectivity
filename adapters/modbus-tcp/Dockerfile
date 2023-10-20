@@ -3,6 +3,6 @@ FROM ${baseimage}
 
 WORKDIR /sfc
 
-ADD build/distributions/modbus-tcp.tar .
+ADD build/distributions/modbus-tcp.tar.gz .
 
 CMD ["./modbus-tcp/bin/modbus-tcp",  "-envport", "PORT"]

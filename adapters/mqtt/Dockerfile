@@ -3,6 +3,6 @@ FROM ${baseimage}
 
 WORKDIR /sfc
 
-ADD build/distributions/mqtt.tar .
+ADD build/distributions/mqtt.tar.gz .
 
 CMD ["./mqtt/bin/mqtt",  "-envport", "PORT"]
