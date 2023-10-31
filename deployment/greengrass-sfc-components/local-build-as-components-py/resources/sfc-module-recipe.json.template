@@ -1,0 +1,38 @@
+{
+      "RecipeFormatVersion": "2020-01-25",
+      "ComponentName": "{CompName}",
+      "ComponentVersion": "1.0.0",
+      "ComponentDescription": "SFC {CompName} module",
+      "ComponentPublisher": "AWS",
+      "ComponentConfiguration": {
+         "DefaultConfiguration": {
+            "ipc_mode": false,
+            "ipc_port": 5001
+            }
+      },
+      "Manifests": [
+         {
+            "Platform": {
+               "os": "linux"
+            },
+            "Lifecycle": {
+               "Install": {
+                   "RequiresPrivilege": true,
+                   "Script": "cd {artifacts:path} && tar -xvf {CompFileName}"
+               }, 
+               "Run": {
+                   "RequiresPrivilege": true,
+                   "Script": "if $IPC_MODE; then {artifacts:path}/{CompName}/bin/{CompName} -port {configuration:/ipc_port}; fi",
+                   "Setenv": {
+                       "IPC_MODE": "{configuration:/ipc_mode}"
+                   }
+               }
+            },
+            "Artifacts":[
+              {
+                "URI": "s3://[REPLACE WITH YOUR S3 BUCKET]/latest/artifacts/com.amazon.sfc.sfc-main/1.0.0/sfc-main.tar.gz"
+              }
+            ]
+         }
+      ]
+   }

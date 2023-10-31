@@ -1,0 +1,56 @@
+{
+   "RecipeFormatVersion": "2020-01-25",
+   "ComponentName": "com.amazon.sfc.sfc-main",
+   "ComponentVersion": "1.0.0",
+   "ComponentDescription": "SFC-Core component",
+   "ComponentPublisher": "AWS",
+   "ComponentDependencies": {
+    "com.amazon.sfc.opcua": {
+      "VersionRequirement": "^0.0.2",
+      "DependencyType": "HARD"
+    },
+    "com.amazon.sfc.debug-target": {
+      "VersionRequirement": "^0.0.2",
+      "DependencyType": "HARD"
+    },
+    "com.amazon.sfc.aws-s3-target": {
+      "VersionRequirement": "^0.0.2",
+      "DependencyType": "HARD"
+    },
+    "com.amazon.sfc.aws-iot-mqtt-target": {
+      "VersionRequirement": "^0.0.2",
+      "DependencyType": "HARD"
+    }
+   },
+   "ComponentConfiguration": {
+      "DefaultConfiguration": {
+         "SFC_CONFIG_JSON": {}
+      }
+   },
+   "Manifests": [
+      {
+         "Platform": {
+            "os": "linux"
+         },
+         "Lifecycle": {
+             
+            "Install": {
+                "RequiresPrivilege": true,
+                "Script": "cd {artifacts:path} && tar -xvf sfc-main.tar.gz"
+            }, 
+            "Run": {
+                "RequiresPrivilege": true,
+                "Script": "printf '{configuration:/SFC_CONFIG_JSON}' > {artifacts:path}/conf.json && {artifacts:path}/sfc-main/bin/sfc-main -config {artifacts:path}/conf.json",
+                "Setenv": {
+                    "SFC_DEPLOYMENT_DIR": "{artifacts:path}"
+                }
+            }
+         },
+         "Artifacts":[
+              {
+                "URI": "s3://[REPLACE WITH YOUR S3 BUCKET]/latest/artifacts/com.amazon.sfc.sfc-main/1.0.0/sfc-main.tar.gz"
+              }
+         ]
+      }
+   ]
+}
