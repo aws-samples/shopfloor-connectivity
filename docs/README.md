@@ -1,5 +1,10 @@
-  SFC documentation
-  =================
+SFC documentation
+=================
+
+### Tutorials
+- [Greengrass In-Process Deployment](./greengrass-in-process/README.md)
+- [Greengrass IPC Deployment](./greengrass-ipc/README.md)
+
 ### TOC
   - [Introduction](#introduction)
     - [SFC Components](#sfc-components)
@@ -29,6 +34,8 @@
     - [Store and forward target](#store-and-forward-target.)
     - [Retention strategies](#retention-strategies)
     - [Router Target](#router-target)
+    - [Greengrass In-Process Deployment](./greengrass-in-process/README.md)
+    - [Greengrass IPC Deployment](./greengrass-ipc/README.md)
   - [Output data format](#output-data-format)
   - [Dataflow and processing](#dataflow-and-processing)
   - [Data Filtering](#data-filtering)

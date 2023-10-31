@@ -1,5 +1,5 @@
-Greengrass components from released sfc version
-===============================================
+Greengrass components CDK tooling
+=================================
 
 Use CDK to automatically install all SFC-modules as Greengrass components.
 
@@ -51,9 +51,9 @@ aws greengrassv2 list-components #| jq
 ### 5. Next steps
 Now create customized `in-process` or `IPC` SFC Greengrass Deployments as described here:
 
-[**Link to sfc greengrass `in-process` howto docs**](../../docs/greengras-in-process/README.md)
+[**Link to sfc greengrass `in-process` howto docs**](../../../docs/greengrass-in-process/README.md)
 
-[**Link to sfc greengrass `IPC` howto docs**](../../docs/greengras-ipc/README.md)
+[**Link to sfc greengrass `IPC` howto docs**](../../../docs/greengrass-ipc/README.md)
 
 ---
 

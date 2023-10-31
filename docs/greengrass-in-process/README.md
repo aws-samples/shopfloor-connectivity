@@ -84,7 +84,7 @@ The complete setup will create components for the SFC modules:
 - aws-iot-mqtt-target
 - opcua
 
-**The setup will configure all modules to be started in SFC's [`in-process mode`](../../docs#in-process-and-ipc-deployment-models)**. That means that all SFC modules run inside the sfc-main process on a single host.
+**The setup will configure all modules to be started in SFC's [`in-process mode`](../README.md#in-process-and-ipc-deployment-models)**. That means that all SFC modules run inside the sfc-main process on a single host.
 
 >Note! <br>
 If you have previously installed the modules in SFC's IPC mode   you must remove the components from IOT CORE and from your Greengrass deployment! 

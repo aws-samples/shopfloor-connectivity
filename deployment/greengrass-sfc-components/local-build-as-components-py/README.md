@@ -22,7 +22,7 @@ Greengrass components from local build
 
 ### Steps
 
-#### 1. Check if you can run the python script `buildSfcComponentRecipes.py`
+#### 1. Check if you can run the python script [`buildSfcComponentRecipes.py`](buildSfcComponentRecipes.py)
 
 ```sh
 python3 buildSfcComponentRecipes.py --help
@@ -33,61 +33,60 @@ usage: buildSfcComponentRecipes.py [-h] [-d BUILDDIR] [-n COMPBASENAME] [-v COMP
 #### 2. Run python script with params
 
 ```sh
-    python3 buildSfcComponentRecipes.py \
-    --s3sfcBucket s3://<YOUR-S3-BUCKET> \ # s3 bucket
-    --buildDir ../../../build/distribution \ # that is the relative path to the `build/distribution` directory
-    --compVersion 0.0.2 \ # component version
-    --accountId 123456789 \ # your aws accountID
-    --region eu-central-1 \ # region you want sfc-components to be deployed
+python3 buildSfcComponentRecipes.py \
+--s3sfcBucket s3://<YOUR-S3-BUCKET> \ # s3 bucket
+--buildDir ../../../build/distribution \ # that is the relative path to the `build/distribution` directory
+--compVersion 0.0.2 \ # component version
+--accountId 123456789 \ # your aws accountID
+--region eu-central-1 \ # region you want sfc-components to be deployed
 
-    buildDir = ../../../build/distribution
-    compBaseName = com.amazon.sfc
-    compVersion = 0.0.2
-    s3sfcBucket = s3://<YOUR-S3-BUCKET>
-    compNamePrefix = latest
-    compNameSuffix = latest
-    region = eu-central-1
-    accountId = 687795499488
+buildDir = ../../../build/distribution
+compBaseName = com.amazon.sfc
+compVersion = 0.0.2
+s3sfcBucket = s3://<YOUR-S3-BUCKET>
+compNamePrefix = latest
+compNameSuffix = latest
+region = eu-central-1
+accountId = 687795499488
 
-    SFC Greengrass Recipes & Artifacts are ready locally!
-
-    --> In order to install into your aws account run: ./install-sfc-components.sh
-    --> In order to uninstall all sfc components run : ./delete-sfc-components.sh
+SFC Greengrass Recipes & Artifacts are ready locally!
+--> In order to install into your aws account run: ./install-sfc-components.sh
+--> In order to uninstall all sfc components run : ./delete-sfc-components.sh
 ```
 
 - please check the created folder/file hierarchy in `build/distribution/<prefix>`
 
 #### 3. Run the created shell script
 
-    That script uses aws-cli to 1/ upload artifacts & recipes and 2/ register component recipes with Greengrass. The script should contain commands like that:
+That script uses aws-cli to 1/ upload artifacts & recipes and 2/ register component recipes with Greengrass. The script should contain commands like that:
 
-    ```sh
-    aws s3 cp --recursive  ../../../build/distribution/latest s3://<YOUR-BUCKET>/latest --region eu-central-1
-    aws greengrassv2 create-component-version  --inline-recipe fileb://../../../build/distribution/latest/recipes/com.amazon.sfc.aws-iot-analytics-target-0.0.2.json --region eu-central-1
-    aws greengrassv2 create-component-version  --inline-recipe fileb://../../../build/distribution/latest/recipes/com.amazon.sfc.file-target-0.0.2.json --region eu-central-1
-    ...
-    ```
+```sh
+aws s3 cp --recursive  ../../../build/distribution/latest s3://<YOUR-BUCKET>/latest --region eu-central-1
+aws greengrassv2 create-component-version  --inline-recipe fileb://../../../build/distribution/latest/recipes/com.amazon.sfc.aws-iot-analytics-target-0.0.2.json --region eu-central-1
+aws greengrassv2 create-component-version  --inline-recipe fileb://../../../build/distribution/latest/recipes/com.amazon.sfc.file-target-0.0.2.json --region eu-central-1
+...
+```
 
-    Run it:
+Run it:
 
-    ```sh
-    ./install-sfc-components.sh
-    ```
+```sh
+./install-sfc-components.sh
+```
 
 #### 4. Check AWS IoT Greengrass component listing
 
-    Use aws-cli to get a list of registered component versions. You should see the sfc-components listed in the returned json.
+Use aws-cli to get a list of registered component versions. You should see the sfc-components listed in the returned json.
 
-    ```sh
-    aws greengrassv2 list-components #| jq
-    ```
+```sh
+aws greengrassv2 list-components #| jq
+```
 
 #### 5. Next steps
 Now create customized `in-process` or `IPC` SFC Greengrass Deployments as described here:
 
-[**Link to sfc greengrass `in-process` howto docs**](../../docs/greengras-in-process/README.md)
+[**Link to sfc greengrass `in-process` howto docs**](../../../docs/greengrass-in-process/README.md)
 
-[**Link to sfc greengrass `IPC` howto docs**](../../docs/greengras-ipc/README.md)
+[**Link to sfc greengrass `IPC` howto docs**](../../../docs/greengrass-ipc/README.md)
 
 
 #### 6. Optional: Cleanup script
