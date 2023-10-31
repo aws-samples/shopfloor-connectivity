@@ -86,7 +86,7 @@ The complete setup will create components for the SFC modules:
 
 **The setup will configure all modules to be started in SFC's [`IPC mode`](../../docs#in-process-and-ipc-deployment-models)**. That means that all SFC modules run outside the sfc-main process on a single host.
 
->Note! <BR>
+>Note! <br>
 If you have previously installed the modules in SFC's in -process mode you must remove first the components from IOT CORE and from your Greengrass deployment! 
 
 
@@ -687,7 +687,7 @@ you should see the similar lines written by the debug-target module:
 - Now we want to see if the data is written also to the S3 bucket. <br>For that open the AWS S3 web console and look into the S3 bucket with the name you entered for ***[REPLACE WITH YOUR S3 BUCKET FOR OPCUA DATA]*** in the **com.amazon.sfc.sfc-main-1.0.0.json** file.<br>
 There you should see the folder with the name **sfc**. In this folder the data is written by the **aws-s3-target** module.
 
-- Now we check if the data is also written to IOT Core MQTT topic: **sfc-greengrass**. <BR>
+- Now we check if the data is also written to IOT Core MQTT topic: **sfc-greengrass**. <br>
 For that open the **IOT Core web console** and select **MQTT test client**.
 
 - Then enter into the topic filter sfc-greengrass and select **Subscribe**.
