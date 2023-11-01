@@ -35,7 +35,6 @@ if not os.path.exists(prefixDir):
 
 # add s3 upload entry to command array
 cmds.append("aws s3 cp --recursive  {topLevelComponentFolder} {s3Bucket}/{s3Path} --region {region}".format(topLevelComponentFolder=sfcBuildDir+"/"+compNamePrefix, s3Bucket=sfcBucket, s3Path=compNamePrefix, region=region))
-cmds.append("sleep 10")
 
 recipeDir = os.path.join(sfcBuildDir, compNamePrefix, "recipes")
 if not os.path.exists(recipeDir):
