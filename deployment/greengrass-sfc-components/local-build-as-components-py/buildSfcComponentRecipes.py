@@ -100,23 +100,24 @@ def createRecipes():
             cmds2.append("aws greengrassv2 delete-component --arn arn:aws:greengrass:{region}:{accountId}:components:{compName}:versions:{compVersion} --region {region}"
                          .format(region=region, accountId=accountId, compName=sfcComponentBaseName+"."+fileBaseName, compVersion=sfcComponentVersion))
 
-def cliOutputs():
-    shellScriptName="install-sfc-components.sh"
-    deleteShellScriptName="delete-sfc-components.sh"
-    print("")
-    print("SFC Greengrass Recipes & Artifacts are ready locally!")
-    with open(shellScriptName, "w", encoding='utf-8') as outfile:
+def createFileFromCmds(filename, cmds):
+    with open(filename, "w", encoding='utf-8') as outfile:
         for cmd in cmds:
             #print(cmd)
             outfile.write(cmd+"\n")
-    with open(deleteShellScriptName, "w", encoding='utf-8') as outfile:
-        for cmd in cmds2:
-            #print(cmd)
-            outfile.write(cmd+"\n")
-    os.chmod(shellScriptName, stat.S_IRWXU)
+    os.chmod(filename, stat.S_IRWXU)
+
+def cliOutputs():
+    installer="install-sfc-components"
+    uninstaller="delete-sfc-components"
+    createFileFromCmds(installer+".sh", cmds)
+    createFileFromCmds(installer+".bat", cmds)
+    createFileFromCmds(uninstaller+".sh", cmds2)
+    createFileFromCmds(uninstaller+".bat", cmds2)
+   
     print("")
-    print("--> In order to install into your aws account run: ./{name}".format(name=shellScriptName))
-    print("--> In order to uninstall all sfc components run : ./{name}".format(name=deleteShellScriptName))
+    print("--> In order to install into your aws account run: ./{name}".format(name=installer+".sh|bat"))
+    print("--> In order to uninstall all sfc components run : ./{name}".format(name=uninstaller+".sh|bat"))
     print("")
     
 
