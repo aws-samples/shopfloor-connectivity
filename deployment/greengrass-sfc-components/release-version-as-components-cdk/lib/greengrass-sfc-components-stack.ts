@@ -34,6 +34,7 @@ export class GreengrassSfcComponentsStack extends cdk.Stack {
         version: '0.2',
         env: {
           variables: {
+            "AWS_REGION": this.region,
             "SFC_COMPONENT_BASENAME": "com.amazon.sfc",
             "SFC_COMPONENT_VERSION": "1.0.0",
             "SFC_COMPONENT_BUCKET": componentBucket.bucketName,
@@ -56,13 +57,14 @@ export class GreengrassSfcComponentsStack extends cdk.Stack {
               'unzip $SFC_LATEST_RELEASE_BUNDLE_NAME',
               'rm $SFC_LATEST_RELEASE_BUNDLE_NAME',
               'cd ..',
-              'python3 buildSfcComponentRecipes.py --s3sfcBucket s3://$SFC_COMPONENT_BUCKET --buildDir sfc-modules --compVersion $SFC_COMPONENT_VERSION --compNamePrefix $SFC_COMPONENT_PREFIX',
+              'python3 buildSfcComponentRecipes.py --s3sfcBucket s3://$SFC_COMPONENT_BUCKET --buildDir sfc-modules --compVersion $SFC_COMPONENT_VERSION --compNamePrefix $SFC_COMPONENT_PREFIX --region $AWS_REGION',
               'tree .'
             ]
           },
           build: {
             commands: [
               'set -e',
+              'cat install-sfc-components.sh',
               './install-sfc-components.sh'
             ]
           }
