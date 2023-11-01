@@ -1,11 +1,14 @@
 SFC documentation
 =================
 
-### Tutorials
-- [Greengrass In-Process Deployment](./greengrass-in-process/README.md)
-- [Greengrass IPC Deployment](./greengrass-ipc/README.md)
-
 ### TOC
+  - [Quickstart](README.md)
+    - [SFC Installation & Deployment](../deployment/README.md)
+      - [SFC release Greengrass components - CDK](../deployment/greengrass-sfc-components/release-version-as-components-cdk/README.md)
+      - [SFC local build Greengrass components - Python](../deployment/greengrass-sfc-components/local-build-as-components-py/README.md)
+    - [Tutorials](README.md)
+      - [Greengrass In-Process Deployment](./greengrass-in-process/README.md)
+      - [Greengrass IPC Deployment](./greengrass-ipc/README.md)
   - [Introduction](#introduction)
     - [SFC Components](#sfc-components)
     - [Protocol Adapters](#protocol-adapters)

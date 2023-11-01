@@ -12,12 +12,25 @@ SFC `IPC` setup in Greengrass V2
     - [Step 5: Testing the deployment](#step-5-testing-the-deployment)
     - [Step 6: Remove the local deployment](#step-6-remove-the-local-deployment)
     - [Step 7: Publish the components](#step-7-publish-the-components)
-    - [Step 8: Deploy the components with AWS IoT Core web console on your device](#step-8-deploy-the-components-with-aws-iot-core-web-console-on-your-device)
+    - [Step 8: Deploy the components with AWS IoT Core web console on your device](#step-8-deploy-the-components-with-aws-iot-core-web-console-to-your-device)
   - [Removing Components from deployment and IOT Core](#removing-components-from-deployment-and-deleting-components)
     - [Remove SFC components from deployment](#remove-sfc-components-from-deployment)
     - [Delete SFC components from IOT Core](#delete-sfc-components-from-iot-core)
 
 # Preconditions
+
+>**Important!** <br> If you already installed SFC Greengrass components using 
+[local sfc-build with python tool](../../deployment/greengrass-sfc-components/local-build-as-components-py/README.md) or [auto-installed via CDK](../../deployment/greengrass-sfc-components/release-version-as-components-cdk/README.md), then 
+you should start with [Step 3](#step-3-creating-greengrass-recipes) and *only* create a custom recipe and custom 
+sfc-config for `sfc-main`. You can query the AWS IoT Greengrass API and fetch the current recipe for `sfc-main` using:
+```sh
+aws greengrassv2 get-component \
+--arn arn:aws:greengrass:<your-region>:<your-aws-account-id>:components:com.amazon.sfc.sfc-main:versions:<your-Version> /--output text \
+--recipe-output-format JSON  \
+--query recipe | base64 --decode #| jq
+```
+> use the JSON returned from above command for `sfc-main` (keep only the URI entry in the Artifacts section). 
+
 
 1. We assume that your Greengrass environment is Linux based as we use bash scripts and the components recipes will target Linux as operating system. 
 

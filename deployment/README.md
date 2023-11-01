@@ -1,15 +1,24 @@
 SFC Deployment & Installers
 ===========================
 
-that area describes how you deploy & install SFC into your aws account
+That area describes how you can deploy & install SFC on the edge and/or into your aws account as AWS IoT Greengrass v2 components.
 
-## AWS IoT Greengrass v2 Components
+## SFC as AWS IoT Greengrass v2 Components
 
-### option 1 - [`create components with current sfc-release`](greengrass-sfc-components/release-version-as-components-cdk/README.md)
+### Option 1 - [`create components with current sfc-release`](greengrass-sfc-components/release-version-as-components-cdk/README.md)
 
-**recommended**: start here if you want sfc greengrass components with a recent sfc-release.
+**`Recommended`**: Start here, if you want sfc greengrass components with a recent sfc-release.
 
 
-### option 2 - [`create components from local build`](greengrass-sfc-components/local-build-as-components-py/README.md)
+### Option 2 - [`create components from local build`](greengrass-sfc-components/local-build-as-components-py/README.md)
 
-use that option if you want to bootstrap greengrass components with recent local changes (e.g. testing out new adapters)
+Use that option if you want to bootstrap greengrass components with recent local changes (e.g. testing out new adapters)
+
+
+## Standalone SFC Installation
+
+`TODO`
+
+## Install SFC using AWS Systems Manager
+
+`TODO`
