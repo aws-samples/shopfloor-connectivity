@@ -64,7 +64,7 @@ class PcccSourceConfiguration : BaseSourceConfiguration() {
         )
 
     companion object {
-        const val CONFIG_ADAPTER_CONTROLLER = "AdapterControllerServer"
+        const val CONFIG_ADAPTER_CONTROLLER = "AdapterController"
 
         private val default = PcccSourceConfiguration()
 

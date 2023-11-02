@@ -122,8 +122,8 @@ class PcccSource(
             // get the values
             val readValues: Map<Address, Any> = pcccClient.read(dataToRead)
 
-            // map to values to addresses
-            val channelReadValues: Map<String, ChannelReadValue> = sequence {
+            // map to values to channels
+            sequence {
                 channels?.forEach { channelID ->
                     val channel = sourceConfiguration.channels[channelID]
                     val channelAddress = channel?.address
@@ -136,7 +136,6 @@ class PcccSource(
                 }
             }.toMap()
 
-            channelReadValues
 
         } catch (e: Exception) {
             resetConnection()

@@ -17,7 +17,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 group = "com.amazonaws.sfc"
 version = "1.0.0"
 
-val protobufVersion = "3.21.2"
+val protobufVersion = "3.21.7"
 val grpcKotlinVersion = "1.3.0"
 val grpcVersion = "1.54.1"
 val reflectionVersion = "1.6.0"

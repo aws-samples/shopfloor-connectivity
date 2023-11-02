@@ -28,7 +28,6 @@ val kotlinVersion = "1.9.0"
 
 val reflectionVersion = "1.6.0"
 val jmesPathVersion = "0.5.1"
-val pahoVersion = "1.2.4"
 val gsonVersion = "2.9.0"
 val postgresClientVersion = "42.3.8"
 val mariadbClientVersion = "2.1.2"

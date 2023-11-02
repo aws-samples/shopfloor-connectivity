@@ -26,7 +26,9 @@ class PcccConfiguration : SourceAdapterBaseConfiguration() {
     private var _sources = mapOf<String, PcccSourceConfiguration>()
 
     val sources: Map<String, PcccSourceConfiguration>
-        get() = _sources.filter { it.value.protocolAdapterID in pcccProtocolAdapters.keys && it.value.protocolAdapterID == PCCC_ADAPTER }
+        get() = _sources.filter {
+            it.value.protocolAdapterID in pcccProtocolAdapters.keys && it.value.protocolAdapterID == PCCC_ADAPTER
+        }
 
     @SerializedName(CONFIG_PROTOCOL_ADAPTERS)
     private var _protocolAdapters = mapOf<String, PcccAdapterConfiguration>()

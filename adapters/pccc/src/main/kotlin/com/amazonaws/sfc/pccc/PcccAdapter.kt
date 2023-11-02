@@ -14,6 +14,7 @@ Copyright(c) 2023. Amazon.com, Inc. or its affiliates. All Rights Reserved.
 package com.amazonaws.sfc.pccc
 
 
+import com.amazonaws.sfc.config.BaseConfiguration.Companion.WILD_CARD
 import com.amazonaws.sfc.config.ConfigReader
 import com.amazonaws.sfc.data.*
 import com.amazonaws.sfc.log.Logger
@@ -163,8 +164,14 @@ class PcccAdapter(
 
         val start = systemDateTime().toEpochMilli()
 
+        val channelsToRead = if (channels.isNullOrEmpty() || (channels.size == 1 && channels[0] == WILD_CARD )){
+            sourceConfiguration.channels.keys.toList()
+        }else{
+            channels
+        }
+
         val sourceReadResult = try {
-            val pcccSourceReadData = pcccSource.read(channels)
+            val pcccSourceReadData = pcccSource.read(channelsToRead)
             val readDurationInMillis = (systemDateTime().toEpochMilli() - start).toDouble()
             createMetrics(protocolAdapterID, dimensions, readDurationInMillis, pcccSourceReadData)
             SourceReadSuccess(pcccSourceReadData, systemDateTime())

@@ -180,7 +180,7 @@ class ControllerServiceConfiguration : ServiceConfiguration() {
 
             ConfigurationException.check(
                 source.protocolAdapterID in protocolAdapters.keys,
-                "Protocol \"${source.protocolAdapterID}\" for source \"$sourceID\" is not a valid adapter, valid protocols are ${protocolAdapters.keys}",
+                "Protocol adapter \"${source.protocolAdapterID}\" for source \"$sourceID\" is not a valid adapter, valid adapters are ${protocolAdapters.keys}",
                 CONFIG_SOURCE_PROTOCOL_ADAPTER,
                 source
             )
