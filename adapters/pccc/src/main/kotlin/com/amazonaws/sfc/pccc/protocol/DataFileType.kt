@@ -38,6 +38,7 @@ private const val CONTROLLER_TIMER_AREA = 0x86.toByte()
 private const val CONTROLLER_COUNTER_AREA = 0x87.toByte()
 private const val CONTROLLER_CONTROL_AREA = 0x88.toByte()
 private const val CONTROLLER_INT_AREA = 0x89.toByte()
+
 // private const val CONTROLLER_NSTRING_AREA = 0x89.toByte()
 private const val CONTROLLER_FLOAT_AREA = 0x8a.toByte()
 private const val CONTROLLER_OUTPUT_AREA = 0x8b.toByte()
@@ -54,7 +55,9 @@ enum class DataFileType : DataFile {
         override val area = CONTROLLER_OUTPUT_AREA
         override val sizeOfSingleItemInBytes = 2
         override val defaultFileNumber = 0.toShort()
-        override fun decodeValue(bytes: ByteArray, addressSubElement: AddressSubElement?): Any = bytes.toBoolean(addressSubElement?.bitOffset)
+        override fun decodeValue(bytes: ByteArray, addressSubElement: AddressSubElement?): Any =
+            bytes.toBoolean(addressSubElement?.bitOffset)
+
         override fun decodeArrayValue(bytes: ByteArray): ArrayList<Any> = bytes.toBooleanList
     },
 
@@ -63,7 +66,9 @@ enum class DataFileType : DataFile {
         override val area = CONTROLLER_INPUT_AREA
         override val sizeOfSingleItemInBytes = 2
         override val defaultFileNumber = 1.toShort()
-        override fun decodeValue(bytes: ByteArray, addressSubElement: AddressSubElement?): Any = bytes.toBoolean(addressSubElement?.bitOffset)
+        override fun decodeValue(bytes: ByteArray, addressSubElement: AddressSubElement?): Any =
+            bytes.toBoolean(addressSubElement?.bitOffset)
+
         override fun decodeArrayValue(bytes: ByteArray): ArrayList<Any> = bytes.toBooleanList
 
     },
@@ -73,7 +78,7 @@ enum class DataFileType : DataFile {
         override val area = CONTROLLER_STATUS_AREA
         override val sizeOfSingleItemInBytes = 2
         override val defaultFileNumber = 2.toShort()
-        override fun decodeValue(bytes: ByteArray, addressSubElement : AddressSubElement?): Any = bytes.toInt16
+        override fun decodeValue(bytes: ByteArray, addressSubElement: AddressSubElement?): Any = bytes.toInt16
         override fun decodeArrayValue(bytes: ByteArray): ArrayList<Any> = bytes.toIn16List
     },
 
@@ -82,7 +87,9 @@ enum class DataFileType : DataFile {
         override val area = CONTROLLER_BIT_AREA
         override val sizeOfSingleItemInBytes = 2
         override val defaultFileNumber = 3.toShort()
-        override fun decodeValue(bytes: ByteArray, addressSubElement: AddressSubElement?): Any = bytes.toBoolean(addressSubElement?.bitOffset)
+        override fun decodeValue(bytes: ByteArray, addressSubElement: AddressSubElement?): Any =
+            bytes.toBoolean(addressSubElement?.bitOffset)
+
         override fun decodeArrayValue(bytes: ByteArray): ArrayList<Any> = bytes.toBooleanList
     },
 
@@ -91,7 +98,9 @@ enum class DataFileType : DataFile {
         override val area = CONTROLLER_TIMER_AREA
         override val sizeOfSingleItemInBytes = 6
         override val defaultFileNumber = 4.toShort()
-        override fun decodeValue(bytes: ByteArray, addressSubElement : AddressSubElement?): Any = bytes.decodeStructuredData(addressSubElement, knownFields)
+        override fun decodeValue(bytes: ByteArray, addressSubElement: AddressSubElement?): Any =
+            bytes.decodeStructuredData(addressSubElement, knownFields)
+
         override fun decodeArrayValue(bytes: ByteArray): ArrayList<Any> {
             throw NotImplementedError()
         }
@@ -111,7 +120,9 @@ enum class DataFileType : DataFile {
         override val area = CONTROLLER_COUNTER_AREA
         override val sizeOfSingleItemInBytes = 6
         override val defaultFileNumber = 5.toShort()
-        override fun decodeValue(bytes: ByteArray, addressSubElement: AddressSubElement?): Any = bytes.decodeStructuredData(addressSubElement, knownFields)
+        override fun decodeValue(bytes: ByteArray, addressSubElement: AddressSubElement?): Any =
+            bytes.decodeStructuredData(addressSubElement, knownFields)
+
         override fun decodeArrayValue(bytes: ByteArray): ArrayList<Any> {
             throw NotImplementedError()
         }
@@ -133,7 +144,9 @@ enum class DataFileType : DataFile {
         override val area = CONTROLLER_CONTROL_AREA
         override val sizeOfSingleItemInBytes = 6
         override val defaultFileNumber = 6.toShort()
-        override fun decodeValue(bytes: ByteArray, addressSubElement: AddressSubElement?): Any = bytes.decodeStructuredData(addressSubElement, knownFields)
+        override fun decodeValue(bytes: ByteArray, addressSubElement: AddressSubElement?): Any =
+            bytes.decodeStructuredData(addressSubElement, knownFields)
+
         override fun decodeArrayValue(bytes: ByteArray): ArrayList<Any> {
             throw NotImplementedError()
         }
@@ -176,7 +189,7 @@ enum class DataFileType : DataFile {
         override val sizeOfSingleItemInBytes = 84
         override fun decodeValue(bytes: ByteArray, addressSubElement: AddressSubElement?): Any = bytes.decodeString
         override fun decodeArrayValue(bytes: ByteArray): ArrayList<Any> {
-            return ArrayList(bytes.toList().chunked(sizeOfSingleItemInBytes).map{it.toByteArray().decodeString} )
+            return ArrayList(bytes.toList().chunked(sizeOfSingleItemInBytes).map { it.toByteArray().decodeString })
         }
     },
 
@@ -195,6 +208,7 @@ enum class DataFileType : DataFile {
         override fun decodeValue(bytes: ByteArray, addressSubElement: AddressSubElement?): Any {
             return bytes.decodeAscii(addressSubElement)
         }
+
         override fun decodeArrayValue(bytes: ByteArray): ArrayList<Any> = bytes.decodeAsciiList
     };
 

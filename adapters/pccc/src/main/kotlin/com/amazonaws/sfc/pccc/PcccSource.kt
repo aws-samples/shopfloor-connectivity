@@ -64,7 +64,6 @@ class PcccSource(
         }
 
     private suspend fun createPcccClient(): Client {
-        val log = logger.getCtxLoggers(className, "createPcccClient")
 
         return try {
             val client = Client(controllerConfiguration, logger)
@@ -105,13 +104,11 @@ class PcccSource(
 
     suspend fun read(channels: List<String>?): Map<String, ChannelReadValue> {
 
-        val log = logger.getCtxLoggers(className, "read")
-
         if (!pcccClient.connected) {
             pcccClient.connect()
         }
 
-       // at this point we hava a connected client
+        // at this point we hava a connected client
 
         // cached sets of addresses to read
         val dataToRead = readSets

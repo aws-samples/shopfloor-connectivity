@@ -68,16 +68,19 @@ class PcccSourceConfiguration : BaseSourceConfiguration() {
 
         private val default = PcccSourceConfiguration()
 
-        fun create(channels: Map<String, PcccChannelConfiguration> = default._channels,
-                   adapterControllerID: String = default._adapterControllerID,
-                   name: String = default._name,
-                   description: String = default._description,
-                   protocolAdapter: String? = default._protocolAdapterID): PcccSourceConfiguration {
+        fun create(
+            channels: Map<String, PcccChannelConfiguration> = default._channels,
+            adapterControllerID: String = default._adapterControllerID,
+            name: String = default._name,
+            description: String = default._description,
+            protocolAdapter: String? = default._protocolAdapterID
+        ): PcccSourceConfiguration {
 
             val instance = createSourceConfiguration<PcccSourceConfiguration>(
                 name = name,
                 description = description,
-                protocolAdapter = protocolAdapter)
+                protocolAdapter = protocolAdapter
+            )
 
             with(instance) {
                 _adapterControllerID = adapterControllerID
@@ -86,6 +89,5 @@ class PcccSourceConfiguration : BaseSourceConfiguration() {
             return instance
         }
     }
-
 
 }

@@ -164,9 +164,9 @@ class PcccAdapter(
 
         val start = systemDateTime().toEpochMilli()
 
-        val channelsToRead = if (channels.isNullOrEmpty() || (channels.size == 1 && channels[0] == WILD_CARD )){
+        val channelsToRead = if (channels.isNullOrEmpty() || (channels.size == 1 && channels[0] == WILD_CARD)) {
             sourceConfiguration.channels.keys.toList()
-        }else{
+        } else {
             channels
         }
 

@@ -42,16 +42,19 @@ class PcccAdapterConfiguration : ProtocolAdapterConfiguration(), Validate {
 
         private val default = PcccAdapterConfiguration()
 
-        fun create(controllers: Map<String, PcccControllerConfiguration> = default._controllers,
-                   description: String = default._description,
-                   metrics: MetricsSourceConfiguration? = default._metrics,
-                   adapterServer: String? = default._protocolAdapterServer): PcccAdapterConfiguration {
+        fun create(
+            controllers: Map<String, PcccControllerConfiguration> = default._controllers,
+            description: String = default._description,
+            metrics: MetricsSourceConfiguration? = default._metrics,
+            adapterServer: String? = default._protocolAdapterServer
+        ): PcccAdapterConfiguration {
 
             val instance = createAdapterConfiguration<PcccAdapterConfiguration>(
                 description = description,
                 adapterType = PCCC_ADAPTER,
                 metrics = metrics,
-                adapterServer = adapterServer)
+                adapterServer = adapterServer
+            )
 
             with(instance) {
                 _controllers = controllers
@@ -59,9 +62,7 @@ class PcccAdapterConfiguration : ProtocolAdapterConfiguration(), Validate {
             return instance
         }
 
-
     }
-
 }
 
 

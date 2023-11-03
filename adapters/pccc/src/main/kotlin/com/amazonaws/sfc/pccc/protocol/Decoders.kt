@@ -137,7 +137,7 @@ object Decoders {
         }
 
 
-    private fun ByteArray.decodeField(offsets: AddressSubElement ): Any {
+    private fun ByteArray.decodeField(offsets: AddressSubElement): Any {
         var b = this.sliceArray(offsets.wordOffset..offsets.wordOffset + 1).toInt16
         if (offsets.shr != null) b = (b.toInt() shr offsets.shr!!.toInt()).toShort()
         if (offsets.shl != null) b = (b.toInt() shl offsets.shl!!.toInt()).toShort()

@@ -28,7 +28,11 @@ import kotlinx.coroutines.runBlocking
 class PcccProtocolService : ServiceMain() {
 
     override fun createServiceInstance(args: Array<String>, configuration: String, logger: Logger): Service {
-        return IpcAdapterService.createProtocolAdapterService(args, configuration, logger) { _adapterID: String, _configReader: ConfigReader, _logger: Logger ->
+        return IpcAdapterService.createProtocolAdapterService(
+            args,
+            configuration,
+            logger
+        ) { _adapterID: String, _configReader: ConfigReader, _logger: Logger ->
             PcccAdapter.createPcccAdapter(_adapterID, _configReader, _logger)
 
         }

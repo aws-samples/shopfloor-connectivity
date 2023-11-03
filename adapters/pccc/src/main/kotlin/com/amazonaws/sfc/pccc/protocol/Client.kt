@@ -160,7 +160,7 @@ class Client(private val config: PcccControllerConfiguration, private val logger
 
         val fromControllerStr = "from controller at ${config.address}"
 
-        val readValues =  sequence {
+        val readValues = sequence {
             addressSets.forEach { addressSet ->
 
                 val addressStr = "address${if (addressSet.addresses.size == 1) "" else "es"} ${addressSet.addresses}"
@@ -198,7 +198,7 @@ class Client(private val config: PcccControllerConfiguration, private val logger
                     // ZIp addresses and data together, the order of the addresses might have been modified because of optimization
                     yieldAll(addressSet.addresses.zip(valuesOfReadAddresses))
 
-                } catch (e : Exception){
+                } catch (e: Exception) {
                     log.error("Error reading $addressStr $fromControllerStr, $e")
                 }
             }
@@ -399,7 +399,7 @@ class Client(private val config: PcccControllerConfiguration, private val logger
         if (this.isEmpty()) return 0
         val dataLenPerItem = this[0].dataFile.sizeOfSingleItemInBytes
         val startOfAddress = address.dataOffsetInItem + (address.index * dataLenPerItem)
-        return maxOf{
+        return maxOf {
             val end = it.dataOffsetInItem + (it.index * dataLenPerItem) + it.arrayLen * dataLenPerItem
             (startOfAddress - end - 1)
         }
@@ -407,14 +407,14 @@ class Client(private val config: PcccControllerConfiguration, private val logger
 
     private fun optimizeAddresses(addresses: List<Address>): List<OptimizedAddressSet> {
 
-         val log = logger.getCtxLoggers(className, "optimizeAddresses" )
-         val optimized = sequence {
+        val log = logger.getCtxLoggers(className, "optimizeAddresses")
+        val optimized = sequence {
 
             // Group by type and number of the data files
             val s: Map<DataFile, List<Address>> = addresses.toSet().groupBy { it.dataFile }
             val t = s.map { (df, n) -> df to n.groupBy { it.dataFileNumber } }.toMap()
 
-             t.forEach { (dataFile: DataFile, addressesForDataType: Map<Short, List<Address>>) ->
+            t.forEach { (dataFile: DataFile, addressesForDataType: Map<Short, List<Address>>) ->
 
                 // optimize reads for supported data types
                 if (dataFile in optimizedDataTypes) {
@@ -428,14 +428,14 @@ class Client(private val config: PcccControllerConfiguration, private val logger
                         addressesSortedByIndex.drop(1).forEach { address ->
 
                             // combined total length of combined address if this address is added, note that memory buffers of addresses may overlap
-                            val totalCombinedLengthWithinLimit = (combinedAddresses + address).totalLength  <= 220
+                            val totalCombinedLengthWithinLimit = (combinedAddresses + address).totalLength <= 220
                             // it within range then calculate max gap between this and any other combined address
                             val gapBetweenAddressesWithinLimit = if (totalCombinedLengthWithinLimit) {
-                                val gap =combinedAddresses.maxGap(address)
+                                val gap = combinedAddresses.maxGap(address)
                                 gap <= config.readMaxGap
                             } else false
 
-                            if ( totalCombinedLengthWithinLimit && gapBetweenAddressesWithinLimit  ) {
+                            if (totalCombinedLengthWithinLimit && gapBetweenAddressesWithinLimit) {
                                 // add to combined addresses
                                 combinedAddresses.add(address)
                             } else {
@@ -479,19 +479,21 @@ class Client(private val config: PcccControllerConfiguration, private val logger
             }
         }.toList()
 
-        log.trace( "Optimized list of ${addresses.size} into ${optimized.size} sets of combined addresses")
+        log.trace("Optimized list of ${addresses.size} into ${optimized.size} sets of combined addresses")
         return optimized
     }
 
     private fun processReadResponsePacketData(addresses: List<Address>, valueBytes: ByteArray): List<Any> =
 
         sequence {
-            val offset = addresses.first().index * addresses.first().dataFile.sizeOfSingleItemInBytes + addresses.first().dataOffsetInItem
+            val offset =
+                addresses.first().index * addresses.first().dataFile.sizeOfSingleItemInBytes + addresses.first().dataOffsetInItem
             addresses.forEach { address ->
 
                 // Get the slice of data for this address from the buffer
                 val startPositionOfData = (address.index * address.dataFile.sizeOfSingleItemInBytes) - offset
-                val endPositionOfData = (startPositionOfData + address.dataFile.sizeOfSingleItemInBytes * address.arrayLen) - 1
+                val endPositionOfData =
+                    (startPositionOfData + address.dataFile.sizeOfSingleItemInBytes * address.arrayLen) - 1
                 val addressData = valueBytes.sliceArray(startPositionOfData..endPositionOfData)
 
                 // Decode either as single value or array

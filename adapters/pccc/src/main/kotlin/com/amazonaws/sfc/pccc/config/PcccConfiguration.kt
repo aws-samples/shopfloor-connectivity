@@ -108,22 +108,24 @@ class PcccConfiguration : SourceAdapterBaseConfiguration() {
 
         private val default = PcccConfiguration()
 
-        fun create(sources: Map<String, PcccSourceConfiguration> = default._sources,
-                   protocolAdapters: Map<String, PcccAdapterConfiguration> = default._protocolAdapters,
-                   name: String = default._name,
-                   version: String = default._version,
-                   awsVersion: String? = default._awsVersion,
-                   description: String = default._description,
-                   schedules: List<ScheduleConfiguration> = default._schedules,
-                   logLevel: LogLevel? = default._logLevel,
-                   metadata: Map<String, String> = default._metadata,
-                   elementNames: ElementNamesConfiguration = default._elementNames,
-                   targetServers: Map<String, ServerConfiguration> = default._targetServers,
-                   targetTypes: Map<String, InProcessConfiguration> = default._targetTypes,
-                   adapterServers: Map<String, ServerConfiguration> = default._protocolAdapterServers,
-                   adapterTypes: Map<String, InProcessConfiguration> = default._protocolTypes,
-                   awsIotCredentialProviderClients: Map<String, AwsIotCredentialProviderClientConfiguration> = default._awsIoTCredentialProviderClients,
-                   secretsManagerConfiguration: SecretsManagerConfiguration? = default._secretsManagerConfiguration): PcccConfiguration {
+        fun create(
+            sources: Map<String, PcccSourceConfiguration> = default._sources,
+            protocolAdapters: Map<String, PcccAdapterConfiguration> = default._protocolAdapters,
+            name: String = default._name,
+            version: String = default._version,
+            awsVersion: String? = default._awsVersion,
+            description: String = default._description,
+            schedules: List<ScheduleConfiguration> = default._schedules,
+            logLevel: LogLevel? = default._logLevel,
+            metadata: Map<String, String> = default._metadata,
+            elementNames: ElementNamesConfiguration = default._elementNames,
+            targetServers: Map<String, ServerConfiguration> = default._targetServers,
+            targetTypes: Map<String, InProcessConfiguration> = default._targetTypes,
+            adapterServers: Map<String, ServerConfiguration> = default._protocolAdapterServers,
+            adapterTypes: Map<String, InProcessConfiguration> = default._protocolTypes,
+            awsIotCredentialProviderClients: Map<String, AwsIotCredentialProviderClientConfiguration> = default._awsIoTCredentialProviderClients,
+            secretsManagerConfiguration: SecretsManagerConfiguration? = default._secretsManagerConfiguration
+        ): PcccConfiguration {
 
             val instance = createBaseConfiguration<PcccConfiguration>(
                 name = name,
@@ -139,7 +141,8 @@ class PcccConfiguration : SourceAdapterBaseConfiguration() {
                 adapterServers = adapterServers,
                 adapterTypes = adapterTypes,
                 awsIotCredentialProviderClients = awsIotCredentialProviderClients,
-                secretsManagerConfiguration = secretsManagerConfiguration)
+                secretsManagerConfiguration = secretsManagerConfiguration
+            )
 
             with(instance) {
                 _sources = sources
@@ -148,7 +151,5 @@ class PcccConfiguration : SourceAdapterBaseConfiguration() {
             return instance
         }
     }
-
-
 }
 

@@ -27,25 +27,22 @@ class PcccChannelConfiguration : ChannelConfiguration() {
 
     @SerializedName(CONFIG_ADDRESS)
     private var _address: String = ""
-    val address: Address by lazy {Address.parse(_address)}
+    val address: Address by lazy { Address.parse(_address) }
 
     override fun validate() {
 
-        if (_address.isEmpty()){
+        if (_address.isEmpty()) {
             throw ConfigurationException("$CONFIG_ADDRESS of a PCCC channel can not be empty", CONFIG_ADDRESS, this)
         }
 
         try {
             address
-        }catch ( e : AddressException){
+        } catch (e: AddressException) {
             throw ConfigurationException("\"$_address\" is not a valid address, ${e.message}", CONFIG_ADDRESS, this)
         }
 
         validated = true
     }
-
-
-
 
     companion object {
 
@@ -53,13 +50,15 @@ class PcccChannelConfiguration : ChannelConfiguration() {
 
         private val default = PcccChannelConfiguration()
 
-        fun create( address : String = default._address,
-                    name: String? = default._name,
-                    description: String = default._description,
-                    transformation: String? = default._transformationID,
-                    metadata: Map<String, String> = default._metadata,
-                    changeFilter: String? = default._changeFilterID,
-                    valueFilter: String? = default._valueFilterID): PcccChannelConfiguration {
+        fun create(
+            address: String = default._address,
+            name: String? = default._name,
+            description: String = default._description,
+            transformation: String? = default._transformationID,
+            metadata: Map<String, String> = default._metadata,
+            changeFilter: String? = default._changeFilterID,
+            valueFilter: String? = default._valueFilterID
+        ): PcccChannelConfiguration {
 
             val instance = createChannelConfiguration<PcccChannelConfiguration>(
                 name = name,
@@ -77,8 +76,6 @@ class PcccChannelConfiguration : ChannelConfiguration() {
         }
 
     }
-
-
 }
 
 

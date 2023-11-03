@@ -39,6 +39,5 @@ class PcccConnectPathConfig {
             }
             return instance
         }
-
     }
 }

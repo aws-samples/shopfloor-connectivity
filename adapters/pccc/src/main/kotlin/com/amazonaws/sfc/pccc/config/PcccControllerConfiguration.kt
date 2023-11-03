@@ -148,6 +148,4 @@ class PcccControllerConfiguration : TcpConfiguration, Validate {
         set(value) {
             _validated = value
         }
-
-
 }
