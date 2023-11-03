@@ -17,7 +17,7 @@ import java.time.LocalDate
 group = "com.amazonaws.sfc"
 version = "1.0.0"
 
-val module = "sql"
+val module = "pccc"
 
 val sfcCoreVersion = "1.0.0"
 val sfcIpcVersion = "1.0.0"
@@ -29,11 +29,7 @@ val kotlinVersion = "1.9.0"
 val reflectionVersion = "1.6.0"
 val jmesPathVersion = "0.5.1"
 val gsonVersion = "2.9.0"
-val postgresClientVersion = "42.3.8"
-val mariadbClientVersion = "2.1.2"
-val oracleClientVersion = "23.2.0.0"
-val sqlServerClientVersion = "12.2.0.jre8"
-val mysqlClientVersion = "8.0.33"
+
 
 plugins {
     id("sfc.kotlin-application-conventions")
@@ -47,20 +43,10 @@ dependencies {
 
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinCoroutinesVersion")
-    implementation("org.jetbrains.kotlin:kotlin-reflect:$reflectionVersion")
-
-    implementation("org.postgresql:postgresql:$postgresClientVersion")
-    implementation("org.mariadb.jdbc:mariadb-java-client:$mariadbClientVersion")
-    implementation("com.oracle.database.jdbc:ojdbc8:$oracleClientVersion")
-    implementation("com.microsoft.sqlserver:mssql-jdbc:${sqlServerClientVersion}")
-    implementation("mysql:mysql-connector-java:$mysqlClientVersion")
-
-    implementation("com.google.code.gson:gson:$gsonVersion")
-
 }
 
 application {
-    mainClass.set("com.amazonaws.sfc.sql.SqlProtocolService")
+    mainClass.set("com.amazonaws.sfc.pccc.PcccProtocolService")
     applicationName = project.name
 }
 
