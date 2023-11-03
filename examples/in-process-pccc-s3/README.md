@@ -9,10 +9,12 @@ use it as the value of the --config parameter when starting sfc-main.
 
 A debug target is included in the example to optionally write the output
 to the console.
+&nbsp;  
+&nbsp;  
 
 ## Deployment directory
 
-A Placeholder \${SFC_DEPLOYMENT_DIR} is used in the configuration. SFC
+A Placeholder ${SFC_DEPLOYMENT_DIR} is used in the configuration. SFC
 dynamically replaces these placeholders with the value of the
 environment variable from the placeholder. It in this example it should
 have the value of the pathname of the directory where scf-main, the used
@@ -20,11 +22,13 @@ adapters and targets are deployed with the following directory
 structure. (This structure can be changed by setting the pathnames in
 the AdapterTypes and TargetTypes sections)
 
-${SFC_DEPLOYMENT_DIR}\
-&nbsp;&nbsp;&nbsp;|-sfc-main\
-&nbsp;&nbsp;&nbsp;|-debug-target\
-&nbsp;&nbsp;&nbsp;|-aws-s3-target\
-&nbsp;&nbsp;&nbsp;|-pccc
+${SFC_DEPLOYMENT_DIR}  
+&nbsp;&nbsp;&nbsp;|-sfc-main  
+&nbsp;&nbsp;&nbsp;|-debug-target    
+&nbsp;&nbsp;&nbsp;|-aws-s3-target  
+&nbsp;&nbsp;&nbsp;|-pccc  
+&nbsp;  
+&nbsp;
 
 
 ## Target section
@@ -36,7 +40,11 @@ ${SFC_DEPLOYMENT_DIR}\
 ```
 
 In order to write the data to both the S3 bucket as well as the console
-uncomment the DebugTarget by deleting the'#'.
+uncomment the DebugTarget by deleting the'#'.  
+&nbsp;
+&nbsp;  
+
+
 
 ## S3Target section
 
@@ -71,6 +79,9 @@ compression.
 CredentialProviderClient specifies the credentials provider which is
 used to give access to the used AWS service. For more information see
 section AwsIotCredentialProviderClients below.
+&nbsp;  
+&nbsp;  
+
 
 ## Sources Section
 
@@ -79,6 +90,8 @@ the controller. In this template there is an example for every
 address/type supported by the adapter. In order to change the name of
 the value as it is included in the data which is send to the targets
 include a setting "Name" for the channel.
+&nbsp;  
+&nbsp;  
 
 ## ProtocolAdapters section
 
@@ -106,6 +119,9 @@ setting specifying that value.
 
 OptimizeReads is set to true to allow the adapter to combine reads from
 the controller.
+&nbsp;  
+&nbsp;  
+
 
 ## AwsIotCredentialProviderClients
 
@@ -142,6 +158,9 @@ setting, which will replace the value from the GreenGrass V2
 Configuration. Note that although SFC can be deployed as a GreenGrass
 component, it can also run as a standalone lone process or in a docker
 container and still use a GreenGrass configuration.
+&nbsp;  
+&nbsp;  
+
 
 ```
 "AwsIotCredentialProviderClients": {
