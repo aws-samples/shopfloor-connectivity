@@ -124,11 +124,11 @@ give access to the services used by the target which uses the client.
 "AwsIotCredentialProviderClients": {
   "AwsIotClient": {
     "IotCredentialEndpoint": "<ID>.credentials.iot.<YOUR REGION>.amazonaws.com",
-    "RoleAlias": "<ROLE EXCHANGE ALIAS>”,
-    "ThingName": "<THING NAME> ",
-    "Certificate": "<PATH TO DEVICE CERTIFICATE .crt FILE>",
-    "PrivateKey": "<PATH TO PRIVATE KEY .key FILE>",
-    "RootCa": "<PATH TO ROOt CERTIFICATE .pen FILE>",
+    "RoleAlias": "< ROLE EXCHANGE ALIAS >”,
+    "ThingName": "< THING NAME > ",
+    "Certificate": "< PATH TO DEVICE CERTIFICATE .crt FILE >",
+    "PrivateKey": "< PATH TO PRIVATE KEY .key FILE >",
+    "RootCa": "< PATH TO ROOt CERTIFICATE .pen FILE >",
   }
 }
 ```
