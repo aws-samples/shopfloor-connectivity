@@ -239,11 +239,3 @@ finch run -d -p 4840:4840 ghcr.io/umati/sample-server:main
 # run sfc
 sfc-main/bin/sfc-main -config example.json -info
 ```
-
-[//]: # "### Quick start - With Docker"
-
-[//]: # "## Build"
-
-[//]: # "## Deploy with Greengrass"
-
-[//]: # "## Write your own adapters"
