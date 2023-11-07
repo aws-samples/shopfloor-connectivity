@@ -14,6 +14,9 @@ That area describes how you can deploy & install SFC on the edge and/or into you
 
 Use that option if you want to bootstrap greengrass components with recent local changes (e.g. testing out new adapters)
 
+## SFC Container deployments
+
+`TODO`
 
 ## Standalone SFC Installation
 
