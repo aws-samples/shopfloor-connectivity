@@ -18,7 +18,7 @@ import kotlin.time.toDuration
 class PcccControllerConfiguration : TcpConfiguration, Validate {
 
     @SerializedName(CONFIG_CONNECT_PATH)
-    private var _connectPath: PcccConnectPathConfig? = null
+    private var _connectPath: PcccConnectPathConfiguration? = null
     val connectPathConfig = _connectPath
 
     @SerializedName(CONFIG_WAIT_AFTER_CONNECT_ERROR)
@@ -73,12 +73,12 @@ class PcccControllerConfiguration : TcpConfiguration, Validate {
         private const val CONFIG_ADDRESS = "Address"
         private const val CONFIG_PORT = "Port"
         private const val CONFIG_CONNECT_TIMEOUT = "ConnectTimeout"
+        private const val CONFIG_OPTIMIZE_READS = "OptimizeReads"
+        private const val CONFIG_READ_MAX_GAP = "MaxReadGap"
         private const val CONFIG_READ_TIMEOUT = "ReadTimeout"
         private const val CONFIG_WAIT_AFTER_CONNECT_ERROR = "WaitAfterConnectError"
         private const val CONFIG_WAIT_AFTER_READ_ERROR = "WaitAfterReadError"
         private const val CONFIG_WAIT_AFTER_WRITE_ERROR = "WaitAfterWriteError"
-        private const val CONFIG_OPTIMIZE_READS = "OptimizeReads"
-        private const val CONFIG_READ_MAX_GAP = "MaxReadGap"
 
         const val DEFAULT_PCCC_PORT = 44818
         const val DEFAULT_MAX_GAP = 32
@@ -91,7 +91,7 @@ class PcccControllerConfiguration : TcpConfiguration, Validate {
         private val default = PcccControllerConfiguration()
 
         fun create(
-            connectPath: PcccConnectPathConfig? = default._connectPath,
+            connectPath: PcccConnectPathConfiguration? = default._connectPath,
             waitAfterConnectError: Long = default._waitAfterConnectError,
             waitAfterReadError: Long = default._waitAfterReadError,
             waitAfterWriteError: Long = default._waitAfterWriteError,

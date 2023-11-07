@@ -4,7 +4,7 @@ import com.amazonaws.sfc.config.ConfigurationClass
 import com.google.gson.annotations.SerializedName
 
 @ConfigurationClass
-class PcccConnectPathConfig {
+class PcccConnectPathConfiguration {
 
     @SerializedName(CONFIG_BACKPLANE)
     private var _backplane = DEFAULT_BACKPLANE
@@ -23,14 +23,14 @@ class PcccConnectPathConfig {
         const val DEFAULT_BACKPLANE = 1
         const val DEFAULT_SLOT = 0
 
-        private val default = PcccConnectPathConfig()
+        private val default = PcccConnectPathConfiguration()
 
         fun create(
             backplane: Int = default._backplane,
             slot: Int = default._slot
-        ): PcccConnectPathConfig {
+        ): PcccConnectPathConfiguration {
 
-            val instance = PcccConnectPathConfig()
+            val instance = PcccConnectPathConfiguration()
 
             with(instance) {
                 _backplane = backplane

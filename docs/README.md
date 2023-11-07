@@ -3844,7 +3844,7 @@ This section describes the configuration types for the S7 protocol adapter and c
 </tr>
 <tr class="odd">
 <td>WaitAfterErrors</td>
-<td>Time in milliseconds to wait before reading after a red or connection error has occurred,</td>
+<td>Time in milliseconds to wait before reading after a read or connection error has occurred,</td>
 <td>Integer</td>
 <td>Default is 10000 (milliseconds)</td>
 </tr>
@@ -5782,6 +5782,7 @@ The adapters have a service wrapper that enables these adapters can be executed 
 | S7           | s7                   | com.amazonaws.sfc.s7.S7ProtocolService                 |
 | SNMP         | snmp                 | com.amazonaws.sfc.snmp.SnmpProtocolService             |
 | SQL          | sql                  | Com.amazonaws.sfc.sql.SqlProtocolService               |
+| PCCC         | pccc                 | com.amazonaws.sfc.pccc.PcccProtocolService             |
 
 The applications do have all the following command line parameters in common.
 
@@ -6036,6 +6037,18 @@ SFC_DEPLOYMENT_DIR: Directory in which deployment packed is deployed, with the s
     "SNMP": {
       "JarFiles": ["${SFC_DEPLOYMENT_DIR}/snmp/lib"],
       "FactoryClassName": "com.amazonaws.sfc.snmp.SnmpAdapter"
+    },
+    "SQL": {
+      "JarFiles": ["${SFC_DEPLOYMENT_DIR}/sql/lib"],
+      "FactoryClassName": "com.amazonaws.sfc.sql.SqlAdapter"
+    },
+    "S7": {
+      "JarFiles": ["${SFC_DEPLOYMENT_DIR}/s7/lib"],
+      "FactoryClassName": "com.amazonaws.sfc.s7.S7Adapter"
+    },
+    "PCCC": {
+      "JarFiles": ["${SFC_DEPLOYMENT_DIR}/pccc/lib"],
+      "FactoryClassName": "com.amazonaws.sfc.pccc.PcccAdapter"
     }
 }
 ```
@@ -6068,38 +6081,100 @@ The jar files are part of the target deployment and can be found in the lib dire
 *<u>Note that only target types which are used, and run in-process with the SFC core need to be included in the configuration file.</u>*
 
 ```json
-"TargetTypes": {
+
+  "TargetTypes": {
     "DEBUG-TARGET": {
-      "JarFiles": ["${SFC_DEPLOYMENT_DIR}/debug-target/lib"],
+      "JarFiles": [
+        "${SFC_DEPLOYMENT_DIR}/debug-target/lib"
+      ],
       "FactoryClassName": "com.amazonaws.sfc.debugtarget.DebugTargetWriter"
     },
     "AWS-FIREHOSE": {
-      "JarFiles": ["${SFC_DEPLOYMENT_DIR}/aws-kinesis-firehose-target/lib",
-        "${SFC_DEPLOYMENT_DIR}/aws-kinesis-firehose-target/lib/firehose-${AWS_SDK_VERSION}.jar"
+      "JarFiles": [
+        "${SFC_DEPLOYMENT_DIR}/aws-kinesis-firehose-target/lib"
       ],
       "FactoryClassName": "com.amazonaws.sfc.awsfirehose.AwsFirehoseTargetWriter"
     },
     "AWS-IOT-HTTP": {
-      "JarFiles": ["${SFC_DEPLOYMENT_DIR}/aws-iot-http-target/lib"],
+      "JarFiles": [
+        "${SFC_DEPLOYMENT_DIR}/aws-iot-http-target/lib"
+      ],
       "FactoryClassName": "com.amazonaws.sfc.awsiot.http.AwsIotHttpTargetWriter"
     },
     "AWS-IOT-MQTT": {
-      "JarFiles": ["${SFC_DEPLOYMENT_DIR}/aws-iot-mqtt-target/lib/"],
+      "JarFiles": [
+        "${SFC_DEPLOYMENT_DIR}/aws-iot-mqtt-target/lib/"
+      ],
       "FactoryClassName": "com.amazonaws.sfc.awsiot.mqtt.AwsIotMqttTargetWriter"
     },
     "AWS-KINESIS": {
-      "JarFiles": ["${SFC_DEPLOYMENT_DIR}/aws-kinesis-target/lib"],
+      "JarFiles": [
+        "${SFC_DEPLOYMENT_DIR}/aws-kinesis-target/lib"
+      ],
       "FactoryClassName": "com.amazonaws.sfc.awskinesis.AwsKinesisTargetWriter"
     },
     "AWS-LAMBDA": {
-      "JarFiles": ["${SFC_DEPLOYMENT_DIR}/aws-lambda-target/lib"],
+      "JarFiles": [
+        "${SFC_DEPLOYMENT_DIR}/aws-lambda-target/lib"
+      ],
       "FactoryClassName": "com.amazonaws.sfc.awslambda.AwsLambdaTargetWriter"
     },
     "AWS-SQS": {
-      "JarFiles": ["${SFC_DEPLOYMENT_DIR}/aws-sqs-target/lib"],
+      "JarFiles": [
+        "${SFC_DEPLOYMENT_DIR}/aws-sqs-target/lib"
+      ],
       "FactoryClassName": "com.amazonaws.sfc.awssqs.AwsSqsTargetWriter"
+    },
+    "AWS-IOT-ANALYTICS": {
+      "JarFiles": [
+        "${SFC_DEPLOYMENT_DIR}/debug-target/lib"
+      ],
+      "FactoryClassName": "com.amazonaws.sfc.awsiota.AwsIotAnalyticsTargetWriter"
+    },
+    "AWS-S3": {
+      "JarFiles": [
+        "${SFC_DEPLOYMENT_DIR}/aws-s3-target/lib"
+      ],
+      "FactoryClassName": "com.amazonaws.sfc.awsfirehose.AwsS3TargetWriter"
+    },
+    "AWS-SITEWISE": {
+      "JarFiles": [
+        "${SFC_DEPLOYMENT_DIR}/aws-iot-http-target/lib"
+      ],
+      "FactoryClassName": "com.amazonaws.sfc.awssitewise.AwsSiteWiseTargetWriter"
+    },
+    "AWS-SNS": {
+      "JarFiles": [
+        "${SFC_DEPLOYMENT_DIR}/aws-sns-target/lib/"
+      ],
+      "FactoryClassName": "com.amazonaws.sfc.awssns.AwsSnsTargetWriter"
+    },
+    "AWS-TIMESTREAM": {
+      "JarFiles": [
+        "${SFC_DEPLOYMENT_DIR}/aws-timestream-target/lib"
+      ],
+      "FactoryClassName": "com.amazonaws.sfc.awstimestream.AwsTimestreamTargetWriter"
+    },
+    "FILE-TARGET": {
+      "JarFiles": [
+        "${SFC_DEPLOYMENT_DIR}/aws-lambda-target/lib"
+      ],
+      "FactoryClassName": "com.amazonaws.sfc.filetarget.FileTargetWriter"
+    },
+    "ROUTER": {
+      "JarFiles": [
+        "${SFC_DEPLOYMENT_DIR}/router/lib"
+      ],
+      "FactoryClassName": "com.amazonaws.sfc.router.RouterTargetWriter"
+    },
+    "STORE-FORWARD": {
+      "JarFiles": [
+        "${SFC_DEPLOYMENT_DIR}/storeforward/lib"
+      ],
+      "FactoryClassName": "com.amazonaws.sfc.storeforward.StoreForwardTargetWriter"
     }
   }
+
 ```
 
 [^top](#toc)
