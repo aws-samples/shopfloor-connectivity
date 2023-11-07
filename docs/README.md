@@ -130,6 +130,13 @@ SFC documentation
     - [SnmpChannelConfiguration](#snmpchannelconfiguration)
     - [SnmpAdapterConfiguration](#snmpadapterconfiguration)
     - [SnmpDeviceConfiguration](#snmpdeviceconfiguration)
+  - [PCCC Protocol Configuration](#pccc-protocol-configuration)
+    - [PcccSourceConfiguration](#pcccsourceconfiguration)
+    - [PcccChannelConfiguration](#pcccchannelconfiguration)
+    - [PCCC Addressing](#pccc-addressing)
+    - [PcccAdapterConfiguration](#pcccadapterconfiguration)
+    - [PcccControllerConfiguration](#pccccontrollerconfiguration)
+    - [PcccConnectPathConfiguration](#pcccconnectpathconfiguration)
   - [AWS IoT Analytics Service Target](#aws-iot-analytics-service-target)
     - [AwsIotAnalyticsTargetConfiguration](#awsiotanalyticstargetconfiguration)
   - [AWS IoT Core Service Target](#aws-iot-core-service-target)
@@ -163,6 +170,7 @@ SFC documentation
     - [StoreForwardTargetConfiguration](#storeforwardtargetconfiguration)
   - [ Router Target](#-router-target)
     - [RouterTargetConfiguration](#routertargetconfiguration)
+    - [RoutesConfiguration](#routesconfiguration)
   - [MetricsWriters](#metricswriters)
     - [AwsCloudWatchConfiguration](#awscloudwatchconfiguration)
   - [Running the SFC core process](#running-the-sfc-core-process)
@@ -1476,7 +1484,7 @@ Example of OPCUA server configuration using Basic256Sha256 security profile for 
 		<tr class="even">
 			<td>Schedules</td>
 			<td>List of one or more schedules that define how data is collected from their sources, processed, and send to the targets</td>
-			<td>Schedule</td>
+			<td><a href="#schedule">Schedule</a></td>
 			<td>At least one active schedule needs to be present</td>
 		</tr>
 		<tr class="odd">
@@ -1487,13 +1495,13 @@ Example of OPCUA server configuration using Basic256Sha256 security profile for 
 				<p>Implementations of input protocols will define their specific source configurations with additional specific attributes required for that protocol additionally to the common attributes (See SourceConfiguration type)</p>
 				<p>The entries of this Sources element will contain protocol-specific entries for the used protocol implementation. The protocol implementation is responsible for reading and handling the protocol-specific attributes.</p>
 			</td>
-			<td>Map[String, SourceConfiguration]</td>
+			<td>Map[String, <a href="#sourceconfiguration">SourceConfiguration</a>]</td>
 			<td>At least 1 source must be configured.</td>
 		</tr>
 		<tr class="even">
 			<td>ProtocolAdapters</td>
 			<td>Protocol adapters are the sources to read data from and abstract the actual protocol that us used to read the data. Each source used in a schedule must have a reference to a protocol adapter. As protocol adapters can be of different types, each inherited type has additional specific attributes for the protocol.</td>
-			<td>Map[String, ProtocolAdapterConfiguration]</td>
+			<td>Map[String, <a href="#protocoladapterconfiguration">ProtocolAdapterConfiguration</a>]</td>
 			<td></td>
 		</tr>
 		<tr class="odd">
@@ -1505,7 +1513,7 @@ Example of OPCUA server configuration using Basic256Sha256 security profile for 
 				<p>Note Only types that run in the same process as the SFC core need to be configured. If the core uses IPC to send the data to a target that runs in its process, the type does not have to be defined in the ProtocolAdapterTypes section.</p>
 				<p>Only JVM implementations of protocol adapters can be used to run in the same process as the SFC core.</p>
 			</td>
-			<td>Map[String,InProcessConfiguration]</td>
+			<td>Map[String,<a href="#inprocessconfiguration">InProcessConfiguration</a>]</td>
 			<td></td>
 		</tr>
 		<tr class="even">
@@ -1514,7 +1522,7 @@ Example of OPCUA server configuration using Basic256Sha256 security profile for 
 				<p>Servers that run protocol adapter instances as separate processes. The SFC core will read the data from these servers using a streaming IPC protocol(gRPC) This section is a map indexed by the protocol adapter server identifier. The entries contain the address information that the SFC Core will use to connect and communicate with the IPC service.</p>
 				<p>The protocol-servers can be referenced by their identifier from the ProtocolAdapters section of the configuration.</p>
 			</td>
-			<td>Map[String,ServerConfiguration]</td>
+			<td>Map[String,<a href="#serverconfiguration">ServerConfiguration</a>]</td>
 			<td></td>
 		</tr>
 		<tr class="odd">
@@ -1525,7 +1533,7 @@ Example of OPCUA server configuration using Basic256Sha256 security profile for 
 				<p>Targets can be of different types that have specific configuration attributes. Target implementations define their specific configuration types containing the attributes required for communicating with the target.</p>
 				<p>For sending the data to the targets the SFC core only uses a subset of attributes that are common between all target types.</p>
 			</td>
-			<td>Map[String,TargetConfiguration]</td>
+			<td>Map[String,<a href="#targetconfiguration">TargetConfiguration</a>]</td>
 			<td></td>
 		</tr>
 		<tr class="even">
@@ -1537,7 +1545,7 @@ Example of OPCUA server configuration using Basic256Sha256 security profile for 
 				<p>Note Only types that run in the same process as the SFC core need to be included in the configuration. If the core uses IPC to send the data to a target that runs in its process, the type does not have to be defined in the TargetTypes section.</p>
 				<p>Only JVM implementations of targets can be used to run in the same process as the SFC core.</p>
 			</td>
-			<td>Map[String,InProcessConfiguration]</td>
+			<td>Map[String,<a href="#inprocessconfiguration">InProcessConfiguration</a>]</td>
 			<td></td>
 		</tr>
 		<tr class="odd">
@@ -1546,13 +1554,13 @@ Example of OPCUA server configuration using Basic256Sha256 security profile for 
 				<p>Servers that run target instances as separate processes. The SFC core will send the data to these targets using IPC (gRPC) This section is a map indexed by the target server identifier. The entries contain the address information that the SFC Core will use to connect and communicate with the IPC service.</p>
 				<p>The targets-servers can be referenced by their identifier from the Targets section of the configuration.</p>
 			</td>
-			<td>Map[String,ServerConfiguration]</td>
+			<td>Map[String,<a href="#serverconfiguration">ServerConfiguration</a>]</td>
 			<td></td>
 		</tr>
 		<tr class="even">
 			<td>SecretsManager</td>
 			<td>Gives access to secrets stored in AWS secrets manager which are used to replace placeholders in the configuration</td>
-			<td>SecretsManagerConfiguration</td>
+			<td><a href="#secretsmanagerconfiguration">SecretsManagerConfiguration</a></td>
 			<td></td>
 		</tr>
 		<tr class="odd">
@@ -1563,7 +1571,7 @@ Example of OPCUA server configuration using Basic256Sha256 security profile for 
 				<p>Each entry is a list of one or more transformation operators. An operator consists of the name of the operator and operator-specific parameters. The operators are applied in the order in which they are listed. The output type of an operator must be compatible with the input type of the next operator in the list.</p>
 				<p>If a value the transformation is applied to is an array of values, the transformation will be applied to each value in the array.</p>
 			</td>
-			<td>Map[String,TransformationOperator[]]</td>
+			<td>Map[String,<a href="#transformationoperator">TransformationOperator</a>[]]</td>
 			<td>
 				<p>Example:</p>
 				<p>{</p>
@@ -1587,7 +1595,7 @@ Example of OPCUA server configuration using Basic256Sha256 security profile for 
 		<tr class="even">
 			<td>ChangeFilters</td>
 			<td>Filters that can be applied at source or channel value level to let pass values only if they have changed at all or an absolute or percentage from the previously passed value, or since a time interval.</td>
-			<td>Map[String,ChangeFilterConfiguration]</td>
+			<td>Map[String,<a href="#changefilterconfiguration">ChangeFilterConfiguration</a>]</td>
 			<td>
 				<p>Example:</p>
 				<p>"ChangeFilters" : {
@@ -1617,7 +1625,7 @@ Example of OPCUA server configuration using Basic256Sha256 security profile for 
 		<tr class="odd">
 			<td>ValueFilters</td>
 			<td>Filters that can be applied at channel values level. Values are passed if the value matches the filter expression</td>
-			<td>Map[String,ValueFilterConfiguration]</td>
+			<td>Map[String,<a href="#valuefilterconfiguration">ValueFilterConfiguration</a>]</td>
 			<td>
 				<p>Example</p>
 				<p>"ValueFilters": {</p>
@@ -1648,7 +1656,7 @@ Example of OPCUA server configuration using Basic256Sha256 security profile for 
 		<tr class="even">
 			<td>AwsIotCredentialProviderClients</td>
 			<td>Configuration for clients using the AWS IoT Credential Provider Service to obtain session credentials.</td>
-			<td>Map[String,AwsIotCredentialProviderClientConfiguration]</td>
+			<td>Map[String,<a href="#awsiotcredentialproviderclientconfiguration">AwsIotCredentialProviderClientConfiguration</a>]</td>
 			<td></td>
 		</tr>
 		<tr class="odd">
@@ -1660,19 +1668,19 @@ Example of OPCUA server configuration using Basic256Sha256 security profile for 
 		<tr class="even">
 			<td>ConfigProvider</td>
 			<td>Configuration for custom configuration hander</td>
-			<td>InProcessConfiguration</td>
+			<td><a href="#inprocessconfiguration">InProcessConfiguration</a></td>
 			<td></td>
 		</tr>
 		<tr class="odd">
 			<td>LogWriter</td>
 			<td>Configuration for custom log writer</td>
-			<td>InProcessConfiguration</td>
+			<td><a href="#inprocessconfiguration">InProcessConfiguration</a></td>
 			<td>Default writer logs to console</td>
 		</tr>
 		<tr class="even">
 			<td>HealthProbe</td>
 			<td>Configuration for main process health probe endpoint</td>
-			<td>HealthProbeConfiguration</td>
+			<td><a href="#healthprobeconfiguration">HealthProbeConfiguration</a></td>
 			<td></td>
 		</tr>
 	</tbody>
@@ -1751,7 +1759,7 @@ Example of OPCUA server configuration using Basic256Sha256 security profile for 
 <tr class="odd">
 <td>Aggregation</td>
 <td>Optionally aggregation can be applied to the schedule output data by adding an Aggregation element. The collected values will be buffered and optionally one or more aggregation functions can be applied to these values before sending it to the targets.</td>
-<td>Aggregation</td>
+<td><a href="#aggregation">Aggregation</a></td>
 <td>Default is no aggregation of data</td>
 </tr>
 </tbody>
@@ -1803,7 +1811,7 @@ Example of OPCUA server configuration using Basic256Sha256 security profile for 
 <td><p>Channels are an abstraction of the values read from the source. For processing the value from these channels, the SFC core only uses a small set of generic attributes which are common for all protocols.</p>
 <p>This element is a map indexed by the channel identifiers. The entries contain the actual protocol specific source configuration data</p>
 <p>Implementations of input protocols will define their channel configuration types containing protocol-specific attributes to read values from their source. The protocol implementation is responsible for reading and handling the protocol-specific attributes.</p></td>
-<td>Map[String,ChannelConfiguration]</td>
+<td>Map[String,<a href="#channelconfiguration">ChannelConfiguration</a>]</td>
 <td></td>
 </tr>
 <tr class="even">
@@ -2079,7 +2087,7 @@ Context variables for template</p>
 | Configuration data for reading secrets stored in AWS Secrets manger and storing these locally in situations where connectivity is lost. |                                                                                                                                                                    |                              |                                                                                                                                                                                                                                                          |
 |-----------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | **Name**                                                                                                                                | **Description**                                                                                                                                                    | **Type**                     | **Comments**                                                                                                                                                                                                                                             |
-| Secrets                                                                                                                                 | Configured secrets                                                                                                                                                 | \[CloudSecretConfiguration\] | Configured cloud secrets                                                                                                                                                                                                                                 |
+| Secrets                                                                                                                                 | Configured secrets                                                                                                                                                 | \[[CloudSecretConfiguration](#cloudsecretconfiguration)\] | Configured cloud secrets                                                                                                                                                                                                                                 |
 | PrivateKeyFile                                                                                                                          | Name of file containing the private key used to encrypt locally stores secrets                                                                                     | String                       | Default is "sfc-secrets-manager-private-key.pem"                                                                                                                                                                                                         |
 | CertificatesAndKeysByFileReference                                                                                                      | Can be set to true to transmit private key by filename to external IPC services. The file name must exist and be accessible in the environment running the service | Boolean                      | Default is false                                                                                                                                                                                                                                         |
 | StoredSecretsFile                                                                                                                       | Name of the file used to store secrets.                                                                                                                            | String                       | Default is " sfc-secrets-manager-secrets"                                                                                                                                                                                                                |
@@ -2112,7 +2120,7 @@ Context variables for template</p>
 | CommonDimensions                                                                                                           | Set of extra dimensions added to every datapoint                        | Map(String,String)        | Optional         |
 | CollectCoreMetrics                                                                                                         | Set to false to disable collection from core metrics data               | Boolean                   | Default= true    |
 | Interval                                                                                                                   | Interval in seconds for reading metrics from adapters, targets and core | Integer                   | 10               |
-| Writer                                                                                                                     | Used writer for metrics data                                            | MetricWriterConfiguration |                  |
+| Writer                                                                                                                     | Used writer for metrics data                                            | [MetricWriterConfiguration](#metricswriterconfiguration) |                  |
 | Namespace                                                                                                                  | Namespace for collected metrics                                         | String                    | Default is "SFC" |
 
 ## MetricsWriterConfiguration
@@ -2120,8 +2128,8 @@ Context variables for template</p>
 | Writer used to write collected metrics data. This writer can be configured as an in-process instance or a client to and IPC service. If both options are configured the IPC service is used. |                                             |                       |              |
 |----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------|-----------------------|--------------|
 | **Name**                                                                                                                                                                                     | **Description**                             | **Type**              | **Comments** |
-| MetricsWriter                                                                                                                                                                                | Jar files implementing the writer           | InProcesConfigurarion |              |
-| MetricsServer                                                                                                                                                                                | Server providing the metrics writer service | ServerConfigurarion   |              |
+| MetricsWriter                                                                                                                                                                                | Jar files implementing the writer           | [InProcesConfigurarion](#inprocessconfiguration) |              |
+| MetricsServer                                                                                                                                                                                | Server providing the metrics writer service | [ServerConfigurarion](#serverconfiguration)   |              |
 
 ## HealthProbeConfiguration
 
@@ -2433,7 +2441,7 @@ aws iot describe-endpoint --endpoint-type iot:CredentialProvider.</p>
 <tr class="even">
 <td>HealthProbe</td>
 <td>Configures the health probe endpoint when the address is used for an SFC service process.</td>
-<td>HealthProbeConfigurarion</td>
+<td><a href="#healthprobeconfiguration">HealthProbeConfigurarion</a></td>
 <td></td>
 </tr>
 </tbody>
@@ -3087,7 +3095,7 @@ This section describes the configuration types for the OPCUA protocol adapter an
 <td>Channels</td>
 <td><p>The channels configuration for an OPCUA source holds configuration data to read values from nodes on the source OPCUA server.</p>
 <p>The element is a map indexed by the channel identifier.</p></td>
-<td>Map[String,OpcuaNodeChannelConfiguration]</td>
+<td>Map[String,<a href="#opcuanodechannelconfiguration">OpcuaNodeChannelConfiguration</a>]</td>
 <td>At least 1 channel must be configured.</td>
 </tr>
 <tr class="odd">
@@ -3181,7 +3189,7 @@ This section describes the configuration types for the OPCUA protocol adapter an
 <tr class="even">
 <td>NodeChangeFilter</td>
 <td>Change filter used in subscription for node that defines the conditions when a value change must be reported.</td>
-<td>OpcuaNodeChangeFilter</td>
+<td><a href="#opcuanodechangefilter">OpcuaNodeChangeFilter</a></td>
 <td>Optional</td>
 </tr>
 <tr class="odd">
@@ -3275,13 +3283,13 @@ This section describes the configuration types for the OPCUA protocol adapter an
 <tr class="even">
 <td>OpcuaServers</td>
 <td>Opcua servers configured for this adapter. The opcua source using the adapter must have a reference to one of these in its AdapterOpcuaServer attribute.</td>
-<td>Map[String,OpcuaServerConfiguration]</td>
+<td>Map[String,<a href="#opcuaserverconfiguration">OpcuaServerConfiguration</a>]</td>
 <td></td>
 </tr>
 <tr class="odd">
 <td>ServerProfiles</td>
 <td>Profiles configured for this adapter. Servers in this adapter can have a reference to one if its profiles in their ServerProfile attribute.</td>
-<td>Map[String,OpcuaServerProfileConfiguration]</td>
+<td>Map[String,<a href="#opcuaserverprofileconfiguration">OpcuaServerProfileConfiguration</a>]</td>
 <td></td>
 </tr>
 </tbody>
@@ -3292,7 +3300,7 @@ This section describes the configuration types for the OPCUA protocol adapter an
 | Profile that can be applied to configured OPCUA server, for example to additional event and alarm types for that server. |                                                       |                                          |              |
 |--------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------|------------------------------------------|--------------|
 | **Name**                                                                                                                 | **Description**                                       | **Type**                                 | **Comments** |
-| EventTypes                                                                                                               | Additional event types that can be used for a server, | Map\[String,OpcUaEvenTypeConfiguration\] |              |
+| EventTypes                                                                                                               | Additional event types that can be used for a server, | Map\[String,[OpcUaEvenTypeConfiguration](#opcuaeventtypeconfiguration)\] |              |
 
 ## OpcuaEventTypeConfiguration
 
@@ -3466,13 +3474,13 @@ This section describes the configuration types for the OPCUA protocol adapter an
 <tr class="even">
 <td>Certificate</td>
 <td>Client certificate configuration</td>
-<td>CertificateConfiguration</td>
+<td><a href="#certificateconfiguration">CertificateConfiguration</a></td>
 <td></td>
 </tr>
 <tr class="odd">
 <td>CertificateValidation</td>
 <td>Certificate validation configuration</td>
-<td>CertificateValidationConfiguration</td>
+<td><a href="#certificatevalidationconfiguration">CertificateValidationConfiguration</a></td>
 <td></td>
 </tr>
 </tbody>
@@ -3487,7 +3495,7 @@ This section describes the configuration types for the OPCUA protocol adapter an
 | PrivateKeyFile                                    | Path name to pem private key file (optional for pkcs12, required for pem)                                                  | String                             |                                                                                                                                                                           |
 | Alias                                             | Alias to use for pkcs12 certificate files                                                                                  | String                             | Default is "alias"                                                                                                                                                        |
 | Password                                          | Password for pkcs12 certificate files                                                                                      | String                             |                                                                                                                                                                           |
-| SelfSignedCertificate                             | Self-signed certificate configuration used to generate a self-signed certificate                                           | SelfSignedCertificateConfiguration | If the certificate specified by CertificateFile does not exist a certificate is generated using this configuration. If this section does not exist an error is generated. |
+| SelfSignedCertificate                             | Self-signed certificate configuration used to generate a self-signed certificate                                           | [SelfSignedCertificateConfiguration](#selfsignedcertificateconfiguration) | If the certificate specified by CertificateFile does not exist a certificate is generated using this configuration. If this section does not exist an error is generated. |
 | Format                                            | Format of the certificate file, can either be Pem or Pkcs12.                                                               | String                             | If not specified the adapter will attempt to determine the type from the filename of the key file.                                                                        |
 | ExpirationWarningPeriod                           | Period in days in which the adapter will generate a daily warning and metrics value before the client certificate expires. | Integer                            | Default is 30, set to 0 to disable.                                                                                                                                       |
 
@@ -3568,7 +3576,7 @@ This section describes the configuration types for the OPCUA protocol adapter an
 | **Name**                                  | **Description**                                                                                 | **Type**                     | Comments                                                                                       |
 | Active                                    | Flag to set to enable or disable the validation of server certificates                          | Boolean                      | Default is true                                                                                |
 | Directory                                 | Pathname to base directory under which certificates and certificate revocation lists are stored | String                       | This directory must exist, subdirectories will be created by the adapter if they do not exist. |
-| ValidationOptions                         | Configuration of op optional checks                                                             | CertificateValidationOptions | When not set then all options are enabled                                                      |
+| ValidationOptions                         | Configuration of op optional checks                                                             | [CertificateValidationOptions](#certificatevalidationoptions) | When not set then all options are enabled                                                      |
 
 
 [^top](#toc)
@@ -3624,7 +3632,7 @@ This section describes the configuration types for the OPCDA protocol adapter an
 <td colspan="2"><p>The channels configuration for an OPCDA source holds configuration data to read values from items on the source OPCDA server.</p>
 <p>The element is a map indexed by the channel identifier.</p>
 <p>Channels can be "commented" out by adding a "#" at the beginning of the identifier of that channel.</p></td>
-<td colspan="2">Map[String,OpcdaChannelConfiguration]</td>
+<td colspan="2">Map[String,<a href="#opcdachannelconfiguration">OpcdaChannelConfiguration</a>]</td>
 <td>At least 1 channel must be configured.</td>
 </tr>
 <tr class="odd">
@@ -3705,7 +3713,7 @@ This section describes the configuration types for the OPCDA protocol adapter an
 <tr class="even">
 <td>OpcdaServers</td>
 <td>Opcda servers configured for this adapter. The Opcda source using the adapter must refer to one of these servers with the AdapterOpcdaServer attribute.</td>
-<td>Map[String,OpcdaServerConfiguration]</td>
+<td>Map[String,<a href="#opcdaserverconfiguration">OpcdaServerConfiguration</a>]</td>
 <td></td>
 </tr>
 </tbody>
@@ -3756,7 +3764,7 @@ This section describes the configuration types for the S7 protocol adapter and c
 <td><p>The channels configuration for an S7 source holds configuration data to read values from fields on the source PLC.</p>
 <p>The element is a map indexed by the channel identifier.</p>
 <p>Channels can be "commented" out by adding a "#" at the beginning of the identifier of that channel.</p></td>
-<td>Map[String,S7FieldChannelChannelConfiguration]</td>
+<td>Map[String,<a href="#s7fieldchannelconfiguration">S7FieldChannelConfiguration</a>]</td>
 <td>At least 1 channel must be configured.</td>
 </tr>
 <tr class="odd">
@@ -3839,7 +3847,7 @@ This section describes the configuration types for the S7 protocol adapter and c
 <tr class="even">
 <td>Controllers</td>
 <td>PLCs servers configured for this adapter. The S7 source using the adapter must have a reference to one of these in its AdapterController attribute.</td>
-<td>Map[String,S7ControllerConfiguration]</td>
+<td>Map[String,<a href="#s7controllerconfiguration">S7ControllerConfiguration</a>]</td>
 <td></td>
 </tr>
 <tr class="odd">
@@ -3991,7 +3999,7 @@ This section describes the configuration types for the MQTT protocol adapter and
 <td colspan="2"><p>The channels configuration for an MQTT source holds configuration data to read values from topics on the source MQTT broker.</p>
 <p>The element is a map indexed by the channel identifier.</p>
 <p>Channels can be "commented" out by adding a "#" at the beginning of the identifier of that channel.</p></td>
-<td colspan="2">Map[String,MqttChannelConfiguration]</td>
+<td colspan="2">Map[String,<a href="#mqttchannelconfiguration">MqttChannelConfiguration</a>]</td>
 <td>At least 1 channel must be configured.</td>
 </tr>
 <tr class="odd">
@@ -4040,7 +4048,7 @@ This section describes the configuration types for the MQTT protocol adapter and
 <tr class="even">
 <td>TopicNameMapping</td>
 <td>Mapping from topic names to alternative names. As a channel can have multiple topics, that also can include wildcards, this mapping can be used to build consistent and expected value names.</td>
-<td>TopicNameMapping</td>
+<td><a href="#topicnamemapping">TopicNameMapping</a></td>
 <td></td>
 </tr>
 <tr class="odd">
@@ -4091,7 +4099,7 @@ This section describes the configuration types for the MQTT protocol adapter and
 <tr class="even">
 <td>TopicNameMapping</td>
 <td>Mapping from topic names to alternative names. As a channel can have multiple topics, that also can include wildcards, this mapping can be used to build consistent and expected value names.</td>
-<td>TopicNameMapping</td>
+<td><a href="#topicnamemapping">TopicNameMapping</a></td>
 <td><p>Example:</p>
 <p>Channel subscription is:</p>
 <p>"Topics" :[ "test"/#"]</p>
@@ -4145,7 +4153,7 @@ This section describes the configuration types for the MQTT protocol adapter and
 <tr class="even">
 <td>Brokers</td>
 <td>Brokers configured for this adapter. The mqtt source using the adapter must refer to one of these servers with the AdapterBroker attribute.</td>
-<td>Map[String,MqttBrokerConfiguration]</td>
+<td>Map[String,<a href="#mqttbrokerconfiguration">MqttBrokerConfiguration</a>]</td>
 <td></td>
 </tr>
 </tbody>
@@ -4196,7 +4204,7 @@ This section describes the configuration types for the SQL adapter and contains 
 <tr class="even">
 <td>Channels</td>
 <td colspan="2">The channels configuration for an SQL source holds configuration data to read values through SQL statements. "commented" out by adding a "#" at the beginning of the identifier of that channel.</td>
-<td colspan="2">Map[String,SqlChannelConfiguration]</td>
+<td colspan="2">Map[String,<a href="#sqlchannelconfiguration">SqlChannelConfiguration</a>]</td>
 <td>At least 1 channel must be configured.</td>
 </tr>
 <tr class="odd">
@@ -4286,7 +4294,7 @@ This section describes the configuration types for the SQL adapter and contains 
 <tr class="even">
 <td>DbServers</td>
 <td>Database servers configured for this adapter. The sql source using the adapter must refer to one of these servers with the AdapterDbServer attribute.</td>
-<td>Map[String,DbServerConfiguration]</td>
+<td>Map[String,<a href="#dbserverconfiguration">DbServerConfiguration</a>]</td>
 <td></td>
 </tr>
 </tbody>
@@ -4418,7 +4426,7 @@ This section describes the configuration types for the Modbus TCP protocol adapt
 <td colspan="2"><p>The channels hold configuration data to read values from the Modbus source device.</p>
 <p>The element is a map indexed by the channel identifier.</p>
 <p>Channels can be "commented" out by adding a "#" at the beginning of the identifier of that channel.</p></td>
-<td colspan="2">Map[String,ModbusChannelConfiguration]</td>
+<td colspan="2">Map[String,<a href="#modbuschannelconfiguration">ModbusChannelConfiguration</a>]</td>
 <td>At least 1 channel must be configured.</td>
 </tr>
 <tr class="odd">
@@ -4431,7 +4439,7 @@ This section describes the configuration types for the Modbus TCP protocol adapt
 <tr class="even">
 <td colspan="2">Optimization</td>
 <td colspan="2">Optimization for combining reading values from adjacent or near adjacent in a single read request.</td>
-<td colspan="2">ModbusOptimization</td>
+<td colspan="2"><a href="#modbusoptimization">ModbusOptimization</a></td>
 <td>Default optimization is enabled with a RegisterMaxGapSize of 8 and a CoilMaxGapSize of 16.</td>
 </tr>
 <tr class="odd">
@@ -4526,7 +4534,7 @@ This section describes the configuration types for the Modbus TCP protocol adapt
 <tr class="even">
 <td>Devices</td>
 <td>Modbus devices configured for this adapter. The modbus tcp source using the adapter must refer to one of these servers with the AdapterDevice attribute.</td>
-<td>Map[String,ModbusTcpDeviceConfiguration]</td>
+<td>Map[String,<a href="#modbustcpdeviceconfiguration">ModbusTcpDeviceConfiguration</a>]</td>
 <td></td>
 </tr>
 </tbody>
@@ -4582,7 +4590,7 @@ This section describes the configuration types for the SNMP protocol adapter and
 <td colspan="2"><p>The channels hold configuration data to read values from the SNMP source devices.</p>
 <p>The element is a map indexed by the channel identifier.</p>
 <p>Channels can be "commented" out by adding a "#" at the beginning of the identifier of that channel.</p></td>
-<td colspan="2">Map[String,SnmpChannelConfiguration]</td>
+<td colspan="2">Map[String,<a href="#snmpchannelconfiguration">SnmpChannelConfiguration</a>]</td>
 <td>At least 1 channel must be configured.</td>
 </tr>
 <tr class="odd">
@@ -4657,15 +4665,13 @@ This section describes the configuration types for the SNMP protocol adapter and
 <tr class="even">
 <td>Devices</td>
 <td>Snmp devices configured for this adapter. The modbus tcp source using the adapter must refer to one of these servers with the AdapterDevice attribute.</td>
-<td>Map[String,SnmpDeviceConfiguration]</td>
+<td>Map[String,<a href="#snmpdeviceconfiguration">SnmpDeviceConfiguration</a>]</td>
 <td></td>
 </tr>
 </tbody>
 </table>
 
 ## SnmpDeviceConfiguration
-
-## 
 
 | Configuration data for connecting to and reading from a SNMP device. |                                                             |          |                                              |
 |----------------------------------------------------------------------|-------------------------------------------------------------|----------|----------------------------------------------|
@@ -4681,6 +4687,472 @@ This section describes the configuration types for the SNMP protocol adapter and
 
 
 [^top](#toc)
+
+# PCCC Protocol Configuration
+
+This section describes the configuration types for the PCCC protocol adapter and contains the extensions and specific configuration types
+
+## PcccSourceConfiguration
+
+<table>
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 25%" />
+<col style="width: 32%" />
+<col style="width: 22%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th colspan="4"><p><strong>PCCCSourceConfiguration</strong> Extends SourceConfiguration</p>
+<p>The PCCCSourceConfiguration extends the common Source configuration with PCCC specific source configuration data</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Name</strong></td>
+<td><strong>Description</strong></td>
+<td><strong>Type</strong></td>
+<td><strong>Comments</strong></td>
+</tr>
+<tr class="even">
+<td>Channels</td>
+<td><p>The channels configuration for a PCCC source holds configuration data to read values from fields on the source controller.</p>
+<p>The element is a map indexed by the channel identifier.</p>
+<p>Channels can be "commented" out by adding a "#" at the beginning of the identifier of that channel.</p></td>
+<td>Map[String,<a href="#pcccchannelconfiguration">PcccChannelConfiguration</a>]</td>
+<td>At least 1 channel must be configured.</td>
+</tr>
+<tr class="odd">
+<td>AdapterController</td>
+<td>Server Identifier for the controller to read from. This referenced server must be present in the Controllers section of the adapter referred to by the ProtocolAdapter attribute of the source.</td>
+<td>String</td>
+<td>Must be an identifier of a server in the Controllers section of the PCCC adapter used by the source.</td>
+</tr>
+</tbody>
+</table>
+
+[^top](#toc)
+
+## PcccChannelConfiguration
+
+<table>
+<colgroup>
+<col style="width: 15%" />
+<col style="width: 19%" />
+<col style="width: 22%" />
+<col style="width: 43%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th colspan="4"><p><strong>PcccChannelConfiguration</strong></p>
+<p><strong>Extends ChannelConfiguration</strong></p>
+<p>The PcccFieldChannelConfiguration extends the common Channel configuration with PCCC specific channel configuration data</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Name</strong></td>
+<td><strong>Description</strong></td>
+<td><strong>Type</strong></td>
+<td><strong>Comments</strong></td>
+</tr>
+<tr class="even">
+<td>Address</td>
+<td>A string containing the address of the field to read from the controller.</td>
+<td>String</td>
+<td>For supported datatype and address syntax see <a href="#pccc-addressing">See PCCC Addressing section below.</a></td>
+</tr>
+</tbody>
+</table>
+
+[^top](#toc)
+
+## PCCC Addressing
+
+The following datatype with their addresses can be used as the value of “Address” in a PcccChannel.
+
+Datatype OUPUT, Prefix O
+
+Default file number 0
+
+Syntax: 0\<filenumber\>:\<element index\>\[/bit offset\]\[,arraylen\]
+
+**O0:0** First 16 output bits as Boolean values in logical order, the bit at offset 0 becomes the first item in the array.
+
+<img src="./img/pccc/image1.png" style="width:4.42951in;height:0.58019in" />
+
+**O0:0.1** Second set of 16 output bites as 16 Boolean values in logical order
+
+<img src="./img/pccc/image2.png" style="width:4.28618in;height:0.56142in" />
+
+**O0:0,2** First 32 output bits as 2 sets of 16 Boolean values in logical order
+
+<img src="./img/pccc/image3.png" style="width:4.26523in;height:0.55867in" />
+
+**O0:0/0** First output at offset 0 bit as Boolean value
+
+<img src="./img/pccc/image4.png" style="width:4.22175in;height:0.55298in" />
+
+**O0:0/15** Fifteenth output bit at offset 15 as Boolean value
+
+<img src="./img/pccc/image5.png" style="width:4.15827in;height:0.54466in" />
+
+**Datatype INPUT, Prefix I**
+
+Default file number 1
+
+Syntax: 0\<file number\>:\<element index\>\[/bit offset\]\[,array len\]
+
+**I1:0** First 16 input bits as Boolean values in logical order, the bit at offset 0 becomes the first item in the array.
+
+<img src="./img/pccc/image6.png" style="width:4.20977in;height:0.55456in" />
+
+**I1:0.1.** Second set of 16 input bites as 16 Boolean values in logical
+
+<img src="./img/pccc/image7.png" style="width:4.18124in;height:0.5508in" />
+
+**I1:0,2** First 32 input bits as 2 sets of 16 Boolean values in logical order
+
+<img src="./img/pccc/image8.png" style="width:4.12484in;height:0.54337in" />
+
+**I1:0/0**. First input bit at offset 0 as Boolean value
+
+<img src="./img/pccc/image9.png" style="width:4.11139in;height:0.5416in" />
+
+**O0:0/15** Fifteenth output at offset 15 bit as Boolean value
+
+<img src="./img/pccc/image10.png" style="width:4.09619in;height:0.5396in" />
+
+**Datatype BINARY, Prefix B**
+
+Default file number 3
+
+Syntax: B\<file number\>:\<element index\>\[/bit offset\]
+
+**B3:0** First 16 binary bits as Boolean values in logical order, the bit shown below at offset 0 becomes the first item in the array.
+
+<img src="./img/pccc/image11.png" style="width:4.16323in;height:0.55777in" />
+
+**B3:0.1** Second set of 16 binary bites as 16 Boolean values in logical
+
+<img src="./img/pccc/image12.png" style="width:4.20022in;height:0.56272in" />
+
+**B3:0/0.** First binary bit at offset as Boolean value
+
+<img src="./img/pccc/image13.png" style="width:4.10473in;height:0.54993in" />
+
+**B3:0/15** Fifteenth binary bit at offset 15 as Boolean value
+
+<img src="./img/pccc/image14.png" style="width:4.10599in;height:0.5501in" />
+
+**Datatype TIMER, Prefix T**
+
+Default file number 4
+
+Syntax: T\<file number\>:\<element index\>\[/bit offset\] for bit values
+
+T\<file number\>:\<element index\>\[.value by name\] for named numeric values
+
+**T4:0** Timer as a structure containing all elements
+
+<img src="./img/pccc/image15.png" style="width:3.05094in;height:0.57004in" />
+
+**T4:0.ACC** Timer numeric ACC value.
+
+<img src="./img/pccc/image16.png" style="width:3.05626in;height:0.57104in" />
+
+**T4:0.EN** Timer Boolean EN bit value
+
+<img src="./img/pccc/image17.png" style="width:3.04003in;height:0.56801in" />
+
+**Datatype COUNTER, Prefix C**
+
+Default file number 5
+
+Syntax: C\<file number\>:\<element index\>\[/bit offset\] for bit values
+
+C\<file number\>:\<element index\>\[.value by name\] for named numeric values
+
+**C5:0** Counter as a structure containing all elements
+
+<img src="./img/pccc/image18.png" style="width:2.96261in;height:0.55884in" />
+
+**C5:0.ACC Counter ACC numeric value**
+
+<img src="./img/pccc/image19.png" style="width:2.99306in;height:0.56458in" />
+
+**C5:0.ACC Counter CU bit value**
+
+<img src="./img/pccc/image20.png" style="width:3.06239in;height:0.57766in" />
+
+**Datatype CONTROL, Prefix R**
+
+Default file number 6
+
+Syntax: R\<file number\>:\<element index\>\[/bit offset\] for bit values
+
+R\<file number\>:\<element index\>\[.value by name\] for named numeric values
+
+**R6:0** Control as a structure containing all elements
+
+<img src="./img/pccc/image21.png" style="width:3.18222in;height:0.51584in" />
+
+**R6:0.POS Counter POS numeric value**
+
+<img src="./img/pccc/image22.png" style="width:3.14338in;height:0.50954in" />
+
+**R6:0.ACC Control EN bit value**
+
+<img src="./img/pccc/image23.png" style="width:3.08741in;height:0.50047in" />
+
+**Datatype INTEGER, Prefix N (16 bit)**
+
+Default file number 7
+
+Syntax: N\<file number\>:\<element index\>\[\<array len\>\]
+
+**N7:0 First 16 bits integer value**
+
+<img src="./img/pccc/image24.png" style="width:5.79437in;height:0.57263in" />
+
+**N7:1 Second 16 bits integer value**
+
+<img src="./img/pccc/image25.png" style="width:5.4056in;height:0.53421in" />
+
+**N7:0,3 First 3 16 bits integer values**
+
+<img src="./img/pccc/image26.png" style="width:5.3826in;height:0.53193in" />
+
+**Datatype FLOAT, Prefix F**
+
+Syntax: F\<file number\>:\<element index\>\[\<array len\>\]
+
+**F8:0 First float value**
+
+<img src="./img/pccc/image27.png" style="width:5.37544in;height:0.53238in" />
+
+**F8:1 Second float value**
+
+<img src="./img/pccc/image28.png" style="width:5.52594in;height:0.54728in" />
+
+**F8:0,2 First 2 float value**
+
+<img src="./img/pccc/image29.png" style="width:5.39762in;height:0.53457in" />
+
+**Datatype STRING, Prefix ST**
+
+Syntax: ST\<file number\>:\<element index\>
+
+**ST9:0 First string value**
+
+<img src="./img/pccc/image30.png" style="width:1.74001in;height:0.52925in" />
+
+**ST9:1 Second string value**
+
+<img src="./img/pccc/image31.png" style="width:1.74041in;height:0.52938in" />
+
+**Datatype LONG, Prefix L (32 bit)**
+
+Syntax: L\<file number\>:\<element index\>\[\<array len\>\]
+
+**L10:0 First 32 bits integer value**
+
+<img src="./img/pccc/image32.png" style="width:5.38738in;height:0.53298in" />
+
+**L10:1 Second 32 bits integer value**
+
+<img src="./img/pccc/image33.png" style="width:5.3943in;height:0.53367in" />
+
+**L10:0,3 First 3 32 bits integer values**
+
+<img src="./img/pccc/image34.png" style="width:5.41913in;height:0.53612in" />
+
+**Datatype ASCII, Prefix A**
+
+Default file number 11
+
+Syntax: A\<file number\>:\<element index\>\[/character offset\]
+
+**A11:0 First character pair**
+
+<img src="./img/pccc/image35.png" style="width:5.99478in;height:0.56762in" />
+
+**A11:0 Second character pair**
+
+<img src="./img/pccc/image36.png" style="width:6.42308in;height:0.60417in" />
+
+**A11:0/0 First character of in first character pair**
+
+<img src="./img/pccc/image37.png" style="width:6.42292in;height:0.60417in" />
+
+**A11:0/0 Second character of in seconds character pair**
+
+<img src="./img/pccc/image38.png" style="width:6.42319in;height:0.60417in" />
+
+[^top](#toc)
+
+## PcccAdapterConfiguration
+
+<table>
+<colgroup>
+<col style="width: 14%" />
+<col style="width: 19%" />
+<col style="width: 27%" />
+<col style="width: 39%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th colspan="4"><p><strong>PcccAdapterConfiguration</strong></p>
+<p><strong>Extends ProcolAdapterConfiguration</strong></p>
+<p>The PcccAdapterConfiguration extends the common adapter configuration with PCCC specific adapter configuration settings. The AdapterType to use for this adapter is "PCCC".</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Name</strong></td>
+<td><strong>Description</strong></td>
+<td><strong>Type</strong></td>
+<td><strong>Comments</strong></td>
+</tr>
+<tr class="even">
+<td>Controllers</td>
+<td>PLCs servers configured for this adapter. The PCCC source using the adapter must have a reference to one of these in its AdapterController attribute.</td>
+<td>Map[String,<a href="#pccccontrollerconfiguration">PcccControllerConfiguration</a>]</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+
+[^top](#toc)
+
+## PcccControllerConfiguration
+
+<table>
+<colgroup>
+<col style="width: 18%" />
+<col style="width: 27%" />
+<col style="width: 28%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th colspan="4"><p><strong>PcccControllerConfiguration</strong></p>
+<p>Configuration data for connecting to and reading from sources for controllers using PCCC</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Name</strong></td>
+<td><strong>Description</strong></td>
+<td><strong>Type</strong></td>
+<td>Comments</td>
+</tr>
+<tr class="even">
+<td>Address</td>
+<td>IP Address of the controller</td>
+<td>String</td>
+<td>IP address in format aaa.bbb.ccc.ddd</td>
+</tr>
+<tr class="odd">
+<td>Port</td>
+<td>Port number</td>
+<td>Integer</td>
+<td>Default is 44818</td>
+</tr>
+<tr class="even">
+<td>ConnectPath</td>
+<td>Connect path for controller</td>
+<td><a href="#pcccconnectpathconfiguration">PcccConnectPathConfiguration</a></td>
+<td>Optional</td>
+</tr>
+<tr class="odd">
+<td>ConnectTimeout</td>
+<td>Timeout for connecting to the controller in milliseconds</td>
+<td>Integer</td>
+<td>Default is 10000</td>
+</tr>
+<tr class="even">
+<td>ReadTimeout</td>
+<td>Timeout for reading response packets from the controller in milliseconds</td>
+<td>Integer</td>
+<td>Default is 10000</td>
+</tr>
+<tr class="odd">
+<td>WaitAfterConnectError</td>
+<td>Time to wait before (re)connecting after a connection error in milliseconds</td>
+<td>Integer</td>
+<td>Default is 10000</td>
+</tr>
+<tr class="even">
+<td>WaitAfterReadError</td>
+<td>Time to wait before reading values from the controller after a read error in milliseconds</td>
+<td>Integer</td>
+<td>Default is 10000</td>
+</tr>
+<tr class="odd">
+<td>WaitAferWriteError</td>
+<td>Time to wait after an error writing request packets to the controller in milliseconds</td>
+<td>Integer</td>
+<td>Default is 10000</td>
+</tr>
+<tr class="even">
+<td>OptimizeReads</td>
+<td>Optimized the reading of data from the controller by combining the reads for (near) adjacent fields in a single read request.</td>
+<td>Boolean</td>
+<td><p>Default is true</p>
+<p>Optimization reduces the calls made to the controller to read data. When troubleshooting optimization it can be disabled to find specific fields that make the (combined) reads to fail.</p></td>
+</tr>
+<tr class="odd">
+<td>MaxReadGap</td>
+<td>When optimization is used this specified the max number of bytes between near adjacent fields that may be combined in a single read.</td>
+<td>Integer</td>
+<td>Default is 32</td>
+</tr>
+</tbody>
+</table>
+
+[^top](#toc)
+
+## PcccConnectPathConfiguration
+
+<table>
+<colgroup>
+<col style="width: 18%" />
+<col style="width: 27%" />
+<col style="width: 28%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th colspan="4"><p><strong>PcccConnectPathConfiguration</strong></p>
+<p>Configuration connect path of a controller used for routing.</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Name</strong></td>
+<td><strong>Description</strong></td>
+<td><strong>Type</strong></td>
+<td>Comments</td>
+</tr>
+<tr class="even">
+<td>Backplane</td>
+<td>Backplane number</td>
+<td>Integer</td>
+<td>Default is 1</td>
+</tr>
+<tr class="odd">
+<td>Slot</td>
+<td>Slot number</td>
+<td>Integer</td>
+<td>Default is 0</td>
+</tr>
+</tbody>
+</table>
+
+[^top](#toc)
+
+---
 
 # AWS IoT Analytics Service Target
 
@@ -5126,7 +5598,7 @@ aws iot describe-endpoint --endpoint-type iot:Data-ATS</p>
 <tr class="even">
 <td>Assets</td>
 <td>Assets to write to</td>
-<td>List of AwsSiteWiseAssetConfiguration</td>
+<td>List of <a href="#awssitewiseassetconfiguration">AwsSiteWiseAssetConfiguration</a></td>
 <td></td>
 </tr>
 <tr class="odd">
@@ -5158,7 +5630,7 @@ aws iot describe-endpoint --endpoint-type iot:Data-ATS</p>
 |----------------------------|----------------------------------|-----------------------------------------------|----------|
 | **Name**                   | **Description**                  | **Type**                                      | Comments |
 | AssetId                    | Asset to write to                | String                                        |          |
-| Properties                 | Properties to write to the asset | List of AwsSiteWiseAssetPropertyConfiguration |          |
+| Properties                 | Properties to write to the asset | List of [AwsSiteWiseAssetPropertyConfiguration](#awssitewiseassetpropertyconfiguration) |          |
 
 
 ## AwsSiteWiseAssetPropertyConfiguration
@@ -5415,7 +5887,7 @@ aws iot describe-endpoint --endpoint-type iot:Data-ATS</p>
 <tr class="even">
 <td>Records</td>
 <td>Records to write to table</td>
-<td>List of AwsTimestreamRecordConfiguration</td>
+<td>List of <a href="#awstimestreamrecordconfiguration">AwsTimestreamRecordConfiguration</a></td>
 <td></td>
 </tr>
 </tbody>
@@ -5471,7 +5943,7 @@ aws iot describe-endpoint --endpoint-type iot:Data-ATS</p>
 <tr class="even">
 <td>Dimensions</td>
 <td>Record dimensions</td>
-<td>List of AwsTimestreamDimensionConfiguration</td>
+<td>List of <a href="#awstimestreamdimensionconfiguration">AwsTimestreamDimensionConfiguration</a></td>
 <td></td>
 </tr>
 </tbody>
@@ -5710,7 +6182,7 @@ aws iot describe-endpoint --endpoint-type iot:Data-ATS</p>
 <p>This map is indexed by the target IDs of primary targets to which data is routed.</p>
 <p>Each entry can have an alternative route to which the data is routed if writing to the primary target fails.</p>
 <p>A success target can be specified to which data is routed if the data was written successfully to the primary or alternative target.</p></td>
-<td>Map[String, RoutesConfiguration]</td>
+<td>Map[String, <a href="#routesconfiguration">RoutesConfiguration</a>]</td>
 <td>The targets must be targets that are configured either as in-process or IPC service targets in the same configuration.</td>
 </tr>
 <tr class="odd">
@@ -5723,6 +6195,8 @@ aws iot describe-endpoint --endpoint-type iot:Data-ATS</p>
 </tr>
 </tbody>
 </table>
+
+## RoutesConfiguration
 
 | RoutesConfiguration contains alternative and success routes for primary targets. |                                                                                                                    |          |          |
 |----------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------|----------|----------|
@@ -5744,10 +6218,9 @@ aws iot describe-endpoint --endpoint-type iot:Data-ATS</p>
 | BatchSize                                                                                                                                                                                | Number of data points to buffer to write as a batch to CloudWatch service                                          | Int      |                                                           | Default and max value is 1000        |
 | CredentialProviderClient                                                                                                                                                                 | Name of configured credentials client that will be used to read secrets stored in the AWS Secrets Manager service. |          | If not set the AWS SDK credential provider chain is used. |                                      |
 
-**  
-**
-
 [^top](#toc)
+
+---
 
 # Running the SFC core process
 
