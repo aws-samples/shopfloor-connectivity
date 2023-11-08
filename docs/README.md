@@ -5584,7 +5584,7 @@ aws iot describe-endpoint --endpoint-type iot:Data-ATS</p>
 </colgroup>
 <thead>
 <tr class="header">
-<th colspan="4"><p>AwsTimestreamTargetConfiguration extends the type TargetConfiguration with specific configuration data for sending data to Timestream tables. The Targets configuration element can contain entries of this type, the TargetType of these entries must be set to <strong>"AWS-SITEWISE"</strong></p>
+<th colspan="4"><p>AwsSitewiseTargetConfiguration extends the type TargetConfiguration with specific configuration data for sending data to Timestream tables. The Targets configuration element can contain entries of this type, the TargetType of these entries must be set to <strong>"AWS-SITEWISE"</strong></p>
 <p>Requires IAM permission iotsitewise:BatchPutAssetPropertyValue to write to the configured tables.</p></th>
 </tr>
 </thead>
@@ -6612,7 +6612,7 @@ The jar files are part of the target deployment and can be found in the lib dire
     },
     "AWS-SITEWISE": {
       "JarFiles": [
-        "${SFC_DEPLOYMENT_DIR}/aws-iot-http-target/lib"
+        "${SFC_DEPLOYMENT_DIR}/aws-sitewise-target/lib"
       ],
       "FactoryClassName": "com.amazonaws.sfc.awssitewise.AwsSiteWiseTargetWriter"
     },
@@ -6630,19 +6630,19 @@ The jar files are part of the target deployment and can be found in the lib dire
     },
     "FILE-TARGET": {
       "JarFiles": [
-        "${SFC_DEPLOYMENT_DIR}/aws-lambda-target/lib"
+        "${SFC_DEPLOYMENT_DIR}/aws-file-target/lib"
       ],
       "FactoryClassName": "com.amazonaws.sfc.filetarget.FileTargetWriter"
     },
     "ROUTER": {
       "JarFiles": [
-        "${SFC_DEPLOYMENT_DIR}/router/lib"
+        "${SFC_DEPLOYMENT_DIR}/router-target/lib"
       ],
       "FactoryClassName": "com.amazonaws.sfc.router.RouterTargetWriter"
     },
     "STORE-FORWARD": {
       "JarFiles": [
-        "${SFC_DEPLOYMENT_DIR}/storeforward/lib"
+        "${SFC_DEPLOYMENT_DIR}/store-forward-target/lib"
       ],
       "FactoryClassName": "com.amazonaws.sfc.storeforward.StoreForwardTargetWriter"
     }
