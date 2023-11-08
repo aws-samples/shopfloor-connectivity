@@ -1,20 +1,5 @@
 # Shopfloor Connectivity Framework (SFC)
 
-## WIP: Tenets for that README
-
-- KISS
-- in describing text - link to docs/README.md using markdown-refs
-- Sequence could be:
-  - What is SFC?
-    - How does it fit into IDF & UNS patterns
-  - How can I run it locally to test out things? (for HellowWorld use sfc artifacts from here: <https://dyy8lqvmsyeqk.cloudfront.net/>)
-    - show off mock-up data sources like opcua/plcsim and pipe to IoT Core & Sitewise
-    - create catchy screen-capture gifs showing sources & target raw data streams
-  - How can I configure it?
-  - How can I deploy it using Greengrass deployments?
-  - How can I build it?
-  - How can I write my own adapters?
-
 ## Introduction
 
 Shop Floor Connectivity (SFC) is a data ingestion technology that can deliver data to multiple AWS Services.
@@ -58,19 +43,13 @@ In this Quick start you will set up following architecture. The local SFC instal
 At first we have to download and extract the SFC bundles. These are precompiled executeables to get started quickly:
 
 ```shell
-# Define sfc Version
-```
-
-```shell
+# Define sfc version and directory
 export VERSION="1.0.0"
 export SFC_DEPLOYMENT_DIR="./sfc"
 ```
 
 ```shell
 # Download and extract bundles into folder ./sfc
-```
-
-```shell
 mkdir $SFC_DEPLOYMENT_DIR && cd $SFC_DEPLOYMENT_DIR
 wget https://dyy8lqvmsyeqk.cloudfront.net/55b40a6/bundle/sfc-$VERSION.zip && unzip sfc-$VERSION.zip
 rm sfc-$VERSION.zip
@@ -106,9 +85,7 @@ Next we will have to configure the SFC. This is done via a configuration file yo
   <summary>Expand</summary>
 
 ```shell
-
-
-cat << EOF > example.json
+cat << EOF > $SFC_DEPLOYMENT_DIR/example.json
   {
     "AWSVersion": "2022-04-02",
     "Name": "OPCUA to S3, using in process source and targets",
@@ -250,11 +227,19 @@ With everything being set up you can start the OPC UA server and the SFC itself:
 docker run -d -p 4840:4840 ghcr.io/umati/sample-server:main
 
 # run sfc
-sfc/sfc-main/bin/sfc-main -config sfc/example.json -info
+sfc/sfc-main/bin/sfc-main -config sfc/example.json
 ```
 
-TODO: Run log
+### Run Output
 
-TODO: S3 json jq record abfragen
+The output of your Quick Start SFC run should look like the following. You can also check your S3 bucket (e.g. the first entry of your first file) with the following command:
 
-TODO: gif recording
+```shell
+# gets a list of entries in your bucket and filters it to the first file with jq
+export KEY=$(aws s3api list-objects --bucket $SFC_S3_BUCKET_NAME | jq -r '.Contents[0].Key')
+
+# downloads and prints the first entry of this file into your console
+aws s3 cp s3://$SFC_S3_BUCKET_NAME/$KEY - | jq '.[0]'
+```
+
+![SFC-Demo Run](./docs/img/SFC-Demo.gif)
