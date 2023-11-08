@@ -43,8 +43,14 @@ There are three main type of components that make up SFC.
 ### Requirements
 
 - Docker
+<<<<<<< Updated upstream
 - AWS cli
 - java Runtime
+=======
+- Java runtime
+- AWS CLI
+- AWS CLI [Credentials Configuration](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html#configure-precedence)
+>>>>>>> Stashed changes
 
 ### Installation
 
@@ -58,10 +64,26 @@ At first we have to download and extract the SFC bundles. These are precompiled 
 
 ```shell
 # Define sfc Version
+<<<<<<< Updated upstream
 export VERSION="1.0.0"
 
 # Download and extract bundles
 mkdir sfc && cd sfc
+=======
+```
+
+```shell
+export VERSION="1.0.0"
+export SFC_DEPLOYMENT_DIR="./sfc"
+```
+
+```shell
+# Download and extract bundles into folder ./sfc
+```
+
+```shell
+mkdir $SFC_DEPLOYMENT_DIR && cd $SFC_DEPLOYMENT_DIR
+>>>>>>> Stashed changes
 wget https://dyy8lqvmsyeqk.cloudfront.net/55b40a6/bundle/sfc-$VERSION.zip && unzip sfc-$VERSION.zip
 rm sfc-$VERSION.zip
 
@@ -69,10 +91,15 @@ for file in *.tar.gz; do
   tar -xf "$file"
   rm "$file"
 done
+<<<<<<< Updated upstream
+=======
+cd -
+>>>>>>> Stashed changes
 ```
 
 ### Deploy, Configure, Run
 
+<<<<<<< Updated upstream
 At first we will define the Region the Account and the bucket name we want to send the data to:
 
 ```shell
@@ -81,6 +108,16 @@ export AWS_REGION="us-east-1"
 export ACCOUNT_ID=$(aws sts get-caller-identity --query "Account" --output text)
 export SFC_S3_BUCKET_NAME="sfc-s3-bucket-${ACCOUNT_ID}"
 export SFC_DEPLOYMENT_DIR=sfc
+=======
+Next we will define the installation directory, the AWS region, the AWS account and the bucket name we want to send the data to:
+
+```shell
+# define configuration values
+export SFC_DEPLOYMENT_DIR="./sfc"
+export AWS_REGION="us-east-1"
+export ACCOUNT_ID=$(aws sts get-caller-identity --query "Account" --output text)
+export SFC_S3_BUCKET_NAME="sfc-s3-bucket-${AWS_REGION}-${ACCOUNT_ID}"
+>>>>>>> Stashed changes
 ```
 
 If you do not have a S3 bucket yet, you will have to create one:
@@ -239,5 +276,16 @@ With everything being set up you can start the OPC UA server and the SFC itself:
 docker run -d -p 4840:4840 ghcr.io/umati/sample-server:main
 
 # run sfc
+<<<<<<< Updated upstream
 sfc-main/bin/sfc-main -config example.json -info
 ```
+=======
+sfc/sfc-main/bin/sfc-main -config sfc/example.json -info
+```
+
+TODO: Run log
+
+TODO: S3 json jq record abfragen
+
+TODO: gif recording
+>>>>>>> Stashed changes
