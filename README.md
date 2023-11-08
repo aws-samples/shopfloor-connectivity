@@ -1,29 +1,40 @@
-# Shopfloor Connectivity Framework (SFC)
+# Shop Floor Connectivity (SFC) Framework
 
 ## Introduction
 
 Shop Floor Connectivity (SFC) is a data ingestion technology that can deliver data to multiple AWS Services.
 
-SFC addresses limitations of, and unifies data collection of our existing IoT data collection services, allowing customers to collect data in a consistent way to any AWS Service, not just the AWS IoT Services, that can collect and process data. It allows customers to collect data from their industrial equipment and deliver it the AWS services that work best for their requirements. Customers get the cost and functional benefits of specific AWS services and save costs on licenses for additional connectivity products.
+SFC extends and unifies data collection capabilities additionally to our existing IIoT data collection services, allowing customers to provide data in a consistent way to a wide range of AWS Services. It allows customers to collect data from their industrial equipment and deliver it to the AWS services that work best for their requirements. Customers get the cost and functional benefits of specific AWS services and save costs on licenses for additional connectivity products.
+
+<p align="center">
+  <img src="./docs/img/SFC-Demo.gif" width="75%"/>
+</p>
+
 
 ### SFC Components
 
 There are three main type of components that make up SFC.
 
-- Protocol Adapters
-- SFC Core
-- Target Adapters
+- `Protocol Adapters`
+- `SFC Core`
+- `Target Adapters`
 
 <p align="center">
   <img src="docs/img/fig01.png" width="75%"/>
 </p>
-<p align="center">
-    <em>Fig. 1. SFC components</em>
-</p>
 
-[Read more](docs/README.md/#introduction)
+&nbsp; 
 
-## Quick start - With SFC Bundles
+**[SFC `Docs`](./docs/README.md#introduction) 
+++ [SFC `Examples`](./examples) 
+++ [Protocol Connectors](./docs/README.md#running-the-jvm-protocol-adapters-as-an-ipc-service) 
+++ [AWS Service Targets](./docs/README.md#running-targets-as-an-ipc-service) 
+++ [SFC-Builds](https://dyy8lqvmsyeqk.cloudfront.net/) 
+++ [SFC-Releases](https://github.com/aws-samples/shopfloor-connectivity/releases)**
+
+---
+
+## Quick start - With SFC Binaries
 
 ### Requirements
 
@@ -51,7 +62,7 @@ export SFC_DEPLOYMENT_DIR="./sfc"
 ```shell
 # Download and extract bundles into folder ./sfc
 mkdir $SFC_DEPLOYMENT_DIR && cd $SFC_DEPLOYMENT_DIR
-wget https://dyy8lqvmsyeqk.cloudfront.net/55b40a6/bundle/sfc-$VERSION.zip && unzip sfc-$VERSION.zip
+wget https://dyy8lqvmsyeqk.cloudfront.net/60a1ddd/bundle/sfc-$VERSION.zip && unzip sfc-$VERSION.zip
 rm sfc-$VERSION.zip
 
 for file in *.tar.gz; do
