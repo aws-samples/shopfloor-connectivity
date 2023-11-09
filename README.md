@@ -11,9 +11,9 @@ SFC extends and unifies data collection capabilities additionally to our existin
   <img src="./docs/img/SFC-Demo.gif" width="75%"/>
 </p>
 
-#### <code style="background-color:cyan; color:black">Supported protocols:</code> `Siemens S7`, `Rockwell PCCC`, `OPC-UA`, `MQTT`, `SQL`,` Modbus-TCP`
+**Supported protocols:** `Siemens S7`, `Rockwell PCCC`, `OPC-UA`, `MQTT`, `SQL`,` Modbus-TCP`
 
-#### <code style="background-color:cyan; color:black">Supported AWS targets:</code> `IoT Core HTTP`, `IoT Core MQTT`, `Sitewise`, `IoT Analytics`, `Kinesis`, `Firehose`, `Lambda`, `S3`, `SNS`, `SQS`, `Timestream`
+**Supported AWS targets:** `IoT Core HTTP`, `IoT Core MQTT`, `Sitewise`, `IoT Analytics`, `Kinesis`, `Firehose`, `Lambda`, `S3`, `SNS`, `SQS`, `Timestream`
 
 ### [<code style="background-color:cyan; color:black">SFC Docs</code>](./docs/README.md) ++ [<code style="background-color:cyan; color:black">Greengrass Deployment</code>](./deployment/greengrass-sfc-components/release-version-as-components-cdk/README.md) ++ [<code style="background-color:cyan; color:black">Greengrass Lab</code>](./examples/greengrass-in-process/README.md) ++ [<code style="background-color:cyan; color:black">Siemens S7 sample</code>](./examples/in-process-s7-sitewise/README.md)++ [<code style="background-color:cyan; color:black">Rockwell PCCC sample</code>](./examples/in-process-pccc-s3/README.md)
 
