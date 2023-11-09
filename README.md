@@ -1,4 +1,5 @@
-# Shop Floor Connectivity (SFC) Framework
+Shop Floor Connectivity (SFC) Framework
+=======================================
 
 ## Introduction
 
@@ -11,11 +12,10 @@ SFC extends and unifies data collection capabilities additionally to our existin
 </p>
 
 
-[<code style="background-color:cyan; color:black">SFC Docs</code>](./docs/README.md) 
-++ [<code style="background-color:cyan; color:black">Greengrass Deployment</code>](./deployment/greengrass-sfc-components/release-version-as-components-cdk/README.md) 
-++ [<code style="background-color:cyan; color:black">Greengrass Lab</code>](./examples/greengrass-in-process/README.md) 
-++ [<code style="background-color:cyan; color:black">Siemens S7 sample</code>](./examples/in-process-s7-sitewise/README.md)
-++ [<code style="background-color:cyan; color:black">Rockwell PCCC sample</code>](./examples/in-process-pccc-s3/README.md)
+### [<code style="background-color:cyan; color:black">SFC Docs</code>](./docs/README.md) ++ [<code style="background-color:cyan; color:black">Greengrass Deployment</code>](./deployment/greengrass-sfc-components/release-version-as-components-cdk/README.md) ++ [<code style="background-color:cyan; color:black">Greengrass Lab</code>](./examples/greengrass-in-process/README.md) ++ [<code style="background-color:cyan; color:black">Siemens S7 sample</code>](./examples/in-process-s7-sitewise/README.md)++ [<code style="background-color:cyan; color:black">Rockwell PCCC sample</code>](./examples/in-process-pccc-s3/README.md)
+
+&nbsp;
+&nbsp; 
 
 ### SFC Components
 
