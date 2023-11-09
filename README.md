@@ -11,6 +11,12 @@ SFC extends and unifies data collection capabilities additionally to our existin
 </p>
 
 
+[<code style="background-color:cyan; color:black">SFC Docs</code>](./docs/README.md) 
+++ [<code style="background-color:cyan; color:black">Greengrass Deployment</code>](./deployment/greengrass-sfc-components/release-version-as-components-cdk/README.md) 
+++ [<code style="background-color:cyan; color:black">Greengrass Lab</code>](./examples/greengrass-in-process/README.md) 
+++ [<code style="background-color:cyan; color:black">Siemens S7 sample</code>](./examples/in-process-s7-sitewise/README.md)
+++ [<code style="background-color:cyan; color:black">Rockwell PCCC sample</code>](./examples/in-process-pccc-s3/README.md)
+
 ### SFC Components
 
 There are three main type of components that make up SFC.
@@ -25,14 +31,6 @@ There are three main type of components that make up SFC.
 
 &nbsp; 
 
-**[SFC `Docs`](./docs/README.md#introduction) 
-++ [SFC `Examples`](./examples) 
-++ [Protocol Connectors](./docs/README.md#running-the-jvm-protocol-adapters-as-an-ipc-service) 
-++ [AWS Service Targets](./docs/README.md#running-targets-as-an-ipc-service) 
-++ [SFC-Builds](https://dyy8lqvmsyeqk.cloudfront.net/) 
-++ [SFC-Releases](https://github.com/aws-samples/shopfloor-connectivity/releases)**
-
----
 
 ## Quick start - With SFC Binaries
 
