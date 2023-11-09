@@ -32,6 +32,10 @@ There are three main type of components that make up SFC.
   <img src="docs/img/fig01.png" width="75%"/>
 </p>
 
+&nbsp;
+
+Read more in the [`SFC docs`](./docs/README.md)
+
 &nbsp; 
 
 
