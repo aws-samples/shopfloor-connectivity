@@ -40,7 +40,7 @@ export class GreengrassSfcComponentsStack extends cdk.Stack {
             "SFC_COMPONENT_VERSION": "1.0.0",
             "SFC_COMPONENT_BUCKET": componentBucket.bucketName,
             "SFC_COMPONENT_PREFIX": "1.0.0",
-            "SFC_LATEST_RELEASE_BUNDLE_URI": "https://dyy8lqvmsyeqk.cloudfront.net/efb9866/bundle/sfc-1.0.0.zip",
+            "SFC_LATEST_RELEASE_BUNDLE_URI": "https://dyy8lqvmsyeqk.cloudfront.net/3fe22e8/bundle/sfc-1.0.0.zip",
             "SFC_LATEST_RELEASE_BUNDLE_NAME": "sfc-1.0.0.zip"
           }
         },

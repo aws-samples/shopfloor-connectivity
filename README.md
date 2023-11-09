@@ -11,6 +11,9 @@ SFC extends and unifies data collection capabilities additionally to our existin
   <img src="./docs/img/SFC-Demo.gif" width="75%"/>
 </p>
 
+#### <code style="background-color:cyan; color:black">Supported protocols:</code> `Siemens S7`, `Rockwell PCCC`, `OPC-UA`, `MQTT`, `SQL`,` Modbus-TCP`
+
+#### <code style="background-color:cyan; color:black">Supported AWS targets:</code> `IoT Core HTTP`, `IoT Core MQTT`, `Sitewise`, `IoT Analytics`, `Kinesis`, `Firehose`, `Lambda`, `S3`, `SNS`, `SQS`, `Timestream`
 
 ### [<code style="background-color:cyan; color:black">SFC Docs</code>](./docs/README.md) ++ [<code style="background-color:cyan; color:black">Greengrass Deployment</code>](./deployment/greengrass-sfc-components/release-version-as-components-cdk/README.md) ++ [<code style="background-color:cyan; color:black">Greengrass Lab</code>](./examples/greengrass-in-process/README.md) ++ [<code style="background-color:cyan; color:black">Siemens S7 sample</code>](./examples/in-process-s7-sitewise/README.md)++ [<code style="background-color:cyan; color:black">Rockwell PCCC sample</code>](./examples/in-process-pccc-s3/README.md)
 
@@ -60,7 +63,7 @@ export SFC_DEPLOYMENT_DIR="./sfc"
 ```shell
 # Download and extract bundles into folder ./sfc
 mkdir $SFC_DEPLOYMENT_DIR && cd $SFC_DEPLOYMENT_DIR
-wget https://dyy8lqvmsyeqk.cloudfront.net/60a1ddd/bundle/sfc-$VERSION.zip && unzip sfc-$VERSION.zip
+wget https://dyy8lqvmsyeqk.cloudfront.net/3fe22e8/bundle/sfc-$VERSION.zip && unzip sfc-$VERSION.zip
 rm sfc-$VERSION.zip
 
 for file in *.tar.gz; do
@@ -90,6 +93,7 @@ aws s3api create-bucket --bucket ${SFC_S3_BUCKET_NAME} --region ${AWS_REGION}
 ```
 
 Next we will have to configure the SFC. This is done via a configuration file you can specify at execution time (e.g. `sfc-main -config example.json`) We are first defining following variables which we will then use in a example configuration file. The following configuration sets SFC up, to connect to a OPCUA-Server and forward it to the S3 Bucket in your AWS Account:
+> Note: Please expand the section below, the see the json config...
 <details>
   <summary><b>Expand</b></summary>
 
