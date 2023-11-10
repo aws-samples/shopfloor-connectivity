@@ -55,15 +55,15 @@ At first we have to download and extract the SFC bundles. These are precompiled 
 
 ```shell
 # Define sfc version and directory
-export VERSION="1.0.0"
+export VERSION="1.0.1"
 export SFC_DEPLOYMENT_DIR="./sfc"
 ```
 
 ```shell
 # Download and extract bundles into folder ./sfc
 mkdir $SFC_DEPLOYMENT_DIR && cd $SFC_DEPLOYMENT_DIR
-wget https://dyy8lqvmsyeqk.cloudfront.net/3fe22e8/bundle/sfc-$VERSION.zip && unzip sfc-$VERSION.zip
-rm sfc-$VERSION.zip
+wget https://github.com/aws-samples/shopfloor-connectivity/releases/download/v$VERSION/\
+{aws-s3-target,debug-target,opcua,sfc-main}.tar.gz
 
 for file in *.tar.gz; do
   tar -xf "$file"

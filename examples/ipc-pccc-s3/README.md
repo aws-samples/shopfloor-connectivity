@@ -41,7 +41,7 @@ Startup commands for Linux deployments. When running from the console use termin
 
 **Starting the PCCC adapter service**
 
-```
+```bash
 $ pccc/bin/pccc -port 50001
 
 2023-11-10 17:03:17.814 INFO - Created instance of service IpcAdapterService
@@ -50,7 +50,7 @@ $ pccc/bin/pccc -port 50001
 ```
 &nbsp;
 **Starting the S3 Target service**
-```
+```bash
 $aws-s3-target/bin/aws-s3-target -port 50002
 2023-11-10 17:05:40.811 INFO - Created instance of service IpcTargetServer
 2023-11-10 17:05:40.812 INFO - Running service instance
@@ -59,7 +59,7 @@ $aws-s3-target/bin/aws-s3-target -port 50002
 &nbsp;
 **Starting the (optional) Debug target service**
 
-```
+```bash
 $ debug-target/bin/debug-target -port 500032023-11-10 17:08:00.866 INFO - Created instance of service IpcTargetServer
 2023-11-10 17:08:00.867 INFO - Running service instance
 2023-11-10 17:08:01.307 INFO - Target IPC service started, listening on 192.168.1.65:50003, connection type is PlainText
@@ -67,7 +67,7 @@ $ debug-target/bin/debug-target -port 500032023-11-10 17:08:00.866 INFO - Create
 &nbsp;
 **Starting the sfc-main service**
 
-```
+```bash
 $ sfc-main/bin/sfc-main -config ipc-pccc-s3/pccc.json
 2023-11-10 17:22:48.230 INFO - Creating configuration provider of type ConfigProvider
 2023-11-10 17:22:48.246 INFO - Waiting for configuration
