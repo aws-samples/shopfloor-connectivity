@@ -8,7 +8,7 @@ This configuration uses a deployment where each module runs as a service in an i
 
 -   Run just the adapters on edge devices with limited capacity
 
--   Distribute components in different networks, e.g., adapters in the OT network, sfc-core in in network and targets which need internet connectivity in the IT network or DMZ.
+-   Distribute components in different networks, e.g., adapters in the OT network, sfc-core in network and targets which need internet connectivity in the IT network or DMZ.
 
 In order to use the configuration, make the changes describer below, and use it as the value of the –config parameter when starting sfc-main.
 
