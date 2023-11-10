@@ -5,7 +5,7 @@
 
 package com.amazonaws.sfc.debugtarget
 
-import com.amazonaws.sfc.awsdebugtarget.BuildConfig
+import com.amazonaws.sfc.debugtarget.BuildConfig
 import com.amazonaws.sfc.config.ConfigReader
 import com.amazonaws.sfc.config.TargetConfiguration
 import com.amazonaws.sfc.data.*

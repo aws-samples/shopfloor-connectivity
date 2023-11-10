@@ -9,7 +9,7 @@ import java.time.LocalDate
 group = "com.amazonaws.sfc"
 version = "1.0.0"
 
-val module = "awsdebugtarget"
+val module = "debugtarget"
 val sfcCoreVersion = "1.0.0"
 val sfcIpcVersion = "1.0.0"
 val kotlinCoroutinesVersion = "1.6.2"

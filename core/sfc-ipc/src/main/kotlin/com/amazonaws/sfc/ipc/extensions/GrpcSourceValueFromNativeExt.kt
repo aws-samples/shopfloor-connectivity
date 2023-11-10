@@ -735,7 +735,7 @@ object GrpcSourceValueFromNativeExt {
         val replyBytes = readValuesReply.toByteArray()
         val compressedStream = ByteArrayOutputStream()
 
-        GzipCompression.compress(replyBytes.inputStream(), compressedStream)
+        ZipCompression.compress(replyBytes.inputStream(), compressedStream, entryName = "ReadValuesReply")
         return ReadValuesReply.newBuilder()
             .setCompressed(ByteString.readFrom(compressedStream.toByteArray().inputStream()))
             .build()
