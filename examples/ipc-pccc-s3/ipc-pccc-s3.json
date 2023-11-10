@@ -40,17 +40,14 @@
         },
         "OUTPUT-SINGLE-BIT-0": {
           "Address": "O0:0/0",
-          "Name": "OUTPUT-O0:0/1",
           "Description": "First output bit"
         },
         "OUTPUT-SINGLE-BIT-15": {
           "Address": "O0:0/15",
-          "Name": "OUTPUT-O0:0/15",
           "Description": "Fifteenth output bit"
         },
         "INPUT-FIRST-16-BITS": {
           "Address": "I1:0",
-          "Name": "INPUT-O0:0",
           "Description": "First 16 input bit in logical order"
         },
         "INPUT1-FIRST-16-BITS-INDEX": {
@@ -60,7 +57,6 @@
         },
         "INPUT-SINGLE-BIT-0": {
           "Address": "I1:0/0",
-          "Name": "INPUT-I1:0/1",
           "Description": "First input bit"
         },
         "INPUT1-SINGLE-BIT-15": {
