@@ -8,55 +8,50 @@ Shop Floor Connectivity (SFC) is a data ingestion technology that can deliver da
 SFC extends and unifies data collection capabilities additionally to our existing IIoT data collection services, allowing customers to provide data in a consistent way to a wide range of AWS Services. It allows customers to collect data from their industrial equipment and deliver it to the AWS services that work best for their requirements. Customers get the cost and functional benefits of specific AWS services and save costs on licenses for additional connectivity products.
 
 <p align="center">
-  <img src="./docs/img/SFC-Demo.gif" width="75%"/>
+  <img src="./docs/img/s7-iot-core-mqtt.gif" width="75%"/>
 </p>
 
 **Supported protocols:** `Siemens S7`, `Rockwell PCCC`, `OPC-UA`, `MQTT`, `SQL`,` Modbus-TCP`
 
 **Supported AWS targets:** `IoT Core HTTP`, `IoT Core MQTT`, `Sitewise`, `IoT Analytics`, `Kinesis`, `Firehose`, `Lambda`, `S3`, `SNS`, `SQS`, `Timestream`
 
-### [<code style="background-color:cyan; color:black">SFC Docs</code>](./docs/README.md) ++ [<code style="background-color:cyan; color:black">Greengrass Deployment</code>](./deployment/greengrass-sfc-components/release-version-as-components-cdk/README.md) ++ [<code style="background-color:cyan; color:black">Greengrass Lab</code>](./examples/greengrass-in-process/README.md) ++ [<code style="background-color:cyan; color:black">Siemens S7 sample</code>](./examples/in-process-s7-sitewise/README.md)++ [<code style="background-color:cyan; color:black">Rockwell PCCC sample</code>](./examples/in-process-pccc-s3/README.md)
+### [<code style="background-color:cyan; color:black">SFC Docs</code>](./docs/README.md) ++ [<code style="background-color:cyan; color:black">Greengrass Deployment</code>](./deployment/greengrass-sfc-components/release-version-as-components-cdk/README.md) ++ [<code style="background-color:cyan; color:black">Greengrass Lab</code>](./examples/greengrass-in-process/README.md) ++ [<code style="background-color:cyan; color:black">Siemens S7 sample</code>](./examples/in-process-s7-sitewise/README.md) ++ [<code style="background-color:cyan; color:black">Rockwell PCCC sample</code>](./examples/in-process-pccc-s3/README.md) ++ [<code style="background-color:cyan; color:black">Quickstart</code>](#quickstart-example)
 
+---
 &nbsp;
-&nbsp; 
 
 ### SFC Components
 
-There are three main type of components that make up SFC.
+There are three main types of components that make up SFC:
 
 - `Protocol Adapters`
 - `SFC Core`
 - `Target Adapters`
 
+Shop Floor Connectivity (SFC) is a versatile data ingestion solution that can be deployed in a variety of environments, including standalone applications, Docker containers, and Kubernetes pods. With no additional requirements beyond a Java JVM 1.8 runtime, SFC can be deployed on Linux and Windows systems. To optimize hardware utilization, SFC uses parallel and non-blocking async patterns in its software.
+
+SFC protocol and target adapters can be implemented as a JVM component or as an external microservices using the gRPC protocol for communication. When running as stand-alone services, protocol adapters can be deployed on separate machines from the SFC Core process, with secure communication facilitated by gRPC (`IPC-mode`). The SFC Core provides a consistent infrastructure allowing all JVM based protocol and target adapters to run in the same process as the SFC Core (`In-Process mode`).
+
+Distributed deployment using microservices is required to deploy in environments that use segregated OT and IT networks, with components connected to devices, protocol adapters, deployed in the OT network and components requiring internet access, targets adapters, in a DMZ.
+
+The SFC core will provide the services, protocol and target adapters, with the required configuration after these are bootstrapped, providing a single, monitored and consistent source and location of configuration.
+
 <p align="center">
-  <img src="docs/img/fig01.png" width="75%"/>
+  <img src="docs/img/fig02.png" width="75%"/>
 </p>
 
-&nbsp;
-
-Read more in the [`SFC docs`](./docs/README.md)
-
-&nbsp; 
+>Read more in the [`SFC docs`](./docs/README.md)
 
 
-## Quick start - With SFC Binaries
+## Quickstart Example
 
-### Requirements
-
-- Docker
-- Java runtime
-- AWS CLI
-- AWS CLI [Credentials Configuration](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html#configure-precedence)
+>**Requirements**: Docker, Java runtime, aws cli [Credentials Configuration](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html#configure-precedence)
 
 ### Installation
 
-In this Quick start you will set up following architecture. The local SFC installation will receive data from an OPC UA server and send it according to its' configuration to an S3 Bucket:
+In this Quick start you will set up following architecture: A local SFC installation will receive data from an OPC-UA server and send it according to its' configuration to an S3 Bucket. *As a side note here: SFC can deal with more industrial protocols - [have a look at the docs here!](./docs/README.md#running-the-jvm-protocol-adapters-as-an-ipc-service)*
 
-<p align="center">
-  <img src="./docs/img/example.svg" />
-</p>
-
-At first we have to download and extract the SFC bundles. These are precompiled executeables to get started quickly:
+At first we have to download and extract the SFC bundles. These are precompiled executables to get started quickly:
 
 ```shell
 # Define sfc version and directory
@@ -97,7 +92,7 @@ aws s3api create-bucket --bucket ${SFC_S3_BUCKET_NAME} --region ${AWS_REGION}
 ```
 
 Next we will have to configure the SFC. This is done via a configuration file you can specify at execution time (e.g. `sfc-main -config example.json`) We are first defining following variables which we will then use in a example configuration file. The following configuration sets SFC up, to connect to a OPCUA-Server and forward it to the S3 Bucket in your AWS Account:
-> Note: Please expand the section below, the see the json config...
+> Note: **Please** expand the section below, the see the json config...
 <details>
   <summary><b>Expand</b></summary>
 
