@@ -1,4 +1,4 @@
-# SFC Example IPC configuration for Rockwell PCCC to Amazon 
+# SFC Example IPC configuration for Rockwell PCCC to Amazon S3
 
 The file in-process-pccc-s3.json file contains an example template for reading data from a Rockwell controller using PCCC over EthernetIP and sending the data to an S3 bucket.
 
@@ -28,13 +28,16 @@ When the adapter and target services are started the services will listen on the
 
 Startup commands for Linux deployments. When running from the console use terminal session for every service or run the servers as Docker containers.
 
--   \<path to PCCC adapter deployment\>/bin/pccc -port 50001
+-   <path to PCCC adapter deployment>/bin/pccc -port 50001
 
--   \<path to S3 target deployment\>/bin/aws-s3-target -port 50002
+-   <path to S3 target deployment>/bin/aws-s3-target -port 50002
 
--   \<path to debug target deployment\>/bin/debug-target -port 50003
+-   <path to debug target deployment>/bin/debug-target -port 50003
 
--   \<path to sfc-main deployment\>/bin/sfc-main -config \<path to config file\>
+-   <path to sfc-main deployment>/bin/sfc-main -config <path to config file>
+
+&nbsp;  
+
 
 **Starting the PCCC adapter service**
 
@@ -45,7 +48,7 @@ $ pccc/bin/pccc -port 50001
 2023-11-10 17:03:17.815 INFO - Running service instance
 2023-11-10 17:03:18.264 INFO - IPC protocol service started, listening on 192.168.1.65:50001, connection type is PlainText
 ```
-
+&nbsp;
 **Starting the S3 Target service**
 ```
 $aws-s3-target/bin/aws-s3-target -port 50002
@@ -53,7 +56,7 @@ $aws-s3-target/bin/aws-s3-target -port 50002
 2023-11-10 17:05:40.812 INFO - Running service instance
 2023-11-10 17:05:41.417 INFO - Target IPC service started, listening on 192.168.1.65:50002, connection type is PlainText
 ```
-
+&nbsp;
 **Starting the (optional) Debug target service**
 
 ```
@@ -61,7 +64,7 @@ $ debug-target/bin/debug-target -port 500032023-11-10 17:08:00.866 INFO - Create
 2023-11-10 17:08:00.867 INFO - Running service instance
 2023-11-10 17:08:01.307 INFO - Target IPC service started, listening on 192.168.1.65:50003, connection type is PlainText
 ```
-
+&nbsp;
 **Starting the sfc-main service**
 
 ```
@@ -106,8 +109,8 @@ In the AdapterServers section the address (localhost or address of other system)
 ```json
  "AdapterServers": {  
      "PcccAdapterServer": {  
-         "Address": \<IP ADDRESS OF SERVICE\>  
-         "Port": \<PORT FOR SERVICE\>  
+         "Address": <IP ADDRESS OF SERVICE>  
+         "Port": <PORT FOR SERVICE>  
      }  
  },
 ```
@@ -157,11 +160,9 @@ In order to write the data to both the S3 bucket as well as the console uncommen
 }
 ```
 
--   \<YOUR-REGION\>, your region e.g., eu-west-1
-
--   \<YOUR-BUCKET-NAME\>, bucket name to store data
-
--   \<OPTIONAL PREFIX TO USE IN BUCKET\>\", Optional prefix for data in
+-   <YOUR-REGION>, your region e.g., eu-west-1
+-   <YOUR-BUCKET-NAME>, bucket name to store data
+-    < OPTIONAL PREFIX TO USE IN BUCKET>, Optional prefix for data in
     the bucket
 
 The `S3Target` is set up to write data to the specified bucket once every
@@ -196,8 +197,7 @@ include a setting "Name" for the channel.
     "AdapterType": "PCCC",
     "Controllers": {
       "MicroLogix1400": {
-        "Address": "<CONTROLLER IP ADDRESS>",
-        "OptimizeReads": true
+        "Address": "<CONTROLLER IP ADDRESS>"
       }
     }
   }
@@ -205,7 +205,7 @@ include a setting "Name" for the channel.
 
 ```
 
--   \<CONTROLLER IP ADDRESS\>, IP address of the controller
+-   <CONTROLLER IP ADDRESS>, IP address of the controller
 
 This section configures the controller from which the data is read. The
 default port 44818 is used which can be changed by Including a Port
