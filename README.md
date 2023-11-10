@@ -55,7 +55,7 @@ At first we have to download and extract the SFC bundles. These are precompiled 
 
 ```shell
 # Define sfc version and directory
-export VERSION="1.0.1"
+export VERSION="1.0.2"
 export SFC_DEPLOYMENT_DIR="./sfc"
 ```
 
