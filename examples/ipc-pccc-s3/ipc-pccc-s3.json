@@ -52,7 +52,6 @@
         },
         "INPUT1-FIRST-16-BITS-INDEX": {
           "Address": "I1:0.1",
-          "Name": "INPUT-I1:0.0",
           "Description": "First 16 input bit in logical order, using an index which is a 'row' of 16 bits"
         },
         "INPUT-SINGLE-BIT-0": {
@@ -213,7 +212,6 @@
         },
         "STRING-SECOND-VALUE": {
           "Address": "ST9:1",
-          "Name": "STRING-ST9:1",
           "Description": "Second string value, CREATE DATAFILE ST9  ON CONTROLLER WITH AT LEAST 2 ELEMENTS"
         },
         "LONG-FIRST-VALUE": {
