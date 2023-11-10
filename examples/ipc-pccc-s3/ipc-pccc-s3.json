@@ -1,7 +1,7 @@
 {
   "AWSVersion": "2022-04-02",
-  "Name": "Rockwell PCCC to Amazon S3 in process",
-  "Description" : "Example of in process SFC config file to read data from Rockwell controller and send it to an S3 bucket",
+  "Name": "Rockwell PCCC to Amazon S3 in IPC",
+  "Description": "Example of in process SFC config file to read data from Rockwell controller and send it to an S3 bucket",
   "Schedules": [
     {
       "Name": "PCCC-DATA",
@@ -40,10 +40,12 @@
         },
         "OUTPUT-SINGLE-BIT-0": {
           "Address": "O0:0/0",
+          "Name": "OUTPUT-O0:0/1",
           "Description": "First output bit"
         },
         "OUTPUT-SINGLE-BIT-15": {
           "Address": "O0:0/15",
+          "Name": "OUTPUT-O0:0/15",
           "Description": "Fifteenth output bit"
         },
         "INPUT-FIRST-16-BITS": {
@@ -53,10 +55,12 @@
         },
         "INPUT1-FIRST-16-BITS-INDEX": {
           "Address": "I1:0.1",
+          "Name": "INPUT-I1:0.0",
           "Description": "First 16 input bit in logical order, using an index which is a 'row' of 16 bits"
         },
         "INPUT-SINGLE-BIT-0": {
           "Address": "I1:0/0",
+          "Name": "INPUT-I1:0/1",
           "Description": "First input bit"
         },
         "INPUT1-SINGLE-BIT-15": {
@@ -64,6 +68,7 @@
           "Description": "Fifteenth input bit"
         },
         "BINARY-FIRST-16-BITS": {
+          "Address": "B3:0",
           "Description": "First 16 binary bits in logical order"
         },
         "BINARY-SINGLE-BIT-0": {
@@ -256,9 +261,11 @@
   },
   "Targets": {
     "DebugTarget": {
+      "TargetServer" : "DebugTargetServer",
       "TargetType": "DEBUG-TARGET"
     },
     "S3Target": {
+      "TargetServer" : "S3TargetServer",
       "Active": true,
       "TargetType": "AWS-S3",
       "Region": "<YOUR-REGION>",
@@ -270,36 +277,31 @@
       "Compression": "Zip"
     }
   },
-  "AdapterTypes": {
-    "PCCC": {
-      "JarFiles": [
-        "${SFC_DEPLOYMENT_DIR}/pccc/lib"
-      ],
-      "FactoryClassName": "com.amazonaws.sfc.pccc.PcccAdapter"
-    }
-  },
-  "TargetTypes": {
-    "DEBUG-TARGET": {
-      "JarFiles": [
-        "${SFC_DEPLOYMENT_DIR}/debug-target/lib"
-      ],
-      "FactoryClassName": "com.amazonaws.sfc.debugtarget.DebugTargetWriter"
-    },
-    "AWS-S3": {
-      "JarFiles": [
-        "${SFC_DEPLOYMENT_DIR}/aws-s3-target/lib"
-      ],
-      "FactoryClassName": "com.amazonaws.sfc.awss3.AwsS3TargetWriter"
-    }
-  },
   "ProtocolAdapters": {
     "PCCC": {
       "AdapterType": "PCCC",
+      "ProtocolAdapterServer" : "PcccAdapterServer",
       "Controllers": {
         "MicroLogix1400": {
           "Address": "<CONTROLLER IP ADDRESS>",
           "OptimizeReads": true
         }
+      }
+    }
+  },
+  "AdapterServers": {
+    "PcccAdapterServer": {
+      "Address": "<IP ADDRESS FOR PCCC ADAPTER SERVICE>",
+      "Port": < PORT FOR ADAPTER SERVER >
+    },
+    "TargetServers": {
+      "S3TargetServer": {
+        "Address": "<IP ADDRESS for S3 TARGET service>",
+        "Port": < PORT FOR S3 TARGET SERVER >
+      },
+      "DebugTargetServer": {
+        "Address": "localhost",
+        "Port": < PORT FOR DEBUG TARGET SERVER >
       }
     }
   },

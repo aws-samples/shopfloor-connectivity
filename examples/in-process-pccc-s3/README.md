@@ -70,7 +70,7 @@ uncomment the DebugTarget by deleting the'#'.
 -   \<OPTIONAL PREFIX TO USE IN BUCKET\>\", Optional prefix for data in
     the bucket
 
-The `S3Target` is setup to write data to the specified bucket once every
+The `S3Target` is set up to write data to the specified bucket once every
 minute or when the data volume is 1MB in size. Zip Compression is
 enabled to reduce the size of the data which is send to and stored in
 the S3 bucket, remove the "Compression" line or set to "None" to disable
@@ -102,7 +102,7 @@ include a setting "Name" for the channel.
     "Controllers": {
       "MicroLogix1400": {
         "Address": "<CONTROLLER IP ADDRESS>",
-   "OptimizeReads": true,
+        "OptimizeReads": true
 
       }
     }
@@ -137,7 +137,7 @@ a Thing in the AWS IoT service. The role that `RoleAlias` points to, must
 give access to the services used by the target which uses the client.
 
 ```json
-"AwsIotCredentialProviderClients": {
+"AwsIotCredentialProviderClients" : {
   "AwsIotClient": {
     "IotCredentialEndpoint": "<ID>.credentials.iot.<YOUR REGION>.amazonaws.com",
     "RoleAlias": "< ROLE EXCHANGE ALIAS >”,
