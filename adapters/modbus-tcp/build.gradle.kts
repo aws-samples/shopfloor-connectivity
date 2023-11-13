@@ -1,44 +1,31 @@
+// Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: MIT-0
+
 import org.jetbrains.kotlin.util.capitalizeDecapitalize.toUpperCaseAsciiOnly
 import java.nio.file.Path
 import java.time.LocalDate
 
-
-// Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
-// SPDX-License-Identifier: MIT-0
-
-
 group = "com.amazonaws.sfc"
-version = "1.0.0"
+version = rootProject.extra.get("sfc_release")!!
 
 val module = "modbus.tcp"
-val sfcCoreVersion = "1.0.0"
-val sfcIpcVersion = "1.0.0"
-
+val sfcCoreVersion = version
+val sfcIpcVersion = version
 val kotlinCoroutinesVersion = "1.6.2"
 val kotlinVersion = "1.9.0"
-
-
-
 val modbusVersion = "1.0.0"
 
 plugins {
     id("sfc.kotlin-application-conventions")
-
     java
 }
 
 dependencies {
-
     implementation(project(":core:sfc-core"))
     implementation(project(":core:sfc-ipc"))
-
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinCoroutinesVersion")
-
-
-
     api(project(":adapters:modbus"))
-
 }
 
 application {
@@ -64,7 +51,6 @@ tasks.register<Copy>("copyDist") {
 
 task("generateBuildConfig") {
     val version = project.version.toString()
-
     val versionSource = resources.text.fromString(
         """
           |package com.amazonaws.sfc.$module

@@ -1,22 +1,17 @@
-import org.jetbrains.kotlin.util.capitalizeDecapitalize.toUpperCaseAsciiOnly
-import java.time.LocalDate
-
-
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: MIT-0
 
+import org.jetbrains.kotlin.util.capitalizeDecapitalize.toUpperCaseAsciiOnly
+import java.time.LocalDate
 
 group = "com.amazonaws.sfc"
-version = "1.0.0"
+version = rootProject.extra.get("sfc_release")!!
 
-val sfcCoreVersion = "1.0.0"
-val sfcIpcVersion = "1.0.0"
-
+val sfcCoreVersion = version
+val sfcIpcVersion = version
 val module = "mqtt"
 val kotlinCoroutinesVersion = "1.6.2"
 val kotlinVersion = "1.9.0"
-
-
 val reflectionVersion = "1.6.0"
 val jmesPathVersion = "0.5.1"
 val pahoVersion = "1.2.4"
@@ -24,24 +19,18 @@ val gsonVersion = "2.9.0"
 
 plugins {
     id("sfc.kotlin-application-conventions")
-
     java
 }
 
 dependencies {
     implementation(project(":core:sfc-core"))
     implementation(project(":core:sfc-ipc"))
-
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinCoroutinesVersion")
     implementation("org.jetbrains.kotlin:kotlin-reflect:$reflectionVersion")
-
     implementation("org.eclipse.paho:org.eclipse.paho.client.mqttv3:$pahoVersion")
-
     implementation("com.google.code.gson:gson:$gsonVersion")
-
     implementation("io.burt:jmespath-core:$jmesPathVersion")
-
 }
 
 application {

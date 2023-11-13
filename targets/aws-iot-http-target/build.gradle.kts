@@ -1,21 +1,18 @@
-import org.jetbrains.kotlin.util.capitalizeDecapitalize.toUpperCaseAsciiOnly
-import java.time.LocalDate
-
-
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: MIT-0
 
+import org.jetbrains.kotlin.util.capitalizeDecapitalize.toUpperCaseAsciiOnly
+import java.time.LocalDate
 
 group = "com.amazonaws.sfc"
-version = "1.0.0"
-
+version = rootProject.extra.get("sfc_release")!!
 val module = "awsiot.http"
 val kotlinCoroutinesVersion = "1.6.2"
 val kotlinVersion = "1.9.0"
 
 
-val sfcCoreVersion = "1.0.0"
-val sfcIpcVersion = "1.0.0"
+val sfcCoreVersion = version
+val sfcIpcVersion = version
 val awsServicesVersion = "1.0.0"
 val awsSdkVersion = "2.17.209"
 
@@ -26,15 +23,10 @@ plugins {
 }
 
 dependencies {
-
     implementation(project(":core:sfc-core"))
     implementation(project(":core:sfc-ipc"))
-
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinCoroutinesVersion")
-
-
-
     implementation("software.amazon.awssdk:aws-core:$awsSdkVersion")
     implementation("software.amazon.awssdk:iot:$awsSdkVersion")
     implementation("software.amazon.awssdk:iotdataplane:$awsSdkVersion")
