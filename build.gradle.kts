@@ -7,7 +7,8 @@ plugins {
 
 buildscript {
     extra.apply {
-        // SET GLOBAL SFC RELEASE VERSION HERE -> applied to all modules
+        // SET GLOBAL SFC RELEASE VERSION HERE
+        // --> applied to sfc-core, sfc-ipc, sfc-main & sfc-metrics <--
         set("sfc_release", "1.0.3")
     }
 }

@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: MIT-0
 
 group = "com.amazonaws.sfc"
-version = rootProject.extra.get("sfc_release")!!
-
-val sfcCoreVersion = version
+version = "1.0.0"
+val sfcRelease = rootProject.extra.get("sfc_release")!!
+val sfcCoreVersion = sfcRelease
 val kotlinCoroutinesVersion = "1.6.2"
 val kotlinVersion = "1.9.0"
 

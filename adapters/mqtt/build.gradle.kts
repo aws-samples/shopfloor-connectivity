@@ -5,10 +5,11 @@ import org.jetbrains.kotlin.util.capitalizeDecapitalize.toUpperCaseAsciiOnly
 import java.time.LocalDate
 
 group = "com.amazonaws.sfc"
-version = rootProject.extra.get("sfc_release")!!
+version = "1.0.0"
 
-val sfcCoreVersion = version
-val sfcIpcVersion = version
+val sfcRelease = rootProject.extra.get("sfc_release")!!
+val sfcCoreVersion = sfcRelease
+val sfcIpcVersion = sfcRelease
 val module = "mqtt"
 val kotlinCoroutinesVersion = "1.6.2"
 val kotlinVersion = "1.9.0"
