@@ -1,0 +1,104 @@
+{
+  "AWSVersion": "2022-04-02",
+  "Name": "OPCUA to S3, using in process source and targets",
+  "Version": 1,
+  "LogLevel": "Info",
+  "ElementNames": {
+    "Value": "value",
+    "Timestamp": "timestamp",
+    "Metadata": "metadata"
+  },
+  "Schedules": [
+    {
+      "Name": "CsvFilesToDebugTarget",
+      "Interval": 5000,
+      "Description": "Read data of CSV files every 5secs and send to Debug Output Target",
+      "Active": true,
+      "TimestampLevel": "Both",
+      "Sources": {
+        "CSV-FILE-SOURCE-1-PUMP23": ["*"],
+        "CSV-FILE-SOURCE-2-MILL34": ["*"]
+      },
+      "Targets": [
+        "DebugTarget"
+      ]
+    }
+  ],
+  "Sources": {
+    "CSV-FILE-SOURCE-1-PUMP23": {
+      "Name": "CSV-FILE-SOURCE-1",
+      "ProtocolAdapter": "CSV-FILE-ADAPTER",
+      "AdapterCsvFile": "CsvFile-1-pump23",
+      "Channels": {
+        "CsvColumnValue-1": {
+          "Name": "positionX34",
+          "ColName": "pos34",
+          "ColIndex": 0
+        },
+        "CsvColumnValue-2": {
+          "Name": "voltageY35",
+          "ColName": "volt35",
+          "ColIndex": 1
+        },
+        "CsvColumnValue-3": {
+          "Name": "rpmZ347",
+          "ColName": "rpm347",
+          "ColIndex": 2
+        }
+      }
+    },
+    "CSV-FILE-SOURCE-2-MILL34": {
+      "Name": "CSV-FILE-SOURCE-2",
+      "ProtocolAdapter": "CSV-FILE-ADAPTER",
+      "AdapterCsvFile": "CsvFile-2-mill34",
+      "Channels": {
+        "CsvColumnValue-1": {
+          "Name": "spindle1",
+          "ColName": "spindle1",
+          "ColIndex": 0
+        }
+      }
+    }
+  },
+  "Targets": {
+    "DebugTarget": {
+      "Active": true,
+      "TargetType": "DEBUG-TARGET"
+    }
+  },
+  "TargetTypes": {
+    "DEBUG-TARGET": {
+      "JarFiles": [
+        "${SFC_DEPLOYMENT_DIR}/debug-target/lib"
+      ],
+      "FactoryClassName": "com.amazonaws.sfc.debugtarget.DebugTargetWriter"
+    }
+  },
+  "AdapterTypes": {
+    "CSVFILE": {
+      "JarFiles": [
+        "${SFC_DEPLOYMENT_DIR}/csvfile/lib"
+      ],
+      "FactoryClassName": "com.amazonaws.sfc.csvfile.CsvFileAdapter"
+    }
+  },
+  "ProtocolAdapters": {
+    "CSV-FILE-ADAPTER": {
+      "AdapterType": "CSVFILE",
+      "CsvFiles": {
+        "CsvFile-1-pump23": {
+          "FilePath":"${SFC_DEPLOYMENT_DIR}//csv-samples//test-having3-channels.csv",
+          "Delimiter": ";",
+          "LinesToSkip": 1,
+          "MaxRowsPerRead": 1
+        },
+        "CsvFile-2-mill34": {
+          "FilePath":"${SFC_DEPLOYMENT_DIR}//csv-samples//test-channels.csv",
+          "Delimiter": ";",
+          "LinesToSkip": 1,
+          "MaxRowsPerRead": 1
+        }
+      }
+    }
+  }
+}
