@@ -1,10 +1,8 @@
 Example: CSV File adapter
 =========================
 
-that gradle project contains an example adapter for reading in CSV files to SFC.
-
-## CSV files...
-CSV files typically do have an attribute header and come with various `delimiters` like `;`, `,` etc.
+that gradle project contains an example adapter for reading in CSV files to SFC. 
+`Comma Separated Value` files typically do have an attribute header and come with various `delimiters` like `;`, `,` etc.
 
 ```csv
 pos34;volt35;rpm347
@@ -17,6 +15,7 @@ pos34;volt35;rpm347
 
 in this directory run gradle like so:
 ```sh
+cd examples/custom-adapter-csvfile
  ../../gradlew build
 ```
 
@@ -29,6 +28,8 @@ We will use that file in the next section.
 ```sh
 # using the build dir here - get's deleted when running a gradle clean
 cd build
+```
+```shell
 # Define sfc version and directory
 export VERSION="1.0.3"
 export SFC_DEPLOYMENT_DIR="sfc"
@@ -49,11 +50,6 @@ cd -
 ```
 
 2. **Create a working SFC Config file**
-
-> Note: **Please** expand the section below, to see the json config and copy it into your shell...
-
-<details>
-  <summary><b>Expand</b></summary>
 
 ```shell
 cat << EOF > $SFC_DEPLOYMENT_DIR/example.json
@@ -163,7 +159,6 @@ cat << EOF > $SFC_DEPLOYMENT_DIR/example.json
 }
 EOF
 ```
-</details>
 
 3. **Run sfc-main**
 
@@ -173,7 +168,7 @@ sfc/sfc-main/bin/sfc-main -config sfc/example.json
 
 Output should look like this:
 
-```sh
+```txt
 2023-11-21 17:26:14.306 INFO  - Creating configuration provider of type ConfigProvider
 2023-11-21 17:26:14.331 INFO  - Waiting for configuration
 2023-11-21 17:26:14.338 INFO  - Sending initial configuration from file "example.json"
@@ -206,23 +201,92 @@ Output should look like this:
           "timestamp": "2023-11-21T16:26:15.057415Z"
         }
       },
-      "timestamp": "2023-11-21T16:26:15.057926Z"
-    },
-    "CSV-FILE-SOURCE-2": {
-      "values": {
-        "spindle1": {
-          "value": "1",
-          "timestamp": "2023-11-21T16:26:15.055219Z"
-        }
-      },
-      "timestamp": "2023-11-21T16:26:15.057924Z"
-    }
-  }
-}
+...
 ```
+^^ The `DebugTarget` log shows the sfc target data format in JSON with our csv attribute values... 
 
+---
 
-### How was this implemented ?
+## How was this implemented ?
 
+- The class [CsvFileAdapter](src/main/kotlin/com/amazonaws/sfc/csvfile/CsvFileAdapter.kt) implements 
+the Interface [ProtocolAdapter](../../core/sfc-core/src/main/kotlin/com/amazonaws/sfc/data/ProtocolAdapter.kt).
+That interface is used by all other SFC protocol adapters.
+
+<p>
+  <img src="img/CsvFileAdapter.png" width="50%"/>
+</p>
+
+- The Interface defines a **read** function, which returns data of the 
+type [SourceReadResult](../../core/sfc-core/src/main/kotlin/com/amazonaws/sfc/data/SourceReadResult.kt).
+Class CsvFileAdpater overrides that Interface method.
+
+```kotlin
+/**
+     * Reads a values from a source
+     * @param sourceID String Source ID
+     * @param channels List<String>? Channels to read values for, if null then all values for the source are read
+     * @return SourceReadResult
+     */
+    override suspend fun read(sourceID: String, channels: List<String>?): SourceReadResult {
+        val log = logger.getCtxLoggers(className, "read")
+        log.trace("Reading ${if (channels.isNullOrEmpty()) "all" else channels.size} channels from CSV-FILE source \"$sourceID\"")
+
+        val metricDimensions = mapOf(METRICS_DIMENSION_SOURCE to sourceID, MetricsCollector.METRICS_DIMENSION_ADAPTER to sources.keys.toString())
+        val start = DateTime.systemDateTime().toEpochMilli()
+        val skipper = getSourceFileConfiguration(sourceID)?.linesToSkip
+        val maxRows = getSourceFileConfiguration(sourceID)?.maxRowsPerRead
+        val delim = getSourceFileConfiguration(sourceID)?.delimiter.toString()
+
+        try {
+            val readValues = mutableMapOf<String, ChannelReadValue>()
+            getSourceChannelConfiguration(sourceID)?.forEach { channel ->
+                val timestamp = DateTime.systemDateTime()
+                val path = getSourceFileConfiguration(sourceID)?.path.toString()
+                var colValueArray : Array<String> = emptyArray()
+                readFileAsLinesUsingBufferedReader(path).forEach {line ->
+                    colValueArray += line
+                }
+
+                if (skipper != null) {
+                    if(skipper > 0){
+                        colValueArray = colValueArray.drop(skipper).toTypedArray()
+                    }
+                }
+                val value: Any?
+                if(maxRows == 1) {
+                    value = colValueArray
+                        .last()
+                        .split(delim)[channel.value.colIdx]
+                } else {
+                    var lastNcolValues : Array<Any?> = emptyArray()
+                    getSourceFileConfiguration(sourceID)?.let { colValueArray.takeLast(it.maxRowsPerRead).forEach { row ->
+                        lastNcolValues += row.split(getSourceFileConfiguration(sourceID)?.delimiter.toString())[channel.value.colIdx]
+                    } }
+                    value = lastNcolValues
+
+                }
+                val channelReadValue = ChannelReadValue(value, timestamp)
+                readValues[channel.key] = channelReadValue
+            }
+            //getSourceFileConfiguration(sourceID)?.let { log.trace(it.path+": "+channelCsvColumnList.joinToString()) }
+            log.trace("${readValues.size} values read from CSV file ${getSourceFileConfiguration(sourceID)?.path}")
+            val readDurationInMillis = (DateTime.systemDateTime().toEpochMilli() - start).toDouble()
+            createMetrics(adapterID, metricDimensions, readDurationInMillis, readValues)
+
+            return SourceReadSuccess(readValues)
+        } catch (e: Exception) {
+            return SourceReadError("Error reading from File $sourceID, $e")
+        }
+    }
+```
+---
+- Config classes for our csv adapter are built around [CsvFileConfiguration](src/main/kotlin/com/amazonaws/csvfile/sfc/config/CsvFileConfiguration.kt)
+Those config-classes build up the json config scheme of SFC. For a valid CSVFILE 
+Adapter config [look here](src/main/resources/conf-test-csvfile.json).
+
+<p>
+  <img src="img/CsvFileConfiguration.png" width="50%"/>
+</p>
 
 

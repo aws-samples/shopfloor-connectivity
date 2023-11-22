@@ -30,8 +30,6 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-reflect:$reflectionVersion")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinCoroutinesVersion")
-    implementation("com.github.doyaaaaaken:kotlin-csv-jvm:$kotlinCsvVersion")
-
 }
 
 application {
