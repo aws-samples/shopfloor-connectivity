@@ -20,7 +20,7 @@ data class SfcConfig(val name: String, val baseConfig: JsonObject)
 class SfcConfigService(private val connection: Connection) {
     companion object {
         private const val CREATE_TABLE_CONFIGS =
-            "CREATE TABLE CONFIGS (ID SERIAL PRIMARY KEY, NAME VARCHAR(255), CONFIG JSON);"
+            "CREATE TABLE IF NOT EXISTS CONFIGS (ID SERIAL PRIMARY KEY, NAME VARCHAR(255), CONFIG JSON);"
         private const val SELECT_CONFIG_BY_ID = "SELECT name, config FROM configs WHERE id = ?"
         private const val INSERT_CONFIG = "INSERT INTO configs (name, config) VALUES (?, ?::json)"
         private const val UPDATE_CONFIG = "UPDATE configs SET name = ?, config = ?::json WHERE id = ?"
