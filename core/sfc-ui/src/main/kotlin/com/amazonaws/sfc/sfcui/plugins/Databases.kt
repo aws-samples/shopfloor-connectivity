@@ -68,7 +68,7 @@ fun Application.configureDatabases() {
 fun Application.connectToPostgres(embedded: Boolean): Connection {
     Class.forName("org.postgresql.Driver")
     if (embedded) {
-        return DriverManager.getConnection("jdbc:h2:mem:sfctest;DB_CLOSE_DELAY=-1", "root", "")
+        return DriverManager.getConnection("jdbc:h2:file:./sfctest;DB_CLOSE_DELAY=-1", "root", "")
     } else {
         val url = environment.config.property("postgres.url").getString()
         val user = environment.config.property("postgres.user").getString()
