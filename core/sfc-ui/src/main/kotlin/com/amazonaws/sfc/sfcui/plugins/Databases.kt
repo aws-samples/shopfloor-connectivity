@@ -1,5 +1,7 @@
 package com.amazonaws.sfc.sfcui.plugins
 
+import com.amazonaws.sfc.config.ConfigReader
+import com.amazonaws.sfc.config.ControllerServiceConfiguration
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
@@ -18,6 +20,24 @@ fun Application.configureDatabases() {
             val id = configService.create(config)
             call.respond(HttpStatusCode.Created, id)
         }
+
+        // Push existing config to SFC-MAIN
+        post("/push/{id}") {
+            val id = call.parameters["id"]?.toInt() ?: throw IllegalArgumentException("Invalid ID")
+            try {
+                val config = configService.read(id)
+                val configReader =
+                    ConfigReader.createConfigReader(config, allowUnresolved = false, secretsManager = null)
+                //print(configReader)
+                val controllerConfiguration: ControllerServiceConfiguration = configReader.getConfig()
+                print(controllerConfiguration)
+                call.respond(HttpStatusCode.Created, config)
+            } catch (e: Exception) {
+                print(e.stackTrace)
+                call.respond(HttpStatusCode.NotFound)
+            }
+        }
+
         // Read config
         get("/config/{id}") {
             val id = call.parameters["id"]?.toInt() ?: throw IllegalArgumentException("Invalid ID")
