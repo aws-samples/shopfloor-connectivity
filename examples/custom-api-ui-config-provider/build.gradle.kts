@@ -5,11 +5,12 @@ import org.jetbrains.kotlin.util.capitalizeDecapitalize.toUpperCaseAsciiOnly
 import java.time.LocalDate
 
 group = "com.amazonaws.sfc"
-version = rootProject.extra.get("sfc_release")!!
+version = "1.0.0"
 
-val module = "sfcui"
-val sfcCoreVersion = version
-val sfcIpcVersion = version
+val sfcRelease = rootProject.extra.get("sfc_release")!!
+val module = "apiconfigprovider"
+val sfcCoreVersion = sfcRelease
+val sfcIpcVersion = sfcRelease
 val kotlinCoroutinesVersion = "1.6.2"
 val kotlinVersion = "1.9.0"
 val logbackVersion = "1.4.11"
@@ -35,13 +36,11 @@ dependencies {
     implementation("io.ktor:ktor-server-host-common-jvm")
     implementation("io.ktor:ktor-server-tomcat-jvm")
     implementation("ch.qos.logback:logback-classic:$logbackVersion")
-    testImplementation("io.ktor:ktor-server-tests-jvm")
-    testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlinVersion")
 }
 
 application {
-    mainClass.set("localhost.ApplicationKt")
-
+    applicationName = module
+    mainClass.set("com.amazonaws.sfc.config.CustomApiUiConfigProvider")
     val isDevelopment: Boolean = project.ext.has("development")
     applicationDefaultJvmArgs = listOf("-Dio.ktor.development=$isDevelopment")
 }

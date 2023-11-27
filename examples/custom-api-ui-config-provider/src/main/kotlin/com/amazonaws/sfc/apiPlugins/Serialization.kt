@@ -1,4 +1,4 @@
-package com.amazonaws.sfc.sfcui.plugins
+package com.amazonaws.sfc.apiPlugins
 
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*

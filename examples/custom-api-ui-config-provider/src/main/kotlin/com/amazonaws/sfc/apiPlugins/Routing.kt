@@ -1,4 +1,4 @@
-package com.amazonaws.sfc.sfcui.plugins
+package com.amazonaws.sfc.apiPlugins
 
 import io.ktor.server.application.*
 import io.ktor.server.http.content.*

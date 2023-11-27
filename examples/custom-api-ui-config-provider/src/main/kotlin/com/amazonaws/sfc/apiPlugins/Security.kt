@@ -1,4 +1,4 @@
-package com.amazonaws.sfc.sfcui.plugins
+package com.amazonaws.sfc.apiPlugins
 
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
