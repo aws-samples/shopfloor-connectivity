@@ -1,17 +1,13 @@
-package com.amazonaws.sfc.sfcui.plugins
+package com.amazonaws.sfc.apiPlugins
 
-import com.fasterxml.jackson.databind.util.JSONPObject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.jsonObject
 import org.postgresql.util.PGobject
 import java.sql.Connection
 import java.sql.Statement
-import javax.swing.JSeparator
 
 
 @Serializable
@@ -59,7 +55,7 @@ class SfcConfigService(private val connection: Connection) {
         statement.setInt(1, id)
         val resultSet = statement.executeQuery()
         if (resultSet.next()) {
-            val name = resultSet.getString("name")
+            //val name = resultSet.getString("name")
             val baseConfig = resultSet.getString("config")
             return@withContext Json.decodeFromString(baseConfig)
         } else {
