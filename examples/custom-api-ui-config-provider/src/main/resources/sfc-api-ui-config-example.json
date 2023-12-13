@@ -1,7 +1,7 @@
 {
   "ConfigProvider": {
     "JarFiles": [
-      "/Users/asamerh/workspace/SFC-SRC/src/SFC-source/build/distribution/custom-api-ui-config-provider/lib"
+      "$SFC_DEPLOYMENT_DIR/custom-api-ui-config-provider/lib"
     ],
     "FactoryClassName": "com.amazonaws.sfc.config.CustomApiUiConfigProvider"
   }
