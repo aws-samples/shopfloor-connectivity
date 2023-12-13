@@ -1,0 +1,628 @@
+<!--// Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: MIT-0-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="AWS">
+    <title>SFC Config Editor</title>
+    <link rel="icon" href="./assets/favicon.ico" type="image/x-icon">
+    <!--SCRIPT LIBS-->
+    <script src="./js/jsoneditor-2.12.0/jsoneditor.min.js"></script>
+    <script src="./js/jsoneditor-2.12.0/assign.js"></script>
+    <script src="./js/jsoneditor-2.12.0/lz-string.min.js"></script>
+    <script src="./js/jsoneditor-2.12.0/ajv-validator.js"></script>
+    <script src="./js/ace-1.14.0/ace.js"></script>
+    <script src="./js/bootstrap-5.0.2/bootstrap.bundle.min.js"></script>
+    <!--CSS LIBS-->
+    <link rel="stylesheet" href="./css/bootstrap-5.0.2/bootstrap.min.css">
+    <link rel="stylesheet" href="./css/spectre-0.5.9/spectre.min.css">
+    <link rel="stylesheet" href="./css/spectre-0.5.9/spectre-exp.min.css">
+    <link rel="stylesheet" href="./css/spectre-0.5.9/spectre-icons.min.css">
+    <!--CUSTOM CSS-->
+    <style>
+        tr.selected {
+            background-color: rgba(192, 197, 19, 0.13);
+        }
+        .table-hover tbody tr:hover td  {
+            background: rgba(172, 172, 239, 0.44);
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container grid-xl" style="padding-top: 15px; padding-bottom: 30px;" id="sfc-editor">
+        <h2>SFC <span class="badge bg-primary" data-badge="JSON">Config Provider</span></h2>
+        <br>
+        <div class="row columns md:flex">
+            <div class='col-9 col-md-9 w-9/12'>
+                <form>
+                    <div class="form-group">
+                        <div class="row columns md:flex">
+                            <div class='col-1 col-md-1 w-1/12'>
+                                <label for="confId">Id</label>
+                                <input id="confId" class="form-control form-control-sm" type="text" readonly></input>
+                            </div>
+                            <div class='col-11 col-md-11 w-11/12'>
+                                <label for="confName">Config description</label>
+                                <input id="confName" class="form-control form-control-sm" type="text" aria-describedby="confHelp" placeholder="give your config a name..."></input>
+                                <small id="confHelp" class="form-text text-muted">Use the Create and Save Buttons to store config and description</small>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+                <br>
+                <textarea id='output-textarea' rows="15" style="width: 100%; font-family: monospace;"
+                          class='form-control' aria-describedby="editorHelp"></textarea>
+                <small id="editorHelp" class="form-text text-muted">craft your SFC JSON config here! ^^</small>
+                <hr>
+                <div class="row columns md:flex">
+                    <div class='col-12 col-md-12 w-12/12'>
+                        <h4 aria-describedby="PushedconfHelp1">SFC Core Log output</h4>
+                        <small id="PushedconfHelp1" class="form-text text-muted">live sfc log stream via local websockets</small>
+                        <br>
+                        <textarea id="sfcLoggr"readonly></textarea>
+                    </div>
+                </div>
+
+                <hr>
+
+                <h3>Validation</h3>
+                <label for="validate-textarea">This will update whenever the form changes to show validation errors if there
+                    are any.</label><br>
+                <textarea id='validate-textarea' readonly disabled class='form-control'></textarea>
+                <br>
+                <h3>Form View</h3>
+                <div id="json-editor-form"></div>
+
+            </div>
+            <div class='col-3 col-md-3 w-3/12'>
+                <br>
+                <div>
+                    <a class="btn btn-primary disabled" role="button" id="savr" title="Save current config to DB">Save</a>
+                    <a class="btn btn-success"  role="button" id="creatr" title="Create new config from current editor content">Create</a>
+                    <a class="btn btn-secondary disabled"  role="button" id="deletr" title="Delete a stored config from the DB">Delete</a>
+                    <a class="btn btn-secondary disabled"  role="button" id="runnr" title="Push a selected config to SFC-CORE">Run</a>
+                </div>
+                <div>
+                    <br>
+                    <h5>Stored configs</h5>
+                    <br>
+                    <table id="configs" class="table table-hover">
+                        <thead>
+                        <tr>
+                            <th>Id</th>
+                            <th>Name</th>
+                        </tr>
+                        </thead>
+                        <tbody id="cfgData">
+                        </tbody>
+                    </table>
+                </div>
+                <br>
+                <input id="PushedconfId" class="form-control form-control-sm" type="text" aria-describedby="PushedconfHelp" readonly></input>
+                <small id="PushedconfHelp" class="form-text text-muted">this config was pushed to sfc-core</small>
+                <br>
+                <textarea id="runnrResponse"readonly>{"info":"this config was pushed to sfc-core"}</textarea>
+            </div>
+        </div>
+
+        <hr>
+
+        <h3>Schema</h3>
+
+        <div class="row columns md:flex">
+            <div class='col-7 col-md-7 w-7/12'>
+                <label for="schema-textarea">You can change the schema and see how the generated form looks. After you make changes, click "Update Schema"</label>
+                <button class='btn btn-primary btn-block' id='setschema'>Update Schema</button>
+                <textarea id='schema-textarea' style="height: 100vh;"></textarea>
+            </div>
+
+            <div class='col-5 col-md-5 w-5/12'>
+                <label for="je-errors-textarea">
+                    <span>AJV (JE meta-schema): </span>
+                    <code id="je-errors-count"></code>
+                </label>
+                <textarea id='je-errors-textarea'></textarea>
+
+                <br>
+
+                <label for="ajv-errors-textarea">
+                    <span>AJV (meta-schema-2020-12): </span>
+                    <code id="ajv-errors-count"></code>
+                </label>
+                <textarea id='ajv-errors-textarea'></textarea>
+            </div>
+        </div>
+
+        <hr>
+
+    </div>
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+        <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header">
+                <svg class="bd-placeholder-img rounded me-2" width="20" height="20" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" preserveAspectRatio="xMidYMid slice" focusable="false"><rect width="100%" height="100%" fill="#007aff"></rect></svg>
+                <strong class="me-auto" id="toastHeader">Bootstrap</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body" id="toastBody">
+                Hello, world! This is a toast message.
+            </div>
+        </div>
+    </div>
+    <script>
+        var defaultSchema = {
+            "$schema": "http://json-schema.org/draft-07/schema#",
+            "title": "SFC In-Process Config",
+            "type": "object",
+            "properties": {
+                "AWSVersion": {
+                    "type": "string"
+                },
+                "Name": {
+                    "type": "string"
+                },
+                "Version": {
+                    "type": "number"
+                },
+                "LogLevel": {
+                    "type": "string"
+                },
+                "ElementNames": {
+                    "type": "object",
+                    "properties": {
+                        "Value": {
+                            "type": "string"
+                        },
+                        "Timestamp": {
+                            "type": "string"
+                        },
+                        "Metadata": {
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "Value",
+                        "Timestamp",
+                        "Metadata"
+                    ]
+                },
+                "Schedules": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "Name": {
+                                "type": "string"
+                            },
+                            "Interval": {
+                                "type": "number"
+                            },
+                            "Description": {
+                                "type": "string"
+                            },
+                            "Active": {
+                                "type": "boolean"
+                            },
+                            "TimestampLevel": {
+                                "type": "string"
+                            },
+                            "Sources": {
+                                "type": "object"
+                            },
+                            "Targets": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "required": [
+                            "Name",
+                            "Interval",
+                            "Description",
+                            "Active",
+                            "TimestampLevel",
+                            "Sources",
+                            "Targets"
+                        ]
+                    }
+                },
+                "Sources": {
+                    "type": "object"
+                },
+                "Targets": {
+                    "type": "object"
+                },
+                "TargetTypes": {
+                    "type": "object"
+                },
+                "AdapterTypes": {
+                    "type": "object"
+                },
+                "ProtocolAdapters": {
+                    "type": "object"
+                }
+            },
+            "required": [
+                "AWSVersion",
+                "Name",
+                "Version",
+                "LogLevel",
+                "ElementNames",
+                "Schedules",
+                "Sources",
+                "Targets",
+                "TargetTypes",
+                "AdapterTypes",
+                "ProtocolAdapters"
+            ]
+        }
+
+        // parse url -> merge options -> refreshUI() -> initJsoneditor() -> direct link
+
+        /* ------------------------------------------------------------------- data */
+
+        var data = {}
+
+        JSONEditor.defaults.options.theme = 'spectre';
+        var defaultOptions = Object.assign({}, JSONEditor.defaults.options, {
+            object_layout: 'normal',
+            schema: defaultSchema,
+            show_errors: 'always',
+            iconlib: 'spectre',
+            collapsed: true,
+            disable_edit_json: true
+        })
+
+        var jsoneditor = null
+        //var directLink = document.querySelector('#direct-link')
+        var jsonEditorForm = document.querySelector('#json-editor-form')
+        var setSchema = document.querySelector('#setschema')
+        var validateTextarea = document.querySelector('#validate-textarea')
+
+        var aceConfig = {
+            mode: 'ace/mode/json',
+            maxLines: 35,
+            minLines: 15,
+            showFoldWidgets: false,
+            showPrintMargin: false
+        }
+        var aceConfig4Runner = {
+            mode: 'ace/mode/json',
+            theme: 'ace/theme/nord_dark',
+            maxLines: 10,
+            minLines: 2,
+            showFoldWidgets: false,
+            showPrintMargin: false,
+            readOnly: true
+        }
+
+        var aceConfig4Loggr = {
+            mode: 'ace/mode/sh',
+            theme: 'ace/theme/solarized_dark',
+            maxLines: 20,
+            minLines: 2,
+            showFoldWidgets: false,
+            showPrintMargin: false,
+            readOnly: true
+        }
+
+        var outputTextarea = ace.edit('output-textarea', aceConfig)
+        var schemaTextarea = ace.edit('schema-textarea', aceConfig)
+        var outputTextarea4Runner = ace.edit('runnrResponse', aceConfig4Runner)
+        var outputTextarea4Loggr = ace.edit('sfcLoggr', aceConfig4Loggr)
+        var ajvErrorsTextarea = ace.edit('ajv-errors-textarea', aceConfig)
+        var jeErrorsTextarea = ace.edit('je-errors-textarea', aceConfig)
+        var ajvErrorsCount = document.querySelector('#ajv-errors-count')
+        var jeErrorsCount = document.querySelector('#je-errors-count')
+        var ajv = new AjvValidator()
+
+        const validateSchema = () => {
+            const dataToValidate = JSON.parse(schemaTextarea.getValue())
+            let errors
+
+            // AJV validation
+            ajvErrorsCount.textContent = '0'
+            errors = ajv.validate202012(dataToValidate)
+            ajvErrorsTextarea.setValue(JSON.stringify(errors, null, 2))
+            ajvErrorsCount.textContent = JSON.stringify(errors.length)
+            schemaTextarea.clearSelection(1)
+            ajvErrorsTextarea.clearSelection(1)
+
+            // JE validation with AJV
+            jeErrorsCount.textContent = '0'
+            errors = ajv.validateJeMetaSchema(dataToValidate)
+            jeErrorsTextarea.setValue(JSON.stringify(errors, null, 2))
+            jeErrorsCount.textContent = JSON.stringify(errors.length)
+            schemaTextarea.clearSelection(1)
+            jeErrorsTextarea.clearSelection(1)
+        }
+
+        const toastMsg = document.getElementById('liveToast');
+        const toaster = bootstrap.Toast.getOrCreateInstance(toastMsg);
+        var toastHeader = document.getElementById('toastHeader');
+        var toastBody =  document.getElementById('toastBody');
+
+        async function fetchConfig(id) {
+            const res = await fetch('/config/'+id);
+            const cfg = await res.json();
+            return cfg;
+        }
+
+        function highlightTableRow(row) {
+            // Remove highlight from previously selected row, if any
+            const previouslySelectedRow = document.querySelector('tr.selected');
+            if (previouslySelectedRow) {
+                previouslySelectedRow.classList.remove('selected');
+            }
+            // Highlight the clicked row
+            row.classList.add('selected');
+        }
+        async function fetchConfigs() {
+            const res = await fetch('/config');
+            const data = await res.json();
+            let body = ""
+            for (var i = 0; i < data.length; i++) {
+                body += `<tr data-href=\"${data[i].ID}\" data-name=\"${data[i].NAME}\"><td>${data[i].ID}</td><td>${data[i].NAME}</td></tr>`
+            }
+            document.getElementById('cfgData').innerHTML = body
+
+            var confRows =  document.getElementById('configs').rows;
+            Array.from(confRows).forEach(row => {
+                row.addEventListener("click", function() {
+                    // fetch selected record from DB
+                    fetchConfig(this.getAttribute('data-href'))
+                        .then(value => {
+                            outputTextarea.setValue(JSON.stringify(value));
+                            jsoneditor.setValue(JSON.parse(outputTextarea.getValue()));
+                        });
+                    // highlight clicked row
+                    highlightTableRow(row);
+                    // set config name input & id field
+                    document.getElementById('confName').value = this.getAttribute('data-name');
+                    document.getElementById('confId').value = this.getAttribute('data-href');
+                    // unlock buttons
+                    document.getElementById('savr').classList.remove('disabled');
+                    document.getElementById('deletr').classList.remove('disabled');
+                    document.getElementById('runnr').classList.remove('disabled');
+                });
+            });
+        }
+        fetchConfigs()
+
+        async function updateConfig(url, data) {
+            const response = await fetch(url, {
+                method: 'PUT',
+                headers: {
+                    'Content-type': 'application/json'
+                },
+                body: data
+            });
+            const resData = await response.json();
+            await fetchConfigs();
+            toastHeader.innerHTML = "Saved Config";
+            toastBody.innerHTML = "HTTP PUT - "+url;
+            await toaster.show();
+            return resData;
+        }
+
+        async function deleteConfig(url) {
+            const response = await fetch(url, {
+                method: 'DELETE',
+                headers: {
+                    'Content-type': 'application/json'
+                }
+            });
+            await response;
+            toastHeader.innerHTML = "Deleted Config";
+            toastBody.innerHTML = "HTTP DELETE - "+url;
+            await toaster.show();
+            await fetchConfigs();
+        }
+
+        async function createConfig(url, data) {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-type': 'application/json'
+                },
+                body: data
+            });
+            const returnData = await response;
+            await fetchConfigs();
+            return returnData.json();
+        }
+
+        async function runConfig(url) {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-type': 'application/json'
+                }
+            });
+            const returnData = await response;
+            return returnData.json();
+        }
+
+        /* -------------------------------------------------------------- parse url */
+
+        var parseUrl = function () {
+            var url = window.location.search
+            var queryParamsString = url.substring(1, url.length)
+            var queryParams = queryParamsString.split('&')
+
+            if (queryParamsString.length) {
+                queryParams.forEach(function (queryParam) {
+                    var splittedParam = queryParam.split('=')
+                    var param = splittedParam[0]
+                    var value = splittedParam[1]
+
+                    // data query param
+                    if (param === 'data') {
+                        // compress schema and value
+                        try {
+                            data = JSON.parse(LZString.decompressFromBase64(value))
+                        } catch (reason) {
+                        }
+                    }
+                })
+            }
+
+            mergeOptions()
+        }
+
+        /* ----------------------------------------------------------- mergeOptions */
+
+        var mergeOptions = function () {
+            data.options = Object.assign(defaultOptions, data.options)
+            refreshUI()
+        }
+
+        /* -------------------------------------------------------------- refreshUI */
+
+        var refreshUI = function () {
+            // schema
+            schemaTextarea.setValue(JSON.stringify(data.options.schema, null, 2))
+            schemaTextarea.clearSelection(1)
+            validateSchema()
+            initJsoneditor()
+        }
+
+        /* --------------------------------------------------------- initJsoneditor */
+
+        var initJsoneditor = function () {
+            // destroy old JSONEditor instance if exists
+            if (jsoneditor) {
+                jsoneditor.destroy()
+            }
+
+            // new instance of JSONEditor
+            jsoneditor = new window.JSONEditor(jsonEditorForm, data.options)
+
+            // listen for changes
+            jsoneditor.on('change', function () {
+                // output
+                var json = jsoneditor.getValue()
+                outputTextarea.setValue(JSON.stringify(json, null, 2))
+                outputTextarea.clearSelection(1)
+
+                // validate
+                var validationErrors = jsoneditor.validate()
+                if (validationErrors.length) {
+                    validateTextarea.value = JSON.stringify(validationErrors, null, 2)
+                } else {
+                    validateTextarea.value = 'valid'
+                }
+            })
+            //updateDirectLink()
+        }
+
+        /* ------------------------------------------------------- updateDirectLink */
+
+        // var updateDirectLink = function () {
+        //     var url = window.location.href.replace(/\?.*/, '')
+        //     url += '?data='
+        //     url += LZString.compressToBase64(JSON.stringify(data))
+        //     directLink.href = url
+        // }
+
+        /* -------------------------------------------------------- event listeners */
+
+
+        document.getElementById('savr').addEventListener('click',function() {
+            conf = JSON.parse(outputTextarea.getValue());
+            confName = document.getElementById('confName').value;
+            confID = document.getElementById('confId').value;
+            confSave = {"name": confName, "baseConfig": conf};
+            //PUT API Call
+            updateConfig("/config/"+confID, JSON.stringify(confSave));
+            jsoneditor.setValue(JSON.parse(outputTextarea.getValue()));
+        });
+
+        document.getElementById('creatr').addEventListener('click',function() {
+            conf = JSON.parse(outputTextarea.getValue());
+            confName = document.getElementById('confName').value;
+            if (confName.length == 0) {confName = "NewConf";}
+            document.getElementById('confName').value = confName;
+
+            confCreate = {"name": confName, "baseConfig": conf};
+            //PUT API Call
+            newId = createConfig("/config", JSON.stringify(confCreate));
+            newId.then(function(id) {
+                jsoneditor.setValue(JSON.parse(outputTextarea.getValue()));
+                document.getElementById('confId').value = id;
+                console.log(id);
+                toastHeader.innerHTML = "Created Config - id:"+id;
+                toastBody.innerHTML = "HTTP POST - /config/"+id;
+                toaster.show();
+            });
+        });
+
+        document.getElementById('deletr').addEventListener('click',function() {
+            confID = document.getElementById('confId').value;
+
+            deleteConfig("/config/"+confID);
+            confName = document.getElementById('confName').value = "";
+            document.getElementById('confId').value = "";
+
+            refreshUI();
+        });
+
+        document.getElementById('runnr').addEventListener('click',function() {
+            confID = document.getElementById('confId').value;
+            confName = document.getElementById('confName').value;
+            document.getElementById('PushedconfId').value = confID+" - "+confName;
+            run = runConfig("/push/"+confID);
+            run.then(function(resp) {
+                console.log(resp);
+                outputTextarea4Runner.setValue(JSON.stringify(resp, 0, 4));
+                toastHeader.innerHTML = "SFC: Pushed Config - id:"+confID;
+                toastBody.innerHTML = "HTTP POST - /push/"+confID;
+                toaster.show();
+            });
+        });
+
+
+        setSchema.addEventListener('click', function () {
+            try {
+                data.options.schema = JSON.parse(schemaTextarea.getValue())
+                validateSchema()
+            } catch (e) {
+                alert('Invalid Schema: ' + e.message)
+                return
+            }
+            refreshUI()
+        })
+
+
+        var logSession = outputTextarea4Loggr.session;
+
+        function startWebsocket() {
+            var ws = new WebSocket('ws://localhost:8080/logreceiver')
+
+            ws.onmessage = function(e){
+                logSession.insert({
+                    row: logSession.getLength(),
+                    column: 0
+                }, "\n" + e.data)
+                var lastRow = logSession.getLength();
+                if (lastRow > 5500) outputTextarea4Loggr.setValue("");
+                outputTextarea4Loggr.gotoLine(lastRow, 0, true);
+            }
+            ws.onclose = function(){
+                // connection closed, discard old websocket and create a new one in 5s
+                ws = null
+                setTimeout(startWebsocket, 5000)
+            }
+        }
+
+        startWebsocket();
+
+        parseUrl()
+    </script>
+</body>
+</html>

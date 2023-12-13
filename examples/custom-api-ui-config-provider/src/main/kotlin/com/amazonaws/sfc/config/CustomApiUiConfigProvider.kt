@@ -1,7 +1,5 @@
-
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: MIT-0
-
 
 package com.amazonaws.sfc.config
 
@@ -9,18 +7,14 @@ import com.amazonaws.sfc.apiPlugins.*
 import com.amazonaws.sfc.log.Logger
 import com.amazonaws.sfc.service.ConfigProvider
 import com.amazonaws.sfc.util.buildScope
-import io.ktor.http.*
-import io.ktor.server.application.*
 import io.ktor.server.engine.*
-import io.ktor.server.request.*
-import io.ktor.server.response.*
-import io.ktor.server.routing.*
 import io.ktor.server.tomcat.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.jsonObject
 import java.security.PublicKey
-import java.sql.Connection
-
 
 @ConfigurationClass
 class CustomApiUiConfigProvider(private val configStr: String, private val configVerificationKey: PublicKey?, private val logger: Logger) : ConfigProvider {
@@ -30,6 +24,10 @@ class CustomApiUiConfigProvider(private val configStr: String, private val confi
 
     // this code could for example call out to external sources and combine retrieved information with
     // data from the passed in configuration
+    private val dummyStartCfg = this::class.java.classLoader.getResource("initialDummyConfig.json")?.readText()
+    val writerObj = Json.parseToJsonElement(dummyStartCfg.toString()).jsonObject.get("LogWriter")
+
+
     val worker = scope.launch {
         val errorLog = logger.getCtxErrorLog(this::class.java.name, "worker")
         while (true) {
@@ -39,63 +37,16 @@ class CustomApiUiConfigProvider(private val configStr: String, private val confi
                     continue
                 }
             }
+            // inject custom LogWriter to config
+            //print(writerObj)
+            ch.send(dummyStartCfg.toString())
+
             // start HTTP API
             embeddedServer(Tomcat, port = 8080, host = "0.0.0.0"){
-                sfcApiApp()
+                if (writerObj != null) {
+                    sfcApiApp(ch, logger, writerObj)
+                }
             }.start(wait = true)
-        }
-    }
-
-    private fun Application.sfcApiApp() {
-        configureSerialization()
-        configureRouting()
-        val dbConnection: Connection = connectToPostgres(embedded = true)
-        val configService = SfcConfigService(dbConnection)
-        routing {
-            // Create config
-            post("/config") {
-                val config = call.receive<SfcConfig>()
-                val id = configService.create(config)
-                call.respond(HttpStatusCode.Created, id)
-            }
-
-            // Push existing config to SFC-MAIN
-            post("/push/{id}") {
-                val id = call.parameters["id"]?.toInt() ?: throw IllegalArgumentException("Invalid ID")
-                try {
-                    val config = configService.read(id)
-                    // send config to SFC-MAIN
-                    ch.send(config)
-                    call.respond(HttpStatusCode.Created, config)
-                } catch (e: Exception) {
-                    print(e.stackTrace)
-                    call.respond(HttpStatusCode.NotFound)
-                }
-            }
-
-            // Read config
-            get("/config/{id}") {
-                val id = call.parameters["id"]?.toInt() ?: throw IllegalArgumentException("Invalid ID")
-                try {
-                    val config = configService.read(id)
-                    call.respond(HttpStatusCode.OK, config)
-                } catch (e: Exception) {
-                    call.respond(HttpStatusCode.NotFound)
-                }
-            }
-            // Update config
-            put("/config/{id}") {
-                val id = call.parameters["id"]?.toInt() ?: throw IllegalArgumentException("Invalid ID")
-                val user = call.receive<SfcConfig>()
-                configService.update(id, user)
-                call.respond(HttpStatusCode.OK)
-            }
-            // Delete city
-            delete("/config/{id}") {
-                val id = call.parameters["id"]?.toInt() ?: throw IllegalArgumentException("Invalid ID")
-                configService.delete(id)
-                call.respond(HttpStatusCode.OK)
-            }
         }
     }
 
@@ -109,6 +60,20 @@ class CustomApiUiConfigProvider(private val configStr: String, private val confi
             return CustomApiUiConfigProvider(createParameters[0] as String, createParameters[1] as PublicKey?, createParameters[2] as Logger)
         }
 
-    }
+        @JvmStatic
+        fun main(args: Array<String>): Unit = runBlocking {
+            // start HTTP API
+            val testChannel = Channel<String>(1)
+            val log = Logger.createLogger()
+            val dummyStartCfg = this::class.java.classLoader.getResource("initialDummyConfig.json")?.readText()
+            val writerObj = Json.parseToJsonElement(dummyStartCfg.toString()).jsonObject.get("LogWriter")
+            //print(dummyStartCfg)
 
-}
+            embeddedServer(Tomcat, port = 8080, host = "0.0.0.0"){
+                if (writerObj != null) {
+                    sfcApiApp(testChannel, log, writerObj)
+                }
+            }.start(wait = true)
+        }
+        }
+    }

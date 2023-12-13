@@ -1,46 +1,78 @@
 {
-    "name": "SFCMytest01",
-    "baseConfig": {
+    "name": "WorkingOPCUA-sample",
+    "baseConfig":   {
         "AWSVersion": "2022-04-02",
-        "Name": "S7 to Sitewise - Update2",
+        "Name": "OPCUA to DebugTarget, using in process source and targets",
         "Version": 1,
-        "LogLevel": "Trace",
+        "LogLevel": "Info",
+        "ElementNames": {
+            "Value": "value",
+            "Timestamp": "timestamp",
+            "Metadata": "metadata"
+        },
         "Schedules": [
             {
-                "Name": "TestSchedule",
-                "Interval": 500,
-                "Description": "Read S7 values from S7-1200 PLC, send to Sitewise API",
+                "Name": "OpcuaToS3",
+                "Interval": 5000,
+                "Description": "Read data of all OPCUA data types once per second and send to S3",
                 "Active": true,
                 "TimestampLevel": "Both",
                 "Sources": {
-                    "S7-SOURCE": [
+                    "OPCUA-SOURCE": [
                         "*"
                     ]
                 },
                 "Targets": [
-                    "#DebugTarget",
-                    "SitewiseTarget"
+                    "#S3Target",
+                    "DebugTarget"
                 ]
             }
         ],
         "Sources": {
-            "S7-SOURCE": {
-                "Name": "S7-SOURCE",
-                "ProtocolAdapter": "S7",
-                "AdapterController": "S7-PLC-1",
-                "Description": "S7 PLC local server",
+            "OPCUA-SOURCE": {
+                "Name": "OPCUA-SOURCE",
+                "ProtocolAdapter": "OPC-UA",
+                "AdapterOpcuaServer": "OPCUA-SERVER-1",
+                "Description": "OPCUA local test server",
+                "SourceReadingMode": "Polling",
+                "SubscribePublishingInterval": 100,
                 "Channels": {
-                    "RealValueLn-DB1": {
-                        "Name": "Ln",
-                        "Address": "%DB1:60:REAL"
+                    "ServerStatus": {
+                        "Name": "ServerStatus",
+                        "NodeId": "ns=0;i=2256"
                     },
-                    "RealValueExp-DB1": {
-                        "Name": "Exp",
-                        "Address": "%DB1:52:REAL"
+                    "ServerTime": {
+                        "Name": "ServerTime",
+                        "NodeId": "ns=0;i=2256",
+                        "Selector": "@.currentTime"
                     },
-                    "RealValueSqrt-DB1": {
-                        "Name": "Sqrt",
-                        "Address": "%DB1:56:REAL"
+                    "State": {
+                        "Name": "State",
+                        "NodeId": "ns=0;i=2259"
+                    },
+                    "Machine1AbsoluteErrorTime": {
+                        "Name": "AbsoluteErrorTime",
+                        "NodeId": "ns=21;i=59048"
+                    },
+                    "Machine1AbsoluteLength": {
+                        "Name": "AbsoluteLength",
+                        "NodeId": "ns=21;i=59066"
+                    },
+                    "Machine1AbsoluteMachineOffTime": {
+                        "Name": "AbsoluteMachineOffTime",
+                        "NodeId": "ns=21;i=59041"
+                    },
+                    "Machine1AbsoluteMachineOnTime": {
+                        "Name": "AbsoluteMachineOnTime",
+                        "NodeId": "ns=21;i=59050"
+                    },
+                    "Machine1AbsolutePiecesIn": {
+                        "Name": "AbsolutePiecesIn",
+                        "NodeId": "ns=21;i=59068"
+                    },
+                    "Machine1FeedSpeed": {
+                        "Name": "FeedSpeed",
+                        "NodeId": "ns=21;i=59039"
                     }
                 }
             }
@@ -48,101 +80,55 @@
         "Targets": {
             "DebugTarget": {
                 "Active": true,
-                "LogLevel": "Trace",
                 "TargetType": "DEBUG-TARGET"
             },
-            "SitewiseTarget": {
+            "S3Target": {
                 "Active": true,
-                "TargetType": "AWS-SITEWISE",
-                "Region": "<REGION>",
-                "CredentialProviderClient": "AwsIotClient",
-                "Assets": [
-                    {
-                        "AssetId": "ea79dd37-b5ac-4043-9fc9-XXXXXXXX",
-                        "Properties": [
-                            {
-                                "PropertyId": "83b6e976-ee28-4096-b422-XXXXXXXX",
-                                "DataType": "double",
-                                "DataPath": "sources.S7-SOURCE.values.Ln"
-                            }
-                        ]
-                    },
-                    {
-                        "AssetId": "4a803a60-e3bd-4b4c-a52d-XXXXXXXX",
-                        "Properties": [
-                            {
-                                "PropertyId": "0e842706-4cfa-4cc5-9412-XXXXXXXX",
-                                "DataType": "double",
-                                "DataPath": "sources.S7-SOURCE.values.Exp"
-                            }
-                        ]
-                    },
-                    {
-                        "AssetId": "ea79dd37-b5ac-4043-9fc9-XXXXXXXX",
-                        "Properties": [
-                            {
-                                "PropertyId": "c46fa59b-1bce-446f-8084-XXXXXXXX",
-                                "DataType": "double",
-                                "DataPath": "sources.S7-SOURCE.values.Sqrt"
-                            }
-                        ]
-                    }
-                ]
+                "TargetType": "AWS-S3",
+                "Region": "us-east-1",
+                "BucketName": "",
+                "Interval": 60,
+                "BufferSize": 1,
+                "Prefix": "opcua-data",
+                "Compression": "None"
             }
         },
         "TargetTypes": {
             "DEBUG-TARGET": {
                 "JarFiles": [
-                    "${SFC_DEPLOYMENT_DIR}/debug-target/lib"
+                    "/Users/asamerh/sfc/debug-target/lib"
                 ],
                 "FactoryClassName": "com.amazonaws.sfc.debugtarget.DebugTargetWriter"
             },
-            "AWS-SITEWISE": {
+            "AWS-S3": {
                 "JarFiles": [
-                    "${SFC_DEPLOYMENT_DIR}/aws-sitewise-target/lib"
+                    "/Users/asamerh/sfc/aws-s3-target/lib"
                 ],
-                "FactoryClassName": "com.amazonaws.sfc.awssitewise.AwsSiteWiseTargetWriter"
+                "FactoryClassName": "com.amazonaws.sfc.awss3.AwsS3TargetWriter"
             }
         },
         "AdapterTypes": {
-            "S7": {
+            "OPCUA": {
                 "JarFiles": [
-                    "${SFC_DEPLOYMENT_DIR}/s7/lib"
+                    "/Users/asamerh/sfc/opcua/lib"
                 ],
-                "FactoryClassName": "com.amazonaws.sfc.s7.S7Adapter"
+                "FactoryClassName": "com.amazonaws.sfc.opcua.OpcuaAdapter"
             }
         },
         "ProtocolAdapters": {
-            "S7": {
-                "AdapterType": "S7",
-                "Controllers": {
-                    "S7-PLC-1": {
-                        "Address": "192.168.0.2",
-                        "ReadPerSingleField": false,
-                        "LocalRack": 0,
-                        "LocalSlot": 1,
-                        "RemoteRack": 0,
-                        "RemoteSlot": 1,
-                        "PduSize": 1024,
-                        "MaxAmqCaller": 8,
-                        "MaxAmqCallee": 8,
-                        "ControllerType": "S7-1200",
-                        "ReadTimeout": 10000,
-                        "ConnectTimeout": 10000
+            "OPC-UA": {
+                "AdapterType": "OPCUA",
+                "OpcuaServers": {
+                    "OPCUA-SERVER-1": {
+                        "Address": "opc.tcp://localhost",
+                        "Path": "/",
+                        "Port": 4840,
+                        "ConnectTimeout": "10000",
+                        "ReadBatchSize": 500
                     }
                 }
             }
-        },
-        "AwsIotCredentialProviderClients": {
-            "AwsIotClient": {
-                "IotCredentialEndpoint": "<ID>.credentials.iot.<YOUR REGION>.amazonaws.com",
-                "RoleAlias": "<ROLE EXCHANGE ALIAS, e.g.GreengrassV2TokenExchangeRoleAlias>",
-                "ThingName": "<THING NAME> e.g. GreengrassCore-1",
-                "Certificate": "<PATH TO DEVICE CERTIFICATE .crt FILE>",
-                "PrivateKey": "<PATH TO PRIVATE KEY .key FILE>",
-                "RootCa": "<PATH TO ROOt CERTIFICATE .pen FILE>",
-                "#GreenGrassDeploymentPath": "<GREENGRASS DEPLOYMENT DIR>/v2"
-            }
         }
     }
+
 }
