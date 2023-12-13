@@ -14,28 +14,32 @@ val sfcIpcVersion = sfcRelease
 val kotlinCoroutinesVersion = "1.6.2"
 val kotlinVersion = "1.9.0"
 val logbackVersion = "1.4.11"
-val postgres_version="42.5.1"
-val h2_version="2.1.214"
+val postgresVersion="42.5.1"
+val h2Version="2.1.214"
+val ktorVersion="2.3.7"
 
 plugins {
     id("sfc.kotlin-application-conventions")
-    id("io.ktor.plugin") version "2.3.6"
+    id("io.ktor.plugin") version "2.3.7"
     kotlin("plugin.serialization") version "1.9.20"
 }
 
 dependencies {
     implementation(project(":core:sfc-core"))
-    implementation("io.ktor:ktor-server-core-jvm")
-    implementation("io.ktor:ktor-server-auth-jvm")
-    implementation("io.ktor:ktor-server-auth-jwt-jvm")
-    implementation("io.ktor:ktor-server-content-negotiation-jvm")
-    implementation("io.ktor:ktor-client-content-negotiation")
-    implementation("io.ktor:ktor-serialization-kotlinx-json-jvm")
-    implementation("org.postgresql:postgresql:$postgres_version")
-    implementation("com.h2database:h2:$h2_version")
-    implementation("io.ktor:ktor-server-host-common-jvm")
-    implementation("io.ktor:ktor-server-tomcat-jvm")
-    implementation("ch.qos.logback:logback-classic:$logbackVersion")
+    implementation("io.ktor:ktor-server-core-jvm:$ktorVersion")
+    implementation("io.ktor:ktor-server-auth-jvm:$ktorVersion")
+    implementation("io.ktor:ktor-server-auth-jwt-jvm:$ktorVersion")
+    implementation("io.ktor:ktor-server-content-negotiation-jvm:$ktorVersion")
+    implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
+    implementation("io.ktor:ktor-serialization-kotlinx-json-jvm:$ktorVersion")
+    implementation("io.ktor:ktor-server-websockets-jvm:$ktorVersion")
+    implementation("io.ktor:ktor-client-core:$ktorVersion")
+    implementation("io.ktor:ktor-client-cio:$ktorVersion")
+    implementation("io.ktor:ktor-client-websockets:$ktorVersion")
+    implementation("org.postgresql:postgresql:$postgresVersion")
+    implementation("com.h2database:h2:$h2Version")
+    implementation("io.ktor:ktor-server-host-common-jvm:$ktorVersion")
+    implementation("io.ktor:ktor-server-tomcat-jvm:$ktorVersion")
 }
 
 application {
