@@ -96,13 +96,13 @@
         "TargetTypes": {
             "DEBUG-TARGET": {
                 "JarFiles": [
-                    "$SFC_DEPLOYMENT_DIR/debug-target/lib"
+                    "${SFC_DEPLOYMENT_DIR}/debug-target/lib"
                 ],
                 "FactoryClassName": "com.amazonaws.sfc.debugtarget.DebugTargetWriter"
             },
             "AWS-S3": {
                 "JarFiles": [
-                    "$SFC_DEPLOYMENT_DIR/aws-s3-target/lib"
+                    "${SFC_DEPLOYMENT_DIR}/aws-s3-target/lib"
                 ],
                 "FactoryClassName": "com.amazonaws.sfc.awss3.AwsS3TargetWriter"
             }
@@ -110,7 +110,7 @@
         "AdapterTypes": {
             "OPCUA": {
                 "JarFiles": [
-                    "$SFC_DEPLOYMENT_DIR/opcua/lib"
+                    "${SFC_DEPLOYMENT_DIR}/opcua/lib"
                 ],
                 "FactoryClassName": "com.amazonaws.sfc.opcua.OpcuaAdapter"
             }

@@ -12,6 +12,10 @@ import io.ktor.client.plugins.websocket.cio.*
 import io.ktor.http.*
 import io.ktor.websocket.*
 import kotlinx.coroutines.*
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.jsonObject
+import java.io.EOFException
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.time.Duration.Companion.seconds
@@ -21,6 +25,9 @@ class SocketLogWriter(private val configStr: String) : LogWriter, SocketMessage 
 
     private val log: Logger = Logger.createLogger()
     private val scope = buildScope("SocketLogWriter")
+
+    private val initCfg = Json.parseToJsonElement(configStr).jsonObject
+
 
     override fun write(logLevel: LogLevel, timestamp: Long, source: String?, message: String) {
         val dtm = "%-23s".format(SimpleDateFormat("YYYY-MM-dd HH:mm:ss.SS").format(Date()))
@@ -36,9 +43,10 @@ class SocketLogWriter(private val configStr: String) : LogWriter, SocketMessage 
     }
 
     private val session = runBlocking {
+        println(initCfg)
         client.webSocketRawSession(method = HttpMethod.Get,
             host = "localhost",
-            port = 8080,
+            port = getPort(initCfg, log),
             path = "/logreceiver")
     }
 
@@ -62,7 +70,9 @@ class SocketLogWriter(private val configStr: String) : LogWriter, SocketMessage 
                     is Frame.Close -> TODO()
                 }
             }
-        } catch (e: Exception){
+        } catch(eof: EOFException){
+            log.warning(eof.localizedMessage, this::class.java.name)
+        }catch (e: Exception){
             log.error(e.localizedMessage, this.javaClass::getName.name)
         }
     }
@@ -81,6 +91,20 @@ class SocketLogWriter(private val configStr: String) : LogWriter, SocketMessage 
         @Suppress("unused")
         fun newInstance(vararg createParameters: Any): SocketLogWriter {
             return SocketLogWriter(createParameters[0] as String)
+        }
+
+        fun getPort(initialCfg: JsonObject, log: Logger): Int {
+            return if(initialCfg.getValue("ConfigProvider").jsonObject.containsKey("Port")) {
+                try {
+                    val port = Integer.parseInt(initialCfg["ConfigProvider"]?.jsonObject?.get("Port").toString())
+                    log.info("Using port $port from Config file","")
+                    port
+                } catch (e: Exception) {
+                    8080
+                }
+            } else {
+                8080
+            }
         }
     }
 }
