@@ -8,6 +8,7 @@ import io.ktor.server.application.*
 import io.ktor.server.routing.*
 import io.ktor.server.websocket.*
 import io.ktor.websocket.*
+import java.io.EOFException
 import java.time.Duration
 import java.util.*
 import kotlin.collections.LinkedHashSet
@@ -35,6 +36,8 @@ fun Application.configureSockets(log: Logger) {
                         it.session.send(receivedText)
                     }
                 }
+            } catch(eof: EOFException){
+                log.warning(eof.localizedMessage, this::class.java.name)
             } catch (e: Exception) {
                 log.error(e.localizedMessage, this.javaClass::getName.name)
             } finally {

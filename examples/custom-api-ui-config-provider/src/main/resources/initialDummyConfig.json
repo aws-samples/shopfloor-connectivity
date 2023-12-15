@@ -52,7 +52,7 @@
   "TargetTypes": {
     "DEBUG-TARGET": {
       "JarFiles": [
-        "$SFC_DEPLOYMENT_DIR/debug-target/lib"
+        "${SFC_DEPLOYMENT_DIR}/debug-target/lib"
       ],
       "FactoryClassName": "com.amazonaws.sfc.debugtarget.DebugTargetWriter"
     }
@@ -60,7 +60,7 @@
   "AdapterTypes": {
     "SQL": {
       "JarFiles": [
-        "$SFC_DEPLOYMENT_DIR/sql/lib"
+        "${SFC_DEPLOYMENT_DIR}/sql/lib"
       ],
       "FactoryClassName": "com.amazonaws.sfc.sql.SqlAdapter"
     }
@@ -81,7 +81,7 @@
   },
   "LogWriter": {
     "JarFiles": [
-      "$SFC_DEPLOYMENT_DIR/custom-api-ui-config-provider/lib"
+      "${SFC_DEPLOYMENT_DIR}/custom-api-ui-config-provider/lib"
     ],
     "FactoryClassName": "com.amazonaws.sfc.log.SocketLogWriter"
   }

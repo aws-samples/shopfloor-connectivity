@@ -44,7 +44,7 @@ dependencies {
 
 application {
     applicationName = module
-    mainClass.set("com.amazonaws.sfc.config.CustomApiUiConfigProvider")
+    mainClass.set("io.ktor.server.tomcat.EngineMain")
     val isDevelopment: Boolean = project.ext.has("development")
     applicationDefaultJvmArgs = listOf("-Dio.ktor.development=$isDevelopment")
 }

@@ -4,6 +4,7 @@
 package com.amazonaws.sfc.apiPlugins
 
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.*
@@ -19,9 +20,9 @@ import java.util.stream.IntStream
 @Serializable
 data class SfcConfig(val name: String, val baseConfig: JsonObject)
 
-class SfcConfigService(private val connection: Connection) {
+class SfcConfigSchema(private val connection: Connection) {
     companion object {
-        private const val CREATE_TABLE_CONFIGS = "CREATE TABLE IF NOT EXISTS CONFIGS (ID SERIAL PRIMARY KEY, NAME VARCHAR(255), CONFIG JSON);"
+        private const val CREATE_TABLE_CONFIGS = "CREATE TABLE IF NOT EXISTS CONFIGS (ID SERIAL PRIMARY KEY, NAME VARCHAR(255),  CONFIG JSON);"
         private const val CREATE_TABLE_PUSHED = "CREATE TABLE IF NOT EXISTS PUSHED (ID SERIAL PRIMARY KEY, CONFIG_ID INTEGER, FOREIGN KEY (CONFIG_ID) REFERENCES CONFIGS(id));"
         private const val SELECT_CONFIG_BY_ID = "SELECT name, config FROM configs WHERE id = ?"
         private const val SELECT_PUSHED = "SELECT config_id FROM pushed ORDER BY id DESC LIMIT 1"
@@ -39,6 +40,8 @@ class SfcConfigService(private val connection: Connection) {
         statement.executeUpdate(CREATE_TABLE_CONFIGS)
         statement.executeUpdate(CREATE_TABLE_PUSHED)
     }
+
+
 
     private var newConfigId = 0
 
@@ -60,7 +63,7 @@ class SfcConfigService(private val connection: Connection) {
         }
     }
 
-    // Read a Config
+    // Read a Config by ID
     suspend fun read(id: Int): String = withContext(Dispatchers.IO) {
         val statement = connection.prepareStatement(SELECT_CONFIG_BY_ID)
         statement.setInt(1, id)
@@ -70,7 +73,7 @@ class SfcConfigService(private val connection: Connection) {
             val baseConfig = resultSet.getString("config")
             return@withContext Json.decodeFromString(baseConfig)
         } else {
-            throw Exception("Record not found")
+            throw Exception("DB Record not found: $id")
         }
     }
 
@@ -132,7 +135,7 @@ class SfcConfigService(private val connection: Connection) {
             val pushed = resultSet.getString("config_id")
             return@withContext pushed
         } else {
-            throw Exception("Record not found")
+           return@withContext "none"
         }
     }
 

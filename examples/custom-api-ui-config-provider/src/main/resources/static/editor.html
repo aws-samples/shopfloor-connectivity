@@ -103,6 +103,7 @@
                     </table>
                 </div>
                 <br>
+                <h4>Current config</h4>
                 <input id="PushedconfId" class="form-control form-control-sm" type="text" aria-describedby="PushedconfHelp" readonly></input>
                 <small id="PushedconfHelp" class="form-text text-muted">this config was pushed to sfc-core</small>
                 <br>
@@ -304,7 +305,7 @@
         var aceConfig4Loggr = {
             mode: 'ace/mode/sh',
             theme: 'ace/theme/solarized_dark',
-            maxLines: 20,
+            maxLines: 30,
             minLines: 2,
             showFoldWidgets: false,
             showPrintMargin: false,
@@ -550,7 +551,7 @@
             document.getElementById('confName').value = confName;
 
             confCreate = {"name": confName, "baseConfig": conf};
-            //PUT API Call
+            //POST API Call
             newId = createConfig("/config", JSON.stringify(confCreate));
             newId.then(function(id) {
                 jsoneditor.setValue(JSON.parse(outputTextarea.getValue()));
@@ -602,7 +603,8 @@
         var logSession = outputTextarea4Loggr.session;
 
         function startWebsocket() {
-            var ws = new WebSocket('ws://localhost:8080/logreceiver')
+            const port = location.port
+            var ws = new WebSocket(`ws://localhost:${port}/logreceiver`)
 
             ws.onmessage = function(e){
                 logSession.insert({

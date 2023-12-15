@@ -12,15 +12,21 @@ import io.ktor.server.routing.*
 import java.sql.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.ReceiveChannel
+import kotlinx.coroutines.channels.toList
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.*
 
-fun Application.sfcApiApp(ch: Channel<String>, log: Logger, writer: JsonElement) {
+
+fun Application.sfcApiApp(ch: Channel<String>, log: Logger, writer: JsonElement, confProvider: JsonElement) {
+
     configureSerialization()
     configureRouting()
     configureSockets(log)
     val dbConnection: Connection = connectToPostgres(embedded = true)
-    val configService = SfcConfigService(dbConnection)
+    val configService = SfcConfigSchema(dbConnection)
+
+
     routing {
         // Create config
         post("/config") {
@@ -39,7 +45,7 @@ fun Application.sfcApiApp(ch: Channel<String>, log: Logger, writer: JsonElement)
                 // Add our SocketLogWriter if not exists
                 var confJson = Json.parseToJsonElement(config).jsonObject
                 if (!confJson.containsKey("LogWriter")) {
-                    confJson =  JsonObject(confJson + ("LogWriter" to writer))
+                    confJson =  JsonObject(confJson + ("LogWriter" to writer) + ("ConfigProvider" to confProvider))
                 }
                 //print(Json.encodeToString(writer))
                 // send config to SFC-MAIN
@@ -57,6 +63,18 @@ fun Application.sfcApiApp(ch: Channel<String>, log: Logger, writer: JsonElement)
         get("/pushed") {
             try {
                 val config = configService.getPushed()
+                call.respond(HttpStatusCode.OK, config)
+            } catch (e: Exception) {
+                e.stackTrace
+                call.respond(HttpStatusCode.NotFound)
+            }
+        }
+
+        // get active conf
+        get("/active"){
+            try {
+                println(ch.toList())
+                val config = receiveAvailable(ch)
                 call.respond(HttpStatusCode.OK, config)
             } catch (e: Exception) {
                 e.stackTrace
@@ -99,6 +117,14 @@ fun Application.sfcApiApp(ch: Channel<String>, log: Logger, writer: JsonElement)
             call.respond(HttpStatusCode.OK)
         }
     }
+}
+
+suspend fun receiveAvailable(ch: Channel<String>): String {
+    repeat(1){
+        delay(100)
+        return ch.receive()
+    }
+    return ""
 }
 
 

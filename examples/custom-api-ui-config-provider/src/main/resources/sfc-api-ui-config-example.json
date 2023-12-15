@@ -1,8 +1,11 @@
 {
   "ConfigProvider": {
+    "Port": 5000,
+    "SelectedConfIdFromDB": 0,
     "JarFiles": [
-      "$SFC_DEPLOYMENT_DIR/custom-api-ui-config-provider/lib"
+      "${SFC_DEPLOYMENT_DIR}/custom-api-ui-config-provider/lib"
     ],
     "FactoryClassName": "com.amazonaws.sfc.config.CustomApiUiConfigProvider"
   }
+
 }
