@@ -55,7 +55,7 @@ At first we have to download and extract the SFC bundles. These are precompiled 
 
 ```shell
 # Define sfc version and directory
-export VERSION="1.0.2"
+export VERSION="1.0.3"
 export SFC_DEPLOYMENT_DIR="./sfc"
 ```
 
@@ -92,7 +92,7 @@ aws s3api create-bucket --bucket ${SFC_S3_BUCKET_NAME} --region ${AWS_REGION}
 ```
 
 Next we will have to configure the SFC. This is done via a configuration file you can specify at execution time (e.g. `sfc-main -config example.json`) We are first defining following variables which we will then use in a example configuration file. The following configuration sets SFC up, to connect to a OPCUA-Server and forward it to the S3 Bucket in your AWS Account:
-> Note: **Please** expand the section below, the see the json config...
+> Note: **Please** expand the section below, to see the json config...
 <details>
   <summary><b>Expand</b></summary>
 

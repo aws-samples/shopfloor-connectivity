@@ -88,7 +88,7 @@ def createRecipes():
             recipe["ComponentName"] = sfcComponentBaseName+"."+fileBaseName
             recipe["ComponentVersion"] = sfcComponentVersion
             recipe["ComponentDescription"] = "SFC "+fileBaseName+" module"
-            recipe["Manifests"][0]["Lifecycle"]["Install"]["Script"] = "cd {artifacts:path} && tar -xvf "+filename+" && rm "+filename
+            recipe["Manifests"][0]["Lifecycle"]["Install"]["Script"] = "cd {artifacts:path} && tar -xvf "+filename
             if fileBaseName == "sfc-main":
                 recipe["Manifests"][0]["Lifecycle"]["Run"]["Script"] = "printf '{configuration:/SFC_CONFIG_JSON}' > {artifacts:path}/conf.json && {artifacts:path}/"+fileBaseName+"/bin/"+fileBaseName+" -config {artifacts:path}/conf.json"
             else:

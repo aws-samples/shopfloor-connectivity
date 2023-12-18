@@ -11,6 +11,7 @@ SFC documentation
     - [Greengrass SFC IPC step-by-step Lab](../examples/greengrass-ipc/README.md)
     - [Rockwell PCCC to S3 sample](../examples/in-process-pccc-s3/README.md)
     - [Siemens S7 to Sitewise sample](../examples/in-process-s7-sitewise/README.md)
+    - [CSV File Adapter Example](../examples/custom-adapter-csvfile/README.md)
   - [Introduction](#introduction)
     - [SFC Components](#sfc-components)
     - [Protocol Adapters](#protocol-adapters)

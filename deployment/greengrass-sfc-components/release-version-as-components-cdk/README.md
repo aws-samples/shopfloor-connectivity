@@ -51,9 +51,9 @@ aws greengrassv2 list-components #| jq
 ### 5. Next steps
 Now create customized `in-process` or `IPC` SFC Greengrass Deployments as described here:
 
-[**Link to sfc greengrass `in-process` howto docs**](../../../docs/greengrass-in-process/README.md)
+[**Link to sfc greengrass `in-process` howto docs**](../../../examples/greengrass-in-process/README.md)
 
-[**Link to sfc greengrass `IPC` howto docs**](../../../docs/greengrass-ipc/README.md)
+[**Link to sfc greengrass `IPC` howto docs**](../../../examples/greengrass-ipc/README.md)
 
 ---
 

@@ -6,19 +6,19 @@
    "ComponentPublisher": "AWS",
    "ComponentDependencies": {
     "com.amazon.sfc.opcua": {
-      "VersionRequirement": ">=0.0.1",
+      "VersionRequirement": ">=1.0.4",
       "DependencyType": "HARD"
     },
     "com.amazon.sfc.debug-target": {
-      "VersionRequirement": ">=0.0.1",
+      "VersionRequirement": ">=1.0.4",
       "DependencyType": "HARD"
     },
     "com.amazon.sfc.aws-s3-target": {
-      "VersionRequirement": ">=0.0.1",
+      "VersionRequirement": ">=1.0.4",
       "DependencyType": "HARD"
     },
     "com.amazon.sfc.aws-iot-mqtt-target": {
-      "VersionRequirement": ">=0.0.1",
+      "VersionRequirement": ">=1.0.4",
       "DependencyType": "HARD"
     }
    },
