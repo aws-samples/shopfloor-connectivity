@@ -1,0 +1,10 @@
+{ "AWSVersion": "2022-04-02",
+  "Name": "Configuration using custom YAML configurations",
+  "Version": 1,
+  "LogLevel": "Info",
+  "ConfigProvider": {
+    "JarFiles": ["examples/yaml-custom-config-provider/build/libs/yaml-custom-config-provider-1.0.0.jar"],
+    "FactoryClassName": "com.amazonaws.sfc.config.YamlConfigProvider"
+  },
+  "YamlConfigFile" : "examples/yaml-custom-config-provider/config.yaml"
+}

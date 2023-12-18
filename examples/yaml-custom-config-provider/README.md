@@ -12,7 +12,7 @@ The initial SFC configuration file passed to sfc-main only contains the configur
         "JarFiles": ["examples/yaml-custom-config-provider/build/libs/yaml-custom-config-provider-1.0.0.jar"],
         "FactoryClassName": "com.amazonaws.sfc.config.YamlConfigProvider"
     },
-    "YamlConfigFile" : "examples/yaml-custom-config-provider/src/main/kotlin/com/amazonaws/sfc/config/config.yaml"
+    "YamlConfigFile" : "examples/yaml-custom-config-provider/config.yaml"
 }
 ```
 

@@ -1,0 +1,78 @@
+---
+AWSVersion: '2022-04-02'
+Name: OPCUA to S3, IoT Core and console
+Schedules:
+  - Name: OPCUA-DATA
+    Interval: 1000
+    Sources:
+      OPCUA-SOURCE:
+        - "*"
+    Targets:
+      - IoTCoreTarget
+      - S3Target
+      - DebugTarget
+Sources:
+  OPCUA-SOURCE:
+    Name: OPCUA-SOURCE
+    ProtocolAdapter: OPC-UA
+    AdapterOpcuaServer: OPCUA-SERVER
+    SourceReadingMode: Subscription
+    Channels:
+      ServerStatus:
+        NodeId: ns=0;i=2256
+      SimulationCounter:
+        NodeId: ns=3;i=1001
+      SimulationRandom:
+        NodeId: ns=3;i=1002
+      LevelAlarm:
+        NodeId: ns=6;s=MyLevel.Alarm
+        EventType: ExclusiveLevelAlarmType
+ProtocolAdapters:
+  OPC-UA:
+    AdapterType: OPCUA
+    OpcuaServers:
+      OPCUA-SERVER:
+        Address: opc.tcp://sfc-server
+        Path: OPCUA/SimulationServer
+Targets:
+  IoTCoreTarget:
+    TargetType: AWS-IOT-HTTP
+    TopicName: sfc-data-topic
+    Region: eu-west-1
+    CredentialProviderClient: AwsIotClient
+  S3Target:
+    TargetType: AWS-S3
+    Region: eu-west-1
+    BucketName: sfc-data-bucket
+    Interval: 60
+    BufferSize: 1
+    CredentialProviderClient: AwsIotClient
+    Compression: Zip
+  DebugTarget:
+    TargetType: DEBUG-TARGET
+AdapterTypes:
+  OPCUA:
+    JarFiles:
+      - "/sfc/opcua/lib"
+    FactoryClassName: com.amazonaws.sfc.opcua.OpcuaAdapter
+TargetTypes:
+  AWS-IOT-HTTP:
+    JarFiles:
+      - "/sfc/aws-iot-http-target/lib"
+    FactoryClassName: com.amazonaws.sfc.awsiot.http.AwsIotHttpTargetWriter
+  AWS-S3:
+    JarFiles:
+      - "/sfc/aws-s3-target/lib"
+    FactoryClassName: com.amazonaws.sfc.awss3.AwsS3TargetWriter
+  DEBUG-TARGET:
+    JarFiles:
+      - "/sfc/debug-target/lib"
+    FactoryClassName: com.amazonaws.sfc.debugtarget.DebugTargetWriter
+AwsIotCredentialProviderClients:
+  AwsIotClient:
+    IotCredentialEndpoint: 1234567890abcd.credentials.iot.eu-west-1.amazonaws.com
+    RoleAlias: TokenExchangeRoleAlias
+    ThingName: MyThingName
+    Certificate: "/sfc/cert/certificate.crt"
+    PrivateKey: "/sfc/cert/private.key"
+    RootCa: "/sfc/cert/root.pem"
