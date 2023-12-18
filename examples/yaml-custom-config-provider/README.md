@@ -18,6 +18,6 @@ The initial SFC configuration file passed to sfc-main only contains the configur
 
 When sfc-main is started with the command
 
-`sfc-main -config json.config`
+`sfc-main -config config.json`
 
 it will load the custom config provider which will read the configuration from the specified YAML file, convert it to JSON and pass it to SFC-Core. The provider will also detect updates to the YAML config file.
