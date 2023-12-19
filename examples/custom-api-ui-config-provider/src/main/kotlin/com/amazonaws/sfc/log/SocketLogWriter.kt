@@ -73,7 +73,8 @@ class SocketLogWriter(private val configStr: String) : LogWriter, SocketMessage 
         } catch(eof: EOFException){
             log.warning(eof.localizedMessage, this::class.java.name)
         }catch (e: Exception){
-            log.error(e.localizedMessage, this.javaClass::getName.name)
+            // do nothing
+            // log.error(e.localizedMessage, this.javaClass::getName.name)
         }
     }
 

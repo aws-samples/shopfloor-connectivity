@@ -13,6 +13,7 @@ import java.sql.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
+import kotlinx.coroutines.channels.consume
 import kotlinx.coroutines.channels.toList
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.*
@@ -70,18 +71,6 @@ fun Application.sfcApiApp(ch: Channel<String>, log: Logger, writer: JsonElement,
             }
         }
 
-        // get active conf
-        get("/active"){
-            try {
-                println(ch.toList())
-                val config = receiveAvailable(ch)
-                call.respond(HttpStatusCode.OK, config)
-            } catch (e: Exception) {
-                e.stackTrace
-                call.respond(HttpStatusCode.NotFound)
-            }
-        }
-
         // Read config
         get("/config/{id}") {
             val id = call.parameters["id"]?.toInt() ?: throw IllegalArgumentException("Invalid ID")
@@ -117,14 +106,6 @@ fun Application.sfcApiApp(ch: Channel<String>, log: Logger, writer: JsonElement,
             call.respond(HttpStatusCode.OK)
         }
     }
-}
-
-suspend fun receiveAvailable(ch: Channel<String>): String {
-    repeat(1){
-        delay(100)
-        return ch.receive()
-    }
-    return ""
 }
 
 

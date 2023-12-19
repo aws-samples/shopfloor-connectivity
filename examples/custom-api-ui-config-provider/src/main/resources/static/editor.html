@@ -35,7 +35,7 @@
 </head>
 <body>
     <div class="container grid-xl" style="padding-top: 15px; padding-bottom: 30px;" id="sfc-editor">
-        <h2>SFC <span class="badge bg-primary" data-badge="JSON">Config Provider</span></h2>
+        <h2>SFC <span class="badge bg-primary" data-badge="UX">Config Provider</span></h2>
         <br>
         <div class="row columns md:flex">
             <div class='col-9 col-md-9 w-9/12'>
@@ -55,9 +55,18 @@
                     </div>
                 </form>
                 <br>
-                <textarea id='output-textarea' rows="15" style="width: 100%; font-family: monospace;"
-                          class='form-control' aria-describedby="editorHelp"></textarea>
-                <small id="editorHelp" class="form-text text-muted">craft your SFC JSON config here! ^^</small>
+                <div class="row columns md:flex">
+                    <div class='col-9 col-md-9 w-9/12'>
+                        <textarea id='output-textarea' rows="15" style="width: 100%; font-family: monospace;"
+                                  class='form-control' aria-describedby="editorHelp"></textarea>
+                        <small id="editorHelp" class="form-text text-muted">craft your SFC JSON config here! ^^</small>
+                    </div>
+                    <div class='col-3 col-md-3 w-3/12'>
+                        <textarea id='validate-textarea' aria-describedby="help4Validator" readonly></textarea>
+                        <small id="help4Validator" class="form-text text-muted">This will update whenever the editor changes to show validation errors if any.</small><br>
+                    </div>
+                </div>
+
                 <hr>
                 <div class="row columns md:flex">
                     <div class='col-12 col-md-12 w-12/12'>
@@ -69,12 +78,6 @@
                 </div>
 
                 <hr>
-
-                <h3>Validation</h3>
-                <label for="validate-textarea">This will update whenever the form changes to show validation errors if there
-                    are any.</label><br>
-                <textarea id='validate-textarea' readonly disabled class='form-control'></textarea>
-                <br>
                 <h3>Form View</h3>
                 <div id="json-editor-form"></div>
 
@@ -90,7 +93,6 @@
                 <div>
                     <br>
                     <h5>Stored configs</h5>
-                    <br>
                     <table id="configs" class="table table-hover">
                         <thead>
                         <tr>
@@ -103,11 +105,13 @@
                     </table>
                 </div>
                 <br>
-                <h4>Current config</h4>
+                <h5>Current config</h5>
                 <input id="PushedconfId" class="form-control form-control-sm" type="text" aria-describedby="PushedconfHelp" readonly></input>
                 <small id="PushedconfHelp" class="form-text text-muted">this config was pushed to sfc-core</small>
                 <br>
                 <textarea id="runnrResponse"readonly>{"info":"this config was pushed to sfc-core"}</textarea>
+                <br>
+
             </div>
         </div>
 
@@ -156,33 +160,40 @@
     </div>
     <script>
         var defaultSchema = {
-            "$schema": "http://json-schema.org/draft-07/schema#",
-            "title": "SFC In-Process Config",
+            "$schema": "https://json-schema.org/draft-07/schema#",
+            "title": "SFC In-Process & IPC Config Schema",
             "type": "object",
             "properties": {
                 "AWSVersion": {
-                    "type": "string"
+                    "type": "string",
+                    "default": "2022-04-02"
                 },
                 "Name": {
-                    "type": "string"
+                    "type": "string",
+                    "default": "conf1"
                 },
                 "Version": {
-                    "type": "number"
+                    "type": "number",
+                    "default": "1"
                 },
                 "LogLevel": {
-                    "type": "string"
+                    "type": "string",
+                    "default": "info"
                 },
                 "ElementNames": {
                     "type": "object",
                     "properties": {
                         "Value": {
-                            "type": "string"
+                            "type": "string",
+                            "default": "value"
                         },
                         "Timestamp": {
-                            "type": "string"
+                            "type": "string",
+                            "default": "timestamp"
                         },
                         "Metadata": {
-                            "type": "string"
+                            "type": "string",
+                            "default": "metadata"
                         }
                     },
                     "required": [
@@ -197,19 +208,24 @@
                         "type": "object",
                         "properties": {
                             "Name": {
-                                "type": "string"
+                                "type": "string",
+                                "default": "Schedule1"
                             },
                             "Interval": {
-                                "type": "number"
+                                "type": "number",
+                                "default": 1000
                             },
                             "Description": {
-                                "type": "string"
+                                "type": "string",
+                                "default": "Some schedule description here"
                             },
                             "Active": {
-                                "type": "boolean"
+                                "type": "boolean",
+                                "default": true
                             },
                             "TimestampLevel": {
-                                "type": "string"
+                                "type": "string",
+                                "default": "Single"
                             },
                             "Sources": {
                                 "type": "object"
@@ -235,16 +251,49 @@
                 "Sources": {
                     "type": "object"
                 },
+                "ProtocolAdapters": {
+                    "type": "object"
+                },
+                "AdapterTypes": {
+                    "type": "object"
+                },
+                "AdapterServers": {
+                    "type": "object"
+                },
                 "Targets": {
                     "type": "object"
                 },
                 "TargetTypes": {
                     "type": "object"
                 },
-                "AdapterTypes": {
+                "TargetServers": {
                     "type": "object"
                 },
-                "ProtocolAdapters": {
+                "SecretsManager": {
+                    "type": "object"
+                },
+                "Transformations": {
+                    "type": "object"
+                },
+                "ChangeFilters": {
+                    "type": "object"
+                },
+                "ValueFilters": {
+                    "type": "object"
+                },
+                "AwsIotCredentialProviderClients": {
+                    "type": "object"
+                },
+                "Metrics": {
+                    "type": "object"
+                },
+                "ConfigProvider": {
+                    "type": "object"
+                },
+                "LogWriter": {
+                    "type": "object"
+                },
+                "HealthProbe": {
                     "type": "object"
                 }
             },
@@ -256,10 +305,19 @@
                 "ElementNames",
                 "Schedules",
                 "Sources",
+                "ProtocolAdapters",
+                "AdapterTypes",
+                "AdapterServers",
                 "Targets",
                 "TargetTypes",
-                "AdapterTypes",
-                "ProtocolAdapters"
+                "TargetServers",
+                // "SecretsManager",
+                // "Transformations",
+                // "ChangeFilters",
+                // "ValueFilters",
+                // "AwsIotCredentialProviderClients",
+                // "Metrics",
+                // "HealthProbe"
             ]
         }
 
@@ -283,7 +341,6 @@
         //var directLink = document.querySelector('#direct-link')
         var jsonEditorForm = document.querySelector('#json-editor-form')
         var setSchema = document.querySelector('#setschema')
-        var validateTextarea = document.querySelector('#validate-textarea')
 
         var aceConfig = {
             mode: 'ace/mode/json',
@@ -302,6 +359,16 @@
             readOnly: true
         }
 
+        var aceConfig4Validation = {
+            mode: 'ace/mode/json',
+            maxLines: 35,
+            minLines: 15,
+            showFoldWidgets: false,
+            showLineNumbers: false,
+            showPrintMargin: false,
+            readOnly: true
+        }
+
         var aceConfig4Loggr = {
             mode: 'ace/mode/sh',
             theme: 'ace/theme/solarized_dark',
@@ -313,6 +380,7 @@
         }
 
         var outputTextarea = ace.edit('output-textarea', aceConfig)
+        var validateTextarea = ace.edit('validate-textarea', aceConfig4Validation)
         var schemaTextarea = ace.edit('schema-textarea', aceConfig)
         var outputTextarea4Runner = ace.edit('runnrResponse', aceConfig4Runner)
         var outputTextarea4Loggr = ace.edit('sfcLoggr', aceConfig4Loggr)
@@ -320,7 +388,7 @@
         var jeErrorsTextarea = ace.edit('je-errors-textarea', aceConfig)
         var ajvErrorsCount = document.querySelector('#ajv-errors-count')
         var jeErrorsCount = document.querySelector('#je-errors-count')
-        var ajv = new AjvValidator()
+        var ajv = new AjvValidator({allErrors: true});
 
         const validateSchema = () => {
             const dataToValidate = JSON.parse(schemaTextarea.getValue())
@@ -354,15 +422,44 @@
             return cfg;
         }
 
-        function highlightTableRow(row) {
-            // Remove highlight from previously selected row, if any
-            const previouslySelectedRow = document.querySelector('tr.selected');
-            if (previouslySelectedRow) {
-                previouslySelectedRow.classList.remove('selected');
+
+        checkEditorAgainstSchema = function(data) {
+            try {
+                data = JSON.parse(data)
+            } catch (e) {
+                return [{"invalid-json": e.message}]
             }
-            // Highlight the clicked row
-            row.classList.add('selected');
+            return ajv.validate(defaultSchema, data);
+        };
+
+
+        // function to take only the DB-ID of a Config
+        function selectConfig(cfgId) {
+            if (!isNaN(cfgId) || cfgId!="none") {
+                var confRows = document.getElementById('configs').rows;
+                Array.from(confRows).forEach(row => {
+                    if (row.getAttribute('data-href') == cfgId) {
+                        // Remove highlight from previously selected row, if any
+                        const previouslySelectedRow = document.querySelector('tr.selected');
+                        if (previouslySelectedRow) {
+                            previouslySelectedRow.classList.remove('selected');
+                        }
+                        // Highlight the clicked row
+                        row.classList.add('selected');
+
+                        // set config name input & id field
+                        document.getElementById('confName').value = row.getAttribute('data-name');
+                        document.getElementById('confId').value = row.getAttribute('data-href');
+                        // unlock buttons
+                        document.getElementById('savr').classList.remove('disabled');
+                        document.getElementById('deletr').classList.remove('disabled');
+                        document.getElementById('runnr').classList.remove('disabled');
+                    }
+                });
+            }
         }
+
+        // get list of stored configs from DB
         async function fetchConfigs() {
             const res = await fetch('/config');
             const data = await res.json();
@@ -382,18 +479,13 @@
                             jsoneditor.setValue(JSON.parse(outputTextarea.getValue()));
                         });
                     // highlight clicked row
-                    highlightTableRow(row);
-                    // set config name input & id field
-                    document.getElementById('confName').value = this.getAttribute('data-name');
-                    document.getElementById('confId').value = this.getAttribute('data-href');
-                    // unlock buttons
-                    document.getElementById('savr').classList.remove('disabled');
-                    document.getElementById('deletr').classList.remove('disabled');
-                    document.getElementById('runnr').classList.remove('disabled');
+                    selectConfig(this.getAttribute('data-href'));
                 });
             });
+            return data;
         }
-        fetchConfigs()
+
+        const cfgList = fetchConfigs();
 
         async function updateConfig(url, data) {
             const response = await fetch(url, {
@@ -447,6 +539,12 @@
             });
             const returnData = await response;
             return returnData.json();
+        }
+
+        async function getPushed(url) {
+            return (await fetch(url, {
+                method: 'GET'
+            })).json();
         }
 
         /* -------------------------------------------------------------- parse url */
@@ -512,55 +610,64 @@
                 outputTextarea.clearSelection(1)
 
                 // validate
-                var validationErrors = jsoneditor.validate()
+                var validationErrors = jsoneditor.validate();
                 if (validationErrors.length) {
                     validateTextarea.value = JSON.stringify(validationErrors, null, 2)
                 } else {
                     validateTextarea.value = 'valid'
                 }
-            })
-            //updateDirectLink()
+            });
+
+            outputTextarea.getSession().on('change', function () {
+                var valid = checkEditorAgainstSchema(outputTextarea.getValue());
+                if (valid.length) {
+                    validateTextarea.setValue(JSON.stringify(valid, null, 2));
+                } else {
+                    validateTextarea.setValue(JSON.stringify({"valid": true}));
+                }
+                validateTextarea.clearSelection(1);
+            });
         }
-
-        /* ------------------------------------------------------- updateDirectLink */
-
-        // var updateDirectLink = function () {
-        //     var url = window.location.href.replace(/\?.*/, '')
-        //     url += '?data='
-        //     url += LZString.compressToBase64(JSON.stringify(data))
-        //     directLink.href = url
-        // }
-
-        /* -------------------------------------------------------- event listeners */
 
 
         document.getElementById('savr').addEventListener('click',function() {
-            conf = JSON.parse(outputTextarea.getValue());
-            confName = document.getElementById('confName').value;
-            confID = document.getElementById('confId').value;
-            confSave = {"name": confName, "baseConfig": conf};
-            //PUT API Call
-            updateConfig("/config/"+confID, JSON.stringify(confSave));
-            jsoneditor.setValue(JSON.parse(outputTextarea.getValue()));
+            try {
+                conf = JSON.parse(outputTextarea.getValue());
+                confName = document.getElementById('confName').value;
+                confID = document.getElementById('confId').value;
+                confSave = {"name": confName, "baseConfig": conf};
+                //PUT API Call
+                updateConfig("/config/" + confID, JSON.stringify(confSave));
+                jsoneditor.setValue(JSON.parse(outputTextarea.getValue()));
+            } catch(e) {
+                toastHeader.innerHTML = "Invalid JSON";
+                toastBody.innerHTML = "Check your config against the schema.";
+                toaster.show();
+            }
         });
 
         document.getElementById('creatr').addEventListener('click',function() {
-            conf = JSON.parse(outputTextarea.getValue());
-            confName = document.getElementById('confName').value;
-            if (confName.length == 0) {confName = "NewConf";}
-            document.getElementById('confName').value = confName;
+            try {
+                conf = JSON.parse(outputTextarea.getValue());
+                confName = document.getElementById('confName').value;
+                if (confName.length == 0) {confName = "NewConf";}
+                document.getElementById('confName').value = confName;
 
-            confCreate = {"name": confName, "baseConfig": conf};
-            //POST API Call
-            newId = createConfig("/config", JSON.stringify(confCreate));
-            newId.then(function(id) {
-                jsoneditor.setValue(JSON.parse(outputTextarea.getValue()));
-                document.getElementById('confId').value = id;
-                console.log(id);
-                toastHeader.innerHTML = "Created Config - id:"+id;
-                toastBody.innerHTML = "HTTP POST - /config/"+id;
+                confCreate = {"name": confName, "baseConfig": conf};
+                //POST API Call
+                newId = createConfig("/config", JSON.stringify(confCreate));
+                newId.then(function(id) {
+                    jsoneditor.setValue(JSON.parse(outputTextarea.getValue()));
+                    document.getElementById('confId').value = id;
+                    toastHeader.innerHTML = "Created Config - id:"+id;
+                    toastBody.innerHTML = "HTTP POST - /config/"+id;
+                    toaster.show();
+                });
+            } catch(e) {
+                toastHeader.innerHTML = "Invalid JSON";
+                toastBody.innerHTML = "Check your config against the schema.";
                 toaster.show();
-            });
+            }
         });
 
         document.getElementById('deletr').addEventListener('click',function() {
@@ -579,7 +686,6 @@
             document.getElementById('PushedconfId').value = confID+" - "+confName;
             run = runConfig("/push/"+confID);
             run.then(function(resp) {
-                console.log(resp);
                 outputTextarea4Runner.setValue(JSON.stringify(resp, 0, 4));
                 toastHeader.innerHTML = "SFC: Pushed Config - id:"+confID;
                 toastBody.innerHTML = "HTTP POST - /push/"+confID;
@@ -602,10 +708,13 @@
 
         var logSession = outputTextarea4Loggr.session;
 
-        function startWebsocket() {
-            const port = location.port
-            var ws = new WebSocket(`ws://localhost:${port}/logreceiver`)
 
+        // websockets
+        const port = location.port
+        let ws;
+
+        function startWebsocket() {
+            ws = new WebSocket(`ws://localhost:${port}/logreceiver`);
             ws.onmessage = function(e){
                 logSession.insert({
                     row: logSession.getLength(),
@@ -617,14 +726,50 @@
             }
             ws.onclose = function(){
                 // connection closed, discard old websocket and create a new one in 5s
-                ws = null
+                ws.close()
                 setTimeout(startWebsocket, 5000)
             }
         }
 
+        // get info from DB about currently pushed/pinned Config
+        async function loadCfgFromDB() {
+            let id;
+            let list;
+            let loaded;
+            id = await getPushed("/pushed");
+            if (parseInt(id)!=0) {
+                let cfg;
+                cfg = await fetchConfig(id);
+
+                outputTextarea.setValue(JSON.stringify(cfg));
+                jsoneditor.setValue(JSON.parse(outputTextarea.getValue()));
+
+                // set config name input & id field
+                list = await cfgList;
+                for (const c in list) {
+                    if (list[c]["ID"]==id) {
+                        loaded = list[c]["NAME"]
+                    }
+                }
+                selectConfig(id);
+                outputTextarea4Runner.setValue(JSON.stringify(cfg, 0, 4));
+                document.getElementById('PushedconfId').value = id + " - " + loaded;
+            }
+        }
+
+        loadCfgFromDB();
+
         startWebsocket();
 
-        parseUrl()
+        parseUrl();
+
+        //close socket on page reload
+        window.addEventListener('beforeunload', function (e) {
+            e.preventDefault();
+            e.returnValue = '';
+            ws.close();
+        });
+
     </script>
 </body>
 </html>

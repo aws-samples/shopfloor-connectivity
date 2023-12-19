@@ -135,7 +135,7 @@ class SfcConfigSchema(private val connection: Connection) {
             val pushed = resultSet.getString("config_id")
             return@withContext pushed
         } else {
-           return@withContext "none"
+           return@withContext "0"
         }
     }
 

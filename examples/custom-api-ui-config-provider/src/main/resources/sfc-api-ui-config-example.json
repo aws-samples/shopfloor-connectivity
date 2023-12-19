@@ -1,7 +1,7 @@
 {
   "ConfigProvider": {
     "Port": 5000,
-    "SelectedConfIdFromDB": 0,
+    "SelectedConfIdFromDB": 2,
     "JarFiles": [
       "${SFC_DEPLOYMENT_DIR}/custom-api-ui-config-provider/lib"
     ],
