@@ -96,6 +96,5 @@ class YamlConfigProvider(
                 createParameters[2] as Logger
             )
         }
-
     }
 }
