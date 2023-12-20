@@ -4,7 +4,6 @@
 
 package com.amazonaws.sfc.config
 
-import com.google.gson.Gson
 import com.google.gson.annotations.SerializedName
 import java.io.File
 
