@@ -1,0 +1,6 @@
+**/BuildConfig.kt
+
+build/
+.gradle/
+.idea/
+*.db
