@@ -17,6 +17,7 @@ import kotlinx.coroutines.channels.consume
 import kotlinx.coroutines.channels.toList
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.*
+import java.net.InetAddress
 
 
 fun Application.sfcApiApp(ch: Channel<String>, log: Logger, writer: JsonElement, confProvider: JsonElement) {
@@ -67,6 +68,16 @@ fun Application.sfcApiApp(ch: Channel<String>, log: Logger, writer: JsonElement,
                 call.respond(HttpStatusCode.OK, config)
             } catch (e: Exception) {
                 e.stackTrace
+                call.respond(HttpStatusCode.NotFound)
+            }
+        }
+
+        // get Hostname String
+        get("/hostname") {
+            try {
+                val host = InetAddress.getLocalHost().hostName
+                call.respond(HttpStatusCode.OK, "{\"hostname\":\"$host\"}")
+            } catch (e: Exception) {
                 call.respond(HttpStatusCode.NotFound)
             }
         }

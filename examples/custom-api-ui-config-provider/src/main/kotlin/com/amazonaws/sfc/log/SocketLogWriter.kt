@@ -12,6 +12,7 @@ import io.ktor.client.plugins.websocket.cio.*
 import io.ktor.http.*
 import io.ktor.websocket.*
 import kotlinx.coroutines.*
+import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonObject
@@ -32,6 +33,9 @@ class SocketLogWriter(private val configStr: String) : LogWriter, SocketMessage 
     override fun write(logLevel: LogLevel, timestamp: Long, source: String?, message: String) {
         val dtm = "%-23s".format(SimpleDateFormat("YYYY-MM-dd HH:mm:ss.SS").format(Date()))
         val sourceStr = if (source != null) "[$source] :" else ""
+        if (logLevel == LogLevel.ERROR) {
+            println("$dtm $logLevel- $sourceStr $message")
+        }
         // Co-Routine
         scope.launch { sendMessage("$dtm $logLevel- $sourceStr $message") }
     }
@@ -43,7 +47,7 @@ class SocketLogWriter(private val configStr: String) : LogWriter, SocketMessage 
     }
 
     private val session = runBlocking {
-        println(initCfg)
+        log.info(Json.encodeToString(initCfg),"")
         client.webSocketRawSession(method = HttpMethod.Get,
             host = "localhost",
             port = getPort(initCfg, log),

@@ -3,6 +3,7 @@
 
 package com.amazonaws.sfc.config
 
+import com.amazonaws.sfc.apiPlugins.SfcConfig
 import com.amazonaws.sfc.apiPlugins.SfcConfigSchema
 import com.amazonaws.sfc.apiPlugins.sfcApiApp
 import com.amazonaws.sfc.log.Logger
@@ -19,9 +20,12 @@ import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonObject
 import java.lang.Integer.parseInt
+import java.net.InetAddress
 import java.security.PublicKey
-import java.sql.Connection
 import java.sql.DriverManager
+import java.sql.Connection
+import java.text.SimpleDateFormat
+import java.util.*
 
 @ConfigurationClass
 class CustomApiUiConfigProvider(private val configStr: String, private val configVerificationKey: PublicKey?, private val logger: Logger) : ConfigProvider {
@@ -30,21 +34,24 @@ class CustomApiUiConfigProvider(private val configStr: String, private val confi
     private val scope = buildScope("CustomConfigProvider")
 
     private val initCfg = Json.parseToJsonElement(configStr).jsonObject
-    // create dummy start config from file (in order that SFC receives a valid conf at fresh start)
-    private val dummyStartCfg = this::class.java.classLoader.getResource("initialDummyConfig.json")?.readText()
 
     // extract Custom LogWriter JSON-Object from start config - in order to receive websockets in the UI
-    private val writerObj = Json.parseToJsonElement(dummyStartCfg.toString()).jsonObject.get("LogWriter")
+    private val writerObj = Json.parseToJsonElement(initCfg.toString()).jsonObject.get("LogWriter")
 
     // extract ConfigProvider Obj from start cfg
     private val confProviderObj = Json.parseToJsonElement(initCfg.toString()).jsonObject.get("ConfigProvider")
 
     init {
-        // CHECK IF VALID CONF EXISTS IN DB - IF YES -> SEND CFG TO CORE
         runBlocking{
             if (writerObj != null && confProviderObj != null) {
-                checkConf(ch, dummyStartCfg.toString(), writerObj, confProviderObj, initCfg, logger)
+                checkConf(ch, writerObj, confProviderObj, initCfg, logger)
             }
+            else {
+                logger.warning("Make sure to include CustomConfigProvider and LogWriter configs in order to use the UI & API config provider","")
+                //logger.info(Json.encodeToString(initCfg),"")
+                ch.send(Json.encodeToString(initCfg))
+            }
+
         }
     }
 
@@ -92,62 +99,43 @@ class CustomApiUiConfigProvider(private val configStr: String, private val confi
             }
         }
 
-        suspend fun checkConf(ch: Channel<String>, dummy: String, writer: JsonElement, confProvider: JsonElement, initialCfg: JsonObject, log: Logger) {
-            // get SelectedConfIdFromDB from start-cfg -> the config having that ID from DB will be loaded
-            val connection: Connection = checkDBconn()
-            val configService = SfcConfigSchema(connection)
-            // prepare dummy config and include conf-provider sections
-            var dummyJson = Json.parseToJsonElement(dummy).jsonObject
-            dummyJson = JsonObject(dummyJson + ("ConfigProvider" to confProvider))
+        suspend fun checkConf(ch: Channel<String>, writer: JsonElement, confProvider: JsonElement, initialCfg: JsonObject, log: Logger) {
+            try {
+                // attach our LogWriter Obj to receive logs as Websockets && attach ConfigProvider Obj
+                var confJson = initialCfg
 
-            if (initialCfg.getValue("ConfigProvider").jsonObject.containsKey("SelectedConfIdFromDB")) {
+                confJson = JsonObject(confJson + ("LogWriter" to writer) + ("ConfigProvider" to confProvider))
 
-                val initId = initialCfg["ConfigProvider"]?.jsonObject?.get("SelectedConfIdFromDB").toString()
-                // get conf from DB as String
-                try {
-                    val conf = configService.read(initId.toInt())
-                    // create JSON
-                    var confJson = Json.parseToJsonElement(conf).jsonObject
-                    // attach our LogWriter Obj to receive logs as Websockets && attach ConfigProvider Obj
-                    if (!confJson.containsKey("LogWriter")) {
-                        confJson = JsonObject(confJson + ("LogWriter" to writer) + ("ConfigProvider" to confProvider))
-                    }
+                // store initial cfg to DB
+                val connection: Connection = checkDBconn()
+                val configService = SfcConfigSchema(connection)
+                val dtm = "%-23s".format(SimpleDateFormat("YYYY-MM-dd HH:mm:ss").format(Date()))
+                val host = getSystemName()
+                val newSfcConfig = SfcConfig("StartCfg@$host-$dtm", confJson)
 
-                    log.info("Pinned SFC Config found in DB: ID=$initId - sending to SFC-CORE", "")
-                    log.info(conf,"")
+                val newCfgId: Int = configService.create(newSfcConfig)
+                // mark initial cfg as pushed in DB
+                configService.push(newCfgId)
 
-                    ch.send(Json.encodeToString(confJson))
-                } catch (e: Exception) {
-                    log.error(e.localizedMessage, "")
-                    ch.send(Json.encodeToString(dummyJson))
-                    log.info("No pinned SFC Config found in DB! pls check `SelectedConfIdFromDB` in config file - sending dummy cfg...","")
-                }
-            } else {
-                ch.send(Json.encodeToString(dummyJson))
-                log.info("No pinned SFC Config ID set in config key SelectedConfIdFromDB - sending dummy cfg...","")
+                //log.info(Json.encodeToString(confJson),"")
+
+                ch.send(Json.encodeToString(confJson))
+            } catch (e: Exception) {
+                log.error(e.localizedMessage, "")
             }
         }
-
 
         private fun checkDBconn(): Connection {
             Class.forName("org.h2.Driver")
             return DriverManager.getConnection("jdbc:h2:file:./sfctest;DB_CLOSE_DELAY=-1", "root", "")
         }
 
-        /*@JvmStatic
-        fun main(args: Array<String>): Unit = runBlocking {
-            // start HTTP API
-            val testChannel = Channel<String>(1)
-            val log = Logger.createLogger()
-            val dummyStartCfg = this::class.java.classLoader.getResource("initialDummyConfig.json")?.readText()
-            val writerObj = Json.parseToJsonElement(dummyStartCfg.toString()).jsonObject.get("LogWriter")
-            //print(dummyStartCfg)
-
-            embeddedServer(Tomcat, port = 8080){
-                if (writerObj != null) {
-                    sfcApiApp(testChannel, log, writerObj)
-                }
-            }.start(wait = true)
-        }*/
+        private fun getSystemName(): String? {
+            return try {
+                InetAddress.getLocalHost().hostName
+            } catch (e: Exception) {
+                null
+            }
+        }
     }
 }
