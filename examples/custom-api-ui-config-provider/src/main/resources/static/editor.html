@@ -36,6 +36,8 @@
 <body>
     <div class="container grid-xl" style="padding-top: 15px; padding-bottom: 30px;" id="sfc-editor">
         <h2>SFC <span class="badge bg-primary" data-badge="UX">Config Provider</span></h2>
+        <small id="titleRef"></small>
+        <br>
         <br>
         <div class="row columns md:flex">
             <div class='col-9 col-md-9 w-9/12'>
@@ -547,6 +549,12 @@
             })).json();
         }
 
+        async function getHostName(url) {
+            return (await fetch(url, {
+                method: 'GET'
+            })).json();
+        }
+
         /* -------------------------------------------------------------- parse url */
 
         var parseUrl = function () {
@@ -731,6 +739,13 @@
             }
         }
 
+        async function setTitle() {
+            const hostNameObj = await getHostName("/hostname");
+            const hostName = hostNameObj["hostname"];
+
+            document.getElementById('titleRef').innerHTML = "@"+hostName;
+        }
+
         // get info from DB about currently pushed/pinned Config
         async function loadCfgFromDB() {
             let id;
@@ -760,6 +775,8 @@
         loadCfgFromDB();
 
         startWebsocket();
+
+        setTitle();
 
         parseUrl();
 
