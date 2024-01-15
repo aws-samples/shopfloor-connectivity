@@ -1,4 +1,4 @@
-# SFC Example in process configuration for Rockwell ADS to Amazon S3
+# SFC Example in process configuration for Beckhoff ADS to Amazon S3
 
 The file `in-process-ads-s3.json` contains an example template for
 reading data from a Beckhoff controller using ADS over TCP/IP and
