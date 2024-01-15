@@ -1,6 +1,6 @@
-# SFC Example IPC configuration for Rockwell PCCC to Amazon S3
+# SFC Example IPC configuration for Beckhoff ADS to Amazon S3
 
-The file in-process-pccc-s3.json file contains an example template for reading data from a Rockwell controller using PCCC over EthernetIP and sending the data to an S3 bucket.
+The file in-process-ads-s3.json file contains an example template for reading data from a Beckhoff device using ADS over TCP/IP and sending the data to an S3 bucket. The main.tmc program file is included to declare the variables which are read from the device.
 
 This configuration uses a deployment where each module runs as a service in an individual process and communicate using a stream over a TCP/IP connection. These processes can run on the same system or on different systems. Use cases for this type of deployment are:
 
@@ -16,11 +16,11 @@ A debug target is included in the example to optionally write the output to the 
 
 ## Deployment and starting the service modules
 
-Deploy the sfc-main, PCCC adapter, S3 target and optionally the debug target to individual directories.
+Deploy the sfc-main, ADS adapter, S3 target and optionally the debug target to individual directories.
 
 Each module has a subdirectory called bin in which there are two files, one for Linux and one for Windows systems, to start the module as a service.
 
-It’s recommended to first start the PCCC protocol adapter and the S3 target and optionally the Debug target and specify the port number used by the module using the -port parameter.
+It’s recommended to first start the ADS protocol adapter and the S3 target and optionally the Debug target and specify the port number used by the module using the -port parameter.
 
 Then start the sfc-main module and use the -config parameter to specify the name of the used config file. The port numbers in this configuration file for the adapter and target services should match with the port numbers used to start these services.
 
@@ -28,7 +28,7 @@ When the adapter and target services are started the services will listen on the
 
 Startup commands for Linux deployments. When running from the console use terminal session for every service or run the servers as Docker containers.
 
--   <path to PCCC adapter deployment>/bin/pccc -port 50001
+-   <path to ADS adapter deployment>/bin/ads -port 50001
 
 -   <path to S3 target deployment>/bin/aws-s3-target -port 50002
 
@@ -39,10 +39,10 @@ Startup commands for Linux deployments. When running from the console use termin
 &nbsp;  
 
 
-**Starting the PCCC adapter service**
+**Starting the ADS adapter service**
 
 ```bash
-$ pccc/bin/pccc -port 50001
+$ ads/bin/ads -port 50001
 
 2023-11-10 17:03:17.814 INFO - Created instance of service IpcAdapterService
 2023-11-10 17:03:17.815 INFO - Running service instance
@@ -68,10 +68,10 @@ $ debug-target/bin/debug-target -port 500032023-11-10 17:08:00.866 INFO - Create
 **Starting the sfc-main service**
 
 ```bash
-$ sfc-main/bin/sfc-main -config ipc-pccc-s3/pccc.json
+$ sfc-main/bin/sfc-main -config ipc-ads-s3/ipc-ads-s3.json
 2023-11-10 17:22:48.230 INFO - Creating configuration provider of type ConfigProvider
 2023-11-10 17:22:48.246 INFO - Waiting for configuration
-2023-11-10 17:22:48.251 INFO - Sending initial configuration from file "pccc.json"
+2023-11-10 17:22:48.251 INFO - Sending initial configuration from file "in-process-ads-s3.json"
 2023-11-10 17:22:48.816 INFO - Received configuration data from config provider
 2023-11-10 17:22:48.819 INFO - Waiting for configuration
 2023-11-10 17:22:48.819 INFO - Creating and starting new service instance
@@ -98,8 +98,8 @@ $ sfc-main/bin/sfc-main -config ipc-pccc-s3/pccc.json
 To communicate with the protocol adapter as a service add the “AdapterServer” item to the configuration for the adapter. The value must be set to a server in the “AdapterServers” section of the configuration.
 ```json
 "ProtocolAdapters": {  
-    "PCCC": {  
-        "AdapterServer": "PcccAdapterServer",
+    "ADS": {  
+        "AdapterServer": "AdsAdapterServer",
 ```
 
 In the AdapterServers section the address (localhost or address of other system) and port number of the server are specified. The sfc-core will use these to communicate with the adapter service.
@@ -108,7 +108,7 @@ In the AdapterServers section the address (localhost or address of other system)
 
 ```json
  "AdapterServers": {  
-     "PcccAdapterServer": {  
+     "AdsAdapterServer": {  
          "Address": <IP ADDRESS OF SERVICE>  
          "Port": <PORT FOR SERVICE>  
      }  
@@ -181,8 +181,11 @@ section AwsIotCredentialProviderClients below.
 ## Sources Section
 
 In this section, the values are defined as channels, which are read from
-the controller. In this template there is an example for every
-address/type supported by the adapter. In order to change the name of
+the device. In this template there is an example for every
+data type supported by the adapter, declared as a variable/symbol in the MAIN section. 
+It also includes symbols for system variables and constants set by the device.
+
+In order to change the name of
 the value as it is included in the data which is sent to the targets,
 include a setting "Name" for the channel.
 &nbsp;  
@@ -191,28 +194,28 @@ include a setting "Name" for the channel.
 ## ProtocolAdapters section
 
 ```json
-"ProtocolAdapters": {
-  "PCCC": {
-    "AdapterServer": "PcccAdapterServer"
-    "AdapterType": "PCCC",
-    "Controllers": {
-      "MicroLogix1400": {
-        "Address": "<CONTROLLER IP ADDRESS>"
+  "ProtocolAdapters":{
+      "ADS":{
+          "AdapterType":"ADS",
+          "AdapterServer":"AdsAdapterServer",
+          "Devices":{
+              "CX8190":{
+                  "Address":"<IP ADDRESS OF BECKHOFF DEVICE>", 
+                  "Port":<PORT OF DEVCIVE< default is 48898>
+              }
+          }
       }
-    }
-  }
-}
+},
 
 ```
 
--   <CONTROLLER IP ADDRESS>, IP address of the controller
 
-This section configures the controller from which the data is read. The
-default port 44818 is used which can be changed by Including a Port
+-   < DEVICE IP ADDRESS >, IP address of the device
+
+This section configures the device from which the data is read. The
+default port 48898 is used which can be changed by Including a Port
 setting specifying that value.
 
-OptimizeReads is set to true to allow the adapter to combine reads from
-the controller.
 &nbsp;  
 &nbsp;
 
