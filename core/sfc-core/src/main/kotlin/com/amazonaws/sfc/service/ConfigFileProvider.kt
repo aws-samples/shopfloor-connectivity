@@ -48,7 +48,7 @@ class ConfigFileProvider(private val configFile: File, private val configVerific
             return factory.newProviderInstance(configStr, logger)
 
         } catch (e: Throwable) {
-            val msg = "Error creating custom configuration provider, $e"
+            val msg = "Error creating custom configuration provider, check if config file is valid JSON format, $e"
             logger.getCtxErrorLog(className, "customConfigProvider")(msg)
 
             throw ConfigurationException(msg, CONFIG_CUSTOM_CONFIG_PROVIDER)

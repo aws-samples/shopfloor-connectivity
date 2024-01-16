@@ -1,0 +1,243 @@
+{
+  "AWSVersion": "2022-04-02",
+  "Name": "Beckhoff ADS to Amazon S3 in process",
+  "Description": "Example of in process SFC config file to read data from Beckhoff controller and send it to an S3 bucket",
+  "Schedules": [
+    {
+      "Name": "ADS-DATA",
+      "Interval": 1000,
+      "Active": true,
+      "TimestampLevel": "Source",
+      "Sources": {
+        "ADS-SOURCE": [
+          "*"
+        ]
+      },
+      "Targets": [
+        "DebugTarget",
+        "S3Target"
+      ]
+    }
+  ],
+  "Sources": {
+    "ADS-SOURCE": {
+      "Name":"CX8190",
+      "ProtocolAdapter":"ADS",
+      "AdapterDevice":"CX8190",
+      "SourceAmsNetId":"<SOURCE NET ID, e.g. 192.168.1.65.1.1>",
+      "SourceAmsPort":"SOURCE AMS PORT, 50099",
+      "TargetAmsNetId":"<TARGET NET ID, e.g. 5.66.128.52.1.1>",
+      "TargetAmsPort":<TARGET PORT, e.g. 851>,
+      "Description":"Beckhoff device source",
+      "Channels": {
+        "Byte": {
+          "SymbolName": "MAIN.varBYTE",
+          "Description": "Single byte"
+        },
+        "Date": {
+          "SymbolName": "MAIN.varDATE",
+          "Description": "Date"
+        },
+        "DateAndTime": {
+          "SymbolName": "MAIN.varDATE_AND_TIME",
+          "Description": "Data and time, e.g. 2023-12-08T18:17:00Z"
+        },
+        "DInt": {
+          "SymbolName": "MAIN.varDINT",
+          "Description": "Int32"
+        },
+        "DT": {
+          "SymbolName": "MAIN.varDT",
+          "Description": "Date and time, e.g. 2023-12-08T18:17:00Z"
+        },
+        "DWord": {
+          "SymbolName": "MAIN.varDWORD",
+          "Description": "UInt32"
+        },
+        "Int": {
+          "SymbolName": "MAIN.varINT",
+          "Description": "Int16"
+        },
+        "LInt": {
+          "SymbolName": "MAIN.varLINT",
+          "Description": "Int64"
+        },
+        "LReal": {
+          "SymbolName": "MAIN.varLREAL",
+          "Description": "Double"
+        },
+        "LTime": {
+          "SymbolName": "MAIN.varLTIME",
+          "Description": "Time nano seconds resolution, e.g. PT0.000000100S"
+        },
+        "Real": {
+          "SymbolName": "MAIN.varREAL",
+          "Description": ""
+        },
+        "SInt": {
+          "SymbolName": "MAIN.varSINT",
+          "Description": "Byte"
+        },
+        "String": {
+          "SymbolName": "MAIN.varSTRING",
+          "Description": "String"
+        },
+        "Time": {
+          "SymbolName": "MAIN.varTIME",
+          "Description": "Time, e.g. PT0.020S"
+        },
+        "TimeOfDay": {
+          "SymbolName": "MAIN.varTIME_OF_DAY",
+          "Description": "Time of day, e.g. PT18500H"
+        },
+        "TOD": {
+          "SymbolName": "MAIN.varTOD",
+          "Description": "Time of day, e.g. PT18500H"
+        },
+        "UDInt": {
+          "SymbolName": "MAIN.varUDINT",
+          "Description": "UInt32"
+        },
+        "UInt": {
+          "SymbolName": "MAIN.varUINT",
+          "Description": "UInt16"
+        },
+        "ULInt": {
+          "SymbolName": "MAIN.varULINT",
+          "Description": "Uint32"
+        },
+        "USInt": {
+          "SymbolName": "MAIN.varUSINT",
+          "Description": "Byte"
+        },
+        "Word": {
+          "SymbolName": "MAIN.varWORD",
+          "Description": "UINT16"
+        },
+        "WString": {
+          "SymbolName": "MAIN.varWSTRING",
+          "Description": "WString"
+        },
+        "ByteArray1": {
+          "SymbolName": "MAIN.varBYTEARRAY1",
+          "Description": "One dimension byte array"
+        },
+        "ByteArray2": {
+          "SymbolName": "MAIN.varBYTEARRAY2",
+          "Description": "Two dimensions byte array"
+        },
+        "ByteArray3": {
+          "SymbolName": "MAIN.varBYTEARRAY3",
+          "Description": "Three dimensions byte array"
+        },
+        "bFPUSupport": {
+          "SymbolName": "Constants.bFPUSupport"
+        },
+        "bLittleEndian": {
+          "SymbolName": "Constants.bLittleEndian"
+        },
+        "bMulticoreSupport": {
+          "SymbolName": "Constants.bMulticoreSupport"
+        },
+        "bSimulationMode": {
+          "SymbolName": "Constants.bSimulationMode"
+        },
+        "CompilerVersion": {
+          "SymbolName": "Constants.CompilerVersion"
+        },
+        "nPackMode": {
+          "SymbolName": "Constants.nPackMode"
+        },
+        "nRegisterSize": {
+          "SymbolName": "Constants.nRegisterSize"
+        },
+        "RuntimeVersion": {
+          "SymbolName": "Constants.RuntimeVersion"
+        },
+        "RuntimeVersionNumeric": {
+          "SymbolName": "Constants.RuntimeVersionNumeric"
+        },
+        "stLibVersion_Tc2_Standard": {
+          "SymbolName": "Global_Version.stLibVersion_Tc2_Standard"
+        },
+        "stLibVersion_Tc2_System": {
+          "SymbolName": "Global_Version.stLibVersion_Tc2_System"
+        },
+        "stLibVersion_Tc3_Module": {
+          "SymbolName": "Global_Version.stLibVersion_Tc3_Module"
+        },
+        "AppInfo": {
+          "SymbolName": "TwinCAT_SystemInfoVarList._AppInfo"
+        },
+        "TaskInfo": {
+          "SymbolName": "TwinCAT_SystemInfoVarList._TaskInfo"
+        },
+        "TaskOid_PlcTask": {
+          "SymbolName": "TwinCAT_SystemInfoVarList._TaskOid_PlcTask"
+        },
+        "TaskPouOid_PlcTask": {
+          "SymbolName": "TwinCAT_SystemInfoVarList._TaskPouOid_PlcTask"
+        }
+      }
+    }
+  },
+  "Targets": {
+    "DebugTarget": {
+      "TargetType": "DEBUG-TARGET"
+    },
+    "S3Target": {
+      "Active": true,
+      "TargetType": "AWS-S3",
+      "Region": "<YOUR-REGION>",
+      "BucketName": "<YOUR-BUCKET-NAME>",
+      "Interval": 60,
+      "BufferSize": 1,
+      "Prefix": "<OPTIONAL PREFIX TO USE IN BUCKET>",
+      "CredentialProviderClient": "AwsIotClient",
+      "Compression": "Zip"
+    }
+  },
+  "ProtocolAdapters": {
+    "ADS": {
+      "AdapterType": "ADS",
+      "Devices": {
+        "CX8190": {
+          "Address": "<DEVICE IP ADDRESS>"
+        }
+      }
+    }
+  },
+  "AdapterTypes": {
+    "ADS": {
+      "JarFiles": [
+        "${SFC_DEPLOYMENT_DIR}/ads/lib"
+      ],
+      "FactoryClassName": "com.amazonaws.sfc.ads.AdsAdapter"
+    }
+  },
+  "TargetTypes": {
+    "AWS-S3": {
+      "JarFiles": [
+        "${SFC_DEPLOYMENT_DIR}/aws-s3-target/lib"
+      ],
+      "FactoryClassName": "com.amazonaws.sfc.awss3.AwsS3TargetWriter"
+    },
+    "DEBUG-TARGET": {
+      "JarFiles": [
+        "${SFC_DEPLOYMENT_DIR}/debug-target/lib"
+      ],
+      "FactoryClassName": "com.amazonaws.sfc.debugtarget.DebugTargetWriter"
+    }
+  },
+  "AwsIotCredentialProviderClients": {
+    "AwsIotClient": {
+      "IotCredentialEndpoint": "<ID>.credentials.iot.<YOUR REGION>.amazonaws.com",
+      "RoleAlias": "<ROLE EXCHANGE ALIAS, e.g.GreengrassV2TokenExchangeRoleAlias>",
+      "ThingName": "<THING NAME> e.g. GreengrassCore-1",
+      "Certificate": "<PATH TO DEVICE CERTIFICATE .crt FILE>",
+      "PrivateKey": "<PATH TO PRIVATE KEY .key FILE>",
+      "RootCa": "<PATH TO ROOt CERTIFICATE .pen FILE>",
+      "#GreenGrassDeploymentPath": "<GREENGRASS DEPLOYMENT DIR>/v2"
+    }
+  }
+}

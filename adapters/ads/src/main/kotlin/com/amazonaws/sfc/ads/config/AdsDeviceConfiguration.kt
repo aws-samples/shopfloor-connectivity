@@ -2,7 +2,7 @@
  * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.SPDX-License-Identifier: MIT-0
  */
 
-package com.amazonaws.sfc.pccc.config
+package com.amazonaws.sfc.ads.config
 
 import com.amazonaws.sfc.config.ConfigurationClass
 import com.amazonaws.sfc.config.ConfigurationException
@@ -13,13 +13,9 @@ import kotlin.time.Duration
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration
 
-@Suppress("MemberVisibilityCanBePrivate")
 @ConfigurationClass
-class PcccControllerConfiguration : TcpConfiguration, Validate {
+class AdsDeviceConfiguration : TcpConfiguration, Validate {
 
-    @SerializedName(CONFIG_CONNECT_PATH)
-    private var _connectPath: PcccConnectPathConfiguration? = null
-    val connectPathConfig = _connectPath
 
     @SerializedName(CONFIG_WAIT_AFTER_CONNECT_ERROR)
     private var _waitAfterConnectError: Long = DEFAULT_WAIT_AFTER_CONNECT_ERROR
@@ -41,6 +37,11 @@ class PcccControllerConfiguration : TcpConfiguration, Validate {
     override val connectTimeout: Duration
         get() = _connectTimeout.toDuration(DurationUnit.MILLISECONDS)
 
+    @SerializedName(CONFIG_COMMAND_TIMEOUT)
+    private var _commandTimeout: Long = DEFAULT_COMMAND_TIMEOUT_MS
+    val commandTimeout: Duration
+        get() = _commandTimeout.toDuration(DurationUnit.MILLISECONDS)
+
     @SerializedName(CONFIG_READ_TIMEOUT)
     private var _readTimeout: Long = DEFAULT_READ_TIMEOUT_MS
     val readTimeout: Duration
@@ -52,69 +53,51 @@ class PcccControllerConfiguration : TcpConfiguration, Validate {
         get() = _address
 
     @SerializedName(CONFIG_PORT)
-    private var _port: Int = DEFAULT_PCCC_PORT
+    private var _port: Int = DEFAULT_ADS_PORT
     override val port: Int
         get() = _port
 
-    @SerializedName(CONFIG_OPTIMIZE_READS)
-    private var _optimizeReads: Boolean = true
-    val optimizeReads: Boolean
-        get() = _optimizeReads
-
-    @SerializedName(CONFIG_READ_MAX_GAP)
-    private var _readMaxGap: Int = DEFAULT_MAX_GAP
-    val readMaxGap: Int
-        get() = _readMaxGap
-
-
     companion object {
-
-        const val CONFIG_CONNECT_PATH = "ConnectPath"
         private const val CONFIG_ADDRESS = "Address"
         private const val CONFIG_PORT = "Port"
         private const val CONFIG_CONNECT_TIMEOUT = "ConnectTimeout"
-        private const val CONFIG_OPTIMIZE_READS = "OptimizeReads"
-        private const val CONFIG_READ_MAX_GAP = "MaxReadGap"
+        private const val CONFIG_COMMAND_TIMEOUT = "CommandTimeout"
         private const val CONFIG_READ_TIMEOUT = "ReadTimeout"
         private const val CONFIG_WAIT_AFTER_CONNECT_ERROR = "WaitAfterConnectError"
         private const val CONFIG_WAIT_AFTER_READ_ERROR = "WaitAfterReadError"
         private const val CONFIG_WAIT_AFTER_WRITE_ERROR = "WaitAfterWriteError"
 
-        const val DEFAULT_PCCC_PORT = 44818
-        const val DEFAULT_MAX_GAP = 32
+        const val DEFAULT_ADS_PORT = 48898
 
         const val DEFAULT_CONNECT_TIMEOUT_MS = 10000L
-        const val DEFAULT_READ_TIMEOUT_MS = 10000L
+        const val DEFAULT_READ_TIMEOUT_MS = 1000L
+        const val DEFAULT_COMMAND_TIMEOUT_MS = 10000L
         const val DEFAULT_WAIT_AFTER_READ_ERROR = 10000L
         const val DEFAULT_WAIT_AFTER_WRITE_ERROR = 10000L
         const val DEFAULT_WAIT_AFTER_CONNECT_ERROR = 10000L
 
-        private val default = PcccControllerConfiguration()
+        private val default = AdsDeviceConfiguration()
 
         fun create(
-            connectPath: PcccConnectPathConfiguration? = default._connectPath,
             waitAfterConnectError: Long = default._waitAfterConnectError,
             waitAfterReadError: Long = default._waitAfterReadError,
             waitAfterWriteError: Long = default._waitAfterWriteError,
             connectTimeout: Long = default._connectTimeout,
+            commandTimeout: Long = default._commandTimeout,
             address: String = default._address,
-            port: Int = default._port,
-            optimizeReads: Boolean = default._optimizeReads,
-            readMaxGap: Int = default._readMaxGap
-        ): PcccControllerConfiguration {
+            port: Int = default._port
+        ): AdsDeviceConfiguration {
 
-            val instance = PcccControllerConfiguration()
+            val instance = AdsDeviceConfiguration()
 
             with(instance) {
                 _address = address
                 _port = port
-                _optimizeReads = optimizeReads
-                _readMaxGap = readMaxGap
-                _connectPath = connectPath
+                _commandTimeout= commandTimeout
+                _connectTimeout = connectTimeout
                 _waitAfterConnectError = waitAfterConnectError
                 _waitAfterReadError = waitAfterReadError
                 _waitAfterWriteError = waitAfterWriteError
-                _connectTimeout = connectTimeout
             }
             return instance
         }
@@ -123,7 +106,7 @@ class PcccControllerConfiguration : TcpConfiguration, Validate {
     override fun validate() {
         ConfigurationException.check(
             _address.isNotEmpty(),
-            "$CONFIG_ADDRESS for PCCC controller must be set",
+            "$CONFIG_ADDRESS for ADS device must be set",
             CONFIG_ADDRESS,
             this
         )

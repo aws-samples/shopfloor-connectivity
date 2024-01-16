@@ -10,7 +10,9 @@ SFC documentation
     - [Greengrass SFC In-Process step-by-step Lab](../examples/greengrass-in-process/README.md)
     - [Greengrass SFC IPC step-by-step Lab](../examples/greengrass-ipc/README.md)
     - [Rockwell PCCC to S3 sample](../examples/in-process-pccc-s3/README.md)
+    - [Beckhoff ADS to S3 Example](../examples/in-process-ads-s3/README.md)
     - [Siemens S7 to Sitewise sample](../examples/in-process-s7-sitewise/README.md)
+    - [YAML Custom Configuration Provider](../examples/yaml-custom-config-provider/README.md)
     - [CSV File Adapter Example](../examples/custom-adapter-csvfile/README.md)
   - [Introduction](#introduction)
     - [SFC Components](#sfc-components)
@@ -138,6 +140,11 @@ SFC documentation
     - [PcccAdapterConfiguration](#pcccadapterconfiguration)
     - [PcccControllerConfiguration](#pccccontrollerconfiguration)
     - [PcccConnectPathConfiguration](#pcccconnectpathconfiguration)
+  - [ADS Protocol Configuration](#ads-protocol-configuration)
+    - [AdsSourceConfiguration](#adssourceconfiguration)
+    - [AdsChannelConfiguratio](#adschannelconfiguration)
+    - [AdsAdapterConfiguration](#adsadapterconfiguration)
+    - [AdsDeviceConfiguration](#adsdeviceconfiguration)
   - [AWS IoT Analytics Service Target](#aws-iot-analytics-service-target)
     - [AwsIotAnalyticsTargetConfiguration](#awsiotanalyticstargetconfiguration)
   - [AWS IoT Core Service Target](#aws-iot-core-service-target)
@@ -4748,7 +4755,7 @@ This section describes the configuration types for the PCCC protocol adapter and
 <tr class="header">
 <th colspan="4"><p><strong>PcccChannelConfiguration</strong></p>
 <p><strong>Extends ChannelConfiguration</strong></p>
-<p>The PcccFieldChannelConfiguration extends the common Channel configuration with PCCC specific channel configuration data</p></th>
+<p>The PcccChannelConfiguration extends the common Channel configuration with PCCC specific channel configuration data</p></th>
 </tr>
 </thead>
 <tbody>
@@ -5151,6 +5158,195 @@ Syntax: A\<file number\>:\<element index\>\[/character offset\]
 </tr>
 </tbody>
 </table>
+
+# ADS Protocol Configuration
+
+This section describes the configuration types for the ADS protocol adapter and contains the extensions and specific configuration types
+
+## AdsSourceConfiguration
+
+<table>
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 25%" />
+<col style="width: 32%" />
+<col style="width: 22%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th colspan="4"><p><strong>AdsSourceConfiguration</strong> Extends SourceConfiguration</p>
+<p>The AdsSourceConfiguration extends the common Source configuration with ADS specific source configuration data</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Name</strong></td>
+<td><strong>Description</strong></td>
+<td><strong>Type</strong></td>
+<td><strong>Comments</strong></td>
+</tr>
+<tr class="even">
+<td>Channels</td>
+<td><p>The channels configuration for a ADS source holds configuration data to read values from fields on the source controller.</p>
+<p>The element is a map indexed by the channel identifier.</p>
+<p>Channels can be "commented" out by adding a "#" at the beginning of the identifier of that channel.</p></td>
+<td>Map[String,<a href="#adschannelconfiguration">AdsChannelConfiguration</a>]</td>
+<td>At least 1 channel must be configured.</td>
+</tr>
+<tr class="odd">
+<td>AdapterDevice</td>
+<td>Device Identifier for the controller to read from. This referenced server must be present in the Devices section of the adapter referred to by the ProtocolAdapter attribute of the source.</td>
+<td>String</td>
+<td>Must be an identifier of a server in the Controllers section of the ADS adapter used by the source.</td>
+</tr>
+</tbody>
+</table>
+
+[^top](#toc)
+
+## AdsChannelConfiguration
+
+<table>
+<colgroup>
+<col style="width: 15%" />
+<col style="width: 19%" />
+<col style="width: 22%" />
+<col style="width: 43%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th colspan="4"><p><strong>AdsChannelConfiguration</strong></p>
+<p><strong>Extends ChannelConfiguration</strong></p>
+<p>The AdsChannelConfiguration extends the common Channel configuration with ADS specific channel configuration data</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Name</strong></td>
+<td><strong>Description</strong></td>
+<td><strong>Type</strong></td>
+<td><strong>Comments</strong></td>
+</tr>
+<tr class="even">
+<td>SymbolName</td>
+<td>A string containing the name of the symbol to read from the device.</td>
+<td>String</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+
+
+
+[^top](#toc)
+
+## AdsAdapterConfiguration
+
+<table>
+<colgroup>
+<col style="width: 14%" />
+<col style="width: 19%" />
+<col style="width: 27%" />
+<col style="width: 39%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th colspan="4"><p><strong>AdsAdapterConfiguration</strong></p>
+<p><strong>Extends ProcolAdapterConfiguration</strong></p>
+<p>The AdsAdapterConfiguration extends the common adapter configuration with ADS specific adapter configuration settings. The AdapterType to use for this adapter is "ADS".</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Name</strong></td>
+<td><strong>Description</strong></td>
+<td><strong>Type</strong></td>
+<td><strong>Comments</strong></td>
+</tr>
+<tr class="even">
+<td>Controllers</td>
+<td>Devices configured for this adapter. The ADS source using the adapter must have a reference to one of these in its AdapterDevice attribute.</td>
+<td>Map[String,<a href="#adsdeviceconfiguration">AdsDeviceConfiguration</a>]</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+
+[^top](#toc)
+
+## AdsDeviceConfiguration
+
+<table>
+<colgroup>
+<col style="width: 18%" />
+<col style="width: 27%" />
+<col style="width: 28%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th colspan="4"><p><strong>AdsDeviceConfiguration</strong></p>
+<p>Configuration data for connecting to and reading from sources for devices using ADS protocol</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Name</strong></td>
+<td><strong>Description</strong></td>
+<td><strong>Type</strong></td>
+<td>Comments</td>
+</tr>
+<tr class="even">
+<td>Address</td>
+<td>IP Address of the device</td>
+<td>String</td>
+<td>IP address in format aaa.bbb.ccc.ddd</td>
+</tr>
+<tr class="odd">
+<td>Port</td>
+<td>Port number</td>
+<td>Integer</td>
+<td>Default is 48898</td>
+</tr>
+<tr class="even">
+<td>CommandTimeout</td>
+<td>Timeout for executing commands in mulliseconfs</td>
+<td>Integer</td>
+<td>Default is 10000 milliseconds</td>
+</tr>
+<tr class="odd">
+<td>ConnectTimeout</td>
+<td>Timeout for connecting to the device in milliseconds</td>
+<td>Integer</td>
+<td>Default is 10000</td>
+</tr>
+<tr class="even">
+<td>ReadTimeout</td>
+<td>Timeout for reading response packets from the controller in milliseconds</td>
+<td>Integer</td>
+<td>Default is 10000</td>
+</tr>
+<tr class="odd">
+<td>WaitAfterConnectError</td>
+<td>Time to wait before (re)connecting after a connection error in milliseconds</td>
+<td>Integer</td>
+<td>Default is 10000</td>
+</tr>
+<tr class="even">
+<td>WaitAfterReadError</td>
+<td>Time to wait before reading values from the controller after a read error in milliseconds</td>
+<td>Integer</td>
+<td>Default is 10000</td>
+</tr>
+<tr class="odd">
+<td>WaitAferWriteError</td>
+<td>Time to wait after an error writing request packets to the controller in milliseconds</td>
+<td>Integer</td>
+<td>Default is 10000</td>
+</tr>
+</tbody>
+</table>
+
 
 [^top](#toc)
 

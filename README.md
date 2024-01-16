@@ -11,7 +11,7 @@ SFC extends and unifies data collection capabilities additionally to our existin
   <img src="./docs/img/s7-iot-core-mqtt.gif" width="75%"/>
 </p>
 
-**Supported protocols:** `Siemens S7`, `Rockwell PCCC`, `OPC-UA`, `MQTT`, `SQL`,` Modbus-TCP`
+**Supported protocols:** `Siemens S7`, `Rockwell PCCC`, `Beckhoff ADS`, `SNMP`, `OPC-UA`, `MQTT`, `SQL`,` Modbus-TCP`
 
 **Supported AWS targets:** `IoT Core HTTP`, `IoT Core MQTT`, `Sitewise`, `IoT Analytics`, `Kinesis`, `Firehose`, `Lambda`, `S3`, `SNS`, `SQS`, `Timestream`
 

@@ -1,8 +1,11 @@
-# SFC Example in process configuration for Rockwell PCCC to Amazon
+# SFC Example in process configuration for Beckhoff ADS to Amazon S3
 
-The file `in-process-pccc-s3.json` contains an example template for
-reading data from a Rockwell controller using PCCC over EthernetIP and
+The file `in-process-ads-s3.json` contains an example template for
+reading data from a Beckhoff controller using ADS over TCP/IP and
 sending the data to an S3 bucket.
+
+The main.tmc program file is included to declare the variables which are read from the device.
+
 
 In order to use the configuration, make the changes described below, and
 use it as the value of the --config parameter when starting sfc-main.
@@ -26,7 +29,7 @@ ${SFC_DEPLOYMENT_DIR}
 &nbsp;&nbsp;&nbsp;|-sfc-main  
 &nbsp;&nbsp;&nbsp;|-debug-target    
 &nbsp;&nbsp;&nbsp;|-aws-s3-target  
-&nbsp;&nbsp;&nbsp;|-pccc  
+&nbsp;&nbsp;&nbsp;|-ads  
 &nbsp;  
 &nbsp;
 
@@ -39,7 +42,7 @@ ${SFC_DEPLOYMENT_DIR}
 ]
 ```
 
-In order to write the data to both the S3 bucket as well as the console
+In order to write the data to both the S3 bucket and the console
 uncomment the DebugTarget by deleting the'#'.  
 &nbsp;
 &nbsp;  
@@ -65,9 +68,9 @@ uncomment the DebugTarget by deleting the'#'.
 
 -   < YOUR-REGION >, your region e.g., eu-west-1
 
--   < YOUR-BUCKET-NAME >, bucket name to store data
+-   <YOUR-BUCKET-NAME >, bucket name to store data
 
--   < OPTIONAL PREFIX TO USE IN BUCKET >\", Optional prefix for data in
+-   < OPTIONAL PREFIX TO USE IN BUCKET >, Optional prefix for data in
     the bucket
 
 The `S3Target` is set up to write data to the specified bucket once every
@@ -97,24 +100,22 @@ include a setting "Name" for the channel.
 
 ```json
 "ProtocolAdapters": {
-  "PCCC": {
-    "AdapterType": "PCCC",
-    "Controllers": {
-      "MicroLogix1400": {
-        "Address": "< CONTROLLER IP ADDRESS> ",
-        "OptimizeReads": true
-
-      }
+    "ADS": {
+        "AdapterType": "ADS",
+        "Devices": {
+            "CX8190": {
+                "Address": "< DEVICE IP ADDRESS >"
+            }
+        }
     }
-  }
-}
+},
 
 ```
 
--   <CONTROLLER IP ADDRESS>, IP address of the controller
+-   <CONTROLLER IP ADDRESS >, IP address of the controller
 
 This section configures the controller from which the data is read. The
-default port 44818 is used which can be changed by Including a Port
+default port 48898 is used which can be changed by Including a Port
 setting specifying that value.
 
 OptimizeReads is set to true to allow the adapter to combine reads from

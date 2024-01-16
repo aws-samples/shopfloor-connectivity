@@ -1,0 +1,30 @@
+PROGRAM MAIN
+VAR
+	varBOOL: BOOL := TRUE;
+
+	varBYTE: BYTE := 1;
+	varDATE: DATE := DATE#2023-12-8;
+	varDATE_AND_TIME : DATE_AND_TIME := DATE_AND_TIME#2023-12-8-18:14;
+	varDINT : DINT := 2;
+	varDT: DT := DATE_AND_TIME#2023-12-8-18:17;
+	varDWORD: DWORD := 3;
+	varINT: INT := 4;
+	varLINT: LINT := 5;
+	varLREAL: LREAL := 6.0;
+	varLTIME:  LTIME := LTIME#100ns;
+	varREAL: REAL := 7.0;
+	varSINT: SINT := 8;
+	varSTRING: STRING := 'Hello';
+	varTIME : TIME := TIME#20MS;
+	varTIME_OF_DAY: TIME_OF_DAY := TIME_OF_DAY#18:30;
+	varTOD: TOD := TIME_OF_DAY#18:31;
+	varUDINT : UDINT := 9;
+	varUINT : UINT := 10;
+	varULINT : ULINT := 11;
+	varUSINT : USINT := 12;
+    varWORD : WORD := 13;
+	varWSTRING : WSTRING := "Hello world WS";
+	varBYTEARRAY1: ARRAY[0..4] OF BYTE := [0, 1, 2, 3, 4];
+	varBYTEARRAY2: ARRAY[0..4, 0..2] OF BYTE := [0, 1, 2, 10, 11, 12, 20, 21, 22, 30, 31, 32, 40, 41, 42];
+	varBYTEARRAY3: ARRAY[0..1, 0..2, 0..3] OF BYTE := [0, 1, 2, 3, 10, 11, 12, 13, 20, 21, 22, 23, 100, 101, 102, 103, 110, 111, 112, 113, 120, 121, 122, 123];
+END_VAR

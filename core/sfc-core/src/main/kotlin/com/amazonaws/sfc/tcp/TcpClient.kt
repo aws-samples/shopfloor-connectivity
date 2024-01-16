@@ -23,7 +23,7 @@ import kotlin.time.DurationUnit
 import kotlin.time.toDuration
 
 
-class TcpClient(private val config: TcpConfiguration, readBufferSize : Int = READ_BUFFER_SIZE, writeBufferSize : Int = WRITE_BUFFER_SIZE, private val logger: Logger) {
+open class TcpClient(private val config: TcpConfiguration, readBufferSize : Int = READ_BUFFER_SIZE, writeBufferSize : Int = WRITE_BUFFER_SIZE, private val logger: Logger) {
 
     private val className = this::class.java.simpleName
 
