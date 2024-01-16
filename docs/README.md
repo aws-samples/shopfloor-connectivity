@@ -281,6 +281,7 @@ SFC data collection is based on the following concepts
 
 Shop Floor Connectivity (SFC) is a versatile data ingestion solution that can be deployed in a variety of environments, including standalone applications, Docker containers, and Kubernetes pods. With no additional requirements beyond a Java JVM 1.8 runtime, SFC can be deployed on Linux and Windows systems. To optimize hardware utilization, SFC uses parallel and non-blocking async patterns in its software.
 
+
 SFC protocol and target adapters can be implemented as a JVM component or as an external microservices using the gRPC protocol for communication. When running as stand-alone services, protocol adapters can be deployed on separate machines from the SFC Core process, with secure communication facilitated by gRPC. The SFC Core provides a consistent infrastructure allowing all JVM based protocol and target adapters to run in the same process as the SFC Core or as a separate microservice.
 
 Distributed deployment using microservices is required to deploy in environments that use segregated OT and IT networks, with components connected to devices, protocol adapters, deployed in the OT network and components requiring internet access, targets adapters, in a DMZ.
@@ -5199,6 +5200,45 @@ This section describes the configuration types for the ADS protocol adapter and 
 <td>String</td>
 <td>Must be an identifier of a server in the Controllers section of the ADS adapter used by the source.</td>
 </tr>
+
+
+
+<tr class="even">
+<td>SourceAmsId</td>
+<td><p>The Ams netID of the device.</p>
+</td>
+<td>String</td>
+<td>The AMS Net ID consists of 6 bytes and is represented in a dot notation.</td>
+</tr>
+<tr class="odd">
+<td>SourceAmsPort</td>
+<td>The ADS port number. ADS devices in the TwinCAT network are identified by an AMS network address and a port number.</td>
+<td>Integer</td>
+<td>The following decimal port numbers are invariantly defined on each TwinCAT single system.
+
+- Runtime system 1: 851 (in TwinCAT 2: 801)
+- Runtime system 2: 852 (in TwinCAT 2: 811)
+- Runtime system 3: 853 (in TwinCAT 2: 821)
+- Runtime system 4: 854 (in TwinCAT 2: 831)
+- Runtime system 5: 855
+- Runtime system n: 850 + n, etc.</td>
+</tr>
+
+<tr class="even">
+<td>TargetAmsId</td>
+<td><p>The AMS Net ID of the client.</p>
+</td>
+<td>String</td>
+<td>The AMSNetID consists of 6 bytes and is represented in a dot notation. For clients this is typically the network address + .1.1, e.g. 192.168.1.65.1.1<p>
+To authorize the client this AMS Net ID must be added as an AMS route in the SYSTEM/Routes of the Twincat target.</p></td>
+</tr>
+<tr class="odd">
+<td>TargetAmsPort</td>
+<td>Contains the ADS port number of the client.</td>
+<td>Integer</td>
+<td> This can be any value.</td>
+</tr>
+
 </tbody>
 </table>
 
