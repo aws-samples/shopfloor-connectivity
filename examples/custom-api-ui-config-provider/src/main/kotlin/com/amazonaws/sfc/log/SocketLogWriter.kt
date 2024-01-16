@@ -71,7 +71,9 @@ class SocketLogWriter(private val configStr: String) : LogWriter, SocketMessage 
                         //do nothing here
                     }
                     is Frame.Binary -> TODO()
-                    is Frame.Close -> TODO()
+                    is Frame.Close -> {
+
+                    }
                 }
             }
         } catch(eof: EOFException){

@@ -76,7 +76,8 @@ fun Application.sfcApiApp(ch: Channel<String>, log: Logger, writer: JsonElement,
         get("/hostname") {
             try {
                 val host = InetAddress.getLocalHost().hostName
-                call.respond(HttpStatusCode.OK, "{\"hostname\":\"$host\"}")
+                val ip = InetAddress.getLocalHost().hostAddress
+                call.respond(HttpStatusCode.OK, "{\"hostname\":\"$host\",\"ip\":\"$ip\"}")
             } catch (e: Exception) {
                 call.respond(HttpStatusCode.NotFound)
             }
