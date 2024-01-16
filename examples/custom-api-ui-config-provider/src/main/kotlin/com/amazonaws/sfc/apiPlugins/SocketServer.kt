@@ -26,6 +26,11 @@ fun Application.configureSockets(log: Logger) {
         webSocket("/logreceiver") {
             log.info("Adding websocket client!", this.javaClass::getName.name)
             val thisConnection = SocketConn(this)
+            val connCount = connections.size
+            if (connCount > 6) {
+                log.info("Clearing $connCount websocket sessions!","")
+                connections.clear()
+            }
             connections += thisConnection
             try {
                 send("There are ${connections.count()} websocket clients here...")
