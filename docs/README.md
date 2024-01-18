@@ -5176,7 +5176,7 @@ This section describes the configuration types for the ADS protocol adapter and 
 <thead>
 <tr class="header">
 <th colspan="4"><p><strong>AdsSourceConfiguration</strong> Extends SourceConfiguration</p>
-<p>The AdsSourceConfiguration extends the common Source configuration with ADS specific source configuration data</p></th>
+<p>The AdsSourceConfiguration extends the common Source configuration with ADS specific source configuration data.</p></th>
 </tr>
 </thead>
 <tbody>

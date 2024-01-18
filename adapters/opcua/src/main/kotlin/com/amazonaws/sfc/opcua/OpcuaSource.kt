@@ -63,12 +63,12 @@ import kotlin.time.DurationUnit
 import kotlin.time.toDuration
 
 
-class OpcuaSource(private val sourceID: String,
-                  private val configuration: OpcuaConfiguration,
-                  private val clientHandleAtomic: AtomicInteger,
-                  private val logger: Logger,
-                  private val metricsCollector: MetricsCollector?,
-                  adapterMetricDimensions: MetricDimensions?) {
+open class OpcuaSource(private val sourceID: String,
+                       private val configuration: OpcuaConfiguration,
+                       private val clientHandleAtomic: AtomicInteger,
+                       private val logger: Logger,
+                       private val metricsCollector: MetricsCollector?,
+                       adapterMetricDimensions: MetricDimensions?) {
 
     // Working storage for nodes being read
     inner class OpcuaNodeData(
@@ -158,7 +158,7 @@ class OpcuaSource(private val sourceID: String,
         get() = runBlocking { getClient() }
 
     // gets a OPCUA client for a source
-    private suspend fun getClient(): OpcUaClient? {
+    suspend fun getClient(): OpcUaClient? {
 
         // pause after errors
         if (systemDateTime() < pauseWaitUntil) {

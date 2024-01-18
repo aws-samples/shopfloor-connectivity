@@ -9,6 +9,7 @@ package com.amazonaws.sfc.service
 import com.amazonaws.sfc.config.ConfigurationException
 import com.amazonaws.sfc.config.InProcessConfiguration
 import com.amazonaws.sfc.log.CustomLogWriterFactory
+import com.amazonaws.sfc.log.LogLevel
 import com.amazonaws.sfc.log.LogWriter
 import com.amazonaws.sfc.log.Logger
 import com.amazonaws.sfc.log.Logger.Companion.createLogger
@@ -54,6 +55,13 @@ abstract class ServiceMain {
      * @param args Array<String> Command line arguments
      */
     open suspend fun run(args: Array<String>): Unit = coroutineScope {
+
+        // as config provider is not initiated here check if loglevel was provided on command line to
+        // enable specification of the loglevel used by the configuration provider itself
+        val logLevelFromArguments = LogLevel.fromArgs(args)
+        if (logLevelFromArguments != null) {
+            serviceLogger.level = logLevelFromArguments
+        }
 
         Logger.redirectLoggers(serviceLogger, className)
 
