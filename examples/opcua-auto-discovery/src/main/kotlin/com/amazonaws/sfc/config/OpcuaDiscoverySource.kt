@@ -80,9 +80,9 @@ class OpcuaDiscoverySource(
         }
 
         val shouldDiscoverVariables =
-            nodeTypesToDiscover == DiscoveryNodeTypes.Variables || nodeTypesToDiscover == DiscoveryNodeTypes.VariablesAndEventsAndAlarms
+            nodeTypesToDiscover == DiscoveryNodeTypes.Variables || nodeTypesToDiscover == DiscoveryNodeTypes.VariablesAndEvents
         val shouldDiscoverEvents =
-            nodeTypesToDiscover == DiscoveryNodeTypes.Variables || nodeTypesToDiscover == DiscoveryNodeTypes.VariablesAndEventsAndAlarms
+            nodeTypesToDiscover == DiscoveryNodeTypes.Events || nodeTypesToDiscover == DiscoveryNodeTypes.VariablesAndEvents
 
         val nodes = try {
             client.addressSpace?.browseNodes(

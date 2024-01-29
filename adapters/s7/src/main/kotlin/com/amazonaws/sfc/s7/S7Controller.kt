@@ -37,7 +37,7 @@ import kotlin.time.measureTime
 private typealias mapResultFunc = (String, PlcReadResponse) -> Any
 
 
-class S7Controller(private val adapterID: String,
+class  S7Controller(private val adapterID: String,
                    private val sourceID: String,
                    private val config: S7ControllerConfiguration,
                    private val logger: Logger) {

@@ -5,8 +5,8 @@ import com.google.gson.annotations.SerializedName
 enum class DiscoveryNodeTypes {
     @SerializedName("Variables")
     Variables,
-    @SerializedName("EventsAndAlarms")
-    EventsAndAlarms,
-    @SerializedName("All")
-    VariablesAndEventsAndAlarms
+    @SerializedName("Events")
+    Events,
+    @SerializedName("VariablesAndEvents")
+    VariablesAndEvents
 }

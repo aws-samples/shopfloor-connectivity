@@ -7,6 +7,7 @@ package com.amazonaws.sfc.config
 
 import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_CHANNELS
 import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_SOURCES
+import com.amazonaws.sfc.config.OpcuaAutoDiscoveryConfiguration.Companion.CONFIG_DEFAULT_WAIT_BEFORE_RETRY
 import com.amazonaws.sfc.data.JsonHelper
 import com.amazonaws.sfc.data.JsonHelper.Companion.gsonExtended
 import com.amazonaws.sfc.log.Logger
@@ -24,6 +25,9 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.eclipse.milo.opcua.sdk.client.nodes.UaNode
 import java.security.PublicKey
+import kotlin.time.Duration
+import kotlin.time.DurationUnit
+import kotlin.time.toDuration
 
 class OpcuaAutoDiscoveryConfigProvider(
     private val configStr: String,
@@ -34,6 +38,8 @@ class OpcuaAutoDiscoveryConfigProvider(
     private val className = this::class.java.name.toString()
     private val ch = Channel<String>(1)
     private val scope = buildScope("CustomConfigProvider")
+
+    private var waitBeforeRetry : Duration? =CONFIG_DEFAULT_WAIT_BEFORE_RETRY.toDuration(DurationUnit.MILLISECONDS)
 
     private var lastConfig: String? = null
 
@@ -57,6 +63,7 @@ class OpcuaAutoDiscoveryConfigProvider(
                 // get auto discovery config only, this needs verification
                 val autoDiscovery: OpcuaAutoDiscoveryConfiguration = configReader.getConfig(true)
                 val providerConfig: OpcuaDiscoveryProviderConfig = autoDiscovery.autoDiscoveryProviderConfig
+                waitBeforeRetry = autoDiscovery.waitForRetry
 
                 // if no autodiscovery sources just emit received configuration
                 if (providerConfig.isEmpty()) {
@@ -77,10 +84,15 @@ class OpcuaAutoDiscoveryConfigProvider(
                 @Suppress("UNCHECKED_CAST")
                 val configOutputSources = configOutput[CONFIG_SOURCES] as MutableMap<String, Map<String, Any>>
 
-                // validate ifd configured sources for autodiscovery are consistent with configured sourses
-                checkIfConfiguresAutoDiscoverySourcesExist(opcuaConfigInput, providerConfig, log)
-                checkIfEmptySourcesHaveAutoDiscoveryConfiguration(opcuaConfigInput, providerConfig, log)
+                try {
+                    // validate ifd configured sources for autodiscovery are consistent with configured sources
+                    checkIfConfiguresAutoDiscoverySourcesExist(opcuaConfigInput, providerConfig, log)
+                    checkIfEmptySourcesHaveAutoDiscoveryConfiguration(opcuaConfigInput, providerConfig, log)
+                } catch( e)
 
+
+                // todo test if source has nodes -> if empty remove
+                // todo no nodes no returned config
 
                 opcuaConfigInput.sources.forEach { (sourceID, sourceConfig) ->
 
@@ -90,7 +102,6 @@ class OpcuaAutoDiscoveryConfigProvider(
 
                         val discoveredNodesForSource =
                             discovererSourceNodesNodes(sourceID, sourceConfig, opcuaConfigInput, nodesForSource)
-
 
                         @Suppress("UNCHECKED_CAST")
                         val outputChannelsForSource =
@@ -103,12 +114,13 @@ class OpcuaAutoDiscoveryConfigProvider(
                     }
                 }
                 emitConfiguration(buildConfigOutputString(configOutput))
+                return@launch
 
             } catch (e: Exception) {
                 log.error("Error executing autodiscovery, $e")
             }
 
-            delay(1000)
+            delay(waitBeforeRetry))
         }
 
     }
@@ -160,17 +172,52 @@ class OpcuaAutoDiscoveryConfigProvider(
                         )
                     }
 
-                val filteredNodes = nodes.filter { n->
-                    val isExcludedNode = node.exclusions.any{it.matcher(n.path).matches()}
-                    if (isExcludedNode) {
-                        log.trace("Node ${n.path} is excluded by exclusions ${node.exclusions.map { it.pattern().toString() }}")
-                    }
-                    isExcludedNode
-                }
+                val filteredNodes = applyFilters(nodes, node)
                 this.yieldAll(filteredNodes)
             }
         }.toList()
     }
+
+    private fun applyFilters(
+        nodes: List<DiscoveredUaNodeType>,
+        node: OpcuaDiscoveryNodeConfiguration
+    ): List<DiscoveredUaNodeType> {
+        var filteredNodes = includedNodes(nodes, node)
+        filteredNodes = excludeNodes(filteredNodes, node)
+        return filteredNodes
+    }
+
+    private fun excludeNodes(filteredNodes: List<DiscoveredUaNodeType>, node: OpcuaDiscoveryNodeConfiguration) =
+        filteredNodes.filter { n ->
+            val isExcludedNode = node.exclusions.any { it.matcher(n.path).matches() }
+            if (isExcludedNode) {
+                logger.getCtxTraceLog(className, "excludeNodes")
+                "Node ${n.path} is excluded by exclusions ${
+                    node.exclusions.map {
+                        it.pattern().toString()
+                    }
+                }"
+                )
+            }
+            isExcludedNode
+        }
+
+    private fun includedNodes(nodes: List<DiscoveredUaNodeType>, node: OpcuaDiscoveryNodeConfiguration) =
+        nodes.filter { n ->
+            if (node.inclusions.isEmpty()) true
+            else {
+                val isIncluded = node.inclusions.any { it.matcher(n.path).matches() }
+                logger.getCtxTraceLog(className, "includedNodes")(
+                    "Node ${n.path} is included by inclusions ${
+                        node.exclusions.map {
+                            it.pattern().toString()
+                        }
+                    }"
+                )
+                isIncluded
+            }
+        }
+
 
     private fun buildChannelMapEntry(discoveredNode: DiscoveredUaNodeType): Pair<String, MutableMap<String, Any>> {
         val channelName: String = buildIDForNode(discoveredNode.parents, discoveredNode.node)
@@ -245,7 +292,7 @@ class OpcuaAutoDiscoveryConfigProvider(
             }
 
     private fun cleanNameForNode(node: UaNode): String {
-        return (node.displayName.text ?: node.browseName.name.toString())
+        return node.browseName.name.toString()
             .replace("http://", "")
             .replace("/", "_")
             .replace(":", "_")

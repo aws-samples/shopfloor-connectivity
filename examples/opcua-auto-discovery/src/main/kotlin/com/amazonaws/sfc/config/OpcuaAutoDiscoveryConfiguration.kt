@@ -1,6 +1,9 @@
 package com.amazonaws.sfc.config
 
 import com.google.gson.annotations.SerializedName
+import kotlin.time.Duration
+import kotlin.time.DurationUnit
+import kotlin.time.toDuration
 
 
 typealias OpcuaDiscoveryProviderConfig = Map<String, List<OpcuaDiscoveryNodeConfiguration>>
@@ -17,6 +20,13 @@ class OpcuaAutoDiscoveryConfiguration : Validate {
 
     val autoDiscoveryProviderConfig
         get() = _autoDiscoveryConfig
+
+
+    @SerializedName(CONFIG_WAIT_FOR_RETRY)
+    private var _waitForRetry: Long = CONFIG_DEFAULT_WAIT_BEFORE_RETRY
+    val waitForRetry: Duration
+
+        get() = _waitForRetry.toDuration(DurationUnit.MILLISECONDS)
 
     private var _validated = false
 
@@ -49,6 +59,9 @@ class OpcuaAutoDiscoveryConfiguration : Validate {
         const val CONFIG_NODES_TO_DISCOVER = "NodeTypesToDiscover"
         const val CONFIG_DISCOVERY_DEPTH = "DiscoveryDepth"
         const val CONFIG_EXCLUSIONS = "Exclusions"
+        const val CONFIG_INCLUSIONS = "Inclusions"
+        const val CONFIG_WAIT_FOR_RETRY = "WaitForRetry"
+        const val CONFIG_DEFAULT_WAIT_BEFORE_RETRY = 60000L
 
     }
 

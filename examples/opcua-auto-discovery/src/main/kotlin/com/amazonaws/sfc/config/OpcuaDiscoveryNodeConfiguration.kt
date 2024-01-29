@@ -2,6 +2,7 @@ package com.amazonaws.sfc.config
 
 import com.amazonaws.sfc.config.OpcuaAutoDiscoveryConfiguration.Companion.CONFIG_DISCOVERY_DEPTH
 import com.amazonaws.sfc.config.OpcuaAutoDiscoveryConfiguration.Companion.CONFIG_EXCLUSIONS
+import com.amazonaws.sfc.config.OpcuaAutoDiscoveryConfiguration.Companion.CONFIG_INCLUSIONS
 import com.amazonaws.sfc.config.OpcuaAutoDiscoveryConfiguration.Companion.CONFIG_NODES_TO_DISCOVER
 import com.amazonaws.sfc.opcua.config.OpcuaConfiguration.Companion.CONFIG_NODE_ID
 import com.google.gson.annotations.SerializedName
@@ -15,6 +16,13 @@ class OpcuaDiscoveryNodeConfiguration : Validate {
 
     val nodeID: NodeId
         get() = NodeId.parse(_nodeID)
+
+    @SerializedName(CONFIG_INCLUSIONS)
+    private var _inclusions: List<String> = emptyList()
+
+    val inclusions: List<Pattern> by lazy{
+        _inclusions.map { Pattern.compile(it)}
+    }
 
     @SerializedName(CONFIG_EXCLUSIONS)
     private var _exclusions: List<String> = emptyList()
@@ -54,6 +62,18 @@ class OpcuaDiscoveryNodeConfiguration : Validate {
             throw ConfigurationException(
                 "$CONFIG_NODE_ID \"$_nodeID\" is not a valid node id, $e",
                 CONFIG_NODE_ID,
+                this
+            )
+        }
+
+        try {
+            _inclusions.forEach {  r -> Pattern.compile(r)}
+        } catch (
+            e: Exception
+        ) {
+            throw ConfigurationException(
+                "$CONFIG_INCLUSIONS invalid regex expression in $_inclusions, $e",
+                CONFIG_INCLUSIONS,
                 this
             )
         }
