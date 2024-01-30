@@ -1,4 +1,3 @@
-
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: MIT-0
 
@@ -7,15 +6,19 @@ package com.amazonaws.sfc.s7
 
 import com.amazonaws.sfc.data.ProtocolAdapterException
 import com.amazonaws.sfc.log.Logger
-import com.amazonaws.sfc.metrics.*
+import com.amazonaws.sfc.metrics.MetricUnits
+import com.amazonaws.sfc.metrics.MetricsCollector
 import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_CONNECTIONS
 import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_CONNECTION_ERRORS
 import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_READ_DURATION
 import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_VALUES_READ
+import com.amazonaws.sfc.metrics.MetricsDataPoint
+import com.amazonaws.sfc.metrics.MetricsValue
 import com.amazonaws.sfc.s7.config.S7ControllerConfiguration
 import com.amazonaws.sfc.s7.config.S7FieldChannelConfiguration
 import com.amazonaws.sfc.s7.config.S7PlcControllerType
 import com.amazonaws.sfc.util.LookupCacheHandler
+import com.amazonaws.sfc.util.asHexString
 import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
 import org.apache.plc4x.java.api.messages.PlcReadRequest
@@ -32,15 +35,20 @@ import org.apache.plc4x.java.spi.values.PlcBOOL
 import java.math.BigInteger
 import java.nio.charset.Charset
 import java.time.Duration
+import java.time.Instant
+import java.time.LocalDateTime
+import java.time.ZoneOffset
 import kotlin.time.measureTime
 
 private typealias mapResultFunc = (String, PlcReadResponse) -> Any
 
 
-class S7Controller(private val adapterID: String,
-                   private val sourceID: String,
-                   private val config: S7ControllerConfiguration,
-                   private val logger: Logger) {
+class S7Controller(
+    private val adapterID: String,
+    private val sourceID: String,
+    private val config: S7ControllerConfiguration,
+    private val logger: Logger
+) {
 
     private val className = this::class.java.simpleName
 
@@ -80,10 +88,11 @@ class S7Controller(private val adapterID: String,
     )
 
     // cache optimized sets of read requests indexed by the source and channels to reuse for repetitive reads
-    private val readRequestCache = LookupCacheHandler<String, List<PlcReadRequest>?, Map<String, S7FieldChannelConfiguration>>(
-        supplier = { null },
-        initializer = { _, _, channels -> getReadRequests(channels ?: emptyMap()) }
-    )
+    private val readRequestCache =
+        LookupCacheHandler<String, List<PlcReadRequest>?, Map<String, S7FieldChannelConfiguration>>(
+            supplier = { null },
+            initializer = { _, _, channels -> getReadRequests(channels ?: emptyMap()) }
+        )
 
     // lock to prevent overlapping reads for the controller
     val lock by lazy { Mutex() }
@@ -119,15 +128,15 @@ class S7Controller(private val adapterID: String,
         }
 
         "s7://${config.address}?" +
-        "${fnParamStr(S7Configuration::localRack.name, config.localRack)}&" +
-        "${fnParamStr(S7Configuration::localSlot.name, config.localSlot)}&" +
-        "${fnParamStr(S7Configuration::remoteRack.name, config.remoteRack)}&" +
-        "${fnParamStr(S7Configuration::remoteSlot.name, config.remoteSlot)}&" +
-        "${fnParamStr(S7Configuration::pduSize.name, config.pduSize)}&" +
-        "${fnParamStr(S7Configuration::maxAmqCaller.name, config.maxAmqCaller)}&" +
-        fnParamStr(S7Configuration::maxAmqCallee.name, config.maxAmqCallee) +
-        if (config.controllerType == S7PlcControllerType.UNKNOWN_CONTROLLER_TYPE) ""
-        else "&controller-type=${config.controllerType}"
+                "${fnParamStr(S7Configuration::localRack.name, config.localRack)}&" +
+                "${fnParamStr(S7Configuration::localSlot.name, config.localSlot)}&" +
+                "${fnParamStr(S7Configuration::remoteRack.name, config.remoteRack)}&" +
+                "${fnParamStr(S7Configuration::remoteSlot.name, config.remoteSlot)}&" +
+                "${fnParamStr(S7Configuration::pduSize.name, config.pduSize)}&" +
+                "${fnParamStr(S7Configuration::maxAmqCaller.name, config.maxAmqCaller)}&" +
+                fnParamStr(S7Configuration::maxAmqCallee.name, config.maxAmqCallee) +
+                if (config.controllerType == S7PlcControllerType.UNKNOWN_CONTROLLER_TYPE) ""
+                else "&controller-type=${config.controllerType}"
     }
 
     // Driver context which holds the actual parameters returned by the S7 controller
@@ -153,10 +162,10 @@ class S7Controller(private val adapterID: String,
     // actual parameters returned by the PLC
     private val connection by lazy {
 
-           val s7 = CustomS7Driver {
-                // Interceptor stores the driver context
-                _s7DriverContext = it
-            }
+        val s7 = CustomS7Driver {
+            // Interceptor stores the driver context
+            _s7DriverContext = it
+        }
 
         // get the connection using the custom driver
         s7.getConnection(connectString)
@@ -184,7 +193,10 @@ class S7Controller(private val adapterID: String,
                 val rb = connection.readRequestBuilder()
                 allFieldsForReadingChannels.entries.removeIf {
                     if (it.value.dataSize() > plcMaxTpuBytes) {
-                        logger.getCtxWarningLog(className, "getReadRequests")("Size of S7 field ${it.key} is larger than max pdu size of $plcMaxTpuBytes bytes for PLC")
+                        logger.getCtxWarningLog(
+                            className,
+                            "getReadRequests"
+                        )("Size of S7 field ${it.key} is larger than max pdu size of $plcMaxTpuBytes bytes for PLC")
                         return@removeIf true
                     } else {
                         if ((it.value.dataSize() + dataSize) <= plcMaxTpuBytes) {
@@ -207,9 +219,11 @@ class S7Controller(private val adapterID: String,
 
 
     // Reads the values for the specified fields channels
-    suspend fun read(fieldChannels: Map<String, S7FieldChannelConfiguration>,
-                     metricDimensions: Map<String, String>,
-                     metrics: MetricsCollector?): Map<String, Any?> = coroutineScope {
+    suspend fun read(
+        fieldChannels: Map<String, S7FieldChannelConfiguration>,
+        metricDimensions: Map<String, String>,
+        metrics: MetricsCollector?
+    ): Map<String, Any?> = coroutineScope {
         // (re)connect
         connect(metricDimensions, metrics)
         var data: Map<String, Any?>
@@ -219,9 +233,20 @@ class S7Controller(private val adapterID: String,
             // Use results to obtain data from results build output as a map index by the channel names
             data = processResults(fieldChannels, results)
         }
-        metrics?.put(adapterID,
-            MetricsDataPoint(name = METRICS_VALUES_READ, dimensions = metricDimensions, units = MetricUnits.COUNT, MetricsValue(data.size)),
-            MetricsDataPoint(name = METRICS_READ_DURATION, dimensions = metricDimensions, units = MetricUnits.MILLISECONDS, MetricsValue(duration.inWholeMilliseconds.toDouble()))
+        metrics?.put(
+            adapterID,
+            MetricsDataPoint(
+                name = METRICS_VALUES_READ,
+                dimensions = metricDimensions,
+                units = MetricUnits.COUNT,
+                MetricsValue(data.size)
+            ),
+            MetricsDataPoint(
+                name = METRICS_READ_DURATION,
+                dimensions = metricDimensions,
+                units = MetricUnits.MILLISECONDS,
+                MetricsValue(duration.inWholeMilliseconds.toDouble())
+            )
         )
         return@coroutineScope data
     }
@@ -244,15 +269,18 @@ class S7Controller(private val adapterID: String,
                 throw ProtocolAdapterException("Timeout reading from source \"$sourceID\"")
             } catch (e: Exception) {
                 val errorFields = request.fields.map { lookupConfiguredField(it as S7Field) }.toSet()
-                val msg = "Error reading from source  \"$sourceID\", fields [${errorFields.joinToString { it.toString() }}, $e"
+                val msg =
+                    "Error reading from source  \"$sourceID\", fields [${errorFields.joinToString { it.toString() }}, $e"
                 throw ProtocolAdapterException(msg)
             }
         }
     }
 
 
-    private suspend fun processResults(channels: Map<String, S7FieldChannelConfiguration>,
-                                       results: List<PlcReadResponse>): Map<String, Any?> {
+    private suspend fun processResults(
+        channels: Map<String, S7FieldChannelConfiguration>,
+        results: List<PlcReadResponse>
+    ): Map<String, Any?> {
 
         // map indexed by channel
         val rawReadData = channels.map { it.key to mutableMapOf<String, Any>() }.toMap()
@@ -284,7 +312,10 @@ class S7Controller(private val adapterID: String,
     }
 
 
-    private fun constructReadOutput(channels: Map<String, S7FieldChannelConfiguration>, rawData: Map<String, Map<String, Any?>?>): Map<String, Any?> {
+    private fun constructReadOutput(
+        channels: Map<String, S7FieldChannelConfiguration>,
+        rawData: Map<String, Map<String, Any?>?>
+    ): Map<String, Any?> {
         return rawData.map { (channelID, v) ->
             channelID to when {
                 // no data for this channel
@@ -323,6 +354,16 @@ class S7Controller(private val adapterID: String,
         }
     }
 
+    private fun dateTimeAsRawFields(s7Field: S7Field): List<S7Field> {
+        val size = s7Field.numberOfElements * 8
+        val ff =
+            "%${s7Field.memoryArea.shortName}" +
+                    "${if (s7Field.memoryArea == MemoryArea.DATA_BLOCKS) s7Field.blockNumber else ""}:" +
+                    "${s7Field.byteOffset}:SINT[${minOf(size, plcMaxTpuBytes)}]"
+        return listOf(S7Field.of(ff))
+    }
+
+
     // Builds required sets of fields to read data dealing with max pdu size for PLC or datatype
     // not handled by PLC4J. Returns null if configured field can be used
     private fun buildFallbackS7Fields(s7: S7Field): List<S7Field>? =
@@ -334,8 +375,10 @@ class S7Controller(private val adapterID: String,
             TransportSize.WCHAR -> listOf(asRawBytesField(s7))
             TransportSize.LWORD -> listOf(asRawBytesField(s7))
             TransportSize.LINT, TransportSize.ULINT -> listOf(asRawBytesField(s7))
+            TransportSize.DATE_AND_TIME -> dateTimeAsRawFields(s7)
             else -> {
-                val fitsInSinglePduRequest = (s7.numberOfElements == 1) || (s7.numberOfElements * s7.dataType.fixedSizeInBytes <= plcMaxTpuBytes)
+                val fitsInSinglePduRequest =
+                    (s7.numberOfElements == 1) || (s7.numberOfElements * s7.dataType.fixedSizeInBytes <= plcMaxTpuBytes)
                 if (fitsInSinglePduRequest) null else buildChunkedArrayFields(s7)
             }
         }
@@ -348,13 +391,16 @@ class S7Controller(private val adapterID: String,
         }
 
         val chunkStartAndNumberOfElements =
-            IntRange(start = 0, endInclusive = s7Field.numberOfElements - 1).chunked(maxItemsInTpu) { it.first() to (it.last() - it.first()) + 1 }
+            IntRange(
+                start = 0,
+                endInclusive = s7Field.numberOfElements - 1
+            ).chunked(maxItemsInTpu) { it.first() to (it.last() - it.first()) + 1 }
 
         val chunks = chunkStartAndNumberOfElements.map { c ->
             val offset = s7Field.byteOffset + c.first * s7Field.dataType.fixedSizeInBytes
             val ff = "%${s7Field.memoryArea.shortName}" +
-                     "${if (s7Field.memoryArea == MemoryArea.DATA_BLOCKS) s7Field.blockNumber else ""}:" +
-                     "$offset:${s7Field.dataType}[${c.second}]"
+                    "${if (s7Field.memoryArea == MemoryArea.DATA_BLOCKS) s7Field.blockNumber else ""}:" +
+                    "$offset:${s7Field.dataType}[${c.second}]"
             S7Field.of(ff)
         }
         return chunks
@@ -366,8 +412,8 @@ class S7Controller(private val adapterID: String,
         val size = s7Field.numberOfElements * s7Field.dataType.fixedSizeInBytes
         val ff =
             "%${s7Field.memoryArea.shortName}" +
-            "${if (s7Field.memoryArea == MemoryArea.DATA_BLOCKS) s7Field.blockNumber else ""}:" +
-            "${s7Field.byteOffset}:SINT[${minOf(size, plcMaxTpuBytes)}]"
+                    "${if (s7Field.memoryArea == MemoryArea.DATA_BLOCKS) s7Field.blockNumber else ""}:" +
+                    "${s7Field.byteOffset}:SINT[${minOf(size, plcMaxTpuBytes)}]"
         return S7Field.of(ff)
     }
 
@@ -391,8 +437,8 @@ class S7Controller(private val adapterID: String,
 
             stringSections.map { (sectionOffset, sectionLength) ->
                 val rawDataFieldStr = "%${s7Field.memoryArea.shortName}" +
-                                      "${if (s7Field.memoryArea == MemoryArea.DATA_BLOCKS) s7Field.blockNumber else ""}:" +
-                                      "$sectionOffset:USINT[${sectionLength}]"
+                        "${if (s7Field.memoryArea == MemoryArea.DATA_BLOCKS) s7Field.blockNumber else ""}:" +
+                        "$sectionOffset:USINT[${sectionLength}]"
                 S7Field.of(rawDataFieldStr)
             }
 
@@ -579,9 +625,21 @@ class S7Controller(private val adapterID: String,
             // Date and time as ISO formatted string
             TransportSize.DATE_AND_TIME ->
                 mapResultValue(fieldName, result) { fld, resp ->
-                    resp.getAllObjects(fld).map { t ->
-                        t.toString()
-                    }
+
+                    val bytes = resp.getAllBytes(fld).toList()
+                    sequence {
+                        bytes.chunked(8).map { b ->
+                            if (b.size == 8) {
+                                try {
+                                    val dateTimeValue = decodeDateTime(b.toByteArray())
+                                    yield(dateTimeValue)
+                                } catch (e: Exception) {
+                                    val message = "Invalid date time, decoding from ${b.toByteArray().asHexString()} for field $fld, $e}"
+                                    logger.getCtxErrorLog(className, "decoding DATE_AND_TIME")(message)
+                                }
+                            }
+                        }
+                    }.toList()
                 }
 
 
@@ -592,6 +650,23 @@ class S7Controller(private val adapterID: String,
                 }
         }
         return o
+    }
+
+    private fun decodeDateTime(bytes: ByteArray): Instant? {
+
+        val year = bcdYear(bytes[0])
+        val month = bcdToInt(bytes[1])
+        val day = bcdToInt(bytes[2])
+        val hour = bcdToInt(bytes[3])
+        val minute = bcdToInt(bytes[4])
+        val second = bcdToInt(bytes[5])
+        val millisMsd = bcdToInt(bytes[6])
+        val millisLsd = bcdToInt(((bytes[7].toInt() and 0xF0) shr 4).toByte())
+        val millis = millisMsd * 10 + millisLsd
+        val ldt = LocalDateTime.of(year, month, day, hour, minute, second, millis * 1000000)
+        val utcDateTime = ldt.toInstant(ZoneOffset.UTC)
+
+        return utcDateTime
     }
 
     private fun lookupConfiguredField(s7Field: S7Field): S7Field? {
@@ -657,6 +732,21 @@ class S7Controller(private val adapterID: String,
             val str = String(bytes, charset)
             val n = str.indexOf(Char(0))
             return if (n == -1) str else str.substring(0, n)
+        }
+
+        private fun bcdYear(b: Byte): Int {
+            val year = bcdToInt(b)
+            return if (year in 0..89) {
+                year + 2000
+            } else {
+                year + 1900
+            }
+        }
+
+        private fun bcdToInt(bcd: Byte): Int {
+            val secondDigit = (bcd.toInt() and 0x0F).toUInt()
+            val firstDigit = (((bcd.toInt() and 0xF0) shr 4) * 10).toUInt()
+            return (secondDigit + firstDigit).toInt()
         }
 
         // Builds (array of) LREAL from raw bytes
