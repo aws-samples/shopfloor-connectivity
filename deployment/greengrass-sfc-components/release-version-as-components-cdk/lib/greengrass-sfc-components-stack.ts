@@ -37,10 +37,10 @@ export class GreengrassSfcComponentsStack extends cdk.Stack {
             "AWS_REGION": this.region,
             "ACCOUNT_ID": this.account,
             "SFC_COMPONENT_BASENAME": "com.amazon.sfc",
-            "SFC_COMPONENT_VERSION": "1.0.5",
+            "SFC_COMPONENT_VERSION": "1.0.6",
             "SFC_COMPONENT_BUCKET": componentBucket.bucketName,
-            "SFC_COMPONENT_PREFIX": "1.0.5",
-            "SFC_LATEST_RELEASE_BUNDLE_URI": "https://dyy8lqvmsyeqk.cloudfront.net/70fc6d4/bundle/sfc-bundle.zip",
+            "SFC_COMPONENT_PREFIX": "1.0.6",
+            "SFC_LATEST_RELEASE_BUNDLE_URI": "https://dyy8lqvmsyeqk.cloudfront.net/b4ff18b/bundle/sfc-bundle.zip",
             "SFC_LATEST_RELEASE_BUNDLE_NAME": "sfc-bundle.zip"
           }
         },
