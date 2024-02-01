@@ -26,7 +26,6 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withTimeoutOrNull
-import org.apache.plc4x.java.s7.readwrite.context.S7DriverContext
 import java.time.Instant
 import kotlin.time.Duration
 

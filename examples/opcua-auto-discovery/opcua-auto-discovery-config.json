@@ -1,0 +1,109 @@
+{
+  "AWSVersion": "2022-04-02",
+  "Description": "Example configuration using OPCUA auto discovery configuration provider",
+  "Version": 1,
+  "LogLevel": "Trace",
+
+  "ConfigProvider": {
+    "JarFiles": [
+      "<SET TO DEPLOYMENT DIR >/opcua-auto-discovery",
+      "<SET TO DEPLOYMENT DIR >/opcua/libs"
+    ],
+    "FactoryClassName": "com.amazonaws.sfc.config.OpcuaAutoDiscoveryConfigProvider"
+  },
+
+  "AutoDiscovery": {
+    "IncludeDescription": true,
+    "WaitForRetry": 1000,
+    "MaxRetries": 5,
+    "SavedLastConfig": "generated-config.json",
+    "Sources": {
+      "OPCUA-SOURCE": [
+        {
+          "NodeId": "ns=3;s=85/0:Simulation",
+          "DiscoveryDepth": "10",
+          "DiscoveredNodeTypes": "VariablesAndEvents",
+          "Exclusions": [
+            ".*Max\\sValue.*",
+            ".*Min\\sValue.*"
+          ]
+        },
+        {
+          "NodeId": "ns=0;i=2253",
+          "DiscoveredNodeTypes": "VariablesAndEvents",
+          "Exclusions": [
+            "ServerDiagnostics/.*"
+          ]
+        },
+        {
+          "NodeId": "ns=6;s=MyDevice",
+          "DiscoveredNodeTypes": "VariablesAndEvents",
+          "Inclusions": [
+            ".*/MyLevel.*"
+          ]
+        }
+      ]
+    }
+  },
+  "Schedules": [
+    {
+      "Name": "Opcua",
+      "Interval": 1000,
+      "Active": true,
+      "TimestampLevel": "Both",
+      "Sources": {
+        "OPCUA-SOURCE": [
+          "*"
+        ]
+      },
+      "Targets": [
+        "DebugTarget"
+      ]
+    }
+  ],
+  "Sources": {
+    "OPCUA-SOURCE": {
+      "Name": "OPCUA-SOURCE",
+      "ProtocolAdapter": "OPC-UA",
+      "AdapterOpcuaServer": "OPCUA-SERVER",
+      "Description": "OPCUA local server, no channels configured as these are created bu OPCUA auto discovery configuration provider",
+      "SourceReadingMode": "Polling",
+      "Channels": {}
+    }
+  },
+  "Targets": {
+    "DebugTarget": {
+      "TargetServer": "DebugTargetServer",
+      "Active": true,
+      "TargetType": "DEBUG-TARGET"
+    }
+  },
+  "TargetTypes": {
+    "DEBUG-TARGET": {
+      "JarFiles": [
+        "<SET TO DEPLOYMENT DIR>/debug-target/lib"
+      ],
+      "FactoryClassName": "com.amazonaws.sfc.debugtarget.DebugTargetWriter"
+    }
+  },
+  "ProtocolAdapters": {
+    "OPC-UA": {
+      "AdapterType": "OPCUA",
+      "OpcuaServers": {
+        "OPCUA-SERVER": {
+          "Address": "opc.tcp://localhost",
+          "Path": "OPCUA/SimulationServer",
+          "Port": 53530
+        }
+      }
+    }
+  },
+  "AdapterTypes": {
+    "OPCUA": {
+      "JarFiles": [
+        "< SET TO DEPLOYMENT DIR >/opcua/lib"
+      ],
+      "FactoryClassName": "com.amazonaws.sfc.opcua.OpcuaAdapter"
+    }
+  }
+}

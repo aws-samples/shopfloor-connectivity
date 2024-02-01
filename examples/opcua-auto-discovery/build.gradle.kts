@@ -28,6 +28,5 @@ dependencies {
     implementation("org.eclipse.milo:sdk-client:$opcuaMiloVersion")
 
 
-
 }
 
