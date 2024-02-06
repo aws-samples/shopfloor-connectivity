@@ -1,8 +1,8 @@
 # SFC Example OPCUA auto discovery custom config provider
 
-This is an example of a custom config provider allowing auto discovery of nodes to generate channels for configures  OPCUA sources.
+This is an example of a custom config provider allowing auto discovery of nodes to generate channels for configured  OPCUA sources.
 
-The input SFC configuration file used for sfc-main must the configuration for the OPCUA sources used by the OPCUA protocol 
+The input SFC [configuration file `opcua-auto-discovery-config.json`](opcua-auto-discovery-config.json), used for sfc-main, holds the configuration for the OPCUA sources used by the OPCUA protocol 
 adapter. Nodes on the OPCUA servers, which are configured for the sources, are browsed and for selected noded channels will
 be generated and added to the source. The initial list of channels for a source can be left empty. If the source already does 
 contain channels, the channels for the discovered nodes are added to the existing ones.
@@ -37,7 +37,7 @@ of the deployment)
                      "adapters/opcua/build/libs"
                     ],
         "FactoryClassName": "com.amazonaws.sfc.config.OpcuaAutoDiscoveryConfigProvider"
-    }
+    },
 
 ```
 
@@ -45,33 +45,34 @@ The __AutoDiscovery__ configuration section contains the configuration for the a
 
 
 ```json
- "AutoDiscovery": {
-    "Sources": {
-      "OPCUA-SOURCE": 
-      [
-        {
-            "NodeId": "ns=3;s=85/0:Simulation",
-            "DiscoveryDepth": "10",
-            "DiscoveredNodeTypes": "VariablesAndEvents",
-            "Exclusions": [ ".*Max\\sValue.*", ".*Min\\sValue.*"]
-        },
-        {
-            "NodeId": "ns=0;i=2253",
-            "DiscoveredNodeTypes": "VariablesAndEvents",
-            "Exclusions": [ "ServerDiagnostics/.*"]
-        },
-        {
-            "NodeId": "ns=6;s=MyDevice",
-            "DiscoveredNodeTypes": "VariablesAndEvents",
-            "Inclusions" : [".*/MyLevel.*"]
-        }
-      ]
-    }
-    "IncludeDescription": true,
-    "WaitForRetry": 60000,
-    "MaxRetries": 10,
-    "SavedLastConfig" : "generated-config.json",
-  },
+    "AutoDiscovery": {
+       "Sources": {
+         "OPCUA-SOURCE": 
+         [
+           {
+               "NodeId": "ns=3;s=85/0:Simulation",
+               "DiscoveryDepth": "10",
+               "DiscoveredNodeTypes": "VariablesAndEvents",
+               "Exclusions": [ ".*Max\\sValue.*", ".*Min\\sValue.*"]
+           },
+           {
+               "NodeId": "ns=0;i=2253",
+               "DiscoveredNodeTypes": "VariablesAndEvents",
+               "Exclusions": [ "ServerDiagnostics/.*"]
+           },
+           {
+               "NodeId": "ns=6;s=MyDevice",
+               "DiscoveredNodeTypes": "VariablesAndEvents",
+               "Inclusions" : [".*/MyLevel.*"]
+           }
+         ]
+       }
+       "IncludeDescription": true,
+       "WaitForRetry": 60000,
+       "MaxRetries": 10,
+       "SavedLastConfig" : "generated-config.json",
+     },
+...
 ```
 
 The __Sources__ section contains a table with an entry for each source for which nodes will be recovered. The key in this
