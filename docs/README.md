@@ -13,6 +13,7 @@ SFC documentation
     - [Beckhoff ADS to S3 Example](../examples/in-process-ads-s3/README.md)
     - [Siemens S7 to Sitewise sample](../examples/in-process-s7-sitewise/README.md)
     - [YAML Custom Configuration Provider](../examples/yaml-custom-config-provider/README.md)
+    - [OPCUA Auto Discovery Configuration provider](../examples/opcua-auto-discovery/README.md)
     - [CSV File Adapter Example](../examples/custom-adapter-csvfile/README.md)
   - [Introduction](#introduction)
     - [SFC Components](#sfc-components)
@@ -5176,7 +5177,7 @@ This section describes the configuration types for the ADS protocol adapter and 
 <thead>
 <tr class="header">
 <th colspan="4"><p><strong>AdsSourceConfiguration</strong> Extends SourceConfiguration</p>
-<p>The AdsSourceConfiguration extends the common Source configuration with ADS specific source configuration data</p></th>
+<p>The AdsSourceConfiguration extends the common Source configuration with ADS specific source configuration data.</p></th>
 </tr>
 </thead>
 <tbody>

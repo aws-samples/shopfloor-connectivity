@@ -55,10 +55,10 @@ abstract class CommandLine(val args: Array<String>) {
         const val OPTION_CONFIG_FILE = "config"
         const val OPTION_CONFIG_VERIFY_PUBLIC_KEY_FILE = "verify"
         private const val OPTION_HELP = "help"
-        private const val OPTION_LOGLEVEL_ERROR = "error"
-        private const val OPTION_LOGLEVEL_INFO = "info"
-        private const val OPTION_LOGLEVEL_TRACE = "trace"
-        private const val OPTION_LOGLEVEL_WARNING = "warning"
+        const val OPTION_LOGLEVEL_ERROR = "error"
+        const val OPTION_LOGLEVEL_INFO = "info"
+        const val OPTION_LOGLEVEL_TRACE = "trace"
+        const val OPTION_LOGLEVEL_WARNING = "warning"
 
 
         private val helpOption: Option = Option.builder("h")

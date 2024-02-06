@@ -38,6 +38,7 @@ class YamlConfigProviderConfig : Validate {
             CONFIG_YAML_FILE,
             this
         )
+        validated = true
     }
 
     override var validated: Boolean
@@ -49,6 +50,5 @@ class YamlConfigProviderConfig : Validate {
     companion object {
         const val CONFIG_YAML_FILE = "YamlConfigFile"
     }
-
 
 }
