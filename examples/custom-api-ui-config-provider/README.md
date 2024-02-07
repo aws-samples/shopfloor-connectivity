@@ -24,12 +24,12 @@ We will create step by step a working SFC environment with our UX Config Provide
 - Prepare other needed SFC components and copy the built artifact
     ```shell
     # Define sfc version and directory
-    export VERSION="1.0.6"
+    export VERSION="1.0.7"
+    export BUNDLE_URI="https://github.com/aws-samples/shopfloor-connectivity/releases/download/v$VERSION"
     export SFC_DEPLOYMENT_DIR="sfc"
     # Download and extract bundles into folder ./sfc
     mkdir $SFC_DEPLOYMENT_DIR && cd $SFC_DEPLOYMENT_DIR
-    wget https://github.com/aws-samples/shopfloor-connectivity/releases/download/v$VERSION/ \
-  {debug-target,opcua,sfc-main}.tar.gz
+    wget $BUNDLE_URI/{debug-target,opcua,sfc-main}.tar.gz
     cp ../build/distributions/custom-api-ui-config-provider.tar.gz .
     for file in *.tar.gz; do
       tar -xf "$file"
@@ -74,6 +74,8 @@ We will create step by step a working SFC environment with our UX Config Provide
 
   ```shell
   sfc/sfc-main/bin/sfc-main -config custom-api-ui-config-provider.json
+  ```
+  ```shell
   # see how SFC recognized the config provider
   2024-02-07 13:13:26.841 INFO  - Creating configuration provider of type ConfigProvider
   2024-02-07 13:13:26.858 INFO  - Waiting for configuration
