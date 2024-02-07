@@ -1,0 +1,134 @@
+{
+    "name": "WorkingOPCUA-sample",
+    "baseConfig":   {
+        "AWSVersion": "2022-04-02",
+        "Name": "OPCUA to DebugTarget, using in process source and targets",
+        "Version": 1,
+        "LogLevel": "Info",
+        "ElementNames": {
+            "Value": "value",
+            "Timestamp": "timestamp",
+            "Metadata": "metadata"
+        },
+        "Schedules": [
+            {
+                "Name": "OpcuaToS3",
+                "Interval": 5000,
+                "Description": "Read data of all OPCUA data types once per second and send to S3",
+                "Active": true,
+                "TimestampLevel": "Both",
+                "Sources": {
+                    "OPCUA-SOURCE": [
+                        "*"
+                    ]
+                },
+                "Targets": [
+                    "#S3Target",
+                    "DebugTarget"
+                ]
+            }
+        ],
+        "Sources": {
+            "OPCUA-SOURCE": {
+                "Name": "OPCUA-SOURCE",
+                "ProtocolAdapter": "OPC-UA",
+                "AdapterOpcuaServer": "OPCUA-SERVER-1",
+                "Description": "OPCUA local test server",
+                "SourceReadingMode": "Polling",
+                "SubscribePublishingInterval": 100,
+                "Channels": {
+                    "ServerStatus": {
+                        "Name": "ServerStatus",
+                        "NodeId": "ns=0;i=2256"
+                    },
+                    "ServerTime": {
+                        "Name": "ServerTime",
+                        "NodeId": "ns=0;i=2256",
+                        "Selector": "@.currentTime"
+                    },
+                    "State": {
+                        "Name": "State",
+                        "NodeId": "ns=0;i=2259"
+                    },
+                    "Machine1AbsoluteErrorTime": {
+                        "Name": "AbsoluteErrorTime",
+                        "NodeId": "ns=21;i=59048"
+                    },
+                    "Machine1AbsoluteLength": {
+                        "Name": "AbsoluteLength",
+                        "NodeId": "ns=21;i=59066"
+                    },
+                    "Machine1AbsoluteMachineOffTime": {
+                        "Name": "AbsoluteMachineOffTime",
+                        "NodeId": "ns=21;i=59041"
+                    },
+                    "Machine1AbsoluteMachineOnTime": {
+                        "Name": "AbsoluteMachineOnTime",
+                        "NodeId": "ns=21;i=59050"
+                    },
+                    "Machine1AbsolutePiecesIn": {
+                        "Name": "AbsolutePiecesIn",
+                        "NodeId": "ns=21;i=59068"
+                    },
+                    "Machine1FeedSpeed": {
+                        "Name": "FeedSpeed",
+                        "NodeId": "ns=21;i=59039"
+                    }
+                }
+            }
+        },
+        "Targets": {
+            "DebugTarget": {
+                "Active": true,
+                "TargetType": "DEBUG-TARGET"
+            },
+            "S3Target": {
+                "Active": true,
+                "TargetType": "AWS-S3",
+                "Region": "us-east-1",
+                "BucketName": "",
+                "Interval": 60,
+                "BufferSize": 1,
+                "Prefix": "opcua-data",
+                "Compression": "None"
+            }
+        },
+        "TargetTypes": {
+            "DEBUG-TARGET": {
+                "JarFiles": [
+                    "${SFC_DEPLOYMENT_DIR}/debug-target/lib"
+                ],
+                "FactoryClassName": "com.amazonaws.sfc.debugtarget.DebugTargetWriter"
+            },
+            "AWS-S3": {
+                "JarFiles": [
+                    "${SFC_DEPLOYMENT_DIR}/aws-s3-target/lib"
+                ],
+                "FactoryClassName": "com.amazonaws.sfc.awss3.AwsS3TargetWriter"
+            }
+        },
+        "AdapterTypes": {
+            "OPCUA": {
+                "JarFiles": [
+                    "${SFC_DEPLOYMENT_DIR}/opcua/lib"
+                ],
+                "FactoryClassName": "com.amazonaws.sfc.opcua.OpcuaAdapter"
+            }
+        },
+        "ProtocolAdapters": {
+            "OPC-UA": {
+                "AdapterType": "OPCUA",
+                "OpcuaServers": {
+                    "OPCUA-SERVER-1": {
+                        "Address": "opc.tcp://localhost",
+                        "Path": "/",
+                        "Port": 4840,
+                        "ConnectTimeout": "10000",
+                        "ReadBatchSize": 500
+                    }
+                }
+            }
+        }
+    }
+
+}

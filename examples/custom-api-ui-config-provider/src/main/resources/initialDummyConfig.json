@@ -1,0 +1,88 @@
+{
+  "AWSVersion": "2022-04-02",
+  "Name": "THIS IS AN INITIAL DUMMY CONFIGURATION",
+  "Version": 1,
+  "LogLevel": "Info",
+  "ElementNames": {
+    "Value": "value",
+    "Timestamp": "timestamp",
+    "Metadata": "metadata"
+  },
+  "Schedules": [
+    {
+      "Name": "THIS IS AN INITIAL DUMMY CONFIGURATION - PLS CHANGE ACCORDING TO YOUR NEEDS IN DEBUG-UI@localhost:8080",
+      "Interval": 50000,
+      "Description": "PLS CHANGE ACCORDING TO YOUR NEEDS IN DEBUG-UI@localhost:8080",
+      "Active": true,
+      "TimestampLevel": "Both",
+      "Sources": {
+        "SQL-SOURCE": [
+          "*"
+        ]
+      },
+      "Targets": [
+        "DebugTarget"
+      ]
+    }
+  ],
+  "Sources": {
+    "SQL-SOURCE": {
+      "Name": "SQL-SOURCE",
+      "ProtocolAdapter": "SQL",
+      "AdapterDbServer": "SQL-SERVER-1",
+      "SqlReadStatement": "SQL local test server",
+      "SourceReadingMode": "Polling",
+      "SubscribePublishingInterval": 100,
+      "Channels": {
+        "ServerStatus": {
+          "Name": "ServerStatus",
+          "ColumnNames": [
+            "*"
+          ]
+        }
+      }
+    }
+  },
+  "Targets": {
+    "DebugTarget": {
+      "Active": true,
+      "TargetType": "DEBUG-TARGET"
+    }
+  },
+  "TargetTypes": {
+    "DEBUG-TARGET": {
+      "JarFiles": [
+        "${SFC_DEPLOYMENT_DIR}/debug-target/lib"
+      ],
+      "FactoryClassName": "com.amazonaws.sfc.debugtarget.DebugTargetWriter"
+    }
+  },
+  "AdapterTypes": {
+    "SQL": {
+      "JarFiles": [
+        "${SFC_DEPLOYMENT_DIR}/sql/lib"
+      ],
+      "FactoryClassName": "com.amazonaws.sfc.sql.SqlAdapter"
+    }
+  },
+  "ProtocolAdapters": {
+    "SQL": {
+      "AdapterType": "SQL",
+      "DbServers": {
+        "SQL-SERVER-1": {
+          "Host": "localhost",
+          "DatabaseType": "postgresql",
+          "DatabaseName": "test",
+          "Port": 4840,
+          "ConnectTimeout": "10000"
+        }
+      }
+    }
+  },
+  "LogWriter": {
+    "JarFiles": [
+      "${SFC_DEPLOYMENT_DIR}/custom-api-ui-config-provider/lib"
+    ],
+    "FactoryClassName": "com.amazonaws.sfc.log.SocketLogWriter"
+  }
+}
