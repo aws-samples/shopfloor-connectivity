@@ -14,6 +14,7 @@ SFC documentation
     - [Siemens S7 to Sitewise sample](../examples/in-process-s7-sitewise/README.md)
     - [YAML Custom Configuration Provider](../examples/yaml-custom-config-provider/README.md)
     - [OPCUA Auto Discovery Configuration provider](../examples/opcua-auto-discovery/README.md)
+    - [Custom User Interface and API Config Provider](../examples/custom-api-ui-config-provider/README.md)
     - [CSV File Adapter Example](../examples/custom-adapter-csvfile/README.md)
   - [Introduction](#introduction)
     - [SFC Components](#sfc-components)
@@ -4150,7 +4151,7 @@ This section describes the configuration types for the MQTT protocol adapter and
 </colgroup>
 <thead>
 <tr class="header">
-<th colspan="4"><p><strong>Extends ProcolAdapterConfiguration</strong></p>
+<th colspan="4"><p><strong>Extends ProtocolAdapterConfiguration</strong></p>
 <p>The MqttAdapterConfiguration extends the common adapter configuration with MQTT specific adapter configuration settings. The AdapterType to use for this adapter is "MQTT".</p></th>
 </tr>
 </thead>
@@ -4202,7 +4203,7 @@ This section describes the configuration types for the SQL adapter and contains 
 <thead>
 <tr class="header">
 <th colspan="6"><p><strong>Extends Source configuration</strong></p>
-<p>The SqlSourceConfiguration extends the common Source configuration with MQTT specific source configuration data</p></th>
+<p>The SqlSourceConfiguration extends the common Source configuration with SQL specific source configuration data</p></th>
 </tr>
 </thead>
 <tbody>
