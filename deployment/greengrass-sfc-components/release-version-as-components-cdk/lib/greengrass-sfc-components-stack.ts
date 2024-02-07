@@ -6,6 +6,11 @@ import { Asset } from 'aws-cdk-lib/aws-s3-assets';
 import * as path from 'path';
 import * as iam from "aws-cdk-lib/aws-iam";
 
+const sfcVersion = require('child_process').execSync('git describe --tags --abbrev=0').toString().trim().replace("v","");
+const revision = require('child_process').execSync('git rev-parse --short HEAD').toString().trim()
+const sfcBundleUri = `https://dyy8lqvmsyeqk.cloudfront.net/${revision}/bundle/sfc-bundle.zip`;
+
+console.log(revision);
 
 export class GreengrassSfcComponentsStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -37,10 +42,10 @@ export class GreengrassSfcComponentsStack extends cdk.Stack {
             "AWS_REGION": this.region,
             "ACCOUNT_ID": this.account,
             "SFC_COMPONENT_BASENAME": "com.amazon.sfc",
-            "SFC_COMPONENT_VERSION": "1.0.6",
+            "SFC_COMPONENT_VERSION": sfcVersion,
             "SFC_COMPONENT_BUCKET": componentBucket.bucketName,
-            "SFC_COMPONENT_PREFIX": "1.0.6",
-            "SFC_LATEST_RELEASE_BUNDLE_URI": "https://dyy8lqvmsyeqk.cloudfront.net/b4ff18b/bundle/sfc-bundle.zip",
+            "SFC_COMPONENT_PREFIX": sfcVersion,
+            "SFC_LATEST_RELEASE_BUNDLE_URI": sfcBundleUri,
             "SFC_LATEST_RELEASE_BUNDLE_NAME": "sfc-bundle.zip"
           }
         },

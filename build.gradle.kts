@@ -6,13 +6,13 @@ plugins {
 }
 
 buildscript {
+    val version = (gradle as ExtensionAware).extensions.extraProperties.get("versionFromGit") as String
     extra.apply {
         // SET GLOBAL SFC RELEASE VERSION HERE
         // --> applied to sfc-core, sfc-ipc, sfc-main & sfc-metrics <--
-        set("sfc_release", "1.0.3")
+        set("sfc_release", version)
     }
 }
-
 
 tasks.register<Zip>("packageDistribution") {
     archiveFileName.set("sfc-bundle.zip")
