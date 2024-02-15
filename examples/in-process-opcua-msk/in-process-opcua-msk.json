@@ -1,0 +1,125 @@
+{
+  "AWSVersion": "2022-04-02",
+  "Description": "Example configuration OPCUA to AWS MSK",
+  "Version": 1,
+  "LogLevel": "Info",
+  "Schedules": [
+    {
+      "Name": "Data",
+      "Interval": 1000,
+      "Active": true,
+      "TimestampLevel": "Both",
+      "Sources": {
+        "OPCUA-SOURCE": [
+          "*"
+        ]
+      },
+      "Targets": [
+        "#DebugTarget",
+        "MskTarget"
+      ]
+    }
+  ],
+  "Sources": {
+    "OPCUA-SOURCE": {
+      "Name": "OPCUA-SOURCE",
+      "ProtocolAdapter": "OPC-UA",
+      "AdapterOpcuaServer": "OPCUA-SERVER",
+      "Description": "OPCUA local server",
+      "SourceReadingMode": "Subscription",
+      "Channels": {
+        "LevelAlarm": {
+          "Name": "LevelAlarm",
+          "NodeId": "ns=6;s=MyLevel.Alarm",
+          "EventType": "ExclusiveLevelAlarmType"
+        },
+        "ServerStatus": {
+          "Name": "ServerStatus",
+          "NodeId": "ns=0;i=2256"
+        },
+        "SimulationCounter": {
+          "Name": "Counter",
+          "NodeId": "ns=3;i=1001"
+        },
+        "SimulationRandom": {
+          "Name": "Random",
+          "NodeId": "ns=3;i=1002"
+        },
+        "SimulationSawtooth": {
+          "Name": "Sawtooth",
+          "NodeId": "ns=3;i=1003"
+        },
+        "SimulationSawtoothInt": {
+          "Name": "SawtoothInt",
+          "NodeId": "ns=3;i=1003"
+        },
+        "SimulationSinusoid": {
+          "Name": "Sinusoid",
+          "NodeId": "ns=3;i=1004"
+        },
+        "SimulationSquare": {
+          "Name": "Square",
+          "NodeId": "ns=3;i=1005"
+        },
+        "SimulationTriangle": {
+          "Name": "Triangle",
+          "NodeId": "ns=3;i=1006"
+        }
+      }
+    }
+  },
+  "Targets": {
+    "DebugTarget": {
+      "TargetType": "DEBUG-TARGET"
+    },
+    "MskTarget": {
+      "Active": true,
+      "CredentialProviderClient": "AwsIotClient",
+      "TargetType": "AWS-MSK",
+      "BootstrapServers": [
+        "< HOSTNAME-1 >:9198",
+        "< HOSTNAME-2 >:9198",
+        "< HOSTNAME-3 >:9198"
+      ],
+      "TopicName": "< TOPIC >",
+      "Key": " KEY ",
+      "Compression": "gzip",
+      "Serialization": "json",
+      "Acknowledgements": "all"
+    }
+  },
+  "TargetTypes": {
+    "DEBUG-TARGET": {
+      "JarFiles": [
+        "${SFC_DEPLOYMENT_DIR}/debug-target/lib"
+      ],
+      "FactoryClassName": "com.amazonaws.sfc.debugtarget.DebugTargetWriter"
+    },
+    "AWS-MSK": {
+      "JarFiles": [
+        "${SFC_DEPLOYMENT_DIR}/aws-msk-target/lib"
+      ],
+      "FactoryClassName": "com.amazonaws.sfc.awsmsk.AwsMskTargetWriter"
+    }
+  },
+  "ProtocolAdapters": {
+    "OPC-UA": {
+      "AdapterType": "OPCUA",
+      "OpcuaServers": {
+        "OPCUA-SERVER": {
+          "Address": "opc.tcp://localhost",
+          "Path": "OPCUA/SimulationServer",
+          "Port": 53530
+        }
+      }
+    }
+  },
+  "AdapterTypes": {
+    "OPCUA": {
+      "JarFiles": [
+        "${SFC_DEPLOYMENT_DIR}/opcua/lib"
+      ],
+      "FactoryClassName": "com.amazonaws.sfc.opcua.OpcuaAdapter"
+    }
+  }
+}

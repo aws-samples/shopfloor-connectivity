@@ -144,7 +144,7 @@ give access to the services used by the target which uses the client.
     "ThingName": "< THING NAME > ",
     "Certificate": "< PATH TO DEVICE CERTIFICATE .crt FILE >",
     "PrivateKey": "< PATH TO PRIVATE KEY .key FILE >",
-    "RootCa": "< PATH TO ROOt CERTIFICATE .pen FILE >",
+    "RootCa": "< PATH TO ROOT CERTIFICATE .pem FILE >",
   }
 }
 ```
@@ -156,7 +156,7 @@ point to that deployment. SFC will use the GreenGrass V2 configurations
 setting. Specific setting can be overridden by setting a value for that
 setting, which will replace the value from the GreenGrass V2
 Configuration. Note that although SFC can be deployed as a GreenGrass
-component, it can also run as a standalone lone process or in a docker
+component, it can also run as a standalone process or in a docker
 container and still use a GreenGrass configuration.
 &nbsp;  
 &nbsp;  

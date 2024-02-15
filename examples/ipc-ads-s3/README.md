@@ -1,6 +1,6 @@
 # SFC Example IPC configuration for Beckhoff ADS to Amazon S3
 
-The file in-process-ads-s3.json file contains an example template for reading data from a Beckhoff device using ADS over TCP/IP and sending the data to an S3 bucket. The main.tmc program file is included to declare the variables which are read from the device.
+The file ipc-ads-s3.json file contains an example template for reading data from a Beckhoff device using ADS over TCP/IP and sending the data to an S3 bucket. The main.tmc program file is included to declare the variables which are read from the device.
 
 This configuration uses a deployment where each module runs as a service in an individual process and communicate using a stream over a TCP/IP connection. These processes can run on the same system or on different systems. Use cases for this type of deployment are:
 
@@ -141,7 +141,7 @@ IMPORTANT: The port numbers specified in the configuration must match with the p
 },
 ```
 
-In order to write the data to both the S3 bucket as well as the console uncomment the DebugTarget by deleting the’#’ an ensure the DebugServer service is started.
+In order to write the data to both the S3 bucket and the console uncomment the DebugTarget by deleting the’#’ an ensure the DebugServer service is started.
 
 ## S3Target section
 
@@ -241,7 +241,7 @@ give access to the services used by the target which uses the client.
     "ThingName": "< THING NAME > ",
     "Certificate": "< PATH TO DEVICE CERTIFICATE .crt FILE >",
     "PrivateKey": "< PATH TO PRIVATE KEY .key FILE >",
-    "RootCa": "< PATH TO ROOt CERTIFICATE .pen FILE >",
+    "RootCa": "< PATH TO ROOT CERTIFICATE .pem FILE >",
   }
 }
 ```
@@ -253,7 +253,7 @@ point to that deployment. SFC will use the GreenGrass V2 configurations
 setting. Specific setting can be overridden by setting a value for that
 setting, which will replace the value from the GreenGrass V2
 Configuration. Note that although SFC can be deployed as a GreenGrass
-component, it can also run as a standalone lone process or in a docker
+component, it can also run as a standalone process or in a docker
 container and still use a GreenGrass configuration.
 &nbsp;  
 &nbsp;

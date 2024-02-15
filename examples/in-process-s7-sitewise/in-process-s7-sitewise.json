@@ -136,7 +136,7 @@
       "ThingName": "<THING NAME> e.g. GreengrassCore-1",
       "Certificate": "<PATH TO DEVICE CERTIFICATE .crt FILE>",
       "PrivateKey": "<PATH TO PRIVATE KEY .key FILE>",
-      "RootCa": "<PATH TO ROOt CERTIFICATE .pen FILE>",
+      "RootCa": "<PATH TO ROOT CERTIFICATE .pem FILE>",
       "#GreenGrassDeploymentPath": "<GREENGRASS DEPLOYMENT DIR>/v2"
     }
   }
