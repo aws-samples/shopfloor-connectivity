@@ -12,6 +12,8 @@ val sfcCoreVersion = version
 val sfcIpcVersion = version
 val kotlinCoroutinesVersion = "1.6.2"
 val kotlinVersion = "1.9.0"
+val kafkaClientVersion = "3.4.0"
+val awsMskIamVersion = "1.1.6"
 
 plugins {
     id("sfc.kotlin-application-conventions")
@@ -22,6 +24,10 @@ dependencies {
     implementation(project(":core:sfc-ipc"))
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinCoroutinesVersion")
+
+    // libraries required because of KAFKA class loading logic
+    implementation("software.amazon.msk:aws-msk-iam-auth:$awsMskIamVersion")
+//    implementation("org.apache.kafka:kafka-clients:$kafkaClientVersion")
 }
 
 application {

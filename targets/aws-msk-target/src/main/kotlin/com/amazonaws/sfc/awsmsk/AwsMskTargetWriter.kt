@@ -48,6 +48,8 @@ import org.apache.kafka.common.serialization.StringSerializer
 import software.amazon.awssdk.auth.credentials.AwsCredentials
 import software.amazon.awssdk.auth.credentials.AwsSessionCredentials
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider
+import software.amazon.msk.auth.iam.IAMClientCallbackHandler
+import software.amazon.msk.auth.iam.IAMLoginModule
 import java.time.Instant
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration
@@ -173,8 +175,10 @@ class AwsMskTargetWriter(
             CommonClientConfigs.SECURITY_PROTOCOL_CONFIG to "SASL_SSL",
             ProducerConfig.ACKS_CONFIG to mskTargetConfig.acknowledgements.toString(),
             ProducerConfig.COMPRESSION_TYPE_CONFIG to mskTargetConfig.compressionType.toString(),
-            SaslConfigs.SASL_CLIENT_CALLBACK_HANDLER_CLASS to "software.amazon.msk.auth.iam.IAMClientCallbackHandler",
-            SaslConfigs.SASL_JAAS_CONFIG to "software.amazon.msk.auth.iam.IAMLoginModule required;",
+            ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG to StringSerializer::class.java.name,
+            ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG to ByteArraySerializer::class.java.name,
+            SaslConfigs.SASL_CLIENT_CALLBACK_HANDLER_CLASS to IAMClientCallbackHandler::class.java.name,
+            SaslConfigs.SASL_JAAS_CONFIG to "${IAMLoginModule::class.java.name} required;",
             SaslConfigs.SASL_MECHANISM to "AWS_MSK_IAM"
         )
 
@@ -188,7 +192,7 @@ class AwsMskTargetWriter(
     }
 
     private val producer: KafkaProducer<String, ByteArray> by lazy {
-        KafkaProducer(providerProperties, StringSerializer(), ByteArraySerializer())
+        KafkaProducer(providerProperties)
     }
 
     // Periodically flushes the producer to enforce date to be submitted even when the producer buffer is not full

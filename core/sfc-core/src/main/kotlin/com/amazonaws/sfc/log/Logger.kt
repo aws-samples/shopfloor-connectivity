@@ -481,10 +481,10 @@ class Logger(
 
             LogManager.getLogManager().loggerNames.iterator().forEach { logName ->
                 val log = LogManager.getLogManager().getLogger(logName)
-                log.handlers.iterator().forEach { handler ->
+                log?.handlers?.iterator()?.forEach { handler ->
                     log.removeHandler(handler)
                 }
-                log.addHandler(object : Handler() {
+                log?.addHandler(object : Handler() {
 
                     val ctxLog = logger.getCtxLoggers(className, logName)
                     override fun publish(record: LogRecord) {
