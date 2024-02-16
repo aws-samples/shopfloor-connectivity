@@ -122,7 +122,7 @@ class AwsMskTargetConfiguration : AwsServiceConfig, TargetConfiguration() {
 
     companion object {
 
-        private const val CONFIG_BOOTSTRAP_SERVERS = "BootstrapServers"
+        private const val CONFIG_BOOTSTRAP_SERVERS = "BootstrapBrokers"
         private const val CONFIG_TOPIC_NAME = "TopicName"
         private const val CONFIG_KEY_VALUE = "Key"
         private const val CONFIG_PARTITION = "Partition"

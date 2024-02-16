@@ -170,7 +170,7 @@ uncomment the DebugTarget by deleting the'#'.
 "MskTarget": {
     "CredentialProviderClient": "AwsIotClient",
     "TargetType": "AWS-MSK",
-    "BootstrapServers": [
+    "BootstrapBrokers": [
         "< HOSTNAME-1 >:9198",
         "< HOSTNAME-2 >:9198",
         "< HOSTNAME-3 >:9198"

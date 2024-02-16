@@ -10,8 +10,10 @@ SFC documentation
     - [Greengrass SFC In-Process step-by-step Lab](../examples/greengrass-in-process/README.md)
     - [Greengrass SFC IPC step-by-step Lab](../examples/greengrass-ipc/README.md)
     - [Rockwell PCCC to S3 sample](../examples/in-process-pccc-s3/README.md)
-    - [Beckhoff ADS to S3 Example](../examples/in-process-ads-s3/README.md)
+    - [Beckhoff ADS to S3 sample](../examples/in-process-ads-s3/README.md)
     - [Siemens S7 to Sitewise sample](../examples/in-process-s7-sitewise/README.md)
+    - [OPCUA to MSK In-Process sample](../examples/in-process-opcua-msk/README.md)
+    - [OPCUA to MSK IPC sample](../examples/ipc-opcua-msk/README.md)
     - [YAML Custom Configuration Provider](../examples/yaml-custom-config-provider/README.md)
     - [OPCUA Auto Discovery Configuration provider](../examples/opcua-auto-discovery/README.md)
     - [Custom User Interface and API Config Provider](../examples/custom-api-ui-config-provider/README.md)
@@ -152,7 +154,9 @@ SFC documentation
   - [AWS IoT Core Service Target](#aws-iot-core-service-target)
     - [AwsIotHttpTargetConfiguration](#awsiothttptargetconfiguration)
   - [AWS MQTT Service Target](#aws-mqtt-service-target)
-    - [AwsMqttTargetConfiguration](#awsmqtttargetconfiguration)
+    - [AwsMqttTargetConfiguration](#awsmqtttargetconfiguration)  
+  - [AWS MSK Service Target](#aws-msk-service-target)
+    - [AwsMskTargetConfiguration](#awsmsktargetconfiguration)
   - [AWS Kinesis Firehose Service Target](#aws-kinesis-firehose-service-target)
     - [AwsKinesisFirehoseTargetConfiguration](#awskinesisfirehosetargetconfiguration)
   - [AWS Kinesis Service Target](#aws-kinesis-service-target)
@@ -249,7 +253,7 @@ In order to adapt to customer environments, logging, (dynamic) configuration and
 
 ## Target Adapters
 
-SFC target adapters are components that receive the data from the SFC Core and send it to their specific AWS or local services. Components can optionally apply data transformations using an Apache Velocity template, to deliver the data in the required format for the receiving service. At the moment of writing there are adapters for the following AWS Services: IoT Analytics, IoT Core, Kinesis Streams, Kinesis Firehose, Lambda functions, IoT Core, S3, SiteWise, Timestream, SNS, and SQS, with additional targets for the local filesystem, terminal output, and MQTT clients.
+SFC target adapters are components that receive the data from the SFC Core and send it to their specific AWS or local services. Components can optionally apply data transformations using an Apache Velocity template, to deliver the data in the required format for the receiving service. At the moment of writing there are adapters for the following AWS Services: IoT Analytics, IoT Core, Kinesis Streams, Kinesis Firehose, Lambda functions, IoT Core, S3, SiteWise, Timestream, MKS, SNS, and SQS, with additional targets for the local filesystem, terminal output, and MQTT clients.
 
 Target buffering can be applied to reduce the number of required service API calls. All this is part of the SFC infrastructure and makes it easier to develop new target types for additional AWS services Targets can be daisy-chained in order to provide additional functionality which is discussed in this document.
 
@@ -415,7 +419,7 @@ SFC provides full end to end data type-fidelity. Data which is read from the pro
 
 By applying configured transformations, which consists of a sequence of one or more provided transformation operators, the SFC can transform every individual value that is read from a protocol adapter. Transformations can be used to standardize data values and types read from different devices to be delivered in a consistent way to the consuming target adapters. The SFC framework comes with a set of 80 transformation operators.
 
-The SFC core can also aggregate the data into batches and apply aggregation function to that data, which then can be send instead of, or with the individual values. This can be used to reduce the data volume by sending only the output of selected aggregation functions or the number of data messages to the consuming targets. Additionally, transformations, as described above, can be applied to the aggregated data.
+The SFC core can also aggregate the data into batches and apply aggregation function to that data, which then can be sent instead of, or with the individual values. This can be used to reduce the data volume by sending only the output of selected aggregation functions or the number of data messages to the consuming targets. Additionally, transformations, as described above, can be applied to the aggregated data.
 
 The data is delivered to the target in a defined hierarchical structure. An additional, template based, transformation, using Apache Velocity, can be configured for each target to select subsets, restructure or transform the data or transform it into formats like CSV, YAML or XML.
 
@@ -2019,8 +2023,8 @@ Example of OPCUA server configuration using Basic256Sha256 security profile for 
 </tr>
 <tr class="even">
 <td>AdapterType</td>
-<td><p>Type of the adapter. These types are predefined for each adapter type (e.g., OPCUA, OPCDA, MQTT,MODBUS-TCP, SNMP, S7 ).</p>
-<p>If the adapter is running in the same process as the SFC core module, then then it must refer to an entry in the ProtocolAdapterTypes section.</p></td>
+<td><p>Type of the adapter. These types are predefined for each adapter type (e.g., OPCUA, MQTT,MODBUS-TCP, SNMP, S7, ADS ).</p>
+<p>If the adapter is running in the same process as the SFC core module, then it must refer to an entry in the ProtocolAdapterTypes section.</p></td>
 <td>String</td>
 <td></td>
 </tr>
@@ -5495,7 +5499,7 @@ To authorize the client this AMS Net ID must be added as an AMS route in the SYS
 </colgroup>
 <thead>
 <tr class="header">
-<th colspan="4"><p>MqttTopiTargetConfiguration extends the type TargetConfiguration with specific configuration data for connecting to and sending to an AWS IoT Core topic. The Targets configuration element can contain entries of this type, the TargetType of these entries must be set to <strong>"AWS-IOT-MQTT"</strong></p>
+<th colspan="4"><p>MqttTopicTargetConfiguration extends the type TargetConfiguration with specific configuration data for connecting to and sending to an AWS IoT Core topic. The Targets configuration element can contain entries of this type, the TargetType of these entries must be set to <strong>"AWS-IOT-MQTT"</strong></p>
 <p><strong>This target is using certificates to authenticate and use TLS to protect the traffic. A policy allowing to write to the configured topic must be set for the specified certificate.</strong></p></th>
 </tr>
 </thead>
@@ -5557,6 +5561,137 @@ aws iot describe-endpoint --endpoint-type iot:Data-ATS</p>
 <td>Timeout in milliseconds for publishing</td>
 <td>Long</td>
 <td>Default = 10000</td>
+</tr>
+</tbody>
+</table>
+
+[^top](#toc)
+
+# AWS MSK Service Target
+
+## AwsMskTargetConfiguration
+
+<table>
+<colgroup>
+<col style="width: 14%" />
+<col style="width: 17%" />
+<col style="width: 13%" />
+<col style="width: 55%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th colspan="4"><p>AwsMskTargetConfiguration extends the type TargetConfiguration with specific configuration data for connecting to and sending to an AWS MSK topic. The Targets configuration element can contain entries of this type, the TargetType of these entries must be set to <strong>"AWS-MSK"</strong></p>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Name</strong></td>
+<td><strong>Description</strong></td>
+<td><strong>Type</strong></td>
+<td>Comments</td>
+</tr>
+<tr class="even">
+<td>TopicName</td>
+<td>Name of the MSK topic</td>
+<td>String</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>BootstrapBrokers</td>
+<td>Addresses with port number for bootstrap brokers for AWS MSK cluster. (bootstrap.servers)</td>
+<td>List[String]</td>
+<td><p>To get the broker addresses for a cluser use the CLI command <br />
+aws kafka get-bootstrap-brokers --cluster-arn `ClusterArn` and use the addresses retured in `"BootstrapBrokerStringPublicSaslIam"'.</p>
+<p><a href="https://docs.aws.amazon.com/msk/latest/developerguide/msk-get-bootstrap-brokers.html">Getting the bootstrap brokers for an Amazon MSK cluster"</a></p></td>
+</tr>
+<tr class="even">
+<td>Key</td>
+<td>Key used for the written records</td>
+<td>String</td>
+<td>Optional</td>
+</tr>
+<tr class="odd">
+<td>Partition</td>
+<td>Optional partition key</td>
+<td>Integer</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>Serialization</td>
+<td>Serialization <a href="https://kafka.apache.org/documentation/#producerconfigs_value.serializer">(value.serializer)</a></td>
+<td>String</td>
+<td>
+
+- "json" (default)
+- "protobuf", see [protobuf schema](../core/sfc-ipc/src/main/proto/TargetAdapterService.proto)
+
+If a [Template](##TargetConfiguration) is specified to transform the data for this target then this setting is not used and the transformation output is written as a string to the topic.</td>
+</tr>
+<tr class="odd">
+<td>Acknowledgements</td>
+<td>Acknowledgements <a href="https://kafka.apache.org/documentation/#producerconfigs_acks">(acks)</a></td>
+<td>String</td>
+<td>
+
+- "all" = 0
+- "leader" = 1 (default)
+- "all" = -1
+</td>
+</tr>
+<tr class="even">
+<td>ProviderProperties</td>
+<td>Map of provider properties used to create the Kafka producer</td>
+<td>Map[String,String]</td>
+<td>Default is an empty map
+
+A description af producer options can be found in the <a href="https://kafka.apache.org/documentation/#producerconfigs">Kafka documentation</a>
+
+The following properties are set by the adapter
+
+- bootstrap.servers from `BootstrapBrokers`
+- client.id = "sfc-msk-target_" + hostname
+- security.protocol = "SASL_SSL"
+- acks from `Acknowledgements`
+- compression.type from `Compression`
+- key.serializer = "org.apache.kafka.common.serialization.StringSerializer"
+- value.serializer = "org.apache.kafka.common.serialization.ByteArraySerializer"
+- sasl.client.callback.handler.class = "software.amazon.msk.auth.iam.IAMClientCallbackHandler"
+- sasl.jaas.config =  "software.amazon.msk.auth.iam.IAMLoginModule required;"
+- sasl.mechanism = "AWS_MSK_IAM"
+- batch.size from `BatchSize`
+</td>
+</tr>
+<tr class="odd">
+<td>Headers</td>
+<td>Map of headers set for written records</td>
+<td>Map[String,String]</td>
+<td>Default = empty map</td>
+</tr>
+<tr class="even">
+<td>Compression</td>
+<td>Compression type <a href="https://kafka.apache.org/documentation/#producerconfigs_compression.type">(compression.type)</a></td>
+<td>String</td>
+<td>Possible values:
+
+- none (default)
+- snappy
+- lz4
+- gzip
+- zstd
+
+</td>
+</tr>
+<tr class="odd">
+<td>BatchSize</td>
+<td>Batch size <a href="https://kafka.apache.org/documentation/#producerconfigs_batch.size">(batch.size)</a></td>
+<td>Integer</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>Interval</td>
+<td>Interval in milliseconds in which adapter will flush the producer even when the batch size is not reached.</td>
+<td>Integer</td>
+<td></td>
 </tr>
 </tbody>
 </table>
@@ -6597,6 +6732,7 @@ The adapters have a service wrapper that enables these targets can be executed a
 | Analytics     | aws-iot-analytics           | com.amazonaws.sfc.awsiota.AwsIotAnalyticsTargetService        |
 | IoT Core      | aws-iot-http-target         | com.amazonaws.sfc.awsiot.http.AwsIotHttpTargetService         |
 | MQTT          | aws-iot-mqtt-target         | com.amazonaws.sfc.awsiot.mqtt.AwsIotMqttTargetService         |
+| MSK           | aws-msk-target              | com.amazonaws.sfc.awsiot.http.AwsMskTargetService             |
 | File          | File-target                 | com.amazonaws.sfc.awsiot.mqtt.FileTargetService               |
 | Firehose      | aws-kinesis-target          | com.amazonaws.sfc.awsfirehose.AwsKinesisFirehoseTargetService |
 | Kinesis       | aws-kinesis-firehose-target | com.amazonaws.sfc.awskinesis.AwsKinesisTargetService          |
@@ -6820,6 +6956,12 @@ The jar files are part of the target deployment and can be found in the lib dire
       ],
       "FactoryClassName": "com.amazonaws.sfc.awsiot.mqtt.AwsIotMqttTargetWriter"
     },
+   "AWS-MSK": {
+      "JarFiles": [
+        "${SFC_DEPLOYMENT_DIR}/aws-msk-target/lib/"
+      ],
+      "FactoryClassName": "com.amazonaws.sfc.awsiot.mqtt.AwsMskTargetWriter"
+  },
     "AWS-KINESIS": {
       "JarFiles": [
         "${SFC_DEPLOYMENT_DIR}/aws-kinesis-target/lib"
