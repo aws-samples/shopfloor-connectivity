@@ -27,7 +27,6 @@ dependencies {
 
     // libraries required because of KAFKA class loading logic
     implementation("software.amazon.msk:aws-msk-iam-auth:$awsMskIamVersion")
-//    implementation("org.apache.kafka:kafka-clients:$kafkaClientVersion")
 }
 
 application {
