@@ -68,7 +68,7 @@ class AwsMskTargetWriter(
         logger.getCtxInfoLog(className, "")(BuildConfig.toString())
     }
 
-    private val scope = CoroutineScope(Dispatchers.Default) + CoroutineName("MSK Target")
+    private val scope = CoroutineScope(Dispatchers.IO) + CoroutineName("MSK Target")
 
     // channel to pass messages to coroutine that sends data to the MSK topic
     private val targetDataChannel = Channel<TargetData>(100)
@@ -145,23 +145,27 @@ class AwsMskTargetWriter(
     private val credentialsWorker = if (credentialsProvider is AwsIoTCredentialSessionProvider) scope.launch {
 
         while (isActive) {
-            // resolve credentials, note that only when the existing credentials are no longer valid new one will be requested from the credentials service
-            val credentials = credentialsProvider.resolveCredentials()
-            if (lastCredentials == null || lastCredentials != credentials) {
-                credentialsLock.withLock {
-                    credentialsInitialized = false
-                    lastCredentials = credentials
-                    System.setProperty("aws.accessKeyId", credentials.accessKeyId())
-                    System.setProperty("aws.secretKey", credentials.secretAccessKey())
-                    System.setProperty("aws.secretAccessKey", credentials.secretAccessKey())
-                    if (credentials is AwsSessionCredentials) {
-                        System.setProperty("aws.sessionToken", credentials.sessionToken())
+            try {
+                // resolve credentials, note that only when the existing credentials are no longer valid new one will be requested from the credentials service
+                val credentials = credentialsProvider.resolveCredentials()
+                if (lastCredentials == null || lastCredentials != credentials) {
+                    credentialsLock.withLock {
+                        credentialsInitialized = false
+                        lastCredentials = credentials
+                        System.setProperty("aws.accessKeyId", credentials.accessKeyId())
+                        System.setProperty("aws.secretKey", credentials.secretAccessKey())
+                        System.setProperty("aws.secretAccessKey", credentials.secretAccessKey())
+                        if (credentials is AwsSessionCredentials) {
+                            System.setProperty("aws.sessionToken", credentials.sessionToken())
+                        }
+                        credentialsInitialized = true
                     }
-                    credentialsInitialized = true
                 }
-            }
 
-            delay(60.toDuration(DurationUnit.SECONDS))
+                delay(60.toDuration(DurationUnit.SECONDS))
+            } catch (e: Exception) {
+                logger.getCtxErrorLog(className, "credentialsWorker")("$e")
+            }
         }
     }
     else null
@@ -198,7 +202,7 @@ class AwsMskTargetWriter(
     // Periodically flushes the producer to enforce date to be submitted even when the producer buffer is not full
     private val periodicalFlush: Job =
 
-        scope.launch("Kafka producer flush") {
+        scope.launch(context = Dispatchers.IO, name = "Kafka producer flush") {
             val log = logger.getCtxLoggers(className, "periodicalFlush")
             if (mskTargetConfig.interval == null || mskTargetConfig.interval!!.inWholeMilliseconds == 0L) return@launch
 
@@ -272,11 +276,15 @@ class AwsMskTargetWriter(
         log.info("AWS MKS writer for target \"$targetID\" writing to topic \"$topicName\"  on target \"$targetID\"")
 
         while (isActive) {
-            if (credentialsInitialized) {
-                val targetData = targetDataChannel.receive()
-                handleTargetData(targetData)
-            } else {
-                waitForCredentialsInitializationFinished()
+            try {
+                if (credentialsInitialized) {
+                    val targetData = targetDataChannel.receive()
+                    handleTargetData(targetData)
+                } else {
+                    waitForCredentialsInitializationFinished()
+                }
+            }catch (e : Exception){
+                log.error("Error writing to MSK, $e")
             }
         }
     }

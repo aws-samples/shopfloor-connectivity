@@ -14,6 +14,7 @@ import com.amazonaws.sfc.log.LogWriter
 import com.amazonaws.sfc.log.Logger
 import com.amazonaws.sfc.log.Logger.Companion.createLogger
 import com.amazonaws.sfc.util.launch
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.runBlocking
@@ -66,26 +67,34 @@ abstract class ServiceMain {
         Logger.redirectLoggers(serviceLogger, className)
 
         val logs = serviceLogger.getCtxLoggers(className, "run")
-        val configProvider = ConfigProviderFactory.createProvider(args, serviceLogger)
 
-        if (configProvider == null) {
-            createAndRunServiceInstance(args, "{}")
-        } else {
-            while (isActive && configProvider.configuration != null) {
-                logs.info("Waiting for configuration")
-                val configuration = configProvider.configuration?.receive() ?: continue
-                serviceLogger = createLogger(configuration)
-                Logger.redirectLoggers(serviceLogger, className)
-                handleCustomLogWriter(configuration)
-                logs.info("Received configuration data from config provider")
-                stopService()
-                launch("Create Service Instance") {
-                    logs.info("Creating and starting new service instance")
-                    createAndRunServiceInstance(args, configuration)
+        try {
+            val configProvider = ConfigProviderFactory.createProvider(args, serviceLogger)
+
+            if (configProvider == null) {
+                createAndRunServiceInstance(args, "{}")
+            } else {
+                while (isActive && configProvider.configuration != null) {
+                    logs.info("Waiting for configuration")
+                    val configuration = configProvider.configuration?.receive() ?: continue
+                    serviceLogger = createLogger(configuration)
+                    Logger.redirectLoggers(serviceLogger, className)
+                    handleCustomLogWriter(configuration)
+                    logs.info("Received configuration data from config provider")
+                    stopService()
+                    launch(context = Dispatchers.IO, name = "Create Service Instance") {
+                        try {
+                            logs.info("Creating and starting new service instance")
+                            createAndRunServiceInstance(args, configuration)
+                        } catch (e: Exception) {
+                            logs.error("Error creating service instance: $e")
+                        }
+                    }
                 }
             }
+        }catch (e : Exception){
+            logs.error("Error running service: $e")
         }
-
     }
 
     private fun handleCustomLogWriter(configStr: String) {
@@ -126,13 +135,17 @@ abstract class ServiceMain {
 
     private suspend fun runService() = coroutineScope {
 
-        if (serviceInstance == null) {
-            serviceLogger.getCtxErrorLog(className, "runService")("Could not create service instance")
-            exitProcess(1)
-        }
-        serviceInstance?.start()
+        try {
+            if (serviceInstance == null) {
+                serviceLogger.getCtxErrorLog(className, "runService")("Could not create service instance")
+                exitProcess(1)
+            }
+            serviceInstance?.start()
 
-        serviceInstance?.blockUntilShutdown()
+            serviceInstance?.blockUntilShutdown()
+        }catch (e : Exception){
+            serviceLogger.getCtxErrorLog(className, "runService")("Error running service: $e")
+        }
 
     }
 

@@ -1,4 +1,3 @@
-
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: MIT-0
 
@@ -48,13 +47,13 @@ class AwsCloudWatchMetricsWriter(private val configReader: ConfigReader, private
     private val MetricDatum.dataSize
         get() =
             this.metricName().length +
-            this.unit().name.length +
-            this.timestamp().toString().length +
-            this.dimensions().sumOf { it.name().length + it.value().length } +
-            this.counts().size * Double.SIZE_BYTES +
-            this.values().size * Double.SIZE_BYTES +
-            Double.SIZE_BYTES +  // value
-            5 * Double.SIZE_BYTES // statistics
+                    this.unit().name.length +
+                    this.timestamp().toString().length +
+                    this.dimensions().sumOf { it.name().length + it.value().length } +
+                    this.counts().size * Double.SIZE_BYTES +
+                    this.values().size * Double.SIZE_BYTES +
+                    Double.SIZE_BYTES +  // value
+                    5 * Double.SIZE_BYTES // statistics
 
     private val config by lazy {
         configReader.getConfig<AwsCloudWatchMetricsWriterConfiguration>()
@@ -74,54 +73,58 @@ class AwsCloudWatchMetricsWriter(private val configReader: ConfigReader, private
 
     private val scope = buildScope("AWS CloudWatch Metrics Writer")
 
-    val writer = scope.launch {
+    val writer = scope.launch(context = Dispatchers.IO) {
 
         val log = logger.getCtxLoggers(className, "writer")
 
         var timer = timerJob()
 
         while (isActive) {
-            select<Unit> {
-                metricsChannel.onReceive { metricsData ->
+            try {
+                select {
+                    metricsChannel.onReceive { metricsData ->
 
-                    metricsData.dataPoints.forEach { datapoint ->
-                        val metricDatum = buildDataPoint(datapoint, metricsData.commonDimensions)
+                        metricsData.dataPoints.forEach { datapoint ->
+                            val metricDatum = buildDataPoint(datapoint, metricsData.commonDimensions)
 
-                        val metricDatumSize = metricDatum.dataSize
-                        if ((metricDatumSize + bufferedDataSize) > CW_MAX_REQUEST_SIZE) {
-                            log.info("Max put metrics request size reached reached, writing metric data points")
-                            timer.cancel()
-                            flush()
-                            timer = timerJob()
+                            val metricDatumSize = metricDatum.dataSize
+                            if ((metricDatumSize + bufferedDataSize) > CW_MAX_REQUEST_SIZE) {
+                                log.info("Max put metrics request size reached reached, writing metric data points")
+                                timer.cancel()
+                                flush()
+                                timer = timerJob()
+                            }
+
+                            bufferedDataSize += metricDatum.dataSize
+                            metricDatumBuffer.add(metricDatum)
+
+                            if (metricDatumBuffer.size >= (config.metrics?.cloudWatch?.batchSize ?: CONFIG_CW_MAX_BATCH_SIZE)) {
+                                timer.cancel()
+                                flush()
+                                timer = timerJob()
+                            }
                         }
-
-                        bufferedDataSize += metricDatum.dataSize
-                        metricDatumBuffer.add(metricDatum)
-
-                        if (metricDatumBuffer.size >= (config.metrics?.cloudWatch?.batchSize ?: CONFIG_CW_MAX_BATCH_SIZE)) {
-                            timer.cancel()
-                            flush()
-                            timer = timerJob()
+                        if (metricsData.dataPoints.isNotEmpty()) {
+                            log.trace("Metrics data point buffer contains ${metricDatumBuffer.size} entries with a total size of ${bufferedDataSize.byteCountString}")
                         }
                     }
-                    if (metricsData.dataPoints.isNotEmpty()) {
-                        log.trace("Metrics data point buffer contains ${metricDatumBuffer.size} entries with a total size of ${bufferedDataSize.byteCountString}")
+                    timer.onJoin {
+                        if (metricDatumBuffer.isNotEmpty()) {
+                            log.info("${config.metrics?.cloudWatch?.interval?.inWholeSeconds} seconds buffer writer interval reached, writing metric data points")
+                            flush()
+                        }
+                        timer = timerJob()
+
                     }
                 }
-                timer.onJoin {
-                    if (metricDatumBuffer.isNotEmpty()) {
-                        log.info("${config.metrics?.cloudWatch?.interval?.inWholeSeconds} seconds buffer writer interval reached, writing metric data points")
-                        flush()
-                    }
-                    timer = timerJob()
-
-                }
+            } catch (e: Exception) {
+                log.error("Error writing metrics, ${e.message}")
             }
         }
     }
 
     private fun CoroutineScope.timerJob(): Job {
-        return launch("Timeout timer") {
+        return launch(context = Dispatchers.IO, name = "Timeout timer") {
             return@launch try {
                 delay(config.metrics?.cloudWatch?.interval ?: CONFIG_DEFAULT_CW_WRITE_INTERVAL.toDuration(DurationUnit.SECONDS))
             } catch (e: Exception) {
@@ -169,7 +172,7 @@ class AwsCloudWatchMetricsWriter(private val configReader: ConfigReader, private
 
 
     val unitNames =
-        MetricUnits.values().map { it to it.declaringJavaClass.getField(it.name).getDeclaredAnnotation(SerializedName::class.java).value }
+        MetricUnits.entries.map { it to it.declaringJavaClass.getField(it.name).getDeclaredAnnotation(SerializedName::class.java).value }
 
 
     private fun buildDataPoint(dataPoint: MetricsDataPoint, commonDimensions: MetricDimensions?): MetricDatum {

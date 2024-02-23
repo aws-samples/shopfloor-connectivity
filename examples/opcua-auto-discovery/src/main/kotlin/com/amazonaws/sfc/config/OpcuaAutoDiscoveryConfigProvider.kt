@@ -18,6 +18,7 @@ import com.amazonaws.sfc.opcua.config.OpcuaServerConfiguration
 import com.amazonaws.sfc.opcua.config.OpcuaSourceConfiguration
 import com.amazonaws.sfc.service.ConfigProvider
 import com.amazonaws.sfc.util.buildScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -49,7 +50,7 @@ class OpcuaAutoDiscoveryConfigProvider(
 
     private var providerConfig: AutoDiscoveryProviderConfiguration? = AutoDiscoveryProviderConfiguration()
 
-    val discoveryWorker = scope.launch {
+    val discoveryWorker = scope.launch(context = Dispatchers.IO) {
 
         val log = logger.getCtxLoggers(className, "discoveryWorker")
 

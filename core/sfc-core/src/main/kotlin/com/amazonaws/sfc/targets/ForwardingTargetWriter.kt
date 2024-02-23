@@ -18,8 +18,10 @@ import com.amazonaws.sfc.metrics.MetricsProvider
 import com.amazonaws.sfc.metrics.MetricsWriter
 import com.amazonaws.sfc.util.buildScope
 import com.amazonaws.sfc.util.launch
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.withTimeoutOrNull
+import kotlin.coroutines.cancellation.CancellationException
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration
 
@@ -38,7 +40,7 @@ abstract class ForwardingTargetWriter(protected val targetID: String,
 
     private val targetDataChannel = Channel<TargetData>(100)
 
-    protected val targetScope = buildScope("ForwardingTargetWriter")
+    protected val targetScope = buildScope("ForwardingTargetWriter", Dispatchers.IO)
 
     private var _targets: Map<String, TargetWriter>? = null
 
@@ -142,12 +144,18 @@ abstract class ForwardingTargetWriter(protected val targetID: String,
     }
 
     private val writer = targetScope.launch("Writer") {
+        val log =  logger.getCtxLoggers(ForwardingTargetWriter::class.java.simpleName, "writer")
+        try {
+            val logInfo = logger.getCtxInfoLog(ForwardingTargetWriter::class.java.simpleName, "writer")
+            logInfo("AWS stream writer for target \"$targetID\" writing to \"\" ")
 
-        val logInfo = logger.getCtxInfoLog(ForwardingTargetWriter::class.java.simpleName, "writer")
-        logInfo("AWS stream writer for target \"$targetID\" writing to \"\" ")
-
-        for (item in targetDataChannel) {
-            forwardTargetData(item)
+            for (item in targetDataChannel) {
+                forwardTargetData(item)
+            }
+        }catch (e: CancellationException) {
+            log.info("Writer stopped")
+        } catch (e: Exception) {
+            log.error("Error in writer, $e")
         }
     }
 

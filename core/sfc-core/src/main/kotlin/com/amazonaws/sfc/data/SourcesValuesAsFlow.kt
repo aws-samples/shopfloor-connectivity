@@ -38,8 +38,8 @@ class SourcesValuesAsFlow(
 
     init {
         // needs to run as coroutine as locking functions are required which can only be used in suspended functions
-        initJob = scope.launch("initialize") {
-            createSourceReaderLocks(sourceChannels.keys)
+        initJob = scope.launch(context = Dispatchers.IO, name = "initialize") {
+                createSourceReaderLocks(sourceChannels.keys)
         }
     }
 

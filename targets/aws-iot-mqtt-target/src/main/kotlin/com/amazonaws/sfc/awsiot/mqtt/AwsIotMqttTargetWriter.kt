@@ -25,8 +25,10 @@ import com.amazonaws.sfc.targets.TargetException
 import com.amazonaws.sfc.util.buildScope
 import com.amazonaws.sfc.util.canNotReachAwsService
 import com.amazonaws.sfc.util.launch
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.runBlocking
+import kotlin.coroutines.cancellation.CancellationException
 import kotlin.math.absoluteValue
 import kotlin.random.Random
 
@@ -83,8 +85,15 @@ class AwsIotMqttTargetWriter(
     private val targetDataChannel = Channel<TargetData>(100)
 
     // Coroutine that publishes the messages to the target topic
-    private val writer = scope.launch("Writer") {
-        runWriter()
+    private val writer = scope.launch(context = Dispatchers.IO, name = "Writer") {
+        val log = logger.getCtxLoggers(className, "writer")
+        try {
+            runWriter()
+        }catch (e: CancellationException) {
+            log.info("Writer stopped")
+        }catch (e : Exception){
+            log.error("Error in writer, $e")
+        }
     }
 
     private val metricsCollector: MetricsCollector? by lazy {

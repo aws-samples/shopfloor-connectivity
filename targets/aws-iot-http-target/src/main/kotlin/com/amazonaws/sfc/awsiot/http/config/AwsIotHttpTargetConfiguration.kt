@@ -6,9 +6,12 @@
 package com.amazonaws.sfc.awsiot.http.config
 
 import com.amazonaws.sfc.awsiot.http.config.AwsIotHttpWriterConfiguration.Companion.AWS_IOT_HTTP_TARGET
-import com.amazonaws.sfc.config.*
+import com.amazonaws.sfc.config.AwsServiceConfig
 import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_REGION
 import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_TARGETS
+import com.amazonaws.sfc.config.ConfigurationClass
+import com.amazonaws.sfc.config.ConfigurationException
+import com.amazonaws.sfc.config.TargetConfiguration
 import com.amazonaws.sfc.metrics.MetricsSourceConfiguration
 import com.google.gson.annotations.SerializedName
 import software.amazon.awssdk.regions.Region

@@ -10,6 +10,7 @@ import com.amazonaws.sfc.log.Logger
 import com.amazonaws.sfc.util.buildScope
 import com.amazonaws.sfc.util.getIp4NetworkAddress
 import com.sun.net.httpserver.HttpServer
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -24,7 +25,7 @@ class HealthProbeService(
 
     private val className = this::class.simpleName.toString()
 
-    private val scope = buildScope(className)
+    private val scope = buildScope(className, Dispatchers.IO)
 
     private var serverJob: Job? = null
     private var server: HttpServer? = null

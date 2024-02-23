@@ -12,6 +12,7 @@ import com.amazonaws.sfc.metrics.InProcessMetricsProvider
 import com.amazonaws.sfc.metrics.MetricsConfiguration
 import com.amazonaws.sfc.metrics.MetricsProvider
 import com.amazonaws.sfc.util.launch
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.buffer
@@ -38,13 +39,17 @@ class InProcessSourcesReader(
 
         val sourcesReader = SourcesValuesAsFlow(protocolAdapter, sources, schedule.interval)
 
-        launch("Collect Read Results") {
-            sourcesReader.use {
-                sourcesReader.sourceReadResults.buffer(100).cancellable().collect {
-                    if (!consumer(it)) {
-                        cancel()
+        launch(context = Dispatchers.IO, name = "Collect Read Results") {
+            try {
+                sourcesReader.use {
+                    sourcesReader.sourceReadResults.buffer(100).cancellable().collect {
+                        if (!consumer(it)) {
+                            cancel()
+                        }
                     }
                 }
+            }catch (e : Exception){
+                logger.getCtxErrorLog(this::class.java.name, "collectReadResults")("Error reading data from sources, $e")
             }
         }
     }

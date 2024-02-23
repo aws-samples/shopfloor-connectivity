@@ -101,13 +101,17 @@ class AwsFirehoseTargetWriter(
 
 
     // Coroutine that sends the messages to the stream
-    private val writer = scope.launch("Writer") {
+    private val writer = scope.launch(context = Dispatchers.IO, name = "Writer") {
 
-        val logInfo = logger.getCtxInfoLog(className, "writer")
-        logInfo("AWS Kinesis Firehose writer for target \"$targetID\" writing to stream \"${targetConfig.streamName}\" in region ${targetConfig.region} on target \"$targetID\"")
+        val log = logger.getCtxLoggers(className, "writer")
+        try {
+            log.info("AWS Kinesis Firehose writer for target \"$targetID\" writing to stream \"${targetConfig.streamName}\" in region ${targetConfig.region} on target \"$targetID\"")
 
-        for (targetData in targetDataChannel) {
-            sendTargetData(targetData)
+            for (targetData in targetDataChannel) {
+                sendTargetData(targetData)
+            }
+        }catch (e : Exception){
+            log.error("Exception in AWS Kinesis Firehose writer for target \"$targetID\" writing to stream \"${targetConfig.streamName}\" in region ${targetConfig.region} on target \"$targetID\", $e" )
         }
     }
 

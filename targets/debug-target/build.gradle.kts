@@ -5,7 +5,7 @@ import org.jetbrains.kotlin.util.capitalizeDecapitalize.toUpperCaseAsciiOnly
 import java.time.LocalDate
 
 group = "com.amazonaws.sfc"
-version = "1.0.0"
+version = "1.0.1"
 
 val sfcRelease = rootProject.extra.get("sfc_release")!!
 val module = "debugtarget"

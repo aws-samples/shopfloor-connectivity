@@ -12,7 +12,7 @@ import com.amazonaws.sfc.log.Logger
 import com.amazonaws.sfc.metrics.*
 import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_DIMENSION_SOURCE_CATEGORY
 import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_DIMENSION_SOURCE_CATEGORY_ADAPTER
-import com.amazonaws.sfc.opcua.config.*
+import com.amazonaws.sfc.opcua.config.OpcuaConfiguration
 import com.amazonaws.sfc.opcua.config.OpcuaConfiguration.Companion.OPC_UA_ADAPTER
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.runBlocking

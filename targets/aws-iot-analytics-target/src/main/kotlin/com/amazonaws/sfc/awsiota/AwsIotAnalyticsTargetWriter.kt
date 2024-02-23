@@ -30,6 +30,7 @@ import software.amazon.awssdk.services.iotanalytics.IoTAnalyticsClient
 import software.amazon.awssdk.services.iotanalytics.model.BatchPutMessageRequest
 import software.amazon.awssdk.services.iotanalytics.model.BatchPutMessageResponse
 import software.amazon.awssdk.services.iotanalytics.model.Message
+import kotlin.coroutines.cancellation.CancellationException
 
 
 /**
@@ -126,7 +127,14 @@ class AwsIotAnalyticsTargetWriter(
 
     // coroutine that writes messages to channel
     private val writer = scope.launch("Writer") {
-        runWriter()
+        val log = logger.getCtxLoggers(className, "writer")
+        try {
+            runWriter()
+        }catch (e: CancellationException) {
+            log.info("Writer stopped")
+        }catch (e : Exception){
+            log.error("Error in writer, $e")
+        }
     }
 
     // batches and writes messages to the channel

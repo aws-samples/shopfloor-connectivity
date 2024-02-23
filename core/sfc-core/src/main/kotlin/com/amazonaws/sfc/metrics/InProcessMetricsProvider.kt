@@ -7,12 +7,9 @@ package com.amazonaws.sfc.metrics
 
 import com.amazonaws.sfc.log.Logger
 import com.amazonaws.sfc.util.launch
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.buffer
 import kotlinx.coroutines.flow.cancellable
-import kotlinx.coroutines.withTimeoutOrNull
 import kotlin.time.Duration
 
 class InProcessMetricsProvider(private val metricsReader: MetricsCollectorReader,
@@ -26,15 +23,19 @@ class InProcessMetricsProvider(private val metricsReader: MetricsCollectorReader
 
         val metricsProvider = MetricsAsFlow(metricsReader, interval, logger)
 
-        reader = launch("Collect Read Results") {
-            metricsProvider.metricsFlow.buffer(100).cancellable().collect {
-                try {
-                    if (!consumer(it)) {
-                        cancel()
+        reader = launch(context = Dispatchers.IO, name = "Collect Read Results") {
+            try {
+                metricsProvider.metricsFlow.buffer(100).cancellable().collect {
+                    try {
+                        if (!consumer(it)) {
+                            cancel()
+                        }
+                    } catch (e: Exception) {
+                        logger.getCtxErrorLog(className, "read")
                     }
-                } catch (e: Exception) {
-                    logger.getCtxErrorLog(className, "read")
                 }
+            }catch (e : Exception) {
+                logger.getCtxErrorLog(className, "reader")
             }
         }
     }

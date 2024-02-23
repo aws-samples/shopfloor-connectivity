@@ -9,6 +9,7 @@ package com.amazonaws.sfc.metrics
 import com.amazonaws.sfc.log.Logger
 import com.amazonaws.sfc.system.DateTime
 import com.amazonaws.sfc.util.buildScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -71,17 +72,21 @@ class MetricsCollector(private val metricsConfig: MetricsConfiguration?,
     // tests is a metrics source is configured to collect metrics
     private fun isSourceCollectingMetrics(source: String) = metricsCache.keys.contains(source)
 
-    val scope = buildScope("MetricsCollector")
+    val scope = buildScope("MetricsCollector", Dispatchers.IO)
 
     // this job runs with an interval to purge metrics that have not been read within the max metrics age avoiding
     // endless storage of metrics that are not read by a consumer
     private val cleaner = if (metricsConfig?.isCollectingMetrics == true) scope.launch {
         delay(METRICS_MAX_AGE.toDuration(DurationUnit.MINUTES))
         while (isActive) {
-            val duration = measureTime {
-                cleanUp()
+            try {
+                val duration = measureTime {
+                    cleanUp()
+                }
+                delay(METRICS_CLEANUP_INTERVAL - duration)
+            } catch (e: Exception) {
+                logger.getCtxErrorLog(className, "cleaner")("Error cleaning up metrics: ${e.message}")
             }
-            delay(METRICS_CLEANUP_INTERVAL - duration)
         }
     } else null
 

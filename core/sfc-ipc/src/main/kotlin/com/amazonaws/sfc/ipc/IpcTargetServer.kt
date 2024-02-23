@@ -1,4 +1,3 @@
-
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: MIT-0
 
@@ -145,16 +144,25 @@ class IpcTargetServer(
 
             val scope = buildScope("READ-REQUEST")
             scope.launch {
-                requests.collect { request: WriteValuesRequest ->
-                    // convert the request to a map and pass it to the writer of the target
-                    writer?.writeTargetData(request.asTargetData())
+                try {
+                    requests.collect { request: WriteValuesRequest ->
+                        // convert the request to a map and pass it to the writer of the target
+                        writer?.writeTargetData(request.asTargetData())
+                    }
+                } catch (e: Exception) {
+
+                    logger.getCtxErrorLog(className, "writeValues")
                 }
             }
 
             while (serverActive) {
-                val results = resultChannel.receive()
-                val response = buildTargetResultResponse(results, useCompressionForReplies)
-                emit(response)
+                try {
+                    val results = resultChannel.receive()
+                    val response = buildTargetResultResponse(results, useCompressionForReplies)
+                    emit(response)
+                } catch (e: Exception) {
+                    logger.getCtxErrorLog(className, "writeValues")
+                }
             }
         }
 
@@ -216,7 +224,6 @@ class IpcTargetServer(
 
             val log = logger.getCtxLoggers(className, "initializeTarget")
             try {
-
                 _initialized = false
 
                 val requestTargetID = request.targetID
@@ -243,7 +250,7 @@ class IpcTargetServer(
 
                 // Get the configuration data for the target and check if it is the expected type for this target
                 val targetConfiguration = config.targets[targetID]
-                                          ?: throw IpcException("Target type \"$targetID\" does not exist in configuration, available targets are ${config.targets.keys}")
+                    ?: throw IpcException("Target type \"$targetID\" does not exist in configuration, available targets are ${config.targets.keys}")
 
                 if (targetConfiguration.targetType != targetType) {
                     throw IpcException("Configuration target type \"${targetConfiguration.targetType}\" does not match expected target type \"$targetType\"")
@@ -251,7 +258,7 @@ class IpcTargetServer(
 
                 log.info(
                     "Handling target initialization request for target \"$targetID\" of type \"${targetConfiguration.targetType}\" " +
-                    "using configuration \"${request.targetConfiguration}\""
+                            "using configuration \"${request.targetConfiguration}\""
                 )
 
                 if (_writer != null) {
@@ -317,10 +324,16 @@ class IpcTargetServer(
         healthProbeService = if (healthProbeConfiguration == null) null else
             try {
                 val service =
-                    HealthProbeService(targetServerConfiguration.healthProbeConfiguration!!, serviceStopFunction = ::stopUnhealthyService, checkFunction = ::isHealthy, logger = logger)
-                serverScope.launch {
+                    HealthProbeService(
+                        targetServerConfiguration.healthProbeConfiguration!!,
+                        serviceStopFunction = ::stopUnhealthyService,
+                        checkFunction = ::isHealthy,
+                        logger = logger
+                    )
+                serverScope.launch(context = Dispatchers.IO) {
                     delay(1.toDuration(DurationUnit.MINUTES))
                     service.restartIfInactive()
+
                 }
                 service
             } catch (e: Exception) {
@@ -347,7 +360,8 @@ class IpcTargetServer(
                 ResulHandlerReturnedData(
                     ack = this.ack.asResultHandlerData(),
                     nack = this.nack.asResultHandlerData(),
-                    error = this.error.asResultHandlerData())
+                    error = this.error.asResultHandlerData()
+                )
 
 
         /**
@@ -372,7 +386,8 @@ class IpcTargetServer(
             var serviceConfiguration = ConfigReader.createConfigReader(
                 configStr = configurationStr,
                 allowUnresolved = true,
-                secretsManager = null).getConfig<ServiceConfiguration>()
+                secretsManager = null
+            ).getConfig<ServiceConfiguration>()
 
             val secretsManager = SecretsManager.createSecretsManager(serviceConfiguration, logger)
             runBlocking {
@@ -400,10 +415,12 @@ class IpcTargetServer(
             val cert = cmd.cert ?: targetServerConfiguration?.serverCertificate?.absolutePath
 
             // create configuration just for this server
-            val configuration = ServerConfiguration.create(address = address,
+            val configuration = ServerConfiguration.create(
+                address = address,
                 port = port,
                 serverPrivateKey = key,
-                serverCertificate = cert)
+                serverCertificate = cert
+            )
             configuration.validate()
 
             return IpcTargetServer(
@@ -416,7 +433,7 @@ class IpcTargetServer(
         }
 
         private fun getAddress(cmd: IpcTargetServerCommandLine) = (getIp4NetworkAddress(cmd.networkInterface)
-                                                                   ?: throw ProtocolAdapterException("No IP4 network address for interface ${cmd.networkInterface}"))
+            ?: throw ProtocolAdapterException("No IP4 network address for interface ${cmd.networkInterface}"))
 
         private fun getTargetID(cmd: IpcTargetServerCommandLine, serviceConfiguration: ServiceConfiguration): String? {
             return cmd.targetID ?: if (serviceConfiguration.activeTargets.size == 1) serviceConfiguration.activeTargets.keys.first() else null
@@ -437,16 +454,20 @@ class IpcTargetServer(
 
             val targetConfig = if (serviceConfiguration.activeTargets.isNotEmpty())
                 serviceConfiguration.activeTargets[targetID]
-                ?: throw IpcException("Target ID \"$targetID\" does not exist or is not active in configuration, " +
-                                      "existing active targets are ${serviceConfiguration.activeTargets.keys}")
+                    ?: throw IpcException(
+                        "Target ID \"$targetID\" does not exist or is not active in configuration, " +
+                                "existing active targets are ${serviceConfiguration.activeTargets.keys}"
+                    )
             else null
 
             if (targetConfig != null) {
                 val targetServerID = targetConfig.server
 
                 return (if (targetServerID != null) serviceConfiguration.targetServers[targetServerID] else null)
-                       ?: throw IpcException("Server for target ID \"$targetServerID\" does not exist, " +
-                                             "existing servers are  ${serviceConfiguration.targetServers.keys}")
+                    ?: throw IpcException(
+                        "Server for target ID \"$targetServerID\" does not exist, " +
+                                "existing servers are  ${serviceConfiguration.targetServers.keys}"
+                    )
             }
             return null
         }

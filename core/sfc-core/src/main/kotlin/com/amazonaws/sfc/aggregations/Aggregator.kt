@@ -1,4 +1,3 @@
-
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: MIT-0
 
@@ -422,66 +421,71 @@ class Aggregator(private val aggregation: AggregationConfiguration, private val 
     suspend fun aggregate(): MutableMap<String, Map<String, ChannelOutputData>> = coroutineScope {
 
         val log = logger.getCtxLoggers(className, "aggregate")
+        try {
 
-        // Mapping -> Source -> Channel -> Aggregation -> Value
-        val aggregatedOutput = mutableMapOf<String, Map<String, ChannelOutputData>>()
+            // Mapping -> Source -> Channel -> Aggregation -> Value
+            val aggregatedOutput = mutableMapOf<String, Map<String, ChannelOutputData>>()
 
-        // For every stored source
-        for ((sourceID, channelReadValues) in aggregationBuffers + emptyMap()) {
+            // For every stored source
+            for ((sourceID, channelReadValues) in aggregationBuffers + emptyMap()) {
 
-            // For each channel in the source channel -> aggregation name -> Value
-            val aggregatedChannelValuesForSource = mutableMapOf<String, MutableMap<String, ChannelOutputData>>()
+                // For each channel in the source channel -> aggregation name -> Value
+                val aggregatedChannelValuesForSource = mutableMapOf<String, MutableMap<String, ChannelOutputData>>()
 
-            for ((channelID, channelValues) in channelReadValues) {
-                val id = channelID.split(CHANNEL_SEPARATOR)[0]
+                for ((channelID, channelValues) in channelReadValues) {
+                    val id = channelID.split(CHANNEL_SEPARATOR)[0]
 
-                // Get names of all aggregation functions to apply for this channel
-                val (appliedAggregationNames, match) = aggregationsToApply(sourceID, id, channelValues)
-                if (appliedAggregationNames.isNotEmpty()) {
-                    log.trace("Aggregation functions for source  \"$sourceID\", channel \"$channelID\" are ${appliedAggregationNames.joinToString { s -> "\"$s\"" }} for using \"$match\"")
-                    log.trace("Aggregation input for for source \"$sourceID\" channel \"$channelID\" is $channelValues on thread ${Thread.currentThread().name}")
-                } else {
-                    log.trace("No aggregated output values for for source \"$id\" channel \"$channelID\"")
-                }
-
-                // Apply all output aggregations found for the channel in parallel
-                appliedAggregationNames.map { aggregationName ->
-
-                    // async invocation of aggregation method
-                    aggregationName to async {
-                        applyOutputAggregation(channelValues, aggregationName, sourceID, channelID)
+                    // Get names of all aggregation functions to apply for this channel
+                    val (appliedAggregationNames, match) = aggregationsToApply(sourceID, id, channelValues)
+                    if (appliedAggregationNames.isNotEmpty()) {
+                        log.trace("Aggregation functions for source  \"$sourceID\", channel \"$channelID\" are ${appliedAggregationNames.joinToString { s -> "\"$s\"" }} for using \"$match\"")
+                        log.trace("Aggregation input for for source \"$sourceID\" channel \"$channelID\" is $channelValues on thread ${Thread.currentThread().name}")
+                    } else {
+                        log.trace("No aggregated output values for for source \"$id\" channel \"$channelID\"")
                     }
 
-                }.map { (aggregationName, aggregatedDeferredValue) ->
+                    // Apply all output aggregations found for the channel in parallel
+                    appliedAggregationNames.map { aggregationName ->
 
-                    // set the results from the list of returned name/deferred pairs
-                    val aggregated = aggregatedDeferredValue.await()
-
-                    if (aggregated != null) {
-                        val channelOutputData = aggregated.asChannelOutputData()
-                        val channelData = aggregatedChannelValuesForSource[channelID]
-                        if (channelData != null) {
-                            channelData[aggregationName] = channelOutputData
-                        } else {
-                            aggregatedChannelValuesForSource[channelID] = mutableMapOf(aggregationName to channelOutputData)
+                        // async invocation of aggregation method
+                        aggregationName to async {
+                            applyOutputAggregation(channelValues, aggregationName, sourceID, channelID)
                         }
 
-                        log.trace("Aggregation \"${aggregationName}\" output for for source \"$sourceID\" channel \"$channelID\" is $channelOutputData")
-                    } else {
-                        log.error("Aggregation $aggregationName on values for source \"$sourceID\" channel \"$channelID\" returns a null value and are not stored aggregation output")
+                    }.map { (aggregationName, aggregatedDeferredValue) ->
+
+                        // set the results from the list of returned name/deferred pairs
+                        val aggregated = aggregatedDeferredValue.await()
+
+                        if (aggregated != null) {
+                            val channelOutputData = aggregated.asChannelOutputData()
+                            val channelData = aggregatedChannelValuesForSource[channelID]
+                            if (channelData != null) {
+                                channelData[aggregationName] = channelOutputData
+                            } else {
+                                aggregatedChannelValuesForSource[channelID] = mutableMapOf(aggregationName to channelOutputData)
+                            }
+
+                            log.trace("Aggregation \"${aggregationName}\" output for for source \"$sourceID\" channel \"$channelID\" is $channelOutputData")
+                        } else {
+                            log.error("Aggregation $aggregationName on values for source \"$sourceID\" channel \"$channelID\" returns a null value and are not stored aggregation output")
+                        }
                     }
+                }
+
+                // If there are aggregated channel values for a source ad these to the output
+                if (aggregatedChannelValuesForSource.isNotEmpty()) {
+                    aggregatedOutput[sourceID] = aggregatedChannelValuesForSource.map { it.key to ChannelOutputData(it.value) }.toMap()
                 }
             }
 
-            // If there are aggregated channel values for a source ad these to the output
-            if (aggregatedChannelValuesForSource.isNotEmpty()) {
-                aggregatedOutput[sourceID] = aggregatedChannelValuesForSource.map { it.key to ChannelOutputData(it.value) }.toMap()
-            }
+            // Clear all data that was aggregated
+            aggregationBuffers.clear()
+            return@coroutineScope aggregatedOutput
+        } catch (e: Exception) {
+            log.error("Error aggregating data $e")
+            mutableMapOf()
         }
-
-        // Clear all data that was aggregated
-        aggregationBuffers.clear()
-        return@coroutineScope aggregatedOutput
     }
 
 

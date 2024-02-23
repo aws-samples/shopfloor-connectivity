@@ -23,17 +23,22 @@ class CustomConfigProvider(private val configStr: String, private val configVeri
     // this code could for example call out to external sources and combine retrieved information with
     // data from the passed in configuration
     val worker = scope.launch {
-        val errorLog = logger.getCtxErrorLog(this::class.java.name, "worker")
-        while (true) {
-            if (configVerificationKey != null) {
-                if (!ConfigVerification.verify(configStr, configVerificationKey)) {
-                    errorLog("Content of configuration could not be verified")
-                    continue
+        try {
+            val errorLog = logger.getCtxErrorLog(this::class.java.name, "worker")
+            while (true) {
+                if (configVerificationKey != null) {
+                    if (!ConfigVerification.verify(configStr, configVerificationKey)) {
+                        errorLog("Content of configuration could not be verified")
+                        continue
+                    }
                 }
+                // simulate building a new config every minute
+                ch.send(configStr)
+                delay(60000)
             }
-            // simulate building a new config every minute
-            ch.send(configStr)
-            delay(60000)
+        }catch (e :  Exception){
+
+            logger.getCtxErrorLog(this::class.java.name, "worker")("Error in worker thread")
         }
     }
 

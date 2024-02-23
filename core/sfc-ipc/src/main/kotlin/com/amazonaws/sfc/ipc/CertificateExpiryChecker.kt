@@ -16,7 +16,7 @@ import java.io.File
 import java.time.Period
 import java.time.temporal.ChronoUnit
 
-class CertificateExpiryChecker(private val certificateFiles: List<File>, private val expirationWarningPeriodDays: Int, logger: Logger) {
+class CertificateExpiryChecker( certificateFiles: List<File>, private val expirationWarningPeriodDays: Int, logger: Logger) {
 
     private val className = this::class.simpleName.toString()
 
@@ -37,6 +37,7 @@ class CertificateExpiryChecker(private val certificateFiles: List<File>, private
 
             val ctxLog = logger.getCtxLoggers(className, "Check Certificate Expiration")
 
+            try{
             while (true) {
 
                 val now = DateTime.systemDateUTC()
@@ -60,6 +61,9 @@ class CertificateExpiryChecker(private val certificateFiles: List<File>, private
                     }
                 }
                 DateTime.delayUntilNextMidnightUTC()
+            }
+        }catch (e : Exception){
+                ctxLog.error("Error checking certificate expiration, $e")
             }
         }
 

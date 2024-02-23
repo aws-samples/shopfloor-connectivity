@@ -1,4 +1,3 @@
-
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: MIT-0
 
@@ -29,11 +28,8 @@ import com.amazonaws.sfc.util.buildScope
 import com.amazonaws.sfc.util.byteCountString
 import com.amazonaws.sfc.util.canNotReachAwsService
 import com.amazonaws.sfc.util.launch
-import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.selects.select
 import software.amazon.awssdk.awscore.exception.AwsServiceException
 import software.amazon.awssdk.core.sync.RequestBody
@@ -48,7 +44,8 @@ class AwsS3TargetWriter(
     private val targetID: String,
     private val configReader: ConfigReader,
     private val logger: Logger,
-    resultHandler: TargetResultHandler?) : TargetWriter {
+    resultHandler: TargetResultHandler?
+) : TargetWriter {
 
     private val className = this::class.java.simpleName
 
@@ -56,14 +53,18 @@ class AwsS3TargetWriter(
         logger.getCtxInfoLog(className, "")(BuildConfig.toString())
     }
 
-    private val metricDimensions = mapOf(METRICS_DIMENSION_SOURCE to targetID,
-        MetricsCollector.METRICS_DIMENSION_TYPE to className)
+    private val metricDimensions = mapOf(
+        METRICS_DIMENSION_SOURCE to targetID,
+        MetricsCollector.METRICS_DIMENSION_TYPE to className
+    )
 
     private val clientHelper =
-        AwsServiceTargetClientHelper(configReader.getConfig<AwsS3WriterConfiguration>(),
+        AwsServiceTargetClientHelper(
+            configReader.getConfig<AwsS3WriterConfiguration>(),
             targetID,
             S3Client.builder(),
-            logger)
+            logger
+        )
 
     private val s3Client: AwsS3Client
         get() = AwsS3ClientWrapper(clientHelper.serviceClient as S3Client)
@@ -91,12 +92,14 @@ class AwsS3TargetWriter(
         val metricsConfiguration = config.targets[targetID]?.metrics ?: MetricsSourceConfiguration()
         if (config.isCollectingMetrics) {
             logger.metricsCollectorMethod = collectMetricsFromLogger
-            MetricsCollector(metricsConfig = config.metrics,
+            MetricsCollector(
+                metricsConfig = config.metrics,
                 metricsSourceName = targetID,
                 metricsSourceType = MetricsSourceType.TARGET_WRITER,
                 metricsSourceConfiguration = metricsConfiguration,
                 staticDimensions = TARGET_METRIC_DIMENSIONS,
-                logger = logger)
+                logger = logger
+            )
         } else null
     }
 
@@ -130,29 +133,35 @@ class AwsS3TargetWriter(
         loggers.info("AWS S3 writer for target \"$targetID\" writing to S3 bucket \"${targetConfig.bucketName}\"  in region ${targetConfig.region}")
 
         while (isActive) {
-            select<Unit> {
-                targetDataChannel.onReceive { targetData ->
-                    val payload = buildPayload(targetData)
+            try {
+                select {
+                    targetDataChannel.onReceive { targetData ->
+                        val payload = buildPayload(targetData)
 
-                    targetResults?.add(targetData)
-                    buffer.add(targetData, payload)
+                        targetResults?.add(targetData)
+                        buffer.add(targetData, payload)
 
-                    loggers.trace("Received message, buffer size is ${buffer.payloadSize.byteCountString}")
+                        loggers.trace("Received message, buffer size is ${buffer.payloadSize.byteCountString}")
 
-                    // flush if reached buffer size
-                    if (targetData.noBuffering || buffer.payloadSize >= targetConfig.bufferSize) {
-                        loggers.trace("${targetConfig.bufferSize.byteCountString}  buffer size reached, flushing buffer")
-                        timer.cancel()
+                        // flush if reached buffer size
+                        if (targetData.noBuffering || buffer.payloadSize >= targetConfig.bufferSize) {
+                            loggers.trace("${targetConfig.bufferSize.byteCountString}  buffer size reached, flushing buffer")
+                            timer.cancel()
+                            flush()
+                            timer = timerJob()
+
+                        }
+                    }
+                    timer.onJoin {
+                        loggers.trace("${targetConfig.interval / 1000} seconds buffer interval reached, flushing buffer")
                         flush()
                         timer = timerJob()
-
                     }
                 }
-                timer.onJoin {
-                    loggers.trace("${targetConfig.interval / 1000} seconds buffer interval reached, flushing buffer")
-                    flush()
-                    timer = timerJob()
-                }
+            } catch (e: CancellationException) {
+                loggers.info("Writer stopped")
+            } catch (e: Exception) {
+                loggers.error("Error in writer, ${e.message}")
             }
         }
 
@@ -209,17 +218,21 @@ class AwsS3TargetWriter(
         }
     }
 
-    private fun createMetrics(adapterID: String,
-                              metricDimensions: MetricDimensions,
-                              writeDurationInMillis: Double) {
+    private fun createMetrics(
+        adapterID: String,
+        metricDimensions: MetricDimensions,
+        writeDurationInMillis: Double
+    ) {
 
         runBlocking {
-            metricsCollector?.put(adapterID,
+            metricsCollector?.put(
+                adapterID,
                 metricsCollector?.buildValueDataPoint(adapterID, METRICS_WRITES, 1.0, MetricUnits.COUNT, metricDimensions),
                 metricsCollector?.buildValueDataPoint(adapterID, METRICS_MESSAGES, buffer.size.toDouble(), MetricUnits.COUNT, metricDimensions),
                 metricsCollector?.buildValueDataPoint(adapterID, METRICS_WRITE_DURATION, writeDurationInMillis, MetricUnits.MILLISECONDS, metricDimensions),
                 metricsCollector?.buildValueDataPoint(adapterID, METRICS_WRITE_SUCCESS, 1.0, MetricUnits.COUNT, metricDimensions),
-                metricsCollector?.buildValueDataPoint(adapterID, METRICS_WRITE_SIZE, buffer.payloadSize.toDouble(), MetricUnits.BYTES, metricDimensions))
+                metricsCollector?.buildValueDataPoint(adapterID, METRICS_WRITE_SIZE, buffer.payloadSize.toDouble(), MetricUnits.BYTES, metricDimensions)
+            )
         }
     }
 
@@ -286,7 +299,12 @@ class AwsS3TargetWriter(
         @JvmStatic
         @Suppress("unused")
         fun newInstance(vararg createParameters: Any?) =
-            newInstance(createParameters[0] as ConfigReader, createParameters[1] as String, createParameters[2] as Logger, createParameters[3] as TargetResultHandler?)
+            newInstance(
+                createParameters[0] as ConfigReader,
+                createParameters[1] as String,
+                createParameters[2] as Logger,
+                createParameters[3] as TargetResultHandler?
+            )
 
         /**
          * Creates an instance of an AWS S3 writer from the passed configuration
@@ -307,7 +325,8 @@ class AwsS3TargetWriter(
         }
 
         val TARGET_METRIC_DIMENSIONS = mapOf(
-            MetricsCollector.METRICS_DIMENSION_SOURCE_CATEGORY to METRICS_DIMENSION_SOURCE_CATEGORY_TARGET)
+            MetricsCollector.METRICS_DIMENSION_SOURCE_CATEGORY to METRICS_DIMENSION_SOURCE_CATEGORY_TARGET
+        )
 
 
     }

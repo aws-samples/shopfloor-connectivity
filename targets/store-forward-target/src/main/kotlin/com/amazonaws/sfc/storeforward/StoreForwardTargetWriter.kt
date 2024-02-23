@@ -1,4 +1,3 @@
-
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: MIT-0
 
@@ -27,16 +26,19 @@ import kotlin.time.DurationUnit
 import kotlin.time.toDuration
 
 
-class StoreForwardTargetWriter(targetID: String,
-                               configReader: ConfigReader,
-                               private val logger: Logger,
-                               resultHandler: TargetResultHandler?) :
+class StoreForwardTargetWriter(
+    targetID: String,
+    configReader: ConfigReader,
+    private val logger: Logger,
+    resultHandler: TargetResultHandler?
+) :
 
-        ForwardingTargetWriter(
-            targetID = targetID,
-            configReader = configReader,
-            resultHandler = resultHandler,
-            logger = logger), TargetWriter {
+    ForwardingTargetWriter(
+        targetID = targetID,
+        configReader = configReader,
+        resultHandler = resultHandler,
+        logger = logger
+    ), TargetWriter {
 
     private val className = this::class.simpleName ?: ""
 
@@ -44,8 +46,10 @@ class StoreForwardTargetWriter(targetID: String,
         logger.getCtxInfoLog(className, "")(BuildConfig.toString())
     }
 
-    private val metricDimensions = mapOf(MetricsCollector.METRICS_DIMENSION_SOURCE to targetID,
-        MetricsCollector.METRICS_DIMENSION_TYPE to className)
+    private val metricDimensions = mapOf(
+        MetricsCollector.METRICS_DIMENSION_SOURCE to targetID,
+        MetricsCollector.METRICS_DIMENSION_TYPE to className
+    )
 
     private val writerScope by lazy { buildScope("StoreForwardTargetWriter") }
 
@@ -55,7 +59,7 @@ class StoreForwardTargetWriter(targetID: String,
 
     private val forwardingTargetConfiguration by lazy {
         storeAndForwardWriterConfiguration.forwardingTargets[targetID]
-        ?: throw Exception("Configuration for target \"$targetID\" does not exist, configured targets are ${storeAndForwardWriterConfiguration.forwardingTargets.keys}")
+            ?: throw Exception("Configuration for target \"$targetID\" does not exist, configured targets are ${storeAndForwardWriterConfiguration.forwardingTargets.keys}")
     }
 
     private val isAnyTargetProducingMetricsData
@@ -74,11 +78,13 @@ class StoreForwardTargetWriter(targetID: String,
         if (storeAndForwardWriterConfiguration.isCollectingMetrics || isAnyTargetProducingMetricsData) {
 
             logger.metricsCollectorMethod = collectMetricsFromLogger
-            MetricsCollector(metricsConfig = storeAndForwardWriterConfiguration.metrics,
+            MetricsCollector(
+                metricsConfig = storeAndForwardWriterConfiguration.metrics,
                 metricsSourceType = MetricsSourceType.TARGET_WRITER,
                 metricsSourceConfigurations = metricsConfigurations,
                 staticDimensions = TARGET_METRIC_DIMENSIONS,
-                logger = logger)
+                logger = logger
+            )
         } else null
     }
 
@@ -115,14 +121,16 @@ class StoreForwardTargetWriter(targetID: String,
             if (_targetForwardWriters == null) {
                 runBlocking {
                     _targetForwardWriters = getTargets().map { (targetID, targetWriter) ->
-                        targetID to BufferedWriter(targetID = targetID,
+                        targetID to BufferedWriter(
+                            targetID = targetID,
                             targetScope = targetScope,
                             writer = targetWriter,
                             buffer = messageBuffer,
                             bufferConfiguration = forwardingTargetConfiguration,
                             metricsCollectorMethod = collectMetricsFromBuffer,
                             onModeChanged = targetBufferModeChanged,
-                            logger = logger)
+                            logger = logger
+                        )
                     }.toMap()
                 }
             }
@@ -181,21 +189,25 @@ class StoreForwardTargetWriter(targetID: String,
             var timer = timerJob(interval)
             while (isActive) {
 
-                select<Unit> {
-                    bufferingModeChannel.onReceive { isBuffering ->
-                        timer.cancel()
-                        if (isBuffering) {
-                            lastBufferCount = createBufferMetrics()
-                        }
-                        interval = intervalForBufferingMode(lastBufferCount)
-                        timer = timerJob(interval)
+                try {
+                    select {
+                        bufferingModeChannel.onReceive { isBuffering ->
+                            timer.cancel()
+                            if (isBuffering) {
+                                lastBufferCount = createBufferMetrics()
+                            }
+                            interval = intervalForBufferingMode(lastBufferCount)
+                            timer = timerJob(interval)
 
+                        }
+                        timer.onJoin {
+                            lastBufferCount = createBufferMetrics()
+                            interval = intervalForBufferingMode(lastBufferCount)
+                            timer = timerJob(interval)
+                        }
                     }
-                    timer.onJoin {
-                        lastBufferCount = createBufferMetrics()
-                        interval = intervalForBufferingMode(lastBufferCount)
-                        timer = timerJob(interval)
-                    }
+                } catch (e: Exception) {
+                    logger.getCtxErrorLog(className, "bufferMetricsCollector")("Error collecting buffer metrics, $e")
                 }
             }
         }
@@ -205,7 +217,8 @@ class StoreForwardTargetWriter(targetID: String,
     private suspend fun createBufferMetrics(): Long {
         val bufferSize = forwardingTargetConfiguration.subTargets?.fold(0L) { acc, t -> acc + messageBuffer.size(t) } ?: 0
         val bufferCount = forwardingTargetConfiguration.subTargets?.fold(0L) { acc, t -> acc + messageBuffer.count(t) } ?: 0
-        metricsCollector?.put(targetID,
+        metricsCollector?.put(
+            targetID,
             MetricsDataPoint(METRICS_MESSAGE_BUFFERED_SIZE, metricDimensions, MetricUnits.COUNT, MetricsValue(bufferSize.toDouble())),
             MetricsDataPoint(METRICS_MESSAGE_BUFFERED_COUNT, metricDimensions, MetricUnits.COUNT, MetricsValue(bufferCount.toDouble()))
         )
@@ -224,8 +237,16 @@ class StoreForwardTargetWriter(targetID: String,
     private fun createMetrics(adapterID: String) {
 
         runBlocking {
-            metricsCollector?.put(adapterID,
-                metricsCollector?.buildValueDataPoint(adapterID, METRICS_MESSAGES, targetDataForwardWriters.size.toDouble(), MetricUnits.COUNT, metricDimensions))
+            metricsCollector?.put(
+                adapterID,
+                metricsCollector?.buildValueDataPoint(
+                    adapterID,
+                    METRICS_MESSAGES,
+                    targetDataForwardWriters.size.toDouble(),
+                    MetricUnits.COUNT,
+                    metricDimensions
+                )
+            )
         }
     }
 
@@ -255,7 +276,12 @@ class StoreForwardTargetWriter(targetID: String,
         @JvmStatic
         @Suppress("unused")
         fun newInstance(vararg createParameters: Any?) =
-            newInstance(createParameters[0] as ConfigReader, createParameters[1] as String, createParameters[2] as Logger, createParameters[3] as TargetResultHandler?)
+            newInstance(
+                createParameters[0] as ConfigReader,
+                createParameters[1] as String,
+                createParameters[2] as Logger,
+                createParameters[3] as TargetResultHandler?
+            )
 
         @JvmStatic
         fun newInstance(configReader: ConfigReader, targetID: String, logger: Logger, resultHandler: TargetResultHandler?): TargetWriter {
@@ -271,12 +297,15 @@ class StoreForwardTargetWriter(targetID: String,
         val INTERVAL_BUFFER_METRICS = 10.toDuration(DurationUnit.SECONDS)
 
         val STORE_FORWARD_RETURNED_RESULT_DATA =
-            ResulHandlerReturnedData(ack = ResulHandlerReturnedData.ResultHandlerData.SERIALS,
+            ResulHandlerReturnedData(
+                ack = ResulHandlerReturnedData.ResultHandlerData.SERIALS,
                 nack = ResulHandlerReturnedData.ResultHandlerData.MESSAGES,
-                error = ResulHandlerReturnedData.ResultHandlerData.SERIALS)
+                error = ResulHandlerReturnedData.ResultHandlerData.SERIALS
+            )
 
         val TARGET_METRIC_DIMENSIONS = mapOf(
-            MetricsCollector.METRICS_DIMENSION_SOURCE_CATEGORY to MetricsCollector.METRICS_DIMENSION_SOURCE_CATEGORY_TARGET)
+            MetricsCollector.METRICS_DIMENSION_SOURCE_CATEGORY to MetricsCollector.METRICS_DIMENSION_SOURCE_CATEGORY_TARGET
+        )
 
     }
 

@@ -54,14 +54,21 @@ class IpcTargetWriter(private val targetID: String,
 
     private val useCompression: Boolean = serverConfig.compression
 
-    private val scope = buildScope("IPC Target Writer")
+    private val scope = buildScope("IPC Target Writer", dispatcher = Dispatchers.IO)
 
     // Channel to send the data are to be sent to the coroutine that does the actual writing
     private val requestChannel = Channel<WriteValuesRequest>(100)
 
     // Coroutine that writes the data to the service
-    private val writerWorker = scope.launch(buildContext("writer", scope)) {
-        writer()
+    private val writerWorker = scope.launch( buildContext("writer", scope)) {
+        val log =  logger.getCtxLoggers(className, "writer")
+        try {
+            writer()
+        }catch (e: CancellationException) {
+            log.info("Writer stopped")
+        }catch (e : Exception){
+            log.error("Error in writerWorker, ${e.message}")
+        }
     }
 
     private var client: IpcTargetWriterClient? = null
@@ -76,7 +83,6 @@ class IpcTargetWriter(private val targetID: String,
         while (isActive) {
 
             try {
-
                 client = getIpcClient()
 
                 // Setup target IPC service by sending an initial or new config

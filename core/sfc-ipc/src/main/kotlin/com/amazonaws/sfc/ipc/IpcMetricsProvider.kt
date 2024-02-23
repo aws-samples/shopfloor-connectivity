@@ -38,12 +38,13 @@ class IpcMetricsProvider<T : IpcMetricsReaderClient>(configReader: ConfigReader,
      */
     override suspend fun read(interval: Duration, consumer: MetricsConsumer): Unit = coroutineScope {
 
-        metricsReader = launch("IPC Metrics Reader") {
+        metricsReader = launch(context = Dispatchers.IO, name = "IPC Metrics Reader") {
 
             val log = logger.getCtxLoggers(IpcSourceReader::class.java.simpleName, "metrics-reader")
 
             // read loop, remote IPC service is streaming data
             while (isActive) {
+
 
                 // wait with reading until the related source reader or target writer client has been initialized
                 if (!isIpcServiceInitialized()) {

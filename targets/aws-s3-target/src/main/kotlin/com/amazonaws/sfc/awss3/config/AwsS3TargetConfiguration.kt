@@ -6,9 +6,12 @@
 package com.amazonaws.sfc.awss3.config
 
 import com.amazonaws.sfc.awss3.config.AwsS3WriterConfiguration.Companion.AWS_S3
-import com.amazonaws.sfc.config.*
+import com.amazonaws.sfc.config.AwsServiceConfig
 import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_INTERVAL
 import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_REGION
+import com.amazonaws.sfc.config.ConfigurationClass
+import com.amazonaws.sfc.config.ConfigurationException
+import com.amazonaws.sfc.config.TargetConfiguration
 import com.amazonaws.sfc.data.Compress.CONFIG_COMPRESS
 import com.amazonaws.sfc.data.Compress.CONTENT_TYPE
 import com.amazonaws.sfc.data.CompressionType

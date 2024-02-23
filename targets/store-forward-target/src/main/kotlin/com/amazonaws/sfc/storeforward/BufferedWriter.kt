@@ -1,4 +1,3 @@
-
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: MIT-0
 
@@ -29,14 +28,16 @@ import java.io.FileNotFoundException
 
 typealias BufferModeChangedMethod = (target: String, mode: BufferedWriter.WriterMode) -> Unit
 
-class BufferedWriter(private val targetID: String,
-                     private val targetScope: CoroutineScope,
-                     private val writer: TargetWriter,
-                     private val buffer: MessageBuffer,
-                     private val bufferConfiguration: MessageBufferConfiguration,
-                     private val metricsCollectorMethod: MetricsCollectorMethod?,
-                     private val onModeChanged: BufferModeChangedMethod?,
-                     private val logger: Logger) {
+class BufferedWriter(
+    private val targetID: String,
+    private val targetScope: CoroutineScope,
+    private val writer: TargetWriter,
+    private val buffer: MessageBuffer,
+    private val bufferConfiguration: MessageBufferConfiguration,
+    private val metricsCollectorMethod: MetricsCollectorMethod?,
+    private val onModeChanged: BufferModeChangedMethod?,
+    private val logger: Logger
+) {
 
     private val className = this::class.java.simpleName
 
@@ -72,8 +73,8 @@ class BufferedWriter(private val targetID: String,
         get() = mode == WriterMode.BUFFERING
 
     private val usesCleanup = (bufferConfiguration.retainSize != null ||
-                               bufferConfiguration.retainPeriod != null ||
-                               bufferConfiguration.retainNumber != null)
+            bufferConfiguration.retainPeriod != null ||
+            bufferConfiguration.retainNumber != null)
 
     // Worker to process received results from target
     private val resultWorker = launchResultHandlerWorker()
@@ -89,41 +90,50 @@ class BufferedWriter(private val targetID: String,
 
     // Start by resubmitting stored data that might be buffered
     init {
-        targetScope.launch { resubmittingBufferedData() }
+        targetScope.launch {
+            try {
+                resubmittingBufferedData()
+            } catch (e: Exception) {
+                logger.getCtxErrorLog(className, "init")
+            }
+        }
     }
 
     // Start handling results from targets
     private fun launchResultHandlerWorker() = targetScope.launch("Result processor for target $targetID") {
 
         while (isActive) {
+            try {
+                // Read ACK/NACK returned by target
+                val resultData = resultChannel.receive()
 
-            // Read ACK/NACK returned by target
-            val resultData = resultChannel.receive()
+                // Handle received results
+                handleTargetResults(resultData)
 
-            // Handle received results
-            handleTargetResults(resultData)
+                // when receiving NACKs go into buffering mode
+                if (resultData.containsNacks) {
 
-            // when receiving NACKs go into buffering mode
-            if (resultData.containsNacks) {
-
-                if (mode != WriterMode.BUFFERING) {
-                    mode = WriterMode.BUFFERING
-                    // Activate cleanup process whilst buffering
-                    bufferCleanupWorker = if (usesCleanup) launchBufferCleanupWorker() else null
+                    if (mode != WriterMode.BUFFERING) {
+                        mode = WriterMode.BUFFERING
+                        // Activate cleanup process whilst buffering
+                        bufferCleanupWorker = if (usesCleanup) launchBufferCleanupWorker() else null
+                    }
+                    continue
                 }
-                continue
-            }
 
-            // if ACKs are received then go switch to forwarding mode when we were in buffering mode
-            if (resultData.containsAcks) {
+                // if ACKs are received then go switch to forwarding mode when we were in buffering mode
+                if (resultData.containsAcks) {
 
-                if (mode == WriterMode.BUFFERING) {
-                    mode = WriterMode.FORWARDING
-                    // Stop cleanup of buffered data
-                    bufferCleanupWorker?.cancel()
-                    // Resubmit data that was stored in whilst in buffering mode
-                    resubmittingBufferedData()
+                    if (mode == WriterMode.BUFFERING) {
+                        mode = WriterMode.FORWARDING
+                        // Stop cleanup of buffered data
+                        bufferCleanupWorker?.cancel()
+                        // Resubmit data that was stored in whilst in buffering mode
+                        resubmittingBufferedData()
+                    }
                 }
+            } catch (e: Exception) {
+                logger.getCtxErrorLog(className, "resultHandlerWorker")
             }
         }
     }
@@ -142,8 +152,12 @@ class BufferedWriter(private val targetID: String,
     private fun launchBufferCleanupWorker() = targetScope.launch("Buffer cleanup $targetID") {
 
         while (isActive) {
-            cleanupBuffer()
-            delay(bufferConfiguration.cleanupInterval)
+            try {
+                cleanupBuffer()
+                delay(bufferConfiguration.cleanupInterval)
+            } catch (e: Exception) {
+                logger.getCtxErrorLog(className, "bufferCleanupWorker")
+            }
         }
     }
 
@@ -185,7 +199,17 @@ class BufferedWriter(private val targetID: String,
 
                             WriterMode.BUFFERING -> {
                                 buffer.add(targetID, targetData)
-                                metricsCollectorMethod?.let { it(listOf(MetricsValueParam(METRICS_MESSAGE_BUFFERED_COUNT, MetricsValue(1), MetricUnits.COUNT))) }
+                                metricsCollectorMethod?.let {
+                                    it(
+                                        listOf(
+                                            MetricsValueParam(
+                                                METRICS_MESSAGE_BUFFERED_COUNT,
+                                                MetricsValue(1),
+                                                MetricUnits.COUNT
+                                            )
+                                        )
+                                    )
+                                }
                                 // use oldest or latest target data to send to the target in order to get an ACK when it is available again
                                 submitBufferedItem()
                             }
@@ -229,8 +253,10 @@ class BufferedWriter(private val targetID: String,
     private suspend fun forward(targetData: TargetData) {
 
         val one = MetricsValue(1)
-        val metrics = mutableListOf(MetricsValueParam(METRICS_WRITES, one, MetricUnits.COUNT),
-            MetricsValueParam(METRICS_MESSAGES, one, MetricUnits.COUNT))
+        val metrics = mutableListOf(
+            MetricsValueParam(METRICS_WRITES, one, MetricUnits.COUNT),
+            MetricsValueParam(METRICS_MESSAGES, one, MetricUnits.COUNT)
+        )
 
         targetData.noBuffering = false
         if (forwardDataToTarget(targetData)) {
@@ -245,14 +271,17 @@ class BufferedWriter(private val targetID: String,
 
     private fun launchResubmitWorker(): Job {
         return targetScope.launch("Resubmit worker for $targetID") {
-
-            cleanupBuffer()
-            buffer.list(targetID, bufferConfiguration.fifo).filterNotNull().chunked(10).forEach { chunkedItems ->
-                chunkedItems.forEach {
-                    it.noBuffering = false
-                    resubmitChannel.send(it)
+            try {
+                cleanupBuffer()
+                buffer.list(targetID, bufferConfiguration.fifo).filterNotNull().chunked(10).forEach { chunkedItems ->
+                    chunkedItems.forEach {
+                        it.noBuffering = false
+                        resubmitChannel.send(it)
+                    }
+                    delay(1)
                 }
-                delay(1)
+            } catch (e: Exception) {
+                logger.getCtxErrorLog(className, "launchResubmitWorker")
             }
         }
     }
@@ -263,7 +292,8 @@ class BufferedWriter(private val targetID: String,
             bufferCleanupWorker,
             forwardWorker,
             resubmitWorker,
-            resultWorker).forEach {
+            resultWorker
+        ).forEach {
             try {
                 it.cancel()
             } catch (_: CancellationException) {
@@ -300,7 +330,13 @@ class BufferedWriter(private val targetID: String,
                 }
             }
             if (deletedFiles > 0) {
-                log.info("Finished buffer cleanup for target $targetID, number of files in number is ${buffer.count(targetID)}, buffer size is ${buffer.size(targetID).byteCountString}")
+                log.info(
+                    "Finished buffer cleanup for target $targetID, number of files in number is ${buffer.count(targetID)}, buffer size is ${
+                        buffer.size(
+                            targetID
+                        ).byteCountString
+                    }"
+                )
                 metricsCollectorMethod?.let { it(listOf(MetricsValueParam(METRICS_MESSAGE_BUFFERED_DELETED, MetricsValue(1), MetricUnits.COUNT))) }
             }
 

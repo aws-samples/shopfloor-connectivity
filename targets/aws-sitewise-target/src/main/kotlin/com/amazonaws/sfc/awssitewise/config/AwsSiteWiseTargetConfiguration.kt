@@ -6,10 +6,13 @@
 package com.amazonaws.sfc.awssitewise.config
 
 import com.amazonaws.sfc.awssitewise.config.AwsSiteWiseWriterConfiguration.Companion.AWS_SITEWISE
-import com.amazonaws.sfc.config.*
+import com.amazonaws.sfc.config.AwsServiceConfig
 import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_BATCH_SIZE
 import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_INTERVAL
 import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_REGION
+import com.amazonaws.sfc.config.ConfigurationClass
+import com.amazonaws.sfc.config.ConfigurationException
+import com.amazonaws.sfc.config.TargetConfiguration
 import com.amazonaws.sfc.metrics.MetricsSourceConfiguration
 import com.google.gson.annotations.SerializedName
 import software.amazon.awssdk.regions.Region

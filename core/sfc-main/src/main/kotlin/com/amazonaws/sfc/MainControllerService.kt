@@ -129,7 +129,7 @@ class MainControllerService(private val configReader: ConfigReader,
     }
 
     private suspend fun stopMetricsProcessing() = coroutineScope {
-        launch {
+        launch(Dispatchers.IO) {
             listOf(launch {
                 adapterMetricProviders.values.map {
                     launch { it.close() }
@@ -159,7 +159,7 @@ class MainControllerService(private val configReader: ConfigReader,
 
         // list of scheduler to reader pairs
         val schedules: Map<String, Pair<Map<String, SourceValuesReader>, Map<String, TargetWriter>>> =
-            // for each configured service..
+            // for each configured service
             configuration.schedules.filter { it.active }.mapNotNull { schedule ->
                 // create a reader to read input from protocol handler
                 val readers = createReadersForSchedule(schedule, configuration)
@@ -401,22 +401,24 @@ class MainControllerService(private val configReader: ConfigReader,
 
     private suspend fun initializeHealthProbeService() {
 
-        healthProbeService?.stop()
+            healthProbeService?.stop()
 
-        val healthProbeConfiguration = configuration.healthProbeConfiguration
-        healthProbeService = if (healthProbeConfiguration == null) null else
-            try {
-                val service =
-                    HealthProbeService(healthProbeConfiguration, checkFunction = ::isHealthy, serviceStopFunction = ::stopUnhealthyService, logger = logger)
-                controllerScope.launch {
-                    delay(1.toDuration(DurationUnit.MINUTES))
-                    service.restartIfInactive()
+            val healthProbeConfiguration = configuration.healthProbeConfiguration
+            healthProbeService = if (healthProbeConfiguration == null) null else
+                try {
+                    val service =
+                        HealthProbeService(healthProbeConfiguration, checkFunction = ::isHealthy, serviceStopFunction = ::stopUnhealthyService, logger = logger)
+                    controllerScope.launch {
+                        delay(1.toDuration(DurationUnit.MINUTES))
+                        service.restartIfInactive()
+                    }
+                    service
+                } catch (e: Exception) {
+                    logger.getCtxErrorLog(className, "initializeHealthProbeService")("Error initializing health probe service : ${e.message ?: ""}")
+                    null
                 }
-                service
-            } catch (e: Exception) {
-                null
-            }
-        healthProbeService?.start()
+            healthProbeService?.start()
+
     }
 
 

@@ -28,7 +28,7 @@ import kotlin.time.toDuration
  */
 class ScheduleController(private val reader: ScheduleReader, private val aggregator: ScheduleAggregator?, private val writer: ScheduleWriter) : Closeable {
 
-    private val scope = CoroutineScope(Dispatchers.Default)
+    private val scope = CoroutineScope(Dispatchers.IO)
 
     /**
      * Closes the controller
@@ -125,7 +125,7 @@ class ScheduleController(private val reader: ScheduleReader, private val aggrega
 
         val WAIT_FOR_STOP_DURATION = 10.toDuration(DurationUnit.SECONDS)
         val WAIT_FOR_STOP_DURATION_TOTAL = WAIT_FOR_STOP_DURATION * 3
-        private const val READER_BUFFER_SIZE = 100
+        private const val READER_BUFFER_SIZE = 6000
     }
 
 }

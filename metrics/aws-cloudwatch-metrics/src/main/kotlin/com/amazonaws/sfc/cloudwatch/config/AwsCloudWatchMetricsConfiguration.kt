@@ -5,7 +5,10 @@
 
 package com.amazonaws.sfc.cloudwatch.config
 
-import com.amazonaws.sfc.config.*
+import com.amazonaws.sfc.config.ConfigurationClass
+import com.amazonaws.sfc.config.ConfigurationException
+import com.amazonaws.sfc.config.MetricsWriterConfiguration
+import com.amazonaws.sfc.config.Validate
 import com.amazonaws.sfc.metrics.MetricsConfiguration
 import com.google.gson.annotations.SerializedName
 import kotlin.time.Duration

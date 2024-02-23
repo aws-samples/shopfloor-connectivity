@@ -79,15 +79,13 @@ class IpcSourceReader(
 
         var reader: Job? = null
 
-        reader = launch("IPC Source Reader") {
+        reader = launch(context = Dispatchers.IO, name = "IPC Source Reader") {
 
             val log = logger.getCtxLoggers(IpcSourceReader::class.java.simpleName, "reader")
 
             // read loop, remote IPC service is streaming data
             while (isActive) {
-
                 try {
-
                     log.info("Initializing IPC source adapter service on ${serverConfig.addressStr}")
 
                     client = getIpcClient()

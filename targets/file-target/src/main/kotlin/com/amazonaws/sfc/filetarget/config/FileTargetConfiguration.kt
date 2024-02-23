@@ -5,8 +5,11 @@
 
 package com.amazonaws.sfc.filetarget.config
 
-import com.amazonaws.sfc.config.*
 import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_INTERVAL
+import com.amazonaws.sfc.config.ConfigurationClass
+import com.amazonaws.sfc.config.ConfigurationException
+import com.amazonaws.sfc.config.TargetConfiguration
+import com.amazonaws.sfc.config.Validate
 import com.amazonaws.sfc.data.Compress.CONFIG_COMPRESS
 import com.amazonaws.sfc.data.CompressionType
 import com.amazonaws.sfc.filetarget.config.FileTargetWriterConfiguration.Companion.FILE_TARGET

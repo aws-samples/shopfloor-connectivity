@@ -154,7 +154,11 @@ class AwsIotHttpTargetWriter(
 
     // Worker coroutine that handles the publishing of the data to the topic
     private val writer = scope.launch("Writer") {
-        targetWriter()
+        try {
+            targetWriter()
+        }catch (e : Exception){
+            logger.getCtxErrorLog(className, "targetWriter")("Error in target writer, $e")
+        }
     }
 
     private val transformation by lazy { if (targetConfig.template != null) OutputTransformation(targetConfig.template!!, logger) else null }

@@ -9,6 +9,7 @@ import com.amazonaws.sfc.config.ConfigReader
 import com.amazonaws.sfc.config.ConfigWithMetrics
 import com.amazonaws.sfc.log.Logger
 import com.amazonaws.sfc.util.buildScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
@@ -20,7 +21,7 @@ class MetricsProcessor(private val configReader: ConfigReader,
 
     private val className = this::class.java.simpleName
 
-    private val scope = buildScope("Metrics Reader")
+    private val scope = buildScope("Metrics Reader", Dispatchers.IO)
 
     private val metricsChannel = Channel<MetricsData>(100 * metricProviders.size)
 
@@ -77,24 +78,28 @@ class MetricsProcessor(private val configReader: ConfigReader,
 
 
         val log = logger.getCtxLoggers(className, "reader")
+        try {
 
-        if (writer != null) {
-            log.info("Metrics writer of type  ${writer!!::class.java.simpleName} created")
-        }
-
-        for (metricsData in metricsChannel) {
-            try {
-
-                if (writer != null) {
-                    log.trace("Sending ${metricsData.dataPoints.size} data point to metrics writer ${writer!!::class.java.simpleName}")
-                    writer?.writeMetricsData(metricsData)
-                    log.trace("Done sending data point to metrics writer ")
-                } else {
-                    log.error("No metrics writer for sending metrics data point")
-                }
-            } catch (e: Exception) {
-                log.error("Error writing to metrics writer, $e")
+            if (writer != null) {
+                log.info("Metrics writer of type  ${writer!!::class.java.simpleName} created")
             }
+
+            for (metricsData in metricsChannel) {
+                try {
+
+                    if (writer != null) {
+                        log.trace("Sending ${metricsData.dataPoints.size} data point to metrics writer ${writer!!::class.java.simpleName}")
+                        writer?.writeMetricsData(metricsData)
+                        log.trace("Done sending data point to metrics writer ")
+                    } else {
+                        log.error("No metrics writer for sending metrics data point")
+                    }
+                } catch (e: Exception) {
+                    log.error("Error writing to metrics writer, $e")
+                }
+            }
+        }catch ( e: Exception){
+            log.error("Error reading metrics, $e")
         }
     }
 

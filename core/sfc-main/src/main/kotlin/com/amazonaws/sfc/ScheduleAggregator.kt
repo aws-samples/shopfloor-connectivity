@@ -14,6 +14,7 @@ import com.amazonaws.sfc.data.SourceReadSuccess
 import com.amazonaws.sfc.log.Logger
 import com.amazonaws.sfc.util.buildScope
 import com.amazonaws.sfc.util.launch
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.withTimeoutOrNull
@@ -43,9 +44,13 @@ class ScheduleAggregator(
     private val aggregation = schedule.aggregation
 
     // coroutine handling the aggregation of data
-    private val aggregationWorker = scope.launch("Aggregator") {
-        if (aggregation != null) {
-            aggregateSourceValues(aggregation)
+    private val aggregationWorker = scope.launch(context = Dispatchers.IO, name = "Aggregator") {
+        try {
+            if (aggregation != null) {
+                aggregateSourceValues(aggregation)
+            }
+        } catch ( e: Exception) {
+            logger.getCtxErrorLog(this::class.simpleName.toString(), "aggregationWorker")("Error aggregating data, $e")
         }
     }
 

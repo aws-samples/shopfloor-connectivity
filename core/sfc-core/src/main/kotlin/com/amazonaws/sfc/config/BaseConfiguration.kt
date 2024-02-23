@@ -185,6 +185,13 @@ open class BaseConfiguration : Validate, HasSecretsManager {
     override val secretsManagerConfiguration
         get() = _secretsManagerConfiguration
 
+    @SerializedName(CONFIG_TUNING)
+    protected var _tuningConfiguration = TuningConfiguration()
+
+    val tuningConfiguration : TuningConfiguration
+        get() = _tuningConfiguration
+
+
     /**
      * Validates the configuration
      */
@@ -246,6 +253,7 @@ open class BaseConfiguration : Validate, HasSecretsManager {
         const val CONFIG_PROTOCOL_ADAPTERS = "ProtocolAdapters"
         const val CONFIG_PROTOCOL_ADAPTER_TYPES = "AdapterTypes"
         const val CONFIG_PROTOCOL_SERVERS = "AdapterServers"
+        const val CONFIG_TUNING = "Tuning"
         const val CONFIG_REGION = "Region"
         const val CONFIG_SCHEDULES = "Schedules"
         const val CONFIG_SECRETS_MANGER = "SecretsManager"

@@ -23,6 +23,7 @@ import com.amazonaws.sfc.targets.TargetException
 import com.amazonaws.sfc.util.buildScope
 import com.amazonaws.sfc.util.launch
 import com.google.gson.JsonSyntaxException
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
@@ -50,7 +51,7 @@ class MqttAdapter(private val adapterID: String, private val configuration: Mqtt
      * @property message String The received message
      * @property timestamp Instant Time when message was received
      */
-    inner class ReceivedData constructor(
+    inner class ReceivedData (
         val sourceID: String,
         val channelID: String,
         val channel: MqttChannelConfiguration,
@@ -114,9 +115,13 @@ class MqttAdapter(private val adapterID: String, private val configuration: Mqtt
 
     // co-routine processing the received data
 
-    private val changedDataWorker = scope.launch("Receive Data Handler") {
-        for (data in receivedData) {
-            handleDataReceived(data)
+    private val changedDataWorker = scope.launch(context = Dispatchers.IO, name = "Receive Data Handler") {
+        try {
+            for (data in receivedData) {
+                handleDataReceived(data)
+            }
+        }catch (e : Exception){
+            logger.getCtxErrorLog(this::class.java.simpleName, "changedDataWorker")("Error processing received data, $e")
         }
     }
 

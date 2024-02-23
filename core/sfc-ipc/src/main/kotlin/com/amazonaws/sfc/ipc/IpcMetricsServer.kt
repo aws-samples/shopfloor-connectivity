@@ -41,7 +41,7 @@ class IpcMetricsServer(
 
     private val className = this::class.java.simpleName
 
-    private val serviceScope = buildScope(className)
+    private val serviceScope = buildScope(className, dispatcher = Dispatchers.IO)
 
     // writer is created from configuration passed in init service call
     private var _writer: MetricsWriter? = null

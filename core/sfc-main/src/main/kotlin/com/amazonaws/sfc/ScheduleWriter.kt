@@ -1,4 +1,3 @@
-
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: MIT-0
 
@@ -52,7 +51,8 @@ class ScheduleWriter(
     private val targets: Map<String, TargetWriter>,
     private val writerInputChannel: ReceiveChannel<Map<String, SourceOutputData>>,
     private val metricsCollector: MetricsCollector?,
-    private val logger: Logger) {
+    private val logger: Logger
+) {
 
     private val className = this::class.java.simpleName
 
@@ -81,7 +81,11 @@ class ScheduleWriter(
 
     // Coroutine that writes data to all targets for a schedule
     private val writerWorker = scope.launch("Writer") {
-        writeTargetValues()
+        try {
+            writeTargetValues()
+        } catch (e: Exception) {
+            logger.getCtxErrorLog(className, "writerWorker")("Error writing targets, $e")
+        }
     }
 
     val isRunning: Boolean
@@ -167,7 +171,13 @@ class ScheduleWriter(
                     metrics?.add(MetricsDataPoint(name = METRICS_WRITE_SUCCESS, units = MetricUnits.COUNT, value = MetricsValue(writesSuccessfulCount)))
                 }
                 if (writesSuccessfulCount != writes.size) {
-                    metrics?.add(MetricsDataPoint(name = METRICS_WRITE_ERRORS, units = MetricUnits.COUNT, value = MetricsValue(writes.size - writesSuccessfulCount)))
+                    metrics?.add(
+                        MetricsDataPoint(
+                            name = METRICS_WRITE_ERRORS,
+                            units = MetricUnits.COUNT,
+                            value = MetricsValue(writes.size - writesSuccessfulCount)
+                        )
+                    )
                 }
                 metrics?.let { metricsCollector.put(SFC_CORE, it) }
             }

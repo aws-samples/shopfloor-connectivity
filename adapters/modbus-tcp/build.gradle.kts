@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT-0
 
 import org.jetbrains.kotlin.util.capitalizeDecapitalize.toUpperCaseAsciiOnly
-import java.nio.file.Path
 import java.time.LocalDate
 
 group = "com.amazonaws.sfc"

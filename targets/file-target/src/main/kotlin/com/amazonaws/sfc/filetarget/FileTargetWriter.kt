@@ -27,11 +27,8 @@ import com.amazonaws.sfc.targets.TargetException
 import com.amazonaws.sfc.util.buildScope
 import com.amazonaws.sfc.util.byteCountString
 import com.amazonaws.sfc.util.launch
-import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.selects.select
 import java.io.BufferedWriter
 import java.io.File
@@ -97,37 +94,42 @@ class FileTargetWriter(
 
     private val scope = buildScope("File Target")
 
-    private val writer = scope.launch("Writer") {
+    private val writer = scope.launch(context = Dispatchers.IO, name = "Writer") {
 
         var timer = timerJob()
 
-        val loggers = logger.getCtxLoggers(FileTargetWriter::class.java.simpleName, "writer")
-        loggers.info("File writer for target \"$targetID\" writing to directory \"${targetConfig.directory}\"")
+        val log = logger.getCtxLoggers(FileTargetWriter::class.java.simpleName, "writer")
+        log.info("File writer for target \"$targetID\" writing to directory \"${targetConfig.directory}\"")
 
         while (isActive) {
-            select<Unit> {
+            try{
+            select {
                 targetDataChannel.onReceive { targetData ->
 
                     val content = targetData.toJson(config.elementNames)
 
                     buffer.add(targetData, content)
 
-                    loggers.trace("Received message, buffer size is ${buffer.payloadSize.byteCountString}")
+                    log.trace("Received message, buffer size is ${buffer.payloadSize.byteCountString}")
 
                     // flush if reached buffer size
                     if (buffer.payloadSize >= targetConfig.bufferSize) {
-                        loggers.trace("${targetConfig.bufferSize.byteCountString} buffer size reached, flushing buffer")
+                        log.trace("${targetConfig.bufferSize.byteCountString} buffer size reached, flushing buffer")
                         timer.cancel()
                         flush()
                         timer = timerJob()
                     }
                 }
                 timer.onJoin {
-                    loggers.trace("${targetConfig.interval / 1000} seconds buffer interval reached, flushing buffer")
+                    log.trace("${targetConfig.interval / 1000} seconds buffer interval reached, flushing buffer")
                     flush()
                     timer = timerJob()
-
                 }
+                }
+            }catch (e: CancellationException) {
+                log.info("Writer stopped")
+            }catch (e : Exception){
+                log.error("Error in writer, $e")
             }
         }
 

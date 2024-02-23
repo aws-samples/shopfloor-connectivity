@@ -80,12 +80,27 @@ class ModbusDevice(private val sourceID: String,
 
                 // this coroutine will receive and process responses from the device
                 launch("Response Receiver") {
-                    receiveResponses(requests, requestSlots, resultChannel, channels)
+                   try {
+                       receiveResponses(requests, requestSlots, resultChannel, channels)
+                   }catch (e : Exception){
+                       val ctxErrorLog = logger.get()?.getCtxErrorLog(className, "receiver")
+                       if (ctxErrorLog != null) {
+                           ctxErrorLog("Exception while receiving responses from device ${configuration.sourceAdapterDevice} on adapter ${configuration.protocolAdapterID}: ${e.message}")
+                       }
+                   }
+
                 }
 
                 // this coroutine will send the request to the device
                 launch("Request Transmitter") {
-                    sendRequests(requests, requestSlots)
+                    try {
+                        sendRequests(requests, requestSlots)
+                    }catch (e : Exception){
+                        val ctxErrorLog = logger.get()?.getCtxErrorLog(className, "transmitter")
+                        if (ctxErrorLog != null) {
+                            ctxErrorLog("Exception while sending requests to device ${configuration.sourceAdapterDevice} on adapter ${configuration.protocolAdapterID}: ${e.message}")
+                        }
+                    }
                 }
 
                 // this coroutine will check for a timeout receiving the responses for all requests
@@ -292,7 +307,7 @@ class ModbusDevice(private val sourceID: String,
 
     // build all requests to send to the device
     private suspend fun buildRequests(channels: List<String>?) =
-        ModbusChannelType.values().flatMap { channelType ->
+        ModbusChannelType.entries.flatMap { channelType ->
             configuration.addressRangesForType(channelType, channels).map { addressRange ->
                 buildRequest(channelType, addressRange.first, addressRange.second, deviceID)
             }
@@ -312,7 +327,7 @@ class ModbusDevice(private val sourceID: String,
         val log = logger.get()?.getCtxLoggers(ModbusDevice::class.java.simpleName, "responseReceiveWorker")
 
         // create result data structure to store results per channel type
-        val responseData = ModbusChannelType.values().associateWith { mutableMapOf<UShort, Any>() }
+        val responseData = ModbusChannelType.entries.associateWith { mutableMapOf<UShort, Any>() }
 
         // loop to read all requests
         receiverLoop@ while (receivedResponses < requests.size) {

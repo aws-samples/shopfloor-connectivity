@@ -9,6 +9,7 @@ import com.amazonaws.sfc.util.FileWatcher
 import com.amazonaws.sfc.util.buildScope
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -25,7 +26,7 @@ class YamlConfigProvider(
 
     // channel used to send configurations to SFC-Core
     private val ch = Channel<String>(1)
-    
+
     private val scope = buildScope("YamlConfigProvider")
 
     // Read minimal JSON config, this config only has reference to this custom YAML config handler and the name of the actual YAML config file
@@ -50,9 +51,11 @@ class YamlConfigProvider(
             }
         }
 
-    val worker = scope.launch {
+    val worker = scope.launch(Dispatchers.IO) {
 
         val log = logger.getCtxLoggers(className, "watchYamlConfigFile")
+
+        try{
 
         val jsonConfig = configFromYamlAsJson
 
@@ -60,25 +63,30 @@ class YamlConfigProvider(
             log.info("Sending initial configuration to SFC-Core")
             log.trace("Configuration: $jsonConfig")
             ch.send(jsonConfig)
-        } else{
+        } else {
             log.info("Waiting for updated valid config")
         }
 
         val fileWatcher = FileWatcher(config.yamlConfigFile!!)
 
         while (isActive) {
+            try {
+                // watch yaml config file for updates
+                fileWatcher.changes.collect {
+                    // Send to core if it could be converted to JSON
+                    log.info("YAML config file updated")
+                    val configFromYamlAsJson = configFromYamlAsJson
 
-            // watch yaml config file for updates
-            fileWatcher.changes.collect {
-                // Send to core if it could be converted to JSON
-                log.info("YAML config file updated")
-                val configFromYamlAsJson = configFromYamlAsJson
-
-                if (configFromYamlAsJson != null) {
-                    log.info("Sending updated configuration to SFC-Core")
-                    ch.send(configFromYamlAsJson)
+                    if (configFromYamlAsJson != null) {
+                        log.info("Sending updated configuration to SFC-Core")
+                        ch.send(configFromYamlAsJson)
+                    }
                 }
+            } catch (e: Exception) {
+                log.error("Error watching YAML config file, $e")
             }
+        }}catch (e : Exception){
+            log.error("Error watching YAML config file, $e")
         }
     }
 

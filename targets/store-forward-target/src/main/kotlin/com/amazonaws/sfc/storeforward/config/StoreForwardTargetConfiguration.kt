@@ -5,7 +5,10 @@
 
 package com.amazonaws.sfc.storeforward.config
 
-import com.amazonaws.sfc.config.*
+import com.amazonaws.sfc.config.ConfigurationClass
+import com.amazonaws.sfc.config.ConfigurationException
+import com.amazonaws.sfc.config.TargetConfiguration
+import com.amazonaws.sfc.config.Validate
 import com.amazonaws.sfc.metrics.MetricsSourceConfiguration
 import com.amazonaws.sfc.storeforward.config.StoreForwardWriterConfiguration.Companion.STORE_FORWARD
 import com.google.gson.annotations.SerializedName

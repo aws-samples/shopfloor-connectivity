@@ -1,4 +1,3 @@
-
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: MIT-0
 
@@ -56,7 +55,8 @@ class AwsSiteWiseTargetWriter(
     private val targetID: String,
     private val configReader: ConfigReader,
     private val logger: Logger,
-    resultHandler: TargetResultHandler?) : TargetWriter {
+    resultHandler: TargetResultHandler?
+) : TargetWriter {
 
     private val className = this::class.java.simpleName
 
@@ -65,8 +65,10 @@ class AwsSiteWiseTargetWriter(
     }
 
 
-    private val metricDimensions = mapOf(METRICS_DIMENSION_SOURCE to targetID,
-        MetricsCollector.METRICS_DIMENSION_TYPE to className)
+    private val metricDimensions = mapOf(
+        METRICS_DIMENSION_SOURCE to targetID,
+        MetricsCollector.METRICS_DIMENSION_TYPE to className
+    )
 
     private val scope = buildScope("Sitewise Target")
 
@@ -75,7 +77,8 @@ class AwsSiteWiseTargetWriter(
             configReader.getConfig<AwsSiteWiseWriterConfiguration>(),
             targetID,
             IoTSiteWiseClient.builder(),
-            logger)
+            logger
+        )
 
     private val targetResults = if (resultHandler != null) TargetResultBufferedHelper(targetID, resultHandler, logger) else null
     private val sitewiseClient: AwsSiteWiseClient
@@ -95,12 +98,14 @@ class AwsSiteWiseTargetWriter(
         val metricsConfiguration = config.targets[targetID]?.metrics ?: MetricsSourceConfiguration()
         if (config.isCollectingMetrics) {
             logger.metricsCollectorMethod = collectMetricsFromLogger
-            MetricsCollector(metricsConfig = config.metrics,
+            MetricsCollector(
+                metricsConfig = config.metrics,
                 metricsSourceName = targetID,
                 metricsSourceType = MetricsSourceType.TARGET_WRITER,
                 metricsSourceConfiguration = metricsConfiguration,
                 staticDimensions = TARGET_METRIC_DIMENSIONS,
-                logger = logger)
+                logger = logger
+            )
         } else null
     }
     private val collectMetricsFromLogger: MetricsCollectorMethod? =
@@ -131,20 +136,26 @@ class AwsSiteWiseTargetWriter(
         var timer = timerJob()
 
         while (isActive) {
-            select {
+            try {
+                select {
 
-                targetDataChannel.onReceive { targetData ->
-                    timer.cancel()
-                    handleTargetData(targetData)
+                    targetDataChannel.onReceive { targetData ->
+                        timer.cancel()
+                        handleTargetData(targetData)
+                    }
+
+                    timer.onJoin {
+                        log.trace("${(targetConfig.interval.inWholeMilliseconds)} milliseconds buffer interval reached, flushing buffer")
+                        flush()
+                    }
                 }
 
-                timer.onJoin {
-                    log.trace("${(targetConfig.interval.inWholeMilliseconds)} milliseconds buffer interval reached, flushing buffer")
-                    flush()
-                }
+                timer = timerJob()
+            }catch (e: CancellationException) {
+                log.info("Writer stopped")
+            }catch (e : Exception){
+                log.error("Error in writer, $e")
             }
-
-            timer = timerJob()
         }
     }
 
@@ -233,7 +244,8 @@ class AwsSiteWiseTargetWriter(
                 TimeInNanos.builder()
                     .timeInSeconds(timestamp.epochSecond)
                     .offsetInNanos(timestamp.nano)
-                    .build())
+                    .build()
+            )
             .value(buildValue(usedDataType, value))
             .build()
     }
@@ -391,18 +403,22 @@ class AwsSiteWiseTargetWriter(
         propertyValuesBuffer.clear()
     }
 
-    private fun createMetrics(adapterID: String,
-                              metricDimensions: MetricDimensions,
-                              request: BatchPutAssetPropertyValueRequest,
-                              writeDurationInMillis: Double) {
+    private fun createMetrics(
+        adapterID: String,
+        metricDimensions: MetricDimensions,
+        request: BatchPutAssetPropertyValueRequest,
+        writeDurationInMillis: Double
+    ) {
 
         runBlocking {
-            metricsCollector?.put(adapterID,
+            metricsCollector?.put(
+                adapterID,
                 metricsCollector?.buildValueDataPoint(adapterID, METRICS_WRITES, 1.0, MetricUnits.COUNT, metricDimensions),
                 metricsCollector?.buildValueDataPoint(adapterID, METRICS_MESSAGES, request.entries().size.toDouble(), MetricUnits.COUNT, metricDimensions),
                 metricsCollector?.buildValueDataPoint(adapterID, METRICS_WRITE_DURATION, writeDurationInMillis, MetricUnits.MILLISECONDS, metricDimensions),
                 metricsCollector?.buildValueDataPoint(adapterID, METRICS_WRITE_SUCCESS, 1.0, MetricUnits.COUNT, metricDimensions),
-                metricsCollector?.buildValueDataPoint(adapterID, METRICS_WRITE_SIZE, request.toString().length.toDouble(), MetricUnits.BYTES, metricDimensions))
+                metricsCollector?.buildValueDataPoint(adapterID, METRICS_WRITE_SIZE, request.toString().length.toDouble(), MetricUnits.BYTES, metricDimensions)
+            )
         }
     }
 
@@ -499,7 +515,12 @@ class AwsSiteWiseTargetWriter(
         @JvmStatic
         @Suppress("unused")
         fun newInstance(vararg createParameters: Any?) =
-            newInstance(createParameters[0] as ConfigReader, createParameters[1] as String, createParameters[2] as Logger, createParameters[3] as TargetResultHandler?)
+            newInstance(
+                createParameters[0] as ConfigReader,
+                createParameters[1] as String,
+                createParameters[2] as Logger,
+                createParameters[3] as TargetResultHandler?
+            )
 
         /**
          * Creates new instance of AWS SiteWise target from configuration.
@@ -615,7 +636,8 @@ class AwsSiteWiseTargetWriter(
         }
 
         val TARGET_METRIC_DIMENSIONS = mapOf(
-            MetricsCollector.METRICS_DIMENSION_SOURCE_CATEGORY to METRICS_DIMENSION_SOURCE_CATEGORY_TARGET)
+            MetricsCollector.METRICS_DIMENSION_SOURCE_CATEGORY to METRICS_DIMENSION_SOURCE_CATEGORY_TARGET
+        )
 
     }
 }

@@ -1,4 +1,3 @@
-
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: MIT-0
 
@@ -28,14 +27,17 @@ import com.amazonaws.sfc.metrics.MetricsValue
 import com.amazonaws.sfc.transformations.Transformation
 import com.amazonaws.sfc.transformations.TransformationException
 import com.amazonaws.sfc.transformations.invoke
+import com.amazonaws.sfc.util.WorkerQueue
 import com.amazonaws.sfc.util.buildScope
-import com.amazonaws.sfc.util.launch
 import kotlinx.coroutines.*
+import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ClosedSendChannelException
 import kotlinx.coroutines.channels.SendChannel
 import java.io.Closeable
 import kotlin.time.Duration
+import kotlin.time.DurationUnit
+import kotlin.time.toDuration
 
 
 /**
@@ -77,8 +79,12 @@ class ScheduleReader(
         transformations.isNotEmpty() || sources.values.any { s -> s.channels.any { c -> c.value.transformationID != null } }
 
     // coroutine for reading th data from the inputs
-    private val readerWorker: Job = scope.launch("Reader") {
-        readSourceValues()
+    private val readerWorker: Job = scope.launch(Dispatchers.IO + CoroutineName("Reader")) {
+        try {
+            readSourceValues()
+        } catch (e: Exception) {
+            logger.getCtxErrorLog(className, "readSourceValues")("Exception in readerWorker: ${e.message}")
+        }
     }
 
     /**
@@ -116,59 +122,88 @@ class ScheduleReader(
     // This function can return false to signal the reader it must stop reading data from the source.
     private suspend fun readSourceValues() = coroutineScope {
 
-        val readResultsChannel = Channel<Pair<String, ReadResult>>(readers.size)
+        val readResultsChannel = Channel<Pair<String, ReadResult?>>(1000, onBufferOverflow = BufferOverflow.SUSPEND)
 
-        launch("Combine Results") {
-            // Combined source results from all readers
-            val combinedReaderResults = mutableMapOf<String, SourceReadResult>()
-            val readersWithResults = mutableSetOf<String>()
+        val errorLog = logger.getCtxErrorLog(className, "readSourceValues")
+        val processing = launch(Dispatchers.IO + CoroutineName("Reader")) {
+            try {
+                // Combined source results from all readers
+                val combinedReaderResults = mutableMapOf<String, SourceReadResult>()
+                val readersDone = mutableSetOf<String>()
 
-            suspend fun processReceivedData() {
+                suspend fun processReceivedData() {
 
-                if (combinedReaderResults.isNotEmpty()) {
-                    processReceivedData(ReadResult(combinedReaderResults))
-                    combinedReaderResults.clear()
-                    readersWithResults.clear()
-                }
-            }
-
-            while (isActive) {
-                // read result from reader
-                val result = readResultsChannel.receive()
-
-                val protocolAdapterID = result.first
-                val readerResult = result.second
-
-                // reader already has result, process these first
-                if (protocolAdapterID in readersWithResults) {
-                    processReceivedData()
-                }
-                // store results from reader in combined results
-                readersWithResults.add(protocolAdapterID)
-                readerResult.forEach {
-                    combinedReaderResults[it.key] = it.value
-                }
-                // if data from all readers was received process the data
-                if (readersWithResults.size == readers.size) {
-                    processReceivedData()
-                }
-            }
-            processReceivedData()
-        }
-
-        val j = readers.map { (protocolID, reader) ->
-            launch("Send Read Results") {
-                reader.read { result ->
-                    runBlocking {
-                        readResultsChannel.send(protocolID to result)
+                    if (combinedReaderResults.isNotEmpty()) {
+                        processReceivedData(ReadResult(combinedReaderResults))
+                        combinedReaderResults.clear()
+                        readersDone.clear()
                     }
-                    readerWorker.isActive
                 }
+
+                while (isActive) {
+                    try {
+                        // read result from reader
+                        val result = readResultsChannel.receive()
+
+                        val protocolAdapterID = result.first
+                        val readerResult = result.second
+
+                        if (readerResult == null) {
+                            errorLog("No result from  $protocolAdapterID ")
+                            readersDone.add(protocolAdapterID)
+                            continue
+                        }
+
+                        // reader already has result, process these first
+                        if (protocolAdapterID in readersDone) {
+                            processReceivedData()
+                        }
+                        // store results from reader in combined results
+                        readersDone.add(protocolAdapterID)
+                        readerResult.forEach {
+                            combinedReaderResults[it.key] = it.value
+                        }
+                        // if data from all readers was received process the data
+                        if (readersDone.size == readers.size) {
+                            processReceivedData()
+                        }
+                    } catch (e: Exception) {
+                        errorLog("Error reading from reader, $e")
+                    }
+                }
+                processReceivedData()
+            } catch (e: Exception) {
+                errorLog("Exception in processing: ${e.message}")
             }
         }
 
-        j.forEach { it.join() }
+        val reader = launch {
+            while (isActive) {
+                try {
+                    val readerWorkerQueue =
+                        WorkerQueue<Pair<String, SourceValuesReader>, Unit>(workers = config.tuningConfiguration.maxConcurrentSourceReaders, capacity = readers.size, Dispatchers.IO) { (protocolID, reader) ->
+                            runBlocking {
+                                try {
+                                        reader.read { result ->
+                                            readResultsChannel.send(protocolID to result)
+                                            readerWorker.isActive
+                                        }
+                                } catch (e: Exception) {
+                                    errorLog("Error reading from $protocolID")
+                                }
+                            }
+                        }
 
+                    readers.forEach { (protocolID, sourceReader) ->
+                        readerWorkerQueue.submit(protocolID to sourceReader)
+                    }
+                    readerWorkerQueue.await(60.toDuration(DurationUnit.SECONDS))
+
+                } catch (e: Exception) {
+                    errorLog("Error reading from reader, $e")
+                }
+            }
+        }
     }
 
 
@@ -304,10 +339,12 @@ class ScheduleReader(
         }.toMap()
     }
 
-    private suspend fun transformValues(context: CoroutineScope,
-                                        sourceID: String,
-                                        channels: Map<String, ChannelConfiguration>,
-                                        result: Map.Entry<String, SourceReadSuccess>): SourceReadSuccess {
+    private suspend fun transformValues(
+        context: CoroutineScope,
+        sourceID: String,
+        channels: Map<String, ChannelConfiguration>,
+        result: Map.Entry<String, SourceReadSuccess>
+    ): SourceReadSuccess {
 
         // map channel values for this source
         val transformedValues = result.value.values.map { (channelID, channelReadValue) ->

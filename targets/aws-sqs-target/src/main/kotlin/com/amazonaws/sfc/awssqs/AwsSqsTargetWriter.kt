@@ -131,7 +131,7 @@ class AwsSqsTargetWriter(
 
 
     // coroutine that writes messages to queue
-    private val writer = scope.launch("Writer") {
+    private val writer = scope.launch(context = Dispatchers.IO, name = "Writer") {
         val log = logger.getCtxLoggers(AwsSqsTargetWriter::class.java.simpleName, "writer")
 
         log.info("AWS SQS writer for target \"$targetID\" sending to queue \"${targetConfig.queueUrl}\" in region ${targetConfig.region}")
@@ -139,19 +139,26 @@ class AwsSqsTargetWriter(
         var timer = timerJob()
 
         while (isActive) {
-            select {
+            try {
+                select {
 
-                targetDataChannel.onReceive { targetData ->
-                    timer.cancel()
-                    // flush buffer is the serial is already in the buffer
-                    handleTargetData(targetData)
+                    targetDataChannel.onReceive { targetData ->
+                        timer.cancel()
+                        // flush buffer is the serial is already in the buffer
+                        handleTargetData(targetData)
+                    }
+                    timer.onJoin {
+                        log.trace("${(targetConfig.interval.inWholeMilliseconds)} milliseconds buffer interval reached, flushing buffer")
+                        flush()
+                    }
                 }
-                timer.onJoin {
-                    log.trace("${(targetConfig.interval.inWholeMilliseconds)} milliseconds buffer interval reached, flushing buffer")
-                    flush()
-                }
+                timer = timerJob()
+
+            } catch (e: CancellationException) {
+                log.info("Writer stopped")
+            }catch (e : Exception){
+                log.error("Error in writer, $e")
             }
-            timer = timerJob()
         }
     }
 
@@ -181,7 +188,7 @@ class AwsSqsTargetWriter(
     }
 
     private fun CoroutineScope.timerJob(): Job {
-        return launch("Timeout timer") {
+        return launch(context = Dispatchers.IO, name = "Timeout timer") {
 
             return@launch try {
                 delay(targetConfig.interval)

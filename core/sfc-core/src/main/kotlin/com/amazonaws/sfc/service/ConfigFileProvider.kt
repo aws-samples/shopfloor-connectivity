@@ -93,28 +93,40 @@ class ConfigFileProvider(private val configFile: File, private val configVerific
             return@lazy null
         }
 
-        scope.launch(Dispatchers.Default) {
-            watchFile()
+        scope.launch(Dispatchers.IO) {
+            try {
+                watchFile()
+            }catch (e : Exception){
+                loggers.error("Error in configuration provider watch file, $e")
+            }
         }
 
-        scope.launch(Dispatchers.Default) {
-            watchEnvironment()
+        scope.launch(Dispatchers.IO) {
+            try {
+                watchEnvironment()
+            }catch (e : Exception){
+                loggers.error("Error in configuration provider watch environment, $e")
+            }
         }
 
-        scope.launch(Dispatchers.Default) {
+        scope.launch(Dispatchers.IO) {
             while (isActive) {
-                select {
-                    configChannel.onReceive { config ->
-                        customProvider = customConfigProvider(config, configVerificationKey)
-                        if (customProvider == null) {
-                            loggers.trace("Emitting configuration")
-                            ch.send(config)
+                try {
+                    select {
+                        configChannel.onReceive { config ->
+                            customProvider = customConfigProvider(config, configVerificationKey)
+                            if (customProvider == null) {
+                                loggers.trace("Emitting configuration")
+                                ch.send(config)
+                            }
+                        }
+                        customProvider?.configuration?.onReceive { customConfig ->
+                            loggers.trace("Emitting custom configuration")
+                            ch.send(customConfig)
                         }
                     }
-                    customProvider?.configuration?.onReceive { customConfig ->
-                        loggers.trace("Emitting custom configuration")
-                        ch.send(customConfig)
-                    }
+                }catch (e : Exception){
+                    loggers.error("Error in configuration provider, $e")
                 }
             }
         }

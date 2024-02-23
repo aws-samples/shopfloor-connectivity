@@ -1,4 +1,3 @@
-
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: MIT-0
 
@@ -63,12 +62,14 @@ import kotlin.time.DurationUnit
 import kotlin.time.toDuration
 
 
-open class OpcuaSource(private val sourceID: String,
-                       private val configuration: OpcuaConfiguration,
-                       private val clientHandleAtomic: AtomicInteger,
-                       private val logger: Logger,
-                       private val metricsCollector: MetricsCollector?,
-                       adapterMetricDimensions: MetricDimensions?) {
+open class OpcuaSource(
+    private val sourceID: String,
+    private val configuration: OpcuaConfiguration,
+    private val clientHandleAtomic: AtomicInteger,
+    private val logger: Logger,
+    private val metricsCollector: MetricsCollector?,
+    adapterMetricDimensions: MetricDimensions?
+) {
 
     // Working storage for nodes being read
     inner class OpcuaNodeData(
@@ -76,16 +77,19 @@ open class OpcuaSource(private val sourceID: String,
         val readValueId: ReadValueId,
         val eventType: String?,
         val nodeEventSampleInterval: Int?,
-        val eventProperties: List<Pair<NodeId, QualifiedName>>?) {
+        val eventProperties: List<Pair<NodeId, QualifiedName>>?
+    ) {
         val isDataNode = eventType.isNullOrBlank()
         val isEventNode = !isDataNode
 
     }
 
 
-    inner class SubscriptionListener(private val logger: Logger,
-                                     private val fnOnPublishFailure: (UaException?) -> Unit,
-                                     private val fnOnSubscriptionTransferFailed: (UaSubscription?, StatusCode?) -> Unit) : UaSubscriptionManager.SubscriptionListener {
+    inner class SubscriptionListener(
+        private val logger: Logger,
+        private val fnOnPublishFailure: (UaException?) -> Unit,
+        private val fnOnSubscriptionTransferFailed: (UaSubscription?, StatusCode?) -> Unit
+    ) : UaSubscriptionManager.SubscriptionListener {
         override fun onPublishFailure(exception: UaException?) {
             val log = logger.getCtxLoggers(this::class.java.name, "fnOnPublishFailure")
             try {
@@ -116,12 +120,15 @@ open class OpcuaSource(private val sourceID: String,
 
     // configuration for this source instance
     private val sourceConfiguration = configuration.sources[sourceID]
-                                      ?: throw OpcuaSourceException(sourceID, "Unknown source identifier, available sources are ${configuration.sources.keys}")
+        ?: throw OpcuaSourceException(sourceID, "Unknown source identifier, available sources are ${configuration.sources.keys}")
 
     // adapter configuration for source
     private val protocolAdapterID = sourceConfiguration.protocolAdapterID
     private val opcuaAdapterConfiguration = configuration.protocolAdapters[protocolAdapterID]
-                                            ?: throw OpcuaSourceException(sourceID, "Unknown protocol adapter identifier \"$protocolAdapterID\", available OPCUA protocol adapters are ${configuration.protocolAdapters}")
+        ?: throw OpcuaSourceException(
+            sourceID,
+            "Unknown protocol adapter identifier \"$protocolAdapterID\", available OPCUA protocol adapters are ${configuration.protocolAdapters}"
+        )
 
 
     private val dimensions = mapOf(MetricsCollector.METRICS_DIMENSION_SOURCE to "$protocolAdapterID:$sourceID") + adapterMetricDimensions as Map<String, String>
@@ -129,14 +136,20 @@ open class OpcuaSource(private val sourceID: String,
     // server from the adapter used by the source instance
     private val sourceAdapterOpcuaServerID = sourceConfiguration.sourceAdapterOpcuaServerID
     private val opcuaServerConfiguration = opcuaAdapterConfiguration.opcuaServers[sourceAdapterOpcuaServerID]
-                                           ?: throw OpcuaSourceException(sourceID, "Unknown protocol adapter OPCUA server identifier \"$sourceAdapterOpcuaServerID\", available servers for adapter \"$protocolAdapterID\" are ${opcuaAdapterConfiguration.opcuaServers.keys}")
+        ?: throw OpcuaSourceException(
+            sourceID,
+            "Unknown protocol adapter OPCUA server identifier \"$sourceAdapterOpcuaServerID\", available servers for adapter \"$protocolAdapterID\" are ${opcuaAdapterConfiguration.opcuaServers.keys}"
+        )
 
 
     // optional profile for a server which does contain additional event/alarm types
     private val serverProfile =
         if (opcuaServerConfiguration.serverProfile != null)
             opcuaAdapterConfiguration.serverProfiles[opcuaServerConfiguration.serverProfile]
-            ?: throw OpcuaSourceException(sourceID, "Unknown server profile \"${opcuaServerConfiguration.serverProfile}\", available profiles for adapter \"$protocolAdapterID\" are ${opcuaAdapterConfiguration.serverProfiles.keys}")
+                ?: throw OpcuaSourceException(
+                    sourceID,
+                    "Unknown server profile \"${opcuaServerConfiguration.serverProfile}\", available profiles for adapter \"$protocolAdapterID\" are ${opcuaAdapterConfiguration.serverProfiles.keys}"
+                )
         else OpcuaServerProfileConfiguration()
 
     // batch size for interacting with the server
@@ -192,11 +205,13 @@ open class OpcuaSource(private val sourceID: String,
                 logger.getCtxInfoLog(className, "getClient")("Reading from source \"$sourceID\" paused for $waitingPeriod until $pauseWaitUntil")
             } else {
                 if (_opcuaClient?.subscriptionManager?.subscriptions?.isNotEmpty() == true) {
-                    _opcuaClient!!.subscriptionManager.addSubscriptionListener(SubscriptionListener(logger,
-                        fnOnPublishFailure = { ex ->
-                            if (ex?.statusCode?.value == StatusCodes.Bad_ConnectionClosed) (resetClient(0))
-                        },
-                        fnOnSubscriptionTransferFailed = { _, _ -> resetClient(0) }))
+                    _opcuaClient!!.subscriptionManager.addSubscriptionListener(
+                        SubscriptionListener(logger,
+                            fnOnPublishFailure = { ex ->
+                                if (ex?.statusCode?.value == StatusCodes.Bad_ConnectionClosed) (resetClient(0))
+                            },
+                            fnOnSubscriptionTransferFailed = { _, _ -> resetClient(0) })
+                    )
                     connectionWatchdog = startConnectionWatchdog()
                 }
             }
@@ -222,9 +237,13 @@ open class OpcuaSource(private val sourceID: String,
                     // try to read server status
                     if (!isClosing) {
                         withTimeout(opcuaServerConfiguration.readTimeout) {
-                            _opcuaClient?.read(0.0, TimestampsToReturn.Source, mutableListOf(ReadValueId.builder()
-                                .nodeId(Identifiers.Server_ServerStatus_State)
-                                .build()))?.get()
+                            _opcuaClient?.read(
+                                0.0, TimestampsToReturn.Source, mutableListOf(
+                                    ReadValueId.builder()
+                                        .nodeId(Identifiers.Server_ServerStatus_State)
+                                        .build()
+                                )
+                            )?.get()
                         }
                         log.trace("Connection to server ${opcuaServerConfiguration.endPoint} for source \"${sourceID}\" checked")
                     }
@@ -295,9 +314,11 @@ open class OpcuaSource(private val sourceID: String,
 
         if (eventType.isNullOrBlank() || eventsHelper?.isKnownEvent(eventType) == true) eventType
         else {
-            logger.getCtxWarningLog(className, "checkNodeEventType")("Event type \"${nodeChannel.nodeEventType}\" for source \"$sourceID\" channel \"$channelID\" is not a valid event type, " +
-                                                                     "use the name or node id of any of the following valid event types $allValidTypesStr, " +
-                                                                     "adapter will collect events of any type and will use type \"$DEFAULT_EVENT_TYPE\" to collect the event properties")
+            logger.getCtxWarningLog(className, "checkNodeEventType")(
+                "Event type \"${nodeChannel.nodeEventType}\" for source \"$sourceID\" channel \"$channelID\" is not a valid event type, " +
+                        "use the name or node id of any of the following valid event types $allValidTypesStr, " +
+                        "adapter will collect events of any type and will use type \"$DEFAULT_EVENT_TYPE\" to collect the event properties"
+            )
             UNKNOWN_EVENT_TYPE
         }
 
@@ -312,7 +333,11 @@ open class OpcuaSource(private val sourceID: String,
 
     // coroutine handling changed data for subscriptions
     private val changedDataWorker = if (inSubscriptionReadingMode) sourceScope.launch("$sourceID Data Subscription Handler") {
-        onSubscribedNodeData()
+        try {
+            onSubscribedNodeData()
+        } catch (e: Exception) {
+            logger.getCtxErrorLog(className, "changedDataWorker")("Error while handling data changes for source \"$sourceID\", $e")
+        }
     } else null
 
     // *** Event Subscriptions ***
@@ -344,8 +369,8 @@ open class OpcuaSource(private val sourceID: String,
         val predicate =
             { e: EndpointDescription ->
                 securityPolicy.policy.uri == e.securityPolicyUri &&
-                Arrays.stream(e.userIdentityTokens)
-                    .anyMatch { p: UserTokenPolicy -> p.tokenType == userTokenType }
+                        Arrays.stream(e.userIdentityTokens)
+                            .anyMatch { p: UserTokenPolicy -> p.tokenType == userTokenType }
             }
 
 
@@ -399,9 +424,11 @@ open class OpcuaSource(private val sourceID: String,
     }
 
     private val messageLimits: MessageLimits
-        get() = MessageLimits(opcuaServerConfiguration.maxChunkSize,
+        get() = MessageLimits(
+            opcuaServerConfiguration.maxChunkSize,
             opcuaServerConfiguration.maxChunkCount,
-            opcuaServerConfiguration.maxMessageSize)
+            opcuaServerConfiguration.maxMessageSize
+        )
 
     private fun OpcUaClientConfigBuilder.setupClientSecurity(): OpcUaClientConfigBuilder {
 
@@ -473,22 +500,24 @@ open class OpcuaSource(private val sourceID: String,
 
         return sourceScope.launch("OPCUA Certificate Expiry Watcher", Dispatchers.IO) {
 
+            try {
+                while (true) {
 
-            while (true) {
-
-                val now = systemDateUTC()
-                if (certificate.notAfter <= now.add(Period.ofDays(expirationWarningPeriod * -1))) {
-                    val ctxLog = logger.getCtxLoggers(className, "Check Certificate Expiration")
-                    if (certificate.notAfter >= now) {
-                        ctxLog.error("Certificate expired at ${certificate.notAfter}")
-                    } else {
-                        val daysBetween = ChronoUnit.DAYS.between(certificate.notAfter.toInstant(), now.toInstant())
-                        ctxLog.warning("Certificate will expire in $daysBetween days at ${certificate.notAfter}")
+                    val now = systemDateUTC()
+                    if (certificate.notAfter <= now.add(Period.ofDays(expirationWarningPeriod * -1))) {
+                        val ctxLog = logger.getCtxLoggers(className, "Check Certificate Expiration")
+                        if (certificate.notAfter >= now) {
+                            ctxLog.error("Certificate expired at ${certificate.notAfter}")
+                        } else {
+                            val daysBetween = ChronoUnit.DAYS.between(certificate.notAfter.toInstant(), now.toInstant())
+                            ctxLog.warning("Certificate will expire in $daysBetween days at ${certificate.notAfter}")
+                        }
                     }
+                    DateTime.delayUntilNextMidnightUTC()
                 }
-                DateTime.delayUntilNextMidnightUTC()
+            } catch (e: Exception) {
+                logger.getCtxErrorLog(className, "startCertificateExpiryChecker")("Error while checking certificate expiration, $e")
             }
-
         }
 
     }
@@ -623,7 +652,7 @@ open class OpcuaSource(private val sourceID: String,
 
         val requests =
             dataNodeMonitoredItemRequests +
-            eventNodeMonitoredItemRequests
+                    eventNodeMonitoredItemRequests
 
         monitoredItems?.clear()
         monitoredItems = mutableListOf()
@@ -671,8 +700,10 @@ open class OpcuaSource(private val sourceID: String,
         if (!uaMonitoredItem.statusCode.isGood) {
             val errorLog = logger.getCtxErrorLog(className, "onMonitoredItemCreated")
             val channelID = clientHandlesForNodes[uaMonitoredItem.clientHandle.toInt()]?.channelID ?: "unknown channel"
-            errorLog("Error creating subscription for source \"${sourceID}\" " +
-                     "node \"$channelID\" " + "(${uaMonitoredItem.readValueId.nodeId}), ${uaMonitoredItem.statusCode} ")
+            errorLog(
+                "Error creating subscription for source \"${sourceID}\" " +
+                        "node \"$channelID\" " + "(${uaMonitoredItem.readValueId.nodeId}), ${uaMonitoredItem.statusCode} "
+            )
         } else {
 
             val nodeData = clientHandlesForNodes[uaMonitoredItem.clientHandle.toInt()]
@@ -689,13 +720,18 @@ open class OpcuaSource(private val sourceID: String,
     private fun onSubscribedDataReceived(): (context: SerializationContext, UaMonitoredItem, DataValue) -> Unit =
         { context: SerializationContext, item: UaMonitoredItem, value: DataValue ->
             sourceScope.launch("item: ${item.monitoredItemId}") {
-                if ((value.statusCode ?: StatusCode.GOOD).isGood) {
-                    val nativeValue = OpcuaDataTypesConverter(context).asNativeValue(value.value)
-                    dataValueChangeChannel?.send(item to ChannelReadValue(nativeValue, value.sourceTime?.javaInstant))
-                } else {
-                    val nodeChannelID = clientHandlesForNodes[item.clientHandle.toInt()]?.channelID ?: "unknown channel"
+                try {
+                    if ((value.statusCode ?: StatusCode.GOOD).isGood) {
+                        val nativeValue = OpcuaDataTypesConverter(context).asNativeValue(value.value)
+                        dataValueChangeChannel?.send(item to ChannelReadValue(nativeValue, value.sourceTime?.javaInstant))
+                    } else {
+                        val nodeChannelID = clientHandlesForNodes[item.clientHandle.toInt()]?.channelID ?: "unknown channel"
+                        val errorLog = logger.getCtxErrorLog(className, "onSubscribedDataReceived")
+                        errorLog("Received bad subscription data source \"$sourceID\", node \"$nodeChannelID\" (${item.readValueId}), ${value.statusCode}")
+                    }
+                } catch (e: Exception) {
                     val errorLog = logger.getCtxErrorLog(className, "onSubscribedDataReceived")
-                    errorLog("Received bad subscription data source \"$sourceID\", node \"$nodeChannelID\" (${item.readValueId}), ${value.statusCode}")
+                    errorLog("Error processing subscription data source \"$sourceID\", node \"${item.readValueId}\" (${item.statusCode}), $e")
                 }
             }
         }
@@ -703,20 +739,27 @@ open class OpcuaSource(private val sourceID: String,
     private fun onMonitoredEventReceived(): (context: SerializationContext, item: UaMonitoredItem, eventValues: Array<Variant>) -> Unit =
         { context, item, eventPropertyVariantValues ->
             sourceScope.launch("item: ${item.monitoredItemId}") {
-                val node = clientHandlesForNodes[item.clientHandle.toInt()]
-                if ((item.statusCode ?: StatusCode.GOOD).isGood) {
-                    val properties = node?.eventProperties ?: eventsHelper?.findEvent(Identifiers.BaseEventType)?.properties
-                    if (properties != null) {
-                        val propertiesValuesMap = eventsHelper?.variantPropertiesToMap(eventPropertyVariantValues, properties, context)
-                        if (propertiesValuesMap != null) receivedEventsChannel?.send(item to propertiesValuesMap)
+                try {
+                    val node = clientHandlesForNodes[item.clientHandle.toInt()]
+                    if ((item.statusCode ?: StatusCode.GOOD).isGood) {
+                        val properties = node?.eventProperties ?: eventsHelper?.findEvent(Identifiers.BaseEventType)?.properties
+                        if (properties != null) {
+                            val propertiesValuesMap = eventsHelper?.variantPropertiesToMap(eventPropertyVariantValues, properties, context)
+                            if (propertiesValuesMap != null) receivedEventsChannel?.send(item to propertiesValuesMap)
+                        } else {
+                            logger.getCtxErrorLog(className, "onMonitoredEvent")
+                        }
                     } else {
-                        logger.getCtxErrorLog(className, "onMonitoredEvent")
+                        val nodeChannelID = node?.channelID ?: "unknown channel"
+                        val errorLog = logger.getCtxErrorLog(className, "onMonitoredEventReceived")
+                        errorLog("Error status on monitored event item for source \"$sourceID\", node \"$nodeChannelID\" (${item.readValueId}), ${item.statusCode}")
                     }
-                } else {
-                    val nodeChannelID = node?.channelID ?: "unknown channel"
+
+                } catch (e: Exception) {
                     val errorLog = logger.getCtxErrorLog(className, "onMonitoredEventReceived")
-                    errorLog("Error status on monitored event item for source \"$sourceID\", node \"$nodeChannelID\" (${item.readValueId}), ${item.statusCode}")
+                    errorLog("Error processing monitored event item for source \"$sourceID\", node \"${item.readValueId}\" (${item.statusCode}), $e")
                 }
+
             }
         }
 
@@ -819,7 +862,8 @@ open class OpcuaSource(private val sourceID: String,
     private fun processGoodValue(
         channelID: String,
         value: ChannelReadValue,
-        serverTimestamp: Instant?): ChannelReadValue {
+        serverTimestamp: Instant?
+    ): ChannelReadValue {
 
         // don't set value timestamp if it is equal to server timestamp to reduce IPC data flow, the receiving side will add the timestamps
         val valueTimestamp = if (value.timestamp != serverTimestamp) value.timestamp else null
@@ -901,14 +945,30 @@ open class OpcuaSource(private val sourceID: String,
     }
 
 
-    private suspend fun createMetrics(protocolAdapterID: String,
-                                      readDurationInMillis: Double,
-                                      values: MutableMap<String, ChannelReadValue>) {
-        metricsCollector?.put(protocolAdapterID,
+    private suspend fun createMetrics(
+        protocolAdapterID: String,
+        readDurationInMillis: Double,
+        values: MutableMap<String, ChannelReadValue>
+    ) {
+        metricsCollector?.put(
+            protocolAdapterID,
             metricsCollector.buildValueDataPoint(protocolAdapterID, MetricsCollector.METRICS_READS, 1.0, MetricUnits.COUNT, dimensions),
-            metricsCollector.buildValueDataPoint(protocolAdapterID, MetricsCollector.METRICS_READ_DURATION, readDurationInMillis, MetricUnits.MILLISECONDS, dimensions),
-            metricsCollector.buildValueDataPoint(protocolAdapterID, MetricsCollector.METRICS_VALUES_READ, values.size.toDouble(), MetricUnits.COUNT, dimensions),
-            metricsCollector.buildValueDataPoint(protocolAdapterID, MetricsCollector.METRICS_READ_SUCCESS, 1.0, MetricUnits.COUNT, dimensions))
+            metricsCollector.buildValueDataPoint(
+                protocolAdapterID,
+                MetricsCollector.METRICS_READ_DURATION,
+                readDurationInMillis,
+                MetricUnits.MILLISECONDS,
+                dimensions
+            ),
+            metricsCollector.buildValueDataPoint(
+                protocolAdapterID,
+                MetricsCollector.METRICS_VALUES_READ,
+                values.size.toDouble(),
+                MetricUnits.COUNT,
+                dimensions
+            ),
+            metricsCollector.buildValueDataPoint(protocolAdapterID, MetricsCollector.METRICS_READ_SUCCESS, 1.0, MetricUnits.COUNT, dimensions)
+        )
     }
 
     private suspend fun serverReadsInSubscriptionMode(channels: List<String>?) = dataValueChangesStore?.read(channels) ?: emptySequence()

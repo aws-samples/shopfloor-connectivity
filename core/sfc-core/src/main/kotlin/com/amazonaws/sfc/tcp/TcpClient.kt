@@ -3,8 +3,8 @@
 package com.amazonaws.sfc.tcp
 
 import com.amazonaws.sfc.config.TcpConfiguration
-import com.amazonaws.sfc.log.Logger
 import com.amazonaws.sfc.log.LogLevel
+import com.amazonaws.sfc.log.Logger
 import com.amazonaws.sfc.util.buildScope
 import com.amazonaws.sfc.util.launch
 import kotlinx.coroutines.*
@@ -68,7 +68,7 @@ open class TcpClient(private val config: TcpConfiguration, readBufferSize : Int 
     /**
      * Release exclusive access to transport
      */
-    suspend fun unlock() = transportLock.unlock()
+    fun unlock() = transportLock.unlock()
 
     // mutex to prevent simultaneous connection attempts
     private val clientConnectMutex = Mutex()
@@ -125,32 +125,44 @@ open class TcpClient(private val config: TcpConfiguration, readBufferSize : Int 
             }
 
             coroutineScope {
-                val connectJob = launch("Connect") {
+                val connectJob = launch( context =Dispatchers.IO, name = "Connect") {
+                    try {
 
-                    // receives message when connected
-                    val connectedChannel = Channel<Any?>()
+                        // receives message when connected
+                        val connectedChannel = Channel<Any?>()
 
-                    launch("Setup Connection") {
-                        setupConnection(logs.trace, connectedChannel)
-                    }
-
-                    launch("Timeout") {
-                        // signals when connecting takes too long (calling Socket() withing withTimeout is not reliable as it runs on IO dispatcher)
-                        delay(config.connectTimeout.inWholeMilliseconds)
-                        connectedChannel.send(null)
-                    }
-
-                    when (val result = connectedChannel.receive()) {
-                        is Socket -> {
-                            logs.info("Connected to ${config.address}:${config.port}")
-                            // Rest so we can reconnect without delay after a successful connection
-                            lastConnectAttempt = 0L
+                        launch(context = Dispatchers.IO, name = "Setup Connection") {
+                            try {
+                                setupConnection(logs.trace, connectedChannel)
+                            }catch(e : Exception){
+                                logs.error("Error setting up connection, ${e.message}")
+                            }
                         }
 
-                        is Throwable -> error("Error connecting to ${config.address}:${config.port}, ${result.message}")
-                        else -> error("Timeout connecting to ${config.address}:${config.port}")
+                        launch(context = Dispatchers.IO, name = "Timeout") {
+                            try {
+                                // signals when connecting takes too long (calling Socket() withing withTimeout is not reliable as it runs on IO dispatcher)
+                                delay(config.connectTimeout.inWholeMilliseconds)
+                                connectedChannel.send(null)
+                            }catch (e : Exception){
+                                logs.error("Error setting up connection timeout, ${e.message}")
+                            }
+                        }
+
+                        when (val result = connectedChannel.receive()) {
+                            is Socket -> {
+                                logs.info("Connected to ${config.address}:${config.port}")
+                                // Rest so we can reconnect without delay after a successful connection
+                                lastConnectAttempt = 0L
+                            }
+
+                            is Throwable -> error("Error connecting to ${config.address}:${config.port}, ${result.message}")
+                            else -> error("Timeout connecting to ${config.address}:${config.port}")
+                        }
+                        coroutineContext.cancelChildren()
+                    } catch (e : Exception){
+                        logs.error("Error connecting to ${config.address}:${config.port}, ${e.message}")
                     }
-                    coroutineContext.cancelChildren()
                 }
                 connectJob.join()
             }
@@ -192,12 +204,20 @@ open class TcpClient(private val config: TcpConfiguration, readBufferSize : Int 
      */
     fun start() {
 
-        receiver = scope.launch("TCP Receiver") {
-            receiveData()
+        receiver = scope.launch(context = Dispatchers.IO, name = "TCP Receiver") {
+            try {
+                receiveData()
+            }catch(e : Exception){
+                logger.getCtxErrorLog(className,"receiver")("Error receiving data, ${e.message}")
+            }
         }
 
-        transmitter = scope.launch("TCP Transmitter") {
-            transmitData()
+        transmitter = scope.launch(context = Dispatchers.IO, name = "TCP Transmitter") {
+            try {
+                transmitData()
+            }catch(e : Exception){
+                logger.getCtxErrorLog(className, "transmitter")("Error transmitting data, ${e.message}")
+            }
         }
     }
 

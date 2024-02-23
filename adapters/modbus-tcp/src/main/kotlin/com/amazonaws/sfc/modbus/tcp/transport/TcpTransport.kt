@@ -1,4 +1,3 @@
-
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: MIT-0
 
@@ -33,11 +32,13 @@ import kotlin.time.toDuration
 /**
  * TCP data-transport to send/receive data over TCP
  */
-class TcpTransport(private val config: ModbusTcpDeviceConfiguration,
-                   private val adapterID: String,
-                   private val metricDimensions: MetricDimensions,
-                   private val metrics: MetricsCollector?,
-                   val logger: Logger) : ModbusTransport {
+class TcpTransport(
+    private val config: ModbusTcpDeviceConfiguration,
+    private val adapterID: String,
+    private val metricDimensions: MetricDimensions,
+    private val metrics: MetricsCollector?,
+    val logger: Logger
+) : ModbusTransport {
 
     private val className = this::class.java.simpleName
 
@@ -138,29 +139,36 @@ class TcpTransport(private val config: ModbusTcpDeviceConfiguration,
 
             coroutineScope {
                 val connectJob = launch("Connect") {
+                    try {
+                        // receives message when connected
+                        val connectedChannel = Channel<Any?>()
 
-                    // receives message when connected
-                    val connectedChannel = Channel<Any?>()
-
-                    launch("Setup Connection") {
-                        setupConnection(log.trace, connectedChannel)
-                    }
-
-                    launch("Timeout") {
-                        // signals when connecting takes too long (calling Socket() withing withTimeout is not reliable as it runs on IO dispatcher)
-                        delay(config.connectTimeout.inWholeMilliseconds)
-                        connectedChannel.send(null)
-                    }
-
-                    when (val result = connectedChannel.receive()) {
-                        is Socket -> {
-                            log.info("Connected to ${config.address}:${config.port}")
+                        launch("Setup Connection") {
+                            try {
+                                setupConnection(log.trace, connectedChannel)
+                            }catch (e: SocketException){
+                                log.error("SocketException: ${e.message}")
+                            }
                         }
 
-                        is Throwable -> log.error("Error connecting to ${config.address}:${config.port}, ${result.message}")
-                        else -> log.error("Timeout connecting to ${config.address}:${config.port}")
+                        launch("Timeout") {
+                            // signals when connecting takes too long (calling Socket() withing withTimeout is not reliable as it runs on IO dispatcher)
+                            delay(config.connectTimeout.inWholeMilliseconds)
+                            connectedChannel.send(null)
+                        }
+
+                        when (val result = connectedChannel.receive()) {
+                            is Socket -> {
+                                log.info("Connected to ${config.address}:${config.port}")
+                            }
+
+                            is Throwable -> log.error("Error connecting to ${config.address}:${config.port}, ${result.message}")
+                            else -> log.error("Timeout connecting to ${config.address}:${config.port}")
+                        }
+                        coroutineContext.cancelChildren()
+                    } catch (e: Exception) {
+                        log.error("Error connecting to ${config.address}:${config.port}, ${e.message}")
                     }
-                    coroutineContext.cancelChildren()
                 }
                 connectJob.join()
             }
@@ -173,14 +181,16 @@ class TcpTransport(private val config: ModbusTcpDeviceConfiguration,
 
     private suspend fun createConnectionMetrics() {
 
-        metrics?.put(adapterID,
+        metrics?.put(
+            adapterID,
             if (isConnected)
                 MetricsCollector.METRICS_CONNECTIONS
             else
                 MetricsCollector.METRICS_CONNECTION_ERRORS,
             1.0,
             MetricUnits.COUNT,
-            metricDimensions)
+            metricDimensions
+        )
     }
 
     // setup socket connection
@@ -218,11 +228,19 @@ class TcpTransport(private val config: ModbusTcpDeviceConfiguration,
     fun start() {
 
         receiver = scope.launch("TCP Receiver") {
-            receiveData()
+            try {
+                receiveData()
+            }catch (e: Exception){
+                logger.getCtxErrorLog(className, "receiver")("Error receiving data, ${e.message}")
+            }
         }
 
         transmitter = scope.launch("TCP Transmitter") {
-            transmitData()
+            try {
+                transmitData()
+            }catch (e: Exception){
+                logger.getCtxErrorLog(className, "transmitter")("Error transmitting data, ${e.message}")
+            }
         }
     }
 

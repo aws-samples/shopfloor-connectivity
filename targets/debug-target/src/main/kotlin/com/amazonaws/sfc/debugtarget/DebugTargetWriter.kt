@@ -5,7 +5,6 @@
 
 package com.amazonaws.sfc.debugtarget
 
-import com.amazonaws.sfc.debugtarget.BuildConfig
 import com.amazonaws.sfc.config.ConfigReader
 import com.amazonaws.sfc.config.TargetConfiguration
 import com.amazonaws.sfc.data.*
@@ -105,7 +104,7 @@ class DebugTargetWriter(private val targetID: String,
         val data = buildPayload(targetData)
         val start = DateTime.systemDateTime().toEpochMilli()
 
-        output(data.toString())
+        output(data)
         val writeDurationInMillis = (DateTime.systemDateTime().toEpochMilli() - start).toDouble()
         createMetrics(targetID, metricDimensions, data, writeDurationInMillis)
 

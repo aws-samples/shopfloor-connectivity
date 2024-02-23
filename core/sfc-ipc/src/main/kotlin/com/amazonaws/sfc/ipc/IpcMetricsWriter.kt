@@ -47,7 +47,7 @@ class IpcMetricsWriter(
     private val serverAddress = serverConfig.address
     private val serverPort = serverConfig.port
 
-    val scope = buildScope("IPC Metrics Writer")
+    val scope = buildScope("IPC Metrics Writer", dispatcher = Dispatchers.IO)
 
     private var initialized = false
 
@@ -59,7 +59,11 @@ class IpcMetricsWriter(
 
     // Coroutine that writes the data to the service
     private val writerWorker = scope.launch(buildContext("writer", scope)) {
-        writer()
+        try {
+            writer()
+        }catch (e : Exception){
+            logger.getCtxErrorLog(className, "writer")("Error writing metrics to IPC server, $e")
+        }
     }
 
     private val configuration by lazy { configReader.getConfig<ServiceConfiguration>() }

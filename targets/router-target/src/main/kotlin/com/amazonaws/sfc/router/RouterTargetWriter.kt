@@ -1,4 +1,3 @@
-
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: MIT-0
 
@@ -27,14 +26,18 @@ import com.amazonaws.sfc.util.launch
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 
-class RouterTargetWriter(targetID: String,
-                         configReader: ConfigReader,
-                         private val logger: Logger,
-                         resultHandler: TargetResultHandler?) :
-        ForwardingTargetWriter(targetID = targetID,
-            configReader = configReader,
-            resultHandler = resultHandler,
-            logger = logger) {
+class RouterTargetWriter(
+    targetID: String,
+    configReader: ConfigReader,
+    private val logger: Logger,
+    resultHandler: TargetResultHandler?
+) :
+    ForwardingTargetWriter(
+        targetID = targetID,
+        configReader = configReader,
+        resultHandler = resultHandler,
+        logger = logger
+    ) {
 
     private val className = this::class.java.simpleName
 
@@ -54,7 +57,7 @@ class RouterTargetWriter(targetID: String,
 
     private val routingTargetConfiguration by lazy {
         routerWriterConfiguration.routerTargets[targetID]
-        ?: throw Exception("Configuration for target \"$targetID\" does not exist, configured routing targets are ${routerWriterConfiguration.routerTargets.keys}")
+            ?: throw Exception("Configuration for target \"$targetID\" does not exist, configured routing targets are ${routerWriterConfiguration.routerTargets.keys}")
     }
 
     private val primaryTargetKeys by lazy { routingTargetConfiguration.routes.keys }
@@ -72,9 +75,11 @@ class RouterTargetWriter(targetID: String,
     }
 
     private val forwardingTargetResultHelper =
-        TargetResultHelper(targetID = targetID,
+        TargetResultHelper(
+            targetID = targetID,
             targetResultHandler = resultHandler,
-            logger = logger)
+            logger = logger
+        )
 
 
     override val metricsProvider: MetricsProvider? by lazy {
@@ -160,11 +165,13 @@ class RouterTargetWriter(targetID: String,
         return if (routerWriterConfiguration.isCollectingMetrics || isAnyPrimaryTargetProducingMetricsData) {
 
             logger.metricsCollectorMethod = collectMetricsFromLoggerMethod
-            MetricsCollector(metricsConfig = routerWriterConfiguration.metrics,
+            MetricsCollector(
+                metricsConfig = routerWriterConfiguration.metrics,
                 metricsSourceType = MetricsSourceType.TARGET_WRITER,
                 metricsSourceConfigurations = metricsConfigurations,
                 staticDimensions = TARGET_METRIC_DIMENSIONS,
-                logger = logger)
+                logger = logger
+            )
         } else null
     }
 
@@ -215,8 +222,12 @@ class RouterTargetWriter(targetID: String,
     private fun launchResultHandlerWorker() = targetScope.launch("Result processor for target $targetID") {
 
         while (isActive) {
-            val resultData = resultChannel.receive()
-            handleTargetResults(resultData)
+            try {
+                val resultData = resultChannel.receive()
+                handleTargetResults(resultData)
+            } catch (e: Exception) {
+                logger.getCtxErrorLog(className, "launchResultHandlerWorker")("Error handling result, $e")
+            }
         }
     }
 
@@ -232,8 +243,20 @@ class RouterTargetWriter(targetID: String,
 
             val scope = buildScope("handleTargetResults")
             listOf(
-                scope.launch { handleSuccessResults(routesForPrimaryTarget?.successTargetID, resultData) },
-                scope.launch { handleErrorResults(routesForPrimaryTarget?.alternateTargetID, resultData) }
+                scope.launch {
+                    try {
+                        handleSuccessResults(routesForPrimaryTarget?.successTargetID, resultData)
+                    } catch (e: Exception) {
+                        logger.getCtxErrorLog(className, "handleTargetResults")("Error handling success results, $e")
+                    }
+                },
+                scope.launch {
+                    try {
+                        handleErrorResults(routesForPrimaryTarget?.alternateTargetID, resultData)
+                    } catch (e: Exception) {
+                        logger.getCtxErrorLog(className, "handleTargetResults")("Error handling error results, $e")
+                    }
+                }
             ).joinAll()
         }
     }
@@ -258,8 +281,10 @@ class RouterTargetWriter(targetID: String,
     private suspend fun forwardTargetData(targetID: String, targetData: TargetData): Boolean {
 
         val one = MetricsValue(1)
-        val metrics = mutableListOf(MetricsValueParam(METRICS_WRITES, one, MetricUnits.COUNT),
-            MetricsValueParam(METRICS_MESSAGES, one, MetricUnits.COUNT))
+        val metrics = mutableListOf(
+            MetricsValueParam(METRICS_WRITES, one, MetricUnits.COUNT),
+            MetricsValueParam(METRICS_MESSAGES, one, MetricUnits.COUNT)
+        )
 
         return if (writeDataToTarget(targetID, targetData)) {
             metrics.add(MetricsValueParam(METRICS_WRITE_SUCCESS, one, MetricUnits.COUNT))
@@ -324,13 +349,19 @@ class RouterTargetWriter(targetID: String,
         const val TIMEOUT_TARGET_FORWARD = 10000L
 
         val TARGET_METRIC_DIMENSIONS = mapOf(
-            MetricsCollector.METRICS_DIMENSION_SOURCE_CATEGORY to MetricsCollector.METRICS_DIMENSION_SOURCE_CATEGORY_TARGET)
+            MetricsCollector.METRICS_DIMENSION_SOURCE_CATEGORY to MetricsCollector.METRICS_DIMENSION_SOURCE_CATEGORY_TARGET
+        )
 
 
         @JvmStatic
         @Suppress("unused")
         fun newInstance(vararg createParameters: Any?) =
-            newInstance(createParameters[0] as ConfigReader, createParameters[1] as String, createParameters[2] as Logger, createParameters[3] as TargetResultHandler?)
+            newInstance(
+                createParameters[0] as ConfigReader,
+                createParameters[1] as String,
+                createParameters[2] as Logger,
+                createParameters[3] as TargetResultHandler?
+            )
 
 
         @JvmStatic

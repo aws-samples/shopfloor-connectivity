@@ -119,7 +119,7 @@ class AwsTimestreamTargetWriter(
 
 
     // coroutine that writes messages to queue
-    private val writer = scope.launch("Writer") {
+    private val writer = scope.launch(context = Dispatchers.IO, name = "Writer") {
 
         val log = logger.getCtxLoggers(AwsTimestreamTargetWriter::class.java.simpleName, "writer")
 
@@ -128,17 +128,21 @@ class AwsTimestreamTargetWriter(
         var timer = timerJob()
 
         while (isActive) {
-            select<Unit> {
-                targetDataChannel.onReceive { targetData ->
-                    timer.cancel()
-                    handleTargetData(targetData)
+            try {
+                select {
+                    targetDataChannel.onReceive { targetData ->
+                        timer.cancel()
+                        handleTargetData(targetData)
+                    }
+                    timer.onJoin {
+                        log.trace("${(targetConfig.interval.inWholeMilliseconds)} milliseconds buffer interval reached, flushing buffer")
+                        flush()
+                    }
                 }
-                timer.onJoin {
-                    log.trace("${(targetConfig.interval.inWholeMilliseconds)} milliseconds buffer interval reached, flushing buffer")
-                    flush()
-                }
+                timer = timerJob()
+            } catch (e : Exception){
+                log.error("Error writing to AWS Timestream, $e")
             }
-            timer = timerJob()
         }
 
     }

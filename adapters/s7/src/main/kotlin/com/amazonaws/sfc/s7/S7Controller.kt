@@ -225,6 +225,7 @@ class S7Controller(
         metrics: MetricsCollector?
     ): Map<String, Any?> = coroutineScope {
         // (re)connect
+        try{
         connect(metricDimensions, metrics)
         var data: Map<String, Any?>
         // result contains one or more PlcRead responses
@@ -248,7 +249,10 @@ class S7Controller(
                 MetricsValue(duration.inWholeMilliseconds.toDouble())
             )
         )
-        return@coroutineScope data
+        return@coroutineScope data}catch (e : Exception){
+            logger.getCtxErrorLog(className, "read")("Error reading from source \"$sourceID\", $e")
+            throw e
+        }
     }
 
     private suspend fun executeReadRequests(fieldChannels: Map<String, S7FieldChannelConfiguration>) = coroutineScope {
