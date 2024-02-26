@@ -140,7 +140,8 @@ class S7Configuration : SourceAdapterBaseConfiguration() {
                 adapterServers = adapterServers,
                 adapterTypes = adapterTypes,
                 awsIotCredentialProviderClients = awsIotCredentialProviderClients,
-                secretsManagerConfiguration = secretsManager
+                secretsManagerConfiguration = secretsManager,
+                tuningConfiguration = TuningConfiguration()
             )
             with(instance) {
                 _sources = sources

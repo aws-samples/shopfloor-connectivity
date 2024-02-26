@@ -136,7 +136,8 @@ open class ServiceConfiguration : BaseConfiguration() {
                                                                                            adapterServers: Map<String, ServerConfiguration>,
                                                                                            adapterTypes: Map<String, InProcessConfiguration>,
                                                                                            awsIotCredentialProviderClients: Map<String, AwsIotCredentialProviderClientConfiguration>,
-                                                                                           secretsManagerConfiguration: SecretsManagerConfiguration?): T {
+                                                                                           secretsManagerConfiguration: SecretsManagerConfiguration?,
+                                                                                           tuningConfiguration: TuningConfiguration = TuningConfiguration()): T {
 
             val instance = createBaseConfiguration<T>(
                 name = name,
@@ -152,7 +153,8 @@ open class ServiceConfiguration : BaseConfiguration() {
                 adapterServers = adapterServers,
                 adapterTypes = adapterTypes,
                 awsIotCredentialProviderClients = awsIotCredentialProviderClients,
-                secretsManagerConfiguration = secretsManagerConfiguration)
+                secretsManagerConfiguration = secretsManagerConfiguration,
+                tuningConfiguration = tuningConfiguration)
 
             with(instance) {
                 _targets = targets

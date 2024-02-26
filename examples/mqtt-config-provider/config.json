@@ -1,0 +1,11 @@
+{
+  "LogLevel": "Info",
+  "ConfigProvider": {
+    "JarFiles": ["examples/mqtt-config-provider/build/libs"],
+    "FactoryClassName": "com.amazonaws.sfc.config.MqttConfigProvider"
+  },
+  "LocalConfigFile" : "local-config.json",
+  "Port" : 1883,
+  "EndPoint" : "broker.emqx.io",
+  "TopicName" : "sfc-topic"
+}

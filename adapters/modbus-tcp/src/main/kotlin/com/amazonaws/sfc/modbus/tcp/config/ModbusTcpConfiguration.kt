@@ -149,7 +149,8 @@ open class ModbusTcpConfiguration : ModbusConfiguration() {
                 adapterServers = adapterServers,
                 adapterTypes = adapterTypes,
                 awsIotCredentialProviderClients = awsIotCredentialProviderClients,
-                secretsManagerConfiguration = secretsManagerConfiguration)
+                secretsManagerConfiguration = secretsManagerConfiguration,
+                tuningConfiguration = TuningConfiguration())
 
             with(instance) {
                 _protocolAdapters = protocolAdapters

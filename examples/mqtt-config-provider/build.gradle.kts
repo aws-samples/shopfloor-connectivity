@@ -7,8 +7,6 @@ version = "1.0.0"
 val sfcCoreVersion = "1.0.0"
 val kotlinCoroutinesVersion = "1.6.2"
 val kotlinVersion = "1.9.0"
-val pahoVersion = "1.2.5"
-
 
 
 plugins {
@@ -27,10 +25,7 @@ tasks.withType<ShadowJar> {
 }
 
 dependencies {
-
     implementation(project(":core:sfc-core"))
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinCoroutinesVersion")
-    implementation("org.eclipse.paho:org.eclipse.paho.client.mqttv3:$pahoVersion")
-
 }
 

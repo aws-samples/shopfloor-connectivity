@@ -65,7 +65,8 @@ class AwsLambdaWriterConfiguration : AwsServiceTargetsConfig<AwsLambdaTargetConf
                 adapterServers = adapterServers,
                 adapterTypes = adapterTypes,
                 awsIotCredentialProviderClients = awsIotCredentialProviderClients,
-                secretsManagerConfiguration = secretsManagerConfiguration)
+                secretsManagerConfiguration = secretsManagerConfiguration,
+                tuningConfiguration = TuningConfiguration())
 
             instance._targets = targets
             return instance

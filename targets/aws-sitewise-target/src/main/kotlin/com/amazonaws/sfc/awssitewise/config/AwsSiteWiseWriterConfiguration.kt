@@ -75,7 +75,8 @@ class AwsSiteWiseWriterConfiguration : AwsServiceTargetsConfig<AwsSiteWiseTarget
                 adapterServers = adapterServers,
                 adapterTypes = adapterTypes,
                 awsIotCredentialProviderClients = awsIotCredentialProviderClients,
-                secretsManagerConfiguration = secretsManagerConfiguration)
+                secretsManagerConfiguration = secretsManagerConfiguration,
+                tuningConfiguration = TuningConfiguration())
 
             instance._targets = targets
             return instance

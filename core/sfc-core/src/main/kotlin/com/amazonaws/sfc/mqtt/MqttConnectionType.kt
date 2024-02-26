@@ -1,8 +1,8 @@
-package com.amazonaws.sfc.config
+package com.amazonaws.sfc.mqtt
 
 import com.google.gson.annotations.SerializedName
 
-enum class Connection {
+enum class MqttConnectionType {
 
     @SerializedName("Plaintext")
     PLAINTEXT,

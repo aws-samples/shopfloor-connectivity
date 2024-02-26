@@ -123,7 +123,8 @@ class MqttConfiguration : SourceAdapterBaseConfiguration() {
                 adapterServers = adapterServers,
                 adapterTypes = adapterTypes,
                 awsIotCredentialProviderClients = awsIotCredentialProviderClients,
-                secretsManagerConfiguration = secretsManagerConfiguration)
+                secretsManagerConfiguration = secretsManagerConfiguration,
+                tuningConfiguration = TuningConfiguration())
 
             with(instance) {
                 _sources = sources
