@@ -100,7 +100,7 @@ class OpcuaDiscoverySource(
             return emptyList()
         }
 
-        if (nodes?.size != 0 )log.trace("Read ${nodes?.size} nodes for ${nodeID.toParseableString()}")
+        if (nodes?.size != 0) log.trace("Read ${nodes?.size} nodes for ${nodeID.toParseableString()}")
 
         return sequence {
             nodes?.forEach { node: UaNode ->
@@ -119,19 +119,25 @@ class OpcuaDiscoverySource(
                         val eventTypeName = getEventType(client, node)
                         if (eventTypeName != null) {
                             log.trace("Found event node ${node.nodeId} of type $eventTypeName, ${node.displayName.text}")
+
                             yield(EventNode(node, path, eventTypeName))
+
                         } else {
-                            // browse sub nodes
-                            yieldAll(
-                                browseNodes(
-                                    client = client,
-                                    nodeID = node.nodeId,
-                                    path = path + listOf(node),
-                                    nodeTypesToDiscover = nodeTypesToDiscover,
-                                    depth = depth + 1,
-                                    maxDepth = maxDepth
+                            if (path.contains(node)) {
+                                log.warning("Circular reference for node ${node.nodeId.toParseableString()} in path ${path.joinToString(separator = "/") { it.nodeId.toParseableString() }}, skipping")
+                            } else {
+                                // browse sub nodes
+                                yieldAll(
+                                    browseNodes(
+                                        client = client,
+                                        nodeID = node.nodeId,
+                                        path = path + listOf(node),
+                                        nodeTypesToDiscover = nodeTypesToDiscover,
+                                        depth = depth + 1,
+                                        maxDepth = maxDepth
+                                    )
                                 )
-                            )
+                            }
                         }
                     }
                 }

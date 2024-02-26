@@ -1,4 +1,3 @@
-
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: MIT-0
 
@@ -188,7 +187,7 @@ open class BaseConfiguration : Validate, HasSecretsManager {
     @SerializedName(CONFIG_TUNING)
     protected var _tuningConfiguration = TuningConfiguration()
 
-    val tuningConfiguration : TuningConfiguration
+    val tuningConfiguration: TuningConfiguration
         get() = _tuningConfiguration
 
 
@@ -211,9 +210,9 @@ open class BaseConfiguration : Validate, HasSecretsManager {
         if (secretsManagerConfiguration != null) {
             ConfigurationException.check(
                 (secretsManagerConfiguration?.credentialProviderClient == null
-                 || _awsIoTCredentialProviderClients[secretsManagerConfiguration?.credentialProviderClient] != null),
+                        || _awsIoTCredentialProviderClients[secretsManagerConfiguration?.credentialProviderClient] != null),
                 "$CONFIG_SECRETS_MANGER, $CONFIG_CREDENTIAL_PROVIDER_CLIENT \"secretsManagerConfiguration?.credentialProviderClient\" is not configured, " +
-                "configured clients are ${_awsIoTCredentialProviderClients.keys}",
+                        "configured clients are ${_awsIoTCredentialProviderClients.keys}",
                 "$CONFIG_SECRETS_MANGER.$CONFIG_CREDENTIAL_PROVIDER_CLIENT",
                 secretsManagerConfiguration
             )
@@ -278,20 +277,23 @@ open class BaseConfiguration : Validate, HasSecretsManager {
 
         private val default = BaseConfiguration()
 
-        fun create(name: String = default._name,
-                   version: String = default._version,
-                   awsVersion: String? = default._awsVersion,
-                   description: String = default._description,
-                   schedules: List<ScheduleConfiguration> = default._schedules,
-                   logLevel: LogLevel? = default._logLevel,
-                   metadata: Map<String, String> = default._metadata,
-                   elementNames: ElementNamesConfiguration = default._elementNames,
-                   targetServers: Map<String, ServerConfiguration> = default._targetServers,
-                   targetTypes: Map<String, InProcessConfiguration> = default._targetTypes,
-                   adapterServers: Map<String, ServerConfiguration> = default._protocolAdapterServers,
-                   adapterTypes: Map<String, InProcessConfiguration> = default._protocolTypes,
-                   awsIotCredentialProviderClients: Map<String, AwsIotCredentialProviderClientConfiguration> = default._awsIoTCredentialProviderClients,
-                   secretsManagerConfiguration: SecretsManagerConfiguration? = default._secretsManagerConfiguration): BaseConfiguration = createBaseConfiguration(
+        fun create(
+            name: String = default._name,
+            version: String = default._version,
+            awsVersion: String? = default._awsVersion,
+            description: String = default._description,
+            schedules: List<ScheduleConfiguration> = default._schedules,
+            logLevel: LogLevel? = default._logLevel,
+            metadata: Map<String, String> = default._metadata,
+            elementNames: ElementNamesConfiguration = default._elementNames,
+            targetServers: Map<String, ServerConfiguration> = default._targetServers,
+            targetTypes: Map<String, InProcessConfiguration> = default._targetTypes,
+            adapterServers: Map<String, ServerConfiguration> = default._protocolAdapterServers,
+            adapterTypes: Map<String, InProcessConfiguration> = default._protocolTypes,
+            awsIotCredentialProviderClients: Map<String, AwsIotCredentialProviderClientConfiguration> = default._awsIoTCredentialProviderClients,
+            secretsManagerConfiguration: SecretsManagerConfiguration? = default._secretsManagerConfiguration,
+            tuningConfiguration: TuningConfiguration = default._tuningConfiguration
+        ): BaseConfiguration = createBaseConfiguration(
 
             name = name,
             version = version,
@@ -306,7 +308,9 @@ open class BaseConfiguration : Validate, HasSecretsManager {
             adapterServers = adapterServers,
             adapterTypes = adapterTypes,
             awsIotCredentialProviderClients = awsIotCredentialProviderClients,
-            secretsManagerConfiguration = secretsManagerConfiguration)
+            secretsManagerConfiguration = secretsManagerConfiguration,
+            tuningConfiguration = tuningConfiguration
+        )
 
 
         @JvmStatic
@@ -324,7 +328,9 @@ open class BaseConfiguration : Validate, HasSecretsManager {
             adapterServers: Map<String, ServerConfiguration>,
             adapterTypes: Map<String, InProcessConfiguration>,
             awsIotCredentialProviderClients: Map<String, AwsIotCredentialProviderClientConfiguration>,
-            secretsManagerConfiguration: SecretsManagerConfiguration?): T {
+            secretsManagerConfiguration: SecretsManagerConfiguration?,
+            tuningConfiguration: TuningConfiguration
+        ): T {
 
             val parameterLessConstructor = T::class.java.constructors.firstOrNull { it.parameters.isEmpty() }
             assert(parameterLessConstructor != null)
@@ -346,6 +352,7 @@ open class BaseConfiguration : Validate, HasSecretsManager {
                 _protocolTypes = adapterTypes
                 _awsIoTCredentialProviderClients = awsIotCredentialProviderClients
                 _secretsManagerConfiguration = secretsManagerConfiguration
+                _tuningConfiguration = tuningConfiguration
             }
 
             return instance
