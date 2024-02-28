@@ -134,8 +134,7 @@ class OpcuaConfiguration : SourceAdapterBaseConfiguration() {
                 adapterServers = adapterServers,
                 adapterTypes = adapterTypes,
                 awsIotCredentialProviderClients = awsIotCredentialProviderClients,
-                secretsManagerConfiguration = secretsManager,
-                tuningConfiguration = TuningConfiguration()
+                secretsManagerConfiguration = secretsManager
             )
 
             with(instance) {

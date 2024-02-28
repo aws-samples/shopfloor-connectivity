@@ -1,4 +1,3 @@
-
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: MIT-0
 
@@ -27,6 +26,7 @@ import com.amazonaws.sfc.targets.AwsServiceTargetClientHelper
 import com.amazonaws.sfc.targets.TargetException
 import com.amazonaws.sfc.util.buildContext
 import com.amazonaws.sfc.util.canNotReachAwsService
+import com.amazonaws.sfc.util.isJobCancellationException
 import com.amazonaws.sfc.util.launch
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -52,7 +52,8 @@ class AwsFirehoseTargetWriter(
     private val targetID: String,
     private val configReader: ConfigReader,
     private val logger: Logger,
-    resultHandler: TargetResultHandler?) : TargetWriter {
+    resultHandler: TargetResultHandler?
+) : TargetWriter {
 
     private val className = this::class.java.simpleName
 
@@ -60,14 +61,17 @@ class AwsFirehoseTargetWriter(
         logger.getCtxInfoLog(className, "")(BuildConfig.toString())
     }
 
-    private val metricDimensions = mapOf(METRICS_DIMENSION_SOURCE to targetID,
-        MetricsCollector.METRICS_DIMENSION_TYPE to className)
+    private val metricDimensions = mapOf(
+        METRICS_DIMENSION_SOURCE to targetID,
+        MetricsCollector.METRICS_DIMENSION_TYPE to className
+    )
 
     private val clientHelper = AwsServiceTargetClientHelper(
         configReader.getConfig<AwsFirehoseWriterConfiguration>(),
         targetID,
         FirehoseClient.builder(),
-        logger)
+        logger
+    )
 
     private val firehoseClient: AwsFirehoseClient
         get() = AwsFirehoseClientWrapper(clientHelper.serviceClient as FirehoseClient)
@@ -110,8 +114,11 @@ class AwsFirehoseTargetWriter(
             for (targetData in targetDataChannel) {
                 sendTargetData(targetData)
             }
-        }catch (e : Exception){
-            log.error("Exception in AWS Kinesis Firehose writer for target \"$targetID\" writing to stream \"${targetConfig.streamName}\" in region ${targetConfig.region} on target \"$targetID\", $e" )
+        } catch (e: Exception) {
+            if (e.isJobCancellationException)
+                log.info("Writetr stopped")
+            else
+                log.error("Error in AWS Kinesis Firehose writer for target \"$targetID\" writing to stream \"${targetConfig.streamName}\" in region ${targetConfig.region} on target \"$targetID\", $e")
         }
     }
 
@@ -212,17 +219,21 @@ class AwsFirehoseTargetWriter(
         }
     }
 
-    private fun createMetrics(adapterID: String,
-                              metricDimensions: MetricDimensions,
-                              writeDurationInMillis: Double) {
+    private fun createMetrics(
+        adapterID: String,
+        metricDimensions: MetricDimensions,
+        writeDurationInMillis: Double
+    ) {
 
         runBlocking {
-            metricsCollector?.put(adapterID,
+            metricsCollector?.put(
+                adapterID,
                 metricsCollector?.buildValueDataPoint(adapterID, METRICS_WRITES, 1.0, MetricUnits.COUNT, metricDimensions),
                 metricsCollector?.buildValueDataPoint(adapterID, METRICS_MESSAGES, buffer.size.toDouble(), MetricUnits.COUNT, metricDimensions),
                 metricsCollector?.buildValueDataPoint(adapterID, METRICS_WRITE_DURATION, writeDurationInMillis, MetricUnits.MILLISECONDS, metricDimensions),
                 metricsCollector?.buildValueDataPoint(adapterID, METRICS_WRITE_SUCCESS, 1.0, MetricUnits.COUNT, metricDimensions),
-                metricsCollector?.buildValueDataPoint(adapterID, METRICS_WRITE_SIZE, buffer.payloadSize.toDouble(), MetricUnits.BYTES, metricDimensions))
+                metricsCollector?.buildValueDataPoint(adapterID, METRICS_WRITE_SIZE, buffer.payloadSize.toDouble(), MetricUnits.BYTES, metricDimensions)
+            )
         }
     }
 
@@ -254,12 +265,14 @@ class AwsFirehoseTargetWriter(
         val metricsConfiguration = config.targets[targetID]?.metrics ?: MetricsSourceConfiguration()
         if (config.isCollectingMetrics) {
             logger.metricsCollectorMethod = collectMetricsFromLogger
-            MetricsCollector(metricsConfig = config.metrics,
+            MetricsCollector(
+                metricsConfig = config.metrics,
                 metricsSourceName = targetID,
                 metricsSourceType = MetricsSourceType.TARGET_WRITER,
                 metricsSourceConfiguration = metricsConfiguration,
                 staticDimensions = TARGET_METRIC_DIMENSIONS,
-                logger = logger)
+                logger = logger
+            )
         } else null
     }
 
@@ -286,7 +299,12 @@ class AwsFirehoseTargetWriter(
         @JvmStatic
         @Suppress("unused")
         fun newInstance(vararg createParameters: Any?) =
-            newInstance(createParameters[0] as ConfigReader, createParameters[1] as String, createParameters[2] as Logger, createParameters[3] as TargetResultHandler?)
+            newInstance(
+                createParameters[0] as ConfigReader,
+                createParameters[1] as String,
+                createParameters[2] as Logger,
+                createParameters[3] as TargetResultHandler?
+            )
 
         /**
          * Creates an instance of an AWS Kinesis Firehose writer from the passed configuration
@@ -310,7 +328,8 @@ class AwsFirehoseTargetWriter(
         const val FIREHOSE_MAX_BATCH_MSG_SIZE = 1024 * 1024 * 4
 
         val TARGET_METRIC_DIMENSIONS = mapOf(
-            MetricsCollector.METRICS_DIMENSION_SOURCE_CATEGORY to METRICS_DIMENSION_SOURCE_CATEGORY_TARGET)
+            MetricsCollector.METRICS_DIMENSION_SOURCE_CATEGORY to METRICS_DIMENSION_SOURCE_CATEGORY_TARGET
+        )
 
 
     }

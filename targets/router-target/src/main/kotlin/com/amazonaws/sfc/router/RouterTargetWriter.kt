@@ -22,6 +22,7 @@ import com.amazonaws.sfc.targets.ForwardingTargetWriter
 import com.amazonaws.sfc.targets.TargetException
 import com.amazonaws.sfc.targets.TargetWriterFactory
 import com.amazonaws.sfc.util.buildScope
+import com.amazonaws.sfc.util.isJobCancellationException
 import com.amazonaws.sfc.util.launch
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
@@ -321,7 +322,10 @@ class RouterTargetWriter(
             log.trace("Timeout forwarding to target \"${targetID}\"")
             false
         } catch (e: Throwable) {
-            log.error("Error forwarding to target \"${targetID}\", $e")
+            if (e.isJobCancellationException)
+                log.info("Forwarder stopped")
+            else
+                log.error("Error forwarding to target \"${targetID}\", $e")
             false
         }
 

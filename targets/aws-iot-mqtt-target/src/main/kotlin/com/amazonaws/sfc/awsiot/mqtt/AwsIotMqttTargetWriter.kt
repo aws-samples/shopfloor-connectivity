@@ -24,6 +24,7 @@ import com.amazonaws.sfc.system.DateTime
 import com.amazonaws.sfc.targets.TargetException
 import com.amazonaws.sfc.util.buildScope
 import com.amazonaws.sfc.util.canNotReachAwsService
+import com.amazonaws.sfc.util.isJobCancellationException
 import com.amazonaws.sfc.util.launch
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
@@ -89,10 +90,11 @@ class AwsIotMqttTargetWriter(
         val log = logger.getCtxLoggers(className, "writer")
         try {
             runWriter()
-        }catch (e: CancellationException) {
-            log.info("Writer stopped")
         }catch (e : Exception){
-            log.error("Error in writer, $e")
+            if (e.isJobCancellationException)
+                log.info("Writer stopped")
+            else
+               log.error("Error in writer, $e")
         }
     }
 

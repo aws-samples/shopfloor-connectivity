@@ -130,8 +130,7 @@ class SqlConfiguration : SourceAdapterBaseConfiguration() {
                 adapterServers = adapterServers,
                 adapterTypes = adapterTypes,
                 awsIotCredentialProviderClients = awsIotCredentialProviderClients,
-                secretsManagerConfiguration = secretsManagerConfiguration,
-                tuningConfiguration = TuningConfiguration())
+                secretsManagerConfiguration = secretsManagerConfiguration)
 
             with(instance) {
                 _sources = sources

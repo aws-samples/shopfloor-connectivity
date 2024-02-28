@@ -76,8 +76,7 @@ class AwsFirehoseWriterConfiguration : AwsServiceTargetsConfig<AwsKinesisFirehos
                 adapterServers = adapterServers,
                 adapterTypes = adapterTypes,
                 awsIotCredentialProviderClients = awsIotCredentialProviderClients,
-                secretsManagerConfiguration = secretsManagerConfiguration,
-                tuningConfiguration = TuningConfiguration())
+                secretsManagerConfiguration = secretsManagerConfiguration)
 
             instance._targets = targets
             return instance

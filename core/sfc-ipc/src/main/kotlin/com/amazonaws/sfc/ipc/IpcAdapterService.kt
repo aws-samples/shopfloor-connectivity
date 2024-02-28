@@ -23,6 +23,7 @@ import com.amazonaws.sfc.service.HealthProbeService
 import com.amazonaws.sfc.service.Service
 import com.amazonaws.sfc.system.DateTime
 import com.amazonaws.sfc.util.buildScope
+import com.amazonaws.sfc.util.isJobCancellationException
 import io.grpc.BindableService
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
@@ -160,7 +161,7 @@ class IpcAdapterService(
 
         override fun readMetrics(request: Metrics.ReadMetricsRequest): Flow<Metrics.MetricsDataMessage> = channelFlow {
 
-            val errorLog = logger.getCtxErrorLog(className, "readMetrics")
+            val log = logger.getCtxLoggers(className, "readMetrics")
 
             // Interval between reading metrics
             val interval = request.interval.toDuration(DurationUnit.MILLISECONDS)
@@ -173,8 +174,10 @@ class IpcAdapterService(
                         }
                         val reply = it.grpcMetricsDataMessage
                         send(reply)
+
                     } catch (e: Exception) {
-                        errorLog("Error building or emitting readMetrics reply, $e")
+                        if (!e.isJobCancellationException)
+                           log.error("Error building or emitting readMetrics reply, $e")
                     }
                 }
             }

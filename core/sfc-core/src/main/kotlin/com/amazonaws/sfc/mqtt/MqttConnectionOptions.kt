@@ -29,6 +29,7 @@ open class MqttConnectionOptions {
             }
     }
 
+
     @SerializedName(CONFIG_PORT)
     protected var _port: Int? = null
     val port: Int?
@@ -162,7 +163,7 @@ open class MqttConnectionOptions {
         private const val CONFIG_CONNECTION = "Connection"
         private const val CONFIG_PORT = "Port"
 
-        private const val DEFAULT_CONNECT_TIMEOUT = 30
+        private const val DEFAULT_CONNECT_TIMEOUT = 10
         private val DEFAULT_CONNECTION = MqttConnectionType.PLAINTEXT
         private val default = MqttConnectionOptions()
 

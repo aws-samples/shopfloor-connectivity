@@ -133,8 +133,7 @@ class AdsConfiguration : SourceAdapterBaseConfiguration() {
                 adapterServers = adapterServers,
                 adapterTypes = adapterTypes,
                 awsIotCredentialProviderClients = awsIotCredentialProviderClients,
-                secretsManagerConfiguration = secretsManagerConfiguration,
-                tuningConfiguration = TuningConfiguration()
+                secretsManagerConfiguration = secretsManagerConfiguration
             )
 
             with(instance) {

@@ -19,6 +19,7 @@ import com.amazonaws.sfc.metrics.MetricsValue
 import com.amazonaws.sfc.metrics.MetricsValueParam
 import com.amazonaws.sfc.storeforward.config.MessageBufferConfiguration
 import com.amazonaws.sfc.util.byteCountString
+import com.amazonaws.sfc.util.isJobCancellationException
 import com.amazonaws.sfc.util.launch
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
@@ -366,7 +367,10 @@ class BufferedWriter(
         } catch (t: TimeoutCancellationException) {
             log.trace("Timeout forwarding to target \"${targetID}\"")
         } catch (e: Throwable) {
-            log.error("Error forwarding to target \"${targetID}\", $e")
+            if (e.isJobCancellationException)
+                log.info("Target stopped")
+            else
+                log.error("Error forwarding to target \"${targetID}\", $e")
         }
         return@coroutineScope didForwardToTarget
 

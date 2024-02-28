@@ -1,4 +1,3 @@
-
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: MIT-0
 
@@ -24,6 +23,7 @@ import com.amazonaws.sfc.service.Service
 import com.amazonaws.sfc.system.DateTime
 import com.amazonaws.sfc.targets.TargetWriterFactory
 import com.amazonaws.sfc.util.buildScope
+import com.amazonaws.sfc.util.isJobCancellationException
 import kotlinx.coroutines.*
 import kotlin.system.exitProcess
 import kotlin.time.DurationUnit
@@ -37,9 +37,11 @@ import kotlin.time.toDuration
  * @see ControllerServiceConfiguration
  * @see createController
  */
-class MainControllerService(private val configReader: ConfigReader,
-                            private val configuration: ControllerServiceConfiguration,
-                            private val logger: Logger) : Service {
+class MainControllerService(
+    private val configReader: ConfigReader,
+    private val configuration: ControllerServiceConfiguration,
+    private val logger: Logger
+) : Service {
 
     private val className = this::class.java.simpleName
 
@@ -67,14 +69,20 @@ class MainControllerService(private val configReader: ConfigReader,
     private val collectMetricsFromLogger: MetricsCollectorMethod?
         get() =
             if (configuration.metrics?.isCollectingMetrics == true) {
+
                 { metricsList ->
+                    val log = logger.getCtxLoggers(className, "collectMetricsFromLogger")
                     try {
                         val dataPoints = metricsList.map { MetricsDataPoint(name = it.metricsName, units = it.metricUnit, value = it.metricsValue) }
                         runBlocking {
                             coreMetricsCollector?.put(SFC_CORE, dataPoints)
                         }
+
                     } catch (e: java.lang.Exception) {
-                        logger.getCtxErrorLog(this::class.java.simpleName, "collectMetricsFromLogger")("Error collecting metrics from logger, $e")
+                        if (e.isJobCancellationException)
+                            log.info("Stopped collecting metrics")
+                        else
+                            log.error("Error collecting metrics from logger, $e")
                     }
                 }
             } else null
@@ -103,14 +111,13 @@ class MainControllerService(private val configReader: ConfigReader,
      */
     override suspend fun stop() = coroutineScope {
         try {
-
             withTimeout(CLOSING_TIMEOUT) {
                 listOf(
                     stopMetricsProcessing(),
                     stopScheduleControllers(),
                 ).joinAll()
             }
-        } catch (_: TimeoutCancellationException) {
+        } catch (e: Exception) {
             logger.getCtxWarningLog(className, "stop")("Timeout stopping service")
         }
 
@@ -193,19 +200,23 @@ class MainControllerService(private val configReader: ConfigReader,
         val anyMetricCollectors = adapterMetricProviders.isNotEmpty() || targetMetricProviders.isNotEmpty() || coreMetricsProvider != null
         if (configuration.metrics != null && anyMetricCollectors) {
 
-            metricsProcessor = MetricsProcessor(configReader = configReader,
+            metricsProcessor = MetricsProcessor(
+                configReader = configReader,
                 logger = logger,
                 metricProviders = adapterMetricProviders +
-                                  targetMetricProviders +
-                                  if (coreMetricsProvider != null) mapOf(SFC_CORE to coreMetricsProvider) else emptyMap()) { metricsConfiguration ->
+                        targetMetricProviders +
+                        if (coreMetricsProvider != null) mapOf(SFC_CORE to coreMetricsProvider) else emptyMap()
+            ) { metricsConfiguration ->
                 createMetricsWriter(metricsConfiguration)
             }
 
             metricsProcessor?.start()
             if (metricsProcessor != null) {
-                infoLog("Metrics processor started for adapters ${adapterMetricProviders.keys} " +
-                        "and targets ${targetMetricProviders.keys}" +
-                        if (coreMetricsProvider != null) " and $SFC_CORE" else "")
+                infoLog(
+                    "Metrics processor started for adapters ${adapterMetricProviders.keys} " +
+                            "and targets ${targetMetricProviders.keys}" +
+                            if (coreMetricsProvider != null) " and $SFC_CORE" else ""
+                )
             }
         } else {
             metricsProcessor = null
@@ -309,8 +320,10 @@ class MainControllerService(private val configReader: ConfigReader,
     }
 
 
-    private fun initializeMetricsForSourceAdapter(sourceID: String,
-                                                  reader: SourceValuesReader) {
+    private fun initializeMetricsForSourceAdapter(
+        sourceID: String,
+        reader: SourceValuesReader
+    ) {
         val source = configuration.sources[sourceID] ?: return
         val adapter = configuration.protocolAdapters[source.protocolAdapterID]
         val isCollectingMetricsFromAdapter = (configuration.metrics != null) && (adapter?.metrics?.enabled != false)
@@ -321,8 +334,10 @@ class MainControllerService(private val configReader: ConfigReader,
     }
 
 
-    private fun initializeMetricsForTarget(targetID: String,
-                                           target: TargetWriter) {
+    private fun initializeMetricsForTarget(
+        targetID: String,
+        target: TargetWriter
+    ) {
         val targetConfig = configuration.targets[targetID] ?: return
         //   val adapter = configuration.protocolAdapters[source.protocolAdapterID]
         val isCollectingMetricsFromTarget = (configuration.metrics != null) && targetConfig.metrics.enabled
@@ -341,8 +356,10 @@ class MainControllerService(private val configReader: ConfigReader,
         } else {
             if (protocolConfiguration?.protocolAdapterType !in configuration.protocolAdapterTypes) {
                 val log = logger.getCtxLoggers(className, "buildSourceValuesReader")
-                log.error("Protocol type ${protocolConfiguration?.protocolAdapterType} for protocol \"$adapterID\" used in source \"Source \"$sourceID\" does not exist, " +
-                          "valid types are ${configuration.protocolAdapterTypes.keys}")
+                log.error(
+                    "Protocol type ${protocolConfiguration?.protocolAdapterType} for protocol \"$adapterID\" used in source \"Source \"$sourceID\" does not exist, " +
+                            "valid types are ${configuration.protocolAdapterTypes.keys}"
+                )
             }
             createInProcessReader(
                 configuration.protocolAdapterTypes[protocolConfiguration?.protocolAdapterType]!!,
@@ -354,9 +371,11 @@ class MainControllerService(private val configReader: ConfigReader,
 
 
     // create in process reader instance
-    private fun createInProcessReader(conf: InProcessConfiguration,
-                                      schedule: ScheduleConfiguration,
-                                      adapterID: String): SourceValuesReader? {
+    private fun createInProcessReader(
+        conf: InProcessConfiguration,
+        schedule: ScheduleConfiguration,
+        adapterID: String
+    ): SourceValuesReader? {
 
         val log = logger.getCtxLoggers(className, "createInProcessReader")
 
@@ -384,7 +403,7 @@ class MainControllerService(private val configReader: ConfigReader,
         else {
             try {
                 (scheduleControllers?.values?.filterNotNull()?.all { it.isRunning } ?: false) &&
-                (metricsProcessor?.isRunning ?: true)
+                        (metricsProcessor?.isRunning ?: true)
             } catch (_: Exception) {
                 false
             }
@@ -401,23 +420,23 @@ class MainControllerService(private val configReader: ConfigReader,
 
     private suspend fun initializeHealthProbeService() {
 
-            healthProbeService?.stop()
+        healthProbeService?.stop()
 
-            val healthProbeConfiguration = configuration.healthProbeConfiguration
-            healthProbeService = if (healthProbeConfiguration == null) null else
-                try {
-                    val service =
-                        HealthProbeService(healthProbeConfiguration, checkFunction = ::isHealthy, serviceStopFunction = ::stopUnhealthyService, logger = logger)
-                    controllerScope.launch {
-                        delay(1.toDuration(DurationUnit.MINUTES))
-                        service.restartIfInactive()
-                    }
-                    service
-                } catch (e: Exception) {
-                    logger.getCtxErrorLog(className, "initializeHealthProbeService")("Error initializing health probe service : ${e.message ?: ""}")
-                    null
+        val healthProbeConfiguration = configuration.healthProbeConfiguration
+        healthProbeService = if (healthProbeConfiguration == null) null else
+            try {
+                val service =
+                    HealthProbeService(healthProbeConfiguration, checkFunction = ::isHealthy, serviceStopFunction = ::stopUnhealthyService, logger = logger)
+                controllerScope.launch {
+                    delay(1.toDuration(DurationUnit.MINUTES))
+                    service.restartIfInactive()
                 }
-            healthProbeService?.start()
+                service
+            } catch (e: Exception) {
+                logger.getCtxErrorLog(className, "initializeHealthProbeService")("Error initializing health probe service : ${e.message ?: ""}")
+                null
+            }
+        healthProbeService?.start()
 
     }
 
@@ -442,9 +461,11 @@ class MainControllerService(private val configReader: ConfigReader,
          * @throws Exception
          */
 
-        fun createController(args: Array<String>,
-                             configuration: String,
-                             logger: Logger): MainControllerService {
+        fun createController(
+            args: Array<String>,
+            configuration: String,
+            logger: Logger
+        ): MainControllerService {
 
             val cmd = ControllerCommandLineOptions(args)
 
@@ -473,7 +494,8 @@ class MainControllerService(private val configReader: ConfigReader,
         val CORE_METRIC_DIMENSIONS = mapOf(
             MetricsCollector.METRICS_DIMENSION_SOURCE to SFC_CORE,
             MetricsCollector.METRICS_DIMENSION_TYPE to SFC_CORE,
-            MetricsCollector.METRICS_DIMENSION_SOURCE_CATEGORY to MetricsCollector.METRICS_DIMENSION_SOURCE_CATEGORY_CORE)
+            MetricsCollector.METRICS_DIMENSION_SOURCE_CATEGORY to MetricsCollector.METRICS_DIMENSION_SOURCE_CATEGORY_CORE
+        )
 
 
     }

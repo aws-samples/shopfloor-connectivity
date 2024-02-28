@@ -1,4 +1,3 @@
-
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: MIT-0
 
@@ -25,10 +24,7 @@ import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_WRITE_SUCCES
 import com.amazonaws.sfc.system.DateTime
 import com.amazonaws.sfc.targets.AwsServiceTargetClientHelper
 import com.amazonaws.sfc.targets.TargetException
-import com.amazonaws.sfc.util.buildScope
-import com.amazonaws.sfc.util.byteCountString
-import com.amazonaws.sfc.util.canNotReachAwsService
-import com.amazonaws.sfc.util.launch
+import com.amazonaws.sfc.util.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.selects.select
@@ -50,7 +46,8 @@ class AwsSqsTargetWriter(
     private val targetID: String,
     private val configReader: ConfigReader,
     private val logger: Logger,
-    resultHandler: TargetResultHandler?) : TargetWriter {
+    resultHandler: TargetResultHandler?
+) : TargetWriter {
 
     private val className = this::class.java.simpleName
 
@@ -58,15 +55,18 @@ class AwsSqsTargetWriter(
         logger.getCtxInfoLog(className, "")(BuildConfig.toString())
     }
 
-    private val metricDimensions = mapOf(METRICS_DIMENSION_SOURCE to targetID,
-        MetricsCollector.METRICS_DIMENSION_TYPE to className)
+    private val metricDimensions = mapOf(
+        METRICS_DIMENSION_SOURCE to targetID,
+        MetricsCollector.METRICS_DIMENSION_TYPE to className
+    )
 
     private val clientHelper =
         AwsServiceTargetClientHelper(
             configReader.getConfig<AwsSqsWriterConfiguration>(),
             targetID,
             SqsClient.builder(),
-            logger)
+            logger
+        )
 
     private val targetResults = if (resultHandler != null) TargetResultHelper(targetID, resultHandler, logger) else null
 
@@ -77,12 +77,14 @@ class AwsSqsTargetWriter(
         val metricsConfiguration = config.targets[targetID]?.metrics ?: MetricsSourceConfiguration()
         if (config.isCollectingMetrics) {
             logger.metricsCollectorMethod = collectMetricsFromLogger
-            MetricsCollector(metricsConfig = config.metrics,
+            MetricsCollector(
+                metricsConfig = config.metrics,
                 metricsSourceName = targetID,
                 metricsSourceType = MetricsSourceType.TARGET_WRITER,
                 metricsSourceConfiguration = metricsConfiguration,
                 staticDimensions = TARGET_METRIC_DIMENSIONS,
-                logger = logger)
+                logger = logger
+            )
         } else null
     }
 
@@ -156,8 +158,11 @@ class AwsSqsTargetWriter(
 
             } catch (e: CancellationException) {
                 log.info("Writer stopped")
-            }catch (e : Exception){
-                log.error("Error in writer, $e")
+            } catch (e: Exception) {
+                if (e.isJobCancellationException)
+                    log.info("Writer stopped")
+                else
+                    log.error("Error in writer, $e")
             }
         }
     }
@@ -260,17 +265,21 @@ class AwsSqsTargetWriter(
     }
 
 
-    private fun createMetrics(adapterID: String,
-                              metricDimensions: MetricDimensions,
-                              writeDurationInMillis: Double) {
+    private fun createMetrics(
+        adapterID: String,
+        metricDimensions: MetricDimensions,
+        writeDurationInMillis: Double
+    ) {
 
         runBlocking {
-            metricsCollector?.put(adapterID,
+            metricsCollector?.put(
+                adapterID,
                 metricsCollector?.buildValueDataPoint(adapterID, METRICS_WRITES, 1.0, MetricUnits.COUNT, metricDimensions),
                 metricsCollector?.buildValueDataPoint(adapterID, METRICS_MESSAGES, buffer.size.toDouble(), MetricUnits.COUNT, metricDimensions),
                 metricsCollector?.buildValueDataPoint(adapterID, METRICS_WRITE_DURATION, writeDurationInMillis, MetricUnits.MILLISECONDS, metricDimensions),
                 metricsCollector?.buildValueDataPoint(adapterID, METRICS_WRITE_SUCCESS, 1.0, MetricUnits.COUNT, metricDimensions),
-                metricsCollector?.buildValueDataPoint(adapterID, METRICS_WRITE_SIZE, buffer.payloadSize.toDouble(), MetricUnits.BYTES, metricDimensions))
+                metricsCollector?.buildValueDataPoint(adapterID, METRICS_WRITE_SIZE, buffer.payloadSize.toDouble(), MetricUnits.BYTES, metricDimensions)
+            )
         }
 
     }
@@ -347,7 +356,12 @@ class AwsSqsTargetWriter(
         @JvmStatic
         @Suppress("unused")
         fun newInstance(vararg createParameters: Any?) =
-            newInstance(createParameters[0] as ConfigReader, createParameters[1] as String, createParameters[2] as Logger, createParameters[3] as TargetResultHandler?)
+            newInstance(
+                createParameters[0] as ConfigReader,
+                createParameters[1] as String,
+                createParameters[2] as Logger,
+                createParameters[3] as TargetResultHandler?
+            )
 
 
         @JvmStatic
@@ -361,7 +375,8 @@ class AwsSqsTargetWriter(
         }
 
         val TARGET_METRIC_DIMENSIONS = mapOf(
-            MetricsCollector.METRICS_DIMENSION_SOURCE_CATEGORY to METRICS_DIMENSION_SOURCE_CATEGORY_TARGET)
+            MetricsCollector.METRICS_DIMENSION_SOURCE_CATEGORY to METRICS_DIMENSION_SOURCE_CATEGORY_TARGET
+        )
     }
 }
 

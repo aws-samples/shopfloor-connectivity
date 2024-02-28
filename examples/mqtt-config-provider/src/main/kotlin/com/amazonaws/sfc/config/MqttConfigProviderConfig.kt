@@ -8,6 +8,10 @@ import com.amazonaws.sfc.mqtt.MqttConnectionType
 import com.amazonaws.sfc.config.Validate
 import com.amazonaws.sfc.mqtt.MqttConnectionOptions
 import com.google.gson.annotations.SerializedName
+import java.io.File
+import kotlin.time.Duration
+import kotlin.time.DurationUnit
+import kotlin.time.toDuration
 
 
 @ConfigurationClass
@@ -22,8 +26,19 @@ class MqttConfigProviderConfig : Validate, MqttConnectionOptions() {
 
     @SerializedName(CONFIG_LOCAL_CONFIG_FILE)
     private var _localConfigFile: String? = null
-    val localConfigFile: String?
-        get() = _localConfigFile
+    val localConfigFile: File?
+        get() = if (_localConfigFile != null) File(_localConfigFile!!) else null
+
+
+    @SerializedName(CONFIG_WAIT_AFTER_CONNECT_ERROR)
+    private var _waitAfterConnectError: Int = DEFAULT_WAIT_AFTER_CONNECT_ERROR
+    val waitAfterConnectError: Duration
+        get() = _waitAfterConnectError.toDuration(DurationUnit.SECONDS)
+
+    @SerializedName(CONFIG_USE_LOCAL_AT_STARTUP)
+    private var _useLocalConfigFileAtStartUp: Boolean = true
+    val useLocalConfigFileAtStartUp: Boolean
+        get() = _useLocalConfigFileAtStartUp
 
 
     @Throws(ConfigurationException::class)
@@ -34,6 +49,7 @@ class MqttConfigProviderConfig : Validate, MqttConnectionOptions() {
 
         validated = true
     }
+
 
     private fun checkRequiredSettings() {
         ConfigurationException.check(
@@ -56,6 +72,9 @@ class MqttConfigProviderConfig : Validate, MqttConnectionOptions() {
 
         private const val CONFIG_TOPIC_NAME = "TopicName"
         private const val CONFIG_LOCAL_CONFIG_FILE = "LocalConfigFile"
+        private const val CONFIG_USE_LOCAL_AT_STARTUP = "UseLocalConfigFileAtStartUp"
+        private const val CONFIG_WAIT_AFTER_CONNECT_ERROR = "WaitAfterConnectError"
+        private const val DEFAULT_WAIT_AFTER_CONNECT_ERROR = 60
 
 
         private val default = MqttConfigProviderConfig()
@@ -72,7 +91,8 @@ class MqttConfigProviderConfig : Validate, MqttConnectionOptions() {
             rootCA: String? = default._rootCA,
             sslServerCert: String? = default._sslServerCert,
             localConfigFile: String? = default._localConfigFile,
-            connectTimeout: Int = default._connectTimeout
+            connectTimeout: Int = default._connectTimeout,
+            waitAfterConnectError : Int = default._waitAfterConnectError
         ): MqttConfigProviderConfig {
 
 
@@ -90,6 +110,7 @@ class MqttConfigProviderConfig : Validate, MqttConnectionOptions() {
                 _sslServerCert = sslServerCert
                 _localConfigFile = localConfigFile
                 _connectTimeout = connectTimeout
+                _waitAfterConnectError= waitAfterConnectError
             }
             return instance
         }
