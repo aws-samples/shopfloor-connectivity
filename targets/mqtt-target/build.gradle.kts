@@ -5,18 +5,17 @@ import org.jetbrains.kotlin.util.capitalizeDecapitalize.toUpperCaseAsciiOnly
 import java.time.LocalDate
 
 group = "com.amazonaws.sfc"
-version = "2.0.0"
+version = "1.0.0"
 
 val sfcRelease = rootProject.extra.get("sfc_release")!!
-val sfcCoreVersion = sfcRelease
-val sfcIpcVersion = sfcRelease
 val module = "mqtt"
 val kotlinCoroutinesVersion = "1.6.2"
 val kotlinVersion = "1.9.0"
 val reflectionVersion = "1.6.0"
-val jmesPathVersion = "0.5.1"
+val sfcCoreVersion = sfcRelease
+val sfcIpcVersion = sfcRelease
+val log4jVersion = "2.17.2"
 val pahoVersion = "1.2.4"
-val gsonVersion = "2.9.0"
 
 plugins {
     id("sfc.kotlin-application-conventions")
@@ -30,12 +29,13 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinCoroutinesVersion")
     implementation("org.jetbrains.kotlin:kotlin-reflect:$reflectionVersion")
     implementation("org.eclipse.paho:org.eclipse.paho.client.mqttv3:$pahoVersion")
-    implementation("com.google.code.gson:gson:$gsonVersion")
-    implementation("io.burt:jmespath-core:$jmesPathVersion")
+    implementation("org.apache.logging.log4j:log4j-api:$log4jVersion")
+    implementation("org.apache.logging.log4j:log4j-core:$log4jVersion")
+    implementation("org.apache.logging.log4j:log4j-slf4j-impl:$log4jVersion")
 }
 
 application {
-    mainClass.set("com.amazonaws.sfc.mqtt.MqttProtocolService")
+    mainClass.set("com.amazonaws.sfc.awsiot.mqtt.MqttTargetService")
     applicationName = project.name
 }
 
@@ -53,6 +53,7 @@ tasks.register<Copy>("copyDist") {
     include("*.tar.gz")
     into(layout.buildDirectory.dir("../../../build/distribution/"))
 }
+
 
 task("generateBuildConfig") {
     val version = project.version.toString()

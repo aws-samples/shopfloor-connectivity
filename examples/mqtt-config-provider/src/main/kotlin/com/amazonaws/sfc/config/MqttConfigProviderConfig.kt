@@ -1,18 +1,17 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: MIT-0
-
+package com.amazonaws.sfc.config
 
 import com.amazonaws.sfc.config.ConfigurationClass
 import com.amazonaws.sfc.config.ConfigurationException
-import com.amazonaws.sfc.mqtt.MqttConnectionType
 import com.amazonaws.sfc.config.Validate
 import com.amazonaws.sfc.mqtt.MqttConnectionOptions
+import com.amazonaws.sfc.mqtt.MqttConnectionType
 import com.google.gson.annotations.SerializedName
 import java.io.File
 import kotlin.time.Duration
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration
-
 
 @ConfigurationClass
 class MqttConfigProviderConfig : Validate, MqttConnectionOptions() {
@@ -81,7 +80,7 @@ class MqttConfigProviderConfig : Validate, MqttConnectionOptions() {
 
         fun create(
             topicName: String = default._topicName,
-            endpoint: String = default._endpoint,
+            endpoint: String = default._endPoint,
             port: Int? = default._port,
             connection: MqttConnectionType = default._connection,
             username: String? = default._username,
@@ -99,7 +98,7 @@ class MqttConfigProviderConfig : Validate, MqttConnectionOptions() {
             val instance = MqttConfigProviderConfig()
             with(instance) {
                 _topicName = topicName
-                _endpoint = endpoint
+                _endPoint = endpoint
                 _port = port
                 _connection = connection
                 _username = username

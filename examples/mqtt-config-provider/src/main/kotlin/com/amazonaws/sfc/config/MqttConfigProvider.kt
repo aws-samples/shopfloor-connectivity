@@ -3,12 +3,12 @@
 
 package com.amazonaws.sfc.config
 
-import MqttConfigProviderConfig
 import com.amazonaws.sfc.data.JsonHelper.Companion.gsonPretty
 import com.amazonaws.sfc.log.Logger
 import com.amazonaws.sfc.mqtt.MqttHelper
 import com.amazonaws.sfc.service.ConfigProvider
 import com.amazonaws.sfc.util.buildScope
+import com.amazonaws.sfc.util.getHostName
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
@@ -49,7 +49,7 @@ class MqttConfigProvider(
         while (_mqttClient == null && context.isActive) {
             try {
                 val mqttHelper = MqttHelper(providerConfig, logger)
-                _mqttClient = mqttHelper.buildClient()
+                _mqttClient = mqttHelper.buildClient("sfc_config_provider_${getHostName()}")
             } catch (e: Exception) {
                 logger.getCtxErrorLog(className, "mqttClient")("Error creating and connecting mqttClient. $e")
             }
@@ -67,6 +67,7 @@ class MqttConfigProvider(
         url.toURI()
         url
     } catch (e: Exception) {
+        // not a valid url
         null
     }
 
@@ -132,10 +133,10 @@ class MqttConfigProvider(
         val client = getClient(coroutineContext)
 
         if (!loadedLocalFile) {
-            log.info("No configuration from local configuration file, waiting for configuration from broker  ${providerConfig.endpoint} topic ${providerConfig.topicName}")
+            log.info("No configuration from local configuration file, waiting for configuration from broker  ${providerConfig.endPoint} topic ${providerConfig.topicName}")
         }
 
-        log.info("Connected to ${providerConfig.endpoint}, subscribing to topic ${providerConfig.topicName}")
+        log.info("Connected to ${providerConfig.endPoint}, subscribing to topic ${providerConfig.topicName}")
 
         client.subscribe(providerConfig.topicName) { _, message ->
             log.info("Received configuration from topic ${providerConfig.topicName}")

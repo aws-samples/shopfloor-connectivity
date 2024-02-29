@@ -1,4 +1,3 @@
-
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: MIT-0
 
@@ -31,13 +30,11 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withTimeoutOrNull
 import org.eclipse.paho.client.mqttv3.MqttClient
-import org.eclipse.paho.client.mqttv3.MqttConnectOptions
 import org.eclipse.paho.client.mqttv3.MqttMessage
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence
 import java.time.Instant
 import java.util.*
 import kotlin.time.Duration
-import kotlin.time.DurationUnit
 
 
 class MqttAdapter(private val adapterID: String, private val configuration: MqttConfiguration, private val logger: Logger) : ProtocolAdapter {
@@ -51,7 +48,7 @@ class MqttAdapter(private val adapterID: String, private val configuration: Mqtt
      * @property message String The received message
      * @property timestamp Instant Time when message was received
      */
-    inner class ReceivedData (
+    inner class ReceivedData(
         val sourceID: String,
         val channelID: String,
         val channel: MqttChannelConfiguration,
@@ -79,11 +76,13 @@ class MqttAdapter(private val adapterID: String, private val configuration: Mqtt
         val metricsConfigurations = configuration.mqttProtocolAdapters.map { it.key to (it.value.metrics ?: MetricsSourceConfiguration()) }.toMap()
         if (configuration.isCollectingMetrics) {
             logger.metricsCollectorMethod = collectMetricsFromLogger
-            MetricsCollector(metricsConfig = configuration.metrics,
+            MetricsCollector(
+                metricsConfig = configuration.metrics,
                 metricsSourceType = MetricsSourceType.PROTOCOL_ADAPTER,
                 metricsSourceConfigurations = metricsConfigurations,
                 staticDimensions = ADAPTER_METRIC_DIMENSIONS,
-                logger = logger)
+                logger = logger
+            )
         } else null
     }
 
@@ -120,7 +119,7 @@ class MqttAdapter(private val adapterID: String, private val configuration: Mqtt
             for (data in receivedData) {
                 handleDataReceived(data)
             }
-        }catch (e : Exception){
+        } catch (e: Exception) {
             logger.getCtxErrorLog(this::class.java.simpleName, "changedDataWorker")("Error processing received data, $e")
         }
     }
@@ -142,9 +141,9 @@ class MqttAdapter(private val adapterID: String, private val configuration: Mqtt
         // No client or could not connect
         if (client == null) {
             val adapterConfiguration = configuration.mqttProtocolAdapters[protocolAdapterID]
-                                       ?: return SourceReadError("Adapter \"$protocolAdapterID\" for  Source \"$sourceID\" does not exist, available adapters are ${configuration.mqttProtocolAdapters.keys}")
+                ?: return SourceReadError("Adapter \"$protocolAdapterID\" for  Source \"$sourceID\" does not exist, available adapters are ${configuration.mqttProtocolAdapters.keys}")
             val brokerConfiguration = adapterConfiguration.brokers[sourceConfiguration.sourceAdapterbrokerID]
-                                      ?: return SourceReadError("Broker \"${sourceConfiguration.sourceAdapterbrokerID}\" Adapter \"$protocolAdapterID\" for  Source \"$sourceID\" does not exist, available brokers are ${adapterConfiguration.brokers}")
+                ?: return SourceReadError("Broker \"${sourceConfiguration.sourceAdapterbrokerID}\" Adapter \"$protocolAdapterID\" for  Source \"$sourceID\" does not exist, available brokers are ${adapterConfiguration.brokers}")
 
             // Wait for next read and return read error
             val error = SourceReadError("Can not connect to broker at ${brokerConfiguration.endPoint}", DateTime.systemDateTime())
@@ -168,15 +167,31 @@ class MqttAdapter(private val adapterID: String, private val configuration: Mqtt
         return SourceReadSuccess(data, DateTime.systemDateTime())
     }
 
-    private suspend fun createMetrics(protocolAdapterID: String,
-                                      metricDimensions: MetricDimensions?,
-                                      readDurationInMillis: Double,
-                                      values: Map<String, ChannelReadValue>) {
-        metricsCollector?.put(protocolAdapterID,
+    private suspend fun createMetrics(
+        protocolAdapterID: String,
+        metricDimensions: MetricDimensions?,
+        readDurationInMillis: Double,
+        values: Map<String, ChannelReadValue>
+    ) {
+        metricsCollector?.put(
+            protocolAdapterID,
             metricsCollector?.buildValueDataPoint(protocolAdapterID, MetricsCollector.METRICS_READS, 1.0, MetricUnits.COUNT, metricDimensions),
-            metricsCollector?.buildValueDataPoint(protocolAdapterID, MetricsCollector.METRICS_READ_DURATION, readDurationInMillis, MetricUnits.MILLISECONDS, metricDimensions),
-            metricsCollector?.buildValueDataPoint(protocolAdapterID, MetricsCollector.METRICS_VALUES_READ, values.size.toDouble(), MetricUnits.COUNT, metricDimensions),
-            metricsCollector?.buildValueDataPoint(protocolAdapterID, MetricsCollector.METRICS_READ_SUCCESS, 1.0, MetricUnits.COUNT, metricDimensions))
+            metricsCollector?.buildValueDataPoint(
+                protocolAdapterID,
+                MetricsCollector.METRICS_READ_DURATION,
+                readDurationInMillis,
+                MetricUnits.MILLISECONDS,
+                metricDimensions
+            ),
+            metricsCollector?.buildValueDataPoint(
+                protocolAdapterID,
+                MetricsCollector.METRICS_VALUES_READ,
+                values.size.toDouble(),
+                MetricUnits.COUNT,
+                metricDimensions
+            ),
+            metricsCollector?.buildValueDataPoint(protocolAdapterID, MetricsCollector.METRICS_READ_SUCCESS, 1.0, MetricUnits.COUNT, metricDimensions)
+        )
     }
 
     /**
@@ -219,10 +234,12 @@ class MqttAdapter(private val adapterID: String, private val configuration: Mqtt
      * @param sourceID String
      * @return MqttClient?
      */
-    private suspend fun getClientForSource(sourceID: String,
-                                           adapterID: String,
-                                           metrics: MetricsCollector?,
-                                           metricDimensions: Map<String, String>): MqttClient? {
+    private suspend fun getClientForSource(
+        sourceID: String,
+        adapterID: String,
+        metrics: MetricsCollector?,
+        metricDimensions: Map<String, String>
+    ): MqttClient? {
 
         var client = sourceClients[sourceID]
         if ((client != null)) {
@@ -268,20 +285,20 @@ class MqttAdapter(private val adapterID: String, private val configuration: Mqtt
 
         // Create the client
         val id = "${this::class.simpleName}-${sourceConfiguration.protocolAdapterID}-${UUID.randomUUID()}"
-        val client = MqttClient(brokerConfiguration.endPoint, id, MemoryPersistence())
+        val client = try {
+            MqttHelper(brokerConfiguration, logger).buildClient(id, MemoryPersistence())
+        } catch (e: Exception) {
+            log.error("Error connecting to ${brokerConfiguration.endPoint} for source \"$sourceID\", $e")
+            return null
+        }
 
-        // Connect to the broker
-        val options = MqttConnectOptions()
-        options.isAutomaticReconnect = true
-        options.connectionTimeout = brokerConfiguration.connectTimeout.toDouble(DurationUnit.SECONDS).toInt()
         return try {
-            client.connect(options)
             log.info("Connected to broker for source \"$sourceID\" at ${brokerConfiguration.endPoint} with session id \"$id\"")
             // Setup subscriptions
             setupSourceSubscriptions(sourceID, sourceConfiguration, client)
             client
         } catch (e: Throwable) {
-            log.error("Error connecting to broker at ${brokerConfiguration.endPoint} for source \"$sourceID\", $e")
+            log.error("Error setting up subscription ${brokerConfiguration.endPoint} for source \"$sourceID\", $e")
             null
         }
     }
@@ -425,7 +442,13 @@ class MqttAdapter(private val adapterID: String, private val configuration: Mqtt
             val schedule = config.schedules.firstOrNull { it.name == scheduleName }
             val sourcesForAdapter = schedule?.sources?.filter { (config.sources[it.key]?.protocolAdapterID ?: "") == adapterID } ?: return null
 
-            return if (adapter != null) InProcessSourcesReader.createInProcessSourcesReader(schedule, adapter!!, sourcesForAdapter, config.metrics, logger) else null
+            return if (adapter != null) InProcessSourcesReader.createInProcessSourcesReader(
+                schedule,
+                adapter!!,
+                sourcesForAdapter,
+                config.metrics,
+                logger
+            ) else null
 
         }
 
@@ -453,7 +476,8 @@ class MqttAdapter(private val adapterID: String, private val configuration: Mqtt
 
 
         private val ADAPTER_METRIC_DIMENSIONS = mapOf(
-            MetricsCollector.METRICS_DIMENSION_SOURCE_CATEGORY to METRICS_DIMENSION_SOURCE_CATEGORY_ADAPTER)
+            MetricsCollector.METRICS_DIMENSION_SOURCE_CATEGORY to METRICS_DIMENSION_SOURCE_CATEGORY_ADAPTER
+        )
     }
 
 }

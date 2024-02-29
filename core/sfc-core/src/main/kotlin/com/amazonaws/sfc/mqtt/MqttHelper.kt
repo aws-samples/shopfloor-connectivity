@@ -3,9 +3,10 @@ package com.amazonaws.sfc.mqtt
 import com.amazonaws.sfc.crypto.CertificateHelper
 import com.amazonaws.sfc.crypto.KeyHelpers
 import com.amazonaws.sfc.log.Logger
-import com.amazonaws.sfc.util.getHostName
 import org.eclipse.paho.client.mqttv3.MqttClient
+import org.eclipse.paho.client.mqttv3.MqttClientPersistence
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions
+import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence
 import java.security.KeyStore
 import java.security.cert.Certificate
 import java.security.cert.CertificateFactory
@@ -86,7 +87,7 @@ class MqttHelper(private val mqttConnectionConfig: MqttConnectionOptions, privat
         options.keepAliveInterval = 300
         options.isAutomaticReconnect = true
         options.isCleanSession = true
-        options.connectionTimeout = mqttConnectionConfig.connectTimeout
+        options.connectionTimeout = mqttConnectionConfig.connectTimeout.inWholeSeconds.toInt()
 
         if (mqttConnectionConfig.password != null) {
             options.password = mqttConnectionConfig.password!!.toCharArray()
@@ -127,7 +128,7 @@ class MqttHelper(private val mqttConnectionConfig: MqttConnectionOptions, privat
             CertificateHelper.loadX509Certificates(mqttConnectionConfig.sslServerCert!!).toMutableList()
         }
 
-        log.info("Loading server certificate from  ${mqttConnectionConfig.endpoint}:${mqttConnectionConfig.port}")
+        log.info("Loading server certificate from  ${mqttConnectionConfig.endPoint}:${mqttConnectionConfig.port}")
         val serverCertificates: MutableList<X509Certificate> = mutableListOf()
         val sslContext = SSLContext.getInstance("TLS")
 
@@ -148,7 +149,7 @@ class MqttHelper(private val mqttConnectionConfig: MqttConnectionOptions, privat
         }), null)
 
         // request certificates over socket connection
-        (sslContext.socketFactory.createSocket(mqttConnectionConfig.endpoint, mqttConnectionConfig.port ?: 443) as SSLSocket).use { sslSocket ->
+        (sslContext.socketFactory.createSocket(mqttConnectionConfig.endPoint, mqttConnectionConfig.port ?: 443) as SSLSocket).use { sslSocket ->
             sslSocket.useClientMode = true
             sslSocket.startHandshake()
             serverCertificates
@@ -156,15 +157,15 @@ class MqttHelper(private val mqttConnectionConfig: MqttConnectionOptions, privat
         serverCertificates
     }
 
-    fun buildClient(): MqttClient {
+    fun buildClient(clientID : String, persistence: MqttClientPersistence = MemoryPersistence()): MqttClient {
 
         val log = logger.getCtxLoggers(className, "mqttClient")
 
         try {
             log.trace("Building mqtt client")
             val options = connectionOptions
-            val client = MqttClient(mqttConnectionConfig.endpoint, "sfc_config_provider_${getHostName()}")
-            log.trace("Connecting to ${mqttConnectionConfig.endpoint}:${mqttConnectionConfig.port}")
+            val client = MqttClient(mqttConnectionConfig.endPoint, clientID, persistence)
+            log.trace("Connecting to ${mqttConnectionConfig.endPoint}:${mqttConnectionConfig.port}")
             client.connect(options)
             return client
         } catch (e: Throwable) {
