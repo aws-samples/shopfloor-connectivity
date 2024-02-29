@@ -4212,16 +4212,107 @@ This section describes the configuration types for the MQTT protocol adapter and
 </table>
 
 ## MqttBrokerConfiguration
+<table>  
+<colgroup>  
+<col style="width: 17%" />  
+<col style="width: 29%" />  
+<col style="width: 20%" />  
+<col style="width: 32%" />  
+</colgroup>   
+<tbody>  
+<tr class="odd">  
+<td><strong>Name</strong></td>  
+<td><strong>Description</strong></td>  
+<td><strong>Type</strong></td>  
+<td><strong>Comments</strong></td>  
+</tr>  
+<tr class="even">  
+<td>EndPoint</td>  
+<td>Broker endpoint address</td>  
+<td>String</td>  
+<td>Optionally with training port number (see Port)
 
-| Configuration data for connecting to and reading from source MQTT servers |                                                                         |          |                                                                                |
-|---------------------------------------------------------------------------|-------------------------------------------------------------------------|----------|--------------------------------------------------------------------------------|
-| **Name**                                                                  | **Description**                                                         | **Type** | Comments                                                                       |
-| Address                                                                   | Address of a source MQTT broker.                                        | String   | The endpoint the client will connect to is \<Protocol\>://\<Address\>:\<Port\> |
-| Port                                                                      | Port used by the MQTT broker.                                           | Integer  | Default is 1883                                                                |
-| Protocol                                                                  | Protocol to use to connect to the broker                                | String   | Default is "tcp"                                                               |
-| ConnectTimeout                                                            | Timeout period in milliseconds to connect to the broker.                | Integer  | Default is 10000, the minimum value is 1000                                    |
-| WaitAfterConnectError                                                     | The period in milliseconds to wait after a connection failure to retry. | Integer  | Default is 10000, the minimum value is 1000                                    |
 
+If no scheme is specified in the address, then it will be added based on the Connection type.
+("tcp://" for PlainText or "ssl://" for ServerSideTLS or MutualTLS)</td>
+</tr>  
+<tr class="odd">  
+<td>Port</td>  
+<td>Port on MQTT broker</td>  
+<td>Integer</td>  
+<td>
+
+Commonly port numbers are
+-  1883 for Plaintext
+-  8883 for ServerSideTLS
+-  8884 for MutualTLS.
+-  443 for AWS IoT Core endpoints
+
+In no port number is specified then the EndPoint address is searched for a training port number.
+
+</td> 
+</tr>  
+<tr class="even">  
+<td>Connection</td>  
+<td>Connection type</td>  
+<td>String</td>  
+<td>
+
+-  "PlainText" (Default)
+-  "ServerSideTLS"
+-  "MutualTLS"
+</td>  
+</tr>  
+<tr class="even">  
+<td>SslServerCertificate</td>  
+<td>Path to server certificate file to verify the identity of the broker.</td>  
+<td>String</td>  
+<td>If no certificate file is specified it is obtained from the server.
+<p>Used for connections of type ServerSideTLS and MutualTLS</p></td>  
+</tr>  
+<tr class="odd">  
+<td>PrivateKey</td>  
+<td>Path to client private key file</td>  
+<td>String</td>  
+<td></td>  
+</tr>  
+<tr class="even">  
+<td>RootCA</td>  
+<td>Path to root certificate file. The Root CA file in an MQTT client is used for server certificate verification when establishing a secure connection with the broker (using TLS/SSL)</td>  
+<td>String</td>  
+<td></td>  
+</tr>  
+<tr class="odd">  
+<td>Certificate</td>  
+<td>Path to client certificate file. Used if broker used certificate authentication</td>  
+<td>String</td>  
+<td></td>  
+</tr>  
+<tr class="even">  
+<td>Username</td>  
+<td>Username if broker is using username and password authentication</td>  
+<td>String</td>  
+<td>Username and password should not be included as clear text in the configuration. It is strongly recommended to use placeholders and use the SFC integration with the AWS secrets manager.</td>
+<tr class="odd">  
+<td>Password</td>  
+<td>Password if broker is using username and password authentication</td>  
+<td>String</td>  
+<td>Username and password should not be included as clear text in the configuration. It is strongly recommended to use placeholders and use the SFC integration with the AWS secrets manager.</td>  
+</tr>  
+<tr class="even">  
+<td>ConnectionTimeout</td>  
+<td>Timeout for connecting to the broker in seconds</td>  
+<td>Int</td>  
+<td>Default is 10 seconds</td>
+<tr class="odd">  
+<td>WaitAfterConnectError</td>  
+<td>Period in seconds to wait before trying to connect after a connection failure</td>  
+<td>Int</td>  
+<td>Default is 60 seconds</td>
+
+</tr>  
+</tbody>  
+</table>
 
 [^top](#toc)
 

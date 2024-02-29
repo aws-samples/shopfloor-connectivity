@@ -27,6 +27,7 @@ import com.amazonaws.sfc.metrics.MetricsSourceConfiguration
 import com.amazonaws.sfc.service.addExternalSecretsConfig
 import com.amazonaws.sfc.util.buildContext
 import com.amazonaws.sfc.util.buildScope
+import com.amazonaws.sfc.util.isJobCancellationException
 import io.grpc.StatusException
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.*
@@ -64,10 +65,11 @@ class IpcTargetWriter(private val targetID: String,
         val log =  logger.getCtxLoggers(className, "writer")
         try {
             writer()
-        }catch (e: CancellationException) {
-            log.info("Writer stopped")
         }catch (e : Exception){
-            log.error("Error in writerWorker, ${e.message}")
+            if (e.isJobCancellationException)
+                log.info("Writer stopped")
+            else
+                log.error("Error in writerWorker, ${e.message}")
         }
     }
 
@@ -111,7 +113,7 @@ class IpcTargetWriter(private val targetID: String,
                 }
 
             } catch (e: Exception) {
-                if (e !is CancellationException) {
+                if (!e.isJobCancellationException) {
                     if (client?.lastError == null) {
                         client?.lastError = e
                     }

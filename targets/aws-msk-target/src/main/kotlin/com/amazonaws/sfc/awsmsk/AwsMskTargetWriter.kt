@@ -29,6 +29,7 @@ import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_WRITE_SUCCES
 import com.amazonaws.sfc.system.DateTime
 import com.amazonaws.sfc.targets.TargetException
 import com.amazonaws.sfc.util.getHostName
+import com.amazonaws.sfc.util.isJobCancellationException
 import com.amazonaws.sfc.util.launch
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
@@ -143,7 +144,7 @@ class AwsMskTargetWriter(
 
     // If using the SFC credentials provider this worker wil periodically resolve the temporary credentials
     private val credentialsWorker = if (credentialsProvider is AwsIoTCredentialSessionProvider) scope.launch {
-
+        val log = logger.getCtxLoggers(className, "credentialsWorker")
         while (isActive) {
             try {
                 // resolve credentials, note that only when the existing credentials are no longer valid new one will be requested from the credentials service
@@ -164,7 +165,10 @@ class AwsMskTargetWriter(
 
                 delay(60.toDuration(DurationUnit.SECONDS))
             } catch (e: Exception) {
-                logger.getCtxErrorLog(className, "credentialsWorker")("$e")
+                if (e.isJobCancellationException)
+                    log.info("Crdentials worker stopped")
+                else
+                    log.error("$e")
             }
         }
     }
@@ -284,7 +288,10 @@ class AwsMskTargetWriter(
                     waitForCredentialsInitializationFinished()
                 }
             }catch (e : Exception){
-                log.error("Error writing to MSK, $e")
+                if (e.isJobCancellationException)
+                    log.info("Writer stopped")
+                else
+                    log.error("Error writing to MSK, $e")
             }
         }
     }

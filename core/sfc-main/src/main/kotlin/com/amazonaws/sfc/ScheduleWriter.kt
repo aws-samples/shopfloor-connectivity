@@ -27,6 +27,7 @@ import com.amazonaws.sfc.metrics.MetricsDataPoint
 import com.amazonaws.sfc.metrics.MetricsValue
 import com.amazonaws.sfc.system.DateTime
 import com.amazonaws.sfc.util.buildScope
+import com.amazonaws.sfc.util.isJobCancellationException
 import com.amazonaws.sfc.util.launch
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
@@ -240,7 +241,10 @@ class ScheduleWriter(
             log.error("Timeout writing to target \"${targetID}\"")
             false
         } catch (e: Throwable) {
-            log.error("Error writing to target \"${targetID}\", $e")
+            if (e.isJobCancellationException)
+                log.info("Writer stopped")
+            else
+                log.error("Error writing to target \"${targetID}\", $e")
             false
         }
     }

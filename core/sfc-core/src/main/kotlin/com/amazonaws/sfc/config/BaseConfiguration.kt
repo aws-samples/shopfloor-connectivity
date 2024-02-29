@@ -329,8 +329,7 @@ open class BaseConfiguration : Validate, HasSecretsManager {
             adapterTypes: Map<String, InProcessConfiguration>,
             awsIotCredentialProviderClients: Map<String, AwsIotCredentialProviderClientConfiguration>,
             secretsManagerConfiguration: SecretsManagerConfiguration?,
-            tuningConfiguration: TuningConfiguration = TuningConfiguration()
-        ): T {
+            tuningConfiguration: TuningConfiguration = TuningConfiguration()): T {
 
             val parameterLessConstructor = T::class.java.constructors.firstOrNull { it.parameters.isEmpty() }
             assert(parameterLessConstructor != null)

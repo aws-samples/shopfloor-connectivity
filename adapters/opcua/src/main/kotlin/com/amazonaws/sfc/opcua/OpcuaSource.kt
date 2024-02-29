@@ -333,10 +333,12 @@ open class OpcuaSource(
 
     // coroutine handling changed data for subscriptions
     private val changedDataWorker = if (inSubscriptionReadingMode) sourceScope.launch("$sourceID Data Subscription Handler") {
+
+       val log = logger.getCtxLoggers(className, "changedDataWorker" )
         try {
             onSubscribedNodeData()
-        } catch (e: Exception) {
-            logger.getCtxErrorLog(className, "changedDataWorker")("Error while handling data changes for source \"$sourceID\", $e")
+        }catch (e: Exception) {
+            log.error("Error while handling data changes for source \"$sourceID\", $e")
         }
     } else null
 

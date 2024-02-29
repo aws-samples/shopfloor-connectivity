@@ -243,7 +243,6 @@ class PcccAdapter(
                     }
                 }
             } catch (t: TimeoutCancellationException) {
-
                 log.warning("Timeout stopping PCCC Adapter, $t")
             }
 

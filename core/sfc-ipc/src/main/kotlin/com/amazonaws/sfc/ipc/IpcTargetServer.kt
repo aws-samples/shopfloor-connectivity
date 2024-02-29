@@ -21,6 +21,7 @@ import com.amazonaws.sfc.service.Service
 import com.amazonaws.sfc.system.DateTime
 import com.amazonaws.sfc.util.buildScope
 import com.amazonaws.sfc.util.getIp4NetworkAddress
+import com.amazonaws.sfc.util.isJobCancellationException
 import io.grpc.BindableService
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
@@ -142,6 +143,7 @@ class IpcTargetServer(
          */
         override fun writeValues(requests: Flow<WriteValuesRequest>): Flow<TargetResultResponse> = flow {
 
+            val log = logger.getCtxLoggers(className, "writeValues")
             val scope = buildScope("READ-REQUEST")
             scope.launch {
                 try {
@@ -150,8 +152,10 @@ class IpcTargetServer(
                         writer?.writeTargetData(request.asTargetData())
                     }
                 } catch (e: Exception) {
-
-                    logger.getCtxErrorLog(className, "writeValues")
+                    if (e.isJobCancellationException)
+                        log.info("Service stopped")
+                    else
+                        log.error("Error writing values, e")
                 }
             }
 

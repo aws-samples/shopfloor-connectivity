@@ -273,7 +273,6 @@ class SqlAdapter(private val adapterID: String, private val configuration: SqlCo
                     }
                 }
             } catch (t: TimeoutCancellationException) {
-
                 log.warning("Timeout stopping SQL Adapter, $t")
             }
 

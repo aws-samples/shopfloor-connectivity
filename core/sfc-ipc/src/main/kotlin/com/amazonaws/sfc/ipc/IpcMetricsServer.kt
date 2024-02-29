@@ -188,14 +188,14 @@ class IpcMetricsServer(
         val healthProbeConfiguration = config.metrics?.writer?.metricsServer?.healthProbeConfiguration
         healthProbeService = if (healthProbeConfiguration == null) null else
             try {
-                val service =
-                    HealthProbeService(healthProbeConfiguration, serviceStopFunction = ::stopUnhealthyService, checkFunction = ::isHealthy, logger = logger)
+                val service = HealthProbeService(healthProbeConfiguration, serviceStopFunction = ::stopUnhealthyService, checkFunction = ::isHealthy, logger = logger)
                 serviceScope.launch {
                     delay(1.toDuration(DurationUnit.MINUTES))
                     service.restartIfInactive()
                 }
                 service
             } catch (e: Exception) {
+                logger.getCtxErrorLog(className, "initializeHealthProbeService" )("Error initializing helpth probe service, $e")
                 null
             }
         healthProbeService?.start()

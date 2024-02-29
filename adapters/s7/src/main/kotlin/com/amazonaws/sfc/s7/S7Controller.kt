@@ -273,8 +273,7 @@ class S7Controller(
                 throw ProtocolAdapterException("Timeout reading from source \"$sourceID\"")
             } catch (e: Exception) {
                 val errorFields = request.fields.map { lookupConfiguredField(it as S7Field) }.toSet()
-                val msg =
-                    "Error reading from source  \"$sourceID\", fields [${errorFields.joinToString { it.toString() }}, $e"
+                val msg = "Error reading from source  \"$sourceID\", fields [${errorFields.joinToString { it.toString() }}, $e"
                 throw ProtocolAdapterException(msg)
             }
         }
@@ -354,7 +353,6 @@ class S7Controller(
         } catch (e: Exception) {
             metrics?.put(adapterID, METRICS_CONNECTION_ERRORS, 1.0, MetricUnits.COUNT, metricDimensions)
             throw (ProtocolAdapterException("Can not connect to PLC for source \"${sourceID}\" with connect string \"$connectString\", ${e.message}"))
-
         }
     }
 

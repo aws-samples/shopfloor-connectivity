@@ -8,42 +8,23 @@ package com.amazonaws.sfc.mqtt.config
 import com.amazonaws.sfc.config.ConfigurationClass
 import com.amazonaws.sfc.config.ConfigurationException
 import com.amazonaws.sfc.config.Validate
+import com.amazonaws.sfc.mqtt.MqttConnectionOptions
+import com.amazonaws.sfc.mqtt.MqttConnectionType
 import com.google.gson.annotations.SerializedName
 import kotlin.time.Duration
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration
 
 @ConfigurationClass
-class MqttBrokerConfiguration : Validate {
+class MqttBrokerConfiguration : MqttConnectionOptions(), Validate {
 
-    @SerializedName(CONFIG_BROKER_ADDRESS)
-    private var _address = ""
-    val address: String
-        get() = _address
 
-    @SerializedName(CONFIG_BROKER_PORT)
-    private var _port = DEFAULT_PORT
-    val port: Int
-        get() = _port
-
-    @SerializedName(CONFIG_MQTT_PROTOCOL)
-    private var _mqttProtocol: MqttProtocol? = null
-
-    val protocol: MqttProtocol
-        get() = _mqttProtocol ?: DEFAULT_MQTT_PROTOCOL
-
-    val endPoint
-        get() = "$protocol://${address}:${port}"
-
-    @SerializedName(CONFIG_CONNECT_TIMEOUT)
-    private var _connectTimeout: Long = DEFAULT_CONNECT_TIMEOUT_MS
-    val connectTimeout: Duration
-        get() = _connectTimeout.toDuration(DurationUnit.MILLISECONDS)
 
     @SerializedName(CONFIG_WAIT_AFTER_CONNECT_ERROR)
-    private var _waitAfterConnectError: Long = DEFAULT_WAIT_AFTER_CONNECT_ERROR
+    private var _waitAfterConnectError = DEFAULT_WAIT_AFTER_CONNECT_ERROR
     val waitAfterConnectError: Duration
-        get() = _waitAfterConnectError.toDuration(DurationUnit.MILLISECONDS)
+        get() = _waitAfterConnectError.toDuration(DurationUnit.SECONDS)
+
 
     private var _validated = false
     override var validated
@@ -55,21 +36,19 @@ class MqttBrokerConfiguration : Validate {
     @Throws(ConfigurationException::class)
     override fun validate() {
         if (validated) return
-        validateAddress()
-        validatePort()
+        super.validate()
         validateConnectionTimeout()
         validateWaitAfterConnectError()
         validated = true
-
     }
 
-    private fun atLeastOneSecond(t: Duration) = t >= (1000.toDuration(DurationUnit.MILLISECONDS))
+    private fun atLeastOneSecond(t: Duration) = t >= (1.toDuration(DurationUnit.SECONDS))
 
 
     private fun validateWaitAfterConnectError() =
         ConfigurationException.check(
             atLeastOneSecond(waitAfterConnectError),
-            "Wait after connect error $CONFIG_WAIT_AFTER_CONNECT_ERROR must be 1000 (milliseconds) or longer",
+            "Wait after connect error $CONFIG_WAIT_AFTER_CONNECT_ERROR must be 1 second or longer",
             "WaitAfterConnectError",
             this
         )
@@ -77,59 +56,50 @@ class MqttBrokerConfiguration : Validate {
     private fun validateConnectionTimeout() =
         ConfigurationException.check(
             atLeastOneSecond(connectTimeout),
-            "Connect timeout $CONFIG_CONNECT_TIMEOUT must be 1000 (milliseconds) or longer",
-            CONFIG_CONNECT_TIMEOUT,
-            this
-        )
-
-    private fun validatePort() {
-        ConfigurationException.check(
-            (port > 0),
-            "Port must be 1 or higher",
-            CONFIG_BROKER_PORT,
-            this
-        )
-    }
-
-    private fun validateAddress() =
-        ConfigurationException.check(
-            (address.isNotEmpty()),
-            "Address of TCP source server can not be empty",
-            CONFIG_BROKER_ADDRESS,
+            "Connect timeout $CONFIG_MQTT_CONNECT_TIMEOUT must be 1 second or longer",
+            CONFIG_MQTT_CONNECT_TIMEOUT,
             this
         )
 
 
     companion object {
-        private const val DEFAULT_PORT = 1883
-        private const val DEFAULT_CONNECT_TIMEOUT_MS = 10000L
-        const val DEFAULT_WAIT_AFTER_CONNECT_ERROR = 10000L
-        private val DEFAULT_MQTT_PROTOCOL = MqttProtocol.TCP
-
-        private const val CONFIG_BROKER_ADDRESS = "Address"
-        private const val CONFIG_BROKER_PORT = "Port"
-        private const val CONFIG_MQTT_PROTOCOL = "MqttProtocol"
-        private const val CONFIG_CONNECT_TIMEOUT = "ConnectTimeout"
+        const val DEFAULT_WAIT_AFTER_CONNECT_ERROR = 60
         private const val CONFIG_WAIT_AFTER_CONNECT_ERROR = "WaitAfterConnectError"
 
         private val default = MqttBrokerConfiguration()
 
-        fun create(address: String = default._address,
-                   port: Int = default._port,
-                   mqttProtocol: MqttProtocol? = default._mqttProtocol,
-                   connectTimeout: Long = default._connectTimeout,
-                   waitAfterConnectError: Long = default._waitAfterConnectError): MqttBrokerConfiguration {
+        fun create(
+            endpoint: String = default._endPoint,
+            port: Int? = default._port,
+            connection: MqttConnectionType = default._connection,
+            username: String? = default._username,
+            password: String? = default._password,
+            certificate: String? = default._certificate,
+            privateKey: String? = default._privateKey,
+            rootCA: String? = default._rootCA,
+            sslServerCert: String? = default._sslServerCert,
+            connectTimeout: Int = default._connectTimeout,
+            waitAfterConnectError: Int = default._waitAfterConnectError,
+        ): MqttConnectionOptions {
+
 
             val instance = MqttBrokerConfiguration()
             with(instance) {
-                _address = address
+                _endPoint = endpoint
                 _port = port
-                _mqttProtocol = mqttProtocol
+                _connection = connection
+                _username = username
+                _password = password
+                _certificate = certificate
+                _privateKey = privateKey
+                _rootCA = rootCA
+                _sslServerCert = sslServerCert
                 _connectTimeout = connectTimeout
-                _waitAfterConnectError = waitAfterConnectError
+                _waitAfterConnectError= waitAfterConnectError
             }
             return instance
         }
+
 
     }
 }

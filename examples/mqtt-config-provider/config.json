@@ -1,0 +1,10 @@
+{
+  "ConfigProvider": {
+    "JarFiles": ["< DEPLOYMENT DIR > /mqtt-config-provider/build/libs"],
+    "FactoryClassName": "com.amazonaws.sfc.config.MqttConfigProvider"
+  },
+  "LocalConfigFile" : "local-config.json",
+  "Port" : < PORT NUMBER >,
+  "EndPoint" : "< BROKER ADDRESS >",
+  "TopicName" : "< TOPIC NAME >"
+}

@@ -29,6 +29,7 @@ import com.amazonaws.sfc.transformations.TransformationException
 import com.amazonaws.sfc.transformations.invoke
 import com.amazonaws.sfc.util.WorkerQueue
 import com.amazonaws.sfc.util.buildScope
+import com.amazonaws.sfc.util.isJobCancellationException
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.channels.Channel
@@ -124,7 +125,7 @@ class ScheduleReader(
 
         val readResultsChannel = Channel<Pair<String, ReadResult?>>(1000, onBufferOverflow = BufferOverflow.SUSPEND)
 
-        val errorLog = logger.getCtxErrorLog(className, "readSourceValues")
+        val log = logger.getCtxLoggers(className, "readSourceValues")
         val processing = launch(Dispatchers.IO + CoroutineName("Reader")) {
             try {
                 // Combined source results from all readers
@@ -149,7 +150,7 @@ class ScheduleReader(
                         val readerResult = result.second
 
                         if (readerResult == null) {
-                            errorLog("No result from  $protocolAdapterID ")
+                            log.error("No result from  $protocolAdapterID ")
                             readersDone.add(protocolAdapterID)
                             continue
                         }
@@ -168,12 +169,18 @@ class ScheduleReader(
                             processReceivedData()
                         }
                     } catch (e: Exception) {
-                        errorLog("Error reading from reader, $e")
+                        if (e.isJobCancellationException)
+                            log.info("Processing stopped")
+                        else
+                            log.error("Error processing data from reader, $e")
                     }
                 }
                 processReceivedData()
             } catch (e: Exception) {
-                errorLog("Exception in processing: ${e.message}")
+                if (e.isJobCancellationException)
+                    log.info("Reader stopped")
+                else
+                    log.error("Exception in processing: ${e.message}")
             }
         }
 
@@ -181,15 +188,22 @@ class ScheduleReader(
             while (isActive) {
                 try {
                     val readerWorkerQueue =
-                        WorkerQueue<Pair<String, SourceValuesReader>, Unit>(workers = config.tuningConfiguration.maxConcurrentSourceReaders, capacity = readers.size, Dispatchers.IO) { (protocolID, reader) ->
+                        WorkerQueue<Pair<String, SourceValuesReader>, Unit>(
+                            workers = config.tuningConfiguration.maxConcurrentSourceReaders,
+                            capacity = readers.size,
+                            Dispatchers.IO
+                        ) { (protocolID, reader) ->
                             runBlocking {
                                 try {
-                                        reader.read { result ->
-                                            readResultsChannel.send(protocolID to result)
-                                            readerWorker.isActive
-                                        }
+                                    reader.read { result ->
+                                        readResultsChannel.send(protocolID to result)
+                                        readerWorker.isActive
+                                    }
                                 } catch (e: Exception) {
-                                    errorLog("Error reading from $protocolID")
+                                    if (e.isJobCancellationException)
+                                        log.info("Reader $protocolID stopped")
+                                    else
+                                        log.error("Error reading from $protocolID")
                                 }
                             }
                         }
@@ -198,9 +212,11 @@ class ScheduleReader(
                         readerWorkerQueue.submit(protocolID to sourceReader)
                     }
                     readerWorkerQueue.await(60.toDuration(DurationUnit.SECONDS))
-
                 } catch (e: Exception) {
-                    errorLog("Error reading from reader, $e")
+                    if (e.isJobCancellationException)
+                        log.info("Reader stopped")
+                    else
+                        log.error("Error reading from reader, $e")
                 }
             }
         }

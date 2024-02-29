@@ -22,6 +22,7 @@ import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_DIMENSION_SO
 import com.amazonaws.sfc.system.DateTime.systemDateTime
 import com.amazonaws.sfc.targets.TargetException
 import com.amazonaws.sfc.util.LookupCacheHandler
+import com.amazonaws.sfc.util.isJobCancellationException
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
@@ -251,8 +252,13 @@ class AdsAdapter(
                         log.error("Error closing ADS source for source \"${it.key}")
                     }
                 }
-            } catch (t: TimeoutCancellationException) {
-                log.warning("Timeout stopping ADS Adapter, $t")
+            } catch (e : Exception) {
+                if (e.isJobCancellationException) {
+                    log.warning("ADS Adapter stopped, $e")
+                }
+                else {
+                    log.warning("Timeout stopping ADS Adapter, $e")
+                }
             }
 
         }

@@ -28,6 +28,7 @@ import com.amazonaws.sfc.modbus.tcp.config.ModbusTcpDeviceConfiguration.Companio
 import com.amazonaws.sfc.modbus.tcp.protocol.ModbusTCP
 import com.amazonaws.sfc.modbus.tcp.transport.TcpTransport
 import com.amazonaws.sfc.targets.TargetException
+import com.amazonaws.sfc.util.isJobCancellationException
 import com.amazonaws.sfc.util.launch
 import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
@@ -122,7 +123,10 @@ class ModbusTcpAdapter(private val adapterID: String, private val configuration:
                 joinAll(*sources.toTypedArray(), *stop.toTypedArray())
             }
         } catch (_: TimeoutCancellationException) {
+        }catch ( e : Exception){
+            if (!e.isJobCancellationException) throw e
         }
+
 
     }
 

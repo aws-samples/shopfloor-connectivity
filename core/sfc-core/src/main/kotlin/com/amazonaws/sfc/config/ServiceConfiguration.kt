@@ -153,7 +153,7 @@ open class ServiceConfiguration : BaseConfiguration() {
                 adapterTypes = adapterTypes,
                 awsIotCredentialProviderClients = awsIotCredentialProviderClients,
                 secretsManagerConfiguration = secretsManagerConfiguration,
-                tuningConfiguration = TuningConfiguration())
+                tuningConfiguration = tuningConfiguration)
 
             with(instance) {
                 _targets = targets

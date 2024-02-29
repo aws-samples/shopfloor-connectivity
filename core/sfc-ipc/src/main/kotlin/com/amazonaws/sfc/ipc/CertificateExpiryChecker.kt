@@ -1,4 +1,3 @@
-
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: MIT-0
 
@@ -10,13 +9,16 @@ import com.amazonaws.sfc.log.Logger
 import com.amazonaws.sfc.system.DateTime
 import com.amazonaws.sfc.system.DateTime.add
 import com.amazonaws.sfc.util.buildScope
+import com.amazonaws.sfc.util.isJobCancellationException
 import com.amazonaws.sfc.util.launch
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.TimeoutCancellationException
+import kotlinx.coroutines.isActive
 import java.io.File
 import java.time.Period
 import java.time.temporal.ChronoUnit
 
-class CertificateExpiryChecker( certificateFiles: List<File>, private val expirationWarningPeriodDays: Int, logger: Logger) {
+class CertificateExpiryChecker(certificateFiles: List<File>, private val expirationWarningPeriodDays: Int, logger: Logger) {
 
     private val className = this::class.simpleName.toString()
 
@@ -37,33 +39,37 @@ class CertificateExpiryChecker( certificateFiles: List<File>, private val expira
 
             val ctxLog = logger.getCtxLoggers(className, "Check Certificate Expiration")
 
-            try{
-            while (true) {
+            try {
+                while (isActive) {
 
-                val now = DateTime.systemDateUTC()
+                    val now = DateTime.systemDateUTC()
 
-                certificates.forEach { certificate ->
+                    certificates.forEach { certificate ->
 
-                    val certificateName = certificate.subjectX500Principal.name
+                        val certificateName = certificate.subjectX500Principal.name
 
 
-                    if (certificate.notAfter <= now.add(Period.ofDays(expirationWarningPeriodDays * -1))) {
+                        if (certificate.notAfter <= now.add(Period.ofDays(expirationWarningPeriodDays * -1))) {
 
-                        if (certificate.notAfter <= now) {
-                            ctxLog.error("Certificate $certificateName expired at ${certificate.notAfter}")
+                            if (certificate.notAfter <= now) {
+                                ctxLog.error("Certificate $certificateName expired at ${certificate.notAfter}")
+                            } else {
+                                val daysBetween = ChronoUnit.DAYS.between(certificate.notAfter.toInstant(), now.toInstant())
+                                ctxLog.warning("Certificate $certificateName will expire in $daysBetween days at ${certificate.notAfter}")
+                            }
+
                         } else {
-                            val daysBetween = ChronoUnit.DAYS.between(certificate.notAfter.toInstant(), now.toInstant())
-                            ctxLog.warning("Certificate $certificateName will expire in $daysBetween days at ${certificate.notAfter}")
+                            ctxLog.info("Checking expiration of certificate $certificateName, valid until ${certificate.notAfter}")
                         }
-
-                    } else {
-                        ctxLog.info("Checking expiration of certificate $certificateName, valid until ${certificate.notAfter}")
                     }
+                    DateTime.delayUntilNextMidnightUTC()
                 }
-                DateTime.delayUntilNextMidnightUTC()
-            }
-        }catch (e : Exception){
-                ctxLog.error("Error checking certificate expiration, $e")
+            } catch (e: Exception) {
+                if (e.isJobCancellationException){
+                    ctxLog.info("Stopped certificate checking")
+                } else {
+                    ctxLog.error("Error checking certificate expiration, $e")
+                }
             }
         }
 

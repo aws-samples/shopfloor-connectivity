@@ -155,7 +155,7 @@ class Client(
 
             }
 
-        } catch (_: TimeoutCancellationException) {
+        } catch ( e: TimeoutCancellationException) {
             throw AdsException("Timeout reading response from target ${config.targetAmsNetId} port ${config.targetAmsPort}")
         }
     }

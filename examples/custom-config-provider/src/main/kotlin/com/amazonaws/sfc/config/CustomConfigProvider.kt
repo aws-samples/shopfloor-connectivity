@@ -37,7 +37,6 @@ class CustomConfigProvider(private val configStr: String, private val configVeri
                 delay(60000)
             }
         }catch (e :  Exception){
-
             logger.getCtxErrorLog(this::class.java.name, "worker")("Error in worker thread")
         }
     }

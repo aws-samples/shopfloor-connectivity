@@ -28,6 +28,7 @@ val mockkVersion = "1.12.0"
 val kotlinCoroutinesVersion = "1.6.2"
 val kotlinReflectionVersion = "1.6.0"
 val kotlinVersion = "1.9.0"
+val pahoVersion = "1.2.5"
 
 dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion")
@@ -48,6 +49,7 @@ dependencies {
     api("io.burt:jmespath-core:$jmesPathVersion")
     api("org.apache.velocity:velocity-engine-core:$velocityVersion")
     api("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:$fasterXmlVersion")
+    api("org.eclipse.paho:org.eclipse.paho.client.mqttv3:$pahoVersion")
     api("org.apache.logging.log4j:log4j-api:$log4jVersion")
     api("org.apache.logging.log4j:log4j-core:$log4jVersion")
     api("org.apache.logging.log4j:log4j-slf4j-impl:$log4jVersion")
