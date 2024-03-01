@@ -136,7 +136,8 @@ open class ServiceConfiguration : BaseConfiguration() {
                                                                                            adapterServers: Map<String, ServerConfiguration>,
                                                                                            adapterTypes: Map<String, InProcessConfiguration>,
                                                                                            awsIotCredentialProviderClients: Map<String, AwsIotCredentialProviderClientConfiguration>,
-                                                                                           secretsManagerConfiguration: SecretsManagerConfiguration?): T {
+                                                                                           secretsManagerConfiguration: SecretsManagerConfiguration?,
+                                                                                           tuningConfiguration: TuningConfiguration): T {
 
             val instance = createBaseConfiguration<T>(
                 name = name,
@@ -177,7 +178,8 @@ open class ServiceConfiguration : BaseConfiguration() {
                    adapterServers: Map<String, ServerConfiguration> = default._protocolAdapterServers,
                    adapterTypes: Map<String, InProcessConfiguration> = default._protocolTypes,
                    awsIotCredentialProviderClients: Map<String, AwsIotCredentialProviderClientConfiguration> = default._awsIoTCredentialProviderClients,
-                   secretsManagerConfiguration: SecretsManagerConfiguration? = default._secretsManagerConfiguration): ServiceConfiguration =
+                   secretsManagerConfiguration: SecretsManagerConfiguration? = default._secretsManagerConfiguration,
+                   tuningConfiguration: TuningConfiguration): ServiceConfiguration =
             createServiceConfiguration(targets = targets,
                 protocolAdapters = protocolAdapters,
                 name = name,
@@ -193,7 +195,8 @@ open class ServiceConfiguration : BaseConfiguration() {
                 adapterServers = adapterServers,
                 adapterTypes = adapterTypes,
                 awsIotCredentialProviderClients = awsIotCredentialProviderClients,
-                secretsManagerConfiguration = secretsManagerConfiguration)
+                secretsManagerConfiguration = secretsManagerConfiguration,
+                tuningConfiguration = tuningConfiguration)
 
 
     }

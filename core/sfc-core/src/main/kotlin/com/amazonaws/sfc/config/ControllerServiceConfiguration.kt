@@ -404,7 +404,8 @@ class ControllerServiceConfiguration : ServiceConfiguration() {
                    adapterTypes: Map<String, InProcessConfiguration> = default._protocolTypes,
                    healthProbeConfiguration: HealthProbeConfiguration? = default._healthProbeConfiguration,
                    awsIotCredentialProviderClients: Map<String, AwsIotCredentialProviderClientConfiguration> = default._awsIoTCredentialProviderClients,
-                   secretsManagerConfiguration: SecretsManagerConfiguration? = default._secretsManagerConfiguration): ControllerServiceConfiguration {
+                   secretsManagerConfiguration: SecretsManagerConfiguration? = default._secretsManagerConfiguration,
+                   tuningConfiguration: TuningConfiguration = default._tuningConfiguration): ControllerServiceConfiguration {
 
             val instance = createServiceConfiguration<ControllerServiceConfiguration>(
                 targets = targets,
@@ -422,7 +423,8 @@ class ControllerServiceConfiguration : ServiceConfiguration() {
                 adapterServers = adapterServers,
                 adapterTypes = adapterTypes,
                 awsIotCredentialProviderClients = awsIotCredentialProviderClients,
-                secretsManagerConfiguration = secretsManagerConfiguration)
+                secretsManagerConfiguration = secretsManagerConfiguration,
+                tuningConfiguration = tuningConfiguration)
 
 
             with(instance) {

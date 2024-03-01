@@ -152,9 +152,7 @@ SFC documentation
   - [AWS IoT Analytics Service Target](#aws-iot-analytics-service-target)
     - [AwsIotAnalyticsTargetConfiguration](#awsiotanalyticstargetconfiguration)
   - [AWS IoT Core Service Target](#aws-iot-core-service-target)
-    - [AwsIotHttpTargetConfiguration](#awsiothttptargetconfiguration)
-  - [AWS MQTT Service Target](#aws-mqtt-service-target)
-    - [AwsMqttTargetConfiguration](#awsmqtttargetconfiguration)  
+    - [AwsIotCoreTargetConfiguration](#awsiotcoretargetconfiguration)
   - [AWS MSK Service Target](#aws-msk-service-target)
     - [AwsMskTargetConfiguration](#awsmsktargetconfiguration)
   - [AWS Kinesis Firehose Service Target](#aws-kinesis-firehose-service-target)
@@ -176,6 +174,8 @@ SFC documentation
     - [AwsTimestreamTargetConfiguration](#awstimestreamtargetconfiguration)
     - [AwsTimestreamRecordConfiguration](#awstimestreamrecordconfiguration)
     - [AwsTimestreamDimensionConfiguration](#awstimestreamdimensionconfiguration)
+  - [MQTT Target](#mqtt-target)
+    - [MqttTargetConfiguration](#mqtttargetconfiguration)
   - [File Target](#file-target)
     - [FileConfiguration](#fileconfiguration)
   - [Debug Target](#debug-target)
@@ -4456,7 +4456,7 @@ This section describes the configuration types for the SQL adapter and contains 
 </colgroup>
 <thead>
 <tr class="header">
-<th colspan="4">Configuration data for connecting to and reading from source MQTT servers</th>
+<th colspan="4">Configuration data for connecting to and reading from source SQL servers</th>
 </tr>
 </thead>
 <tbody>
@@ -5574,7 +5574,7 @@ To authorize the client this AMS Net ID must be added as an AMS route in the SYS
 
 # AWS IoT Core Service Target
 
-## AwsIotHttpTargetConfiguration
+## AwsIotCoreTargetConfiguration
 
 <table>
 <colgroup>
@@ -5585,7 +5585,7 @@ To authorize the client this AMS Net ID must be added as an AMS route in the SYS
 </colgroup>
 <thead>
 <tr class="header">
-<th colspan="4"><p>AwsIotHttpTargetConfiguration extends the type TargetConfiguration with specific configuration data for connecting to and sending to AWS IoT core topic using HTTP dataplane API. The Targets configuration element can contain entries of this type, the TargetType of these entries must be set to <strong>"AWS-IOT-HTTP"</strong></p>
+<th colspan="4"><p>AwsIotCoreTargetConfiguration extends the type TargetConfiguration with specific configuration data for connecting to and sending to AWS IoT core topic using HTTP dataplane API. The Targets configuration element can contain entries of this type, the TargetType of these entries must be set to <strong>"AWS-IOT-CORE"</strong></p>
 <p>Requires IAM permission iot:Publish for the topic the data is published to.</p></th>
 </tr>
 </thead>
@@ -5607,87 +5607,6 @@ To authorize the client this AMS Net ID must be added as an AMS route in the SYS
 <td>AWS Region for IoT Core service</td>
 <td>Integer</td>
 <td></td>
-</tr>
-</tbody>
-</table>
-
-[^top](#toc)
-
-# AWS MQTT Service Target
-
-## AwsMqttTargetConfiguration
-
-<table>
-<colgroup>
-<col style="width: 14%" />
-<col style="width: 17%" />
-<col style="width: 13%" />
-<col style="width: 55%" />
-</colgroup>
-<thead>
-<tr class="header">
-<th colspan="4"><p>MqttTopicTargetConfiguration extends the type TargetConfiguration with specific configuration data for connecting to and sending to an AWS IoT Core topic. The Targets configuration element can contain entries of this type, the TargetType of these entries must be set to <strong>"AWS-IOT-MQTT"</strong></p>
-<p><strong>This target is using certificates to authenticate and use TLS to protect the traffic. A policy allowing to write to the configured topic must be set for the specified certificate.</strong></p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><strong>Name</strong></td>
-<td><strong>Description</strong></td>
-<td><strong>Type</strong></td>
-<td>Comments</td>
-</tr>
-<tr class="even">
-<td>TopicName</td>
-<td>Name of the topic</td>
-<td>String</td>
-<td></td>
-</tr>
-<tr class="odd">
-<td>Endpoint</td>
-<td>ATS type endpoint for AWS IoT Core service</td>
-<td>String</td>
-<td><p>To get the endpoint for an account use the AWS CLI command<br />
-aws iot describe-endpoint --endpoint-type iot:Data-ATS</p>
-<p><a href="https://awscli.amazonaws.com/v2/documentation/api/latest/reference/iot/describe-endpoint.html">https://awscli.amazonaws.com/v2/documentation/api/latest/reference/iot/describe-endpoint.html</a></p></td>
-</tr>
-<tr class="even">
-<td>Certificate</td>
-<td>The pathname of the certificate file</td>
-<td>String</td>
-<td></td>
-</tr>
-<tr class="odd">
-<td>Key</td>
-<td>Pathname to the key file</td>
-<td>String</td>
-<td></td>
-</tr>
-<tr class="even">
-<td>RootCA</td>
-<td>Pathname to Root CA certificate file</td>
-<td>String</td>
-<td></td>
-</tr>
-<tr class="odd">
-<td>QoS</td>
-<td>Quality of service</td>
-<td>Integer</td>
-<td><p>0 = At most once</p>
-<p>1 = At least once</p>
-<p>2 = Exactly once</p></td>
-</tr>
-<tr class="even">
-<td>ConnectTimeout</td>
-<td>Timeout in milliseconds for connecting</td>
-<td>Long</td>
-<td>Default = 10000</td>
-</tr>
-<tr class="odd">
-<td>PublishTimeout</td>
-<td>Timeout in milliseconds for publishing</td>
-<td>Long</td>
-<td>Default = 10000</td>
 </tr>
 </tbody>
 </table>
@@ -6496,6 +6415,151 @@ The following properties are set by the adapter
 
 [^top](#toc)
 
+
+# MQTT Target
+
+## MqttTargetConfiguration
+
+<table>
+<colgroup>
+<col style="width: 14%" />
+<col style="width: 17%" />
+<col style="width: 13%" />
+<col style="width: 55%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th colspan="4"><p>MqttTargetConfiguration extends the type TargetConfiguration with specific configuration data for connecting to and sending to MQTT topic. The Targets configuration element can contain entries of this type, the TargetType of these entries must be set to <strong>"MQTT-TARGET"</strong></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Name</strong></td>
+<td><strong>Description</strong></td>
+<td><strong>Type</strong></td>
+<td>Comments</td>
+</tr>
+<tr class="even">
+<td>TopicName</td>
+<td>Name of the topic</td>
+<td>String</td>
+<td></td>
+</tr>
+
+<tr class="odd">
+<td>EndPoint</td>  
+<td>Broker endpoint address</td>  
+<td>String</td>  
+<td>Optionally with training port number (see Port)
+
+If no scheme is specified in the address, then it will be added based on the Connection type.
+("tcp://" for PlainText or "ssl://" for ServerSideTLS or MutualTLS)
+<p>To get the ATS endpoint for an account use the AWS CLI command<br />
+aws iot describe-endpoint --endpoint-type iot:Data-ATS</p>
+<p><a href="https://awscli.amazonaws.com/v2/documentation/api/latest/reference/iot/describe-endpoint.html">https://awscli.amazonaws.com/v2/documentation/api/latest/reference/iot/describe-endpoint.html</a></p>
+</td>
+</tr>  
+<tr class="even">  
+<td>Port</td>  
+<td>Port on MQTT broker</td>  
+<td>Integer</td>  
+<td>
+
+Commonly port numbers are
+-  1883 for Plaintext
+-  8883 for ServerSideTLS
+-  8884 for MutualTLS.
+-  443 for AWS IoT Core endpoints
+
+In no port number is specified then the EndPoint address is searched for a training port number.
+
+</td> 
+</tr>  
+<tr class="odd">  
+<td>Connection</td>  
+<td>Connection type</td>  
+<td>String</td>  
+<td>
+
+-  "PlainText" (Default)
+-  "ServerSideTLS"
+-  "MutualTLS"
+</td>  
+</tr>  
+<tr class="even">  
+<td>SslServerCertificate</td>  
+<td>Path to server certificate file to verify the identity of the broker.</td>  
+<td>String</td>  
+<td>If no certificate file is specified it is obtained from the server.
+<p>Used for connections of type ServerSideTLS and MutualTLS</p></td>  
+</tr>  
+<tr class="odd">  
+<td>PrivateKey</td>  
+<td>Path to client private key file</td>  
+<td>String</td>  
+<td></td>  
+</tr>  
+<tr class="even">  
+<td>RootCA</td>  
+<td>Path to root certificate file. The Root CA file in an MQTT client is used for server certificate verification when establishing a secure connection with the broker (using TLS/SSL)</td>  
+<td>String</td>  
+<td></td>  
+</tr>  
+<tr class="odd">  
+<td>Certificate</td>  
+<td>Path to client certificate file. Used if broker used certificate authentication</td>  
+<td>String</td>  
+<td></td>  
+</tr>  
+<tr class="even">
+<td>QoS</td>
+<td>Quality of service</td>
+<td>Integer</td>
+<td>Default is 0
+
+<p>0 = At most once</p>
+<p>1 = At least once</p>
+<p>2 = Exactly once</p></td>
+</tr>
+<tr class="odd">  
+<td>Username</td>  
+<td>Username if broker is using username and password authentication</td>  
+<td>String</td>  
+<td>Username and password should not be included as clear text in the configuration. It is strongly recommended to use placeholders and use the SFC integration with the AWS secrets manager.</td>
+<tr class="even">  
+<td>Password</td>  
+<td>Password if broker is using username and password authentication</td>  
+<td>String</td>  
+<td>Username and password should not be included as clear text in the configuration. It is strongly recommended to use placeholders and use the SFC integration with the AWS secrets manager.</td>  
+</tr>  
+<tr class="odd">  
+<td>ConnectionTimeout</td>  
+<td>Timeout for connecting to the broker in seconds</td>  
+<td>Int</td>  
+<td>Default is 10 seconds</td>
+<tr class="even">  
+<td>WaitAfterConnectError</td>  
+<td>Period in seconds to wait before trying to connect after a connection failure</td>  
+<td>Int</td>  
+<td>Default is 60 seconds</td>
+</tr>  
+<tr class="odd">  
+<td>ConnectRetries</td>  
+<td>Number of retries to connec to to MQTT broker</td>  
+<td>Int</td>  
+<td>Default is 10</td>
+</tr>  
+<tr class="odd">
+<td>PublishTimeout</td>
+<td>Timeout in seconds for publishing</td>
+<td>Long</td>
+<td>Default is 10 seconds</td>
+</tr>
+</tbody></table>
+
+[^top](#toc)
+
+
 # File Target
 
 ## FileConfiguration
@@ -6857,9 +6921,8 @@ The adapters have a service wrapper that enables these targets can be executed a
 | **Target**    | **Application name**        | **Main class**                                                |
 |---------------|-----------------------------|---------------------------------------------------------------|
 | Analytics     | aws-iot-analytics           | com.amazonaws.sfc.awsiota.AwsIotAnalyticsTargetService        |
-| IoT Core      | aws-iot-http-target         | com.amazonaws.sfc.awsiot.http.AwsIotHttpTargetService         |
-| MQTT          | aws-iot-mqtt-target         | com.amazonaws.sfc.awsiot.mqtt.AwsIotMqttTargetService         |
-| MSK           | aws-msk-target              | com.amazonaws.sfc.awsiot.http.AwsMskTargetService             |
+| IoT Core      | aws-iotcore-target          | com.amazonaws.sfc.awsiotcore.AwsIoCoreTargetService           |
+| MSK           | aws-msk-target              | com.amazonaws.sfc.awsiot.msk.AwsMskTargetService              |
 | File          | File-target                 | com.amazonaws.sfc.awsiot.mqtt.FileTargetService               |
 | Firehose      | aws-kinesis-target          | com.amazonaws.sfc.awsfirehose.AwsKinesisFirehoseTargetService |
 | Kinesis       | aws-kinesis-firehose-target | com.amazonaws.sfc.awskinesis.AwsKinesisTargetService          |
@@ -6869,6 +6932,7 @@ The adapters have a service wrapper that enables these targets can be executed a
 | SNS           | Aws-sns-target              | com.amazonaws.sfc.awssns.AwsSnsTargetService                  |
 | SQS           | aws-sqs-target              | com.amazonaws.sfc.awssqs.AwsSqsTargetService                  |
 | Timestream    | aws-timestream-target       | com.amazonaws.sfc.awstimestream.AwsTimestreamTargetService    |
+| MQTT          | mqtt-target                 | com.amazonaws.sfc.mqtt.MqttTargetService                      | 
 | File system   | file-target                 | com.amazonaws.sfc.filetarget.TargetService                    |
 | Console       | debug-target                | com.amazonaws.sfc.debugtarget.DebugTargetService              |
 | Store&Forward | Storeforward-target         | com.amazonaws.sfc.storeforward. AwsStoreForwardTargetService  |
@@ -7071,23 +7135,23 @@ The jar files are part of the target deployment and can be found in the lib dire
       ],
       "FactoryClassName": "com.amazonaws.sfc.awsfirehose.AwsFirehoseTargetWriter"
     },
-    "AWS-IOT-HTTP": {
+    "AWS-IOT-CORE": {
       "JarFiles": [
-        "${SFC_DEPLOYMENT_DIR}/aws-iot-http-target/lib"
+        "${SFC_DEPLOYMENT_DIR}/aws-iot-core-target/lib"
       ],
-      "FactoryClassName": "com.amazonaws.sfc.awsiot.http.AwsIotHttpTargetWriter"
+      "FactoryClassName": "com.amazonaws.sfc.awsiocore.AwsIotCoreTargetWriter"
     },
-    "AWS-IOT-MQTT": {
+    "MQTT-TARGET": {
       "JarFiles": [
-        "${SFC_DEPLOYMENT_DIR}/aws-iot-mqtt-target/lib/"
+        "${SFC_DEPLOYMENT_DIR}/mqtt-target/lib/"
       ],
-      "FactoryClassName": "com.amazonaws.sfc.awsiot.mqtt.AwsIotMqttTargetWriter"
+      "FactoryClassName": "com.amazonaws.sfc.awsiot.mqtt.MqttTargetWriter"
     },
    "AWS-MSK": {
       "JarFiles": [
         "${SFC_DEPLOYMENT_DIR}/aws-msk-target/lib/"
       ],
-      "FactoryClassName": "com.amazonaws.sfc.awsiot.mqtt.AwsMskTargetWriter"
+      "FactoryClassName": "com.amazonaws.sfc.awsiot.msk.AwsMskTargetWriter"
   },
     "AWS-KINESIS": {
       "JarFiles": [
