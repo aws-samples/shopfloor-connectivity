@@ -220,6 +220,7 @@ class ScheduleReader(
                 }
             }
         }
+        listOf(reader, processing).joinAll()
     }
 
 
