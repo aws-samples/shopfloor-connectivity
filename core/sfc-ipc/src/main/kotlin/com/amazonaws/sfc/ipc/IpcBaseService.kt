@@ -90,7 +90,7 @@ abstract class IpcBaseService(val serverConfig: ServerConfiguration, val logger:
             certificateExpiryChecker = CertificateExpiryChecker(usedCertificates, serverConfig.expirationWarningPeriod, logger)
 
         } catch (e: Exception) {
-            log.error("Error setting up TLS for $serverConnectionType, $e")
+            log.errorEx("Error setting up TLS for $serverConnectionType", e)
         }
 
         return builder.build()

@@ -5,11 +5,14 @@
 package com.amazonaws.sfc.ipc
 
 
+import com.amazonaws.sfc.channels.channelSubmitEventHandler
+import com.amazonaws.sfc.channels.submit
 import com.amazonaws.sfc.config.ConfigReader
 import com.amazonaws.sfc.config.SecretsManagerConfiguration
 import com.amazonaws.sfc.config.ServerConfiguration
 import com.amazonaws.sfc.config.ServiceConfiguration
 import com.amazonaws.sfc.data.*
+import com.amazonaws.sfc.ipc.IpcMetricsServerCommandLine.Companion.OPTION_TARGET
 import com.amazonaws.sfc.ipc.extensions.GrpcTargetValueAsNativeExt.asTargetData
 import com.amazonaws.sfc.ipc.extensions.GrpcTargetValueFromNativeExt
 import com.amazonaws.sfc.ipc.extensions.grpcMetricsDataMessage
@@ -60,7 +63,7 @@ class IpcTargetServer(
 
     private var _resulHandlerReturnedData: ResulHandlerReturnedData? = null
 
-    val resultChannel = Channel<TargetResult>(100)
+    val resultChannel = Channel<TargetResult>(serverConfig.serviceResultsChannelSize)
 
     private var serverActive = true
 
@@ -155,7 +158,7 @@ class IpcTargetServer(
                     if (e.isJobCancellationException)
                         log.info("Service stopped")
                     else
-                        log.error("Error writing values, e")
+                        log.errorEx("Error writing values", e)
                 }
             }
 
@@ -248,7 +251,7 @@ class IpcTargetServer(
 
                 // If a target ID was specified from the command line or the config file check if is the expected target
                 if (targetID != null && requestTargetID != targetID) {
-                    throw IpcException("Configuration target ID \"$requestTargetID\" does not match expected target ID \"$targetID\"")
+                    throw IpcException("Configuration target ID \"$requestTargetID\" does not match expected target ID \"$targetID\", use command line option \"-$OPTION_TARGET $requestTargetID\" to specify the target used for this service")
                 }
                 targetID = requestTargetID
 
@@ -285,7 +288,7 @@ class IpcTargetServer(
                 log.info("Target writer for target \"$targetID\" of type \"${targetConfiguration.targetType}\" created")
 
             } catch (e: java.lang.Exception) {
-                log.error("Error initializing target from configuration \"${request.targetConfiguration}\", ${e.message}")
+                log.errorEx("Error initializing target from configuration \"${request.targetConfiguration}\"", e)
                 InitializeTargetResponse.newBuilder().setInitialized(false).setError(e.message).build()
             }
 
@@ -479,7 +482,17 @@ class IpcTargetServer(
 
     override fun handleResult(targetResult: TargetResult) {
         runBlocking {
-            resultChannel.send(targetResult)
+            val log = logger.getCtxLoggers(className, "handleResult")
+            resultChannel.submit(targetResult, serverConfig.serviceResultsChannelTimeout) { event ->
+                channelSubmitEventHandler(
+                    event = event,
+                    channelName = "$className:resultChannel",
+                    tuningChannelSizeName = ServerConfiguration.CONFIG_SERVICE_RESULTS_CHANNEL_SIZE,
+                    currentChannelSize = serverConfig.serviceResultsChannelSize,
+                    tuningChannelTimeoutName = ServerConfiguration.CONFIG_SERVICE_RESULTS_CHANNEL_TIMEOUT,
+                    log = log
+                )
+            }
         }
     }
 

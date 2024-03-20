@@ -4,12 +4,17 @@
 
 package com.amazonaws.sfc.router
 
+import com.amazonaws.sfc.channels.channelSubmitEventHandler
+import com.amazonaws.sfc.channels.submit
 import com.amazonaws.sfc.config.ConfigReader
+import com.amazonaws.sfc.config.ConfigWithTuningConfiguration
 import com.amazonaws.sfc.config.TargetConfiguration
+import com.amazonaws.sfc.config.TuningConfiguration
 import com.amazonaws.sfc.data.*
 import com.amazonaws.sfc.ipc.IpcTargetWriter
 import com.amazonaws.sfc.log.Logger
 import com.amazonaws.sfc.metrics.*
+import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_MEMORY
 import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_MESSAGES
 import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_WRITES
 import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_WRITE_ERRORS
@@ -21,6 +26,7 @@ import com.amazonaws.sfc.router.config.RoutesConfiguration.Companion.CONFIG_SUCC
 import com.amazonaws.sfc.targets.ForwardingTargetWriter
 import com.amazonaws.sfc.targets.TargetException
 import com.amazonaws.sfc.targets.TargetWriterFactory
+import com.amazonaws.sfc.util.MemoryMonitor
 import com.amazonaws.sfc.util.buildScope
 import com.amazonaws.sfc.util.isJobCancellationException
 import com.amazonaws.sfc.util.launch
@@ -56,13 +62,16 @@ class RouterTargetWriter(
         configReader.getConfig<RouterWriterConfiguration>()
     }
 
+    private val tuningConfiguration by lazy{
+        configReader.getConfig<ConfigWithTuningConfiguration>().tuningConfiguration
+    }
+
     private val routingTargetConfiguration by lazy {
         routerWriterConfiguration.routerTargets[targetID]
             ?: throw Exception("Configuration for target \"$targetID\" does not exist, configured routing targets are ${routerWriterConfiguration.routerTargets.keys}")
     }
 
     private val primaryTargetKeys by lazy { routingTargetConfiguration.routes.keys }
-    private val secondaryTargetKeys by lazy { routingTargetConfiguration.routes.values.flatMap { it.routeTargets } }
 
     private val primaryTargetsConfigurations by lazy {
         routerWriterConfiguration.targets.filter { t -> t.key in routingTargetConfiguration.subTargets }
@@ -93,12 +102,8 @@ class RouterTargetWriter(
         }
     }
 
-
-    // Channel to pass data to be forwarded to targets
-    private val forwardChannel = Channel<TargetData>(100)
-
     // Channel to pass result data from target
-    private val resultChannel = Channel<TargetResult>(100)
+    private val resultChannel = Channel<TargetResult>(tuningConfiguration.targetResultsChannelSize)
 
 
     // Worker to process received results from target
@@ -185,7 +190,7 @@ class RouterTargetWriter(
                         metricsCollector?.put(targetID, dataPoints)
                     }
                 } catch (e: java.lang.Exception) {
-                    logger.getCtxErrorLog(this::class.java.simpleName, "collectMetricsFromLogger")("Error collecting metrics from logger, $e")
+                    logger.getCtxErrorLogEx(this::class.java.simpleName, "collectMetricsFromLogger")("Error collecting metrics from logger", e)
                 }
             }
         } else null
@@ -227,7 +232,7 @@ class RouterTargetWriter(
                 val resultData = resultChannel.receive()
                 handleTargetResults(resultData)
             } catch (e: Exception) {
-                logger.getCtxErrorLog(className, "launchResultHandlerWorker")("Error handling result, $e")
+                logger.getCtxErrorLogEx(className, "launchResultHandlerWorker")("Error handling result", e)
             }
         }
     }
@@ -248,14 +253,14 @@ class RouterTargetWriter(
                     try {
                         handleSuccessResults(routesForPrimaryTarget?.successTargetID, resultData)
                     } catch (e: Exception) {
-                        logger.getCtxErrorLog(className, "handleTargetResults")("Error handling success results, $e")
+                        logger.getCtxErrorLogEx(className, "handleTargetResults")("Error handling success results", e)
                     }
                 },
                 scope.launch {
                     try {
                         handleErrorResults(routesForPrimaryTarget?.alternateTargetID, resultData)
                     } catch (e: Exception) {
-                        logger.getCtxErrorLog(className, "handleTargetResults")("Error handling error results, $e")
+                        logger.getCtxErrorLogEx(className, "handleTargetResults")("Error handling error results", e)
                     }
                 }
             ).joinAll()
@@ -284,7 +289,8 @@ class RouterTargetWriter(
         val one = MetricsValue(1)
         val metrics = mutableListOf(
             MetricsValueParam(METRICS_WRITES, one, MetricUnits.COUNT),
-            MetricsValueParam(METRICS_MESSAGES, one, MetricUnits.COUNT)
+            MetricsValueParam(METRICS_MESSAGES, one, MetricUnits.COUNT),
+            MetricsValueParam(METRICS_MEMORY, MetricsValue(MemoryMonitor.getUsedMemoryMB().toDouble()),MetricUnits.MEGABYTES)
         )
 
         return if (writeDataToTarget(targetID, targetData)) {
@@ -321,11 +327,11 @@ class RouterTargetWriter(
         } catch (t: TimeoutCancellationException) {
             log.trace("Timeout forwarding to target \"${targetID}\"")
             false
-        } catch (e: Throwable) {
+        } catch (e: Exception) {
             if (e.isJobCancellationException)
                 log.info("Forwarder stopped")
             else
-                log.error("Error forwarding to target \"${targetID}\", $e")
+                log.errorEx("Error forwarding to target \"${targetID}\"", e)
             false
         }
 
@@ -335,7 +341,16 @@ class RouterTargetWriter(
 
     override fun handleResult(targetResult: TargetResult) {
         runBlocking {
-            resultChannel.send(targetResult)
+            resultChannel.submit(targetResult, tuningConfiguration.targetResultsChannelTimeout) { event ->
+                channelSubmitEventHandler(
+                    event = event,
+                    channelName = "$className:resultChannel",
+                    tuningChannelSizeName = TuningConfiguration.CONFIG_TARGET_RESULTS_CHANNEL_SIZE,
+                    currentChannelSize = tuningConfiguration.targetResultsChannelSize,
+                    tuningChannelTimeoutName = TuningConfiguration.CONFIG_TARGET_RESULTS_CHANNEL_TIMEOUT,
+                    log = logger.getCtxLoggers(className, "handleResult")
+                )
+            }
         }
     }
 

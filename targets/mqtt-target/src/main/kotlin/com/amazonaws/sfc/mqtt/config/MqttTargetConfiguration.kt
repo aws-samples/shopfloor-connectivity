@@ -7,8 +7,11 @@ package com.amazonaws.sfc.mqtt.config
 import com.amazonaws.sfc.config.ConfigurationClass
 import com.amazonaws.sfc.config.ConfigurationException
 import com.amazonaws.sfc.config.TargetConfiguration
+import com.amazonaws.sfc.config.Validate
+import com.amazonaws.sfc.data.Compress.CONFIG_COMPRESS
+import com.amazonaws.sfc.data.CompressionType
 import com.amazonaws.sfc.mqtt.MqttConnectionOptions
-import com.amazonaws.sfc.mqtt.MqttConnectionType
+import com.amazonaws.sfc.mqtt.MqttConnectionProtocol
 import com.google.gson.annotations.SerializedName
 import java.io.File
 import kotlin.time.Duration
@@ -17,7 +20,7 @@ import kotlin.time.toDuration
 
 
 @ConfigurationClass
-class MqttTargetConfiguration : TargetConfiguration() {
+class MqttTargetConfiguration : TargetConfiguration(), Validate {
 
     @SerializedName(CONFIG_QOS)
     private var _qos: Int = QOS_DEFAULT
@@ -46,40 +49,34 @@ class MqttTargetConfiguration : TargetConfiguration() {
         get() = _connectRetries
 
     @SerializedName(MqttConnectionOptions.CONFIG_MQTT_END_POINT)
-    private var _endPoint: String = ""
+    protected var _endPoint: String = ""
     val endPoint: String by lazy {
 
         val hasPort = Regex("""(.+):(\d+)${'$'}$""")
         val m = hasPort.find(_endPoint)
-        val s = if (m == null) _endPoint else {
+        if (m == null) _endPoint else {
             if (_port == null) {
                 _port = m.groups[1]!!.value.toInt()
             }
             m.groups[0]?.value.toString()
         }
 
-        val hasProtocol = Regex("""^w+://""")
-        if (hasProtocol.matches(_endPoint)) {
+        val hasProtocol = MqttConnectionProtocol.validValues.any { _endPoint.startsWith(it) }
+        if (hasProtocol) {
             _endPoint
-        } else
-            when (connection) {
-                MqttConnectionType.SSL -> "ssl://$s"
-                MqttConnectionType.MUTUAL -> "ssl://$s"
-                MqttConnectionType.PLAINTEXT -> "tcp://$s"
+        } else {
+            if (certificate != null || privateKey != null || rootCA != null) {
+                "${MqttConnectionProtocol.SSL.protocolPrefix}_endPoint"
+            } else {
+                "${MqttConnectionProtocol.SSL.protocolPrefix}_endPoint"
             }
+        }
     }
 
     @SerializedName(MqttConnectionOptions.CONFIG_MQTT_PORT)
     private var _port: Int? = null
     val port: Int?
         get() = _port
-
-    @SerializedName(MqttConnectionOptions.CONFIG_MQTT_CONNECTION)
-    private var _connection: MqttConnectionType = MqttConnectionOptions.DEFAULT_MQTT_CONNECTION
-
-    val connection: MqttConnectionType
-        get() = _connection
-
 
     @SerializedName(MqttConnectionOptions.CONFIG_MQTT_CERTIFICATE)
     private var _certificate: String? = null
@@ -115,11 +112,36 @@ class MqttTargetConfiguration : TargetConfiguration() {
     private var _connectTimeout = MqttConnectionOptions.DEFAULT_CONNECT_TIMEOUT
     val connectTimeout: Duration = _connectTimeout.toDuration(DurationUnit.SECONDS)
 
+    @SerializedName(CONFIG_BATCH_COUNT)
+    private var _batchCount: Int = 1
+    val batchCount
+        get() = _batchCount
+
+    @SerializedName(CONFIG_BATCH_SIZE)
+    private var _batchSize: Int? = null
+    val batchSize
+        get() = if (_batchSize != null) _batchSize!! * 1024 else null
+
+    @SerializedName(CONFIG_BATCH_INTERVAL)
+    private var _batchInterval: Int? = null
+    val batchInterval : Duration
+        get() = _batchInterval?.toDuration(DurationUnit.MILLISECONDS) ?: Duration.INFINITE
+
+    @SerializedName(CONFIG_MAX_PAYLOAD_SIZE)
+    private var _maxPayloadSize : Int? = null
+    val maxPayloadSize
+        get() = if (_maxPayloadSize != null) _maxPayloadSize!! * 1024 else null
+
+    @SerializedName(CONFIG_COMPRESS)
+    private var _compressionType: CompressionType? = null
+
+    val compressionType: CompressionType
+        get() = _compressionType ?: CompressionType.NONE
+
     val mqttConnectionOptions: MqttConnectionOptions by lazy {
         MqttConnectionOptions.create(
             endPoint = _endPoint,
             port = _port,
-            connection = _connection,
             username = _username,
             password = _password,
             certificate = _certificate,
@@ -133,10 +155,11 @@ class MqttTargetConfiguration : TargetConfiguration() {
     @Throws(ConfigurationException::class)
     override fun validate() {
         if (validated) return
-        super.validate()
         validateQos()
+        validateBufferSize()
         mqttConnectionOptions.validate()
         checkRequiredSettings()
+        super.validate()
         validated = true
     }
 
@@ -150,6 +173,14 @@ class MqttTargetConfiguration : TargetConfiguration() {
         )
     }
 
+    private fun validateBufferSize(){
+        ConfigurationException.check(
+            (_batchSize == null || _maxPayloadSize == null || _compressionType == CompressionType.NONE || (_batchSize!! <= _maxPayloadSize!!)),
+            "$CONFIG_BATCH_SIZE must be smaller or equal to value of $CONFIG_BATCH_SIZE",
+            CONFIG_BATCH_SIZE,
+            this)
+    }
+
     // Checks if al required attributes are set
     private fun checkRequiredSettings() {
         ConfigurationException.check(
@@ -158,7 +189,6 @@ class MqttTargetConfiguration : TargetConfiguration() {
             CONFIG_TOPIC_NAME,
             this
         )
-
     }
 
     companion object {
@@ -172,13 +202,16 @@ class MqttTargetConfiguration : TargetConfiguration() {
         private const val QOS_DEFAULT = 0
         private const val CONFIG_CONNECT_RETRIES = "ConnectRetries"
         private const val CONNECT_RETRIES_DEFAULT = 10
+        private const val CONFIG_BATCH_SIZE = "BatchSize"
+        private const val CONFIG_BATCH_COUNT = "BatchCount"
+        private const val CONFIG_BATCH_INTERVAL = "BatchInterval"
+        private const val CONFIG_MAX_PAYLOAD_SIZE = "MaxPayloadSize"
 
         private val default = MqttTargetConfiguration()
 
         fun create(
             endpoint: String = default._endPoint,
             port: Int? = default._port,
-            connection: MqttConnectionType = default._connection,
             username: String? = default._username,
             password: String? = default._password,
             certificate: String? = default._certificate,
@@ -187,7 +220,11 @@ class MqttTargetConfiguration : TargetConfiguration() {
             sslServerCert: String? = default._sslServerCert,
             connectTimeout: Int = default._connectTimeout,
             topicName: String? = default._topicName,
-            qos : Int = default._qos
+            qos : Int = default._qos,
+            batchCount : Int = default.batchCount,
+            batchSize : Int? = default._batchSize,
+            batchInterval : Int? = default._batchInterval,
+            maxPayloadSize : Int? = default._maxPayloadSize,
         ): MqttTargetConfiguration {
 
 
@@ -195,7 +232,6 @@ class MqttTargetConfiguration : TargetConfiguration() {
             with(instance) {
                 _endPoint = endpoint
                 _port = port
-                _connection = connection
                 _username = username
                 _password = password
                 _certificate = certificate
@@ -205,6 +241,10 @@ class MqttTargetConfiguration : TargetConfiguration() {
                 _connectTimeout = connectTimeout
                 _topicName = topicName
                 _qos = qos
+                _batchCount = batchCount
+                _batchSize= batchSize
+                _batchInterval= batchInterval
+                _maxPayloadSize= maxPayloadSize
             }
             return instance
         }

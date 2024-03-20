@@ -83,7 +83,7 @@ class SnmpDevice(
                 if (retries > deviceConfiguration.retries) {
                     throw ProtocolAdapterException(msg)
                 }
-                logger.getCtxWarningLog(msg + ", retry in ${deviceConfiguration.waitAfterReadError}")
+                logger.getCtxWarningLogEx(msg + ", retry in ${deviceConfiguration.waitAfterReadError}", e)
                 try {
                     snmp.close()
                 } catch (_: Throwable) {

@@ -81,10 +81,10 @@ class ScheduleController(private val reader: ScheduleReader, private val aggrega
             val schedule: ScheduleConfiguration = config.schedules.first { it.name == scheduleName }
 
             // Channel for sending data to targets
-            val writerInputChannel = Channel<Map<String, SourceOutputData>>(READER_BUFFER_SIZE)
+            val writerInputChannel = Channel<Map<String, SourceOutputData>>(config.tuningConfiguration.writerInputChannelSize)
 
             // Channel for sending data to aggregator
-            val aggregatorInputChannel = if (schedule.isAggregated) Channel<Map<String, SourceReadSuccess>>(schedule.aggregationSize) else null
+            val aggregatorInputChannel = if (schedule.isAggregated) Channel<Map<String, SourceReadSuccess>>(config.tuningConfiguration.aggregatorChannelSize) else null
 
             return ScheduleController(
 
@@ -125,7 +125,6 @@ class ScheduleController(private val reader: ScheduleReader, private val aggrega
 
         val WAIT_FOR_STOP_DURATION = 10.toDuration(DurationUnit.SECONDS)
         val WAIT_FOR_STOP_DURATION_TOTAL = WAIT_FOR_STOP_DURATION * 3
-        private const val READER_BUFFER_SIZE = 6000
     }
 
 }

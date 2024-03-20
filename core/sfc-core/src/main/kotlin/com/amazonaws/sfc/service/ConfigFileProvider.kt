@@ -10,9 +10,11 @@ import com.amazonaws.sfc.config.ConfigVerification
 import com.amazonaws.sfc.config.ConfigurationException
 import com.amazonaws.sfc.config.CustomConfigurationProviderFactory
 import com.amazonaws.sfc.config.InProcessConfiguration.Companion.getCustomConfig
+import com.amazonaws.sfc.data.JsonHelper.Companion.extendedJsonException
 import com.amazonaws.sfc.log.Logger
 import com.amazonaws.sfc.util.FileWatcher
 import com.amazonaws.sfc.util.buildScope
+import com.google.gson.JsonSyntaxException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
@@ -39,6 +41,7 @@ class ConfigFileProvider(private val configFile: File, private val configVerific
     val scope = buildScope("Configuration File Config Provider")
 
     private fun customConfigProvider(configStr: String, configVerificationKey: PublicKey?): ConfigProvider? {
+        val log = logger.getCtxLoggers(className, "customConfigProvider")
         try {
 
             val customConfigProviderConfig = getCustomConfig(configStr, CONFIG_CUSTOM_CONFIG_PROVIDER) ?: return null
@@ -47,10 +50,13 @@ class ConfigFileProvider(private val configFile: File, private val configVerific
             val factory = CustomConfigurationProviderFactory(customConfigProviderConfig, configVerificationKey, logger)
             return factory.newProviderInstance(configStr, logger)
 
-        } catch (e: Throwable) {
-            val msg = "Error creating custom configuration provider, check if config file is valid JSON format, $e"
-            logger.getCtxErrorLog(className, "customConfigProvider")(msg)
-
+        } catch( e : JsonSyntaxException){
+             val msg = "Error creating custom configuration provider, invalid JSON syntax in configuration"
+             log.errorEx(msg, e.extendedJsonException(configStr))
+             throw ConfigurationException(msg, CONFIG_CUSTOM_CONFIG_PROVIDER)
+        } catch (e: Exception) {
+            val msg = "Error creating custom configuration provider"
+            log.errorEx(msg, e)
             throw ConfigurationException(msg, CONFIG_CUSTOM_CONFIG_PROVIDER)
         }
     }
@@ -97,7 +103,7 @@ class ConfigFileProvider(private val configFile: File, private val configVerific
             try {
                 watchFile()
             }catch (e : Exception){
-                loggers.error("Error in configuration provider watch file, $e")
+                loggers.errorEx("Error in configuration provider watch file", e)
             }
         }
 
@@ -105,7 +111,7 @@ class ConfigFileProvider(private val configFile: File, private val configVerific
             try {
                 watchEnvironment()
             }catch (e : Exception){
-                loggers.error("Error in configuration provider watch environment, $e")
+                loggers.errorEx("Error in configuration provider watch environment", e)
             }
         }
 
@@ -126,7 +132,7 @@ class ConfigFileProvider(private val configFile: File, private val configVerific
                         }
                     }
                 }catch (e : Exception){
-                    loggers.error("Error in configuration provider, $e")
+                    loggers.errorEx("Error in configuration provider", e)
                 }
             }
         }

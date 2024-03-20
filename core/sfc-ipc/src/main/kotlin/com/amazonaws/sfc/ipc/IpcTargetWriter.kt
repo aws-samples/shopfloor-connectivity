@@ -66,9 +66,7 @@ class IpcTargetWriter(private val targetID: String,
         try {
             writer()
         }catch (e : Exception){
-            if (e.isJobCancellationException)
-                log.info("Writer stopped")
-            else
+            if (!e.isJobCancellationException)
                 log.error("Error in writerWorker, ${e.message}")
         }
     }
@@ -121,8 +119,8 @@ class IpcTargetWriter(private val targetID: String,
                         log.info("Target service is shutting down")
                     } else {
                         var s = "Error communicating with target IPC service on ${serverConfig.addressStr}, "
-                        s += if (e is StatusException) "${e.cause ?: e.message}" else e.message
-                        log.error(s)
+                        s += if (e is StatusException) "${e.cause?.message ?: e.message}" else e.message
+                        log.errorEx(s, e)
                     }
                     resetIpcClient()
                     delay(IpcSourceReader.WAIT_AFTER_ERROR)
@@ -156,9 +154,11 @@ class IpcTargetWriter(private val targetID: String,
                 true
             } else false
 
+        } catch ( e : StatusException){
+            log.error("Error IPC initializing server for target \"$targetID\" on ${serverConfig.addressStr}, ${e.cause?.message ?: e.message}")
+            false
         } catch (e: Exception) {
-            val errorMessage = if (e is StatusException) "${e.cause ?: e.message}" else e.message
-            log.error("Error IPC initializing  server for target \"$targetID\" on ${serverConfig.addressStr}, $errorMessage")
+            log.errorEx("Error IPC initializing  server for target \"$targetID\" on ${serverConfig.addressStr}", e)
             false
         }
     }

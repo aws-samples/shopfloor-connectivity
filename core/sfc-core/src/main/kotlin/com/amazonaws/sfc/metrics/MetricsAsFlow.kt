@@ -41,8 +41,8 @@ class MetricsAsFlow(private var metricsReader: MetricsCollectorReader?,
                             try {
                                 log.trace("Emitting ${availableMetrics.flatMap { it.dataPoints }.size} metrics data points")
                                 emitAll(availableMetrics.asFlow())
-                            } catch (e: Throwable) {
-                                log.error("Error emitting metrics, $e")
+                            } catch (e: Exception) {
+                                log.errorEx("Error emitting metrics", e)
                                 cancelled = true
                             }
                         }

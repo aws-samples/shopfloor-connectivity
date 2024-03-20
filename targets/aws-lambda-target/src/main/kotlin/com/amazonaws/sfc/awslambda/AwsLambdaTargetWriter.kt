@@ -21,11 +21,9 @@ import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_WRITE_SIZE
 import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_WRITE_SUCCESS
 import com.amazonaws.sfc.system.DateTime
 import com.amazonaws.sfc.targets.AwsServiceTargetClientHelper
+import com.amazonaws.sfc.targets.TargetDataChannel
 import com.amazonaws.sfc.targets.TargetException
-import com.amazonaws.sfc.util.buildScope
-import com.amazonaws.sfc.util.byteCountString
-import com.amazonaws.sfc.util.canNotReachAwsService
-import com.amazonaws.sfc.util.launch
+import com.amazonaws.sfc.util.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.selects.select
@@ -60,10 +58,15 @@ class AwsLambdaTargetWriter(
         LambdaClient.builder(),
         logger
     )
+
     private val lambdaClient: AwsLambdaClient
         get() = AwsLambdaClientWrapper(clientHelper.serviceClient as LambdaClient)
 
-    private val targetDataChannel = Channel<TargetData>(100)
+    private val targetConfig: AwsLambdaTargetConfiguration by lazy {
+        clientHelper.targetConfig(config, targetID, AWS_LAMBDA)
+    }
+
+    private val targetDataChannel = TargetDataChannel.create(targetConfig, "$className:targetDataChannel")
 
     private val scope = buildScope("Lambda Target")
 
@@ -74,10 +77,6 @@ class AwsLambdaTargetWriter(
         get() {
             return clientHelper.writerConfig(configReader, AWS_LAMBDA)
         }
-
-    private val targetConfig: AwsLambdaTargetConfiguration by lazy {
-        clientHelper.targetConfig(config, targetID, AWS_LAMBDA)
-    }
 
     private val transformation by lazy { if (targetConfig.template != null) OutputTransformation(targetConfig.template!!, logger) else null }
 
@@ -105,7 +104,7 @@ class AwsLambdaTargetWriter(
                         metricsCollector?.put(targetID, dataPoints)
                     }
                 } catch (e: java.lang.Exception) {
-                    logger.getCtxErrorLog(this::class.java.simpleName, "collectMetricsFromLogger")("Error collecting metrics from logger, $e")
+                    logger.getCtxErrorLogEx(this::class.java.simpleName, "collectMetricsFromLogger")("Error collecting metrics from logger", e)
                 }
             }
         } else null
@@ -139,10 +138,9 @@ class AwsLambdaTargetWriter(
                     }
                 }
                 timer = timerJob()
-            }catch (e: CancellationException) {
-                log.info("Writer stopped")
-            }catch (e : Exception){
-                log.error("Error in writer, $e")
+            } catch (e: Exception) {
+                if (!e.isJobCancellationException)
+                    log.errorEx("Error in writer", e)
             }
         }
 
@@ -219,8 +217,8 @@ class AwsLambdaTargetWriter(
 
             log.trace("Lambda Invoke result is ${resp.sdkHttpResponse()?.statusCode()}")
 
-        } catch (e: Throwable) {
-            log.error("Error invoking function \"$functionName\" for target \"$targetID\", ${e.message}")
+        } catch (e: Exception) {
+            log.errorEx("Error invoking function \"$functionName\" for target \"$targetID\"", e)
             if (canNotReachAwsService(e)) {
                 targetResults?.nackBuffered()
             } else {
@@ -283,7 +281,7 @@ class AwsLambdaTargetWriter(
 
 
     override suspend fun writeTargetData(targetData: TargetData) {
-        targetDataChannel.send(targetData)
+        targetDataChannel.submit(targetData, logger.getCtxLoggers(className, "writeTargetData" ))
 
     }
 

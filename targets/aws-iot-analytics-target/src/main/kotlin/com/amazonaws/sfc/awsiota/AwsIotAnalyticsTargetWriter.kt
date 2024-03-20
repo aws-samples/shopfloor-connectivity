@@ -18,11 +18,13 @@ import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_DIMENSION_SO
 import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_DIMENSION_SOURCE_CATEGORY_TARGET
 import com.amazonaws.sfc.system.DateTime
 import com.amazonaws.sfc.targets.AwsServiceTargetClientHelper
+import com.amazonaws.sfc.targets.TargetDataChannel
 import com.amazonaws.sfc.targets.TargetException
+import com.amazonaws.sfc.util.MemoryMonitor.Companion.getUsedMemoryMB
 import com.amazonaws.sfc.util.buildScope
 import com.amazonaws.sfc.util.canNotReachAwsService
+import com.amazonaws.sfc.util.isJobCancellationException
 import com.amazonaws.sfc.util.launch
-import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.runBlocking
 import software.amazon.awssdk.awscore.exception.AwsServiceException
 import software.amazon.awssdk.core.SdkBytes
@@ -30,7 +32,6 @@ import software.amazon.awssdk.services.iotanalytics.IoTAnalyticsClient
 import software.amazon.awssdk.services.iotanalytics.model.BatchPutMessageRequest
 import software.amazon.awssdk.services.iotanalytics.model.BatchPutMessageResponse
 import software.amazon.awssdk.services.iotanalytics.model.Message
-import kotlin.coroutines.cancellation.CancellationException
 
 
 /**
@@ -90,7 +91,7 @@ class AwsIotAnalyticsTargetWriter(
                         metricsCollector?.put(targetID, dataPoints)
                     }
                 } catch (e: java.lang.Exception) {
-                    logger.getCtxErrorLog(this::class.java.simpleName, "collectMetricsFromLogger")("Error collecting metrics from logger, $e")
+                    logger.getCtxErrorLogEx(this::class.java.simpleName, "collectMetricsFromLogger")("Error collecting metrics from logger", e)
                 }
             }
         } else null
@@ -105,7 +106,7 @@ class AwsIotAnalyticsTargetWriter(
      * @param targetData TargetData
      */
     override suspend fun writeTargetData(targetData: TargetData) {
-        targetDataChannel.send(targetData)
+        targetDataChannel.submit(targetData, logger.getCtxLoggers(className, "writeTargetData"))
     }
 
     /**
@@ -118,8 +119,12 @@ class AwsIotAnalyticsTargetWriter(
         iotaClient.close()
     }
 
+    private val targetConfig: AwsIotAnalyticsTargetConfiguration by lazy {
+        clientHelper.targetConfig(config, targetID, AWS_IOT_ANALYTICS)
+    }
+
     // channel for passing messages to coroutine that sends messages to IoT analytics  stream
-    private val targetDataChannel = Channel<TargetData>(100)
+    private val targetDataChannel = TargetDataChannel.create(targetConfig, "$className:targetDataChannel")
 
     // buffer for message batches
     private val buffer = newTargetDataBuffer(resultHandler)
@@ -130,10 +135,9 @@ class AwsIotAnalyticsTargetWriter(
         val log = logger.getCtxLoggers(className, "writer")
         try {
             runWriter()
-        }catch (e: CancellationException) {
-            log.info("Writer stopped")
         }catch (e : Exception){
-            log.error("Error in writer, $e")
+            if (!e.isJobCancellationException)
+                log.errorEx("Error in writer", e)
         }
     }
 
@@ -143,7 +147,7 @@ class AwsIotAnalyticsTargetWriter(
 
         infoLog("AWS IoT Analytics writer for target \"$targetID\" sending to channel \"${targetConfig.channelName}\" in region ${targetConfig.region}")
 
-        for (targetData in targetDataChannel) {
+        for (targetData in targetDataChannel.channel) {
             sendTargetData(targetData)
         }
     }
@@ -212,7 +216,7 @@ class AwsIotAnalyticsTargetWriter(
             ackOrErrorTargetDataSerials(resp)
 
         } catch (e: Exception) {
-            log.error("Error sending to channel \"$streamName\" for target \"$targetID\", ${e.message}")
+            log.errorEx("Error sending to channel \"$streamName\" for target \"$targetID\"", e)
             runBlocking { metricsCollector?.put(targetID, MetricsCollector.METRICS_WRITE_ERRORS, 1.0, MetricUnits.COUNT, metricDimensions) }
             nackOrErrorTargetDataSerials(e)
         } finally {
@@ -227,6 +231,7 @@ class AwsIotAnalyticsTargetWriter(
 
         runBlocking {
             metricsCollector?.put(adapterID,
+                metricsCollector?.buildValueDataPoint(adapterID, MetricsCollector.METRICS_MEMORY, getUsedMemoryMB().toDouble(),MetricUnits.MEGABYTES ),
                 metricsCollector?.buildValueDataPoint(adapterID, MetricsCollector.METRICS_WRITES, 1.0, MetricUnits.COUNT, metricDimensions),
                 metricsCollector?.buildValueDataPoint(adapterID, MetricsCollector.METRICS_MESSAGES, buffer.size.toDouble(), MetricUnits.COUNT, metricDimensions),
                 metricsCollector?.buildValueDataPoint(adapterID, MetricsCollector.METRICS_WRITE_DURATION, writeDurationInMillis, MetricUnits.MILLISECONDS, metricDimensions),
@@ -279,11 +284,6 @@ class AwsIotAnalyticsTargetWriter(
         get() {
             return clientHelper.writerConfig(configReader, AWS_IOT_ANALYTICS)
         }
-
-    private val targetConfig: AwsIotAnalyticsTargetConfiguration by lazy {
-        clientHelper.targetConfig(config, targetID, AWS_IOT_ANALYTICS)
-    }
-
 
     companion object {
 

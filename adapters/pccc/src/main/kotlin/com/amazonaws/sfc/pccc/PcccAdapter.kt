@@ -20,6 +20,7 @@ import com.amazonaws.sfc.pccc.config.PcccSourceConfiguration
 import com.amazonaws.sfc.pccc.config.PcccSourceConfiguration.Companion.CONFIG_ADAPTER_CONTROLLER
 import com.amazonaws.sfc.system.DateTime.systemDateTime
 import com.amazonaws.sfc.targets.TargetException
+import com.amazonaws.sfc.util.MemoryMonitor.Companion.getUsedMemoryMB
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
@@ -127,10 +128,7 @@ class PcccAdapter(
                         metricsCollector?.put(adapterID, dataPoints)
                     }
                 } catch (e: java.lang.Exception) {
-                    logger.getCtxErrorLog(
-                        this::class.java.simpleName,
-                        "collectMetricsFromLogger"
-                    )("Error collecting metrics from logger, $e")
+                    logger.getCtxErrorLogEx( className, "collectMetricsFromLogger")("Error collecting metrics from logger", e)
                 }
             }
         } else null
@@ -193,6 +191,13 @@ class PcccAdapter(
                 .sum()
         metricsCollector?.put(
             protocolAdapterID,
+            metricsCollector?.buildValueDataPoint(
+                protocolAdapterID,
+                MetricsCollector.METRICS_MEMORY,
+                getUsedMemoryMB().toDouble(),
+                MetricUnits.MEGABYTES,
+                metricDimensions
+            ),
             metricsCollector?.buildValueDataPoint(
                 protocolAdapterID,
                 MetricsCollector.METRICS_READS,
@@ -291,11 +296,12 @@ class PcccAdapter(
             }
 
             return if (adapter != null) InProcessSourcesReader.createInProcessSourcesReader(
-                schedule,
-                adapter!!,
-                sourcesForAdapter,
-                config.metrics,
-                logger
+                schedule = schedule,
+                adapter = adapter!!,
+                sources = sourcesForAdapter,
+                tuningConfiguration = config.tuningConfiguration,
+                metricsConfig = config.metrics,
+                logger = logger
             ) else null
 
         }

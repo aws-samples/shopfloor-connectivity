@@ -32,6 +32,9 @@ class MqttAdapterConfiguration : ProtocolAdapterConfiguration(), Validate {
 
     companion object {
         const val CONFIG_MQTT_BROKERS_SERVERS = "Brokers"
+        const val CONFIG_RECEIVED_DATA_CHANNEL_SIZE = "ReceivedDataChannelSize"
+        const val CONFIG_RECEIVED_DATA_CHANNEL_TIMEOUT = "ReceivedDataChannelTimeout"
+
         private val default = MqttAdapterConfiguration()
 
         fun create(brokers: Map<String, MqttBrokerConfiguration> = default._brokers,

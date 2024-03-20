@@ -54,7 +54,7 @@ open class InstanceFactory<T>(private val config: InProcessConfiguration, privat
             @Suppress("UNCHECKED_CAST")
             return creatorMethod?.invoke(null, createParameters) as T?
         } catch (e: java.lang.reflect.InvocationTargetException) {
-            logs.error("Error creating instance of \"${config.factoryClassName}\" from jar ${config.jarFiles?.joinToString()}, cause is ${e.targetException}")
+            logs.errorEx("Error creating instance of \"${config.factoryClassName}\" from jar ${config.jarFiles?.joinToString()}, cause is ${e.targetException}", e)
         }
         return null
     }

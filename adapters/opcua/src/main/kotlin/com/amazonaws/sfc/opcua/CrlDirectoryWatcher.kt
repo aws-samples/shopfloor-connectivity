@@ -36,7 +36,7 @@ internal class CrlDirectoryWatcher(path: Path, scope: CoroutineScope, logger: Lo
             ctxLog.trace("Loading certificate revocation lists from directory ${path.toAbsolutePath()}")
             val newEntries = CertificateHelper.loadAllCRLsInDir(path.toFile(),
                 onFailed = { file, ex ->
-                    ctxLog.error("Error loading certificate revocation list from file \"$file\", $ex")
+                    ctxLog.errorEx("Error loading certificate revocation list from file \"$file\"", ex)
                 },
                 onLoaded = { file: File, certs: List<X509CRL> ->
                     ctxLog.trace("File \"$file\" ${certs.joinToString(prefix = "\n", separator = "\n") { it.toString() }}")

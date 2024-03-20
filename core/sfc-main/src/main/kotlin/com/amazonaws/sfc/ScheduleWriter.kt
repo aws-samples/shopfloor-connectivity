@@ -19,6 +19,7 @@ import com.amazonaws.sfc.data.TargetWriter.Companion.TIMOUT_TARGET_WRITE
 import com.amazonaws.sfc.log.Logger
 import com.amazonaws.sfc.metrics.MetricUnits
 import com.amazonaws.sfc.metrics.MetricsCollector
+import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_MEMORY
 import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_MESSAGES
 import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_WRITES
 import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_WRITE_ERRORS
@@ -26,6 +27,7 @@ import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_WRITE_SUCCES
 import com.amazonaws.sfc.metrics.MetricsDataPoint
 import com.amazonaws.sfc.metrics.MetricsValue
 import com.amazonaws.sfc.system.DateTime
+import com.amazonaws.sfc.util.MemoryMonitor.Companion.getUsedMemoryMB
 import com.amazonaws.sfc.util.buildScope
 import com.amazonaws.sfc.util.isJobCancellationException
 import com.amazonaws.sfc.util.launch
@@ -85,7 +87,7 @@ class ScheduleWriter(
         try {
             writeTargetValues()
         } catch (e: Exception) {
-            logger.getCtxErrorLog(className, "writerWorker")("Error writing targets, $e")
+            logger.getCtxErrorLogEx(className, "writerWorker")("Error writing targets", e)
         }
     }
 
@@ -179,6 +181,13 @@ class ScheduleWriter(
                             value = MetricsValue(writes.size - writesSuccessfulCount)
                         )
                     )
+                    metrics?.add(
+                        MetricsDataPoint(
+                            name = METRICS_MEMORY,
+                            units = MetricUnits.MEGABYTES,
+                            value = MetricsValue(getUsedMemoryMB().toDouble())
+                        )
+                    )
                 }
                 metrics?.let { metricsCollector.put(SFC_CORE, it) }
             }
@@ -240,11 +249,9 @@ class ScheduleWriter(
         } catch (t: TimeoutCancellationException) {
             log.error("Timeout writing to target \"${targetID}\"")
             false
-        } catch (e: Throwable) {
-            if (e.isJobCancellationException)
-                log.info("Writer stopped")
-            else
-                log.error("Error writing to target \"${targetID}\", $e")
+        } catch (e: Exception) {
+            if (!e.isJobCancellationException)
+                log.errorEx("Error writing to target \"${targetID}\"", e)
             false
         }
     }

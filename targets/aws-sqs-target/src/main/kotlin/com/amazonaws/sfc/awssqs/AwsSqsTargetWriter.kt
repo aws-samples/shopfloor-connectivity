@@ -23,6 +23,7 @@ import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_WRITE_SIZE
 import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_WRITE_SUCCESS
 import com.amazonaws.sfc.system.DateTime
 import com.amazonaws.sfc.targets.AwsServiceTargetClientHelper
+import com.amazonaws.sfc.targets.TargetDataChannel
 import com.amazonaws.sfc.targets.TargetException
 import com.amazonaws.sfc.util.*
 import kotlinx.coroutines.*
@@ -97,7 +98,7 @@ class AwsSqsTargetWriter(
                         metricsCollector?.put(targetID, dataPoints)
                     }
                 } catch (e: java.lang.Exception) {
-                    logger.getCtxErrorLog(this::class.java.simpleName, "collectMetricsFromLogger")("Error collecting metrics from logger, $e")
+                    logger.getCtxErrorLogEx(this::class.java.simpleName, "collectMetricsFromLogger")("Error collecting metrics from logger", e)
                 }
             }
         } else null
@@ -109,12 +110,8 @@ class AwsSqsTargetWriter(
 
     private val scope = buildScope("Sqs Target")
 
-    /**
-     * Writes message to SQS target.
-     * @param targetData TargetData
-     */
     override suspend fun writeTargetData(targetData: TargetData) {
-        targetDataChannel.send(targetData)
+        targetDataChannel.submit(targetData, logger.getCtxLoggers(className, "writeTargetData"))
     }
 
     override suspend fun close() {
@@ -123,8 +120,17 @@ class AwsSqsTargetWriter(
         sqsClient.close()
     }
 
+    private var _targetConfig: AwsSqsTargetConfiguration? = null
+    private val targetConfig: AwsSqsTargetConfiguration
+        get() {
+            if (_targetConfig == null) {
+                _targetConfig = clientHelper.targetConfig(config, targetID, AWS_SQS)
+            }
+            return _targetConfig as AwsSqsTargetConfiguration
+        }
+
     // channel for passing messages to coroutine that sends messages to SQS queue
-    private val targetDataChannel = Channel<TargetData>(100)
+    private val targetDataChannel = TargetDataChannel.create(targetConfig, "$className:targetDataChannel")
 
 
     private val buffer by lazy {
@@ -156,13 +162,9 @@ class AwsSqsTargetWriter(
                 }
                 timer = timerJob()
 
-            } catch (e: CancellationException) {
-                log.info("Writer stopped")
             } catch (e: Exception) {
-                if (e.isJobCancellationException)
-                    log.info("Writer stopped")
-                else
-                    log.error("Error in writer, $e")
+                if (!e.isJobCancellationException)
+                    log.errorEx("Error in writer", e)
             }
         }
     }
@@ -252,7 +254,7 @@ class AwsSqsTargetWriter(
             reportResults(resp, log.error)
 
         } catch (e: Exception) {
-            log.error("Error sending to queue \"$queueUrl\" for target \"$targetID\", ${e.message}")
+            log.errorEx("Error sending to queue \"$queueUrl\" for target \"$targetID\"", e)
             runBlocking { metricsCollector?.put(targetID, METRICS_WRITE_ERRORS, 1.0, MetricUnits.COUNT, metricDimensions) }
             if (canNotReachAwsService(e)) {
                 targetResults?.nackList(buffer.items)
@@ -274,6 +276,7 @@ class AwsSqsTargetWriter(
         runBlocking {
             metricsCollector?.put(
                 adapterID,
+                metricsCollector?.buildValueDataPoint(adapterID, MetricsCollector.METRICS_MEMORY, MemoryMonitor.getUsedMemoryMB().toDouble(),MetricUnits.MEGABYTES ),
                 metricsCollector?.buildValueDataPoint(adapterID, METRICS_WRITES, 1.0, MetricUnits.COUNT, metricDimensions),
                 metricsCollector?.buildValueDataPoint(adapterID, METRICS_MESSAGES, buffer.size.toDouble(), MetricUnits.COUNT, metricDimensions),
                 metricsCollector?.buildValueDataPoint(adapterID, METRICS_WRITE_DURATION, writeDurationInMillis, MetricUnits.MILLISECONDS, metricDimensions),
@@ -339,16 +342,6 @@ class AwsSqsTargetWriter(
         get() {
             return clientHelper.writerConfig(configReader, AWS_SQS)
         }
-
-    private var _targetConfig: AwsSqsTargetConfiguration? = null
-    private val targetConfig: AwsSqsTargetConfiguration
-        get() {
-            if (_targetConfig == null) {
-                _targetConfig = clientHelper.targetConfig(config, targetID, AWS_SQS)
-            }
-            return _targetConfig as AwsSqsTargetConfiguration
-        }
-
 
     companion object {
         const val SQS_MAX_BATCH_MSG_SIZE = 1024 * 256

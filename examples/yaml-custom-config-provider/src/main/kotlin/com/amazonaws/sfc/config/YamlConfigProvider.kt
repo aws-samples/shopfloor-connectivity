@@ -46,7 +46,7 @@ class YamlConfigProvider(
                 val jsonWriter = ObjectMapper()
                 return jsonWriter.writeValueAsString(yaml)
             } catch (e: Exception) {
-                log.error("Error converting YAML from ${config.yamlConfigFile?.absolutePath} to JSON, $e")
+                log.errorEx("Error converting YAML from ${config.yamlConfigFile?.absolutePath} to JSON", e)
                 null
             }
         }
@@ -83,10 +83,10 @@ class YamlConfigProvider(
                     }
                 }
             } catch (e: Exception) {
-                log.error("Error watching YAML config file, $e")
+                log.errorEx("Error watching YAML config file", e)
             }
         }}catch (e : Exception){
-            log.error("Error watching YAML config file, $e")
+            log.errorEx("Error watching YAML config file", e)
         }
     }
 

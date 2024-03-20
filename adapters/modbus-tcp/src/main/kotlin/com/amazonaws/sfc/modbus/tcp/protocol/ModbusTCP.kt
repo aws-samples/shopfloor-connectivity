@@ -114,7 +114,7 @@ class ModbusTCP(
                     }
                 }
             } catch (ex: Modbus.ModbusException) {
-                log.error("${ex.message} whilst reading ${if (state == ReadResponseState.ReadMBAPHeaderState) "header" else "response or error"}")
+                log.errorEx("${ex.message} whilst reading ${if (state == ReadResponseState.ReadMBAPHeaderState) "header" else "response or error"}", ex)
 
             }
         }

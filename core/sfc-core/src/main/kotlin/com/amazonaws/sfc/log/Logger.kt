@@ -1,4 +1,3 @@
-
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: MIT-0
 
@@ -21,13 +20,14 @@ import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_WARNINGS
 import com.amazonaws.sfc.metrics.MetricsCollectorMethod
 import com.amazonaws.sfc.metrics.MetricsValue
 import com.amazonaws.sfc.metrics.MetricsValueParam
+import com.amazonaws.sfc.util.toStringEx
 import java.util.logging.Handler
 import java.util.logging.Level
 import java.util.logging.LogManager
 import java.util.logging.LogRecord
 
 
-typealias LogFunction = (String, String?) -> Unit
+typealias LogFunction = (String, String?, Exception?) -> Unit
 
 interface LogWriter {
     fun write(logLevel: LogLevel, timestamp: Long, source: String?, message: String)
@@ -42,7 +42,8 @@ class Logger(
     secretNames: Set<String>? = null,
     secretValues: Set<String>? = null,
     private val hiddenText: String = HIDDEN_VALUE,
-    var writer: LogWriter) {
+    var writer: LogWriter
+) {
 
 
     private var _secretNames = if (!secretNames.isNullOrEmpty()) secretNames as MutableSet<String> else mutableSetOf()
@@ -118,16 +119,27 @@ class Logger(
     }
 
     // method for emitting trace messages
-    private fun logTrace(message: String, source: String? = this.source) {
+    private fun logTrace(message: String, source: String? = this.source, exception: Exception? = null) {
         if (level == LogLevel.TRACE) {
-            emit(LogLevel.TRACE, source, message)
+            if (exception != null) {
+                emit(LogLevel.TRACE, source, message + " : ${exception.toStringEx()}")
+            } else {
+                emit(LogLevel.TRACE, source, message)
+            }
         }
     }
 
+
     // method for emitting warning messages
-    private fun logWarning(message: String, source: String? = this.source) {
+    private fun logWarning(message: String, source: String? = this.source, exception: Exception? = null) {
         if (level >= LogLevel.WARNING) {
-            emit(LogLevel.WARNING, source, message)
+            if (level == LogLevel.TRACE && exception != null) {
+                emit(LogLevel.WARNING, source, "$message  : ${exception.toStringEx()}")
+            } else {
+                var msg = message
+                if (exception != null) msg += ", $exception"
+                emit(LogLevel.WARNING, source, msg)
+            }
         }
         try {
             metricsCollectorMethod?.let { it(listOf(MetricsValueParam(METRICS_WARNINGS, MetricsValue(1), MetricUnits.COUNT))) }
@@ -136,15 +148,25 @@ class Logger(
     }
 
     // method for emitting informational messages
-    private fun logInfo(message: String, source: String? = this.source) {
+    private fun logInfo(message: String, source: String? = this.source, exception: Exception? = null) {
         if (level >= LogLevel.INFO) {
-            emit(LogLevel.INFO, source, message)
+            if (level == LogLevel.TRACE && exception != null) {
+                emit(LogLevel.INFO, source, message + " : ${exception.toStringEx()}")
+            } else {
+                var msg = message
+                if (exception != null) msg += ", $exception"
+                emit(LogLevel.INFO, source, msg)
+            }
         }
     }
 
     // method for emitting error messages
-    private fun logError(message: String, source: String? = this.source) {
-        emit(LogLevel.ERROR, source, message)
+    private fun logError(message: String, source: String? = this.source, exception: Exception? = null) {
+        if (exception != null) {
+            emit(level, source, message + " : ${exception.toStringEx()}")
+        } else {
+            emit(LogLevel.ERROR, source, message)
+        }
         try {
             metricsCollectorMethod?.let { it(listOf(MetricsValueParam(METRICS_ERRORS, MetricsValue(1), MetricUnits.COUNT))) }
         } catch (_: Exception) {
@@ -163,6 +185,9 @@ class Logger(
      * @param ctxMethodVar Any
      * @return (String) -> Unit
      */
+    fun getCtxErrorLogEx(ctxInstance: Any, ctxMethodVar: Any): ((String, Exception?) -> Unit) =
+        getCtxErrorLogEx(logSource(LogLevel.ERROR, ctxInstance, ctxMethodVar))
+
     fun getCtxErrorLog(ctxInstance: Any, ctxMethodVar: Any): ((String) -> Unit) =
         getCtxErrorLog(logSource(LogLevel.ERROR, ctxInstance, ctxMethodVar))
 
@@ -172,6 +197,9 @@ class Logger(
      * @param ctxMethod String
      * @return (String) -> Unit
      */
+    fun getCtxErrorLogEx(ctxInstance: Any, ctxMethod: String): ((String, Exception?) -> Unit) =
+        getCtxErrorLogEx(logSource(LogLevel.ERROR, ctxInstance, ctxMethod))
+
     fun getCtxErrorLog(ctxInstance: Any, ctxMethod: String): ((String) -> Unit) =
         getCtxErrorLog(logSource(LogLevel.ERROR, ctxInstance, ctxMethod))
 
@@ -181,6 +209,9 @@ class Logger(
      * @param ctxMethodVar Any
      * @return (String) -> Unit
      */
+    fun getCtxErrorLogEx(ctxName: String, ctxMethodVar: Any): ((String, Exception?) -> Unit) =
+        getCtxErrorLogEx(logSource(LogLevel.ERROR, ctxName, ctxMethodVar))
+
     fun getCtxErrorLog(ctxName: String, ctxMethodVar: Any): ((String) -> Unit) =
         getCtxErrorLog(logSource(LogLevel.ERROR, ctxName, ctxMethodVar))
 
@@ -190,14 +221,21 @@ class Logger(
      * @param ctxMethod String
      * @return (String) -> Unit
      */
+    fun getCtxErrorLogEx(ctxName: String, ctxMethod: String): ((String, Exception?) -> Unit) =
+        getCtxErrorLogEx(logSource(ctxName, ctxMethod))
+
     fun getCtxErrorLog(ctxName: String, ctxMethod: String): ((String) -> Unit) =
         getCtxErrorLog(logSource(ctxName, ctxMethod))
+
 
     /**
      * Get a method to use for logging errors using a method variable to build the source of the messages
      * @param ctxMethodVar Any
      * @return (String) -> Unit
      */
+    fun getCtxErrorLogEx(ctxMethodVar: Any): ((String, Exception?) -> Unit) =
+        getCtxErrorLogEx(logSource(LogLevel.ERROR, ctxMethodVar))
+
     fun getCtxErrorLog(ctxMethodVar: Any): ((String) -> Unit) =
         getCtxErrorLog(logSource(LogLevel.ERROR, ctxMethodVar))
 
@@ -206,17 +244,23 @@ class Logger(
      * @param logSource String
      * @return (String) -> Unit
      */
+    fun getCtxErrorLogEx(logSource: String): ((String, Exception?) -> Unit) {
+        return { s: String, exception: Exception? ->
+            error(s, logSource, exception)
+        }
+    }
+
     fun getCtxErrorLog(logSource: String): ((String) -> Unit) {
-        return {
-            error(it, logSource)
+        return { s: String ->
+            error(s, logSource, null)
         }
     }
 
     /**
      * Method to use to log trace messages, evaluates to an empty function if loglevel is below Trace level
      */
-    val trace: ((String, String?) -> Unit)
-        get() = if (this.level == LogLevel.TRACE) this::logTrace else { _: String, _: String? ->
+    val trace: LogFunction
+        get() = if (this.level == LogLevel.TRACE) this::logTrace else { _: String, _: String?, _: Exception? ->
         }
 
     /**
@@ -225,6 +269,9 @@ class Logger(
      * @param ctxMethodVar Any
      * @return (String) -> Unit
      */
+    fun getCtxTraceLogEx(ctxInstance: Any, ctxMethodVar: Any): ((String, Exception?) -> Unit) =
+        getCtxTraceLogEx(logSource(LogLevel.TRACE, ctxInstance, ctxMethodVar))
+
     fun getCtxTraceLog(ctxInstance: Any, ctxMethodVar: Any): ((String) -> Unit) =
         getCtxTraceLog(logSource(LogLevel.TRACE, ctxInstance, ctxMethodVar))
 
@@ -234,6 +281,9 @@ class Logger(
      * @param ctxMethod String
      * @return (String) -> Unit
      */
+    fun getCtxTraceLogEx(ctxInstance: Any, ctxMethod: String): ((String, Exception?) -> Unit) =
+        getCtxTraceLogEx(logSource(LogLevel.TRACE, ctxInstance, ctxMethod))
+
     fun getCtxTraceLog(ctxInstance: Any, ctxMethod: String): ((String) -> Unit) =
         getCtxTraceLog(logSource(LogLevel.TRACE, ctxInstance, ctxMethod))
 
@@ -243,8 +293,12 @@ class Logger(
      * @param ctxMethodVar Any
      * @return (String) -> Unit
      */
+    fun getCtxTraceLogEx(ctxName: String, ctxMethodVar: Any): ((String, Exception?) -> Unit) =
+        getCtxTraceLogEx(logSource(LogLevel.TRACE, ctxName, ctxMethodVar))
+
     fun getCtxTraceLog(ctxName: String, ctxMethodVar: Any): ((String) -> Unit) =
         getCtxTraceLog(logSource(LogLevel.TRACE, ctxName, ctxMethodVar))
+
 
     /**
      * Get a method to use for logging trace messages using a class name and a method name to build the source of the messages
@@ -252,6 +306,9 @@ class Logger(
      * @param ctxMethod String
      * @return (String) -> Unit
      */
+    fun getCtxTraceLogEx(ctxName: String, ctxMethod: String): ((String, Exception?) -> Unit) =
+        getCtxTraceLogEx(logSource(ctxName, ctxMethod))
+
     fun getCtxTraceLog(ctxName: String, ctxMethod: String): ((String) -> Unit) =
         getCtxTraceLog(logSource(ctxName, ctxMethod))
 
@@ -260,6 +317,9 @@ class Logger(
      * @param ctxMethodVar Any
      * @return (String) -> Unit
      */
+    fun getCtxTraceLogEx(ctxMethodVar: Any): ((String, Exception?) -> Unit) =
+        getCtxTraceLogEx(logSource(LogLevel.TRACE, ctxMethodVar))
+
     fun getCtxTraceLog(ctxMethodVar: Any): ((String) -> Unit) =
         getCtxTraceLog(logSource(LogLevel.TRACE, ctxMethodVar))
 
@@ -268,17 +328,23 @@ class Logger(
      * @param logSource String
      * @return (String) -> Unit
      */
+    fun getCtxTraceLogEx(logSource: String): ((String, Exception?) -> Unit) {
+        return { s: String, exception: Exception? ->
+            trace(s, logSource, exception)
+        }
+    }
+
     fun getCtxTraceLog(logSource: String): ((String) -> Unit) {
-        return {
-            trace(it, logSource)
+        return { s: String ->
+            trace(s, logSource, null)
         }
     }
 
     /**
      * Method to use to log warning messages, evaluates to an empty function if loglevel is below WARNING level
      */
-    val warning: ((String, String?) -> Unit)
-        get() = if (this.level >= LogLevel.WARNING) this::logWarning else { _: String, _: String? ->
+    val warning: LogFunction
+        get() = if (this.level >= LogLevel.WARNING) this::logWarning else { _: String, _: String?, _: Exception? ->
         }
 
     /**
@@ -287,8 +353,12 @@ class Logger(
      * @param ctxMethodVar Any
      * @return (String) -> Unit
      */
+    fun getCtxWarningLogEx(ctxInstance: Any, ctxMethodVar: Any): ((String, Exception?) -> Unit) =
+        getCtxWarningLogEx(logSource(LogLevel.WARNING, ctxInstance, ctxMethodVar))
+
     fun getCtxWarningLog(ctxInstance: Any, ctxMethodVar: Any): ((String) -> Unit) =
         getCtxWarningLog(logSource(LogLevel.WARNING, ctxInstance, ctxMethodVar))
+
 
     /**
      * Get a method to use for logging trace messages using a class instance and a method name to build the source of the messages
@@ -296,6 +366,9 @@ class Logger(
      * @param ctxMethod String
      * @return (String) -> Unit
      */
+    fun getCtxWarningLogEx(ctxInstance: Any, ctxMethod: String): ((String, Exception?) -> Unit) =
+        getCtxWarningLogEx(logSource(LogLevel.WARNING, ctxInstance, ctxMethod))
+
     fun getCtxWarningLog(ctxInstance: Any, ctxMethod: String): ((String) -> Unit) =
         getCtxWarningLog(logSource(LogLevel.WARNING, ctxInstance, ctxMethod))
 
@@ -305,6 +378,9 @@ class Logger(
      * @param ctxMethodVar Any
      * @return (String) -> Unit
      */
+    fun getCtxWarningLogEx(ctxName: String, ctxMethodVar: Any): ((String, Exception?) -> Unit) =
+        getCtxWarningLogEx(logSource(LogLevel.WARNING, ctxName, ctxMethodVar))
+
     fun getCtxWarningLog(ctxName: String, ctxMethodVar: Any): ((String) -> Unit) =
         getCtxWarningLog(logSource(LogLevel.WARNING, ctxName, ctxMethodVar))
 
@@ -314,6 +390,9 @@ class Logger(
      * @param ctxMethod String
      * @return (String) -> Unit
      */
+    fun getCtxWarningLogEx(ctxName: String, ctxMethod: String): ((String, Exception?) -> Unit) =
+        getCtxWarningLogEx(logSource(ctxName, ctxMethod))
+
     fun getCtxWarningLog(ctxName: String, ctxMethod: String): ((String) -> Unit) =
         getCtxWarningLog(logSource(ctxName, ctxMethod))
 
@@ -322,6 +401,9 @@ class Logger(
      * @param ctxMethodVar Any
      * @return (String) -> Unit
      */
+    fun getCtxWarningLogEx(ctxMethodVar: Any): ((String, Exception?) -> Unit) =
+        getCtxWarningLogEx(logSource(LogLevel.WARNING, ctxMethodVar))
+
     fun getCtxWarningLog(ctxMethodVar: Any): ((String) -> Unit) =
         getCtxWarningLog(logSource(LogLevel.WARNING, ctxMethodVar))
 
@@ -330,17 +412,23 @@ class Logger(
      * @param logSource String
      * @return (String) -> Unit
      */
+    fun getCtxWarningLogEx(logSource: String): ((String, Exception?) -> Unit) {
+        return { s: String, exception: Exception? ->
+            warning(s, logSource, exception)
+        }
+    }
+
     fun getCtxWarningLog(logSource: String): ((String) -> Unit) {
-        return {
-            warning(it, logSource)
+        return { s: String ->
+            warning(s, logSource, null)
         }
     }
 
     /**
      * Method to use to log informational messages, evaluates to an empty function if loglevel is below INFO level
      */
-    val info: ((String, String?) -> Unit)
-        get() = if (this.level >= LogLevel.INFO) this::logInfo else { _: String, _: String? ->
+    val info: LogFunction
+        get() = if (this.level >= LogLevel.INFO) this::logInfo else { _: String, _: String?, _: Exception? ->
         }
 
     /**
@@ -349,6 +437,9 @@ class Logger(
      * @param ctxMethodVar Any
      * @return (String) -> Unit
      */
+    fun getCtxInfoLogEx(ctxInstance: Any, ctxMethodVar: Any): ((String, Exception?) -> Unit) =
+        getCtxInfoLogEx(logSource(LogLevel.INFO, ctxInstance, ctxMethodVar))
+
     fun getCtxInfoLog(ctxInstance: Any, ctxMethodVar: Any): ((String) -> Unit) =
         getCtxInfoLog(logSource(LogLevel.INFO, ctxInstance, ctxMethodVar))
 
@@ -358,6 +449,9 @@ class Logger(
      * @param ctxMethod String
      * @return (String) -> Unit
      */
+    fun getCtxInfoLogEx(ctxInstance: Any, ctxMethod: String): ((String, Exception?) -> Unit) =
+        getCtxInfoLogEx(logSource(LogLevel.INFO, ctxInstance, ctxMethod))
+
     fun getCtxInfoLog(ctxInstance: Any, ctxMethod: String): ((String) -> Unit) =
         getCtxInfoLog(logSource(LogLevel.INFO, ctxInstance, ctxMethod))
 
@@ -367,6 +461,9 @@ class Logger(
      * @param ctxMethodVar Any
      * @return (String) -> Unit
      */
+    fun getCtxInfoLogEx(ctxName: String, ctxMethodVar: Any): ((String, Exception?) -> Unit) =
+        getCtxInfoLogEx(logSource(LogLevel.INFO, ctxName, ctxMethodVar))
+
     fun getCtxInfoLog(ctxName: String, ctxMethodVar: Any): ((String) -> Unit) =
         getCtxInfoLog(logSource(LogLevel.INFO, ctxName, ctxMethodVar))
 
@@ -376,6 +473,9 @@ class Logger(
      * @param ctxMethod String
      * @return (String) -> Unit
      */
+    fun getCtxInfoLogEx(ctxName: String, ctxMethod: String): ((String, Exception?) -> Unit) =
+        getCtxInfoLogEx(logSource(ctxName, ctxMethod))
+
     fun getCtxInfoLog(ctxName: String, ctxMethod: String): ((String) -> Unit) =
         getCtxInfoLog(logSource(ctxName, ctxMethod))
 
@@ -384,6 +484,9 @@ class Logger(
      * @param ctxMethodVar Any
      * @return (String) -> Unit
      */
+    fun getCtxInfoLogEx(ctxMethodVar: Any): ((String, Exception?) -> Unit) =
+        getCtxInfoLogEx(logSource(LogLevel.INFO, ctxMethodVar))
+
     fun getCtxInfoLog(ctxMethodVar: Any): ((String) -> Unit) =
         getCtxInfoLog(logSource(LogLevel.INFO, ctxMethodVar))
 
@@ -392,9 +495,16 @@ class Logger(
      * @param logSource String
      * @return (String) -> Unit
      */
+
+    fun getCtxInfoLogEx(logSource: String): ((String, Exception?) -> Unit) {
+        return { s: String, exception: Exception? ->
+            info(s, logSource, exception)
+        }
+    }
+
     fun getCtxInfoLog(logSource: String): ((String) -> Unit) {
-        return {
-            info(it, logSource)
+        return { s: String ->
+            info(s, logSource, null)
         }
     }
 
@@ -591,9 +701,13 @@ class Logger(
      */
     class ContextLogger(
         val error: ((String) -> Unit),
+        val errorEx: ((String, Exception?) -> Unit),
         val warning: ((String) -> Unit),
+        val warningEx: ((String, Exception?) -> Unit),
         val info: ((String) -> Unit),
-        val trace: ((String) -> Unit)
+        val infoEx: ((String, Exception?) -> Unit),
+        val trace: ((String) -> Unit),
+        val traceEx: ((String, Exception?) -> Unit)
 
     ) {
         companion object {
@@ -607,9 +721,13 @@ class Logger(
 
                 return ContextLogger(
                     error = logger.getCtxErrorLog(logSource),
+                    errorEx = logger.getCtxErrorLogEx(logSource),
                     warning = logger.getCtxWarningLog(logSource),
+                    warningEx = logger.getCtxWarningLogEx(logSource),
                     info = logger.getCtxInfoLog((logSource)),
-                    trace = logger.getCtxTraceLog(logSource)
+                    infoEx = logger.getCtxInfoLogEx((logSource)),
+                    trace = logger.getCtxTraceLog(logSource),
+                    traceEx = logger.getCtxTraceLogEx(logSource)
                 )
             }
         }

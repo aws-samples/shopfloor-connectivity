@@ -10,6 +10,9 @@ import com.amazonaws.sfc.crypto.CertificateConfiguration.Companion.CONFIG_CERT_E
 import com.amazonaws.sfc.service.ServerConnectionType
 import com.google.gson.annotations.SerializedName
 import java.io.File
+import kotlin.time.Duration
+import kotlin.time.DurationUnit
+import kotlin.time.toDuration
 
 /**
  * Base class for configuration of IPC source or target address
@@ -104,6 +107,16 @@ open class ServerConfiguration : Validate {
     private var _compression = false
     val compression: Boolean
         get() = _compression
+
+    @SerializedName(CONFIG_SERVICE_RESULTS_CHANNEL_SIZE)
+    private var _serviceResultsChannelSize = 1000
+    val serviceResultsChannelSize: Int
+        get() = _serviceResultsChannelSize
+
+    @SerializedName(CONFIG_SERVICE_RESULTS_CHANNEL_TIMEOUT)
+    private var _serviceResultsChannelTimeout = 10000
+    val serviceResultsChannelTimeout: Duration
+        get() = _serviceResultsChannelTimeout.toDuration(DurationUnit.MILLISECONDS)
 
     private var _usedByServer: Boolean = false
     val usedByServer: Boolean
@@ -220,6 +233,9 @@ open class ServerConfiguration : Validate {
         const val CONFIG_HEALTH_PROBE = "HealthProbe"
         const val CONFIG_CONNECTION_TYPE = "ConnectionType"
         const val CONFIG_COMPRESSION = "Compression"
+
+        const val CONFIG_SERVICE_RESULTS_CHANNEL_SIZE = "ServerResultsChannelSize"
+        const val CONFIG_SERVICE_RESULTS_CHANNEL_TIMEOUT = "ServerResultsChannelTimeout"
 
         private val default = ServerConfiguration()
 

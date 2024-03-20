@@ -23,11 +23,9 @@ import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_WRITE_SIZE
 import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_WRITE_SUCCESS
 import com.amazonaws.sfc.system.DateTime
 import com.amazonaws.sfc.targets.AwsServiceTargetClientHelper
+import com.amazonaws.sfc.targets.TargetDataChannel
 import com.amazonaws.sfc.targets.TargetException
-import com.amazonaws.sfc.util.buildContext
-import com.amazonaws.sfc.util.canNotReachAwsService
-import com.amazonaws.sfc.util.isJobCancellationException
-import com.amazonaws.sfc.util.launch
+import com.amazonaws.sfc.util.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
@@ -84,7 +82,7 @@ class AwsFirehoseTargetWriter(
      * @param targetData TargetData
      */
     override suspend fun writeTargetData(targetData: TargetData) {
-        targetDataChannel.send(targetData)
+        targetDataChannel.submit(targetData, logger.getCtxLoggers(className, "writeTargetData"))
     }
 
     /**
@@ -97,8 +95,12 @@ class AwsFirehoseTargetWriter(
         firehoseClient.close()
     }
 
+    private val targetConfig: AwsKinesisFirehoseTargetConfiguration by lazy {
+        clientHelper.targetConfig(config, targetID, AWS_KINESIS_FIREHOSE)
+    }
+
     // Channel to pass message to coroutine that batches and sends messages to the stream
-    private val targetDataChannel = Channel<TargetData>(100)
+    private val targetDataChannel = TargetDataChannel.create(targetConfig, "$className:targetDataChannel")
 
     // Message buffer
     private val buffer = newTargetDataBuffer(resultHandler)
@@ -111,14 +113,12 @@ class AwsFirehoseTargetWriter(
         try {
             log.info("AWS Kinesis Firehose writer for target \"$targetID\" writing to stream \"${targetConfig.streamName}\" in region ${targetConfig.region} on target \"$targetID\"")
 
-            for (targetData in targetDataChannel) {
+            for (targetData in targetDataChannel.channel) {
                 sendTargetData(targetData)
             }
         } catch (e: Exception) {
-            if (e.isJobCancellationException)
-                log.info("Writetr stopped")
-            else
-                log.error("Error in AWS Kinesis Firehose writer for target \"$targetID\" writing to stream \"${targetConfig.streamName}\" in region ${targetConfig.region} on target \"$targetID\", $e")
+            if (!e.isJobCancellationException)
+                log.errorEx("Error in AWS Kinesis Firehose writer for target \"$targetID\" writing to stream \"${targetConfig.streamName}\" in region ${targetConfig.region} on target \"$targetID\"", e)
         }
     }
 
@@ -207,7 +207,7 @@ class AwsFirehoseTargetWriter(
             targetResults?.ackAndError(ok, errors)
 
         } catch (e: Exception) {
-            log.error("Error sending to kinesis firehose delivery stream \"$streamName\" for target \"$targetID\", ${e.message}")
+            log.errorEx("Error sending to kinesis firehose delivery stream \"$streamName\" for target \"$targetID\"", e)
             runBlocking { metricsCollector?.put(targetID, METRICS_WRITE_ERRORS, 1.0, MetricUnits.COUNT, metricDimensions) }
             if (canNotReachAwsService(e)) {
                 targetResults?.nackList(buffer.items)
@@ -228,6 +228,7 @@ class AwsFirehoseTargetWriter(
         runBlocking {
             metricsCollector?.put(
                 adapterID,
+                metricsCollector?.buildValueDataPoint(adapterID, MetricsCollector.METRICS_MEMORY, MemoryMonitor.getUsedMemoryMB().toDouble(),MetricUnits.MEGABYTES ),
                 metricsCollector?.buildValueDataPoint(adapterID, METRICS_WRITES, 1.0, MetricUnits.COUNT, metricDimensions),
                 metricsCollector?.buildValueDataPoint(adapterID, METRICS_MESSAGES, buffer.size.toDouble(), MetricUnits.COUNT, metricDimensions),
                 metricsCollector?.buildValueDataPoint(adapterID, METRICS_WRITE_DURATION, writeDurationInMillis, MetricUnits.MILLISECONDS, metricDimensions),
@@ -256,11 +257,6 @@ class AwsFirehoseTargetWriter(
         }
 
 
-    private val targetConfig: AwsKinesisFirehoseTargetConfiguration by lazy {
-
-        clientHelper.targetConfig(config, targetID, AWS_KINESIS_FIREHOSE)
-    }
-
     private val metricsCollector: MetricsCollector? by lazy {
         val metricsConfiguration = config.targets[targetID]?.metrics ?: MetricsSourceConfiguration()
         if (config.isCollectingMetrics) {
@@ -285,7 +281,7 @@ class AwsFirehoseTargetWriter(
                         metricsCollector?.put(targetID, dataPoints)
                     }
                 } catch (e: java.lang.Exception) {
-                    logger.getCtxErrorLog(this::class.java.simpleName, "collectMetricsFromLogger")("Error collecting metrics from logger, $e")
+                    logger.getCtxErrorLogEx(this::class.java.simpleName, "collectMetricsFromLogger")("Error collecting metrics from logger", e)
                 }
             }
         } else null

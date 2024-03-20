@@ -43,8 +43,8 @@ open class TargetResultHelper(targetID: String, targetResultHandler: TargetResul
 
             targetResultHandler?.handleResult(result)
             loggers.trace("Returning ACK for target data with serial numbers ${targetDataList?.map { it.serial }}")
-        } catch (e: Throwable) {
-            loggers.error("Error returning ACK for target data with serial numbers ${targetDataList?.map { it.serial }}, $e")
+        } catch (e: Exception) {
+            loggers.errorEx("Error returning ACK for target data with serial numbers ${targetDataList?.map { it.serial }}", e)
         }
     }
 
@@ -73,8 +73,8 @@ open class TargetResultHelper(targetID: String, targetResultHandler: TargetResul
 
             targetResultHandler?.handleResult(result)
             loggers.trace("Returning NACK for target data with serial numbers ${targetDataList?.map { it.serial }}")
-        } catch (e: Throwable) {
-            loggers.error("Error returning NACK target data with serial numbers ${targetDataList?.map { it.serial }}, $e")
+        } catch (e: Exception) {
+            loggers.errorEx("Error returning NACK target data with serial numbers ${targetDataList?.map { it.serial }}", e)
         }
     }
 
@@ -97,8 +97,8 @@ open class TargetResultHelper(targetID: String, targetResultHandler: TargetResul
 
             targetResultHandler?.handleResult(result)
             loggers.trace("Returning ACK and for  target data with serial numbers ${ackTargetDataList?.map { it.serial }}, reporting ERROR for target data with serial numbers ${errorTargetDataList?.map { it.serial }}")
-        } catch (e: Throwable) {
-            loggers.error("Error returning ACK for target data with serial numbers ${ackTargetDataList?.map { it.serial }} and  error for target data with serial numbers ${errorTargetDataList?.map { it.serial }}, $e")
+        } catch (e: Exception) {
+            loggers.errorEx("Error returning ACK for target data with serial numbers ${ackTargetDataList?.map { it.serial }} and  error for target data with serial numbers ${errorTargetDataList?.map { it.serial }}", e)
         }
     }
 

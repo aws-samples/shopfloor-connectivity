@@ -22,36 +22,35 @@ open class MqttConnectionOptions : Validate {
 
         val hasPort = Regex("""(.+):(\d+)${'$'}$""")
         val m = hasPort.find(_endPoint)
-        val s = if (m == null) _endPoint else {
+        if (m == null) _endPoint else {
             if (_port == null) {
                 _port = m.groups[1]!!.value.toInt()
             }
             m.groups[0]?.value.toString()
         }
 
-        val hasProtocol = Regex("""^w+://""")
-        if (hasProtocol.matches(_endPoint)) {
+        val hasProtocol = MqttConnectionProtocol.validValues.any { _endPoint.startsWith(it) }
+        if (hasProtocol) {
             _endPoint
-        } else
-            when (connection) {
-                MqttConnectionType.SSL -> "ssl://$s"
-                MqttConnectionType.MUTUAL -> "ssl://$s"
-                MqttConnectionType.PLAINTEXT -> "tcp://$s"
+        } else {
+            if (certificate != null || privateKey != null || rootCA != null) {
+                "${MqttConnectionProtocol.SSL.protocolPrefix}_endPoint"
+            } else {
+                "${MqttConnectionProtocol.SSL.protocolPrefix}_endPoint"
             }
+        }
     }
 
+    val protocol: MqttConnectionProtocol? by lazy {
+        MqttConnectionProtocol.fromAddress(endPoint)
+    }
 
     @SerializedName(CONFIG_MQTT_PORT)
-    protected var _port: Int? = null
+    protected
+
+    var _port: Int? = null
     val port: Int?
         get() = _port
-
-    @SerializedName(CONFIG_MQTT_CONNECTION)
-    protected var _connection: MqttConnectionType = DEFAULT_MQTT_CONNECTION
-
-    val connection: MqttConnectionType
-        get() = _connection
-
 
     @SerializedName(CONFIG_MQTT_CERTIFICATE)
     protected var _certificate: String? = null
@@ -87,6 +86,9 @@ open class MqttConnectionOptions : Validate {
     protected var _connectTimeout = DEFAULT_CONNECT_TIMEOUT
     val connectTimeout: Duration = _connectTimeout.toDuration(DurationUnit.SECONDS)
 
+    val address
+        get() = endPoint.substringAfter("://")
+
     private var _validated = false
     override var validated
         get() = _validated
@@ -95,38 +97,59 @@ open class MqttConnectionOptions : Validate {
         }
 
     override fun validate() {
-        checkConnectionRequirements()
+        validateProtocol()
+        checkProtocolRequirements()
         checkRequiredSettings()
+
+
+
+        validated = true
     }
-    private fun checkConnectionRequirements() {
-        when (_connection) {
-            MqttConnectionType.PLAINTEXT -> planTextRequirements()
-            MqttConnectionType.SSL -> checkServerSideSslRequirements()
-            MqttConnectionType.MUTUAL -> checkMutualTlsRequirements()
+
+    private fun validateProtocol() {
+        if (MqttConnectionProtocol.validValues.none { _endPoint.startsWith(it) } && (_endPoint.contains("""^\w+://"""))) {
+            throw ConfigurationException(
+                "${_endPoint.substringBefore("://")}:// of $CONFIG_MQTT_END_POINT is not a valid protocol, valid protocols are ${MqttConnectionProtocol.validValues}",
+                CONFIG_MQTT_END_POINT, this
+            )
         }
     }
 
-    private fun checkMutualTlsRequirements() {
-        checkPrefix(_connection, "ssl")
+    private fun checkProtocolRequirements() {
+        when (protocol) {
+            MqttConnectionProtocol.TCP -> checkTcpRequirements()
+            MqttConnectionProtocol.SSL -> checkSslRequirements()
+            null -> throw ConfigurationException("No protocol specified for MQTT connection end point", CONFIG_MQTT_END_POINT, this)
+        }
+    }
+
+    private fun checkTcpRequirements() {
+        checkEndPointProtocol()
+    }
+
+
+    private fun checkSslRequirements() {
+        checkEndPointProtocol()
         checkIfSetAndExist(rootCA, CONFIG_MQTT_ROOT_CA)
         checkIfSetAndExist(certificate, CONFIG_MQTT_CERTIFICATE)
         checkIfSetAndExist(privateKey, CONFIG_MQTT_PRIVATE_KEY)
         sslServerCertMustExistIfConfigured()
     }
 
-    private fun checkServerSideSslRequirements() {
-        checkPrefix(_connection, "ssl")
-        sslServerCertMustExistIfConfigured()
+    private fun checkEndPointProtocol() {
+        ConfigurationException.check(
+            endPoint.startsWith(protocol?.protocolPrefix ?: ""),
+            "$CONFIG_MQTT_END_POINT must start with ${MqttConnectionProtocol.TCP.protocolPrefix}",
+            CONFIG_MQTT_END_POINT,
+            this
+        )
     }
 
-    private fun planTextRequirements() {
-        checkPrefix(_connection, "tcp")
-    }
 
     private fun checkIfSetAndExist(f: File?, n: String) {
         ConfigurationException.check(
             f != null && f.exists(),
-            "$n must be set and exist for connection $connection}",
+            "$n ${f?.absolutePath} does not exist}}",
             n,
             this
         )
@@ -135,17 +158,8 @@ open class MqttConnectionOptions : Validate {
     private fun sslServerCertMustExistIfConfigured() {
         ConfigurationException.check(
             sslServerCert == null || sslServerCert?.exists() == true,
-            "$CONFIG_MQTT_SSL_SERVER_CERT must exist for connection ${MqttConnectionType.MUTUAL}",
+            "$CONFIG_MQTT_SSL_SERVER_CERT ${sslServerCert?.absolutePath} does not exist",
             CONFIG_MQTT_SSL_SERVER_CERT,
-            this
-        )
-    }
-
-    private fun checkPrefix(c: MqttConnectionType, s: String) {
-        ConfigurationException.check(
-            endPoint.startsWith("$s://"),
-            "$CONFIG_MQTT_END_POINT must start with $s:// for connection ${c}",
-            CONFIG_MQTT_END_POINT,
             this
         )
     }
@@ -165,9 +179,10 @@ open class MqttConnectionOptions : Validate {
             "$CONFIG_MQTT_PORT for MQTT target must be set",
             CONFIG_MQTT_PORT,
             this
-        )}
+        )
+    }
 
-    companion object{
+    companion object {
         const val CONFIG_MQTT_END_POINT = "EndPoint"
         const val CONFIG_MQTT_CERTIFICATE = "Certificate"
         const val CONFIG_MQTT_PRIVATE_KEY = "PrivateKey"
@@ -176,20 +191,18 @@ open class MqttConnectionOptions : Validate {
         const val CONFIG_MQTT_CONNECT_TIMEOUT = "ConnectTimeout"
         const val CONFIG_MQTT_USERNAME = "Username"
         const val CONFIG_MQTT_PASSWORD = "Password"
-        const val CONFIG_MQTT_CONNECTION = "Connection"
         const val CONFIG_MQTT_PORT = "Port"
+
         // included as this was setting has been renamed to CONFIG_END_POINT
         const val CONFIG_BROKER_ADDRESS = "Address"
 
         const val DEFAULT_CONNECT_TIMEOUT = 10
-        val DEFAULT_MQTT_CONNECTION = MqttConnectionType.PLAINTEXT
 
         private val default = MqttConnectionOptions()
 
         fun create(
             endPoint: String = default._endPoint,
             port: Int? = default._port,
-            connection: MqttConnectionType = default._connection,
             username: String? = default._username,
             password: String? = default._password,
             certificate: String? = default._certificate,
@@ -204,7 +217,6 @@ open class MqttConnectionOptions : Validate {
             with(instance) {
                 _endPoint = endPoint
                 _port = port
-                _connection = connection
                 _username = username
                 _password = password
                 _certificate = certificate

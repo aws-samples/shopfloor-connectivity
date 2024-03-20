@@ -23,7 +23,9 @@ import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_WRITE_SIZE
 import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_WRITE_SUCCESS
 import com.amazonaws.sfc.system.DateTime
 import com.amazonaws.sfc.targets.AwsServiceTargetClientHelper
+import com.amazonaws.sfc.targets.TargetDataChannel
 import com.amazonaws.sfc.targets.TargetException
+import com.amazonaws.sfc.util.MemoryMonitor
 import com.amazonaws.sfc.util.canNotReachAwsService
 import com.amazonaws.sfc.util.launch
 import kotlinx.coroutines.*
@@ -91,8 +93,6 @@ class AwsIotCoreTargetWriter(
             return endpoint
         }
 
-    // Channel to pass data to be sent to target to worker that does the actual sending
-    private val targetDataChannel = Channel<TargetData>(100)
 
     private val config: AwsIotCoreWriterConfiguration
         get() {
@@ -102,6 +102,9 @@ class AwsIotCoreTargetWriter(
     private val targetConfig: AwsIotCoreTargetConfiguration by lazy {
         clientHelper.targetConfig(config, targetID, AWS_IOT_CORE_TARGET)
     }
+
+    // Channel to pass data to be sent to target to worker that does the actual sending
+    private val targetDataChannel = TargetDataChannel.create(targetConfig, "$className:targetDataChannel")
 
     private val metricsCollector: MetricsCollector? by lazy {
         val metricsConfiguration = config.targets[targetID]?.metrics ?: MetricsSourceConfiguration()
@@ -125,7 +128,7 @@ class AwsIotCoreTargetWriter(
                         metricsCollector?.put(targetID, dataPoints)
                     }
                 } catch (e: java.lang.Exception) {
-                    logger.getCtxErrorLog(this::class.java.simpleName, "collectMetricsFromLogger")("Error collecting metrics from logger, $e")
+                    logger.getCtxErrorLogEx(this::class.java.simpleName, "collectMetricsFromLogger")("Error collecting metrics from logger", e)
                 }
             }
         } else null
@@ -140,7 +143,7 @@ class AwsIotCoreTargetWriter(
      */
     override suspend fun writeTargetData(targetData: TargetData) {
         // Accept data and send for worker for processing and  sending to IoT topic target
-        targetDataChannel.send(targetData)
+        targetDataChannel.submit(targetData, logger.getCtxLoggers(className, "writeTargetData"))
     }
 
     /**
@@ -157,7 +160,7 @@ class AwsIotCoreTargetWriter(
         try {
             targetWriter()
         }catch (e : Exception){
-            logger.getCtxErrorLog(className, "targetWriter")("Error in target writer, $e")
+            logger.getCtxErrorLogEx(className, "targetWriter")("Error in target writer", e)
         }
     }
 
@@ -174,7 +177,7 @@ class AwsIotCoreTargetWriter(
         log.info("AWS IoT Core writer for target \"$targetID\" publishing to topic \"${targetConfig.topicName}\" in region ${targetConfig.region} on target $targetID")
 
         // Receive all data passed to worker through channel
-        for (targetData in targetDataChannel) {
+        for (targetData in targetDataChannel.channel) {
             val topicName = targetConfig.topicName ?: targetData.schedule
 
             val payload = buildPayload(targetData)
@@ -191,8 +194,8 @@ class AwsIotCoreTargetWriter(
 
                 log.trace("Publish result is ${resp.sdkHttpResponse().statusText()}")
                 targetResults?.ack(targetData)
-            } catch (e: Throwable) {
-                log.error("Error publishing to topic \"$topicName\" for target \"$targetID\", ${e.message}")
+            } catch (e: Exception) {
+                log.errorEx("Error publishing to topic \"$topicName\" for target \"$targetID\"", e)
                 runBlocking { metricsCollector?.put(targetID, METRICS_WRITE_ERRORS, 1.0, MetricUnits.COUNT, metricDimensions) }
                 if (canNotReachAwsService(e)) {
                     targetResults?.nack(targetData)
@@ -210,6 +213,7 @@ class AwsIotCoreTargetWriter(
 
         runBlocking {
             metricsCollector?.put(adapterID,
+                metricsCollector?.buildValueDataPoint(adapterID, MetricsCollector.METRICS_MEMORY, MemoryMonitor.getUsedMemoryMB().toDouble(),MetricUnits.MEGABYTES ),
                 metricsCollector?.buildValueDataPoint(adapterID, METRICS_WRITES, 1.0, MetricUnits.COUNT, metricDimensions),
                 metricsCollector?.buildValueDataPoint(adapterID, METRICS_MESSAGES, 1.0, MetricUnits.COUNT, metricDimensions),
                 metricsCollector?.buildValueDataPoint(adapterID, METRICS_WRITE_DURATION, writeDurationInMillis, MetricUnits.MILLISECONDS, metricDimensions),

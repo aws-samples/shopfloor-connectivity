@@ -33,6 +33,8 @@ class CustomApiUiConfigProvider(private val configStr: String, private val confi
     private val ch = Channel<String>(1)
     private val scope = buildScope("CustomConfigProvider")
 
+    val className: String = this::class.java.name
+
     private val initCfg = Json.parseToJsonElement(configStr).jsonObject
 
     // extract Custom LogWriter JSON-Object from start config - in order to receive websockets in the UI
@@ -42,12 +44,13 @@ class CustomApiUiConfigProvider(private val configStr: String, private val confi
     private val confProviderObj = Json.parseToJsonElement(initCfg.toString()).jsonObject.get("ConfigProvider")
 
     init {
+        val log = logger.getCtxLoggers(className, "init")
         runBlocking{
             if (writerObj != null && confProviderObj != null) {
                 checkConf(ch, writerObj, confProviderObj, initCfg, logger)
             }
             else {
-                logger.warning("Make sure to include CustomConfigProvider and LogWriter configs in order to use the UI & API config provider","")
+                log.warning("Make sure to include CustomConfigProvider and LogWriter configs in order to use the UI & API config provider")
                 //logger.info(Json.encodeToString(initCfg),"")
                 ch.send(Json.encodeToString(initCfg))
             }
@@ -85,11 +88,12 @@ class CustomApiUiConfigProvider(private val configStr: String, private val confi
             return CustomApiUiConfigProvider(createParameters[0] as String, createParameters[1] as PublicKey?, createParameters[2] as Logger)
         }
 
-        fun getPort(initialCfg: JsonObject, log: Logger): Int {
+        fun getPort(initialCfg: JsonObject, logger : Logger): Int {
             return if(initialCfg.getValue("ConfigProvider").jsonObject.containsKey("Port")) {
+                val log = logger.getCtxLoggers(this::class.java.name, "getPort")
                 try {
                     val port = parseInt(initialCfg["ConfigProvider"]?.jsonObject?.get("Port").toString())
-                    log.info("Using port $port from Config file","")
+                    log.info("Using port $port from Config file")
                     port
                 } catch (e: Exception) {
                     8080
@@ -99,7 +103,8 @@ class CustomApiUiConfigProvider(private val configStr: String, private val confi
             }
         }
 
-        suspend fun checkConf(ch: Channel<String>, writer: JsonElement, confProvider: JsonElement, initialCfg: JsonObject, log: Logger) {
+        suspend fun checkConf(ch: Channel<String>, writer: JsonElement, confProvider: JsonElement, initialCfg: JsonObject, logger: Logger) {
+            val log = logger.getCtxLoggers(this::class.java.name)
             try {
                 // attach our LogWriter Obj to receive logs as Websockets && attach ConfigProvider Obj
                 var confJson = initialCfg
@@ -121,7 +126,7 @@ class CustomApiUiConfigProvider(private val configStr: String, private val confi
 
                 ch.send(Json.encodeToString(confJson))
             } catch (e: Exception) {
-                log.error(e.localizedMessage, "")
+                log.errorEx(e.localizedMessage, e)
             }
         }
 

@@ -27,8 +27,8 @@ fun CoroutineScope.launch(name: String, context: CoroutineContext = EmptyCorouti
 
 
 val Throwable.isJobCancellationException: Boolean
-    get() = (this::class.java.name == "kotlinx.coroutines.JobCancellationException") || (this is CancellationException)
+    get() = (this::class.java.name.contains("JobCancellationException") || (this is CancellationException))
 
 val Exception.isJobCancellationException: Boolean
-    get() = (this::class.java.name == "kotlinx.coroutines.JobCancellationException") || (this is CancellationException)
+    get() = (this::class.java.name.contains("JobCancellationException") || (this is CancellationException))
 

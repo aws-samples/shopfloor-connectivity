@@ -19,6 +19,7 @@ val bouncyCastleVersion = "1.70"
 val commonsCliVersion = "1.5.0"
 val commonsCodecVersion = "1.15"
 val commonsIoVersion = "2.13.0"
+val commonsMathVersion = "3.6.1"
 val fasterXmlVersion = "2.14.2"
 val gsonVersion = "2.9.0"
 val jmesPathVersion = "0.5.1"
@@ -38,6 +39,7 @@ dependencies {
     api("commons-cli:commons-cli:$commonsCliVersion")
     implementation("commons-codec:commons-codec:$commonsCodecVersion")
     implementation("commons-io:commons-io:$commonsIoVersion")
+    implementation("org.apache.commons:commons-math3:${commonsMathVersion}")
     api("software.amazon.awssdk:secretsmanager:$awsSdkVersion")
     implementation("com.amazonaws:aws-encryption-sdk-java:$awsEncryptionSdkVersion")
     implementation("software.amazon.awssdk.crt:aws-crt:$awsSdkCrtVersion")

@@ -14,6 +14,7 @@ import com.amazonaws.sfc.ipc.extensions.GrpcTargetValueFromNativeExt.isMixedType
 import com.amazonaws.sfc.ipc.extensions.GrpcValueFromNativeExt.channelCustomValue
 import com.amazonaws.sfc.ipc.extensions.GrpcValueFromNativeExt.channelCustomValueList
 import com.amazonaws.sfc.ipc.extensions.GrpcValueFromNativeExt.channelValue
+import com.amazonaws.sfc.util.toStringEx
 import com.google.protobuf.ByteString
 import java.io.ByteArrayOutputStream
 import java.time.Instant
@@ -757,7 +758,7 @@ object GrpcSourceValueFromNativeExt {
                         sourceValuesReply.addAnyValue(sourceValue.key, sourceValue.value.value)
                     } catch (ex: Throwable) {
                         val typeString = if (sourceValue.value.value != null) " of type ${sourceValue.value.value!!::class.java.name}" else ""
-                        println("**** Fatal error converting value ${sourceValue.value.value}$typeString for source value \"${sourceValue.key}\" into gRPC ReadValue type ****, $ex")
+                        println("**** Fatal error converting value ${sourceValue.value.value}$typeString for source value \"${sourceValue.key}\" into gRPC ReadValue type ****, ${ex.toStringEx()}")
                     }
                 }
                 sourceValuesReply.build()

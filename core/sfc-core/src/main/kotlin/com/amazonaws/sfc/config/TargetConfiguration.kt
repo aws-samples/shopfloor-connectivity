@@ -13,6 +13,8 @@ import com.amazonaws.sfc.metrics.MetricsConfiguration
 import com.amazonaws.sfc.metrics.MetricsSourceConfiguration
 import com.google.gson.annotations.SerializedName
 import java.io.File
+import kotlin.time.DurationUnit
+import kotlin.time.toDuration
 
 /**
  * Base class with minimum set of attributes for a target configuration
@@ -88,6 +90,16 @@ open class TargetConfiguration : Validate {
     val metrics: MetricsSourceConfiguration
         get() = _metrics
 
+    @SerializedName(CONFIG_TARGET_CHANNEL_BUFFER_SIZE)
+    protected val _targetChannelSize = CONFIG_TARGET_CHANNEL_BUFFER_SIZE_DEFAULT
+    val targetChannelSize
+        get() = _targetChannelSize
+
+    @SerializedName(CONFIG_TARGET_CHANNEL_BUFFER_TIMEOUT)
+    protected val _targetChannelChannelTimeout = CONFIG_TARGET_CHANNEL_BUFFER_TIMEOUT_DEFAULT
+    val targetChannelChannelTimeout
+        get() = _targetChannelChannelTimeout.toDuration(DurationUnit.MILLISECONDS)
+
 
     private var _validated = false
     override var validated
@@ -122,6 +134,12 @@ open class TargetConfiguration : Validate {
     companion object {
         const val CONFIG_TARGET_TEMPLATE = "Template"
         const val CONFIG_TARGET_TYPE = "TargetType"
+
+        const val CONFIG_TARGET_CHANNEL_BUFFER_SIZE = "TargetChannelSize"
+        const val CONFIG_TARGET_CHANNEL_BUFFER_TIMEOUT = "TargetChannelTimeout"
+
+        const val CONFIG_TARGET_CHANNEL_BUFFER_TIMEOUT_DEFAULT = 10000
+        const val CONFIG_TARGET_CHANNEL_BUFFER_SIZE_DEFAULT = 100
 
         const val CONFIG_TARGET_SERVER = "TargetServer"
         fun create(description: String = "",

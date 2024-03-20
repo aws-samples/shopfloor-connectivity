@@ -5,17 +5,21 @@
 package com.amazonaws.sfc.storeforward
 
 import com.amazonaws.sfc.config.ConfigReader
+import com.amazonaws.sfc.config.ConfigWithTuningConfiguration
 import com.amazonaws.sfc.config.TargetConfiguration
+import com.amazonaws.sfc.config.TuningConfiguration
 import com.amazonaws.sfc.data.*
 import com.amazonaws.sfc.ipc.IpcTargetWriter
 import com.amazonaws.sfc.log.Logger
 import com.amazonaws.sfc.metrics.*
+import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_MEMORY
 import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_MESSAGES
 import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_MESSAGE_BUFFERED_COUNT
 import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_MESSAGE_BUFFERED_SIZE
 import com.amazonaws.sfc.storeforward.config.StoreForwardWriterConfiguration
 import com.amazonaws.sfc.targets.ForwardingTargetWriter
 import com.amazonaws.sfc.targets.TargetWriterFactory
+import com.amazonaws.sfc.util.MemoryMonitor.Companion.getUsedMemoryMB
 import com.amazonaws.sfc.util.buildScope
 import com.amazonaws.sfc.util.launch
 import kotlinx.coroutines.*
@@ -57,6 +61,11 @@ class StoreForwardTargetWriter(
         configReader.getConfig<StoreForwardWriterConfiguration>()
     }
 
+    private val tuningConfiguration : TuningConfiguration
+        get() =
+            configReader.getConfig<ConfigWithTuningConfiguration>().tuningConfiguration
+
+
     private val forwardingTargetConfiguration by lazy {
         storeAndForwardWriterConfiguration.forwardingTargets[targetID]
             ?: throw Exception("Configuration for target \"$targetID\" does not exist, configured targets are ${storeAndForwardWriterConfiguration.forwardingTargets.keys}")
@@ -97,7 +106,7 @@ class StoreForwardTargetWriter(
                         metricsCollector?.put(targetID, dataPoints)
                     }
                 } catch (e: java.lang.Exception) {
-                    logger.getCtxErrorLog(this::class.java.simpleName, "collectMetricsFromLogger")("Error collecting metrics from logger, $e")
+                    logger.getCtxErrorLogEx(this::class.java.simpleName, "collectMetricsFromLogger")("Error collecting metrics from logger", e)
                 }
             }
         } else null
@@ -129,6 +138,7 @@ class StoreForwardTargetWriter(
                             bufferConfiguration = forwardingTargetConfiguration,
                             metricsCollectorMethod = collectMetricsFromBuffer,
                             onModeChanged = targetBufferModeChanged,
+                            tuningConfiguration = tuningConfiguration,
                             logger = logger
                         )
                     }.toMap()
@@ -161,7 +171,7 @@ class StoreForwardTargetWriter(
                         metricsCollector?.put(targetID, dataPoints)
                     }
                 } catch (e: java.lang.Exception) {
-                    logger.getCtxErrorLog(this::class.java.simpleName, "collectMetricsFromBuffer")("Error collecting metrics from buffer, $e")
+                    logger.getCtxErrorLogEx(this::class.java.simpleName, "collectMetricsFromBuffer")("Error collecting metrics from buffer", e)
                 }
             }
         } else null
@@ -207,7 +217,7 @@ class StoreForwardTargetWriter(
                         }
                     }
                 } catch (e: Exception) {
-                    logger.getCtxErrorLog(className, "bufferMetricsCollector")("Error collecting buffer metrics, $e")
+                    logger.getCtxErrorLogEx(className, "bufferMetricsCollector")("Error collecting buffer metrics", e)
                 }
             }
         }
@@ -219,6 +229,7 @@ class StoreForwardTargetWriter(
         val bufferCount = forwardingTargetConfiguration.subTargets?.fold(0L) { acc, t -> acc + messageBuffer.count(t) } ?: 0
         metricsCollector?.put(
             targetID,
+            MetricsDataPoint(METRICS_MEMORY, metricDimensions, MetricUnits.MEGABYTES, MetricsValue(getUsedMemoryMB().toDouble())),
             MetricsDataPoint(METRICS_MESSAGE_BUFFERED_SIZE, metricDimensions, MetricUnits.COUNT, MetricsValue(bufferSize.toDouble())),
             MetricsDataPoint(METRICS_MESSAGE_BUFFERED_COUNT, metricDimensions, MetricUnits.COUNT, MetricsValue(bufferCount.toDouble()))
         )

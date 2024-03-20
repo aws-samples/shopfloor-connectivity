@@ -128,7 +128,6 @@ class PcccSource(
 
         } catch (e: Exception) {
             resetConnection()
-            //  log.error("Error reading data for source \"$sourceID\", $e")
             throw (e)
         }
     }

@@ -36,7 +36,7 @@ class HealthProbeHandler(private val healthProbeConfiguration: HealthProbeConfig
             val state = try {
                 checkStateFunction()
             } catch (e: Exception) {
-                log.error("Error checking service state, $e")
+                log.errorEx("Error checking service state", e)
                 false
             }
             log.trace("Service state is ${if (state) "HEALTHY" else "UNHEALTHY"}")

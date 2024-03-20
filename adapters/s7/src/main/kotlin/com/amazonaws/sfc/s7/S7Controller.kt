@@ -78,7 +78,7 @@ class S7Controller(
 
     // Cache for S7 fields, the index is an id for the configured field, the value could be a list of fields
     // if the field needed to be split in smaller size segments to deal with max size of pdu for the controller type
-    // or a fields to readf the raw data if the type is not supported in PLC4J
+    // or a fields to read the raw data if the type is not supported in PLC4J
     private val fieldCache = LookupCacheHandler<String, S7FieldData, String>(
         supplier = { address ->
             val s7Field = S7Field.of(address)
@@ -250,7 +250,7 @@ class S7Controller(
             )
         )
         return@coroutineScope data}catch (e : Exception){
-            logger.getCtxErrorLog(className, "read")("Error reading from source \"$sourceID\", $e")
+            logger.getCtxErrorLogEx(className, "read")("Error reading from source \"$sourceID\"", e)
             throw e
         }
     }
@@ -636,8 +636,8 @@ class S7Controller(
                                     val dateTimeValue = decodeDateTime(b.toByteArray())
                                     yield(dateTimeValue)
                                 } catch (e: Exception) {
-                                    val message = "Invalid date time, decoding from ${b.toByteArray().asHexString()} for field $fld, $e}"
-                                    logger.getCtxErrorLog(className, "decoding DATE_AND_TIME")(message)
+                                    val message = "Invalid date time, decoding from ${b.toByteArray().asHexString()} for field $fld}"
+                                    logger.getCtxErrorLogEx(className, "decoding DATE_AND_TIME")(message, e)
                                 }
                             }
                         }

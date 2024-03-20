@@ -96,7 +96,7 @@ class OpcuaDiscoverySource(
                     .build()
             )
         } catch (e: Exception) {
-            log.error("Error  browsing nodes for node ${nodeID.toParseableString()}, $e ")
+            log.errorEx("Error  browsing nodes for node ${nodeID.toParseableString()}", e)
             return emptyList()
         }
 
@@ -157,7 +157,7 @@ class OpcuaDiscoverySource(
                 AddressSpace.BrowseOptions.builder().setNodeClassMask(setOf(NodeClass.Variable)).build()
             )
         } catch (e: Exception) {
-            log.error("Error reading sub nodes for node ${node.nodeId} ")
+            log.errorEx("Error reading sub nodes for node ${node.nodeId}", e)
             return null
         }
 
@@ -181,7 +181,7 @@ class OpcuaDiscoverySource(
                 eventsHelper.allEventClassNames[i]
             }
         } catch (e: Exception) {
-            log.error("Error reading event type for node ${node.nodeId} from sub node ${eventTypeNode.nodeId}, $e ")
+            log.errorEx("Error reading event type for node ${node.nodeId} from sub node ${eventTypeNode.nodeId}", e)
             null
         }
     }

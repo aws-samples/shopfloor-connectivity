@@ -55,8 +55,8 @@ class TargetResultBufferedHelper(targetID: String, targetResultHandler: TargetRe
             )
             targetResultHandler?.handleResult(result)
             loggers.trace("Returning ACK for target data with serial numbers ${_serialBuffer ?: messageBuffer?.map { it.serial }}")
-        } catch (e: Throwable) {
-            loggers.error("Error returning ACK for target data with serial numbers serials ${_serialBuffer ?: messageBuffer?.map { it.serial }}, $e")
+        } catch (e: Exception) {
+            loggers.errorEx("Error returning ACK for target data with serial numbers serials ${_serialBuffer ?: messageBuffer?.map { it.serial }}", e)
         } finally {
             clear()
         }
@@ -80,8 +80,8 @@ class TargetResultBufferedHelper(targetID: String, targetResultHandler: TargetRe
             )
             targetResultHandler?.handleResult(result)
             loggers.trace("Returning NACK for target data with serial numbers ${_serialBuffer ?: messageBuffer?.map { it.serial }} ")
-        } catch (e: Throwable) {
-            loggers.error("Error returning ERROR for data with serial numbers ${_serialBuffer ?: messageBuffer?.map { it.serial }}, $e")
+        } catch (e: Exception) {
+            loggers.errorEx("Error returning ERROR for data with serial numbers ${_serialBuffer ?: messageBuffer?.map { it.serial }}", e)
         } finally {
             clear()
         }
@@ -105,8 +105,8 @@ class TargetResultBufferedHelper(targetID: String, targetResultHandler: TargetRe
             )
             targetResultHandler?.handleResult(result)
             loggers.trace("Reporting error processing data for serial numbers $serialBuffer")
-        } catch (e: Throwable) {
-            loggers.error("Error returning ERROR for target data with serial numbers $serialBuffer, $e")
+        } catch (e: Exception) {
+            loggers.errorEx("Error returning ERROR for target data with serial numbers $serialBuffer", e)
         } finally {
             clear()
         }

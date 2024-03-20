@@ -6,7 +6,7 @@ SFC documentation
     - [SFC release as Greengrass components - CDK](../deployment/greengrass-sfc-components/release-version-as-components-cdk/README.md)
     - [SFC local build as Greengrass components - Python](../deployment/greengrass-sfc-components/local-build-as-components-py/README.md)
   - [Examples](../examples)
-    - [Quickstart Lab](../README.md#quick-start---with-sfc-binaries)
+    - [Quickstart Lab](../README.md#quickstart-example)
     - [Greengrass SFC In-Process step-by-step Lab](../examples/greengrass-in-process/README.md)
     - [Greengrass SFC IPC step-by-step Lab](../examples/greengrass-ipc/README.md)
     - [Rockwell PCCC to S3 sample](../examples/in-process-pccc-s3/README.md)
@@ -73,6 +73,10 @@ SFC documentation
   - [Service Health Probes](#service-health-probes)
   - [OPCUA Alarm and Events types](#opcua-alarm-and-events-types)
   - [OPCUA security profiles and certificates](#opcua-security-profiles-and-certificates)
+  - [SFC Tuning](#sfc-tuning)
+    - [SFC Channel Tuning](#sfc-channel-tuning)
+    - [SFC Memory Monitoring](#sfc-memory-monitoring)
+    - [Concurrent reading from sources](#concurrent-reading-from-sources)
   - [SFC configuration](#sfc-configuration)
     - [SFC top level configuration](#sfc-top-level-configuration)
     - [Schedule](#schedule)
@@ -792,27 +796,28 @@ Additional settings can be set for the actual configured writer. For the AWS Clo
 
 The following metric values are collected:
 
-| **Metric name**         | **Description**                                               | **Collected by**                    |
-|-------------------------|---------------------------------------------------------------|-------------------------------------|
-| BytesReceived           | Bytes read by the adapter                                     | ModbusTCP connector                 |
-| BytesSend               | Bytes send by the adapter                                     | ModbusTCP connector                 |
-| BytesWritten            | Bytes written by target                                       | Selected adapters                   |
-| Connection              | Number of connections                                         | All connectors                      |
-| ConnectionErrors        | Number of failed connections                                  | All connectors                      |
-| Errors                  | Number of logged errors                                       | Core and all connectors and targets |
-| MessageBufferedSize     | Size of buffered messages in bytes                            | StoreForwardTarget                  |
-| Messages                | Number of messages processed                                  | All targets                         |
-| MessagesBufferedCount   | Number of buffered messages                                   | StoreForwardTarget                  |
-| MessagesBufferedDeleted | Number of messaged deleted                                    | StoreForwardTarget                  |
+| **Metric name**         | **Description**                                              | **Collected by**                    |
+|-------------------------|--------------------------------------------------------------|-------------------------------------|
+| BytesReceived           | Bytes read by the adapter                                    | ModbusTCP connector                 |
+| BytesSend               | Bytes send by the adapter                                    | ModbusTCP connector                 |
+| BytesWritten            | Bytes written by target                                      | Selected adapters                   |
+| Connection              | Number of connections                                        | All connectors                      |
+| ConnectionErrors        | Number of failed connections                                 | All connectors                      |
+| Errors                  | Number of logged errors                                      | Core and all connectors and targets |
+| Memory                  | Used memory by process in MB                                 | Core and all connectors and targets |
+| MessageBufferedSize     | Size of buffered messages in bytes                           | StoreForwardTarget                  |
+| Messages                | Number of messages processed                                 | All targets                         |
+| MessagesBufferedCount   | Number of buffered messages                                  | StoreForwardTarget                  |
+| MessagesBufferedDeleted | Number of messaged deleted                                   | StoreForwardTarget                  |
 | ReadDuration            | Time in milliseconds used by adapter to read data from source | All adapters                        |
-| ReadErrors              | Number of read errors                                         | All adapters                        |
-| Reads                   | Number of reads                                               | All adapters                        |
-| ReadSuccess             | Number of succeeded reads                                     | All adapters                        |
-| Values read             | Number of values read                                         | All adapters                        |
-| Warnings                | Number of logged warnings                                     | Core and all connectors and targets |
-| WriteDuration           | Time in milliseconds used by target to write data             | All targets                         |
-| WriteErrors             | Number of failed writes                                       | All Targets                         |
-| Writes                  | Writes by targets                                             | All targets                         |
+| ReadErrors              | Number of read errors                                        | All adapters                        |
+| Reads                   | Number of reads                                              | All adapters                        |
+| ReadSuccess             | Number of succeeded reads                                    | All adapters                        |
+| Values read             | Number of values read                                        | All adapters                        |
+| Warnings                | Number of logged warnings                                    | Core and all connectors and targets |
+| WriteDuration           | Time in milliseconds used by target to write data            | All targets                         |
+| WriteErrors             | Number of failed writes                                      | All Targets                         |
+| Writes                  | Writes by targets                                            | All targets                         |
 
 [^top](#toc)
 
@@ -1175,7 +1180,7 @@ Health probe endpoints for SFC service are configured by adding a HealthProbe co
 </tr>
 <tr class="even">
 <td>Metrics writer</td>
-<td>In the MetricsServer section for the writer configured in the top level Mettrics section.</td>
+<td>In the MetricsServer section for the writer configured in the top level Metrics section.</td>
 <td>Status of listening ports for the hosted gRPC service</td>
 </tr>
 </tbody>
@@ -1355,7 +1360,7 @@ The OPCUA adapter can also validate the certificate it receives from the OPCUA s
 
 The certs directories contain trusted certificates and certificates of issuers in order to validate signed certificates. The crl directories contain the certification revocation lists. When a server certificate does not pass the validation it will be stored in PEM format in the rejected directory, from where it can after inspection be moved into the trusted certificate directory.
 
-A number of optional checks (see <https://reference.opcfoundation.org/v104/Core/docs/Part4/6.1.3/>) can be configured in a ValidationOptions section in the CertificateValidation section. It can contain the following attributes that can be set to false to disable the optional validation, which by default are all enabled)
+A number of optional checks (see <https://reference.opcfoundation.org/v104/Core/docs/Part4/6.1.3/>) can be configured in a ValidationOptions section in the CertificateValidation section. It can contain the following attributes that can be set to a value of false to disable the optional validation, which by default are all enabled)
 
 Validation options:
 
@@ -1405,6 +1410,88 @@ Example of OPCUA server configuration using Basic256Sha256 security profile for 
 ```
 
 [^top](#toc)
+
+# SFC tuning
+
+
+This section describes the tuning of SFC using the elements of the “Tuning” configuration at the top level of the SFC configuration file.
+
+## SFC channel tuning
+
+The internal processes of SFC use memory buffered channels to communicate. These channels are used to decouple the process and allow processing of the data in parallel. When SFC is writing data to a channel then it first makes a non-blocking call to send the data to the channel. If this fails, because the channel has reached it maximum capacity, as warning is generated, which included the name of the channel, the current size of the parameter and the name of the tunning parameter that can be used to change the capacity of the channel. SFC will then make blocking call to send the data to the channel, waiting for available capacity in the channel. If a timeout whilst waiting for the item to be sent occurs an error message is generated. The message includes the name of the channel, the timeout period and the name of the tuning parameter to change the timeout period.
+
+As the sizing of the channels is specified by the number of items the actual memory used by the channels depends on the size of the items which are sent to the channel. All timeouts are specified in milliseconds.
+
+The channel warning and errors typically occur when SFC collects data from the sources faster than it can process and deliver it to the targets.
+
+### Channel capacity warnings
+
+Channel reached full capacity and data cannot be sent directly
+Sending data to channelName is blocking, consider setting tuning parameter tuningChannelSizeName to a higher value, current value is currentChannelSize
+
+Data was sent to channel after waiting for available capcity in channel
+Sending date to channelName  was blocking for duration, consider setting tuning parameter tuningChannelSizeName to a higher value, current value is currentChannelSize
+
+### Channel capacity errors
+
+Timeout occurred whilst waiting for capacity in channe
+Sending data to channelName timeout after timeout, consider setting tuning parameter tuningChannelTimeoutName to a longer value
+
+Out of memory occurred sending the data to the channel
+Out of memory while submitting element to channelName, outIfMemoryError, consider setting tuning parameter tuningChannelSizeName to a lower value, current value is currentChannelSize
+
+
+
+The picture below shows the main channels used by SFC.
+
+<img src="img/SFC-Channels.png" width="50%" align="center"/>
+
+
+**Aggregation Channel**
+
+When a schedule is configured to apply aggregation on the collected data then this channel is used to send the data to the aggregation process. Note that the aggregation process reads the data from the channel and stores it until the configured size is reached and the data is aggregated.
+Tuning parameters: AggregatorChannelSize/AggregatorChannelTimeout
+
+**Writer Channel**
+
+Processed data from either the reading or aggregation process is sent to this channel from where the SFC writer will read it and send it to the configured targets
+Tuning parameters: WriterInputChannelSize / WriterInputChannelTimeout
+
+**Target Output Channel**
+
+Target output data is written to the target output channel of a target from where it is read for sending it to the target’s specific destination.
+Tuning parameters: TargetChannelSize/TargetChannelTimeout
+
+**Metrics Output Channel**
+
+If metrics collection is enabled then this channel is used to send data to an instance of a metrics writer that writes the metrics data.
+Tuning parameters : ChannelSizePerMetricsProvider/MetricsChannelTimeout
+
+**Targets Results Channel**
+
+This channel is used to receive the results from delivering the data by the targets.
+Tuning parameters: TargetResultsChannelSize/TargetResultsChannelTimeout
+
+**Additional channel parameters (not in picture)**
+
+Tuning parameters: TargetForwardingChannelSize/TargetForwardingChannelTimeout
+Used by targets that do forward data (e.g.  store-and-forward-target and router-target) to the next adapter in a configured adapter chain.
+
+Tuning parameters: TargetResubmitChannelSize/TargetResubmitChannelTimeout
+Used by targets that do resubmit data (e.g.  store-and-forward-target) to the next adapter in a configured adapter chain.
+
+
+## SFC memory monitoring
+
+Every minute each SFC component will check the amount of memory it is using. At 10-minute interval the memory allocation trend will be calculated for the last 10 and 60 minutes. The trend will be a number which is positive if the amount of memory increases, or negative if it decreases. If the memory usage  trend over the last 60 minutes goes up then a warning is generated. This situation will typically happen if SFC collects data faster than is can process and deliver it to targets. As too much data in flight will be stored in the channels further in the processing pipeline, the memory used by these items may cause out of memory errors.
+It the memory usage trend goes up over a 60-minute period a warning will be generated.
+
+If tracing is enabled for logging then each minute interval sampling and 10-minute trends will be sent to the logging output.
+
+## Concurrent reading from sources.
+When a schedule is reading data from multiple sources then this will happen in parallel. By default, the maximum number of sources that are read in parallel is 5. This number can be modified by setting the MaxConcurrentSourceReaders tuning parameter. This number can be increased to read from more sources at the same time. This number is typically lowered to limit the load on network and system resources.
+The parameter AllSourcesReadTimeout can be used to specify the period within reading from all sources must be completed.
+
 
 # SFC configuration
 
@@ -1683,7 +1770,7 @@ Example of OPCUA server configuration using Basic256Sha256 security profile for 
 		</tr>
 		<tr class="even">
 			<td>ConfigProvider</td>
-			<td>Configuration for custom configuration hander</td>
+			<td>Configuration for custom configuration handler</td>
 			<td><a href="#inprocessconfiguration">InProcessConfiguration</a></td>
 			<td></td>
 		</tr>
@@ -2101,6 +2188,19 @@ Context variables for template</p>
 <td>String</td>
 <td>Must refer to an existing client configuration in AwsIotCredentialProviderClients section.</td>
 </tr>
+<tr class="odd">
+<td>TargetChannelSize</td>
+<td>Size of channel used by target to process and write items</td>
+<td>Int</td>
+<td>Default is 100</td>
+see <a href="#sfc-tuning">SFC TuningC</a> for more details
+</tr>
+<tr class="odd">
+<td>TargetChannelTimeout</td>
+<td>Timeout in milliseconds for writing to internal target channel if it has reached it capacity </td>
+<td>Int</td>
+<td>Default is 1000</td>
+</tr>
 </tbody>
 </table>
 
@@ -2240,7 +2340,7 @@ Nothing is returned if the service is not healthy.</td>
 </colgroup>
 <thead>
 <tr class="header">
-<th colspan="4">Tuning parameters for SFC compoinents</th>
+<th colspan="4">Tuning parameters for SFC components</th>
 </tr>
 </thead>
 <tbody>
@@ -2249,12 +2349,141 @@ Nothing is returned if the service is not healthy.</td>
 <td><strong>Description</strong></td>
 <td><strong>Type</strong></td>
 <td><strong>Comments</strong></td>
+
 </tr>
 <tr class="even">
 <td>MaxConcurrentSourceReaders</td>
 <td>Max number of sources read concurrently by an SFC Schedule</td></td>
 <td>Int</td>
 <td>Default is 5</td>
+</tr>
+
+
+<tr class="even">
+<td>AllSourcesReadTimeout</td>
+<td>Timeout in which reading from all sources must be completed. </td></td>
+<td>Int</td>
+<td>Default is 60000</td>
+</tr>
+
+<tr class="odd">
+<td>ScheduleReaderResultsChannelSize</td>
+<td>Internal buffer size for reading from sources</td></td>
+<td>Int</td>
+<td>Default is 5000
+
+Increment when getting timeouts on ScheduleReader:writerInputChannel, reduce to limit memory use by reader</td>
+</tr><tr class="even">
+<td>ScheduleReaderResultsChannelTimeout</td>
+<td>Timeout writing to internal buffer for reading from sources in milliseconds</td></td>
+<td>Int</td>
+<td>Default is 1000
+
+Increment when getting timeouts on ScheduleReader:resultsChannel and available memory is limited</td>
+</tr>
+<tr class="odd">
+<td>AggregatorChannelSize</td>
+<td>Internal buffer size for sending data to aggregator</td></td>
+<td>Int</td>
+<td>Default is 1000
+
+Increment when getting timeouts on ScheduleReader:aggregationChannel, reduce to limit memory used for aggregation</td>
+</tr>
+<tr class="even">
+<td>ScheduleReaderResultsChannelTimeout</td>
+<td>Timeout writing to internal buffer used to send data to aggregation in milliseconds</td></td>
+<td>Int</td>
+<td>Default is 1000
+
+Increment when getting timeouts on ScheduleReader:aggregationChannel and available memory is limited</td>
+</tr>
+
+<tr class="odd">
+<td>WriterInputChannelSize</td>
+<td>Internal buffer size for sending data to writers</td></td>
+<td>Int</td>
+<td>Default is 10000
+
+Increment when getting timeouts on ScheduleController:writerInputChannel, reduce to limit memory use </td>
+</tr>
+
+<tr class="even">
+<td>WriterInputChannelSizeTimeout</td>
+<td>Timeout writing to internal buffer used to send data to writers in milliseconds</td></td>
+<td>Int</td>
+<td>Default is 1000
+
+Increment when getting timeouts on writerInputChannel and available memory is limited</td>
+</tr>
+
+<tr class="odd">
+<td>ChannelSizePerMetricsProvider</td>
+<td>Buffer size per metrics provider used for internal metrics processor</td></td>
+<td>Int</td>
+<td>Default is 1000
+
+Increment when getting timeouts on MetricsProcessor:metricsChannel, reduce to limit memory use </td>
+</tr>
+<tr class="even">
+<td>MetricsChannelTimeout</td>
+<td>Timeout writing to internal metrics processor buffer in milliseconds</td></td>
+<td>Int</td>
+<td>Default is 5000
+
+Increment when getting timeouts on metrics channels and available memory is limited</td>
+</tr>
+
+
+<tr class="odd">
+<td>TargetResultsChannelSize</td>
+<td>Buffer size for internal buffer to send target results</td></td>
+<td>Int</td>
+<td>Default is 1000
+
+Increment when getting timeouts on resultChannels, reduce to limit memory use </td>
+</tr>
+<tr class="even">
+<td>TargetResultsChannelTimeout</td>
+<td>Timeout writing to target results buffer in milliseconds</td></td>
+<td>Int</td>
+<td>Default is 5000
+
+Increment when getting timeouts on result channels and available memory is limited</td>
+</tr>
+
+
+<tr class="odd">
+<td>TargetForwardingChannelSize</td>
+<td>Buffer size for internal buffer to forward target data used by chained targets</td></td>
+<td>Int</td>
+<td>Default is 1000
+
+Increment when getting timeouts on forwarding channels, reduce to limit memory use </td>
+</tr>
+<tr class="even">
+<td>TargetForwardingChannelTimeout</td>
+<td>Timeout writing to forwarding buffer in milliseconds</td></td>
+<td>Int</td>
+<td>Default is 1000
+
+Increment when getting timeouts on forwarding channels and available memory is limited</td>
+</tr>
+
+<tr class="odd">
+<td>TargetResubmitChannelSize</td>
+<td>Buffer size for internal buffer to resubmit target data used by chained targets</td></td>
+<td>Int</td>
+<td>Default is 1000
+
+Increment when getting timeouts on resubmit channels, reduce to limit memory use </td>
+</tr>
+<tr class="even">
+<td>TargetResubmitChannelTimeout</td>
+<td>Timeout writing to resubmit buffer in milliseconds</td></td>
+<td>Int</td>
+<td>Default is 1000
+
+Increment when getting timeouts on resubmit channels and available memory is limited</td>
 </tr>
 </tbody>
 </table>
@@ -2495,6 +2724,18 @@ aws iot describe-endpoint --endpoint-type iot:CredentialProvider.</p>
 <td>Configures the health probe endpoint when the address is used for an SFC service process.</td>
 <td><a href="#healthprobeconfiguration">HealthProbeConfiguration</a></td>
 <td></td>
+</tr>
+<tr class="odd">
+<td>ServerResultsChannelSize</td>
+<td>Size of internal buffer used by IPC servers to send results to the SFC core</td>
+<td>Int</td>
+<td>Default is 1000</td>
+</tr>
+<tr class="even">
+<td>ServerResultsChannelSize</td>
+<td>Timeout in milliseconds to send data to internal results buffer</td>
+<td>Int</td>
+<td>Default is  10000</td>
 </tr>
 </tbody>
 </table>
@@ -3344,6 +3585,20 @@ This section describes the configuration types for the OPCUA protocol adapter an
 <td>Map[String,<a href="#opcuaserverprofileconfiguration">OpcuaServerProfileConfiguration</a>]</td>
 <td></td>
 </tr>
+
+<tr class="odd">
+<td>ChangedDataChannelSize</td>
+<td>Size of internal buffer to receive data for event subscriptions</td>
+<td>Int</td>
+<td>Default is 1000</td>
+</tr>
+
+<tr class="odd">
+<td>ChangedDataChannelTimeout</td>
+<td>Timeout in milliseconds to send data to internal buffer for received data for event subscriptions</td>
+<td>Int</td>
+<td>Default is 1000</td>
+</tr>
 </tbody>
 </table>
 
@@ -3990,7 +4245,7 @@ This section describes the configuration types for the S7 protocol adapter and c
 <tr class="odd">
 <td>ReadPerSingleField</td>
 <td><p>Flag to let the connector read fields from the one at a time. Normally fields are combined up the maximum PDU size of the controller to reduce the number of read actions. When the data for a field in a combined set cannot be read or decoded by the PLC then the read for the full set will fail with a single error. In order to find the field that is causing the issue this field can be set to true in which case the connector log an error for the specific field that is causing the issue.</p>
-<p>In normal operations it is strongly recommended to set this flag to false to reduce the number of read action performed on the PLC</p></td>
+<p>In normal operations it is strongly recommended to set this flag to a value of false to reduce the number of read action performed on the PLC</p></td>
 <td>Boolean</td>
 <td>Default is false</td>
 </tr>
@@ -4202,12 +4457,28 @@ This section describes the configuration types for the MQTT protocol adapter and
 <td><strong>Type</strong></td>
 <td><strong>Comments</strong></td>
 </tr>
+
 <tr class="even">
 <td>Brokers</td>
 <td>Brokers configured for this adapter. The mqtt source using the adapter must refer to one of these servers with the AdapterBroker attribute.</td>
 <td>Map[String,<a href="#mqttbrokerconfiguration">MqttBrokerConfiguration</a>]</td>
 <td></td>
 </tr>
+
+<tr class="odd">
+<td>ReceivedDataChannelSize</td>
+<td>Size of internal buffer to receive data for topic subscriptions</td>
+<td>Int</td>
+<td>Default is 1000</td>
+</tr>
+
+<tr class="odd">
+<td>ReceivedDataChannelTimeout</td>
+<td>Timeout in milliseconds to send data to internal buffer for received data for topic subscriptions</td>
+<td>Int</td>
+<td>Default is 1000</td>
+</tr>
+
 </tbody>
 </table>
 
@@ -4243,7 +4514,7 @@ If no scheme is specified in the address, then it will be added based on the Con
 <td>
 
 Commonly port numbers are
--  1883 for Plaintext
+-  1883 for PlaintText
 -  8883 for ServerSideTLS
 -  8884 for MutualTLS.
 -  443 for AWS IoT Core endpoints
@@ -4903,7 +5174,7 @@ This section describes the configuration types for the PCCC protocol adapter and
 <td>Address</td>
 <td>A string containing the address of the field to read from the controller.</td>
 <td>String</td>
-<td>For supported datatype and address syntax see <a href="#pccc-addressing">See PCCC Addressing section below.</a></td>
+<td>For supported datatype and address syntax see <a href="#pccc-addressing">PCCC Addressing section below.</a></td>
 </tr>
 </tbody>
 </table>
@@ -5608,6 +5879,47 @@ To authorize the client this AMS Net ID must be added as an AMS route in the SYS
 <td>Integer</td>
 <td></td>
 </tr>
+
+
+
+<tr class="even">  
+<td>BatchCount</td>  
+<td>Number of messages to buffer before sending data as a batch  to topic.</td>  
+<td>Int</td>  
+<td>Batching is enabled by setting a value for one or more of BatchSize, BatchCount and BatchInterval.
+Whenever the number of messages, total message size or an interval is reached the buffered data is sent as an array of messages to the topic.</td>
+</tr>
+
+<tr class="odd">  
+<td>BatchSize</td>  
+<td>Payload size in KB of messages to batch before sending data as a batch to topic.</td>  
+<td>Int</td>  
+<td>Batching is enabled by setting a value for one or more of BatchSize, BatchCount and BatchInterval.
+Whenever the number of messages, total message size or an interval is reached the buffered data is sent as an array of messages to the topic.
+The size is calculated on the uncompressed payload of the messages.</td>
+</tr>
+
+<tr class="even">  
+<td>BatchInterval</td>  
+<td>Interval in milliseconds after which a batch of messages is sent to the topic, even when the BatchSize or BatchCount limit is not reached.</td>  
+<td>Int</td>  
+<td>Batching is enabled by setting a value for one or more of BatchSize, BatchCount and BatchInterval.
+Whenever the number of messages, total message size or an interval is reached the buffered data is sent as an array of messages to the topic.
+</td>
+</tr>
+
+<tr class="odd">  
+<td>Compression</td>  
+<td>Compression method for MQTT message payloads.</td>  
+<td>String
+
+- "None"
+- "Zip"
+- "GZip"
+</td>  
+<td>Default is "None"</td>
+</tr> 
+
 </tbody>
 </table>
 
@@ -6466,7 +6778,7 @@ aws iot describe-endpoint --endpoint-type iot:Data-ATS</p>
 <td>
 
 Commonly port numbers are
--  1883 for Plaintext
+-  1883 for PlainText
 -  8883 for ServerSideTLS
 -  8884 for MutualTLS.
 -  443 for AWS IoT Core endpoints
@@ -6545,7 +6857,7 @@ In no port number is specified then the EndPoint address is searched for a train
 </tr>  
 <tr class="odd">  
 <td>ConnectRetries</td>  
-<td>Number of retries to connec to to MQTT broker</td>  
+<td>Number of retries to connect to MQTT broker</td>  
 <td>Int</td>  
 <td>Default is 10</td>
 </tr>  
@@ -6555,6 +6867,55 @@ In no port number is specified then the EndPoint address is searched for a train
 <td>Long</td>
 <td>Default is 10 seconds</td>
 </tr>
+
+
+<tr class="even">  
+<td>BatchCount</td>  
+<td>Number of messages to buffer before sending data as a batch  to topic.</td>  
+<td>Int</td>  
+<td>Batching is enabled by setting a value for one or more of BatchSize, BatchCount and BatchInterval.
+Whenever the number of messages, total message size or an interval is reached the buffered data is sent as an array of messages to the topic.</td>
+</tr>
+
+<tr class="odd">  
+<td>BatchSize</td>  
+<td>Payload size in KB of messages to batch before sending data as a batch to topic.</td>  
+<td>Int</td>  
+<td>Batching is enabled by setting a value for one or more of BatchSize, BatchCount and BatchInterval.
+Whenever the number of messages, total message size or an interval is reached the buffered data is sent as an array of messages to the topic.
+The size is calculated on the uncompressed payload of the messages.</td>
+</tr>
+
+<tr class="even">  
+<td>BatchInterval</td>  
+<td>Interval in milliseconds after which a batch of messages is sent to the topic, even when the BatchSize or BatchCount limit is not reached.</td>  
+<td>Int</td>  
+<td>Batching is enabled by setting a value for one or more of BatchSize, BatchCount and BatchInterval.
+Whenever the number of messages, total message size or an interval is reached the buffered data is sent as an array of messages to the topic.
+</td>
+</tr>
+
+<tr class="odd">
+<td>MaxPayloadSize</td>
+<td>Max payload size in KB for MQTT messages.</td>
+<td>Int</td>
+<td>Note if compression is enabled the payload size of a single target data message, or a batch of messages can be larger, than this value. When batching of messages is enabled, without compression a batch
+of messages will be sent to the topic when this size is reached.</td>
+</tr>
+
+<tr class="even">  
+<td>Compression</td>  
+<td>Compression method for MQTT message payloads.</td>  
+<td>String
+
+- "None"
+- "Zip"
+- "GZip"
+</td>  
+<td>Default is "None"</td>
+</tr> 
+
+
 </tbody></table>
 
 [^top](#toc)
@@ -6783,6 +7144,8 @@ In no port number is specified then the EndPoint address is searched for a train
 | Interval                                                                                                                                                                                 | Interval in seconds in which metrics are written to the service (or earlier if buffer size is reached)             | Integer  |                                                           | Default is 60                        |
 | BatchSize                                                                                                                                                                                | Number of data points to buffer to write as a batch to CloudWatch service                                          | Int      |                                                           | Default and max value is 1000        |
 | CredentialProviderClient                                                                                                                                                                 | Name of configured credentials client that will be used to read secrets stored in the AWS Secrets Manager service. |          | If not set the AWS SDK credential provider chain is used. |                                      |
+| CloudWatchMetricsChannelSize|Size of internal buffer to send metrics  data to CloudWatch| Int| Default is 1000|
+|CloudWatchMetricsChannelTimeout|Time in milliseconds to send data to internal buffer|Int|Default = 10000|
 
 [^top](#toc)
 
@@ -7552,13 +7915,13 @@ The core passes a configuration reader to the method that the implementation can
 An implementation of a metrics writer can be exposed as an IPC service. This IPC service is defined in Metrics.proto as MetricsWriterService
 
 ```kotlin
-Service MetricsWriterService{
-  rpc WriteMetrics(stream MetricsDataMessage) returns (google.protobuf.Empty);
-  rpc InitializeMetricsWriter(InitializeMetricsWriterRequest) returns (InitializeMetricsWriterResponse){}
+Service MetricsWriterService {
+    rpc WriteMetrics (stream MetricsDataMessage) returns (google.protobuf.Empty)
+    rpc InitializeMetricsWriter (InitializeMetricsWriterRequest) returns (InitializeMetricsWriterResponse){}
 }
 ```
 
-For the service the service base class provided by the SFC framework can be used. The Service class for the writer needs to override the abstract method createServiceInstance of that class by a method that creates an instance of the actual writer.
+For the service base class provided by the SFC framework can be used. The Service class for the writer needs to override the abstract method createServiceInstance of that class by a method that creates an instance of the actual writer.
 
 ```kotlin
 class AwsCloudWatchMetricsWriterService : ServiceMain() {
@@ -7671,7 +8034,7 @@ the parameters for logging (-trace, -info, -warning, -error) are not available f
 -   Implement the configuration types required for the adapter. When initializing the adapter using the InitializeAdapter service call the JSON configuration for the adapter is passed as JSON data. When the CreateAdapter method (see above) is called, an instance of the sfc ConfigReader is passed as a parameter. An instance of the configuration class, containing the deserialized data can be obtained by calling the readers GetConfig method, passing the type of the configuration class. This configuration data is used to create and initialize the adapter. The configuration class must inherit from the SFC BaseConfiguration class. The IValidate class can be implemented which will be called to execute the configuration validation  
     logic after reading the data from the JSON configuration data.
 
--   Implement a static main method for the service class that creates a (singleton) instance of that class, and calls its from ProtocolServiceMain inherited Run method to start the service.
+-   Implement a static main method for the service class that creates a (singleton) instance of that class, and calls it's from ProtocolServiceMain inherited Run method to start the service.
 
 ```c#
 public sealed class OpcdaProtocolService : ProtocolServiceMain

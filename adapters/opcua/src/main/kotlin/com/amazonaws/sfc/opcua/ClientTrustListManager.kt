@@ -83,8 +83,7 @@ class ClientTrustListManager(baseDirectoryName: String, private val logger: Logg
             constrainFilePermissions(file)
             log.info("Written certificate to ${file.absolutePath}")
         } catch (e: java.lang.Exception) {
-
-            log.error("Error writing certificate to ${file.absolutePath} $e")
+            log.errorEx("Error writing certificate to ${file.absolutePath}", e)
         }
     }
 

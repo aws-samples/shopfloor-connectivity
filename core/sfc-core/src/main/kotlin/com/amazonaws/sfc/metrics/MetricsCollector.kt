@@ -9,10 +9,7 @@ package com.amazonaws.sfc.metrics
 import com.amazonaws.sfc.log.Logger
 import com.amazonaws.sfc.system.DateTime
 import com.amazonaws.sfc.util.buildScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.time.Instant
@@ -83,7 +80,9 @@ class MetricsCollector(private val metricsConfig: MetricsConfiguration?,
                 val duration = measureTime {
                     cleanUp()
                 }
-                delay(METRICS_CLEANUP_INTERVAL - duration)
+                runBlocking {
+                    delay(METRICS_CLEANUP_INTERVAL - duration)
+                }
             } catch (e: Exception) {
                 logger.getCtxErrorLog(className, "cleaner")("Error cleaning up metrics: ${e.message}")
             }
@@ -303,6 +302,7 @@ class MetricsCollector(private val metricsConfig: MetricsConfiguration?,
         const val METRICS_WRITE_SIZE = "BytesWritten"
         const val METRICS_WRITE_SUCCESS = "WriteSuccess"
         const val METRICS_WRITES = "Writes"
+        const val METRICS_MEMORY = "Memory"
 
         const val METRICS_DIMENSION_ADAPTER = "Adapter"
         const val METRICS_DIMENSION_SOURCE = "Source"

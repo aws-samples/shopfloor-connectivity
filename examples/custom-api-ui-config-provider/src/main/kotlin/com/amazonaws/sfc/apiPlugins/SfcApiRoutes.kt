@@ -54,8 +54,7 @@ fun Application.sfcApiApp(ch: Channel<String>, log: Logger, writer: JsonElement,
                 ch.send(Json.encodeToString(confJson))
                 call.respond(HttpStatusCode.Created, config)
             } catch (e: Exception) {
-                print(e.stackTrace)
-                log.error("ERROR in CFG","ERROR in CFG")
+                log.error(this::class.simpleName + ":post" ,"Error in CFG", e)
                 call.respond(HttpStatusCode.NotFound)
             }
         }

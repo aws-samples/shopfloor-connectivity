@@ -204,7 +204,7 @@ class JsonHelper {
                 val line = matches.first().groups[1]?.value?.toIntOrNull()
                 return if (line != null) {
                     val start = maxOf(0, line - 5)
-                    val end = minOf(json.lines().size, line + 5)
+                    val end = minOf(json.lines().size-1, line + 5)
                     var lines = json.lines().slice(IntRange(start, end))
                     lines = lines.mapIndexed { i, l ->
                         val index = start + i + 1
@@ -217,6 +217,8 @@ class JsonHelper {
             }
             return e
         }
+
+        fun JsonSyntaxException.extendedJsonException(json : String) = enrichedJsonSyntaxErrorException(this, json)
 
 
     }

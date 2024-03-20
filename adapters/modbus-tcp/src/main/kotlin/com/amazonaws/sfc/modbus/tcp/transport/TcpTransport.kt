@@ -11,6 +11,7 @@ import com.amazonaws.sfc.metrics.MetricUnits
 import com.amazonaws.sfc.metrics.MetricsCollector
 import com.amazonaws.sfc.modbus.protocol.ModbusTransport
 import com.amazonaws.sfc.modbus.tcp.config.ModbusTcpDeviceConfiguration
+import com.amazonaws.sfc.util.MemoryMonitor.Companion.getUsedMemoryMB
 import com.amazonaws.sfc.util.buildScope
 import com.amazonaws.sfc.util.launch
 import kotlinx.coroutines.*
@@ -147,7 +148,7 @@ class TcpTransport(
                             try {
                                 setupConnection(log.trace, connectedChannel)
                             }catch (e: SocketException){
-                                log.error("SocketException: ${e.message}")
+                                log.errorEx("SocketException: ${e.message}", e)
                             }
                         }
 
@@ -162,7 +163,7 @@ class TcpTransport(
                                 log.info("Connected to ${config.address}:${config.port}")
                             }
 
-                            is Throwable -> log.error("Error connecting to ${config.address}:${config.port}, ${result.message}")
+                            is Exception -> log.errorEx("Error connecting to ${config.address}:${config.port}, ${result.message}", result)
                             else -> log.error("Timeout connecting to ${config.address}:${config.port}")
                         }
                         coroutineContext.cancelChildren()
@@ -258,6 +259,7 @@ class TcpTransport(
                     try {
                         outputStream?.write(bytes.asByteArray())
                         outputStream?.flush()
+                        metrics?.put(adapterID, MetricsCollector.METRICS_MEMORY, getUsedMemoryMB().toDouble(), MetricUnits.MEGABYTES, metricDimensions)
                         metrics?.put(adapterID, MetricsCollector.METRICS_BYTES_SEND, bytes.size.toDouble(), MetricUnits.BYTES, metricDimensions)
                     } catch (e: SocketException) {
                         log.error("Error writing data to ${config.address}:${config.port}, ${e.message}")
@@ -289,6 +291,7 @@ class TcpTransport(
                             if (logger.level == LogLevel.TRACE) {
                                 logReceivedBytes(log.trace, bytesRead, buffer)
                             }
+                            metrics?.put(adapterID, MetricsCollector.METRICS_MEMORY, getUsedMemoryMB().toDouble(), MetricUnits.MEGABYTES, metricDimensions)
                             metrics?.put(adapterID, MetricsCollector.METRICS_BYTES_RECEIVED, bytesRead.toDouble(), MetricUnits.BYTES, metricDimensions)
                         }
 

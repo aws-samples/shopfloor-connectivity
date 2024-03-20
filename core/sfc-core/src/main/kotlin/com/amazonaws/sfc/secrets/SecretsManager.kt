@@ -245,7 +245,7 @@ class SecretsManager(
         val decryptedResponse: GetSecretValueResponse? = try {
             decrypt(awsSecretResponse)
         } catch (e: SecretCryptoException) {
-            errLog(" Unable to decrypt secret, skip loading in cache \"${awsSecretResponse.arn}\",  ${e.cause}")
+            errLog(" Unable to decrypt secret, skip loading in cache \"${awsSecretResponse.arn}\",  ${e.cause?.message}")
             throw SecretManagerException("Cannot load secret from disk", e)
         }
         val secretArn = decryptedResponse!!.arn()
@@ -357,9 +357,9 @@ class SecretsManager(
                         KeyHelpers.createPKCS8KeyFile(filename)
                         log.info("Private key file \"$filename\" created")
                     } catch (e: Exception) {
-                        val msg = "Could not create key file \"$filename\", $e"
-                        log.error(msg)
-                        throw SecretManagerException(msg)
+                        val msg = "Could not create key file \"$filename\""
+                        log.errorEx(msg, e)
+                        throw SecretManagerException("msg, $e")
                     }
                 } else {
                     val msg =

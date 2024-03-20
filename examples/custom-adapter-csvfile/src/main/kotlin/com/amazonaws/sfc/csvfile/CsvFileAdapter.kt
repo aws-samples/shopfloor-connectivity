@@ -163,7 +163,7 @@ class CsvFileAdapter(private val adapterID: String, private val configuration: C
                         metricsCollector?.put(adapterID, dataPoints)
                     }
                 } catch (e: java.lang.Exception) {
-                    logger.getCtxErrorLog(this::class.java.simpleName, "collectMetricsFromLogger")("Error collecting metrics from logger, $e")
+                    logger.getCtxErrorLogEx(this::class.java.simpleName, "collectMetricsFromLogger")("Error collecting metrics from logger", e)
                 }
             }
         } else null
@@ -225,7 +225,14 @@ class CsvFileAdapter(private val adapterID: String, private val configuration: C
             val schedule = config.schedules.firstOrNull { it.name == scheduleName }
             val sourcesForAdapter = schedule?.sources?.filter { (config.fileSources[it.key]?.protocolAdapterID ?: "") == adapterID } ?: return null
 
-            return if (adapter != null) InProcessSourcesReader.createInProcessSourcesReader(schedule, adapter!!, sourcesForAdapter, config.metrics, logger) else null
+            return if (adapter != null) InProcessSourcesReader.createInProcessSourcesReader(
+                schedule = schedule,
+                adapter = adapter!!,
+                sources = sourcesForAdapter,
+                tuningConfiguration = config.tuningConfiguration,
+                metricsConfig = config.metrics,
+                logger = logger
+            ) else null
 
         }
 

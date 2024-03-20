@@ -82,7 +82,7 @@ class MainControllerService(
                         if (e.isJobCancellationException)
                             log.info("Stopped collecting metrics")
                         else
-                            log.error("Error collecting metrics from logger, $e")
+                            log.errorEx("Error collecting metrics from logger", e)
                     }
                 }
             } else null
@@ -390,8 +390,8 @@ class MainControllerService(
         log.trace("jar files for reader are ${conf.jarFiles!!.joinToString()}")
         val reader = try {
             sourceReaderFactory?.createInProcessReader(schedule.name, adapterID, logger)
-        } catch (e: Throwable) {
-            log.error("Error creating instance of \"${conf.factoryClassName}\" from jar ${conf.jarFiles!!.joinToString()} : ${e::class.java.simpleName}, ${e.message ?: ""}")
+        } catch (e: Exception) {
+            log.errorEx("Error creating instance of \"${conf.factoryClassName}\" from jar ${conf.jarFiles!!.joinToString()} : ${e::class.java.simpleName}, ${e.message ?: ""}", e)
             null
         }
         return reader

@@ -1,4 +1,3 @@
-
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: MIT-0
 
@@ -11,6 +10,8 @@ import com.amazonaws.sfc.config.ScheduleConfiguration.Companion.CONFIG_SCHEDULE_
 import com.amazonaws.sfc.log.LogLevel
 import com.amazonaws.sfc.opcua.config.OpcuaSourceConfiguration.Companion.CONFIG_SOURCE_ADAPTER_OPCUA_SERVER
 import com.google.gson.annotations.SerializedName
+import kotlin.time.DurationUnit
+import kotlin.time.toDuration
 
 
 @ConfigurationClass
@@ -31,6 +32,26 @@ class OpcuaConfiguration : SourceAdapterBaseConfiguration() {
 
     val opcuaProtocolAdapters
         get() = protocolAdapters.filter { it.value.protocolAdapterType == OPC_UA_ADAPTER }
+
+    @SerializedName(CONFIG_CHANGED_DATA_CHANNEL_SIZE)
+    protected val _changedDataChannelSize = 1000
+    val changedDataChannelSize
+        get() = _changedDataChannelSize
+
+    @SerializedName(CONFIG_CHANGED_DATA_CHANNEL_TIMEOUT)
+    protected val _changedDataChannelTimeout = 1000
+    val changedDataChannelTimeout
+        get() = _changedDataChannelTimeout.toDuration(DurationUnit.MILLISECONDS)
+
+    @SerializedName(CONFIG_RECEIVED_EVENTS_CHANNEL_SIZE)
+    protected val _receivedEventsChannelSize = 1000
+    val receivedEventsChannelSize
+        get() = _receivedEventsChannelSize
+
+    @SerializedName(CONFIG_RECEIVED_EVENTS_CHANNEL_TIMEOUT)
+    protected val _receivedEventsChannelTimeout = 1000
+    val receivedEventsChannelTimeout
+        get() = _receivedEventsChannelTimeout.toDuration(DurationUnit.MILLISECONDS)
 
 
     @Throws(ConfigurationException::class)
@@ -103,22 +124,30 @@ class OpcuaConfiguration : SourceAdapterBaseConfiguration() {
         const val CONFIG_PROPERTIES = "Properties"
         const val CONFIG_INHERITS_FROM = "Inherits"
 
-        fun create(sources: Map<String, OpcuaSourceConfiguration> = default._sources,
-                   protocolAdapters: Map<String, OpcuaAdapterConfiguration> = default._protocolAdapters,
-                   name: String = default._name,
-                   version: String = default._version,
-                   awsVersion: String? = default._awsVersion,
-                   description: String = default._description,
-                   schedules: List<ScheduleConfiguration> = default._schedules,
-                   logLevel: LogLevel? = default._logLevel,
-                   metadata: Map<String, String> = default._metadata,
-                   elementNames: ElementNamesConfiguration = default._elementNames,
-                   targetServers: Map<String, ServerConfiguration> = default._targetServers,
-                   targetTypes: Map<String, InProcessConfiguration> = default._targetTypes,
-                   adapterServers: Map<String, ServerConfiguration> = default._protocolAdapterServers,
-                   adapterTypes: Map<String, InProcessConfiguration> = default._protocolTypes,
-                   awsIotCredentialProviderClients: Map<String, AwsIotCredentialProviderClientConfiguration> = default._awsIoTCredentialProviderClients,
-                   secretsManager: SecretsManagerConfiguration? = default._secretsManagerConfiguration): OpcuaConfiguration {
+        const val CONFIG_CHANGED_DATA_CHANNEL_SIZE = "ChangedDataChannelSize"
+        const val CONFIG_CHANGED_DATA_CHANNEL_TIMEOUT = "ChangedDataChannelTimeout"
+
+        const val CONFIG_RECEIVED_EVENTS_CHANNEL_SIZE = "ReceivedEventChannelSize"
+        const val CONFIG_RECEIVED_EVENTS_CHANNEL_TIMEOUT = "ReceivedEventChannelTimeout"
+
+        fun create(
+            sources: Map<String, OpcuaSourceConfiguration> = default._sources,
+            protocolAdapters: Map<String, OpcuaAdapterConfiguration> = default._protocolAdapters,
+            name: String = default._name,
+            version: String = default._version,
+            awsVersion: String? = default._awsVersion,
+            description: String = default._description,
+            schedules: List<ScheduleConfiguration> = default._schedules,
+            logLevel: LogLevel? = default._logLevel,
+            metadata: Map<String, String> = default._metadata,
+            elementNames: ElementNamesConfiguration = default._elementNames,
+            targetServers: Map<String, ServerConfiguration> = default._targetServers,
+            targetTypes: Map<String, InProcessConfiguration> = default._targetTypes,
+            adapterServers: Map<String, ServerConfiguration> = default._protocolAdapterServers,
+            adapterTypes: Map<String, InProcessConfiguration> = default._protocolTypes,
+            awsIotCredentialProviderClients: Map<String, AwsIotCredentialProviderClientConfiguration> = default._awsIoTCredentialProviderClients,
+            secretsManager: SecretsManagerConfiguration? = default._secretsManagerConfiguration
+        ): OpcuaConfiguration {
 
             val instance = createBaseConfiguration<OpcuaConfiguration>(
                 name = name,

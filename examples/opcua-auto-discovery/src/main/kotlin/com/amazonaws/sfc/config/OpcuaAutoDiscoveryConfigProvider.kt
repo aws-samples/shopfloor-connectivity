@@ -44,7 +44,7 @@ class OpcuaAutoDiscoveryConfigProvider(
     private var retryCount = 0
 
     // channel to pass configuration to SFC core
-    override val configuration: Channel<String> = Channel<String>(1)
+    override val configuration: Channel<String> = Channel(1)
 
     private var lastConfig: String? = null
 
@@ -102,7 +102,7 @@ class OpcuaAutoDiscoveryConfigProvider(
                     checkIfConfiguredAutoDiscoverySourcesExist(opcuaConfigInput, providerConfig)
                     checkIfEmptySourcesHaveAutoDiscoveryConfiguration(opcuaConfigInput, providerConfig)
                 } catch (e: Exception) {
-                    log.error("Error validating autodiscovery configuration, $e")
+                    log.errorEx("Error validating autodiscovery configuration", e)
                     return@launch
                 }
 
@@ -132,7 +132,7 @@ class OpcuaAutoDiscoveryConfigProvider(
                 }
 
             } catch (e: Exception) {
-                log.error("Error executing autodiscovery, $e")
+                log.errorEx("Error executing autodiscovery", e)
             }
 
             // If a period for retry was configured retry if discovery for a source did not return any nodes.
@@ -346,7 +346,7 @@ class OpcuaAutoDiscoveryConfigProvider(
                 log.info("Saving config to $savedLastConfig")
                 savedLastConfig.writeText(configStr)
             } catch (e: Exception) {
-                log.error("Error saving last configuration to file $savedLastConfig, $e")
+                log.errorEx("Error saving last configuration to file $savedLastConfig", e)
             }
         }
     }

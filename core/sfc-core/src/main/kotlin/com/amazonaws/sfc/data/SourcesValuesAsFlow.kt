@@ -1,4 +1,3 @@
-
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: MIT-0
 
@@ -6,14 +5,18 @@
 package com.amazonaws.sfc.data
 
 import com.amazonaws.sfc.config.BaseConfiguration.Companion.WILD_CARD
+import com.amazonaws.sfc.log.Logger
 import com.amazonaws.sfc.system.DateTime.systemDateTime
+import com.amazonaws.sfc.util.WorkerQueue
 import com.amazonaws.sfc.util.buildScope
+import com.amazonaws.sfc.util.isJobCancellationException
 import com.amazonaws.sfc.util.launch
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.sync.Mutex
 import java.io.Closeable
+import kotlin.coroutines.CoroutineContext
 import kotlin.time.Duration
 import kotlin.time.DurationUnit
 import kotlin.time.measureTime
@@ -30,24 +33,28 @@ import kotlin.time.toDuration
 class SourcesValuesAsFlow(
     private val adapter: ProtocolAdapter,
     private val sourceChannels: Map<String, List<String>>,
-    private val interval: Duration) : Closeable {
+    private val interval: Duration,
+    private val logger: Logger
+) : Closeable {
 
     private var initJob: Job? = null
+    private val classname = this.javaClass.name
 
     private val scope = buildScope("IPC Protocol Service Values Flow Handler")
 
     init {
         // needs to run as coroutine as locking functions are required which can only be used in suspended functions
         initJob = scope.launch(context = Dispatchers.IO, name = "initialize") {
-                createSourceReaderLocks(sourceChannels.keys)
+            createSourceReaderLocks(sourceChannels.keys)
         }
     }
 
     // read values returned as a flow
-    val sourceReadResults: Flow<ReadResult> by lazy {
+    fun sourceReadResults(context: CoroutineContext, maxConcurrentSourceReads: Int, timeout: Duration): Flow<ReadResult> {
 
+        val log = logger.getCtxLoggers(classname, "SourcesValuesAsFlow")
 
-        flow {
+        return flow {
             // wait for initialization has been finished
             initJob?.join()
 
@@ -56,47 +63,65 @@ class SourcesValuesAsFlow(
                 sourceID to sourceChannels.channelList
             }.toMap()
 
-            var cancelled = false
 
-            while (!cancelled) {
+            while (context.isActive) {
+
+                val workerQueue = WorkerQueue<Pair<String, List<String>?>, Pair<String, SourceReadResult>>(
+                    maxConcurrentSourceReads,
+                    context = Dispatchers.IO,
+                    logger = logger
+                ) { (sourceID, channels) ->
+                    try {
+                        val taskLogger = logger.getCtxLoggers(classname, "sourceReadResultWorker-$sourceID")
+                        // make call to adapter and get the result
+                        taskLogger.trace("Start reading ${channels.channelList?.size ?: "all"} channels from source $sourceID")
+
+                        runBlocking {
+                            val result = adapter.read(sourceID, channels)
+                            taskLogger.trace("Finished reading from source, read $sourceID ${if (result is SourceReadSuccess) "succeeded" else "failed"}")
+                            sourceID to result
+
+                        }
+                    } catch (e: Exception) {
+                        if (!e.isJobCancellationException) {
+                            log.errorEx("Error reading from source $sourceID", e)
+                            sourceID to SourceReadError(e.message ?: e.stackTrace.toString(), systemDateTime())
+                        } else sourceID to SourceReadSuccess(emptyMap(), systemDateTime())
+                    }
+                }
 
                 // measure time it takes to handle a read cycle
                 val duration = measureTime {
-
                     // create map, indexed by the sourceID, with deferred read results
-                    val deferredResponses: Map<String, Deferred<SourceReadResult>> = sourcesToRead.map {
-                        val sourceID = it.key
-                        val channels = it.value
-                        sourceID to scope.async {
-                            sourceReadLocks[sourceID]?.lock()
-                            try {
-                                // make call to adapter and get the result
-                                adapter.read(sourceID, channels)
 
-                            } catch (e: Throwable) {
-                                // error making the actual call to the protocol adapter
-                                SourceReadError(e.message ?: e.stackTrace.toString(), systemDateTime())
-                            } finally {
-                                sourceReadLocks[sourceID]?.unlock()
-                            }
+                    sourcesToRead.forEach { (sourceID, channels) ->
+                        workerQueue.submit(sourceID to channels)
+                    }
 
-                        }
-                    }.toMap()
-
-                    // wait for deferred read calls and create map of returned responses
-                    val channelResults = deferredResponses.map { resp ->
-                        resp.key to resp.value.await()
-                    }.toMap()
-
-                    // emit result in flow
                     try {
-                        emit(ReadResult(channelResults))
-                    } catch (e: Throwable) {
-                        cancelled = true
+                        val result = workerQueue.await(timeout).filterNotNull().toMap()
+                        emit(ReadResult(result))
+                    } catch (e: TimeoutCancellationException) {
+                        log.error("Timeout waiting for read results from sources ${sourcesToRead.keys}")
+                        workerQueue.reset()
+                    } catch (e: Exception) {
+                        if (!e.isJobCancellationException) {
+                            log.errorEx("Error reading from sources", e)
+                        }
+                        workerQueue.reset()
+                    }
+
+                }
+
+                // wait for next iteration
+                if (duration > interval) {
+                    log.warning("Read cycle took $duration, which is more than read interval of $interval")
+                } else {
+                    log.trace("Read cycle took $duration")
+                    runBlocking {
+                        delay(interval - duration)
                     }
                 }
-                // wait for next iteration
-                delay(interval - duration)
             }
         }
     }

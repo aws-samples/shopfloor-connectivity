@@ -34,7 +34,7 @@ internal class CertificateDirectoryWatcher(path: Path, scope: CoroutineScope, pr
 
             return CertificateHelper.loadAllCertificatesInDir(path.toFile(),
                 onFailed = { f: File, ex: Exception ->
-                    ctxLog.error("Error loading certificate from file \"$f\", $ex")
+                    ctxLog.errorEx("Error loading certificate from file \"$f\"", ex)
                 },
                 onLoaded = { f: File, certs: List<X509Certificate> ->
                     ctxLog.trace("File \"$f\" ${certs.joinToString(prefix = "\n", separator = "\n") { it.toString() }}")

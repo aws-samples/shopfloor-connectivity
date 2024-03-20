@@ -23,8 +23,11 @@ import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_WRITE_SIZE
 import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_WRITE_SUCCESS
 import com.amazonaws.sfc.system.DateTime
 import com.amazonaws.sfc.targets.AwsServiceTargetClientHelper
+import com.amazonaws.sfc.targets.TargetDataChannel
 import com.amazonaws.sfc.targets.TargetException
+import com.amazonaws.sfc.util.MemoryMonitor
 import com.amazonaws.sfc.util.canNotReachAwsService
+import com.amazonaws.sfc.util.isJobCancellationException
 import com.amazonaws.sfc.util.launch
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
@@ -98,8 +101,8 @@ class AwsKinesisTargetWriter(
                     runBlocking {
                         metricsCollector?.put(targetID, dataPoints)
                     }
-                } catch (e: java.lang.Exception) {
-                    logger.getCtxErrorLog(this::class.java.simpleName, "collectMetricsFromLogger")("Error collecting metrics from logger, $e")
+                } catch (e: Exception) {
+                    logger.getCtxErrorLogEx(this::class.java.simpleName, "collectMetricsFromLogger")("Error collecting metrics from logger", e)
                 }
             }
         } else null
@@ -112,7 +115,7 @@ class AwsKinesisTargetWriter(
      * @param targetData TargetData
      */
     override suspend fun writeTargetData(targetData: TargetData) {
-        targetDataChannel.send(targetData)
+        targetDataChannel.submit(targetData, logger.getCtxLoggers(className, "writeTargetData"))
     }
 
 
@@ -125,8 +128,17 @@ class AwsKinesisTargetWriter(
         kinesisClient.close()
     }
 
+    private val targetConfig: AwsKinesisTargetConfiguration
+        get() {
+            return clientHelper.targetConfig(
+                config,
+                targetID,
+                AWS_KINESIS_TARGET
+            )
+        }
+
     // channel to pass messages to coroutine that sends data to the Kinesis stream
-    private val targetDataChannel = Channel<TargetData>(100)
+    private val targetDataChannel = TargetDataChannel.create(targetConfig, "$className:targetDataChannel")
 
     // buffer for batching messages
     private val buffer = newTargetDataBuffer(resultHandler)
@@ -153,10 +165,9 @@ class AwsKinesisTargetWriter(
                     }
                 }
                 timer = timerJob()
-            }catch (e: CancellationException) {
-                log.info("Writer stopped")
-            }catch (e : Exception){
-                log.error("Error in writer, $e")
+            } catch (e: Exception) {
+                if (!e.isJobCancellationException)
+                    log.errorEx("Error in writer", e)
             }
         }
     }
@@ -243,8 +254,8 @@ class AwsKinesisTargetWriter(
             }
             targetResults?.ackAndError(ok, errors)
 
-        } catch (e: Throwable) {
-            log.error("Error sending to kinesis  stream \"$streamName\" for target \"$targetID\", ${e.message}")
+        } catch (e: Exception) {
+            log.errorEx("Error sending to kinesis  stream \"$streamName\" for target \"$targetID\"", e)
             runBlocking { metricsCollector?.put(targetID, METRICS_WRITE_ERRORS, 1.0, MetricUnits.COUNT, metricDimensions) }
             if (canNotReachAwsService(e)) {
                 targetResults?.nackList(buffer.items)
@@ -265,6 +276,7 @@ class AwsKinesisTargetWriter(
         runBlocking {
             metricsCollector?.put(
                 adapterID,
+                metricsCollector?.buildValueDataPoint(adapterID, MetricsCollector.METRICS_MEMORY, MemoryMonitor.getUsedMemoryMB().toDouble(),MetricUnits.MEGABYTES ),
                 metricsCollector?.buildValueDataPoint(adapterID, METRICS_WRITES, 1.0, MetricUnits.COUNT, metricDimensions),
                 metricsCollector?.buildValueDataPoint(adapterID, METRICS_MESSAGES, buffer.size.toDouble(), MetricUnits.COUNT, metricDimensions),
                 metricsCollector?.buildValueDataPoint(adapterID, METRICS_WRITE_DURATION, writeDurationInMillis, MetricUnits.MILLISECONDS, metricDimensions),
@@ -300,14 +312,6 @@ class AwsKinesisTargetWriter(
     private val config: AwsKinesisWriterConfiguration
         get() = clientHelper.writerConfig(configReader, AWS_KINESIS_TARGET)
 
-    private val targetConfig: AwsKinesisTargetConfiguration
-        get() {
-            return clientHelper.targetConfig(
-                config,
-                targetID,
-                AWS_KINESIS_TARGET
-            )
-        }
 
     companion object {
         const val KINESIS_MAX_BATCH_MSG_SIZE = 1024 * 1024 * 5

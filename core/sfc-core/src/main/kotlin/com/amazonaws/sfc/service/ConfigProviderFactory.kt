@@ -72,7 +72,7 @@ object ConfigProviderFactory {
                 }
 
             } catch (e: Exception) {
-                log.error("Error loading key from configuration verification key file ${configVerificationKeyFile.absoluteFile}, ${e.message}")
+                log.errorEx("Error loading key from configuration verification key file ${configVerificationKeyFile.absoluteFile}", e)
                 exitProcess((1))
             }
     }

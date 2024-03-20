@@ -9,7 +9,7 @@ import com.amazonaws.sfc.config.ConfigurationClass
 import com.amazonaws.sfc.config.ConfigurationException
 import com.amazonaws.sfc.config.Validate
 import com.amazonaws.sfc.mqtt.MqttConnectionOptions
-import com.amazonaws.sfc.mqtt.MqttConnectionType
+import com.amazonaws.sfc.mqtt.MqttConnectionProtocol
 import com.google.gson.annotations.SerializedName
 import kotlin.time.Duration
 import kotlin.time.DurationUnit
@@ -25,13 +25,6 @@ class MqttBrokerConfiguration : MqttConnectionOptions(), Validate {
     val waitAfterConnectError: Duration
         get() = _waitAfterConnectError.toDuration(DurationUnit.SECONDS)
 
-
-    private var _validated = false
-    override var validated
-        get() = _validated
-        set(value) {
-            _validated = value
-        }
 
     @Throws(ConfigurationException::class)
     override fun validate() {
@@ -71,7 +64,6 @@ class MqttBrokerConfiguration : MqttConnectionOptions(), Validate {
         fun create(
             endpoint: String = default._endPoint,
             port: Int? = default._port,
-            connection: MqttConnectionType = default._connection,
             username: String? = default._username,
             password: String? = default._password,
             certificate: String? = default._certificate,
@@ -87,7 +79,6 @@ class MqttBrokerConfiguration : MqttConnectionOptions(), Validate {
             with(instance) {
                 _endPoint = endpoint
                 _port = port
-                _connection = connection
                 _username = username
                 _password = password
                 _certificate = certificate

@@ -1,4 +1,3 @@
-
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: MIT-0
 
@@ -23,10 +22,9 @@ import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_WRITE_SUCCES
 import com.amazonaws.sfc.system.DateTime
 import com.amazonaws.sfc.system.DateTime.systemCalendar
 import com.amazonaws.sfc.system.DateTime.systemCalendarUTC
+import com.amazonaws.sfc.targets.TargetDataChannel
 import com.amazonaws.sfc.targets.TargetException
-import com.amazonaws.sfc.util.buildScope
-import com.amazonaws.sfc.util.byteCountString
-import com.amazonaws.sfc.util.launch
+import com.amazonaws.sfc.util.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.selects.select
@@ -45,7 +43,8 @@ class FileTargetWriter(
     private val targetID: String,
     private val configReader: ConfigReader,
     private val logger: Logger,
-    resultHandler: TargetResultHandler?) : TargetWriter {
+    resultHandler: TargetResultHandler?
+) : TargetWriter {
 
     private val className = this::class.java.simpleName
 
@@ -53,10 +52,16 @@ class FileTargetWriter(
         logger.getCtxInfoLog(className, "")(BuildConfig.toString())
     }
 
-    private val metricDimensions = mapOf(METRICS_DIMENSION_SOURCE to targetID,
-        MetricsCollector.METRICS_DIMENSION_TYPE to className)
+    private val metricDimensions = mapOf(
+        METRICS_DIMENSION_SOURCE to targetID,
+        MetricsCollector.METRICS_DIMENSION_TYPE to className
+    )
 
-    private val targetDataChannel = Channel<TargetData>(1000)
+    private val targetConfig: FileTargetConfiguration
+        get() = config.targets[targetID]
+            ?: throw TargetException("Configuration for type $FILE_TARGET for target with ID \"$targetID\" does not exist, existing targets are ${config.targets.keys}")
+
+    private val targetDataChannel = TargetDataChannel.create(targetConfig, "$className:targetDataChannel")
 
     private val buffer = TargetDataBuffer(storeFullMessage = false)
     private val targetResults = if (resultHandler != null) TargetResultBufferedHelper(targetID, resultHandler, logger) else null
@@ -65,12 +70,14 @@ class FileTargetWriter(
         val metricsConfiguration = config.targets[targetID]?.metrics ?: MetricsSourceConfiguration()
         if (config.isCollectingMetrics) {
             logger.metricsCollectorMethod = collectMetricsFromLogger
-            MetricsCollector(metricsConfig = config.metrics,
+            MetricsCollector(
+                metricsConfig = config.metrics,
                 metricsSourceName = targetID,
                 metricsSourceType = MetricsSourceType.TARGET_WRITER,
                 metricsSourceConfiguration = metricsConfiguration,
                 staticDimensions = TARGET_METRIC_DIMENSIONS,
-                logger = logger)
+                logger = logger
+            )
         } else null
     }
 
@@ -83,7 +90,7 @@ class FileTargetWriter(
                         metricsCollector?.put(targetID, dataPoints)
                     }
                 } catch (e: java.lang.Exception) {
-                    logger.getCtxErrorLog(this::class.java.simpleName, "collectMetricsFromLogger")("Error collecting metrics from logger, $e")
+                    logger.getCtxErrorLogEx(this::class.java.simpleName, "collectMetricsFromLogger")("Error collecting metrics from logger", e)
                 }
             }
         } else null
@@ -102,34 +109,33 @@ class FileTargetWriter(
         log.info("File writer for target \"$targetID\" writing to directory \"${targetConfig.directory}\"")
 
         while (isActive) {
-            try{
-            select {
-                targetDataChannel.onReceive { targetData ->
+            try {
+                select {
+                    targetDataChannel.onReceive { targetData ->
 
-                    val content = targetData.toJson(config.elementNames)
+                        val content = targetData.toJson(config.elementNames)
 
-                    buffer.add(targetData, content)
+                        buffer.add(targetData, content)
 
-                    log.trace("Received message, buffer size is ${buffer.payloadSize.byteCountString}")
+                        log.trace("Received message, buffer size is ${buffer.payloadSize.byteCountString}")
 
-                    // flush if reached buffer size
-                    if (buffer.payloadSize >= targetConfig.bufferSize) {
-                        log.trace("${targetConfig.bufferSize.byteCountString} buffer size reached, flushing buffer")
-                        timer.cancel()
+                        // flush if reached buffer size
+                        if (buffer.payloadSize >= targetConfig.bufferSize) {
+                            log.trace("${targetConfig.bufferSize.byteCountString} buffer size reached, flushing buffer")
+                            timer.cancel()
+                            flush()
+                            timer = timerJob()
+                        }
+                    }
+                    timer.onJoin {
+                        log.trace("${targetConfig.interval / 1000} seconds buffer interval reached, flushing buffer")
                         flush()
                         timer = timerJob()
                     }
                 }
-                timer.onJoin {
-                    log.trace("${targetConfig.interval / 1000} seconds buffer interval reached, flushing buffer")
-                    flush()
-                    timer = timerJob()
-                }
-                }
-            }catch (e: CancellationException) {
-                log.info("Writer stopped")
-            }catch (e : Exception){
-                log.error("Error in writer, $e")
+            } catch (e: Exception) {
+                if (!e.isJobCancellationException)
+                    log.errorEx("Error in writer", e)
             }
         }
 
@@ -149,7 +155,7 @@ class FileTargetWriter(
      * @param targetData TargetData
      */
     override suspend fun writeTargetData(targetData: TargetData) {
-        targetDataChannel.send(targetData)
+        targetDataChannel.submit(targetData, logger.getCtxLoggers(className, "writeTargetData"))
     }
 
     private fun flush() {
@@ -172,8 +178,8 @@ class FileTargetWriter(
 
             targetResults?.ackBuffered()
 
-        } catch (e: Throwable) {
-            log.error("Error writing to file \"$outputFile\" for target \"$targetID\", ${e.message}")
+        } catch (e: Exception) {
+            log.errorEx("Error writing to file \"$outputFile\" for target \"$targetID\"", e)
             runBlocking { metricsCollector?.put(targetID, METRICS_WRITE_ERRORS, 1.0, MetricUnits.COUNT, metricDimensions) }
             targetResults?.errorBuffered()
         } finally {
@@ -181,17 +187,22 @@ class FileTargetWriter(
         }
     }
 
-    private fun createMetrics(adapterID: String,
-                              metricDimensions: MetricDimensions,
-                              writeDurationInMillis: Double) {
+    private fun createMetrics(
+        adapterID: String,
+        metricDimensions: MetricDimensions,
+        writeDurationInMillis: Double
+    ) {
 
         runBlocking {
-            metricsCollector?.put(adapterID,
+            metricsCollector?.put(
+                adapterID,
+                metricsCollector?.buildValueDataPoint(adapterID, MetricsCollector.METRICS_MEMORY, MemoryMonitor.getUsedMemoryMB().toDouble(),MetricUnits.MEGABYTES ),
                 metricsCollector?.buildValueDataPoint(adapterID, METRICS_WRITES, 1.0, MetricUnits.COUNT, metricDimensions),
                 metricsCollector?.buildValueDataPoint(adapterID, METRICS_MESSAGES, buffer.size.toDouble(), MetricUnits.COUNT, metricDimensions),
                 metricsCollector?.buildValueDataPoint(adapterID, METRICS_WRITE_DURATION, writeDurationInMillis, MetricUnits.MILLISECONDS, metricDimensions),
                 metricsCollector?.buildValueDataPoint(adapterID, METRICS_WRITE_SUCCESS, 1.0, MetricUnits.COUNT, metricDimensions),
-                metricsCollector?.buildValueDataPoint(adapterID, METRICS_WRITE_SIZE, buffer.payloadSize.toDouble(), MetricUnits.BYTES, metricDimensions))
+                metricsCollector?.buildValueDataPoint(adapterID, METRICS_WRITE_SIZE, buffer.payloadSize.toDouble(), MetricUnits.BYTES, metricDimensions)
+            )
         }
 
     }
@@ -213,15 +224,25 @@ class FileTargetWriter(
         var firstLine = true
 
         val file = File(outputFile).outputStream()
-        val outputStream = BufferedWriter(OutputStreamWriter(
-            if (targetConfig.compressionType == CompressionType.NONE) file
-            else
-                try {
-                    Compress.createCompression(targetConfig.compressionType, file, if (targetConfig.json) "${removeExtension(Path(outputFile).name)}.json" else "").compressionStream
-                } catch (e: Exception) {
-                    logger.getCtxErrorLog("Error creating compression for type ${targetConfig.compressionType.name} ($e), writing to uncompressed file $outputFile instead")
-                    file
-                }))
+        val outputStream = BufferedWriter(
+            OutputStreamWriter(
+                if (targetConfig.compressionType == CompressionType.NONE) file
+                else
+                    try {
+                        Compress.createCompression(
+                            targetConfig.compressionType,
+                            file,
+                            if (targetConfig.json) "${removeExtension(Path(outputFile).name)}.json" else ""
+                        ).compressionStream
+                    } catch (e: Exception) {
+                        logger.getCtxErrorLogEx(
+                            "Error creating compression for type ${targetConfig.compressionType.name}, writing to uncompressed file $outputFile instead",
+                            e
+                        )
+                        file
+                    }
+            )
+        )
 
         outputStream.use { f ->
             if (tc.json) {
@@ -284,17 +305,16 @@ class FileTargetWriter(
             throw TargetException("Could not load $FILE_TARGET Target configuration: ${e.message}")
         }
 
-
-    private val targetConfig: FileTargetConfiguration
-        get() = config.targets[targetID]
-                ?: throw TargetException("Configuration for type $FILE_TARGET for target with ID \"$targetID\" does not exist, existing targets are ${config.targets.keys}")
-
-
     companion object {
         @JvmStatic
         @Suppress("unused")
         fun newInstance(vararg createParameters: Any?) =
-            newInstance(createParameters[0] as ConfigReader, createParameters[1] as String, createParameters[2] as Logger, createParameters[3] as TargetResultHandler?)
+            newInstance(
+                createParameters[0] as ConfigReader,
+                createParameters[1] as String,
+                createParameters[2] as Logger,
+                createParameters[3] as TargetResultHandler?
+            )
 
         /**
          * Creates a new instance of a file target .
@@ -311,7 +331,8 @@ class FileTargetWriter(
         }
 
         val TARGET_METRIC_DIMENSIONS = mapOf(
-            MetricsCollector.METRICS_DIMENSION_SOURCE_CATEGORY to METRICS_DIMENSION_SOURCE_CATEGORY_TARGET)
+            MetricsCollector.METRICS_DIMENSION_SOURCE_CATEGORY to METRICS_DIMENSION_SOURCE_CATEGORY_TARGET
+        )
     }
 
 }

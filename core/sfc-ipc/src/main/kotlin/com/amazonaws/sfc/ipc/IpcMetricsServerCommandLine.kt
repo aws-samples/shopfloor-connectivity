@@ -51,7 +51,7 @@ class IpcMetricsServerCommandLine(args: Array<String>) : ServiceCommandLineOptio
 
     companion object {
 
-        private const val OPTION_TARGET = "target"
+        const val OPTION_TARGET = "target"
 
         private val targetOption: Option = Option.builder(OPTION_TARGET)
             .type(String::class.java)

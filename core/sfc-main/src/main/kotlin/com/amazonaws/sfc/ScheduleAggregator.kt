@@ -1,4 +1,3 @@
-
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: MIT-0
 
@@ -7,14 +6,19 @@ package com.amazonaws.sfc
 
 import com.amazonaws.sfc.aggregations.AggregationConfiguration
 import com.amazonaws.sfc.aggregations.Aggregator
+import com.amazonaws.sfc.channels.channelSubmitEventHandler
+import com.amazonaws.sfc.channels.submit
 import com.amazonaws.sfc.config.ControllerServiceConfiguration
 import com.amazonaws.sfc.config.ScheduleConfiguration
+import com.amazonaws.sfc.config.TuningConfiguration
 import com.amazonaws.sfc.data.SourceOutputData
 import com.amazonaws.sfc.data.SourceReadSuccess
 import com.amazonaws.sfc.log.Logger
 import com.amazonaws.sfc.util.buildScope
 import com.amazonaws.sfc.util.launch
+import com.amazonaws.sfc.util.toStringEx
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.withTimeoutOrNull
@@ -28,7 +32,7 @@ import kotlin.time.Duration
  * @property logger Logger Logger for output
  */
 class ScheduleAggregator(
-    config: ControllerServiceConfiguration,
+    private val config: ControllerServiceConfiguration,
     private val schedule: ScheduleConfiguration,
     private val aggregationOutputChannel: SendChannel<Map<String, SourceOutputData>>,
     private val aggregationInputChannel: ReceiveChannel<Map<String, SourceReadSuccess>>,
@@ -36,6 +40,8 @@ class ScheduleAggregator(
 ) {
 
     private val scope = buildScope("SFC Schedule Aggregator")
+
+    private val className = this::class.java.name
 
     // transformations for aggregated data
     private val transformations = config.transformations
@@ -49,8 +55,8 @@ class ScheduleAggregator(
             if (aggregation != null) {
                 aggregateSourceValues(aggregation)
             }
-        } catch ( e: Exception) {
-            logger.getCtxErrorLog(this::class.simpleName.toString(), "aggregationWorker")("Error aggregating data, $e")
+        } catch (e: Exception) {
+            logger.getCtxErrorLog(this::class.simpleName.toString(), "aggregationWorker")("Error aggregating data, ${e.toStringEx()}")
         }
     }
 
@@ -62,6 +68,7 @@ class ScheduleAggregator(
 
         val aggregator = Aggregator(aggregation, transformations, logger)
 
+        val log = logger.getCtxLoggers(this::class.simpleName.toString(), "aggregateSourceValues")
         // read received data from channel
         for (data: Map<String, SourceReadSuccess> in aggregationInputChannel) {
             // if aggregation size is reached apply aggregations
@@ -74,10 +81,18 @@ class ScheduleAggregator(
                             )
                 }.toMap()
                 // send to schedule writer
-                aggregationOutputChannel.send(aggregatedData)
+                (aggregationOutputChannel as Channel).submit(aggregatedData, config.tuningConfiguration.writerInputChannelTimeout) { event ->
+                    channelSubmitEventHandler(
+                        event = event,
+                        channelName = "$className:readerOutputChannel",
+                        tuningChannelSizeName = TuningConfiguration.CONFIG_WRITER_INPUT_CHANNEL_TIMEOUT,
+                        currentChannelSize = config.tuningConfiguration.writerInputChannelSize,
+                        tuningChannelTimeoutName = TuningConfiguration.CONFIG_WRITER_INPUT_CHANNEL_TIMEOUT,
+                        log = log
+                    )
+                }
             }
         }
-
     }
 
     /**
@@ -90,6 +105,5 @@ class ScheduleAggregator(
             aggregationWorker.join()
         } != null
     }
-
 
 }

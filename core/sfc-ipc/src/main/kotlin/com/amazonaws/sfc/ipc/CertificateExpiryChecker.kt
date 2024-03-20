@@ -68,7 +68,7 @@ class CertificateExpiryChecker(certificateFiles: List<File>, private val expirat
                 if (e.isJobCancellationException){
                     ctxLog.info("Stopped certificate checking")
                 } else {
-                    ctxLog.error("Error checking certificate expiration, $e")
+                    ctxLog.errorEx("Error checking certificate expiration", e)
                 }
             }
         }

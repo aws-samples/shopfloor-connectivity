@@ -2,11 +2,8 @@
 // SPDX-License-Identifier: MIT-0
 package com.amazonaws.sfc.config
 
-import com.amazonaws.sfc.config.ConfigurationClass
-import com.amazonaws.sfc.config.ConfigurationException
-import com.amazonaws.sfc.config.Validate
 import com.amazonaws.sfc.mqtt.MqttConnectionOptions
-import com.amazonaws.sfc.mqtt.MqttConnectionType
+import com.amazonaws.sfc.mqtt.MqttConnectionProtocol
 import com.google.gson.annotations.SerializedName
 import java.io.File
 import kotlin.time.Duration
@@ -82,7 +79,6 @@ class MqttConfigProviderConfig : Validate, MqttConnectionOptions() {
             topicName: String = default._topicName,
             endpoint: String = default._endPoint,
             port: Int? = default._port,
-            connection: MqttConnectionType = default._connection,
             username: String? = default._username,
             password: String? = default._password,
             certificate: String? = default._certificate,
@@ -100,7 +96,6 @@ class MqttConfigProviderConfig : Validate, MqttConnectionOptions() {
                 _topicName = topicName
                 _endPoint = endpoint
                 _port = port
-                _connection = connection
                 _username = username
                 _password = password
                 _certificate = certificate

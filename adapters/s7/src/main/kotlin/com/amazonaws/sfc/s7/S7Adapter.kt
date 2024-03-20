@@ -13,6 +13,7 @@ import com.amazonaws.sfc.metrics.*
 import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_DIMENSION_SOURCE
 import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_DIMENSION_SOURCE_CATEGORY
 import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_DIMENSION_SOURCE_CATEGORY_ADAPTER
+import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_MEMORY
 import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_READS
 import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_READ_DURATION
 import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_READ_ERRORS
@@ -22,6 +23,7 @@ import com.amazonaws.sfc.s7.config.S7Configuration
 import com.amazonaws.sfc.s7.config.S7ControllerConfiguration
 import com.amazonaws.sfc.system.DateTime
 import com.amazonaws.sfc.util.LookupCacheHandler
+import com.amazonaws.sfc.util.MemoryMonitor.Companion.getUsedMemoryMB
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -79,7 +81,7 @@ class S7Adapter(private val adapterID: String, private val configuration: S7Conf
                         metricsCollector?.put(adapterID, dataPoints)
                     }
                 } catch (e: java.lang.Exception) {
-                    logger.getCtxErrorLog(this::class.java.simpleName, "collectMetricsFromLogger")("Error collecting metrics from logger, $e")
+                    logger.getCtxErrorLogEx(this::class.java.simpleName, "collectMetricsFromLogger")("Error collecting metrics from logger", e)
                 }
             }
         } else null
@@ -142,6 +144,7 @@ class S7Adapter(private val adapterID: String, private val configuration: S7Conf
                                       readDurationInMillis: Double,
                                       values: Map<String, ChannelReadValue>) {
         metricsCollector?.put(adapterID,
+            metricsCollector?.buildValueDataPoint(adapterID, METRICS_MEMORY, getUsedMemoryMB().toDouble(), MetricUnits.MEGABYTES, metricDimensions),
             metricsCollector?.buildValueDataPoint(adapterID, METRICS_READS, 1.0, MetricUnits.COUNT, metricDimensions),
             metricsCollector?.buildValueDataPoint(adapterID, METRICS_READ_DURATION, readDurationInMillis, MetricUnits.MILLISECONDS, metricDimensions),
             metricsCollector?.buildValueDataPoint(adapterID, METRICS_VALUES_READ, values.size.toDouble(), MetricUnits.COUNT, metricDimensions),
@@ -212,7 +215,14 @@ class S7Adapter(private val adapterID: String, private val configuration: S7Conf
             val schedule = config.schedules.firstOrNull { it.name == scheduleName }
             val sourcesForAdapter = schedule?.sources?.filter { (config.sources[it.key]?.protocolAdapterID ?: "") == adapterID } ?: return null
 
-            return if (adapter != null) InProcessSourcesReader.createInProcessSourcesReader(schedule, adapter!!, sourcesForAdapter, config.metrics, logger) else null
+            return if (adapter != null) InProcessSourcesReader.createInProcessSourcesReader(
+                schedule = schedule,
+                adapter = adapter!!,
+                sources = sourcesForAdapter,
+                tuningConfiguration = config.tuningConfiguration,
+                metricsConfig = config.metrics,
+                logger = logger
+            ) else null
 
         }
 

@@ -24,7 +24,9 @@ import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_DIMENSION_SO
 import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_WRITE_ERRORS
 import com.amazonaws.sfc.system.DateTime
 import com.amazonaws.sfc.targets.AwsServiceTargetClientHelper
+import com.amazonaws.sfc.targets.TargetDataChannel
 import com.amazonaws.sfc.targets.TargetException
+import com.amazonaws.sfc.util.MemoryMonitor
 import com.amazonaws.sfc.util.buildScope
 import com.amazonaws.sfc.util.canNotReachAwsService
 import com.amazonaws.sfc.util.launch
@@ -79,9 +81,15 @@ class AwsTimestreamTargetWriter(
     private val elementNames = config.elementNames
 
     private val commonAttributes by lazy { buildCommonAttributes() }
+    /**
+     * Gets the config for the Timestream Target
+     */
+    private val targetConfig: AwsTimestreamTargetConfiguration by lazy {
+        clientHelper.targetConfig(config, targetID, AWS_TIMESTREAM)
+    }
 
     // channel for passing messages to coroutine that sends messages to timestream record queue
-    private val targetDataChannel = Channel<TargetData>(100)
+    private val targetDataChannel = TargetDataChannel.create(targetConfig, "${className}:targetDataChannel")
 
     // Buffer to collect batch of timestream records
     private val recordBuffer = mutableListOf<Record>()
@@ -108,7 +116,7 @@ class AwsTimestreamTargetWriter(
                         metricsCollector?.put(targetID, dataPoints)
                     }
                 } catch (e: java.lang.Exception) {
-                    logger.getCtxErrorLog(this::class.java.simpleName, "collectMetricsFromLogger")("Error collecting metrics from logger, $e")
+                    logger.getCtxErrorLogEx(this::class.java.simpleName, "collectMetricsFromLogger")("Error collecting metrics from logger", e)
                 }
             }
         } else null
@@ -130,7 +138,7 @@ class AwsTimestreamTargetWriter(
         while (isActive) {
             try {
                 select {
-                    targetDataChannel.onReceive { targetData ->
+                    targetDataChannel.channel.onReceive { targetData ->
                         timer.cancel()
                         handleTargetData(targetData)
                     }
@@ -141,7 +149,7 @@ class AwsTimestreamTargetWriter(
                 }
                 timer = timerJob()
             } catch (e : Exception){
-                log.error("Error writing to AWS Timestream, $e")
+                log.errorEx("Error writing to AWS Timestream", e)
             }
         }
 
@@ -186,11 +194,11 @@ class AwsTimestreamTargetWriter(
     }
 
     /**
-     * Writes message to internal Timestream target
+     * Writes message to internal TimeStream target
      * @param targetData TargetData
      */
     override suspend fun writeTargetData(targetData: TargetData) {
-        targetDataChannel.send(targetData)
+        targetDataChannel.submit(targetData, logger.getCtxLoggers(className, "writeTargetData"))
     }
 
     /**
@@ -252,7 +260,7 @@ class AwsTimestreamTargetWriter(
             } catch (e: NullPointerException) {
                 null
             } catch (e: Exception) {
-                log.error("Error querying dimension \"$dimension\" using \"${dimension.dimensionValuePathStr}\"for target \"$targetID\", $e")
+                log.errorEx("Error querying dimension \"$dimension\" using \"${dimension.dimensionValuePathStr}\"for target \"$targetID\"", e)
                 null
             }
 
@@ -318,7 +326,7 @@ class AwsTimestreamTargetWriter(
             } catch (e: NullPointerException) {
                 null
             } catch (e: Exception) {
-                logger.getCtxErrorLog(className, "getMeasuredValueAndTime")("Error querying value for target \"$targetID\", record $recordConfig, $e")
+                logger.getCtxErrorLogEx(className, "getMeasuredValueAndTime")("Error querying value for target \"$targetID\", record $recordConfig", e)
                 null
             }
 
@@ -400,7 +408,7 @@ class AwsTimestreamTargetWriter(
                 log.trace("Timestream WriteRecords succeeded")
 
             } catch (e: Exception) {
-                log.error("Error writing Timestream database \"${targetConfig.database}\", table \"${targetConfig.tableName}\" , ${e.message}")
+                log.errorEx("Error writing Timestream database \"${targetConfig.database}\", table \"${targetConfig.tableName}\"", e)
                 runBlocking { metricsCollector?.put(targetID, METRICS_WRITE_ERRORS, 1.0, MetricUnits.COUNT, metricDimensions) }
                 if (canNotReachAwsService(e)) {
                     targetResults?.nackBuffered()
@@ -419,6 +427,7 @@ class AwsTimestreamTargetWriter(
 
         runBlocking {
             metricsCollector?.put(adapterID,
+                metricsCollector?.buildValueDataPoint(adapterID, MetricsCollector.METRICS_MEMORY, MemoryMonitor.getUsedMemoryMB().toDouble(),MetricUnits.MEGABYTES ),
                 metricsCollector?.buildValueDataPoint(adapterID, MetricsCollector.METRICS_WRITES, 1.0, MetricUnits.COUNT, metricDimensions),
                 metricsCollector?.buildValueDataPoint(adapterID, MetricsCollector.METRICS_MESSAGES, request.records().size.toDouble(), MetricUnits.COUNT, metricDimensions),
                 metricsCollector?.buildValueDataPoint(adapterID, MetricsCollector.METRICS_WRITE_DURATION, writeDurationInMillis, MetricUnits.MILLISECONDS, metricDimensions),
@@ -451,13 +460,6 @@ class AwsTimestreamTargetWriter(
         get() {
             return clientHelper.writerConfig(configReader, AWS_TIMESTREAM)
         }
-
-    /**
-     * Gets the config for the Timestream Target
-     */
-    private val targetConfig: AwsTimestreamTargetConfiguration by lazy {
-        clientHelper.targetConfig(config, targetID, AWS_TIMESTREAM)
-    }
 
 
     companion object {

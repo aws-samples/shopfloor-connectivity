@@ -11,6 +11,8 @@ import com.amazonaws.sfc.config.*
 import com.amazonaws.sfc.log.LogLevel
 import com.amazonaws.sfc.metrics.MetricsConfiguration.Companion.CONFIG_METRICS
 import com.google.gson.annotations.SerializedName
+import kotlin.time.DurationUnit
+import kotlin.time.toDuration
 
 class AwsCloudWatchMetricsWriterConfiguration : BaseConfiguration(), Validate {
 
@@ -19,6 +21,16 @@ class AwsCloudWatchMetricsWriterConfiguration : BaseConfiguration(), Validate {
 
     val metrics: AwsCloudWatchMetricsConfiguration?
         get() = _metrics
+
+    @SerializedName(CONFIG_METRICS_CHANNEL_SIZE)
+    private var _metricsChannelSize: Int = 1000
+    val metricsChannelSize
+        get() = _metricsChannelSize
+
+    @SerializedName(CONFIG_METRICS_CHANNEL_TIMEOUT)
+    private var _metricsChannelTimeout: Int = 10000
+    val metricsChannelTimeout
+        get() = _metricsChannelTimeout.toDuration(DurationUnit.MILLISECONDS)
 
     override fun validate() {
         if (validated) return
@@ -31,6 +43,11 @@ class AwsCloudWatchMetricsWriterConfiguration : BaseConfiguration(), Validate {
     }
 
     companion object {
+
+
+        const val CONFIG_METRICS_CHANNEL_SIZE =  "CloudWatchMetricsChannelSize"
+        const val CONFIG_METRICS_CHANNEL_TIMEOUT = "CloudWatchMetricsChannelTimeout"
+
         private val default = AwsCloudWatchMetricsWriterConfiguration()
 
         fun create(metrics: AwsCloudWatchMetricsConfiguration? = default._metrics,

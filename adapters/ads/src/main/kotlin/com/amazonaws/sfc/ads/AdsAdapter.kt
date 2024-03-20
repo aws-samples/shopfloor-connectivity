@@ -22,8 +22,8 @@ import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_DIMENSION_SO
 import com.amazonaws.sfc.system.DateTime.systemDateTime
 import com.amazonaws.sfc.targets.TargetException
 import com.amazonaws.sfc.util.LookupCacheHandler
+import com.amazonaws.sfc.util.MemoryMonitor.Companion.getUsedMemoryMB
 import com.amazonaws.sfc.util.isJobCancellationException
-import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -144,10 +144,7 @@ class AdsAdapter(
                         metricsCollector?.put(adapterID, dataPoints)
                     }
                 } catch (e: java.lang.Exception) {
-                    logger.getCtxErrorLog(
-                        this::class.java.simpleName,
-                        "collectMetricsFromLogger"
-                    )("Error collecting metrics from logger, $e")
+                    logger.getCtxErrorLogEx(className,"collectMetricsFromLogger")("Error collecting metrics from logger", e)
                 }
             }
         } else null
@@ -205,6 +202,13 @@ class AdsAdapter(
             protocolAdapterID,
             metricsCollector?.buildValueDataPoint(
                 protocolAdapterID,
+                MetricsCollector.METRICS_MEMORY,
+                getUsedMemoryMB().toDouble(),
+                MetricUnits.MEGABYTES,
+                metricDimensions
+            ),
+            metricsCollector?.buildValueDataPoint(
+                protocolAdapterID,
                 MetricsCollector.METRICS_READS,
                 1.0,
                 MetricUnits.COUNT,
@@ -254,10 +258,10 @@ class AdsAdapter(
                 }
             } catch (e : Exception) {
                 if (e.isJobCancellationException) {
-                    log.warning("ADS Adapter stopped, $e")
+                    log.info("ADS Adapter stopped")
                 }
                 else {
-                    log.warning("Timeout stopping ADS Adapter, $e")
+                    log.warning("Timeout stopping ADS Adapter")
                 }
             }
 
@@ -308,11 +312,12 @@ class AdsAdapter(
             }
 
             return if (adapter != null) InProcessSourcesReader.createInProcessSourcesReader(
-                schedule,
-                adapter!!,
-                sourcesForAdapter,
-                config.metrics,
-                logger
+                schedule =schedule,
+                adapter = adapter!!,
+                sources = sourcesForAdapter,
+                tuningConfiguration = config.tuningConfiguration,
+                metricsConfig = config.metrics,
+                logger = logger
             ) else null
 
         }

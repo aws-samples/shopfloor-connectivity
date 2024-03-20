@@ -9,7 +9,11 @@ import com.amazonaws.sfc.awsiot.AwsIotCredentialProviderClientConfiguration
 import com.amazonaws.sfc.config.*
 import com.amazonaws.sfc.config.ScheduleConfiguration.Companion.CONFIG_SCHEDULE_SOURCES
 import com.amazonaws.sfc.log.LogLevel
+import com.amazonaws.sfc.mqtt.config.MqttAdapterConfiguration.Companion.CONFIG_RECEIVED_DATA_CHANNEL_SIZE
+import com.amazonaws.sfc.mqtt.config.MqttAdapterConfiguration.Companion.CONFIG_RECEIVED_DATA_CHANNEL_TIMEOUT
 import com.google.gson.annotations.SerializedName
+import kotlin.time.DurationUnit
+import kotlin.time.toDuration
 
 @ConfigurationClass
 class MqttConfiguration : SourceAdapterBaseConfiguration() {
@@ -25,6 +29,16 @@ class MqttConfiguration : SourceAdapterBaseConfiguration() {
 
     val mqttProtocolAdapters: Map<String, MqttAdapterConfiguration>
         get() = _protocolAdapters.filter { it.value.protocolAdapterType == MQTT_ADAPTER }
+
+    @SerializedName(CONFIG_RECEIVED_DATA_CHANNEL_SIZE)
+    protected val _receivedDataChannelSize = 1000
+    val receivedDataChannelSize
+        get() = _receivedDataChannelSize
+
+    @SerializedName(CONFIG_RECEIVED_DATA_CHANNEL_TIMEOUT)
+    protected val _receivedDataChannelTimeout = 1000
+    val receivedDataChannelTimeout
+        get() = _receivedDataChannelTimeout.toDuration(DurationUnit.MILLISECONDS)
 
     @Throws(ConfigurationException::class)
     override fun validate() {

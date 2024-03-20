@@ -32,7 +32,7 @@ class MqttHelper(private val mqttConnectionConfig: MqttConnectionOptions, privat
             keyStore.setCertificateEntry("server_cert_$i", c)
         }
 
-        if (mqttConnectionConfig.connection == MqttConnectionType.MUTUAL && mqttConnectionConfig.rootCA != null) {
+        if (mqttConnectionConfig.protocol == MqttConnectionProtocol.SSL && mqttConnectionConfig.rootCA != null) {
             log.info("Loading CA certificate from ${mqttConnectionConfig.rootCA?.absolutePath}")
             val certificateFactory = CertificateFactory.getInstance("X.509")
             val caCerts = certificateFactory.generateCertificates(mqttConnectionConfig.rootCA!!.inputStream())
@@ -57,7 +57,7 @@ class MqttHelper(private val mqttConnectionConfig: MqttConnectionOptions, privat
         log.info("Loading certificates from certificate file ${mqttConnectionConfig.certificate?.absolutePath} ")
         val certificateChain = certificateFactory.generateCertificates(mqttConnectionConfig.certificate?.inputStream())
         certificateChain.forEach { c ->
-            log.trace("Loaded certificate is ${c.toString()}")
+            log.trace("Loaded certificate is ${c}")
         }
 
         log.trace("Loading private key from ${mqttConnectionConfig.privateKey?.absolutePath}")
@@ -100,23 +100,13 @@ class MqttHelper(private val mqttConnectionConfig: MqttConnectionOptions, privat
     }
 
     private val sslContext: SSLContext? by lazy {
-        when (mqttConnectionConfig.connection) {
-            MqttConnectionType.SSL -> {
-                val sslContext = SSLContext.getInstance("TLSv1.3")
-                sslContext.init(keyManagerFactory.keyManagers, trustManagerFactory.trustManagers, null)
-                sslContext
-            }
-
-            MqttConnectionType.MUTUAL -> {
-                trustManagerFactory to keyManagerFactory
-                val sslContext = SSLContext.getInstance("TLSv1.3")
-                sslContext.init(keyManagerFactory.keyManagers, trustManagerFactory.trustManagers, null)
-                sslContext
-            }
-
-            MqttConnectionType.PLAINTEXT -> null
-        }
+        if (mqttConnectionConfig.protocol == MqttConnectionProtocol.SSL) {
+            val sslContext = SSLContext.getInstance("TLSv1.3")
+            sslContext.init(keyManagerFactory.keyManagers, trustManagerFactory.trustManagers, null)
+            sslContext
+        } else null
     }
+
 
     private val sslServerCert: MutableList<X509Certificate> by lazy {
 
@@ -149,7 +139,7 @@ class MqttHelper(private val mqttConnectionConfig: MqttConnectionOptions, privat
         }), null)
 
         // request certificates over socket connection
-        (sslContext.socketFactory.createSocket(mqttConnectionConfig.endPoint, mqttConnectionConfig.port ?: 443) as SSLSocket).use { sslSocket ->
+        (sslContext.socketFactory.createSocket(mqttConnectionConfig.address, mqttConnectionConfig.port ?: 443) as SSLSocket).use { sslSocket ->
             sslSocket.useClientMode = true
             sslSocket.startHandshake()
             serverCertificates
@@ -157,7 +147,7 @@ class MqttHelper(private val mqttConnectionConfig: MqttConnectionOptions, privat
         serverCertificates
     }
 
-    fun buildClient(clientID : String, persistence: MqttClientPersistence = MemoryPersistence()): MqttClient {
+    fun buildClient(clientID: String, persistence: MqttClientPersistence = MemoryPersistence()): MqttClient {
 
         val log = logger.getCtxLoggers(className, "mqttClient")
 
@@ -168,8 +158,8 @@ class MqttHelper(private val mqttConnectionConfig: MqttConnectionOptions, privat
             log.trace("Connecting to ${mqttConnectionConfig.endPoint}:${mqttConnectionConfig.port}")
             client.connect(options)
             return client
-        } catch (e: Throwable) {
-            logger.getCtxErrorLog(className, "client")("$e")
+        } catch (e: Exception) {
+            logger.getCtxErrorLogEx(className, "client")("Error building MQTT client", e)
             throw e
         }
     }

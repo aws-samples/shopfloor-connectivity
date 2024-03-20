@@ -51,7 +51,7 @@ class MqttConfigProvider(
                 val mqttHelper = MqttHelper(providerConfig, logger)
                 _mqttClient = mqttHelper.buildClient("sfc_config_provider_${getHostName()}")
             } catch (e: Exception) {
-                logger.getCtxErrorLog(className, "mqttClient")("Error creating and connecting mqttClient. $e")
+                logger.getCtxErrorLogEx(className, "mqttClient")("Error creating and connecting mqttClient", e)
             }
             if (_mqttClient == null) {
                 log.info("Waiting ${providerConfig.waitAfterConnectError} before trying to create and connecting MQTT client")
@@ -99,11 +99,11 @@ class MqttConfigProvider(
             log.info("Downloading configuration from from $url")
             try {
                 val configString = downloadFile(url)
-                log.info("Configuration downloaded, size is ${configString}")
+                log.info("Configuration downloaded, size is $configString")
                 log.trace(configString)
                 return downloadFile(url)
             } catch (e: Exception) {
-                log.error("Error downloading configuration from $url, ${e.message}")
+                log.errorEx("Error downloading configuration from $url", e)
                 throw e
 
             }
@@ -123,7 +123,7 @@ class MqttConfigProvider(
                 val configStr = providerConfig.localConfigFile!!.readText()
                 loadedLocalFile = emitConfiguration(configStr)
             } catch (e: Exception) {
-                log.error("Error loading configuration from local file, ${e.message}")
+                log.errorEx("Error loading configuration from local file", e)
             }
         } else{
             log.info("Local configuration file ${providerConfig.localConfigFile!!.absolutePath} does not exist")
@@ -148,7 +148,7 @@ class MqttConfigProvider(
             try {
                 ch.send(channel.receive())
             } catch (e: Exception) {
-                log.error("Error sending configuration to SFC-Core, ${e.message.toString()}")
+                log.errorEx("Error sending configuration to SFC-Core", e)
                 break
             }
         }
@@ -185,7 +185,7 @@ class MqttConfigProvider(
                 localFile.writeText(gsonPretty().toJson(config))
             }
         } catch (e: Exception) {
-            log.error("Error writing configuration to local file, ${e.message.toString()}")
+            log.errorEx("Error writing configuration to local file", e)
         }
     }
 

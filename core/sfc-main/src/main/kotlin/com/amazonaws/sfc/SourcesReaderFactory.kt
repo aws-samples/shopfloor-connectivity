@@ -48,7 +48,7 @@ class SourceReaderFactory(private val configReader: ConfigReader, private val lo
         return try {
             factory.createInstance(configReader, schedule, adapterID, readerLog) as SourceValuesReader
         } catch (e: Exception) {
-            log.error("Error creating instance, $e")
+            log.errorEx("Error creating instance", e)
             null
         }
     }

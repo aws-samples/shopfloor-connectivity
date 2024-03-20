@@ -12,8 +12,10 @@ import com.amazonaws.sfc.log.Logger
 import com.amazonaws.sfc.metrics.*
 import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_DIMENSION_SOURCE_CATEGORY
 import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_DIMENSION_SOURCE_CATEGORY_ADAPTER
+import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_MEMORY
 import com.amazonaws.sfc.opcua.config.OpcuaConfiguration
 import com.amazonaws.sfc.opcua.config.OpcuaConfiguration.Companion.OPC_UA_ADAPTER
+import com.amazonaws.sfc.util.MemoryMonitor
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
@@ -66,9 +68,10 @@ class OpcuaAdapter(private val adapterID: String, private val configuration: Opc
                     val dataPoints = metricsList.map { MetricsDataPoint(it.metricsName, dimensions, it.metricUnit, it.metricsValue) }
                     runBlocking {
                         metricsCollector?.put(adapterID, dataPoints)
+                        metricsCollector?.put(adapterID, MetricsDataPoint(METRICS_MEMORY, dimensions, MetricUnits.MEGABYTES, MetricsValue(MemoryMonitor.getUsedMemoryMB().toDouble())))
                     }
                 } catch (e: java.lang.Exception) {
-                    logger.getCtxErrorLog(this::class.java.simpleName, "collectMetricsFromLogger")("Error collecting metrics from logger, $e")
+                    logger.getCtxErrorLogEx(this::class.java.simpleName, "collectMetricsFromLogger")("Error collecting metrics from logger", e)
                 }
             }
         } else null
@@ -141,7 +144,7 @@ class OpcuaAdapter(private val adapterID: String, private val configuration: Opc
             val schedule = config.schedules.firstOrNull { it.name == scheduleName }
             val sourcesForAdapter = schedule?.sources?.filter { (config.sources[it.key]?.protocolAdapterID ?: "") == adapterID } ?: return null
 
-            return InProcessSourcesReader.createInProcessSourcesReader(schedule, protocolAdapter!!, sourcesForAdapter, config.metrics, logger)
+            return InProcessSourcesReader.createInProcessSourcesReader(schedule, protocolAdapter!!, sourcesForAdapter, config.tuningConfiguration, config.metrics, logger)
         }
 
         private var protocolAdapter: ProtocolAdapter? = null

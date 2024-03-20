@@ -82,9 +82,9 @@ class OutputTransformation(private var templateFile: File, private val logger: L
             context.put(elementNames.metadata, data[elementNames.metadata])
             template?.merge(context, sw)
             sw.toString()
-        } catch (ex: Throwable) {
-            val logError = logger.getCtxErrorLog(className, "transform")
-            logError("Error transforming data with template ${templateFile.name}, $ex")
+        } catch (ex: Exception) {
+            val logErrorEx = logger.getCtxErrorLogEx(className, "transform")
+            logErrorEx("Error transforming data with template ${templateFile.name}", ex)
             null
         }
     }

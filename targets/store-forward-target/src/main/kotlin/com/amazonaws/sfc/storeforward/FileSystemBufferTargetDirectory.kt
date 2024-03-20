@@ -181,7 +181,7 @@ internal data class FileSystemBufferTargetDirectory(val directory: File, val com
             try {
                 remove(f.name, writeTimeout)
             } catch (e: IOException) {
-                logger.getCtxErrorLog("FileSystemMessageBuffer.FileSystemBufferTargetDirectory", "cleanByTargetBufferSize")("Error deleting file ${f.absolutePath} for , $e")
+                logger.getCtxErrorLogEx("FileSystemMessageBuffer.FileSystemBufferTargetDirectory", "cleanByTargetBufferSize")("Error deleting file ${f.absolutePath}", e)
             }
         }
 
@@ -200,7 +200,7 @@ internal data class FileSystemBufferTargetDirectory(val directory: File, val com
             try {
                 remove(f.name, writeTimeout)
             } catch (e: IOException) {
-                logger.getCtxErrorLog("FileSystemMessageBuffer.FileSystemBufferTargetDirectory", "cleanByFileAge")("Error deleting file ${f.absolutePath} for , $e")
+                logger.getCtxErrorLogEx("FileSystemMessageBuffer.FileSystemBufferTargetDirectory", "cleanByFileAge")("Error deleting file ${f.absolutePath}" , e)
             }
         }
         return toDelete.size
@@ -217,7 +217,7 @@ internal data class FileSystemBufferTargetDirectory(val directory: File, val com
             try {
                 remove(f.name, writeTimeout)
             } catch (e: IOException) {
-                logger.getCtxErrorLog("FileSystemMessageBuffer.FileSystemBufferTargetDirectory", "cleanByNumberOfFiles")("Error deleting file ${f.absolutePath} for , $e")
+                logger.getCtxErrorLogEx("FileSystemMessageBuffer.FileSystemBufferTargetDirectory", "cleanByNumberOfFiles")("Error deleting file ${f.absolutePath}" , e)
             }
         }
         return toDelete.size
@@ -228,7 +228,7 @@ internal data class FileSystemBufferTargetDirectory(val directory: File, val com
             try {
                 remove(it.name, writeTimeout)
             } catch (e: IOException) {
-                logger.getCtxErrorLog("FileSystemMessageBuffer.FileSystemBufferTargetDirectory", "clean")("Error deleting file ${it.absolutePath} for , $e")
+                logger.getCtxErrorLogEx("FileSystemMessageBuffer.FileSystemBufferTargetDirectory", "clean")("Error deleting file ${it.absolutePath}" , e)
             }
         }
     }

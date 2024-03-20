@@ -1,4 +1,4 @@
-@file:OptIn(ExperimentalUnsignedTypes::class, ExperimentalUnsignedTypes::class, ExperimentalUnsignedTypes::class)
+
 
 package com.amazonaws.sfc.tcp
 
@@ -135,7 +135,7 @@ open class TcpClient(private val config: TcpConfiguration, readBufferSize : Int 
                             try {
                                 setupConnection(logs.trace, connectedChannel)
                             }catch(e : Exception){
-                                logs.error("Error setting up connection, ${e.message}")
+                                logs.errorEx("Error setting up connection", e)
                             }
                         }
 
@@ -238,7 +238,7 @@ open class TcpClient(private val config: TcpConfiguration, readBufferSize : Int 
                         outputStream?.flush()
 
                     } catch (e: SocketException) {
-                        log.error("Error writing data to ${config.address}:${config.port}, ${e.message}")
+                        log.errorEx("Error writing data to ${config.address}:${config.port}", e)
                         flagForReconnect()
                         delay(config.waitAfterWriteError.inWholeMilliseconds)
                     }
@@ -277,8 +277,8 @@ open class TcpClient(private val config: TcpConfiguration, readBufferSize : Int 
 
                     } catch (t: SocketTimeoutException) {
                         // Timeout reading data, nu further action required. Timeout is used to keep read loop responsive and checking isActive flag frequently.
-                    } catch (e: Throwable) {
-                        log.error("Error reading data from ${config.address}:${config.port}, ${e.message}")
+                    } catch (e: Exception) {
+                        log.errorEx("Error reading data from ${config.address}:${config.port}", e)
                         flagForReconnect()
                         delay(config.waitAfterReadError.inWholeMilliseconds)
                     }

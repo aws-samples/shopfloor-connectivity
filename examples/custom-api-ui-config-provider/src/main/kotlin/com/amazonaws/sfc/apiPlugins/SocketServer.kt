@@ -14,6 +14,10 @@ import java.util.*
 import kotlin.collections.LinkedHashSet
 
 fun Application.configureSockets(log: Logger) {
+
+    val className = this.javaClass::getName.name
+    val loggers = log.getCtxLoggers(className, "configureSockets")
+
     install(WebSockets) {
         pingPeriod = Duration.ofSeconds(15)
         timeout = Duration.ofSeconds(15)
@@ -24,11 +28,11 @@ fun Application.configureSockets(log: Logger) {
     routing {
         val connections = Collections.synchronizedSet<SocketConn?>(LinkedHashSet())
         webSocket("/logreceiver") {
-            log.info("Adding websocket client!", this.javaClass::getName.name)
+            loggers.info("Adding websocket client!")
             val thisConnection = SocketConn(this)
             val connCount = connections.size
             if (connCount > 6) {
-                log.info("Clearing $connCount websocket sessions!","")
+                loggers.info("Clearing $connCount websocket sessions!")
                 connections.clear()
             }
             connections += thisConnection
@@ -42,11 +46,11 @@ fun Application.configureSockets(log: Logger) {
                     }
                 }
             } catch(eof: EOFException){
-                log.warning(eof.localizedMessage, this::class.java.name)
+                loggers.warningEx(eof.localizedMessage, eof)
             } catch (e: Exception) {
-                log.error(e.localizedMessage, this.javaClass::getName.name)
+                loggers.errorEx(e.localizedMessage, e)
             } finally {
-                log.info("Removing websocket client $thisConnection!",this.javaClass::getName.name)
+                loggers.info("Removing websocket client $thisConnection!")
                 connections -= thisConnection
             }
         }

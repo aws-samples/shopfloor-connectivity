@@ -483,7 +483,7 @@ class Aggregator(private val aggregation: AggregationConfiguration, private val 
             aggregationBuffers.clear()
             return@coroutineScope aggregatedOutput
         } catch (e: Exception) {
-            log.error("Error aggregating data $e")
+            log.errorEx("Error aggregating data", e)
             mutableMapOf()
         }
     }
@@ -523,12 +523,12 @@ class Aggregator(private val aggregation: AggregationConfiguration, private val 
         channelID: String
     ): ChannelReadValue? {
 
-        val logError = logger.getCtxErrorLog(className, "applyOutputAggregation")
+        val log = logger.getCtxLoggers(className, "applyOutputAggregation")
 
         // Lookup the function by its name that implements the aggregation
         val aggregationFunction = aggregationOutputFunctions[aggregationName.lowercase()]
         if (aggregationFunction == null) {
-            logError("Aggregation \"$aggregationName\" is not implemented")
+            log.error("Aggregation \"$aggregationName\" is not implemented")
             return null
         }
 
@@ -541,8 +541,8 @@ class Aggregator(private val aggregation: AggregationConfiguration, private val 
             } else {
                 null
             }
-        } catch (e: Throwable) {
-            logError("Error applying aggregation $aggregationName on values for source \"$sourceID\" channel \"$channelID\" with values ${channelValues}, $e")
+        } catch (e: Exception) {
+            log.errorEx("Error applying aggregation $aggregationName on values for source \"$sourceID\" channel \"$channelID\" with values $channelValues", e)
             null
         }
     }
@@ -598,8 +598,8 @@ class Aggregator(private val aggregation: AggregationConfiguration, private val 
 
                 ChannelReadValue(value, target.timestamp)
 
-            } catch (e: Throwable) {
-                log.error("Error applying transformation $outputTransformationID to aggregated output \"$aggregationName\" \"${target.value}\" (${if (target.value != null) target.value!!::class.java.name else ""}) for source \"$sourceID\", channel \"$channelID\", $e")
+            } catch (e: Exception) {
+                log.errorEx("Error applying transformation $outputTransformationID to aggregated output \"$aggregationName\" \"${target.value}\" (${if (target.value != null) target.value!!::class.java.name else ""}) for source \"$sourceID\", channel \"$channelID\"", e)
                 null
             }
         }

@@ -4,6 +4,8 @@
 
 package com.amazonaws.sfc.opcua
 
+import com.amazonaws.sfc.channels.channelSubmitEventHandler
+import com.amazonaws.sfc.channels.submit
 import com.amazonaws.sfc.crypto.CertificateFormat
 import com.amazonaws.sfc.crypto.CertificateHelper
 import com.amazonaws.sfc.crypto.PkcsCertificateHelper
@@ -16,6 +18,10 @@ import com.amazonaws.sfc.metrics.MetricsCollector
 import com.amazonaws.sfc.opcua.FilterHelper.Companion.DEFAULT_EVENT_TYPE
 import com.amazonaws.sfc.opcua.FilterHelper.Companion.UNKNOWN_EVENT_TYPE
 import com.amazonaws.sfc.opcua.config.*
+import com.amazonaws.sfc.opcua.config.OpcuaConfiguration.Companion.CONFIG_CHANGED_DATA_CHANNEL_SIZE
+import com.amazonaws.sfc.opcua.config.OpcuaConfiguration.Companion.CONFIG_CHANGED_DATA_CHANNEL_TIMEOUT
+import com.amazonaws.sfc.opcua.config.OpcuaConfiguration.Companion.CONFIG_RECEIVED_EVENTS_CHANNEL_SIZE
+import com.amazonaws.sfc.opcua.config.OpcuaConfiguration.Companion.CONFIG_RECEIVED_EVENTS_CHANNEL_TIMEOUT
 import com.amazonaws.sfc.system.DateTime
 import com.amazonaws.sfc.system.DateTime.add
 import com.amazonaws.sfc.system.DateTime.systemDateTime
@@ -96,7 +102,7 @@ open class OpcuaSource(
                 log.warning("fnOnPublishFailure event received with status ${exception?.statusCode.toString()}")
                 fnOnPublishFailure(exception)
             } catch (e: Exception) {
-                log.error("Error executing onSubscriptionTransferFailedAction, $e")
+                log.errorEx("Error executing onSubscriptionTransferFailedAction", e)
             }
         }
 
@@ -106,7 +112,7 @@ open class OpcuaSource(
                 log.warning("onSubscriptionTransferFailed event received with status code ${statusCode.toString()} ")
                 fnOnSubscriptionTransferFailed(subscription, statusCode)
             } catch (e: Exception) {
-                log.error("Error executing onSubscriptionTransferFailedAction, $e")
+                log.errorEx("Error executing onSubscriptionTransferFailedAction", e)
             }
         }
     }
@@ -247,10 +253,12 @@ open class OpcuaSource(
                         }
                         log.trace("Connection to server ${opcuaServerConfiguration.endPoint} for source \"${sourceID}\" checked")
                     }
-                    delay(opcuaServerConfiguration.connectionWatchdogInterval)
+                    runBlocking {
+                        delay(opcuaServerConfiguration.connectionWatchdogInterval)
+                    }
                 } catch (e: Exception) {
                     if (!e.isJobCancellationException) {
-                        log.error("Unable to read from server ${opcuaServerConfiguration.endPoint} for source \"${sourceID}\", $e")
+                        log.errorEx("Unable to read from server ${opcuaServerConfiguration.endPoint} for source \"${sourceID}\"", e)
                         resetClient(0)
                         delay(opcuaServerConfiguration.waitAfterReadError)
                     }
@@ -329,16 +337,17 @@ open class OpcuaSource(
     private val dataValueChangesStore = if (inSubscriptionReadingMode) SourceDataValuesStore<ChannelReadValue>() else null
 
     // channel to send data changes to the consuming coroutine that is handling data changes
-    private val dataValueChangeChannel = if (inSubscriptionReadingMode) Channel<Pair<UaMonitoredItem, ChannelReadValue>>(1000) else null
+    private val dataValueChangeChannel =
+        if (inSubscriptionReadingMode) Channel<Pair<UaMonitoredItem, ChannelReadValue>>(configuration.changedDataChannelSize) else null
 
     // coroutine handling changed data for subscriptions
     private val changedDataWorker = if (inSubscriptionReadingMode) sourceScope.launch("$sourceID Data Subscription Handler") {
 
-       val log = logger.getCtxLoggers(className, "changedDataWorker" )
+        val log = logger.getCtxLoggers(className, "changedDataWorker")
         try {
             onSubscribedNodeData()
-        }catch (e: Exception) {
-            log.error("Error while handling data changes for source \"$sourceID\", $e")
+        } catch (e: Exception) {
+            log.errorEx("Error while handling data changes for source \"$sourceID\"", e)
         }
     } else null
 
@@ -403,9 +412,12 @@ open class OpcuaSource(
                 }, clientConfig
             )
 
-        } catch (e: Throwable) {
-            val cause = (if (e is UaException && e.cause != null) e.cause!!.message else e.message).toString()
+        } catch (e: UaException) {
+            val cause = (if (e.cause != null) e.cause!!.message else e.message).toString()
             log.error("Error creating client for for source \"$sourceID\" at  ${opcuaServerConfiguration.endPoint}, $cause")
+            null
+        } catch (e: Exception) {
+            log.errorEx("Error creating client for for source \"$sourceID\" at  ${opcuaServerConfiguration.endPoint}", e)
             null
         }
 
@@ -416,8 +428,8 @@ open class OpcuaSource(
                 log.info("Client for source \"$sourceID\" connected to ${opcuaServerConfiguration.endPoint}")
                 metricsCollector?.put(protocolAdapterID, MetricsCollector.METRICS_CONNECTIONS, 1.0, MetricUnits.COUNT, dimensions)
                 opcuaClient
-            } catch (e: Throwable) {
-                log.error("Error connecting at ${opcuaServerConfiguration.endPoint} for source \"$sourceID\", $e")
+            } catch (e: Exception) {
+                log.errorEx("Error connecting at ${opcuaServerConfiguration.endPoint} for source \"$sourceID\"", e)
                 metricsCollector?.put(protocolAdapterID, MetricsCollector.METRICS_CONNECTION_ERRORS, 1.0, MetricUnits.COUNT, dimensions)
                 null
             }
@@ -518,7 +530,7 @@ open class OpcuaSource(
                     DateTime.delayUntilNextMidnightUTC()
                 }
             } catch (e: Exception) {
-                logger.getCtxErrorLog(className, "startCertificateExpiryChecker")("Error while checking certificate expiration, $e")
+                logger.getCtxErrorLogEx(className, "startCertificateExpiryChecker")("Error while checking certificate expiration", e)
             }
         }
 
@@ -721,25 +733,39 @@ open class OpcuaSource(
 
     private fun onSubscribedDataReceived(): (context: SerializationContext, UaMonitoredItem, DataValue) -> Unit =
         { context: SerializationContext, item: UaMonitoredItem, value: DataValue ->
+            val log = logger.getCtxLoggers(className, "onSubscribedDataReceived")
             sourceScope.launch("item: ${item.monitoredItemId}") {
                 try {
                     if ((value.statusCode ?: StatusCode.GOOD).isGood) {
                         val nativeValue = OpcuaDataTypesConverter(context).asNativeValue(value.value)
-                        dataValueChangeChannel?.send(item to ChannelReadValue(nativeValue, value.sourceTime?.javaInstant))
+                        dataValueChangeChannel?.submit(
+                            item to ChannelReadValue(nativeValue, value.sourceTime?.javaInstant),
+                            configuration.changedDataChannelTimeout
+                        ) { event ->
+                            channelSubmitEventHandler(
+                                event = event,
+                                channelName = "$className:dataValueChangeChannel",
+                                tuningChannelSizeName = CONFIG_CHANGED_DATA_CHANNEL_SIZE,
+                                currentChannelSize = configuration.changedDataChannelSize,
+                                tuningChannelTimeoutName = CONFIG_CHANGED_DATA_CHANNEL_TIMEOUT,
+                                log = log
+                            )
+                        }
                     } else {
                         val nodeChannelID = clientHandlesForNodes[item.clientHandle.toInt()]?.channelID ?: "unknown channel"
                         val errorLog = logger.getCtxErrorLog(className, "onSubscribedDataReceived")
                         errorLog("Received bad subscription data source \"$sourceID\", node \"$nodeChannelID\" (${item.readValueId}), ${value.statusCode}")
                     }
                 } catch (e: Exception) {
-                    val errorLog = logger.getCtxErrorLog(className, "onSubscribedDataReceived")
-                    errorLog("Error processing subscription data source \"$sourceID\", node \"${item.readValueId}\" (${item.statusCode}), $e")
+                    val errorLogEx = logger.getCtxErrorLogEx(className, "onSubscribedDataReceived")
+                    errorLogEx("Error processing subscription data source \"$sourceID\", node \"${item.readValueId}\" (${item.statusCode})", e)
                 }
             }
         }
 
     private fun onMonitoredEventReceived(): (context: SerializationContext, item: UaMonitoredItem, eventValues: Array<Variant>) -> Unit =
         { context, item, eventPropertyVariantValues ->
+            val log = logger.getCtxLoggers(className, "onMonitoredEventReceived")
             sourceScope.launch("item: ${item.monitoredItemId}") {
                 try {
                     val node = clientHandlesForNodes[item.clientHandle.toInt()]
@@ -747,7 +773,19 @@ open class OpcuaSource(
                         val properties = node?.eventProperties ?: eventsHelper?.findEvent(Identifiers.BaseEventType)?.properties
                         if (properties != null) {
                             val propertiesValuesMap = eventsHelper?.variantPropertiesToMap(eventPropertyVariantValues, properties, context)
-                            if (propertiesValuesMap != null) receivedEventsChannel?.send(item to propertiesValuesMap)
+                            if (propertiesValuesMap != null) receivedEventsChannel?.submit(
+                                item to propertiesValuesMap,
+                                configuration.receivedEventsChannelTimeout
+                            ) { event ->
+                                channelSubmitEventHandler(
+                                    event = event,
+                                    channelName = "$className:receivedEventsChannel",
+                                    tuningChannelSizeName = CONFIG_RECEIVED_EVENTS_CHANNEL_SIZE,
+                                    currentChannelSize = configuration.receivedEventsChannelSize,
+                                    tuningChannelTimeoutName = CONFIG_RECEIVED_EVENTS_CHANNEL_TIMEOUT,
+                                    log = log
+                                )
+                            }
                         } else {
                             logger.getCtxErrorLog(className, "onMonitoredEvent")
                         }
@@ -758,8 +796,8 @@ open class OpcuaSource(
                     }
 
                 } catch (e: Exception) {
-                    val errorLog = logger.getCtxErrorLog(className, "onMonitoredEventReceived")
-                    errorLog("Error processing monitored event item for source \"$sourceID\", node \"${item.readValueId}\" (${item.statusCode}), $e")
+                    val errorLogEx = logger.getCtxErrorLogEx(className, "onMonitoredEventReceived")
+                    errorLogEx("Error processing monitored event item for source \"$sourceID\", node \"${item.readValueId}\" (${item.statusCode})", e)
                 }
 
             }

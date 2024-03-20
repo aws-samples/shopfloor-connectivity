@@ -29,10 +29,9 @@ import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_WRITE_SIZE
 import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_WRITE_SUCCESS
 import com.amazonaws.sfc.system.DateTime
 import com.amazonaws.sfc.targets.AwsServiceTargetClientHelper
+import com.amazonaws.sfc.targets.TargetDataChannel
 import com.amazonaws.sfc.targets.TargetException
-import com.amazonaws.sfc.util.buildScope
-import com.amazonaws.sfc.util.canNotReachAwsService
-import com.amazonaws.sfc.util.launch
+import com.amazonaws.sfc.util.*
 import io.burt.jmespath.Expression
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
@@ -87,8 +86,19 @@ class AwsSiteWiseTargetWriter(
     // Configured field names
     private val elementNames = config.elementNames
 
+
+    private var _targetConfig: AwsSiteWiseTargetConfiguration? = null
+    private val targetConfig: AwsSiteWiseTargetConfiguration
+        get() {
+            if (_targetConfig == null) {
+                _targetConfig = clientHelper.targetConfig(config, targetID, AWS_SITEWISE)
+            }
+            return _targetConfig as AwsSiteWiseTargetConfiguration
+        }
+
+
     // channel for passing messages to coroutine that sends messages to SiteWise queue
-    private val targetDataChannel = Channel<TargetData>(100)
+    private val targetDataChannel = TargetDataChannel.create(targetConfig, "$className:targetDataChannel")
 
     // Buffer to collect batch of property values
     private val propertyValuesBuffer = mutableMapOf<String, MutableMap<SiteWiseAssetPropertyConfiguration, MutableList<AssetPropertyValue>>>()
@@ -117,7 +127,7 @@ class AwsSiteWiseTargetWriter(
                         metricsCollector?.put(targetID, dataPoints)
                     }
                 } catch (e: java.lang.Exception) {
-                    logger.getCtxErrorLog(this::class.java.simpleName, "collectMetricsFromLogger")("Error collecting metrics from logger, $e")
+                    logger.getCtxErrorLogEx(this::class.java.simpleName, "collectMetricsFromLogger")("Error collecting metrics from logger", e)
                 }
             }
         } else null
@@ -151,10 +161,9 @@ class AwsSiteWiseTargetWriter(
                 }
 
                 timer = timerJob()
-            }catch (e: CancellationException) {
-                log.info("Writer stopped")
-            }catch (e : Exception){
-                log.error("Error in writer, $e")
+            } catch (e: Exception) {
+                if (!e.isJobCancellationException)
+                    log.errorEx("Error in writer", e)
             }
         }
     }
@@ -183,7 +192,10 @@ class AwsSiteWiseTargetWriter(
                         val assetValue = buildAssetValue(property.dataType, valueAndTimeStamp.first, valueAndTimeStamp.second)
                         storeValueAndTimestampInBuffer(asset.assetID, property, assetValue)
                     } catch (e: Exception) {
-                        log.error("Error building property value for property $property from value ${valueAndTimeStamp.first} (${valueAndTimeStamp.first::class.java.simpleName}), ${e.message}")
+                        log.errorEx(
+                            "Error building property value for property $property from value ${valueAndTimeStamp.first} (${valueAndTimeStamp.first::class.java.simpleName})",
+                            e
+                        )
                     }
                 }
             }
@@ -214,7 +226,7 @@ class AwsSiteWiseTargetWriter(
      * @param targetData TargetData
      */
     override suspend fun writeTargetData(targetData: TargetData) {
-        targetDataChannel.send(targetData)
+        targetDataChannel.submit(targetData, logger.getCtxLoggers(className, "writeTargetData"))
     }
 
     /**
@@ -300,7 +312,7 @@ class AwsSiteWiseTargetWriter(
             } catch (e: NullPointerException) {
                 null
             } catch (e: Exception) {
-                log.error("Error querying data for target \"$targetID\", asset ${asset.assetID}, property $prop")
+                log.errorEx("Error querying data for target \"$targetID\", asset ${asset.assetID}, property $prop", e)
                 null
             }
 
@@ -373,7 +385,7 @@ class AwsSiteWiseTargetWriter(
                         r
 
                     } catch (e: AwsServiceException) {
-                        log.error("SiteWise batchPutAssetPropertyValue error ${e.message}")
+                        log.errorEx("SiteWise batchPutAssetPropertyValue error", e)
                         runBlocking { metricsCollector?.put(targetID, METRICS_WRITE_ERRORS, 1.0, MetricUnits.COUNT, metricDimensions) }
 
                         // Check the exception, it will throw an AwsServiceRetryableException if the error is recoverable
@@ -392,7 +404,7 @@ class AwsSiteWiseTargetWriter(
 
                 }
             } catch (e: Exception) {
-                log.error("Error sending to SiteWise \"$targetID\", ${e.message}")
+                log.errorEx("Error sending to SiteWise \"$targetID\"", e)
                 if (canNotReachAwsService(e)) {
                     targetResults?.nackBuffered()
                 } else {
@@ -413,6 +425,7 @@ class AwsSiteWiseTargetWriter(
         runBlocking {
             metricsCollector?.put(
                 adapterID,
+                metricsCollector?.buildValueDataPoint(adapterID, MetricsCollector.METRICS_MEMORY, MemoryMonitor.getUsedMemoryMB().toDouble(),MetricUnits.MEGABYTES ),
                 metricsCollector?.buildValueDataPoint(adapterID, METRICS_WRITES, 1.0, MetricUnits.COUNT, metricDimensions),
                 metricsCollector?.buildValueDataPoint(adapterID, METRICS_MESSAGES, request.entries().size.toDouble(), MetricUnits.COUNT, metricDimensions),
                 metricsCollector?.buildValueDataPoint(adapterID, METRICS_WRITE_DURATION, writeDurationInMillis, MetricUnits.MILLISECONDS, metricDimensions),
@@ -494,19 +507,6 @@ class AwsSiteWiseTargetWriter(
     private val config: AwsSiteWiseWriterConfiguration
         get() {
             return clientHelper.writerConfig(configReader, AWS_SITEWISE)
-        }
-
-    /**
-     * Gets the config for the siteWise Target
-     */
-
-    private var _targetConfig: AwsSiteWiseTargetConfiguration? = null
-    private val targetConfig: AwsSiteWiseTargetConfiguration
-        get() {
-            if (_targetConfig == null) {
-                _targetConfig = clientHelper.targetConfig(config, targetID, AWS_SITEWISE)
-            }
-            return _targetConfig as AwsSiteWiseTargetConfiguration
         }
 
 

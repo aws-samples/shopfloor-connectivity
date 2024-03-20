@@ -37,6 +37,8 @@ class AwsCloudWatchConfiguration : AwsServiceConfig, Validate {
     val batchSize
         get() = _batchSize
 
+
+
     // id of a configured credential provider client to obtain credentials to access CloudWatch service
     @SerializedName(BaseConfiguration.CONFIG_CREDENTIAL_PROVIDER_CLIENT)
     private var _credentialProvideClient: String? = null

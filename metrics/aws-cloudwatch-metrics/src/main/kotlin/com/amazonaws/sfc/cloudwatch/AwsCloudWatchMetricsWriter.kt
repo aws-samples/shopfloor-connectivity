@@ -5,10 +5,14 @@
 package com.amazonaws.sfc.cloudwatch
 
 
+import com.amazonaws.sfc.channels.channelSubmitEventHandler
+import com.amazonaws.sfc.channels.submit
 import com.amazonaws.sfc.cloudwatch.config.AwsCloudWatchConfiguration
 import com.amazonaws.sfc.cloudwatch.config.AwsCloudWatchConfiguration.Companion.CONFIG_CW_MAX_BATCH_SIZE
 import com.amazonaws.sfc.cloudwatch.config.AwsCloudWatchConfiguration.Companion.CONFIG_DEFAULT_CW_WRITE_INTERVAL
 import com.amazonaws.sfc.cloudwatch.config.AwsCloudWatchMetricsWriterConfiguration
+import com.amazonaws.sfc.cloudwatch.config.AwsCloudWatchMetricsWriterConfiguration.Companion.CONFIG_METRICS_CHANNEL_SIZE
+import com.amazonaws.sfc.cloudwatch.config.AwsCloudWatchMetricsWriterConfiguration.Companion.CONFIG_METRICS_CHANNEL_TIMEOUT
 import com.amazonaws.sfc.config.ConfigReader
 import com.amazonaws.sfc.log.Logger
 import com.amazonaws.sfc.metrics.*
@@ -42,7 +46,11 @@ class AwsCloudWatchMetricsWriter(private val configReader: ConfigReader, private
     private val metricDatumBuffer = mutableListOf<MetricDatum>()
     private var bufferedDataSize = 0
 
-    private val metricsChannel = Channel<MetricsData>(1000)
+    private val config by lazy {
+        configReader.getConfig<AwsCloudWatchMetricsWriterConfiguration>()
+    }
+
+    private val metricsChannel = Channel<MetricsData>(config.metricsChannelSize)
 
     private val MetricDatum.dataSize
         get() =
@@ -55,9 +63,6 @@ class AwsCloudWatchMetricsWriter(private val configReader: ConfigReader, private
                     Double.SIZE_BYTES +  // value
                     5 * Double.SIZE_BYTES // statistics
 
-    private val config by lazy {
-        configReader.getConfig<AwsCloudWatchMetricsWriterConfiguration>()
-    }
 
     private var _clientHelper: AwsCloudWatchClientHelper? = null
 
@@ -118,7 +123,8 @@ class AwsCloudWatchMetricsWriter(private val configReader: ConfigReader, private
                     }
                 }
             } catch (e: Exception) {
-                log.error("Error writing metrics, ${e.message}")
+                if (e !is IllegalStateException) // service shutting down, not an error
+                    log.errorEx("Error writing metrics", e)
             }
         }
     }
@@ -161,8 +167,9 @@ class AwsCloudWatchMetricsWriter(private val configReader: ConfigReader, private
                 }
             }
             log.trace("putMetricData response status code is ${resp.sdkHttpResponse().statusCode()}")
-        } catch (e: Throwable) {
-            log.error("Error writing metrics, ${e.message}")
+        } catch (e: Exception) {
+            if (e !is IllegalStateException) // service shutting down, not an error
+                log.errorEx("Error writing metrics", e)
         } finally {
             bufferedDataSize = 0
             metricDatumBuffer.clear()
@@ -215,11 +222,19 @@ class AwsCloudWatchMetricsWriter(private val configReader: ConfigReader, private
         }.toList()
     }
 
-
     override suspend fun writeMetricsData(metricsData: MetricsData) {
-        val trace = logger.getCtxTraceLog(className, "write")
-        trace("${metricsData.dataPoints} received")
-        metricsChannel.send(metricsData)
+        val log = logger.getCtxLoggers(className, "write")
+        log.trace("${metricsData.dataPoints} received")
+        metricsChannel.submit(metricsData, config.metricsChannelTimeout) { event ->
+            channelSubmitEventHandler(
+                event = event,
+                channelName = "$className:metricsChannel",
+                tuningChannelSizeName = CONFIG_METRICS_CHANNEL_SIZE,
+                currentChannelSize = config.metricsChannelSize,
+                tuningChannelTimeoutName = CONFIG_METRICS_CHANNEL_TIMEOUT,
+                log = log
+            )
+        }
     }
 
     override suspend fun close() {

@@ -8,12 +8,15 @@ package com.amazonaws.sfc.service
 
 import com.amazonaws.sfc.config.ConfigurationException
 import com.amazonaws.sfc.config.InProcessConfiguration
+import com.amazonaws.sfc.data.JsonHelper.Companion.extendedJsonException
 import com.amazonaws.sfc.log.CustomLogWriterFactory
 import com.amazonaws.sfc.log.LogLevel
 import com.amazonaws.sfc.log.LogWriter
 import com.amazonaws.sfc.log.Logger
 import com.amazonaws.sfc.log.Logger.Companion.createLogger
+import com.amazonaws.sfc.util.MemoryMonitor
 import com.amazonaws.sfc.util.launch
+import com.google.gson.JsonSyntaxException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.isActive
@@ -43,8 +46,10 @@ abstract class ServiceMain {
             // Create factory and new instance of custom provider
             val factory = CustomLogWriterFactory(customConfigProviderConfig, createLogger(configStr))
             return factory.newLogWriterInstance(configStr)
-
-        } catch (e: Throwable) {
+        } catch( e : JsonSyntaxException){
+            val msg = "Error creating custom log writer, invalid JSON in configuration ${e.extendedJsonException(configStr)}"
+            throw ConfigurationException(msg, Logger.CONF_LOG_WRITER)
+        } catch (e: Exception) {
             val msg = "Error creating custom log writer, $e"
             throw ConfigurationException(msg, Logger.CONF_LOG_WRITER)
         }
@@ -68,16 +73,21 @@ abstract class ServiceMain {
 
         val logs = serviceLogger.getCtxLoggers(className, "run")
 
+        var memoryMonitor : MemoryMonitor? = null
+
         try {
             val configProvider = ConfigProviderFactory.createProvider(args, serviceLogger)
 
             if (configProvider == null) {
+                memoryMonitor = MemoryMonitor(scope = this, logger = serviceLogger)
                 createAndRunServiceInstance(args, "{}")
             } else {
                 while (isActive && configProvider.configuration != null) {
                     logs.info("Waiting for configuration")
                     val configuration = configProvider.configuration?.receive() ?: continue
                     serviceLogger = createLogger(configuration)
+                    memoryMonitor?.stop()
+                    memoryMonitor = MemoryMonitor(scope = this, logger = serviceLogger)
                     Logger.redirectLoggers(serviceLogger, className)
                     handleCustomLogWriter(configuration)
                     logs.info("Received configuration data from config provider")
@@ -87,13 +97,16 @@ abstract class ServiceMain {
                             logs.info("Creating and starting new service instance")
                             createAndRunServiceInstance(args, configuration)
                         } catch (e: Exception) {
-                            logs.error("Error creating service instance: $e")
+                            logs.errorEx("Error creating service instance", e)
                         }
                     }
                 }
             }
         }catch (e : Exception){
-            logs.error("Error running service: $e")
+            logs.errorEx("Error running service", e)
+        }
+        finally {
+            memoryMonitor?.stop()
         }
     }
 
@@ -121,14 +134,14 @@ abstract class ServiceMain {
             serviceInstance = createServiceInstance(args, configuration, serviceLogger)
             logs.info("Created instance of service ${serviceInstance!!::class.java.simpleName}")
         } catch (e: Exception) {
-            logs.error("Error creating service instance: ${e.message}")
+            logs.errorEx("Error creating service instance: ${e.message}", e)
         }
         // run the service
         try {
             logs.info("Running service instance")
             runService()
         } catch (e: Exception) {
-            logs.error("Error starting service instance: $e")
+            logs.errorEx("Error starting service instance", e)
 
         }
     }
@@ -144,7 +157,7 @@ abstract class ServiceMain {
 
             serviceInstance?.blockUntilShutdown()
         }catch (e : Exception){
-            serviceLogger.getCtxErrorLog(className, "runService")("Error running service: $e")
+            serviceLogger.getCtxErrorLogEx(className, "runService")("Error running service", e)
         }
 
     }

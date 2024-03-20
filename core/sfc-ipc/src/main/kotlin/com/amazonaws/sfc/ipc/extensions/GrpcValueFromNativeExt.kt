@@ -430,7 +430,7 @@ object GrpcValueFromNativeExt {
     }
 
     private fun typedMap(value: LinkedHashMap<*, *>): TypedMap? =
-        TypedMap.newBuilder().putAllEntries(value.map { (k, v) -> k.toString() to channelValue(v, null) }.toMap()).build()
+        TypedMap.newBuilder().putAllEntries(value.filter { it.value != null }.map { (k, v) -> k.toString() to channelValue(v, null) }.toMap()).build()
 
     /**
      * Builds a new channel value from an array of map values

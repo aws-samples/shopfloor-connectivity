@@ -1,14 +1,12 @@
-
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: MIT-0
 
 
 package com.amazonaws.sfc.targets
 
-import com.amazonaws.sfc.config.ConfigReader
-import com.amazonaws.sfc.config.ConfigurationException
-import com.amazonaws.sfc.config.ServiceConfiguration
-import com.amazonaws.sfc.config.TargetConfiguration
+import com.amazonaws.sfc.channels.channelSubmitEventHandler
+import com.amazonaws.sfc.channels.submit
+import com.amazonaws.sfc.config.*
 import com.amazonaws.sfc.data.TargetData
 import com.amazonaws.sfc.data.TargetResultHandler
 import com.amazonaws.sfc.data.TargetWriter
@@ -17,28 +15,34 @@ import com.amazonaws.sfc.metrics.MetricsProcessor
 import com.amazonaws.sfc.metrics.MetricsProvider
 import com.amazonaws.sfc.metrics.MetricsWriter
 import com.amazonaws.sfc.util.buildScope
+import com.amazonaws.sfc.util.isJobCancellationException
 import com.amazonaws.sfc.util.launch
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.withTimeoutOrNull
-import kotlin.coroutines.cancellation.CancellationException
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration
 
 
 @Suppress("unused")
-abstract class ForwardingTargetWriter(protected val targetID: String,
-                                      protected val configReader: ConfigReader,
-                                      protected val resultHandler: TargetResultHandler?,
-                                      private val logger: Logger) :
-        TargetWriter, MetricsWriter, TargetResultHandler {
+abstract class ForwardingTargetWriter(
+    protected val targetID: String,
+    protected val configReader: ConfigReader,
+    protected val resultHandler: TargetResultHandler?,
+    private val logger: Logger
+) :
+    TargetWriter, MetricsWriter, TargetResultHandler {
 
     private val targetMetricProviders = mutableMapOf<String, MetricsProvider>()
     private var metricsProcessor: MetricsProcessor? = null
 
     private val className = this::class.java.simpleName
 
-    private val targetDataChannel = Channel<TargetData>(100)
+    private val tuningConfiguration by lazy {
+        configReader.getConfig<ConfigWithTuningConfiguration>().tuningConfiguration
+    }
+
+    private val targetDataChannel = Channel<TargetData>(tuningConfiguration.targetForwardingChannelSize)
 
     protected val targetScope = buildScope("ForwardingTargetWriter", Dispatchers.IO)
 
@@ -84,9 +88,11 @@ abstract class ForwardingTargetWriter(protected val targetID: String,
     abstract fun createTargetWriter(targetID: String, targetConfig: TargetConfiguration): TargetWriter?
 
 
-    private fun setupMetricsProviderForTarget(targetID: String,
-                                              targetConfig: TargetConfiguration?,
-                                              targetWriter: TargetWriter?) {
+    private fun setupMetricsProviderForTarget(
+        targetID: String,
+        targetConfig: TargetConfiguration?,
+        targetWriter: TargetWriter?
+    ) {
         if (targetWriter != null) {
             val isCollectingMetricsFromAdapter = (targetConfig?.metrics != null) && targetConfig.metrics.enabled
             if (isCollectingMetricsFromAdapter && targetWriter.metricsProvider != null) {
@@ -144,7 +150,7 @@ abstract class ForwardingTargetWriter(protected val targetID: String,
     }
 
     private val writer = targetScope.launch("Writer") {
-        val log =  logger.getCtxLoggers(ForwardingTargetWriter::class.java.simpleName, "writer")
+        val log = logger.getCtxLoggers(ForwardingTargetWriter::class.java.simpleName, "writer")
         try {
             val logInfo = logger.getCtxInfoLog(ForwardingTargetWriter::class.java.simpleName, "writer")
             logInfo("AWS stream writer for target \"$targetID\" writing to \"\" ")
@@ -152,10 +158,9 @@ abstract class ForwardingTargetWriter(protected val targetID: String,
             for (item in targetDataChannel) {
                 forwardTargetData(item)
             }
-        }catch (e: CancellationException) {
-            log.info("Writer stopped")
         } catch (e: Exception) {
-            log.error("Error in writer, $e")
+            if (!e.isJobCancellationException)
+                log.errorEx("Error in writer", e)
         }
     }
 
@@ -170,7 +175,17 @@ abstract class ForwardingTargetWriter(protected val targetID: String,
      * @param targetData TargetData
      */
     override suspend fun writeTargetData(targetData: TargetData) {
-        targetDataChannel.send(targetData)
+        targetDataChannel.submit(targetData, tuningConfiguration.targetForwardingChannelTimeout) { event ->
+            val log = logger.getCtxLoggers(className, "writeTargetData")
+            channelSubmitEventHandler(
+                event = event,
+                "$className:targetChannelData",
+                tuningChannelSizeName = TuningConfiguration.CONFIG_TARGET_FORWARDING_CHANNEL_SIZE,
+                currentChannelSize = config.tuningConfiguration.targetForwardingChannelSize,
+                tuningChannelTimeoutName = TuningConfiguration.CONFIG_TARGET_FORWARDING_CHANNEL_TIMEOUT,
+                log = log
+            )
+        }
     }
 
 

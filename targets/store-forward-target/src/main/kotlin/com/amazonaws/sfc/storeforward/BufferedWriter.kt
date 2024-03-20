@@ -4,6 +4,9 @@
 
 package com.amazonaws.sfc.storeforward
 
+import com.amazonaws.sfc.channels.channelSubmitEventHandler
+import com.amazonaws.sfc.channels.submit
+import com.amazonaws.sfc.config.TuningConfiguration
 import com.amazonaws.sfc.data.TargetData
 import com.amazonaws.sfc.data.TargetResult
 import com.amazonaws.sfc.data.TargetWriter
@@ -37,6 +40,7 @@ class BufferedWriter(
     private val bufferConfiguration: MessageBufferConfiguration,
     private val metricsCollectorMethod: MetricsCollectorMethod?,
     private val onModeChanged: BufferModeChangedMethod?,
+    private val tuningConfiguration: TuningConfiguration,
     private val logger: Logger
 ) {
 
@@ -48,13 +52,13 @@ class BufferedWriter(
     }
 
     // Channel to pass data to be forwarded to targets
-    private val forwardChannel = Channel<TargetData>(100)
+    private val forwardChannel = Channel<TargetData>(tuningConfiguration.targetForwardingChannelSize)
 
     // Channel to pass resubmitted data
-    private val resubmitChannel = Channel<TargetData>(100)
+    private val resubmitChannel = Channel<TargetData>(tuningConfiguration.targetResubmitChannelSize)
 
     // Channel to pass result data from target
-    private val resultChannel = Channel<TargetResult>(100)
+    private val resultChannel = Channel<TargetResult>(tuningConfiguration.targetResultsChannelSize)
 
     // Writer can be in forwarding ot buffering mode
     private var _mode = WriterMode.FORWARDING
@@ -167,7 +171,6 @@ class BufferedWriter(
 
         var timeout: Job? = null
 
-        val errLog = logger.getCtxErrorLog(className, "forwardWorker")
         while (isActive) {
 
             // job to check for timeouts
@@ -225,7 +228,7 @@ class BufferedWriter(
 
             } catch (e: Exception) {
                 if (e !is CancellationException) {
-                    errLog("$e")
+                    logger.getCtxErrorLogEx(className, "forwardWorker")("Error in forwarding worker", e)
                 }
             }
         }
@@ -277,7 +280,19 @@ class BufferedWriter(
                 buffer.list(targetID, bufferConfiguration.fifo).filterNotNull().chunked(10).forEach { chunkedItems ->
                     chunkedItems.forEach {
                         it.noBuffering = false
-                        resubmitChannel.send(it)
+
+                        resubmitChannel.submit(it, tuningConfiguration.targetForwardingChannelTimeout) { event ->
+                            channelSubmitEventHandler(
+                                event = event,
+                                channelName = "$className:resubmitChannel",
+                                tuningChannelSizeName = TuningConfiguration.CONFIG_TARGET_RESUBMIT_CHANNEL_SIZE,
+                                currentChannelSize = tuningConfiguration.targetResubmitChannelSize,
+                                tuningChannelTimeoutName = TuningConfiguration.CONFIG_TARGET_RESUBMIT_CHANNEL_TIMEOUT,
+                                log = logger.getCtxLoggers(className, "resubmitWorker")
+                            )
+                        }
+
+
                     }
                     delay(1)
                 }
@@ -342,7 +357,7 @@ class BufferedWriter(
             }
 
         } catch (e: Exception) {
-            log.error("Error cleaning up buffer for target $targetID, $e")
+            log.errorEx("Error cleaning up buffer for target $targetID", e)
         }
     }
 
@@ -366,11 +381,11 @@ class BufferedWriter(
             }
         } catch (t: TimeoutCancellationException) {
             log.trace("Timeout forwarding to target \"${targetID}\"")
-        } catch (e: Throwable) {
+        } catch (e: Exception) {
             if (e.isJobCancellationException)
                 log.info("Target stopped")
             else
-                log.error("Error forwarding to target \"${targetID}\", $e")
+                log.errorEx("Error forwarding to target \"${targetID}\"", e)
         }
         return@coroutineScope didForwardToTarget
 
@@ -406,13 +421,32 @@ class BufferedWriter(
             buffer.add(targetID, list)
     }
 
-    suspend fun write(targetData: TargetData) {
-        forwardChannel.send(targetData)
+    fun write(targetData: TargetData) {
+        forwardChannel.submit(targetData, tuningConfiguration.targetForwardingChannelTimeout) { event ->
+            channelSubmitEventHandler(
+                event = event,
+                channelName = "$className:forwardChannel",
+                tuningChannelSizeName = TuningConfiguration.CONFIG_TARGET_FORWARDING_CHANNEL_SIZE,
+                currentChannelSize = tuningConfiguration.targetForwardingChannelSize,
+                tuningChannelTimeoutName = TuningConfiguration.CONFIG_TARGET_FORWARDING_CHANNEL_TIMEOUT,
+                log = logger.getCtxLoggers(className, "write")
+            )
+        }
     }
 
     fun handleResult(result: TargetResult) {
         runBlocking {
-            resultChannel.send(result)
+
+            resultChannel.submit(result, tuningConfiguration.targetForwardingChannelTimeout) { event ->
+                channelSubmitEventHandler(
+                    event = event,
+                    channelName = "$className:resultChannel",
+                    tuningChannelSizeName = TuningConfiguration.CONFIG_TARGET_RESULTS_CHANNEL_SIZE,
+                    currentChannelSize = tuningConfiguration.targetResultsChannelSize,
+                    tuningChannelTimeoutName = TuningConfiguration.CONFIG_TARGET_RESULTS_CHANNEL_TIMEOUT,
+                    log = logger.getCtxLoggers(className, "handleResult")
+                )
+            }
         }
     }
 

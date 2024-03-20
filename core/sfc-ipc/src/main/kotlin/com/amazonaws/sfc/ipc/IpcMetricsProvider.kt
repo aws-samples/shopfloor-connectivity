@@ -73,8 +73,8 @@ class IpcMetricsProvider<T : IpcMetricsReaderClient>(configReader: ConfigReader,
                             log.info("Metrics source service is shutting down")
                         } else {
                             var s = "Error communicating with metrics IPC service on ${serverConfig.addressStr}, "
-                            s += if (e is StatusException) "${e.cause ?: e.message}" else e.message
-                            log.error(s)
+                            s += if (e is StatusException) "${e.cause?.message ?: e.message}" else e.message
+                            log.errorEx(s, e)
                         }
                         resetIpcClient()
                         delay(IpcSourceReader.WAIT_AFTER_ERROR)

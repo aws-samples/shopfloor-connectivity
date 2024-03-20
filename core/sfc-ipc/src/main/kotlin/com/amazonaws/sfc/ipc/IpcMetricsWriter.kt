@@ -62,7 +62,7 @@ class IpcMetricsWriter(
         try {
             writer()
         }catch (e : Exception){
-            logger.getCtxErrorLog(className, "writer")("Error writing metrics to IPC server, $e")
+            logger.getCtxErrorLogEx(className, "writer")("Error writing metrics to IPC server", e)
         }
     }
 
@@ -97,9 +97,14 @@ class IpcMetricsWriter(
                         log.info("Sending configuration \"$metricsConfigurationStr\" to metrics Server")
                         sendInitializationConfiguration(metricsConfigurationStr)
                         log.info("IPC server for metrics writer initialized")
-                    } catch (e: Exception) {
-                        val errorMessage = if (e is StatusException) "${e.cause ?: e.message}" else e.message
+                    }catch (e : StatusException){
+                        val errorMessage = "${e.cause?.message ?: e.message}"
                         log.error("Error IPC initializing  metrics writer server on $serverAddress, $errorMessage")
+                        grpcClient = null
+                        delay(WAIT_AFTER_ERROR)
+                        continue
+                    } catch (e: Exception) {
+                        log.errorEx("Error IPC initializing  metrics writer server on $serverAddress", e)
                         grpcClient = null
                         delay(WAIT_AFTER_ERROR)
                         continue
@@ -107,14 +112,14 @@ class IpcMetricsWriter(
                 }
                 writMetrics(grpcClient)
 
-            } catch (e: Throwable) {
+            } catch (e: Exception) {
                 if (e::class.java.simpleName == "JobCancellationException") {
                     log.trace("Writer cancelled")
                 } else {
                     var s = "Error communicating with metrics writer service on $serverAddress, "
-                    s += if (e is StatusException) "${e.cause ?: e.message}" else e.message
+                    s += if (e is StatusException) "${e.cause?.message ?: e.message}" else e.message
                     grpcClient = null
-                    log.error(s)
+                    log.errorEx(s, e)
                     delay(WAIT_AFTER_ERROR)
                 }
             }

@@ -6,11 +6,8 @@
 package com.amazonaws.sfc.ipc
 
 
-import com.amazonaws.sfc.config.ConfigReader
-import com.amazonaws.sfc.config.ProtocolAdapterConfiguration
+import com.amazonaws.sfc.config.*
 import com.amazonaws.sfc.config.SecretsManagerConfiguration.Companion.CONFIG_CLOUD_SECRETS
-import com.amazonaws.sfc.config.ServerConfiguration
-import com.amazonaws.sfc.config.ServiceConfiguration
 import com.amazonaws.sfc.data.*
 import com.amazonaws.sfc.ipc.ProtocolServerCommandLine.Companion.OPTION_PROTOCOL_ADAPTER
 import com.amazonaws.sfc.ipc.extensions.GrpcSourceValueFromNativeExt.asReadValuesReply
@@ -43,6 +40,7 @@ typealias CreateProtocolAdapterMethod = (String, ConfigReader, Logger) -> Protoc
 class IpcAdapterService(
     private val adapterID: String?,
     serverConfig: ServerConfiguration,
+    private val tuningConfiguration: TuningConfiguration,
     logger: Logger,
     private val createAdapter: CreateProtocolAdapterMethod) : IpcBaseService(serverConfig, logger), Service {
 
@@ -132,9 +130,9 @@ class IpcAdapterService(
 
             return flow {
                 // Create a reader to feed the channel flow
-                SourcesValuesAsFlow(protocolAdapter, sources, interval).use { reader ->
+                SourcesValuesAsFlow(protocolAdapter, sources, interval, logger).use { reader ->
                     // Loop reading from reader read results channel
-                    reader.sourceReadResults.buffer(100).cancellable().collect {
+                    reader.sourceReadResults(currentCoroutineContext(), maxConcurrentSourceReads = tuningConfiguration.maxConcurrentSourceReaders, timeout =  tuningConfiguration.allSourcesReadTimeout).buffer(100).cancellable().collect {
 
                         if (logger.level == LogLevel.TRACE) {
                             it.forEach { source, result ->
@@ -177,7 +175,7 @@ class IpcAdapterService(
 
                     } catch (e: Exception) {
                         if (!e.isJobCancellationException)
-                           log.error("Error building or emitting readMetrics reply, $e")
+                           log.errorEx("Error building or emitting readMetrics reply", e)
                     }
                 }
             }
@@ -307,7 +305,8 @@ class IpcAdapterService(
                 adapterID = protocolAdapterID,
                 serverConfig = configuration,
                 logger = logger,
-                createAdapter = createAdapter
+                createAdapter = createAdapter,
+                tuningConfiguration = serviceConfiguration.tuningConfiguration
             )
         }
 

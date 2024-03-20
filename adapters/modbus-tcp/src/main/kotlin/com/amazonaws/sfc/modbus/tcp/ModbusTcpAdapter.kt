@@ -94,7 +94,7 @@ class ModbusTcpAdapter(private val adapterID: String, private val configuration:
                         metricsCollector?.put(adapterID, dataPoints)
                     }
                 } catch (e: java.lang.Exception) {
-                    logger.getCtxErrorLog(this::class.java.simpleName, "collectMetricsFromLogger")("Error collecting metrics from logger, $e")
+                    logger.getCtxErrorLogEx(className, "collectMetricsFromLogger")("Error collecting metrics from logger", e)
                 }
             }
         } else null
@@ -158,7 +158,7 @@ class ModbusTcpAdapter(private val adapterID: String, private val configuration:
     /**
      * Returns all devices used by the adapter
      */
-    private val modbusDevices: Map<String, Map<String, com.amazonaws.sfc.modbus.protocol.ModbusTransport?>> by lazy { setupModbusDevices() }
+    private val modbusDevices: Map<String, Map<String, ModbusTransport?>> by lazy { setupModbusDevices() }
 
 
     private fun initializeSourceDevices(): Map<String, ModbusDevice> {
@@ -230,7 +230,7 @@ class ModbusTcpAdapter(private val adapterID: String, private val configuration:
             val schedule: ScheduleConfiguration = config.schedules.firstOrNull { it.name == scheduleName } ?: return null
 
             val sourcesForAdapter = schedule.sources.filter { (config.sources[it.key]?.protocolAdapterID ?: "") == adapterID }
-            return if (adapter != null) InProcessSourcesReader.createInProcessSourcesReader(schedule, adapter!!, sourcesForAdapter, config.metrics, logger) else null
+            return if (adapter != null) InProcessSourcesReader.createInProcessSourcesReader(schedule, adapter!!, sourcesForAdapter, config.tuningConfiguration, config.metrics, logger) else null
 
         }
 

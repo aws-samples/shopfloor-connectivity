@@ -151,7 +151,7 @@ class IpcMetricsServer(
                 InitializeMetricsWriterResponse.newBuilder().setInitialized(true).build()
 
             } catch (e: Exception) {
-                log.error("Error metrics from configuration \"${request.metricsConfiguration}\", ${e.message}")
+                log.errorEx("Error metrics from configuration \"${request.metricsConfiguration}\"", e)
                 InitializeMetricsWriterResponse.newBuilder().setInitialized(false).setError(e.message).build()
             }
 
@@ -195,7 +195,7 @@ class IpcMetricsServer(
                 }
                 service
             } catch (e: Exception) {
-                logger.getCtxErrorLog(className, "initializeHealthProbeService" )("Error initializing helpth probe service, $e")
+                logger.getCtxErrorLogEx(className, "initializeHealthProbeService" )("Error initializing helpth probe service", e)
                 null
             }
         healthProbeService?.start()

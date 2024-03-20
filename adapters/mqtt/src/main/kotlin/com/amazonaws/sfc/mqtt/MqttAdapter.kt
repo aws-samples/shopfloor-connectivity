@@ -4,6 +4,8 @@
 
 package com.amazonaws.sfc.mqtt
 
+import com.amazonaws.sfc.channels.channelSubmitEventHandler
+import com.amazonaws.sfc.channels.submit
 import com.amazonaws.sfc.config.ChannelConfiguration.Companion.CHANNEL_SEPARATOR
 import com.amazonaws.sfc.config.ConfigReader
 import com.amazonaws.sfc.data.*
@@ -14,11 +16,13 @@ import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_CONNECTIONS
 import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_CONNECTION_ERRORS
 import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_DIMENSION_SOURCE
 import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_DIMENSION_SOURCE_CATEGORY_ADAPTER
+import com.amazonaws.sfc.mqtt.config.MqttAdapterConfiguration
 import com.amazonaws.sfc.mqtt.config.MqttChannelConfiguration
 import com.amazonaws.sfc.mqtt.config.MqttConfiguration
 import com.amazonaws.sfc.mqtt.config.MqttSourceConfiguration
 import com.amazonaws.sfc.system.DateTime
 import com.amazonaws.sfc.targets.TargetException
+import com.amazonaws.sfc.util.MemoryMonitor.Companion.getUsedMemoryMB
 import com.amazonaws.sfc.util.buildScope
 import com.amazonaws.sfc.util.launch
 import com.google.gson.JsonSyntaxException
@@ -96,7 +100,7 @@ class MqttAdapter(private val adapterID: String, private val configuration: Mqtt
                         metricsCollector?.put(adapterID, dataPoints)
                     }
                 } catch (e: java.lang.Exception) {
-                    logger.getCtxErrorLog(this::class.java.simpleName, "collectMetricsFromLogger")("Error collecting metrics from logger, $e")
+                    logger.getCtxErrorLogEx(className, "collectMetricsFromLogger")("Error collecting metrics from logger", e)
                 }
             }
         } else null
@@ -109,8 +113,9 @@ class MqttAdapter(private val adapterID: String, private val configuration: Mqtt
         sourceID to SourceDataValuesStore<ChannelReadValue>()
     }.toMap()
 
+
     // channel to send data changes to the coroutine that is handling these changes
-    private val receivedData = Channel<ReceivedData>(1000)
+    private val receivedData = Channel<ReceivedData>(configuration.receivedDataChannelSize)
 
     // co-routine processing the received data
 
@@ -120,7 +125,7 @@ class MqttAdapter(private val adapterID: String, private val configuration: Mqtt
                 handleDataReceived(data)
             }
         } catch (e: Exception) {
-            logger.getCtxErrorLog(this::class.java.simpleName, "changedDataWorker")("Error processing received data, $e")
+            logger.getCtxErrorLogEx(this::class.java.simpleName, "changedDataWorker")("Error processing received data", e)
         }
     }
 
@@ -175,7 +180,16 @@ class MqttAdapter(private val adapterID: String, private val configuration: Mqtt
     ) {
         metricsCollector?.put(
             protocolAdapterID,
-            metricsCollector?.buildValueDataPoint(protocolAdapterID, MetricsCollector.METRICS_READS, 1.0, MetricUnits.COUNT, metricDimensions),
+            metricsCollector?.buildValueDataPoint(protocolAdapterID,
+                MetricsCollector.METRICS_MEMORY,
+                getUsedMemoryMB().toDouble(),
+                MetricUnits.MEGABYTES,
+                metricDimensions),
+            metricsCollector?.buildValueDataPoint(protocolAdapterID,
+                MetricsCollector.METRICS_READS,
+                1.0,
+                MetricUnits.COUNT,
+                metricDimensions),
             metricsCollector?.buildValueDataPoint(
                 protocolAdapterID,
                 MetricsCollector.METRICS_READ_DURATION,
@@ -218,8 +232,8 @@ class MqttAdapter(private val adapterID: String, private val configuration: Mqtt
                     }
                 }
             } catch (e: Exception) {
-                val log = logger.getCtxErrorLog(className, "stop")
-                log("Error unsubscribing or disconnecting MQTT client, $e")
+                val log = logger.getCtxErrorLogEx(className, "stop")
+                log("Error unsubscribing or disconnecting MQTT client", e)
             }
 
             // clear data stores
@@ -288,7 +302,7 @@ class MqttAdapter(private val adapterID: String, private val configuration: Mqtt
         val client = try {
             MqttHelper(brokerConfiguration, logger).buildClient(id, MemoryPersistence())
         } catch (e: Exception) {
-            log.error("Error connecting to ${brokerConfiguration.endPoint} for source \"$sourceID\", $e")
+            log.errorEx("Error connecting to ${brokerConfiguration.endPoint} for source \"$sourceID\"", e)
             return null
         }
 
@@ -297,8 +311,8 @@ class MqttAdapter(private val adapterID: String, private val configuration: Mqtt
             // Setup subscriptions
             setupSourceSubscriptions(sourceID, sourceConfiguration, client)
             client
-        } catch (e: Throwable) {
-            log.error("Error setting up subscription ${brokerConfiguration.endPoint} for source \"$sourceID\", $e")
+        } catch (e: Exception) {
+            log.errorEx("Error setting up subscription ${brokerConfiguration.endPoint} for source \"$sourceID\"", e)
             null
         }
     }
@@ -310,13 +324,22 @@ class MqttAdapter(private val adapterID: String, private val configuration: Mqtt
      * @param client MqttClient The connected client
      */
     private fun setupSourceSubscriptions(sourceID: String, source: MqttSourceConfiguration, client: MqttClient) {
+        val log = logger.getCtxLoggers(className, "sourceSubscriber")
         // Channels for the source have 1 or more topics they can subscribe to
         source.channels.forEach { (channelID, channel) ->
             channel.topics.forEach { t ->
                 client.subscribe(t) { topic, message: MqttMessage ->
                     // The received data is sent to a buffered channel for further processing
                     runBlocking {
-                        receivedData.send(ReceivedData(sourceID, channelID, channel, topic, message.toString()))
+                        receivedData.submit(ReceivedData(sourceID, channelID, channel, topic, message.toString()), configuration.receivedDataChannelTimeout){ event->
+                            channelSubmitEventHandler(event,
+                                channelName = "$className:receivedData",
+                                tuningChannelSizeName = MqttAdapterConfiguration.CONFIG_RECEIVED_DATA_CHANNEL_SIZE,
+                                currentChannelSize = configuration.receivedDataChannelSize,
+                                tuningChannelTimeoutName = MqttAdapterConfiguration.CONFIG_RECEIVED_DATA_CHANNEL_TIMEOUT,
+                                log = log
+                            )
+                        }
                     }
                 }
             }
@@ -365,8 +388,8 @@ class MqttAdapter(private val adapterID: String, private val configuration: Mqtt
                     }
                     ChannelReadValue(value, timestamp)
                 } catch (e: JsonSyntaxException) {
-                    val log = logger.getCtxErrorLog("dataValue")
-                    log("Source \"$sourceID\", Channel \"$channelID\", Value \"$message\" is not valid JSON, $e")
+                    val log = logger.getCtxErrorLogEx("dataValue")
+                    log("Source \"$sourceID\", Channel \"$channelID\", Value \"$message\" is not valid JSON", e)
                     null
                 }
             } else {
@@ -398,7 +421,7 @@ class MqttAdapter(private val adapterID: String, private val configuration: Mqtt
                     }
                     selected
                 } catch (e: java.lang.Exception) {
-                    log.error("Error applying selector \"${channel.selectorStr}\" for source \"$sourceID\", node \"$channelID\", ${e.message}")
+                    log.errorEx("Error applying selector \"${channel.selectorStr}\" for source \"$sourceID\", node \"$channelID\", ${e.message}", e)
                 }
             } else {
                 // No selector, return value
@@ -418,14 +441,7 @@ class MqttAdapter(private val adapterID: String, private val configuration: Mqtt
 
         private val createInstanceMutex = Mutex()
 
-        /**
-         * Creates a new reader for the MQTT protocol adapter from its configuration
-         * @param configReader ConfigReader Configuration reader for the adapter
-         * @see com.amazonaws.mqtt.sfc.config.MqttConfiguration
-         * @param scheduleName String Name of the schedule
-         * @param logger Logger Logger for output
-         * @return SourceValuesReader? Created reader
-         */
+
         @JvmStatic
         fun newInstance(configReader: ConfigReader, scheduleName: String, adapterID: String, logger: Logger): SourceValuesReader? {
 
@@ -443,11 +459,12 @@ class MqttAdapter(private val adapterID: String, private val configuration: Mqtt
             val sourcesForAdapter = schedule?.sources?.filter { (config.sources[it.key]?.protocolAdapterID ?: "") == adapterID } ?: return null
 
             return if (adapter != null) InProcessSourcesReader.createInProcessSourcesReader(
-                schedule,
-                adapter!!,
-                sourcesForAdapter,
-                config.metrics,
-                logger
+                schedule = schedule,
+                adapter = adapter!!,
+                sources = sourcesForAdapter,
+                tuningConfiguration = config.tuningConfiguration,
+                metricsConfig = config.metrics,
+                logger = logger
             ) else null
 
         }

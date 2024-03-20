@@ -44,6 +44,7 @@ import com.amazonaws.sfc.service.ConfigFileProvider.Companion.CONFIG_CUSTOM_CONF
 import com.amazonaws.sfc.service.ServerConnectionType
 import com.amazonaws.sfc.service.addExternalSecretsConfig
 import com.amazonaws.sfc.util.launch
+import io.grpc.Status
 import io.grpc.StatusException
 import kotlinx.coroutines.*
 import kotlin.time.Duration
@@ -93,12 +94,17 @@ class IpcSourceReader(
                     try {
                         val adapterConfiguration = getAdapterConfiguration(configReader)
                         _initialized = client?.initializeAsync(adapterConfiguration, serverConfig, logger)?.await() == true
-
-                    } catch (e: Exception) {
-                        val errorMessage = if (e is StatusException) "${e.cause ?: e.message}" else e.message
-                        log.error("Error initializing IPC source service for ${serverConfig.addressStr}, $errorMessage")
-                        if (serverConfig.serverConnectionType == ServerConnectionType.PlainText && errorMessage.toString().contains("unknown reason"))
+                    } catch (e : StatusException){
+                        val errorMessage = "${e.cause?.message ?: e.message}"
+                        if (serverConfig.serverConnectionType == ServerConnectionType.PlainText && errorMessage.contains("unknown reason"))
                             log.error("${ServerConnectionType.PlainText} connection type is configured for client, check if server requires ServerSide or Mutual TLS")
+                        else
+                            log.error("Error initializing IPC source service for ${serverConfig.addressStr}, $errorMessage")
+                        delay(WAIT_AFTER_ERROR)
+                        continue
+                    } catch (e: Exception) {
+                        val errorMessage = "${e.cause?.message ?: e.message}"
+                        log.errorEx("Error initializing IPC source service for ${serverConfig.addressStr}, $errorMessage", e)
                         delay(WAIT_AFTER_ERROR)
                         continue
                     }
@@ -122,7 +128,7 @@ class IpcSourceReader(
                             log.info("Source service is shutting down")
                         } else {
                             var s = "Error communicating with source connector service on ${serverConfig.addressStr}, "
-                            s += if (e is StatusException) "${e.cause ?: e.message}" else e.message
+                            s += if (e is StatusException) "${e.cause?.message ?: e.message}" else e.message
                             log.error(s)
                         }
                         resetIpcClient()

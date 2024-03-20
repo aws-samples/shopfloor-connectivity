@@ -1,4 +1,3 @@
-
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: MIT-0
 
@@ -22,6 +21,7 @@ import com.amazonaws.sfc.system.DateTime
 import com.amazonaws.sfc.system.DateTime.systemDateTime
 import com.amazonaws.sfc.targets.TargetException
 import com.amazonaws.sfc.util.InstanceFactory
+import com.amazonaws.sfc.util.MemoryMonitor.Companion.getUsedMemoryMB
 import com.amazonaws.sfc.util.buildScope
 import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
@@ -91,7 +91,7 @@ class SqlAdapter(private val adapterID: String, private val configuration: SqlCo
                     log.info("Loading driver ${it.driverClassName} for database type $it")
                     Class.forName(it.driverClassName, true, classLoader)
                 } catch (e: Exception) {
-                    log.error("Error loading driver ${it.driverClassName} for database type $it, $e")
+                    log.errorEx("Error loading driver ${it.driverClassName} for database type $it", e)
                 }
             }
         }
@@ -123,7 +123,7 @@ class SqlAdapter(private val adapterID: String, private val configuration: SqlCo
                         connection.close()
 
                     } catch (e: Exception) {
-                        log.error("Error running initialization script \"${dbServerConfig.initScript}\" for server \"$dbServerID\", $e")
+                        log.errorEx("Error running initialization script \"${dbServerConfig.initScript}\" for server \"$dbServerID\"", e)
                     } finally {
                         connection?.close()
                     }
@@ -150,7 +150,8 @@ class SqlAdapter(private val adapterID: String, private val configuration: SqlCo
                 sqlSourceConfiguration = sqlSourceConfiguration,
                 metricsCollector = metricsCollector,
                 adapterMetricDimensions = adapterMetricDimensions,
-                logger = logger)
+                logger = logger
+            )
         } catch (e: SqlAdapterException) {
             logger.getCtxErrorLog(className, "createSqlSource")("Error creating sql source for source \"$sourceID\", ${e.message}")
             null
@@ -160,33 +161,39 @@ class SqlAdapter(private val adapterID: String, private val configuration: SqlCo
 
     private fun getSourceConfiguration(sourceID: String): SqlSourceConfiguration {
         return sourceConfigurations[sourceID]
-               ?: throw SqlAdapterException("\"$sourceID\" is not a valid sql source, " +
-                                            "available sql sources are ${sourceConfigurations.keys}")
+            ?: throw SqlAdapterException(
+                "\"$sourceID\" is not a valid sql source, " +
+                        "available sql sources are ${sourceConfigurations.keys}"
+            )
     }
 
     private fun protocolAdapterForSource(sourceID: String): SqlAdapterConfiguration {
         val sourceConfig = getSourceConfiguration(sourceID)
         return configuration.sqlProtocolAdapters[sourceConfig.protocolAdapterID]
-               ?: throw SqlAdapterException("\"${sourceConfig.protocolAdapterID}\" for source \"$sourceID\" is not a valid sql protocol adapter, " +
-                                            "available sql protocol adapters are ${configuration.sqlProtocolAdapters.keys}")
+            ?: throw SqlAdapterException(
+                "\"${sourceConfig.protocolAdapterID}\" for source \"$sourceID\" is not a valid sql protocol adapter, " +
+                        "available sql protocol adapters are ${configuration.sqlProtocolAdapters.keys}"
+            )
     }
 
     private fun dbServerConfigurationForSource(sourceID: String): Pair<String, DbServerConfiguration> {
         val sourceConfig = getSourceConfiguration(sourceID)
         val sqlAdapter = protocolAdapterForSource(sourceID)
         return sourceConfig.adapterDbServerID to (sqlAdapter.dbServers[sourceConfig.adapterDbServerID]
-                                                  ?: throw SqlAdapterException("\"${sourceConfig.adapterDbServerID}\" is not a valid $CONFIG_ADAPTER_DB_SERVER for adapter \"${sourceConfig.protocolAdapterID}\" used by source \"$sourceID\", valid servers are ${sqlAdapter.dbServers.keys}"))
+            ?: throw SqlAdapterException("\"${sourceConfig.adapterDbServerID}\" is not a valid $CONFIG_ADAPTER_DB_SERVER for adapter \"${sourceConfig.protocolAdapterID}\" used by source \"$sourceID\", valid servers are ${sqlAdapter.dbServers.keys}"))
     }
 
     override val metricsCollector: MetricsCollector? by lazy {
         val metricsConfigurations = configuration.sqlProtocolAdapters.map { it.key to (it.value.metrics ?: MetricsSourceConfiguration()) }.toMap()
         if (configuration.isCollectingMetrics) {
             logger.metricsCollectorMethod = collectMetricsFromLogger
-            MetricsCollector(metricsConfig = configuration.metrics,
+            MetricsCollector(
+                metricsConfig = configuration.metrics,
                 metricsSourceType = MetricsSourceType.PROTOCOL_ADAPTER,
                 metricsSourceConfigurations = metricsConfigurations,
                 staticDimensions = ADAPTER_METRIC_DIMENSIONS,
-                logger = logger)
+                logger = logger
+            )
         } else null
     }
 
@@ -200,7 +207,7 @@ class SqlAdapter(private val adapterID: String, private val configuration: SqlCo
                         metricsCollector?.put(adapterID, dataPoints)
                     }
                 } catch (e: java.lang.Exception) {
-                    logger.getCtxErrorLog(this::class.java.simpleName, "collectMetricsFromLogger")("Error collecting metrics from logger, $e")
+                    logger.getCtxErrorLogEx(this::class.java.simpleName, "collectMetricsFromLogger")("Error collecting metrics from logger", e)
                 }
             }
         } else null
@@ -226,11 +233,11 @@ class SqlAdapter(private val adapterID: String, private val configuration: SqlCo
         sqlSources
         val sqlSource = sqlSources[sourceID] ?: return SourceReadError("Invalid source configuration")
 
-        val start = DateTime.systemDateTime().toEpochMilli()
+        val start = systemDateTime().toEpochMilli()
 
         val sourceReadResult = try {
             val sqlSourceReadData = sqlSource.read(channels) ?: emptyMap()
-            val readDurationInMillis = (DateTime.systemDateTime().toEpochMilli() - start).toDouble()
+            val readDurationInMillis = (systemDateTime().toEpochMilli() - start).toDouble()
             createMetrics(protocolAdapterID, dimensions, readDurationInMillis, sqlSourceReadData)
             SourceReadSuccess(sqlSourceReadData, systemDateTime())
         } catch (e: Exception) {
@@ -241,17 +248,41 @@ class SqlAdapter(private val adapterID: String, private val configuration: SqlCo
         return sourceReadResult
     }
 
-    private suspend fun createMetrics(protocolAdapterID: String,
-                                      metricDimensions: MetricDimensions?,
-                                      readDurationInMillis: Double,
-                                      values: Map<String, ChannelReadValue>) {
+    private suspend fun createMetrics(
+        protocolAdapterID: String,
+        metricDimensions: MetricDimensions?,
+        readDurationInMillis: Double,
+        values: Map<String, ChannelReadValue>
+    ) {
 
         val valueCount = if (values.size == 0) 0 else values.map { if (it.value.value is ArrayList<*>) (it.value.value as ArrayList<*>).size else 1 }.sum()
-        metricsCollector?.put(protocolAdapterID,
-            metricsCollector?.buildValueDataPoint(protocolAdapterID, MetricsCollector.METRICS_READS, 1.0, MetricUnits.COUNT, metricDimensions),
-            metricsCollector?.buildValueDataPoint(protocolAdapterID, MetricsCollector.METRICS_READ_DURATION, readDurationInMillis, MetricUnits.MILLISECONDS, metricDimensions),
-            metricsCollector?.buildValueDataPoint(protocolAdapterID, MetricsCollector.METRICS_VALUES_READ, valueCount.toDouble(), MetricUnits.COUNT, metricDimensions),
-            metricsCollector?.buildValueDataPoint(protocolAdapterID, MetricsCollector.METRICS_READ_SUCCESS, 1.0, MetricUnits.COUNT, metricDimensions))
+        metricsCollector?.put(
+            protocolAdapterID, metricsCollector?.buildValueDataPoint(
+                protocolAdapterID,
+                MetricsCollector.METRICS_MEMORY,
+                getUsedMemoryMB().toDouble(),
+                MetricUnits.MEGABYTES,
+                metricDimensions
+            ), metricsCollector?.buildValueDataPoint(
+                protocolAdapterID,
+                MetricsCollector.METRICS_READS,
+                1.0,
+                MetricUnits.COUNT, metricDimensions
+            ),
+            metricsCollector?.buildValueDataPoint(
+                protocolAdapterID,
+                MetricsCollector.METRICS_READ_DURATION,
+                readDurationInMillis,
+                MetricUnits.MILLISECONDS,
+                metricDimensions
+            ), metricsCollector?.buildValueDataPoint(
+                protocolAdapterID,
+                MetricsCollector.METRICS_VALUES_READ,
+                valueCount.toDouble(),
+                MetricUnits.COUNT,
+                metricDimensions
+            ), metricsCollector?.buildValueDataPoint(protocolAdapterID, MetricsCollector.METRICS_READ_SUCCESS, 1.0, MetricUnits.COUNT, metricDimensions)
+        )
     }
 
     /**
@@ -323,7 +354,14 @@ class SqlAdapter(private val adapterID: String, private val configuration: SqlCo
                 adapter?.init()
             }
 
-            return if (adapter != null) InProcessSourcesReader.createInProcessSourcesReader(schedule, adapter!!, sourcesForAdapter, config.metrics, logger) else null
+            return if (adapter != null) InProcessSourcesReader.createInProcessSourcesReader(
+                schedule = schedule,
+                adapter = adapter!!,
+                sources = sourcesForAdapter,
+                tuningConfiguration = config.tuningConfiguration,
+                metricsConfig = config.metrics,
+                logger = logger
+            ) else null
 
         }
 
@@ -341,7 +379,8 @@ class SqlAdapter(private val adapterID: String, private val configuration: SqlCo
 
 
         private val ADAPTER_METRIC_DIMENSIONS = mapOf(
-            MetricsCollector.METRICS_DIMENSION_SOURCE_CATEGORY to METRICS_DIMENSION_SOURCE_CATEGORY_ADAPTER)
+            MetricsCollector.METRICS_DIMENSION_SOURCE_CATEGORY to METRICS_DIMENSION_SOURCE_CATEGORY_ADAPTER
+        )
     }
 
 }

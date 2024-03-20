@@ -32,7 +32,7 @@ class AwsIoTCredentialSessionProvider(config: AwsIotCredentialProviderClientConf
                 getCredentials(config, logger)
             }
         } catch (e: Throwable) {
-            throw AWSIotException("Error getting credentials , ${e.message}:${e.cause}")
+            throw AWSIotException("Error getting credentials , ${e.message}:${e.cause?.message}")
         }
     },
 

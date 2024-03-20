@@ -123,7 +123,7 @@ class AdsSource(
                     _symbols
 
                 } catch (e: Exception) {
-                    log.error("Error getting symbols for ADS source \"$sourceID\", $e")
+                    log.errorEx("Error getting symbols for ADS source \"$sourceID\"", e)
                     null
                 }
                 _symbols
@@ -145,7 +145,7 @@ class AdsSource(
 
                     _client!!
                 } catch (e: Exception) {
-                    log.error("Error creating ADS client for source \"$sourceID\", $e")
+                    log.errorEx("Error creating ADS client for source \"$sourceID\"", e)
                     null
                 }
             }

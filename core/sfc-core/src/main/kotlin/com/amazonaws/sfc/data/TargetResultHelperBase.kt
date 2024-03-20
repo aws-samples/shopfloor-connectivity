@@ -108,8 +108,8 @@ open class TargetResultHelperBase(protected val targetID: String,
 
             targetResultHandler?.handleResult(result)
             loggers.trace("Reporting results for data with  serial numbers $allSerials")
-        } catch (e: Throwable) {
-            loggers.error("Error reporting results for data with serial numbers $allSerials , $e")
+        } catch (e: Exception) {
+            loggers.errorEx("Error reporting results for data with serial numbers $allSerials", e)
         }
     }
 }

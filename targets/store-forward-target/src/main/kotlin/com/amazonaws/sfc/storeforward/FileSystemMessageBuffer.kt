@@ -33,8 +33,8 @@ class FileSystemMessageBuffer(targets: Iterable<String>,
                 Files.createDirectories(Path(targetPath.absolutePath))
             }
             targetID to FileSystemBufferTargetDirectory(targetPath, configuration.compression)
-        } catch (e: Throwable) {
-            logger.getCtxErrorLog(className, "store")("Error creating store directory for target \"$targetID\" in \"${configuration.directory?.absolutePath}\", $e")
+        } catch (e: Exception) {
+            logger.getCtxErrorLogEx(className, "store")("Error creating store directory for target \"$targetID\" in \"${configuration.directory?.absolutePath}\"", e)
             null
         }
     }).toTypedArray())
@@ -67,7 +67,7 @@ class FileSystemMessageBuffer(targets: Iterable<String>,
                 }
 
             } catch (e: Exception) {
-                log.error("Error storing target data with serial ${targetData.serial} for target \"$targetID\", $e")
+                log.errorEx("Error storing target data with serial ${targetData.serial} for target \"$targetID\"", e)
             }
         }
     }
@@ -87,7 +87,7 @@ class FileSystemMessageBuffer(targets: Iterable<String>,
             try {
                 targetDirectory.remove(serial, configuration.writeTimeout)
             } catch (e: Exception) {
-                log.error("Error deleting target data with serial $serial for target \"$targetID\", $e")
+                log.errorEx("Error deleting target data with serial $serial for target \"$targetID\"", e)
 
             }
         }
@@ -115,7 +115,7 @@ class FileSystemMessageBuffer(targets: Iterable<String>,
 
             } catch (e: Exception) {
                 if (it.exists()) {
-                    logs.error("Can not deserialize target data from ${it.absolutePath}, $e")
+                    logs.errorEx("Can not deserialize target data from ${it.absolutePath}", e)
                 }
             }
         }
@@ -136,7 +136,7 @@ class FileSystemMessageBuffer(targets: Iterable<String>,
 
             } catch (e: Exception) {
                 if (it.exists()) {
-                    logs.error("Can not deserialize target data from ${it.absolutePath}, $e")
+                    logs.errorEx("Can not deserialize target data from ${it.absolutePath}", e)
                 }
             }
         }

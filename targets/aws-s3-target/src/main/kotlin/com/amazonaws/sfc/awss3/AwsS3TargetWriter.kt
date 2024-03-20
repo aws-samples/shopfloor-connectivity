@@ -23,13 +23,14 @@ import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_WRITE_SUCCES
 import com.amazonaws.sfc.system.DateTime
 import com.amazonaws.sfc.system.DateTime.systemCalendarUTC
 import com.amazonaws.sfc.targets.AwsServiceTargetClientHelper
+import com.amazonaws.sfc.targets.TargetDataChannel
 import com.amazonaws.sfc.targets.TargetException
-import com.amazonaws.sfc.util.buildScope
-import com.amazonaws.sfc.util.byteCountString
-import com.amazonaws.sfc.util.canNotReachAwsService
-import com.amazonaws.sfc.util.launch
-import kotlinx.coroutines.*
+import com.amazonaws.sfc.util.*
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.selects.select
 import software.amazon.awssdk.awscore.exception.AwsServiceException
 import software.amazon.awssdk.core.sync.RequestBody
@@ -69,7 +70,11 @@ class AwsS3TargetWriter(
     private val s3Client: AwsS3Client
         get() = AwsS3ClientWrapper(clientHelper.serviceClient as S3Client)
 
-    private val targetDataChannel = Channel<TargetData>(100)
+    private val targetConfig: AwsS3TargetConfiguration by lazy {
+        clientHelper.targetConfig(config, targetID, AWS_S3)
+    }
+
+    private val targetDataChannel = TargetDataChannel.create(targetConfig, "$className::targetDatChannel")
 
     private val scope = buildScope("S3 Target")
     private val targetResults = if (resultHandler != null) TargetResultBufferedHelper(targetID, resultHandler, logger) else null
@@ -80,9 +85,6 @@ class AwsS3TargetWriter(
             return clientHelper.writerConfig(configReader, AWS_S3)
         }
 
-    private val targetConfig: AwsS3TargetConfiguration by lazy {
-        clientHelper.targetConfig(config, targetID, AWS_S3)
-    }
 
     private val transformation by lazy {
         if (targetConfig.template != null) OutputTransformation(targetConfig.template!!, logger) else null
@@ -112,7 +114,7 @@ class AwsS3TargetWriter(
                         metricsCollector?.put(targetID, dataPoints)
                     }
                 } catch (e: java.lang.Exception) {
-                    logger.getCtxErrorLog(this::class.java.simpleName, "collectMetricsFromLogger")("Error collecting metrics from logger, $e")
+                    logger.getCtxErrorLogEx(this::class.java.simpleName, "collectMetricsFromLogger")("Error collecting metrics from logger", e)
                 }
             }
         } else null
@@ -158,10 +160,9 @@ class AwsS3TargetWriter(
                         timer = timerJob()
                     }
                 }
-            } catch (e: CancellationException) {
-                loggers.info("Writer stopped")
             } catch (e: Exception) {
-                loggers.error("Error in writer, ${e.message}")
+                if (!e.isJobCancellationException)
+                    loggers.errorEx("Error in writer", e)
             }
         }
 
@@ -204,8 +205,8 @@ class AwsS3TargetWriter(
 
             log.trace("S3  putObject result is ${resp.sdkHttpResponse()?.statusCode()}")
 
-        } catch (e: Throwable) {
-            log.error("Error writing to bucket \"$bucketName\" for target \"$targetID\", ${e.message}")
+        } catch (e: Exception) {
+            log.errorEx("Error writing to bucket \"$bucketName\" for target \"$targetID\"", e)
             runBlocking { metricsCollector?.put(targetID, METRICS_WRITE_ERRORS, 1.0, MetricUnits.COUNT, metricDimensions) }
 
             if (canNotReachAwsService(e)) {
@@ -227,6 +228,7 @@ class AwsS3TargetWriter(
         runBlocking {
             metricsCollector?.put(
                 adapterID,
+                metricsCollector?.buildValueDataPoint(adapterID, MetricsCollector.METRICS_MEMORY, MemoryMonitor.getUsedMemoryMB().toDouble(),MetricUnits.MEGABYTES ),
                 metricsCollector?.buildValueDataPoint(adapterID, METRICS_WRITES, 1.0, MetricUnits.COUNT, metricDimensions),
                 metricsCollector?.buildValueDataPoint(adapterID, METRICS_MESSAGES, buffer.size.toDouble(), MetricUnits.COUNT, metricDimensions),
                 metricsCollector?.buildValueDataPoint(adapterID, METRICS_WRITE_DURATION, writeDurationInMillis, MetricUnits.MILLISECONDS, metricDimensions),
@@ -285,8 +287,7 @@ class AwsS3TargetWriter(
 
 
     override suspend fun writeTargetData(targetData: TargetData) {
-        targetDataChannel.send(targetData)
-
+        targetDataChannel.submit(targetData, logger.getCtxLoggers("$className:writeTargetData"))
     }
 
     override suspend fun close() {

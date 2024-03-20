@@ -11,7 +11,8 @@ import io.ktor.client.plugins.websocket.*
 import io.ktor.client.plugins.websocket.cio.*
 import io.ktor.http.*
 import io.ktor.websocket.*
-import kotlinx.coroutines.*
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
@@ -24,8 +25,10 @@ import kotlin.time.Duration.Companion.seconds
 @Suppress("unused")
 class SocketLogWriter(private val configStr: String) : LogWriter, SocketMessage {
 
-    private val log: Logger = Logger.createLogger()
+    private val logger: Logger = Logger.createLogger()
     private val scope = buildScope("SocketLogWriter")
+
+    private val classname: String = this::class.java.name
 
     private val initCfg = Json.parseToJsonElement(configStr).jsonObject
 
@@ -47,25 +50,27 @@ class SocketLogWriter(private val configStr: String) : LogWriter, SocketMessage 
     }
 
     private val session = runBlocking {
-        log.info(Json.encodeToString(initCfg),"")
+        val log = logger.getCtxLoggers(classname, "session")
+        log.info(Json.encodeToString(initCfg))
         client.webSocketRawSession(method = HttpMethod.Get,
             host = "localhost",
-            port = getPort(initCfg, log),
+            port = getPort(initCfg, logger),
             path = "/logreceiver")
     }
 
     override suspend fun sendMessage(message: String) {
+        val log = logger.getCtxLoggers(classname, "SendMessage")
         try{
             session.outgoing.send(Frame.Text(message))
             for (frame in session.incoming) {
                 when (frame) {
                     is Frame.Pong -> {
 
-                        log.trace("ping's response received","")
+                        log.trace("ping's response received")
                     }
                     is Frame.Ping -> {
                         session.outgoing.send(Frame.Pong(frame.buffer))
-                        log.trace("ping recieved from ${frame.javaClass}","")
+                        log.trace("ping received from ${frame.javaClass}")
                     }
                     is Frame.Text -> {
                         //do nothing here
@@ -77,7 +82,7 @@ class SocketLogWriter(private val configStr: String) : LogWriter, SocketMessage 
                 }
             }
         } catch(eof: EOFException){
-            log.warning(eof.localizedMessage, this::class.java.name)
+            log.warningEx(eof.localizedMessage, eof)
         }catch (e: Exception){
             // do nothing
             // log.error(e.localizedMessage, this.javaClass::getName.name)
@@ -100,13 +105,15 @@ class SocketLogWriter(private val configStr: String) : LogWriter, SocketMessage 
             return SocketLogWriter(createParameters[0] as String)
         }
 
-        fun getPort(initialCfg: JsonObject, log: Logger): Int {
+        fun getPort(initialCfg: JsonObject, logger: Logger): Int {
             return if(initialCfg.getValue("ConfigProvider").jsonObject.containsKey("Port")) {
+                val log = logger.getCtxLoggers(SocketLogWriter::class.java.name, "getPort")
                 try {
                     val port = Integer.parseInt(initialCfg["ConfigProvider"]?.jsonObject?.get("Port").toString())
-                    log.info("Using port $port from Config file","")
+                    log.info("Using port $port from Config file")
                     port
                 } catch (e: Exception) {
+                    log.warningEx("Using default port 8080", e)
                     8080
                 }
             } else {

@@ -27,6 +27,7 @@ import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_WRITE_ERRORS
 import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_WRITE_SIZE
 import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_WRITE_SUCCESS
 import com.amazonaws.sfc.system.DateTime
+import com.amazonaws.sfc.targets.TargetDataChannel
 import com.amazonaws.sfc.targets.TargetException
 import com.amazonaws.sfc.util.getHostName
 import com.amazonaws.sfc.util.isJobCancellationException
@@ -71,8 +72,17 @@ class AwsMskTargetWriter(
 
     private val scope = CoroutineScope(Dispatchers.IO) + CoroutineName("MSK Target")
 
+    // Configuration loaded for this MSK target
+    private val mskTargetConfig: AwsMskTargetConfiguration by lazy {
+        mskWriterConfig.targets[targetID]
+            ?: throw ConfigurationException(
+                "Configuration for type $AWS_MSK_TARGET for target with ID \"$targetID\" does not exist, existing targets are ${mskWriterConfig.targets.keys}",
+                BaseConfiguration.CONFIG_TARGETS
+            )
+    }
+
     // channel to pass messages to coroutine that sends data to the MSK topic
-    private val targetDataChannel = Channel<TargetData>(100)
+    private val targetDataChannel = TargetDataChannel.create(mskTargetConfig, "$className:targetDataChannel")
 
     private var wasAnyDataSent = false
 
@@ -91,14 +101,6 @@ class AwsMskTargetWriter(
         }
     }
 
-    // Configuration loaded for this MSK target
-    private val mskTargetConfig: AwsMskTargetConfiguration by lazy {
-        mskWriterConfig.targets[targetID]
-            ?: throw ConfigurationException(
-                "Configuration for type $AWS_MSK_TARGET for target with ID \"$targetID\" does not exist, existing targets are ${mskWriterConfig.targets.keys}",
-                BaseConfiguration.CONFIG_TARGETS
-            )
-    }
 
     private val credentialClientConfig: AwsIotCredentialProviderClientConfiguration? by lazy {
         if (!mskTargetConfig.credentialProviderClient.isNullOrEmpty()) {
@@ -166,9 +168,9 @@ class AwsMskTargetWriter(
                 delay(60.toDuration(DurationUnit.SECONDS))
             } catch (e: Exception) {
                 if (e.isJobCancellationException)
-                    log.info("Crdentials worker stopped")
+                    log.info("Credentials worker stopped")
                 else
-                    log.error("$e")
+                    log.errorEx("Credentials worker error", e)
             }
         }
     }
@@ -248,7 +250,7 @@ class AwsMskTargetWriter(
                         metricsCollector?.put(targetID, dataPoints)
                     }
                 } catch (e: java.lang.Exception) {
-                    logger.getCtxErrorLog(this::class.java.simpleName, "collectMetricsFromLogger")("Error collecting metrics from logger, $e")
+                    logger.getCtxErrorLogEx(this::class.java.simpleName, "collectMetricsFromLogger")("Error collecting metrics from logger", e)
                 }
             }
         } else null
@@ -258,7 +260,7 @@ class AwsMskTargetWriter(
 
 
     override suspend fun writeTargetData(targetData: TargetData) {
-        targetDataChannel.send(targetData)
+        targetDataChannel.submit(targetData, logger.getCtxLoggers(className, "writeTargetData"))
     }
 
     private val topicName by lazy { mskTargetConfig.topicName }
@@ -287,11 +289,9 @@ class AwsMskTargetWriter(
                 } else {
                     waitForCredentialsInitializationFinished()
                 }
-            }catch (e : Exception){
-                if (e.isJobCancellationException)
-                    log.info("Writer stopped")
-                else
-                    log.error("Error writing to MSK, $e")
+            } catch (e: Exception) {
+                if (!e.isJobCancellationException)
+                    log.errorEx("Error writing to MSK", e)
             }
         }
     }
@@ -357,7 +357,7 @@ class AwsMskTargetWriter(
                     }
 
                     else -> {
-                        log.error("Error writing message ${targetData.serial} to topic \"$topicName\" for target \"$targetID\", ${exception.message}")
+                        log.errorEx("Error writing message ${targetData.serial} to topic \"$topicName\" for target \"$targetID\"", exception)
                         targetResults?.error(targetData)
                         runBlocking { metricsCollector?.put(targetID, METRICS_WRITE_ERRORS, 1.0, MetricUnits.COUNT, metricDimensions) }
                     }
@@ -396,7 +396,7 @@ class AwsMskTargetWriter(
                     try {
                         producer.flush()
                     } catch (e: Exception) {
-                        logger.getCtxErrorLog(className, "flush")("Error flushing kafka producer, $e")
+                        logger.getCtxErrorLogEx(className, "flush")("Error flushing kafka producer", e)
                     }
                 }
             }

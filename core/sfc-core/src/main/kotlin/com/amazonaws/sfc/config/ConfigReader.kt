@@ -5,6 +5,7 @@
 
 package com.amazonaws.sfc.config
 
+import com.amazonaws.sfc.data.JsonHelper.Companion.extendedJsonException
 import com.amazonaws.sfc.data.JsonHelper.Companion.fromJsonExtended
 import com.amazonaws.sfc.filters.FilterConfiguration
 import com.amazonaws.sfc.filters.FilterConfigurationDeserializer
@@ -13,6 +14,7 @@ import com.amazonaws.sfc.transformations.TransformationOperator
 import com.amazonaws.sfc.transformations.TransformationsDeserializer
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
+import com.google.gson.JsonSyntaxException
 
 
 /**
@@ -41,7 +43,8 @@ class ConfigReader private constructor(val config: String, private val allowUnre
             config
         } catch (e: Throwable) {
             val s = T::class.simpleName?.substringAfter(".") ?: ""
-            throw ConfigurationException("Error getting configuration of type $s: $e", s)
+            val ee = if (e is JsonSyntaxException) e.extendedJsonException(jsonConfig) else e
+            throw ConfigurationException("Error getting configuration of type $s: $ee", s)
         }
     }
 

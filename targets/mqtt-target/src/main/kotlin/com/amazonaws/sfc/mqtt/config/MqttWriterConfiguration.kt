@@ -14,7 +14,7 @@ import com.google.gson.annotations.SerializedName
  * AWS IoT Core target configuration
  */
 @ConfigurationClass
-class MqttWriterConfiguration : BaseConfigurationWithMetrics() {
+class MqttWriterConfiguration : BaseConfigurationWithMetrics(), Validate{
 
 
     @SerializedName(CONFIG_TARGETS)
@@ -40,7 +40,7 @@ class MqttWriterConfiguration : BaseConfigurationWithMetrics() {
     }
 
     companion object {
-        const val MQTT_TARGET = "MQTT_TARGET"
+        const val MQTT_TARGET = "MQTT-TARGET"
 
         private val default = MqttWriterConfiguration()
 

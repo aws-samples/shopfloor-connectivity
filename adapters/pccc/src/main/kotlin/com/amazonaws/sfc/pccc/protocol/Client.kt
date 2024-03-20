@@ -186,7 +186,7 @@ class Client(private val config: PcccControllerConfiguration, private val logger
                     yieldAll(addressSet.addresses.zip(valuesOfReadAddresses))
 
                 } catch (e: Exception) {
-                    log.error("Error reading $addressStr $fromControllerStr, $e")
+                    log.errorEx("Error reading $addressStr $fromControllerStr", e)
                 }
             }
 
