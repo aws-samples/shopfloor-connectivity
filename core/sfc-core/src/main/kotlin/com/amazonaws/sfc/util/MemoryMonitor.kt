@@ -94,7 +94,6 @@ class MemoryMonitor(
             memDelta < 0 -> "${asMB(abs(memDelta))}MB down"
             else -> ""
         }
-        val mb = "${asMB(memDelta)} $ }"
         val duration = interval * samples.size
         return "$duration: ${memDeltaStr}, trend is ${round(trend, 2)}"
     }
