@@ -1,4 +1,3 @@
-
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: MIT-0
 
@@ -55,7 +54,7 @@ open class LookupCacheHandler<K, T, I>(
     // Internal concurrent hash map class  for cached value, if a value is not present an entry is created
     // holding a value that is the result of a call to the supplier function.
     private class CashedEntriesHashMap<K, T>(private val supplier: Function<in K, out T>) :
-            ConcurrentHashMap<K, T>() {
+        ConcurrentHashMap<K, T>() {
 
         override operator fun get(key: K): T {
             return super.computeIfAbsent(key, supplier)
@@ -68,8 +67,6 @@ open class LookupCacheHandler<K, T, I>(
         var value: Deferred<T?>? = null
     }
 
-    // Lock that gives short  exclusive access to cached entries
-    private val cacheEntryLock = Mutex()
 
     // Cached entries
     private val cache = CashedEntriesHashMap<K, CachedEntry<T>> { CachedEntry() }
@@ -83,47 +80,40 @@ open class LookupCacheHandler<K, T, I>(
 
         return@coroutineScope async getAsyncScope@{
 
-            // Short lock to get exclusive access cached entry to set the deferred result for initialization
-            cacheEntryLock.lock()
 
-            try {
-                // Get an entry, if it is not in the cache one is created with the values set by the supplier
-                val entry = cache[key]
+            // Get an entry, if it is not in the cache one is created with the values set by the supplier
+            val entry = cache[key]
 
-                // Check if initializer completed
-                if (entry.value?.isCompleted == true) {
+            // Check if initializer completed
+            if (entry.value?.isCompleted == true) {
 
-                    val value = entry.value?.await()
-                    if (isValid.apply(value)) {
-                        return@getAsyncScope value
-                    }
-                    // function did compete but item was no longer valid, set to null, so it is executed again in next step
-                    entry.value = null
+                val value = entry.value?.await()
+                if (isValid.apply(value)) {
+                    return@getAsyncScope value
                 }
-
-                // Initializer not executed yet or reset due to value that was no longer valid
-                if (entry.value == null) {
-                    // Execute initializer async and store deferred result so additional lookups for the
-                    // same key will wait on same deferred result whilst the initialization function is executing.
-                    entry.value = async initAsyncScope@{
-
-                        var item: T? = supplier.apply(key)
-                        try {
-                            // set initialized value
-                            item = initializer(key, item, init)
-                            return@initAsyncScope item
-                        } catch (ex: Exception) {
-                            // something went wrong, action and value defined in onError method
-                            item = onInitializationError(key, item, ex)
-                            return@initAsyncScope item
-                        }
-                    }
-                }
-
-            } finally {
-                // release exclusive access to entry
-                cacheEntryLock.unlock()
+                // function did compete but item was no longer valid, set to null, so it is executed again in next step
+                entry.value = null
             }
+
+            // Initializer not executed yet or reset due to value that was no longer valid
+            if (entry.value == null) {
+                // Execute initializer async and store deferred result so additional lookups for the
+                // same key will wait on same deferred result whilst the initialization function is executing.
+                entry.value = async initAsyncScope@{
+
+                    var item: T? = supplier.apply(key)
+                    try {
+                        // set initialized value
+                        item = initializer(key, item, init)
+                        return@initAsyncScope item
+                    } catch (ex: Exception) {
+                        // something went wrong, action and value defined in onError method
+                        item = onInitializationError(key, item, ex)
+                        return@initAsyncScope item
+                    }
+                }
+            }
+
 
             // await async initializer, concurrent calls will wait on same deferred result whilst
             // initialization is running
@@ -132,9 +122,9 @@ open class LookupCacheHandler<K, T, I>(
     }
 
     suspend fun clear() {
-        cacheEntryLock.withLock {
-            cache.clear()
-        }
+
+        cache.clear()
+
     }
 
     val keys: Set<K>

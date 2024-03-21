@@ -236,7 +236,7 @@ class StoreForwardTargetWriter(
         return bufferCount
     }
 
-    private fun CoroutineScope.timerJob(duration: Duration) = launch("Timeout Timer") {
+    private fun CoroutineScope.timerJob(duration: Duration) = launch( context = Dispatchers.Default, name = "Timeout Timer") {
         try {
             delay(duration)
         } catch (e: Exception) {

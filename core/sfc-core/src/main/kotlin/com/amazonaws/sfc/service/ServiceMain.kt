@@ -92,7 +92,7 @@ abstract class ServiceMain {
                     handleCustomLogWriter(configuration)
                     logs.info("Received configuration data from config provider")
                     stopService()
-                    launch(context = Dispatchers.IO, name = "Create Service Instance") {
+                    launch(context = Dispatchers.Default, name = "Create Service Instance") {
                         try {
                             logs.info("Creating and starting new service instance")
                             createAndRunServiceInstance(args, configuration)

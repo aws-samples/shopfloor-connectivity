@@ -139,7 +139,7 @@ open class TargetConfiguration : Validate {
         const val CONFIG_TARGET_CHANNEL_BUFFER_TIMEOUT = "TargetChannelTimeout"
 
         const val CONFIG_TARGET_CHANNEL_BUFFER_TIMEOUT_DEFAULT = 10000
-        const val CONFIG_TARGET_CHANNEL_BUFFER_SIZE_DEFAULT = 100
+        const val CONFIG_TARGET_CHANNEL_BUFFER_SIZE_DEFAULT = 1000
 
         const val CONFIG_TARGET_SERVER = "TargetServer"
         fun create(description: String = "",

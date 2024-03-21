@@ -1,4 +1,3 @@
-
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: MIT-0
 
@@ -9,6 +8,7 @@ package com.amazonaws.sfc.metrics
 import com.amazonaws.sfc.log.Logger
 import com.amazonaws.sfc.system.DateTime
 import com.amazonaws.sfc.util.buildScope
+import com.amazonaws.sfc.util.toConcurrentMap
 import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -35,41 +35,45 @@ val MetricDimensions.dataSize: Int
  * @property staticDimensions Map<String, String>? Set of common dimension added to every metric
  * @property logger Logger for output
  */
-class MetricsCollector(private val metricsConfig: MetricsConfiguration?,
-                       private val metricsSourceType: MetricsSourceType,
-                       private val metricsSourceConfigurations: Map<String, MetricsSourceConfiguration>,
-                       private val staticDimensions: MetricDimensions? = null,
-                       private val logger: Logger) : MetricsCollectorReader {
+class MetricsCollector(
+    private val metricsConfig: MetricsConfiguration?,
+    private val metricsSourceType: MetricsSourceType,
+    private val metricsSourceConfigurations: Map<String, MetricsSourceConfiguration>,
+    private val staticDimensions: MetricDimensions? = null,
+    private val logger: Logger
+) : MetricsCollectorReader {
 
     private val className = this::class.java.simpleName
 
     // Secondary constructor for cases that only have a single metric config at target/source level
-    constructor(metricsConfig: MetricsConfiguration?,
-                metricsSourceName: String,
-                metricsSourceConfiguration: MetricsSourceConfiguration,
-                staticDimensions: MetricDimensions? = null,
-                metricsSourceType: MetricsSourceType,
-                logger: Logger) :
-            this(metricsConfig = metricsConfig,
+    constructor(
+        metricsConfig: MetricsConfiguration?,
+        metricsSourceName: String,
+        metricsSourceConfiguration: MetricsSourceConfiguration,
+        staticDimensions: MetricDimensions? = null,
+        metricsSourceType: MetricsSourceType,
+        logger: Logger
+    ) :
+            this(
+                metricsConfig = metricsConfig,
                 metricsSourceType = metricsSourceType,
                 metricsSourceConfigurations = mapOf(metricsSourceName to metricsSourceConfiguration),
                 staticDimensions = staticDimensions,
-                logger = logger)
-
-    private val bufferMutex = Mutex()
+                logger = logger
+            )
 
     // stored metrics
     private var metricsCache = newMetricsCache()
 
     // builds a new metrics cache
-    private fun newMetricsCache() = metricsSourceConfigurations.filterValues {
+    private fun newMetricsCache(): Map<String, MutableList<MetricsDataPoint>> = metricsSourceConfigurations.filterValues {
         it.enabled
-    }.map { it.key to mutableListOf<MetricsDataPoint>() }.toMap()
+    }.map { it.key to mutableListOf<MetricsDataPoint>() }.toConcurrentMap()
 
     // tests is a metrics source is configured to collect metrics
     private fun isSourceCollectingMetrics(source: String) = metricsCache.keys.contains(source)
 
-    val scope = buildScope("MetricsCollector", Dispatchers.IO)
+    val scope = buildScope("MetricsCollector", Dispatchers.Default)
 
     // this job runs with an interval to purge metrics that have not been read within the max metrics age avoiding
     // endless storage of metrics that are not read by a consumer
@@ -100,7 +104,8 @@ class MetricsCollector(private val metricsConfig: MetricsConfiguration?,
         value: Double,
         units: MetricUnits,
         dimensions: MetricDimensions? = null,
-        timestamp: Instant = metricDefaultDateTime()) {
+        timestamp: Instant = metricDefaultDateTime()
+    ) {
 
         val dataPoint = buildValueDataPoint(
             metricSource,
@@ -108,7 +113,8 @@ class MetricsCollector(private val metricsConfig: MetricsConfiguration?,
             value = (value),
             units = units,
             dimensions = dimensions,
-            timestamp = timestamp)
+            timestamp = timestamp
+        )
 
         if (dataPoint != null) {
             put(metricSource, dataPoint)
@@ -117,19 +123,22 @@ class MetricsCollector(private val metricsConfig: MetricsConfiguration?,
     }
 
     // build a data point if metric collection is enabled for the metric source
-    fun buildValueDataPoint(metricSource: String,
-                            name: String,
-                            value: Double,
-                            units: MetricUnits,
-                            dimensions: MetricDimensions? = null,
-                            timestamp: Instant = metricDefaultDateTime()): MetricsDataPoint? =
+    fun buildValueDataPoint(
+        metricSource: String,
+        name: String,
+        value: Double,
+        units: MetricUnits,
+        dimensions: MetricDimensions? = null,
+        timestamp: Instant = metricDefaultDateTime()
+    ): MetricsDataPoint? =
         if (isSourceCollectingMetrics(metricSource))
             MetricsDataPoint(
                 name = name,
                 value = MetricsValue(value),
                 units = units,
                 dimensions = dimensions,
-                timestamp = timestamp)
+                timestamp = timestamp
+            )
         else null
 
     // build and stores a single data point if metrics are enabled for the specified metrics source for a list of values and counts
@@ -149,18 +158,21 @@ class MetricsCollector(private val metricsConfig: MetricsConfiguration?,
                 name = name,
                 value = MetricsValues(values.toList(), counts = counts?.toList()),
                 units = units, dimensions = dimensions,
-                timestamp = timestamp)
+                timestamp = timestamp
+            )
             put(metricSource, dataPoint)
         }
     }
 
     // build and stores a single data point if metrics are enabled for the specified metrics source for a statistics value
-    suspend fun put(metricSource: String,
-                    name: String,
-                    statistics: MetricsStatistics,
-                    units: MetricUnits,
-                    dimensions: MetricDimensions? = null,
-                    timestamp: Instant = metricDefaultDateTime()) {
+    suspend fun put(
+        metricSource: String,
+        name: String,
+        statistics: MetricsStatistics,
+        units: MetricUnits,
+        dimensions: MetricDimensions? = null,
+        timestamp: Instant = metricDefaultDateTime()
+    ) {
 
         if (isSourceCollectingMetrics(metricSource)) {
 
@@ -170,7 +182,8 @@ class MetricsCollector(private val metricsConfig: MetricsConfiguration?,
                     value = statistics,
                     units = units,
                     dimensions = dimensions,
-                    timestamp = timestamp)
+                    timestamp = timestamp
+                )
             put(metricSource, dataPoint)
         }
     }
@@ -191,9 +204,7 @@ class MetricsCollector(private val metricsConfig: MetricsConfiguration?,
     suspend fun put(metricSource: String, dataPoints: List<MetricsDataPoint>) {
 
         if (dataPoints.isNotEmpty()) {
-            bufferMutex.withLock {
-                metricsCache[metricSource]?.addAll(dataPoints)
-            }
+            metricsCache[metricSource]?.addAll(dataPoints)
         }
     }
 
@@ -215,16 +226,22 @@ class MetricsCollector(private val metricsConfig: MetricsConfiguration?,
     private suspend fun cleanUp() {
         val deleteBefore = DateTime.systemDateTimeUTC().minusSeconds(60L * METRICS_MAX_AGE)
         val log = logger.getCtxInfoLog(className, "cleanup")
-        bufferMutex.withLock {
-            metricsCache.values.forEach { entry ->
-                val before = entry.size
-                entry.removeIf { dataPoint -> dataPoint.timestamp.isBefore(deleteBefore) }
-                val after = entry.size
-                if (before != after) {
-                    log("Purging uncollected data points older than $deleteBefore")
-                    log("${before - after} of $before data points purged from metrics collector for metric sources ${metricsSourceConfigurations.keys.joinToString(separator = ", ") { "\"$it\"" }}")
-                }
+
+        metricsCache.values.forEach { entry ->
+            val before = entry.size
+            entry.removeIf { dataPoint -> dataPoint.timestamp.isBefore(deleteBefore) }
+            val after = entry.size
+            if (before != after) {
+                log("Purging uncollected data points older than $deleteBefore")
+                log(
+                    "${before - after} of $before data points purged from metrics collector for metric sources ${
+                        metricsSourceConfigurations.keys.joinToString(
+                            separator = ", "
+                        ) { "\"$it\"" }
+                    }"
+                )
             }
+
         }
     }
 
@@ -232,24 +249,23 @@ class MetricsCollector(private val metricsConfig: MetricsConfiguration?,
     override suspend fun read(): List<MetricsData>? {
         if (metricsCache.isEmpty()) return null
 
-        bufferMutex.withLock {
-            val data = metricsCache.map { (source, entry) ->
-                val commonDimensions =
-                    ((staticDimensions ?: emptyMap()) +  // fixed adapter dimensions
-                     (metricsSourceConfigurations[source]?.commonDimensions ?: emptyMap()) + // configured common dimensions for source
-                     (metricsConfig?.commonDimensions ?: emptyMap())) // top level configured dimensions
+        val data = metricsCache.map { (source, entry) ->
+            val commonDimensions =
+                ((staticDimensions ?: emptyMap()) +  // fixed adapter dimensions
+                        (metricsSourceConfigurations[source]?.commonDimensions ?: emptyMap()) + // configured common dimensions for source
+                        (metricsConfig?.commonDimensions ?: emptyMap())) // top level configured dimensions
 
-                val (mergedCommonDimensions, optimizedDataPoints) = optimizeDataPoints(commonDimensions, entry)
+            val (mergedCommonDimensions, optimizedDataPoints) = optimizeDataPoints(commonDimensions, entry)
 
-                MetricsData(source = source,
-                    sourceType = metricsSourceType,
-                    dataPoints = optimizedDataPoints,
-                    commonDimensions = mergedCommonDimensions.ifEmpty { null })
-            }
-            metricsCache = newMetricsCache()
-            return data.filter { it.dataPoints.isNotEmpty() }
+            MetricsData(source = source,
+                sourceType = metricsSourceType,
+                dataPoints = optimizedDataPoints,
+                commonDimensions = mergedCommonDimensions.ifEmpty { null })
         }
+        metricsCache = newMetricsCache()
+        return data.filter { it.dataPoints.isNotEmpty() }
     }
+
 
     // Find all common metrics and adds these to common dimensions to reduce data size of read data points
     private fun optimizeDataPoints(commonDimensions: MetricDimensions, dataPoints: List<MetricsDataPoint>): Pair<MetricDimensions, List<MetricsDataPoint>> {
@@ -269,7 +285,8 @@ class MetricsCollector(private val metricsConfig: MetricsConfiguration?,
                 dimensions = if (!dimensions.isNullOrEmpty()) dimensions else null,
                 units = it.units,
                 value = it.value,
-                timestamp = it.timestamp)
+                timestamp = it.timestamp
+            )
         }
 
         return Pair(mergedCommonDimensions, optimizedDataPoints)

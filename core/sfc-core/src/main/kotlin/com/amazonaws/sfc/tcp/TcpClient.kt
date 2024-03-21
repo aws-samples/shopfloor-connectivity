@@ -139,7 +139,7 @@ open class TcpClient(private val config: TcpConfiguration, readBufferSize : Int 
                             }
                         }
 
-                        launch(context = Dispatchers.IO, name = "Timeout") {
+                        launch(context = Dispatchers.Default, name = "Timeout") {
                             try {
                                 // signals when connecting takes too long (calling Socket() withing withTimeout is not reliable as it runs on IO dispatcher)
                                 delay(config.connectTimeout.inWholeMilliseconds)

@@ -75,7 +75,7 @@ class AwsFirehoseTargetWriter(
         get() = AwsFirehoseClientWrapper(clientHelper.serviceClient as FirehoseClient)
 
     private val targetResults = if (resultHandler != null) TargetResultHelper(targetID, resultHandler, logger) else null
-    private val scope = CoroutineScope(Dispatchers.Default) + buildContext("Kinesis Firehose Target")
+    private val scope = CoroutineScope(Dispatchers.IO) + buildContext("Kinesis Firehose Target")
 
     /**
      * Writes a message to publish to a Kinesis Firehose stream.

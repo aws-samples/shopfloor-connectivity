@@ -29,6 +29,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlin.time.Duration
+import kotlin.time.measureTime
 
 // Cache for sharing lockable TCP clients as ADS only supports a singleTCP client connection
 // from the same client IP address. If multiple sources read from same device these will share the same
@@ -161,7 +162,6 @@ class AdsAdapter(
 
         val adsSource = adsSources[sourceID] ?: return SourceReadError("Invalid source configuration")
 
-        val start = systemDateTime().toEpochMilli()
 
         val channelsToRead = if (channels.isNullOrEmpty() || (channels.size == 1 && channels[0] == WILD_CARD)) {
             sourceConfiguration.channels.keys.toList()
@@ -170,9 +170,11 @@ class AdsAdapter(
         }
 
         val sourceReadResult = try {
-            val adsSourceReadData = adsSource.read(channelsToRead)
-            val readDurationInMillis = (systemDateTime().toEpochMilli() - start).toDouble()
-            createMetrics(protocolAdapterID, dimensions, readDurationInMillis, adsSourceReadData)
+            var adsSourceReadData: Map<String, ChannelReadValue>
+            val duration = measureTime {
+                adsSourceReadData = adsSource.read(channelsToRead)
+            }
+            createMetrics(protocolAdapterID, dimensions, duration, adsSourceReadData)
             SourceReadSuccess(adsSourceReadData, systemDateTime())
         } catch (e: Exception) {
             metricsCollector?.buildValueDataPoint(
@@ -191,7 +193,7 @@ class AdsAdapter(
     private suspend fun createMetrics(
         protocolAdapterID: String,
         metricDimensions: MetricDimensions?,
-        readDurationInMillis: Double,
+        duration: Duration,
         values: Map<String, ChannelReadValue>
     ) {
 
@@ -217,7 +219,7 @@ class AdsAdapter(
             metricsCollector?.buildValueDataPoint(
                 protocolAdapterID,
                 MetricsCollector.METRICS_READ_DURATION,
-                readDurationInMillis,
+                duration.inWholeMilliseconds.toDouble(),
                 MetricUnits.MILLISECONDS,
                 metricDimensions
             ),

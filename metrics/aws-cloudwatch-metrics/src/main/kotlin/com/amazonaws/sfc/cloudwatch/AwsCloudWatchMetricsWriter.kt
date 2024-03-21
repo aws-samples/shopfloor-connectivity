@@ -130,7 +130,7 @@ class AwsCloudWatchMetricsWriter(private val configReader: ConfigReader, private
     }
 
     private fun CoroutineScope.timerJob(): Job {
-        return launch(context = Dispatchers.IO, name = "Timeout timer") {
+        return launch(context = Dispatchers.Default, name = "Timeout timer") {
             return@launch try {
                 delay(config.metrics?.cloudWatch?.interval ?: CONFIG_DEFAULT_CW_WRITE_INTERVAL.toDuration(DurationUnit.SECONDS))
             } catch (e: Exception) {

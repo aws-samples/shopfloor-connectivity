@@ -13,8 +13,10 @@ import kotlinx.coroutines.selects.SelectClause1
 import kotlin.time.Duration
 
 class TargetDataChannel(private val channelName: String, private val capacity: Int, private val timeout: Duration) {
+
     private val _channel = Channel<TargetData>(capacity)
     val channel : ReceiveChannel<TargetData> = _channel
+
     fun submit(targetData: TargetData, log: Logger.ContextLogger) {
         _channel.submit(targetData, timeout = timeout) { event ->
             channelSubmitEventHandler(
@@ -29,7 +31,11 @@ class TargetDataChannel(private val channelName: String, private val capacity: I
     }
 
     fun close() {
-        _channel.close()
+        try {
+            _channel.close()
+        }catch (_ : Exception) {
+            // ignore
+        }
     }
 
     val onReceive: SelectClause1<TargetData> = _channel.onReceive

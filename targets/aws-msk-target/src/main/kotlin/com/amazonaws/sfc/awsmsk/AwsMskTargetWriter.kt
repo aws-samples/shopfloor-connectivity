@@ -53,6 +53,8 @@ import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider
 import software.amazon.msk.auth.iam.IAMClientCallbackHandler
 import software.amazon.msk.auth.iam.IAMLoginModule
 import java.time.Instant
+import java.util.concurrent.locks.ReentrantLock
+import kotlin.concurrent.withLock
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration
 
@@ -89,7 +91,7 @@ class AwsMskTargetWriter(
     private val targetResults = if (resultHandler != null) TargetResultHelper(targetID, resultHandler, logger) else null
 
     // Mutex for r/w consistency credential elements
-    private val credentialsLock = Mutex()
+    private val credentialsLock = ReentrantLock()
     private var lastCredentials: AwsCredentials? = null
 
     // Configuration loaded for the MSK target writer
@@ -208,7 +210,7 @@ class AwsMskTargetWriter(
     // Periodically flushes the producer to enforce date to be submitted even when the producer buffer is not full
     private val periodicalFlush: Job =
 
-        scope.launch(context = Dispatchers.IO, name = "Kafka producer flush") {
+        scope.launch(context = Dispatchers.Default, name = "Kafka producer flush") {
             val log = logger.getCtxLoggers(className, "periodicalFlush")
             if (mskTargetConfig.interval == null || mskTargetConfig.interval!!.inWholeMilliseconds == 0L) return@launch
 

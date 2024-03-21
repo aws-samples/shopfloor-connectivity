@@ -23,7 +23,7 @@ class InProcessMetricsProvider(private val metricsReader: MetricsCollectorReader
 
         val metricsProvider = MetricsAsFlow(metricsReader, interval, logger)
 
-        reader = launch(context = Dispatchers.IO, name = "Collect Read Results") {
+        reader = launch(context = Dispatchers.Default, name = "Collect Read Results") {
             try {
                 metricsProvider.metricsFlow.buffer(100).cancellable().collect {
                     try {

@@ -1422,7 +1422,8 @@ The internal processes of SFC use memory buffered channels to communicate. These
 
 As the sizing of the channels is specified by the number of items the actual memory used by the channels depends on the size of the items which are sent to the channel. All timeouts are specified in milliseconds.
 
-The channel warning and errors typically occur when SFC collects data from the sources faster than it can process and deliver it to the targets.
+The channel warning and errors typically occur when SFC collects data from the sources faster than it can process and deliver it to the targets. If this happens incidentally, due to peaks in collected data or targets temporary processing the data slower, size of the buffer can be incremented.
+Other solutions are redcing the interval the schedule uses to read the data or enable batching for targets which support it.
 
 ### Channel capacity warnings
 
@@ -2192,7 +2193,7 @@ Context variables for template</p>
 <td>TargetChannelSize</td>
 <td>Size of channel used by target to process and write items</td>
 <td>Int</td>
-<td>Default is 100</td>
+<td>Default is 1000</td>
 see <a href="#sfc-tuning">SFC TuningC</a> for more details
 </tr>
 <tr class="odd">
@@ -5871,7 +5872,7 @@ To authorize the client this AMS Net ID must be added as an AMS route in the SYS
 <td>TopicName</td>
 <td>Name of the topic</td>
 <td>String</td>
-<td></td>
+<td>Topic names must not start with "$" as these are reserved for topics used only by AWS IoT Core</td>
 </tr>
 <tr class="odd">
 <td>Region</td>

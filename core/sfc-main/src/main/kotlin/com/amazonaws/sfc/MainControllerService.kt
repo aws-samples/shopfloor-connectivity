@@ -136,7 +136,7 @@ class MainControllerService(
     }
 
     private suspend fun stopMetricsProcessing() = coroutineScope {
-        launch(Dispatchers.IO) {
+        launch(Dispatchers.Default) {
             listOf(launch {
                 adapterMetricProviders.values.map {
                     launch { it.close() }

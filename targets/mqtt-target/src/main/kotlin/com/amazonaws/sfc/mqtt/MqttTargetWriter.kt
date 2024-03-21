@@ -54,7 +54,7 @@ class MqttTargetWriter(
     )
 
     private val buffer = TargetDataBuffer(storeFullMessage = false)
-    private val doesBatching by lazy { targetConfig.batchSize != null || targetConfig.batchCount > 1 || targetConfig.batchInterval != Duration.INFINITE }
+    private val doesBatching by lazy { targetConfig.batchSize != null || targetConfig.batchCount != null || targetConfig.batchInterval != Duration.INFINITE }
     private val usesCompression = targetConfig.compressionType != CompressionType.NONE
 
     private var _mqttClient: MqttClient? = null
@@ -130,8 +130,9 @@ class MqttTargetWriter(
 
                         if (checkMessagePayloadSize(targetData, messagePayload.length, log)) {
 
-                            if (reachedBufferOrMaxPayloadWhenBufferingMessage(messagePayload)) {
-                                timer = flushBeforeAddingToBuffer(timer, log)
+                            if (exceedBufferOrMaxPayloadWhenBufferingMessage(messagePayload)) {
+                                log.trace("Batch size of ${targetConfig.batchSize?.byteCountString}${if (targetConfig.maxPayloadSize != null) " or ${targetConfig.maxPayloadSize!!.byteCountString}" else ""}}reached")
+                                timer = writeBufferedMessages(timer)
                             }
                             targetResults?.add(targetData)
                             buffer.add(targetData, messagePayload)
@@ -139,14 +140,14 @@ class MqttTargetWriter(
                             log.trace("Received message, buffered size is ${buffer.payloadSize.byteCountString}")
 
                             if (targetData.noBuffering || bufferReachedMaxSizeOrMessages(log)) {
-                                timer = flushBufferedMessages(timer)
+                                timer = writeBufferedMessages(timer)
                             }
                         }
                     }
 
                     timer.onJoin {
-                        log.trace("${targetConfig.batchInterval} buffer interval reached")
-                        timer = flushBufferedMessages(timer)
+                        log.trace("${targetConfig.batchInterval} batch interval reached")
+                        timer = writeBufferedMessages(timer)
 
                     }
                 }
@@ -155,15 +156,10 @@ class MqttTargetWriter(
                     log.errorEx("Error in writer", e)
             }
         }
-        flushBufferedMessages(timer).cancel()
+        writeBufferedMessages(timer).cancel()
 
     }
 
-    private suspend fun flushBufferedMessages(timer: Job): Job {
-        if (timer.isActive) timer.cancel()
-        flush()
-        return createTimer()
-    }
 
     private fun createTimer(): Job {
         return scope.launch {
@@ -176,24 +172,19 @@ class MqttTargetWriter(
     }
 
     private fun bufferReachedMaxSizeOrMessages(log: Logger.ContextLogger): Boolean {
-        val reachedBufferCount = buffer.size >= targetConfig.batchCount
-        if (targetConfig.batchCount > 1 && reachedBufferCount) log.trace("${targetConfig.batchCount} buffer count reached")
+        val reachedBufferCount =  ((targetConfig.batchCount!= null ) && (buffer.size >= targetConfig.batchCount!!))
+        if (((targetConfig.batchCount ?: 0)) > 1 && reachedBufferCount) log.trace("${targetConfig.batchCount} batch count reached")
 
         val reachedBufferSize = !reachedBufferCount &&
                 targetConfig.batchSize != null &&
                 (buffer.payloadSize + (2 + (buffer.size - 1)) >= targetConfig.batchSize!!)
 
-        if (reachedBufferSize) log.trace("${targetConfig.batchSize?.byteCountString} buffer size reached")
+        if (reachedBufferSize) log.trace("${targetConfig.batchSize?.byteCountString} batch size reached")
 
         return reachedBufferSize || reachedBufferCount
     }
 
-    private suspend fun flushBeforeAddingToBuffer(timer: Job, log: Logger.ContextLogger): Job {
-        if (timer.isActive) timer.cancel()
-        log.trace("Buffer size of ${targetConfig.batchSize?.byteCountString}${if (targetConfig.maxPayloadSize != null) " or ${targetConfig.maxPayloadSize!!.byteCountString}" else ""}}reached")
-        flush()
-        return createTimer()
-    }
+
 
     private fun checkMessagePayloadSize(targetData: TargetData, payloadSize: Int, log: Logger.ContextLogger): Boolean {
         if (usesCompression) return true
@@ -204,7 +195,7 @@ class MqttTargetWriter(
         } else true
     }
 
-    private fun reachedBufferOrMaxPayloadWhenBufferingMessage(payload: String): Boolean {
+    private fun exceedBufferOrMaxPayloadWhenBufferingMessage(payload: String): Boolean {
         if (usesCompression) return false
         val bufferedPayloadSizeWhenAddingMessage = payload.length + (2 + (buffer.size - 1)) + buffer.payloadSize
         val bufferSizeExceededWhenAddingMessage = targetConfig.batchSize != null && bufferedPayloadSizeWhenAddingMessage > targetConfig.batchSize!!
@@ -239,11 +230,13 @@ class MqttTargetWriter(
         return compressedData
     }
 
-    private suspend fun flush() {
+    private suspend fun writeBufferedMessages(timer : Job) : Job {
 
-        val log = logger.getCtxLoggers(className, "flush")
+        if (timer.isActive) timer.cancel()
+
+        val log = logger.getCtxLoggers(className, "writeBufferedMessages")
         if (buffer.size == 0) {
-            return
+            return createTimer()
         }
 
         try {
@@ -270,9 +263,9 @@ class MqttTargetWriter(
             log.trace("Published${if (targetConfig.compressionType != CompressionType.NONE) " compressed " else " "}message with size of ${mqttMessage.payload.size.byteCountString} in $duration")
             createMetrics(targetID, metricDimensions, duration.inWholeMilliseconds.toDouble())
 
-        } catch (e: Throwable) {
+        } catch (e: Exception) {
             runBlocking { metricsCollector?.put(targetID, METRICS_WRITE_ERRORS, 1.0, MetricUnits.COUNT, metricDimensions) }
-            log.error("Error publishing to topic \"${targetConfig.topicName}\" for target \"$targetID\", ${e.message}")
+            log.errorEx("Error publishing to topic \"${targetConfig.topicName}\" for target \"$targetID\", ${e.message}", e)
             if (e is TimeoutCancellationException || _mqttClient == null) {
                 targetResults?.nackBuffered()
             } else {
@@ -281,6 +274,7 @@ class MqttTargetWriter(
         } finally {
             buffer.clear()
         }
+        return createTimer()
     }
 
     private val metricsCollector: MetricsCollector? by lazy {

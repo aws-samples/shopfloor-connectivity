@@ -50,7 +50,7 @@ class ScheduleAggregator(
     private val aggregation = schedule.aggregation
 
     // coroutine handling the aggregation of data
-    private val aggregationWorker = scope.launch(context = Dispatchers.IO, name = "Aggregator") {
+    private val aggregationWorker = scope.launch(context = Dispatchers.Default, name = "Aggregator") {
         try {
             if (aggregation != null) {
                 aggregateSourceValues(aggregation)

@@ -19,6 +19,7 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.flow.buffer
 import kotlinx.coroutines.flow.cancellable
+import kotlinx.coroutines.flow.flowOn
 
 
 /**
@@ -46,11 +47,22 @@ class InProcessSourcesReader(
         launch(context = Dispatchers.IO, name = "Collect Read Results") {
             try {
                 sourcesReader.use {
-                    sourcesReader.sourceReadResults(currentCoroutineContext(), tuningConfiguration.maxConcurrentSourceReaders, tuningConfiguration.allSourcesReadTimeout ).buffer(1000).cancellable().collect {
-                        if (!consumer(it)) {
-                            cancel()
+                    sourcesReader.sourceReadResults(
+                        currentCoroutineContext(),
+                        tuningConfiguration.maxConcurrentSourceReaders,
+                        tuningConfiguration.allSourcesReadTimeout
+                    )
+                        .buffer(1000)
+                        .cancellable()
+                        .collect {
+                            try {
+                                if (!consumer(it)) {
+                                    cancel()
+                                }
+                            } catch (e: Exception) {
+                                logger.getCtxLoggers(this::class.java.name, "read").errorEx("Exception happened in consumer", e)
+                            }
                         }
-                    }
                 }
             } catch (e: Exception) {
                 if (!e.isJobCancellationException)
@@ -93,7 +105,7 @@ class InProcessSourcesReader(
             metricsConfig: MetricsConfiguration?,
             logger: Logger
         ): SourceValuesReader {
-            return InProcessSourcesReader(adapter, schedule, sources, tuningConfiguration ,metricsConfig, logger)
+            return InProcessSourcesReader(adapter, schedule, sources, tuningConfiguration, metricsConfig, logger)
         }
     }
 

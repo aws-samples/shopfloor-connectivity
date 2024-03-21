@@ -16,6 +16,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.sync.Mutex
 import java.io.Closeable
+import java.util.concurrent.TimeoutException
+import java.util.concurrent.locks.ReentrantLock
 import kotlin.coroutines.CoroutineContext
 import kotlin.time.Duration
 import kotlin.time.DurationUnit
@@ -49,7 +51,6 @@ class SourcesValuesAsFlow(
         }
     }
 
-    // read values returned as a flow
     fun sourceReadResults(context: CoroutineContext, maxConcurrentSourceReads: Int, timeout: Duration): Flow<ReadResult> {
 
         val log = logger.getCtxLoggers(classname, "SourcesValuesAsFlow")
@@ -68,7 +69,7 @@ class SourcesValuesAsFlow(
 
                 val workerQueue = WorkerQueue<Pair<String, List<String>?>, Pair<String, SourceReadResult>>(
                     maxConcurrentSourceReads,
-                    context = Dispatchers.IO,
+                    context = Dispatchers.Default,
                     logger = logger
                 ) { (sourceID, channels) ->
                     try {
@@ -80,7 +81,6 @@ class SourcesValuesAsFlow(
                             val result = adapter.read(sourceID, channels)
                             taskLogger.trace("Finished reading from source, read $sourceID ${if (result is SourceReadSuccess) "succeeded" else "failed"}")
                             sourceID to result
-
                         }
                     } catch (e: Exception) {
                         if (!e.isJobCancellationException) {
@@ -99,16 +99,19 @@ class SourcesValuesAsFlow(
                     }
 
                     try {
-                        val result = workerQueue.await(timeout).filterNotNull().toMap()
-                        emit(ReadResult(result))
+                        withTimeout(timeout) {
+                            val result = workerQueue.await().filterNotNull().toMap()
+                            emit(ReadResult(result))
+                        }
                     } catch (e: TimeoutCancellationException) {
                         log.error("Timeout waiting for read results from sources ${sourcesToRead.keys}")
                         workerQueue.reset()
                     } catch (e: Exception) {
                         if (!e.isJobCancellationException) {
                             log.errorEx("Error reading from sources", e)
+                        } else {
+                            workerQueue.reset()
                         }
-                        workerQueue.reset()
                     }
 
                 }
@@ -138,10 +141,10 @@ class SourcesValuesAsFlow(
 
     companion object {
 
-        private val addSourceLock = Mutex()
+        private val addSourceLock = ReentrantLock()
 
         // a lock per source to prevent simultaneous reads on a source
-        private val sourceReadLocks: MutableMap<String, Mutex> = mutableMapOf()
+        private val sourceReadLocks: MutableMap<String, ReentrantLock> = mutableMapOf()
 
         private suspend fun createSourceReaderLocks(sources: Set<String>) {
 
@@ -151,7 +154,7 @@ class SourcesValuesAsFlow(
                     try {
                         sources.forEach { sourceID ->
                             if (!sourceReadLocks.containsKey(sourceID)) {
-                                sourceReadLocks[sourceID] = Mutex()
+                                sourceReadLocks[sourceID] = ReentrantLock()
                             }
                         }
                     } finally {

@@ -10,7 +10,7 @@ import software.amazon.awssdk.services.iotdataplane.model.PublishRequest
 import software.amazon.awssdk.services.iotdataplane.model.PublishResponse
 
 
-class AwsIotDataPlaneClientWrapper(private val client: IotDataPlaneClient) : AwsIoTCoreDataPlaneClient {
+class AwsIotCoreClientWrapper(private val client: IotDataPlaneClient) : AwsIoTCoreDataPlaneClient {
     override fun publish(publishRequest: PublishRequest): PublishResponse = client.publish(publishRequest)
     override fun close() = client.close()
 }

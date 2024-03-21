@@ -28,7 +28,7 @@ import kotlin.time.toDuration
  */
 class ScheduleController(private val reader: ScheduleReader, private val aggregator: ScheduleAggregator?, private val writer: ScheduleWriter) : Closeable {
 
-    private val scope = CoroutineScope(Dispatchers.IO)
+    private val scope = CoroutineScope(Dispatchers.Default)
 
     /**
      * Closes the controller

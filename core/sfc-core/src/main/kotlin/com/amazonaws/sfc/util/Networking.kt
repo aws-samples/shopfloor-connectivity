@@ -17,6 +17,11 @@ fun canNotReachAwsService(e: Throwable) = (
         ((((e as? AWSIotException)?.message) ?: "").indexOf("java.net.UnknownHostException") != -1) ||
         (e.message == "Connection pool shut down"))
 
+val Exception.isServiceNotReachable : Boolean
+    get(){
+        return canNotReachAwsService(this)
+    }
+
 fun getIp4NetworkAddress(interfaceName: String?): String? {
 
     if (interfaceName == null) {

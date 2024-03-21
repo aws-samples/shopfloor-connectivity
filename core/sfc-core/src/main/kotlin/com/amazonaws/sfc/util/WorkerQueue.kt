@@ -3,6 +3,7 @@ package com.amazonaws.sfc.util
 import com.amazonaws.sfc.log.Logger
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
+import java.util.concurrent.TimeoutException
 import kotlin.coroutines.CoroutineContext
 import kotlin.time.Duration
 
@@ -54,10 +55,21 @@ class WorkerQueue<T, R>(
         jobs++
     }
 
-    suspend fun await(timeout: Duration = Duration.INFINITE): MutableList<R?> {
+    private fun createTimer(timeout: Duration): Job {
+        return scope.launch {
+            try {
+                delay(timeout)
+            } catch (e: Exception) {
+                // no harm done, timer is just used to guard for timeouts
+            }
+        }
+    }
+
+    suspend fun await(): MutableList<R?> {
         val results = mutableListOf<R?>()
         var count = 0UL
-        withTimeout(timeout) {
+        runBlocking {
+
             while (count < jobs) {
                 val result = done.receive()
                 count++
@@ -66,6 +78,5 @@ class WorkerQueue<T, R>(
             }
         }
         return results
-
     }
 }

@@ -113,7 +113,7 @@ class MqttTargetConfiguration : TargetConfiguration(), Validate {
     val connectTimeout: Duration = _connectTimeout.toDuration(DurationUnit.SECONDS)
 
     @SerializedName(CONFIG_BATCH_COUNT)
-    private var _batchCount: Int = 1
+    private var _batchCount: Int? = null
     val batchCount
         get() = _batchCount
 
@@ -221,10 +221,11 @@ class MqttTargetConfiguration : TargetConfiguration(), Validate {
             connectTimeout: Int = default._connectTimeout,
             topicName: String? = default._topicName,
             qos : Int = default._qos,
-            batchCount : Int = default.batchCount,
+            batchCount : Int? = default.batchCount,
             batchSize : Int? = default._batchSize,
             batchInterval : Int? = default._batchInterval,
             maxPayloadSize : Int? = default._maxPayloadSize,
+            compression  : CompressionType? = default._compressionType
         ): MqttTargetConfiguration {
 
 
@@ -245,6 +246,7 @@ class MqttTargetConfiguration : TargetConfiguration(), Validate {
                 _batchSize= batchSize
                 _batchInterval= batchInterval
                 _maxPayloadSize= maxPayloadSize
+                _compressionType= compression
             }
             return instance
         }

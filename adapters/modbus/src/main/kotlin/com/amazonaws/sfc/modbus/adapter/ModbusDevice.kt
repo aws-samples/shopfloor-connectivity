@@ -1,4 +1,3 @@
-
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: MIT-0
 
@@ -29,6 +28,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withLock
 import java.lang.ref.WeakReference
+import java.util.concurrent.atomic.AtomicInteger
 
 /**
  * Modbus device implementation (both RTU and TCP)
@@ -36,17 +36,20 @@ import java.lang.ref.WeakReference
  * @property modbus ModbusHandler Modbus protocol handler
  * @param ownerAdapter ModbusAdapter Adapter that uses this modbus device
  */
-class ModbusDevice(private val sourceID: String,
-                   private val configuration: ModbusSourceConfiguration,
-                   val deviceID: Int?,
-                   val modbus: ModbusHandler,
-                   ownerAdapter: ModbusAdapter) {
+class ModbusDevice(
+    private val sourceID: String,
+    private val configuration: ModbusSourceConfiguration,
+    val deviceID: Int?,
+    val modbus: ModbusHandler,
+    ownerAdapter: ModbusAdapter
+) {
 
     private val className = this::class.java.simpleName
 
     private val metricDimensions = mapOf(
         METRICS_DIMENSION_SOURCE to "${configuration.protocolAdapterID}:$sourceID",
-        METRICS_DIMENSION_TYPE to ownerAdapter::class.java.simpleName)
+        METRICS_DIMENSION_TYPE to ownerAdapter::class.java.simpleName
+    )
 
     /**
      * Reads values from a modbus device
@@ -80,14 +83,14 @@ class ModbusDevice(private val sourceID: String,
 
                 // this coroutine will receive and process responses from the device
                 launch("Response Receiver") {
-                   try {
-                       receiveResponses(requests, requestSlots, resultChannel, channels)
-                   }catch (e : Exception){
-                       val ctxErrorLog = logger.get()?.getCtxErrorLog(className, "receiver")
-                       if (ctxErrorLog != null) {
-                           ctxErrorLog("Exception while receiving responses from device ${configuration.sourceAdapterDevice} on adapter ${configuration.protocolAdapterID}: ${e.message}")
-                       }
-                   }
+                    try {
+                        receiveResponses(requests, requestSlots, resultChannel, channels)
+                    } catch (e: Exception) {
+                        val ctxErrorLog = logger.get()?.getCtxErrorLog(className, "receiver")
+                        if (ctxErrorLog != null) {
+                            ctxErrorLog("Exception while receiving responses from device ${configuration.sourceAdapterDevice} on adapter ${configuration.protocolAdapterID}: ${e.message}")
+                        }
+                    }
 
                 }
 
@@ -95,7 +98,7 @@ class ModbusDevice(private val sourceID: String,
                 launch("Request Transmitter") {
                     try {
                         sendRequests(requests, requestSlots)
-                    }catch (e : Exception){
+                    } catch (e: Exception) {
                         val ctxErrorLog = logger.get()?.getCtxErrorLog(className, "transmitter")
                         if (ctxErrorLog != null) {
                             ctxErrorLog("Exception while sending requests to device ${configuration.sourceAdapterDevice} on adapter ${configuration.protocolAdapterID}: ${e.message}")
@@ -134,24 +137,44 @@ class ModbusDevice(private val sourceID: String,
         readResult
     }
 
-    private suspend fun createMetrics(metrics: MetricsCollector?,
-                                      protocolAdapterID: String,
-                                      readDurationInMillis: Double,
-                                      result: SourceReadResult) {
+    private suspend fun createMetrics(
+        metrics: MetricsCollector?,
+        protocolAdapterID: String,
+        readDurationInMillis: Double,
+        result: SourceReadResult
+    ) {
 
         if (metrics == null) return
 
-        metrics.put(protocolAdapterID,
+        metrics.put(
+            protocolAdapterID,
             metrics.buildValueDataPoint(protocolAdapterID, MetricsCollector.METRICS_READS, 1.0, MetricUnits.COUNT, metricDimensions),
-            metrics.buildValueDataPoint(protocolAdapterID, MetricsCollector.METRICS_READ_DURATION, readDurationInMillis, MetricUnits.MILLISECONDS, metricDimensions))
+            metrics.buildValueDataPoint(
+                protocolAdapterID,
+                MetricsCollector.METRICS_READ_DURATION,
+                readDurationInMillis,
+                MetricUnits.MILLISECONDS,
+                metricDimensions
+            )
+        )
 
         if (result is SourceReadSuccess) {
-            metrics.put(protocolAdapterID,
-                metrics.buildValueDataPoint(protocolAdapterID, MetricsCollector.METRICS_VALUES_READ, result.values.size.toDouble(), MetricUnits.COUNT, metricDimensions),
-                metrics.buildValueDataPoint(protocolAdapterID, MetricsCollector.METRICS_READ_SUCCESS, 1.0, MetricUnits.COUNT, metricDimensions))
+            metrics.put(
+                protocolAdapterID,
+                metrics.buildValueDataPoint(
+                    protocolAdapterID,
+                    MetricsCollector.METRICS_VALUES_READ,
+                    result.values.size.toDouble(),
+                    MetricUnits.COUNT,
+                    metricDimensions
+                ),
+                metrics.buildValueDataPoint(protocolAdapterID, MetricsCollector.METRICS_READ_SUCCESS, 1.0, MetricUnits.COUNT, metricDimensions)
+            )
         } else {
-            metrics.put(protocolAdapterID,
-                metrics.buildValueDataPoint(protocolAdapterID, MetricsCollector.METRICS_READ_ERRORS, 1.0, MetricUnits.COUNT, metricDimensions))
+            metrics.put(
+                protocolAdapterID,
+                metrics.buildValueDataPoint(protocolAdapterID, MetricsCollector.METRICS_READ_ERRORS, 1.0, MetricUnits.COUNT, metricDimensions)
+            )
         }
 
     }
@@ -173,29 +196,30 @@ class ModbusDevice(private val sourceID: String,
     private val adapter = WeakReference(ownerAdapter)
 
     // transaction id with lock for requests
-    private var _transactionID = 0
-    private val transactionIdLock = Mutex()
+    private var _transactionID = AtomicInteger()
 
     // generate next transaction id
     private suspend fun nextTransactionID(): UShort? {
 
-        transactionIdLock.withLock {
-            if (requestDepth == 0) {
-                return null
-            }
-
-            if (_transactionID == 0xFFFF) {
-                _transactionID = 0
-            }
-            _transactionID += 1
-            return _transactionID.toTransactionID()
+        if (requestDepth == 0) {
+            return null
         }
+
+        if (_transactionID.get() == 0xFFFF) {
+            _transactionID.set(0)
+        }
+
+        _transactionID.incrementAndGet()
+        return _transactionID.incrementAndGet().toTransactionID()
+
     }
 
     // Combine sets of channels (addresses) to be read for a channel type into larger sets, so they can be read by a single read request
-    private fun optimizedAddressRangesForChannelType(source: ModbusSourceConfiguration,
-                                                     channelType: ModbusChannelType,
-                                                     channels: List<String>? = null): List<Pair<UShort, UShort>> {
+    private fun optimizedAddressRangesForChannelType(
+        source: ModbusSourceConfiguration,
+        channelType: ModbusChannelType,
+        channels: List<String>? = null
+    ): List<Pair<UShort, UShort>> {
 
         val ranges = mutableListOf<Pair<UShort, UShort>>()
         val maxReadLen = maxItemsForType(channelType)
@@ -233,8 +257,10 @@ class ModbusDevice(private val sourceID: String,
     }
 
     // get all channels for a specific type
-    private fun ModbusSourceConfiguration.channelsForType(modbusChannelType: ModbusChannelType,
-                                                          channels: List<String>? = null): List<ModbusChannelConfiguration> =
+    private fun ModbusSourceConfiguration.channelsForType(
+        modbusChannelType: ModbusChannelType,
+        channels: List<String>? = null
+    ): List<ModbusChannelConfiguration> =
         this.channels
             .filter { (it.value.type == modbusChannelType) && (if (channels == null) true else (it.key in channels)) }
             .map { it.value }
@@ -440,25 +466,29 @@ class ModbusDevice(private val sourceID: String,
                 address = address,
                 quantity = size,
                 deviceID = deviceID?.toUByte() ?: DEFAULT_DEVICE_ID,
-                transactionID = nextTransactionID())
+                transactionID = nextTransactionID()
+            )
 
             ModbusChannelType.DISCRETE_INPUT -> ReadDiscreteInputsRequest(
                 address = address,
                 quantity = size,
                 deviceID = deviceID?.toUByte() ?: DEFAULT_DEVICE_ID,
-                transactionID = nextTransactionID())
+                transactionID = nextTransactionID()
+            )
 
             ModbusChannelType.INPUT_REGISTER -> ReadInputRegistersRequest(
                 address = address,
                 quantity = size,
                 deviceID = deviceID?.toUByte() ?: DEFAULT_DEVICE_ID,
-                transactionID = nextTransactionID())
+                transactionID = nextTransactionID()
+            )
 
             ModbusChannelType.HOLDING_REGISTER -> ReadHoldingRegistersRequest(
                 address = address,
                 quantity = size,
                 deviceID = deviceID?.toUByte() ?: DEFAULT_DEVICE_ID,
-                transactionID = nextTransactionID())
+                transactionID = nextTransactionID()
+            )
         }
     }
 

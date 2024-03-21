@@ -26,13 +26,10 @@ import com.amazonaws.sfc.util.MemoryMonitor.Companion.getUsedMemoryMB
 import com.amazonaws.sfc.util.buildScope
 import com.amazonaws.sfc.util.launch
 import com.google.gson.JsonSyntaxException
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import kotlinx.coroutines.withTimeoutOrNull
 import org.eclipse.paho.client.mqttv3.MqttClient
 import org.eclipse.paho.client.mqttv3.MqttMessage
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence
@@ -119,15 +116,16 @@ class MqttAdapter(private val adapterID: String, private val configuration: Mqtt
 
     // co-routine processing the received data
 
-    private val changedDataWorker = scope.launch(context = Dispatchers.IO, name = "Receive Data Handler") {
-        try {
-            for (data in receivedData) {
+    private val changedDataWorker = scope.launch(context = Dispatchers.Default, name = "Receive Data Handler") {
+        while (isActive)
+            try {
+                val data = receivedData.receive()
                 handleDataReceived(data)
+            } catch (e: Exception) {
+                logger.getCtxErrorLogEx(this::class.java.simpleName, "changedDataWorker")("Error processing received data", e)
             }
-        } catch (e: Exception) {
-            logger.getCtxErrorLogEx(this::class.java.simpleName, "changedDataWorker")("Error processing received data", e)
-        }
     }
+
 
     /**
      * Reads a values from a source
@@ -162,7 +160,7 @@ class MqttAdapter(private val adapterID: String, private val configuration: Mqtt
         val start = DateTime.systemDateTime().toEpochMilli()
 
         // Get the values and return result
-        val f: Sequence<Pair<String, ChannelReadValue>> = store?.read(channels) ?: emptySequence()
+        val f: List<Pair<String, ChannelReadValue>> = store?.read(channels) ?: emptyList()
         val data = f.toMap()
 
         val readDurationInMillis = (DateTime.systemDateTime().toEpochMilli() - start).toDouble()
@@ -180,16 +178,20 @@ class MqttAdapter(private val adapterID: String, private val configuration: Mqtt
     ) {
         metricsCollector?.put(
             protocolAdapterID,
-            metricsCollector?.buildValueDataPoint(protocolAdapterID,
+            metricsCollector?.buildValueDataPoint(
+                protocolAdapterID,
                 MetricsCollector.METRICS_MEMORY,
                 getUsedMemoryMB().toDouble(),
                 MetricUnits.MEGABYTES,
-                metricDimensions),
-            metricsCollector?.buildValueDataPoint(protocolAdapterID,
+                metricDimensions
+            ),
+            metricsCollector?.buildValueDataPoint(
+                protocolAdapterID,
                 MetricsCollector.METRICS_READS,
                 1.0,
                 MetricUnits.COUNT,
-                metricDimensions),
+                metricDimensions
+            ),
             metricsCollector?.buildValueDataPoint(
                 protocolAdapterID,
                 MetricsCollector.METRICS_READ_DURATION,
@@ -331,8 +333,12 @@ class MqttAdapter(private val adapterID: String, private val configuration: Mqtt
                 client.subscribe(t) { topic, message: MqttMessage ->
                     // The received data is sent to a buffered channel for further processing
                     runBlocking {
-                        receivedData.submit(ReceivedData(sourceID, channelID, channel, topic, message.toString()), configuration.receivedDataChannelTimeout){ event->
-                            channelSubmitEventHandler(event,
+                        receivedData.submit(
+                            ReceivedData(sourceID, channelID, channel, topic, message.toString()),
+                            configuration.receivedDataChannelTimeout
+                        ) { event ->
+                            channelSubmitEventHandler(
+                                event,
                                 channelName = "$className:receivedData",
                                 tuningChannelSizeName = MqttAdapterConfiguration.CONFIG_RECEIVED_DATA_CHANNEL_SIZE,
                                 currentChannelSize = configuration.receivedDataChannelSize,

@@ -65,6 +65,7 @@ import kotlin.io.path.Path
 import kotlin.io.path.exists
 import kotlin.time.Duration
 import kotlin.time.DurationUnit
+import kotlin.time.measureTime
 import kotlin.time.toDuration
 
 
@@ -236,7 +237,7 @@ open class OpcuaSource(
             logger.getCtxInfoLog(className, "startConnectionWatchdog")("Connection watchdog disabled as it's interval is set to 0")
         }
 
-        return sourceScope.launch(Dispatchers.IO) {
+        return sourceScope.launch(Dispatchers.Default) {
             val log = logger.getCtxLoggers(className, "connectionWatchdog")
             while (isActive) {
                 try {
@@ -341,15 +342,33 @@ open class OpcuaSource(
         if (inSubscriptionReadingMode) Channel<Pair<UaMonitoredItem, ChannelReadValue>>(configuration.changedDataChannelSize) else null
 
     // coroutine handling changed data for subscriptions
-    private val changedDataWorker = if (inSubscriptionReadingMode) sourceScope.launch("$sourceID Data Subscription Handler") {
+    private val changedDataWorker =
+        if (inSubscriptionReadingMode) sourceScope.launch(context = Dispatchers.Default, name = "$sourceID Data Subscription Handler") {
 
-        val log = logger.getCtxLoggers(className, "changedDataWorker")
-        try {
-            onSubscribedNodeData()
-        } catch (e: Exception) {
-            log.errorEx("Error while handling data changes for source \"$sourceID\"", e)
-        }
-    } else null
+            val log = logger.getCtxLoggers(className, "changedDataWorker")
+            if (dataValueChangeChannel == null) return@launch
+
+            while (isActive) {
+                val (monitoredItem, data) = dataValueChangeChannel.receive()
+                try {
+                    // find the node using the client handle
+                    val clientHandle = monitoredItem.clientHandle.toInt()
+                    val node = clientHandlesForNodes[clientHandle]
+
+                    if (node != null) {
+                        log.trace("Received subscription data for source \"$sourceID\", \"${node.channelID}\"")
+                        val duration = measureTime {
+                            dataValueChangesStore?.add(node.channelID, data)
+                        }
+                        log.trace("adding data to data store took $duration")
+                    } else {
+                        log.warning("Received subscription data for source \"$sourceID\" but $clientHandle is unknown")
+                    }
+                } catch (e: Exception) {
+                    logger.getCtxLoggers(className, "onSubscribedNodeData").errorEx("Error processing subscription data for source \"$sourceID\"", e)
+                }
+            }
+        } else null
 
     // *** Event Subscriptions ***
 
@@ -357,12 +376,33 @@ open class OpcuaSource(
     private val eventStore = if (anyEventNodes) SourceDataMultiValuesStore<Map<String, Any>>() else null
 
     // channel to send received events to the coroutine that is handling these changes
-    private val receivedEventsChannel = if (anyEventNodes) Channel<Pair<UaMonitoredItem, Map<String, Any>>>(1000) else null
+    private val receivedEventsChannel = if (anyEventNodes) Channel<Pair<UaMonitoredItem, Map<String, Any>>>(configuration.receivedEventsChannelSize) else null
 
     // coroutine handling received events
-    private val eventHandingWorker = if (receivedEventsChannel != null) sourceScope.launch("Event Data Handler") {
-        onSubscribedEventData()
-    } else null
+    private val eventHandingWorker = if (receivedEventsChannel != null) sourceScope.launch(context = Dispatchers.Default, name = "Event Data Handler") {
+
+        val log = logger.getCtxLoggers(className, "onSubscribedEventData")
+        while (isActive) {
+            val (monitoredItem, eventPropertiesData) = receivedEventsChannel.receive()
+            try {
+                val clientHandle = monitoredItem.clientHandle.toInt()
+                val node: OpcuaNodeData? = clientHandlesForNodes[clientHandle]
+
+                if (node != null) {
+                    log.trace("Received event data for source \"$sourceID\", \"${node.channelID}\"")
+                    val duration = measureTime {
+                        eventStore?.add(node.channelID, eventPropertiesData)
+                    }
+                    log.trace("adding event data to event data store took $duration")
+                } else {
+                    log.warning("Received event data for source \"$sourceID\" but $clientHandle is unknown")
+                }
+            } catch (e: Exception) {
+                logger.getCtxLoggers(className, "eventHandingWorker").errorEx("Error processing event data for source \"$sourceID\"", e)
+            }
+        }
+    }
+    else null
 
 
     // creates the client to communicate with the server the source is reading from
@@ -803,37 +843,6 @@ open class OpcuaSource(
             }
         }
 
-
-    // processes changed node data
-    private suspend fun onSubscribedNodeData() {
-        if (dataValueChangeChannel == null) return
-
-        for ((monitoredItem, data) in dataValueChangeChannel) {
-            // find the node using the client handle
-            val clientHandle = monitoredItem.clientHandle.toInt()
-            val node = clientHandlesForNodes[clientHandle]
-
-            if (node != null) {
-                dataValueChangesStore?.add(node.channelID, data)
-            }
-        }
-    }
-
-    // processes events data
-    private suspend fun onSubscribedEventData() {
-        if (receivedEventsChannel == null) return
-
-        for ((monitoredItem, eventPropertiesData) in receivedEventsChannel) {
-
-            val clientHandle = monitoredItem.clientHandle.toInt()
-            val node = clientHandlesForNodes[clientHandle]
-
-            if (node != null) {
-                eventStore?.add(node.channelID, eventPropertiesData)
-            }
-        }
-    }
-
     private var lock = ReentrantLock()
 
     private fun resetClient(waitFor: Long = 0) {
@@ -886,9 +895,9 @@ open class OpcuaSource(
     }
 
     // get the flow to read the source values, the flow depends on the mode the adapter is using
-    private suspend fun readSourceValues(channels: List<String>?): Sequence<Pair<String, ChannelReadValue>> {
+    private suspend fun readSourceValues(channels: List<String>?): List<Pair<String, ChannelReadValue>> {
 
-        val events = (eventStore?.read(channels) ?: emptySequence()).map { it.first to ChannelReadValue(it.second) }
+        val events = (eventStore?.read(channels) ?: emptyList()).map { it.first to ChannelReadValue(it.second) }
 
         val data = if (configuration.sources[sourceID]!!.readingMode == OpcuaSourceReadingMode.SUBSCRIPTION)
             serverReadsInSubscriptionMode(channels)
@@ -951,20 +960,20 @@ open class OpcuaSource(
 
         try {
 
-            val start = systemDateTime().toEpochMilli()
+            val duration = measureTime {
 
-            // collect and process al read source values
-            readSourceValues(channels).forEach { (channelID, value) ->
-                values[channelID] = processGoodValue(channelID, value, serverTimestamp)
+                // collect and process al read source values
+                readSourceValues(channels).toList().forEach { (channelID, value) ->
+                    values[channelID] = processGoodValue(channelID, value, serverTimestamp)
+                }
+
+                // test if a fault was stored by the fault handler used for the connection with the server of the source
+                if (sourceServerFault != null) {
+                    throw java.lang.Exception(sourceServerFault!!.responseHeader.serviceResult.toString())
+                }
             }
 
-            // test if a fault was stored by the fault handler used for the connection with the server of the source
-            if (sourceServerFault != null) {
-                throw java.lang.Exception(sourceServerFault!!.responseHeader.serviceResult.toString())
-            }
-
-            val readDurationInMillis = (systemDateTime().toEpochMilli() - start).toDouble()
-            createMetrics(protocolAdapterID, readDurationInMillis, values)
+            createMetrics(protocolAdapterID, duration.inWholeMilliseconds.toDouble(), values)
 
         } catch (e: Throwable) {
 
@@ -1011,9 +1020,9 @@ open class OpcuaSource(
         )
     }
 
-    private suspend fun serverReadsInSubscriptionMode(channels: List<String>?) = dataValueChangesStore?.read(channels) ?: emptySequence()
+    private suspend fun serverReadsInSubscriptionMode(channels: List<String>?) = dataValueChangesStore?.read(channels) ?: emptyList()
 
-    private suspend fun serverReadsInPollingMode(channels: List<String>?): Sequence<Pair<String, ChannelReadValue>> =
+    private suspend fun serverReadsInPollingMode(channels: List<String>?): List<Pair<String, ChannelReadValue>> =
 
 
         // partition nodes in smaller batches
@@ -1045,7 +1054,10 @@ open class OpcuaSource(
                                 yield(s to ChannelReadValue(nativeValue, value.sourceTime?.javaInstant))
                             }
                         } else {
-                            logger.getCtxErrorLog(className, "read")("Error reading value for channel \"$s\" from source \"$sourceID\", ${value.statusCode}")
+                            logger.getCtxErrorLog(
+                                className,
+                                "read"
+                            )("Error reading value for channel \"$s\" from source \"$sourceID\", ${value.statusCode}")
                         }
                     }
 
@@ -1053,7 +1065,7 @@ open class OpcuaSource(
                     throw ProtocolAdapterException("Error reading from source \"$sourceID\", $e")
                 }
             }
-        }
+        }.toList()
 
     companion object {
         val DEFAULT_INTERVAL = 1.toDuration(DurationUnit.SECONDS)

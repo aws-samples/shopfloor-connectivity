@@ -79,7 +79,7 @@ class ScheduleReader(
         transformations.isNotEmpty() || sources.values.any { s -> s.channels.any { c -> c.value.transformationID != null } }
 
     // coroutine for reading th data from the inputs
-    private val readerWorker: Job = scope.launch(Dispatchers.IO + CoroutineName("Reader")) {
+    private val readerWorker: Job = scope.launch(Dispatchers.Default + CoroutineName("Reader")) {
         val log = logger.getCtxLoggers(className, "readSourceValues")
         try {
             readSourceValues()
@@ -121,14 +121,14 @@ class ScheduleReader(
     }
 
     // Reads source values using the reader for the used protocol, loops while worker is active.
-// This function can return false to signal the reader it must stop reading data from the source.
+    // This function can return false to signal the reader it must stop reading data from the source.
     private suspend fun readSourceValues() = coroutineScope {
 
         val readResultsChannel =
             Channel<Pair<String, ReadResult?>>(config.tuningConfiguration.scheduleReaderResultsChannelSize, onBufferOverflow = BufferOverflow.SUSPEND)
 
         val log = logger.getCtxLoggers(className, "readSourceValues")
-        val processing = launch(Dispatchers.IO + CoroutineName("Reader")) {
+        val processing = launch(Dispatchers.IO + CoroutineName("processing")) {
             try {
                 // Combined source results from all readers
                 val combinedReaderResults = mutableMapOf<String, SourceReadResult>()
@@ -184,51 +184,22 @@ class ScheduleReader(
             }
         }
 
-        val reader = launch {
+        val reader = launch(context = Dispatchers.IO) {
             val readerLog = logger.getCtxLoggers(className, "reader")
 
-
             while (isActive) {
-
-
                 val readerWorkerQueue =
-                    WorkerQueue<Pair<String, SourceValuesReader>, Unit>(
-                        workers = config.tuningConfiguration.maxConcurrentSourceReaders,
-                        capacity = readers.size,
-                        Dispatchers.IO,
-                        logger = logger
-                    ) { (protocolID, reader) ->
-                        runBlocking {
-                            try {
-                                reader.read { result ->
-                                    readResultsChannel.submit(
-                                        protocolID to result,
-                                        config.tuningConfiguration.scheduleReaderResultsChannelTimeout
-                                    ) { event ->
-                                        channelSubmitEventHandler(
-                                            event = event,
-                                            channelName = "$className:resultsChannel",
-                                            tuningChannelSizeName = TuningConfiguration.CONFIG_SCHEDULE_READER_RESULTS_CHANNEL_SIZE,
-                                            currentChannelSize = config.tuningConfiguration.scheduleReaderResultsChannelSize,
-                                            tuningChannelTimeoutName = TuningConfiguration.CONFIG_SCHEDULE_READER_RESULTS_CHANNEL_TIMEOUT,
-                                            log = readerLog
-                                        )
-                                    }
-                                    readerWorker.isActive
-                                }
-                            } catch (e: Exception) {
-                                if (!e.isJobCancellationException)
-                                    readerLog.errorEx("Error reading from $protocolID", e)
-                            }
-                        }
-                    }
-                try {
+                    buildReaderWorkerQueue(readResultsChannel)
 
+                try {
                     readers.forEach { (protocolID, sourceReader) ->
                         readerWorkerQueue.submit(protocolID to sourceReader)
                     }
-
-                    readerWorkerQueue.await(config.tuningConfiguration.allSourcesReadTimeout)
+                    withTimeout(config.tuningConfiguration.allSourcesReadTimeout) {
+                        readerWorkerQueue.await()
+                    }
+                } catch (t: TimeoutCancellationException) {
+                    readerLog.error("Timeout waiting for source readers to complete")
                 } catch (e: Exception) {
                     if (!e.isJobCancellationException)
                         readerLog.errorEx("Error reading from reader", e)
@@ -237,6 +208,45 @@ class ScheduleReader(
             }
         }
         listOf(reader, processing).joinAll()
+    }
+
+    private fun buildReaderWorkerQueue(readResultsChannel: Channel<Pair<String, ReadResult?>>) =
+        WorkerQueue<Pair<String, SourceValuesReader>, Unit>(
+            workers = config.tuningConfiguration.maxConcurrentSourceReaders,
+            capacity = readers.size,
+            Dispatchers.IO,
+            logger = logger
+        ) { (protocolID, reader) ->
+            readProtocolTask(protocolID, reader, readResultsChannel)
+        }
+
+    private fun readProtocolTask(protocolID: String, reader: SourceValuesReader, readResultsChannel: Channel<Pair<String, ReadResult?>>) {
+        val log = logger.getCtxLoggers(className, "readTask")
+        runBlocking {
+            try {
+                log.trace("Worker start reading $protocolID")
+                reader.read { result ->
+                    log.trace("Worker finished reading $protocolID")
+                    readResultsChannel.submit(
+                        protocolID to result,
+                        config.tuningConfiguration.scheduleReaderResultsChannelTimeout
+                    ) { event ->
+                        channelSubmitEventHandler(
+                            event = event,
+                            channelName = "$className:resultsChannel",
+                            tuningChannelSizeName = TuningConfiguration.CONFIG_SCHEDULE_READER_RESULTS_CHANNEL_SIZE,
+                            currentChannelSize = config.tuningConfiguration.scheduleReaderResultsChannelSize,
+                            tuningChannelTimeoutName = TuningConfiguration.CONFIG_SCHEDULE_READER_RESULTS_CHANNEL_TIMEOUT,
+                            log = log
+                        )
+                    }
+                    readerWorker.isActive
+                }
+            } catch (e: Exception) {
+                if (!e.isJobCancellationException)
+                    log.errorEx("Error reading from $protocolID", e)
+            }
+        }
     }
 
 
@@ -274,46 +284,44 @@ class ScheduleReader(
             val filteredData = applyFilters(transformedData)
 
             if (filteredData.isNotEmpty()) {
-                runBlocking {
-                    // send to aggregator for aggregation
-                    if (schedule.isAggregated) {
-                        (aggregationChannel as Channel?)?.submit(filteredData, config.tuningConfiguration.aggregatorChannelTimeout) { event ->
+
+                // send to aggregator for aggregation
+                if (schedule.isAggregated) {
+                    (aggregationChannel as Channel?)?.submit(filteredData, config.tuningConfiguration.aggregatorChannelTimeout) { event ->
+                        channelSubmitEventHandler(
+                            event = event,
+                            channelName = "$className:aggregationChannel",
+                            tuningChannelSizeName = TuningConfiguration.CONFIG_AGGREGATOR_CHANNEL_SIZE,
+                            currentChannelSize = config.tuningConfiguration.aggregatorChannelSize,
+                            tuningChannelTimeoutName = TuningConfiguration.CONFIG_AGGREGATOR_CHANNEL_TIMEOUT,
+                            log = log
+                        )
+
+                    }
+                } else {
+                    // no aggregation, combine with timestamps and send to output writer
+                    val outputValues = buildOutputValues(schedule, filteredData)
+                    try {
+                        (readerOutputChannel as Channel).submit(outputValues, config.tuningConfiguration.writerInputChannelTimeout) { event ->
                             channelSubmitEventHandler(
-                                event = event,
-                                channelName = "$className:aggregationChannel",
-                                tuningChannelSizeName = TuningConfiguration.CONFIG_AGGREGATOR_CHANNEL_SIZE,
-                                currentChannelSize = config.tuningConfiguration.aggregatorChannelSize,
-                                tuningChannelTimeoutName = TuningConfiguration.CONFIG_AGGREGATOR_CHANNEL_TIMEOUT,
-                                log = log
+                                event,
+                                "$className:readerOutputChannel",
+                                TuningConfiguration.CONFIG_WRITER_INPUT_CHANNEL_TIMEOUT,
+                                config.tuningConfiguration.writerInputChannelSize,
+                                TuningConfiguration.CONFIG_WRITER_INPUT_CHANNEL_TIMEOUT,
+                                log
                             )
-
                         }
-                    } else {
-                        // no aggregation, combine with timestamps and send to output writer
-                        val outputValues = buildOutputValues(schedule, filteredData)
-                        try {
-                            (readerOutputChannel as Channel).submit(outputValues, config.tuningConfiguration.writerInputChannelTimeout) { event ->
-                                channelSubmitEventHandler(
-                                    event,
-                                    "$className:readerOutputChannel",
-                                    TuningConfiguration.CONFIG_WRITER_INPUT_CHANNEL_TIMEOUT,
-                                    config.tuningConfiguration.writerInputChannelSize,
-                                    TuningConfiguration.CONFIG_WRITER_INPUT_CHANNEL_TIMEOUT,
-                                    log
-                                )
-
-                            }
-                            val numberOfValues = outputValues.values.fold(0) { acc, v -> acc + v.channels.size }
-                            metrics?.add(
-                                MetricsDataPoint(
-                                    name = METRICS_MEMORY,
-                                    units = MetricUnits.MEGABYTES,
-                                    value = MetricsValue(getUsedMemoryMB().toDouble())
-                                )
+                        val numberOfValues = outputValues.values.fold(0) { acc, v -> acc + v.channels.size }
+                        metrics?.add(
+                            MetricsDataPoint(
+                                name = METRICS_MEMORY,
+                                units = MetricUnits.MEGABYTES,
+                                value = MetricsValue(getUsedMemoryMB().toDouble())
                             )
-                            metrics?.add(MetricsDataPoint(name = METRICS_VALUES_READ, units = MetricUnits.COUNT, value = MetricsValue(numberOfValues)))
-                        } catch (_: ClosedSendChannelException) {
-                        }
+                        )
+                        metrics?.add(MetricsDataPoint(name = METRICS_VALUES_READ, units = MetricUnits.COUNT, value = MetricsValue(numberOfValues)))
+                    } catch (_: ClosedSendChannelException) {
                     }
                 }
             }

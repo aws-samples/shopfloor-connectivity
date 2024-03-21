@@ -1,4 +1,3 @@
-
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: MIT-0
 
@@ -14,19 +13,22 @@ import com.amazonaws.sfc.log.Logger
 import com.amazonaws.sfc.metrics.*
 import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_DIMENSION_SOURCE
 import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_DIMENSION_SOURCE_CATEGORY_TARGET
-import com.amazonaws.sfc.system.DateTime
 import com.amazonaws.sfc.targets.TargetException
 import com.amazonaws.sfc.util.MemoryMonitor
 import kotlinx.coroutines.runBlocking
+import kotlin.time.Duration
+import kotlin.time.measureTime
 
 /**
  * Implements a debug target writer that writes messages to a logger.
  * @property logger Logger Logger for output
  */
-class DebugTargetWriter(private val targetID: String,
-                        private val configReader: ConfigReader,
-                        private val logger: Logger,
-                        resultHandler: TargetResultHandler?) : TargetWriter {
+class DebugTargetWriter(
+    private val targetID: String,
+    private val configReader: ConfigReader,
+    private val logger: Logger,
+    resultHandler: TargetResultHandler?
+) : TargetWriter {
 
 
     private var _targetConfig: TargetConfiguration? = null
@@ -37,8 +39,10 @@ class DebugTargetWriter(private val targetID: String,
         logger.getCtxInfoLog(className, "")(BuildConfig.toString())
     }
 
-    private val metricDimensions = mapOf(METRICS_DIMENSION_SOURCE to targetID,
-        MetricsCollector.METRICS_DIMENSION_TYPE to className)
+    private val metricDimensions = mapOf(
+        METRICS_DIMENSION_SOURCE to targetID,
+        MetricsCollector.METRICS_DIMENSION_TYPE to className
+    )
 
     private val targetResults = if (resultHandler != null) TargetResultHelper(targetID, resultHandler, logger) else null
 
@@ -57,7 +61,7 @@ class DebugTargetWriter(private val targetID: String,
         val writeConfiguration: DebugTargetsConfiguration = configReader.getConfig()
         // get target configuration
         return writeConfiguration.targets[targetID]
-               ?: throw TargetException("Configuration for type $DEBUG_TARGET for target with ID \"$targetID\" does not exist, existing targets are ${writeConfiguration.targets.keys}")
+            ?: throw TargetException("Configuration for type $DEBUG_TARGET for target with ID \"$targetID\" does not exist, existing targets are ${writeConfiguration.targets.keys}")
     }
 
     private val transformation by lazy { if (targetConfig.template != null) OutputTransformation(targetConfig.template!!, logger) else null }
@@ -69,12 +73,14 @@ class DebugTargetWriter(private val targetID: String,
         val metricsConfiguration = config.targets[targetID]?.metrics ?: MetricsSourceConfiguration()
         if (config.isCollectingMetrics) {
             logger.metricsCollectorMethod = collectMetricsFromLogger
-            MetricsCollector(metricsConfig = config.metrics,
+            MetricsCollector(
+                metricsConfig = config.metrics,
                 metricsSourceName = targetID,
                 metricsSourceType = MetricsSourceType.TARGET_WRITER,
                 metricsSourceConfiguration = metricsConfiguration,
                 staticDimensions = TARGET_METRIC_DIMENSIONS,
-                logger = logger)
+                logger = logger
+            )
         } else null
     }
 
@@ -103,28 +109,50 @@ class DebugTargetWriter(private val targetID: String,
      */
     override suspend fun writeTargetData(targetData: TargetData) {
         val data = buildPayload(targetData)
-        val start = DateTime.systemDateTime().toEpochMilli()
 
-        output(data)
-        val writeDurationInMillis = (DateTime.systemDateTime().toEpochMilli() - start).toDouble()
-        createMetrics(targetID, metricDimensions, data, writeDurationInMillis)
+        val duration = measureTime {
+            output(data)
+        }
+        createMetrics(targetID, metricDimensions, data, duration)
 
         targetResults?.ack(targetData)
     }
 
-    private fun createMetrics(adapterID: String,
-                              metricDimensions: MetricDimensions,
-                              data: String,
-                              writeDurationInMillis: Double) {
+
+    private fun createMetrics(
+        adapterID: String,
+        metricDimensions: MetricDimensions,
+        data: String,
+        duration: Duration
+    ) {
 
         runBlocking {
-            metricsCollector?.put(adapterID,
-                metricsCollector?.buildValueDataPoint(adapterID, MetricsCollector.METRICS_MEMORY, MemoryMonitor.getUsedMemoryMB().toDouble(),MetricUnits.MEGABYTES ),
+            metricsCollector?.put(
+                adapterID,
+                metricsCollector?.buildValueDataPoint(
+                    adapterID,
+                    MetricsCollector.METRICS_MEMORY,
+                    MemoryMonitor.getUsedMemoryMB().toDouble(),
+                    MetricUnits.MEGABYTES
+                ),
                 metricsCollector?.buildValueDataPoint(adapterID, MetricsCollector.METRICS_WRITES, 1.0, MetricUnits.COUNT, metricDimensions),
                 metricsCollector?.buildValueDataPoint(adapterID, MetricsCollector.METRICS_MESSAGES, 1.0, MetricUnits.COUNT, metricDimensions),
-                metricsCollector?.buildValueDataPoint(adapterID, MetricsCollector.METRICS_WRITE_DURATION, writeDurationInMillis, MetricUnits.MILLISECONDS, metricDimensions),
+                metricsCollector?.buildValueDataPoint(
+                    adapterID,
+                    MetricsCollector.METRICS_WRITE_DURATION,
+                    duration.inWholeMilliseconds.toDouble(),
+                    MetricUnits.MILLISECONDS,
+                    metricDimensions
+                ),
                 metricsCollector?.buildValueDataPoint(adapterID, MetricsCollector.METRICS_WRITE_SUCCESS, 1.0, MetricUnits.COUNT, metricDimensions),
-                metricsCollector?.buildValueDataPoint(adapterID, MetricsCollector.METRICS_WRITE_SIZE, data.length.toDouble(), MetricUnits.BYTES, metricDimensions))
+                metricsCollector?.buildValueDataPoint(
+                    adapterID,
+                    MetricsCollector.METRICS_WRITE_SIZE,
+                    data.length.toDouble(),
+                    MetricUnits.BYTES,
+                    metricDimensions
+                )
+            )
         }
     }
 
@@ -142,7 +170,12 @@ class DebugTargetWriter(private val targetID: String,
         @JvmStatic
         @Suppress("unused")
         fun newInstance(vararg createParameters: Any?) =
-            newInstance(createParameters[0] as ConfigReader, createParameters[1] as String, createParameters[2] as Logger, createParameters[3] as TargetResultHandler?)
+            newInstance(
+                createParameters[0] as ConfigReader,
+                createParameters[1] as String,
+                createParameters[2] as Logger,
+                createParameters[3] as TargetResultHandler?
+            )
 
         /**
          * Creates a new instance of a debugger target.
@@ -170,7 +203,8 @@ class DebugTargetWriter(private val targetID: String,
         }
 
         val TARGET_METRIC_DIMENSIONS = mapOf(
-            MetricsCollector.METRICS_DIMENSION_SOURCE_CATEGORY to METRICS_DIMENSION_SOURCE_CATEGORY_TARGET)
+            MetricsCollector.METRICS_DIMENSION_SOURCE_CATEGORY to METRICS_DIMENSION_SOURCE_CATEGORY_TARGET
+        )
 
 
     }

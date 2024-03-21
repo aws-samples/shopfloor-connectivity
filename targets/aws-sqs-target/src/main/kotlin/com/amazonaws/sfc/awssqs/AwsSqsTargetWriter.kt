@@ -195,7 +195,7 @@ class AwsSqsTargetWriter(
     }
 
     private fun CoroutineScope.timerJob(): Job {
-        return launch(context = Dispatchers.IO, name = "Timeout timer") {
+        return launch(context = Dispatchers.Default, name = "Timeout timer") {
 
             return@launch try {
                 delay(targetConfig.interval)
