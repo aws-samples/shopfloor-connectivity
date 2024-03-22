@@ -17,6 +17,8 @@ import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_CONNECTION_E
 import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_DIMENSION_SOURCE
 import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_DIMENSION_SOURCE_CATEGORY_ADAPTER
 import com.amazonaws.sfc.mqtt.config.MqttAdapterConfiguration
+import com.amazonaws.sfc.mqtt.config.MqttAdapterConfiguration.Companion.DEFAULT_RECEIVED_DATA_CHANNEL_SIZE
+import com.amazonaws.sfc.mqtt.config.MqttAdapterConfiguration.Companion.DEFAULT_RECEIVED_DATA_CHANNEL_TIMEOUT
 import com.amazonaws.sfc.mqtt.config.MqttChannelConfiguration
 import com.amazonaws.sfc.mqtt.config.MqttConfiguration
 import com.amazonaws.sfc.mqtt.config.MqttSourceConfiguration
@@ -36,6 +38,8 @@ import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence
 import java.time.Instant
 import java.util.*
 import kotlin.time.Duration
+import kotlin.time.DurationUnit
+import kotlin.time.toDuration
 
 
 class MqttAdapter(private val adapterID: String, private val configuration: MqttConfiguration, private val logger: Logger) : ProtocolAdapter {
@@ -66,6 +70,7 @@ class MqttAdapter(private val adapterID: String, private val configuration: Mqtt
 
     private val adapterMetricDimensions = mapOf(MetricsCollector.METRICS_DIMENSION_TYPE to className)
 
+    private val adapterConfiguration = configuration.mqttProtocolAdapters[adapterID]
 
     // clients for each broker used by the sources
     private val sourceClients = mutableMapOf<String, MqttClient?>()
@@ -112,17 +117,21 @@ class MqttAdapter(private val adapterID: String, private val configuration: Mqtt
 
 
     // channel to send data changes to the coroutine that is handling these changes
-    private val receivedData = Channel<ReceivedData>(configuration.receivedDataChannelSize)
+    private val receivedData = Channel<ReceivedData>(adapterConfiguration?.receivedDataChannelSize ?: DEFAULT_RECEIVED_DATA_CHANNEL_SIZE)
 
     // co-routine processing the received data
 
     private val changedDataWorker = scope.launch(context = Dispatchers.Default, name = "Receive Data Handler") {
-        while (isActive)
+        changedDataTask(receivedData, this)
+    }
+
+    private suspend fun changedDataTask(channel: Channel<ReceivedData>, scope: CoroutineScope) {
+        while (scope.isActive)
             try {
-                val data = receivedData.receive()
+                val data = channel.receive()
                 handleDataReceived(data)
             } catch (e: Exception) {
-                logger.getCtxErrorLogEx(this::class.java.simpleName, "changedDataWorker")("Error processing received data", e)
+                logger.getCtxErrorLogEx(scope::class.java.simpleName, "changedDataWorker")("Error processing received data", e)
             }
     }
 
@@ -280,7 +289,6 @@ class MqttAdapter(private val adapterID: String, private val configuration: Mqtt
 
         val log = logger.getCtxLoggers(className, "createServerClient")
 
-
         val sourceConfiguration = sources[sourceID]
         if (sourceConfiguration == null) {
             log.error("Source \"$sourceID\" does not exist, available sources are ${sources.keys}")
@@ -326,28 +334,39 @@ class MqttAdapter(private val adapterID: String, private val configuration: Mqtt
      * @param client MqttClient The connected client
      */
     private fun setupSourceSubscriptions(sourceID: String, source: MqttSourceConfiguration, client: MqttClient) {
-        val log = logger.getCtxLoggers(className, "sourceSubscriber")
         // Channels for the source have 1 or more topics they can subscribe to
         source.channels.forEach { (channelID, channel) ->
             channel.topics.forEach { t ->
                 client.subscribe(t) { topic, message: MqttMessage ->
                     // The received data is sent to a buffered channel for further processing
-                    runBlocking {
-                        receivedData.submit(
-                            ReceivedData(sourceID, channelID, channel, topic, message.toString()),
-                            configuration.receivedDataChannelTimeout
-                        ) { event ->
-                            channelSubmitEventHandler(
-                                event,
-                                channelName = "$className:receivedData",
-                                tuningChannelSizeName = MqttAdapterConfiguration.CONFIG_RECEIVED_DATA_CHANNEL_SIZE,
-                                currentChannelSize = configuration.receivedDataChannelSize,
-                                tuningChannelTimeoutName = MqttAdapterConfiguration.CONFIG_RECEIVED_DATA_CHANNEL_TIMEOUT,
-                                log = log
-                            )
-                        }
-                    }
+                    subscriptionHandler(receivedData, sourceID, channelID, channel, topic, message)
                 }
+            }
+        }
+    }
+
+    private fun subscriptionHandler(
+        receivedDataChannel: Channel<ReceivedData>,
+        sourceID: String,
+        channelID: String,
+        channel: MqttChannelConfiguration,
+        topic: String,
+        message: MqttMessage,
+    ) {
+        val log = logger.getCtxLoggers(className, "sourceSubscriber")
+        runBlocking {
+            receivedDataChannel.submit(
+                ReceivedData(sourceID, channelID, channel, topic, message.toString()),
+                adapterConfiguration?.receivedDataChannelTimeout ?: DEFAULT_RECEIVED_DATA_CHANNEL_TIMEOUT.toDuration(DurationUnit.MILLISECONDS)
+            ) { event ->
+                channelSubmitEventHandler(
+                    event,
+                    channelName = "$className:receivedData",
+                    tuningChannelSizeName = MqttAdapterConfiguration.CONFIG_RECEIVED_DATA_CHANNEL_SIZE,
+                    currentChannelSize = adapterConfiguration?.receivedDataChannelSize ?: 0,
+                    tuningChannelTimeoutName = MqttAdapterConfiguration.CONFIG_RECEIVED_DATA_CHANNEL_TIMEOUT,
+                    log = log
+                )
             }
         }
     }

@@ -9,6 +9,8 @@ import com.amazonaws.sfc.config.*
 import com.amazonaws.sfc.metrics.MetricsSourceConfiguration
 import com.amazonaws.sfc.mqtt.config.MqttConfiguration.Companion.MQTT_ADAPTER
 import com.google.gson.annotations.SerializedName
+import kotlin.time.DurationUnit
+import kotlin.time.toDuration
 
 @ConfigurationClass
 class MqttAdapterConfiguration : ProtocolAdapterConfiguration(), Validate {
@@ -18,6 +20,16 @@ class MqttAdapterConfiguration : ProtocolAdapterConfiguration(), Validate {
 
     val brokers: Map<String, MqttBrokerConfiguration>
         get() = _brokers
+
+    @SerializedName(CONFIG_RECEIVED_DATA_CHANNEL_SIZE)
+    protected val _receivedDataChannelSize = DEFAULT_RECEIVED_DATA_CHANNEL_SIZE
+    val receivedDataChannelSize
+        get() = _receivedDataChannelSize
+
+    @SerializedName(CONFIG_RECEIVED_DATA_CHANNEL_TIMEOUT)
+    protected val _receivedDataChannelTimeout = DEFAULT_RECEIVED_DATA_CHANNEL_TIMEOUT
+    val receivedDataChannelTimeout
+        get() = _receivedDataChannelTimeout.toDuration(DurationUnit.MILLISECONDS)
 
     @Throws(ConfigurationException::class)
     override fun validate() {
@@ -34,6 +46,9 @@ class MqttAdapterConfiguration : ProtocolAdapterConfiguration(), Validate {
         const val CONFIG_MQTT_BROKERS_SERVERS = "Brokers"
         const val CONFIG_RECEIVED_DATA_CHANNEL_SIZE = "ReceivedDataChannelSize"
         const val CONFIG_RECEIVED_DATA_CHANNEL_TIMEOUT = "ReceivedDataChannelTimeout"
+
+        const val DEFAULT_RECEIVED_DATA_CHANNEL_SIZE = 1000
+        const val DEFAULT_RECEIVED_DATA_CHANNEL_TIMEOUT = 1000
 
         private val default = MqttAdapterConfiguration()
 

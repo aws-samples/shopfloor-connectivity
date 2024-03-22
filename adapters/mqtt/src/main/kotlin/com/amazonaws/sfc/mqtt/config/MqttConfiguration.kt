@@ -30,15 +30,6 @@ class MqttConfiguration : SourceAdapterBaseConfiguration() {
     val mqttProtocolAdapters: Map<String, MqttAdapterConfiguration>
         get() = _protocolAdapters.filter { it.value.protocolAdapterType == MQTT_ADAPTER }
 
-    @SerializedName(CONFIG_RECEIVED_DATA_CHANNEL_SIZE)
-    protected val _receivedDataChannelSize = 1000
-    val receivedDataChannelSize
-        get() = _receivedDataChannelSize
-
-    @SerializedName(CONFIG_RECEIVED_DATA_CHANNEL_TIMEOUT)
-    protected val _receivedDataChannelTimeout = 1000
-    val receivedDataChannelTimeout
-        get() = _receivedDataChannelTimeout.toDuration(DurationUnit.MILLISECONDS)
 
     @Throws(ConfigurationException::class)
     override fun validate() {
