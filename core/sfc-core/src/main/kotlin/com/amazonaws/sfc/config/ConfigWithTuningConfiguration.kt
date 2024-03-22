@@ -20,6 +20,6 @@ class ConfigWithTuningConfiguration : Validate {
 
     override var validated: Boolean
         get() = true
-        set(value) {}
+        set(_) {}
 
 }

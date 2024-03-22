@@ -269,7 +269,7 @@ class MqttTargetWriter(
                 val itemStr = if (doesBatching) " containing ${buffer.size} items " else " "
                 log.trace("Published MQTT${compressedStr}message to topic ${targetConfig.topicName} with size of ${mqttMessage.payload.size.byteCountString} ${itemStr}in $duration")
 
-                createMetrics(targetID, metricDimensions, mqttMessage.payload.size, duration ?: Duration.ZERO)
+                createMetrics(targetID, metricDimensions, mqttMessage.payload.size, duration )
             }
 
         } catch (e: Exception) {

@@ -39,7 +39,7 @@ class CustomConfigProvider(private val configStr: String, private val configVeri
                     }
                 }
                 // simulate building a new config every minute
-                this@CustomConfigProvider.ch.send(configStr)
+                ch.send(configStr)
                 delay(60000)
             }
         } catch (e: Exception) {

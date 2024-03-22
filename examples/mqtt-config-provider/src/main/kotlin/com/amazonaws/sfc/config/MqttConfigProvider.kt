@@ -18,6 +18,7 @@ import java.net.URL
 import java.net.URLConnection
 import java.security.PublicKey
 import kotlin.coroutines.CoroutineContext
+import kotlin.time.Duration
 
 @ConfigurationClass
 class MqttConfigProvider(
@@ -29,7 +30,7 @@ class MqttConfigProvider(
     private val className = this::class.java.simpleName
 
     // channel used to send configurations to SFC-Core
-    private val ch = Channel<String>(1)
+    private val configurationChannel = Channel<String>(1)
 
     private val scope = buildScope("MqttConfigProvider")
 
@@ -39,7 +40,7 @@ class MqttConfigProvider(
     }
 
     private var _mqttClient: MqttClient? = null
-    private suspend fun getClient(context: CoroutineContext): MqttClient {
+    private suspend fun getClient(context: CoroutineScope): MqttClient {
 
         val log = logger.getCtxLoggers(className, "getClient")
 
@@ -107,30 +108,29 @@ class MqttConfigProvider(
         } else null
     }
 
-
     val worker = scope.launch {
-        providerTask( ch,this)
+        providerWorker(configurationChannel, this)
     }
 
-    private suspend fun providerTask( channel : Channel<String>, coroutineScope: CoroutineScope) {
-        val channel = Channel<String>()
+
+    private suspend fun providerWorker(channel : Channel<String>, context: CoroutineScope){
+
         val log = logger.getCtxLoggers(className, "mqtt config provider")
         var loadedLocalFile = false
 
-        if (providerConfig.useLocalConfigFileAtStartUp && providerConfig.localConfigFile?.exists() == true) {
+        if ( providerConfig.useLocalConfigFileAtStartUp && providerConfig.localConfigFile?.exists() == true) {
             log.info("Loading existing local configuration file ${providerConfig.localConfigFile!!.absolutePath}")
             try {
                 val configStr = providerConfig.localConfigFile!!.readText()
-                loadedLocalFile = emitConfiguration(configStr)
+                loadedLocalFile = emitConfiguration(configurationChannel, configStr)
             } catch (e: Exception) {
                 log.errorEx("Error loading configuration from local file", e)
             }
-        } else {
+        } else{
             log.info("Local configuration file ${providerConfig.localConfigFile!!.absolutePath} does not exist")
         }
 
-
-        val client = getClient(coroutineScope.coroutineContext)
+        val client = getClient(context)
 
         if (!loadedLocalFile) {
             log.info("No configuration from local configuration file, waiting for configuration from broker  ${providerConfig.endPoint} topic ${providerConfig.topicName}")
@@ -141,20 +141,12 @@ class MqttConfigProvider(
         client.subscribe(providerConfig.topicName) { _, message ->
             log.info("Received configuration from topic ${providerConfig.topicName}")
             val configStr = downLoadConfiguration(message.payload) ?: String(message.payload)
-            emitConfiguration(configStr)
+            emitConfiguration(configurationChannel, configStr)
         }
 
-        while (coroutineScope.isActive) {
-            try {
-                channel.send(channel.receive())
-            } catch (e: Exception) {
-                log.errorEx("Error sending configuration to SFC-Core", e)
-                break
-            }
-        }
+        delay(Duration.INFINITE)
     }
-
-    private fun emitConfiguration(configStr: String) : Boolean{
+    private fun emitConfiguration(ch : Channel<String>, configStr: String) : Boolean{
 
         val log = logger.getCtxLoggers(className, "validateAndEmitConfiguration")
         return try {
@@ -190,7 +182,7 @@ class MqttConfigProvider(
     }
 
 
-    override val configuration: Channel<String> = ch
+    override val configuration: Channel<String> = configurationChannel
 
     companion object {
 
