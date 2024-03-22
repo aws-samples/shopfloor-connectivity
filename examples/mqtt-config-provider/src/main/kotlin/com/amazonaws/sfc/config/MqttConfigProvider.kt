@@ -30,6 +30,7 @@ class MqttConfigProvider(
     // channel used to send configurations to SFC-Core
     private val configurationChannel = Channel<String>(1)
 
+
     private val scope = buildScope("MqttConfigProvider")
 
     // Get initial JSON config, this config contains the information to connect and subscribe to the topic and a reference to a stored local configuration file
