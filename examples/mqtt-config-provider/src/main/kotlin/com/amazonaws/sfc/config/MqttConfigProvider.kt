@@ -17,8 +17,6 @@ import java.io.InputStreamReader
 import java.net.URL
 import java.net.URLConnection
 import java.security.PublicKey
-import kotlin.coroutines.CoroutineContext
-import kotlin.time.Duration
 
 @ConfigurationClass
 class MqttConfigProvider(
@@ -109,16 +107,9 @@ class MqttConfigProvider(
     }
 
     val worker = scope.launch {
-        providerWorker(configurationChannel, this)
-    }
-
-
-    private suspend fun providerWorker(channel : Channel<String>, context: CoroutineScope){
-
         val log = logger.getCtxLoggers(className, "mqtt config provider")
         var loadedLocalFile = false
-
-        if ( providerConfig.useLocalConfigFileAtStartUp && providerConfig.localConfigFile?.exists() == true) {
+        if (providerConfig.useLocalConfigFileAtStartUp && providerConfig.localConfigFile?.exists() == true) {
             log.info("Loading existing local configuration file ${providerConfig.localConfigFile!!.absolutePath}")
             try {
                 val configStr = providerConfig.localConfigFile!!.readText()
@@ -126,26 +117,22 @@ class MqttConfigProvider(
             } catch (e: Exception) {
                 log.errorEx("Error loading configuration from local file", e)
             }
-        } else{
+        } else {
             log.info("Local configuration file ${providerConfig.localConfigFile!!.absolutePath} does not exist")
         }
-
-        val client = getClient(context)
-
+        val client = getClient(this)
         if (!loadedLocalFile) {
             log.info("No configuration from local configuration file, waiting for configuration from broker  ${providerConfig.endPoint} topic ${providerConfig.topicName}")
         }
-
         log.info("Connected to ${providerConfig.endPoint}, subscribing to topic ${providerConfig.topicName}")
-
         client.subscribe(providerConfig.topicName) { _, message ->
             log.info("Received configuration from topic ${providerConfig.topicName}")
             val configStr = downLoadConfiguration(message.payload) ?: String(message.payload)
             emitConfiguration(configurationChannel, configStr)
         }
-
-        delay(Duration.INFINITE)
     }
+
+
     private fun emitConfiguration(ch : Channel<String>, configStr: String) : Boolean{
 
         val log = logger.getCtxLoggers(className, "validateAndEmitConfiguration")
