@@ -162,7 +162,6 @@ class AwsIotCoreTargetWriter(
      * @see TargetWriter
      */
     override suspend fun close() {
-        targetDataChannel.close()
         writer.cancel()
     }
 
@@ -294,7 +293,8 @@ class AwsIotCoreTargetWriter(
             }
 
             val compressedStr = if (targetConfig.compressionType != CompressionType.NONE) " compressed " else " "
-            log.trace("Published${compressedStr}message with size of $payloadSize bytes in in $duration")
+            val itemStr = if (doesBatching) " containing ${buffer.size} items " else " "
+            log.trace("Published MQTT${compressedStr}message with size of $payloadSize bytes${itemStr}in $duration")
 
             createMetrics(targetID, metricDimensions, buffer.size, payloadSize, duration)
             log.trace("Published message to topic \"${targetConfig.topicName}\"")

@@ -260,8 +260,10 @@ class MqttTargetWriter(
                     targetResults?.ackBuffered()
                 }
             }
-            log.trace("Published${if (targetConfig.compressionType != CompressionType.NONE) " compressed " else " "}message with size of ${mqttMessage.payload.size.byteCountString} in $duration")
-            createMetrics(targetID, metricDimensions, duration.inWholeMilliseconds.toDouble())
+
+            val compressedStr = if (targetConfig.compressionType != CompressionType.NONE) " compressed " else " "
+            val itemStr = if (doesBatching) " containing ${buffer.size} items " else " "
+            log.trace("Published MQTT${compressedStr}message with size of ${mqttMessage.payload.size.byteCountString} bytes${itemStr}in $duration")
 
         } catch (e: Exception) {
             runBlocking { metricsCollector?.put(targetID, METRICS_WRITE_ERRORS, 1.0, MetricUnits.COUNT, metricDimensions) }

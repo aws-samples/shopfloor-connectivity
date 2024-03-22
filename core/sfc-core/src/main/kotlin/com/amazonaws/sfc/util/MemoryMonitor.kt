@@ -56,7 +56,7 @@ class MemoryMonitor(
                     memoryUsage = memoryUsage.drop(trendSamplesRecent).toMutableList()
                 }
             } else {
-                log.trace("Currently using ${asMB(usedMemory)} of available  $maxMemory MB")
+                log.trace("Currently using ${asMB(usedMemory)} MB  of available  ${maxMemory} MB")
             }
         }
     }
@@ -64,7 +64,7 @@ class MemoryMonitor(
     private fun memoryTrendUpStr(totalTrend: Double, recentTrend: Double, usedMemory: Long): String {
         val trendStr = "Memory usage is growing, trend over last ${interval * memoryUsage.size} is ${(totalTrend + 0.5).toInt()}"
         val recentStr = "over the last ${interval * trendSamplesRecent} the trend is ${(recentTrend + 0.5).toInt()}"
-        val currentStr = "currently using ${asMB(usedMemory)} of available $maxMemory MB"
+        val currentStr = "currently using ${asMB(usedMemory)} MB of available $maxMemory MB"
         return "$trendStr, $recentStr, $currentStr"
     }
 
@@ -95,7 +95,14 @@ class MemoryMonitor(
             else -> ""
         }
         val duration = interval * samples.size
-        return "$duration: ${memDeltaStr}, trend is ${round(trend, 2)}"
+        val trendAsInt = (trend + 0.5).toInt()
+        val trendStr = when{
+            trendAsInt < 0 -> "down"
+            trendAsInt >0 ->"up"
+            else -> "flat"
+        }
+
+        return "$duration: ${memDeltaStr}, trend is $trendStr} ($trendAsInt)"
     }
 
 
