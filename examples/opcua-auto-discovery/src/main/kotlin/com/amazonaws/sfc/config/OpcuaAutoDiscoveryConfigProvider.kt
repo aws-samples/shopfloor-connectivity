@@ -51,7 +51,10 @@ class OpcuaAutoDiscoveryConfigProvider(
     private var providerConfig: AutoDiscoveryProviderConfiguration? = AutoDiscoveryProviderConfiguration()
 
     val discoveryWorker = scope.launch(context = Dispatchers.IO) {
+        discoverTask(configuration)
+    }
 
+    private suspend fun OpcuaAutoDiscoveryConfigProvider.discoverTask(channel: Channel<String>) {
         val log = logger.getCtxLoggers(className, "discoveryWorker")
 
         var allSourcesSuccessfullyDiscovered = false
@@ -77,7 +80,7 @@ class OpcuaAutoDiscoveryConfigProvider(
                 // if no autodiscovery sources just emit received configuration
                 if (providerConfig == null) {
                     log.error("No autodiscovery configured")
-                    return@launch
+                    return
                 }
 
                 // make config setting available in class scope
@@ -103,7 +106,7 @@ class OpcuaAutoDiscoveryConfigProvider(
                     checkIfEmptySourcesHaveAutoDiscoveryConfiguration(opcuaConfigInput, providerConfig)
                 } catch (e: Exception) {
                     log.errorEx("Error validating autodiscovery configuration", e)
-                    return@launch
+                    return
                 }
 
                 allSourcesSuccessfullyDiscovered = true
@@ -123,12 +126,12 @@ class OpcuaAutoDiscoveryConfigProvider(
 
                 // emit configuration if created sources configuration is valid
                 if (validateSources(configOutputSources, log)) {
-                    emitConfiguration(buildConfigOutputString(configOutput))
+                    emitConfiguration(channel, buildConfigOutputString(configOutput))
                 }
 
                 // all sources have been discovered successfully, no need for retry to failed sources
                 if (allSourcesSuccessfullyDiscovered) {
-                    return@launch
+                    return
                 }
 
             } catch (e: Exception) {
@@ -137,12 +140,11 @@ class OpcuaAutoDiscoveryConfigProvider(
 
             // If a period for retry was configured retry if discovery for a source did not return any nodes.
             retryCount += 1
-            if (waitBeforeRetry == null || retryCount > maxRetries) return@launch
+            if (waitBeforeRetry == null || retryCount > maxRetries) return
 
             log.error("Retrying autodiscovery in $waitBeforeRetry")
             delay(waitBeforeRetry!!)
         }
-
     }
 
     private fun addNodeChannelsForSource(
@@ -325,12 +327,12 @@ class OpcuaAutoDiscoveryConfigProvider(
     }
 
 
-    private suspend fun emitConfiguration(configStr: String) {
+    private suspend fun emitConfiguration(channel : Channel<String>, configStr: String) {
         if (lastConfig != configStr) {
             val log = logger.getCtxLoggers(className, "emitConfiguration")
             log.trace("Emitting configuration to SFC core\n$configStr")
             // send the configuration to the SFC Core
-            configuration.send(configStr)
+            channel.send(configStr)
             saveConfiguration(configStr)
             lastConfig = configStr
         }

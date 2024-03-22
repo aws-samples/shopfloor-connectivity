@@ -107,7 +107,7 @@ class RouterTargetWriter(
 
 
     // Worker to process received results from target
-    private val resultWorker = launchResultHandlerWorker()
+    private val resultWorker = launchResultHandlerWorker(resultChannel)
 
     override val returnedData: ResulHandlerReturnedData? by lazy {
 
@@ -225,11 +225,11 @@ class RouterTargetWriter(
     }
 
     // Start handling results from primary and secondary targets
-    private fun launchResultHandlerWorker() = targetScope.launch("Result processor for target $targetID") {
+    private fun launchResultHandlerWorker(channel : Channel<TargetResult>) = targetScope.launch("Result processor for target $targetID") {
 
         while (isActive) {
             try {
-                val resultData = resultChannel.receive()
+                val resultData = channel.receive()
                 handleTargetResults(resultData)
             } catch (e: Exception) {
                 logger.getCtxErrorLogEx(className, "launchResultHandlerWorker")("Error handling result", e)

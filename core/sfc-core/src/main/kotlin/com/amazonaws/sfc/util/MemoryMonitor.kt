@@ -46,8 +46,8 @@ class MemoryMonitor(
                                 if (memoryUsage.size > trendSamplesRecent) ", over last ${memUsageStr(memoryUsage, totalTrend)}" else ""
                     )
                 }
-                if (memoryUsage.size > trendSamplesRecent && totalTrend > 0) {
-                    log.warning(memoryTrendUpStr(totalTrend, recentTrend, usedMemory))
+                if (memoryUsage.size > trendSamplesRecent && totalTrend > 0 ) {
+                    log.warning(memoryTrendUpStr(totalTrend, memoryUsage.last() - memoryUsage.first(), recentTrend, recentSamples.last() - recentSamples.first(), usedMemory))
                     Runtime.getRuntime().gc()
 
                 }
@@ -56,14 +56,14 @@ class MemoryMonitor(
                     memoryUsage = memoryUsage.drop(trendSamplesRecent).toMutableList()
                 }
             } else {
-                log.trace("Currently using ${asMB(usedMemory)} MB  of available  ${maxMemory} MB")
+                log.trace("Currently using ${asMB(usedMemory)} MB  of available  $maxMemory MB")
             }
         }
     }
 
-    private fun memoryTrendUpStr(totalTrend: Double, recentTrend: Double, usedMemory: Long): String {
-        val trendStr = "Memory usage is growing, trend over last ${interval * memoryUsage.size} is ${(totalTrend + 0.5).toInt()}"
-        val recentStr = "over the last ${interval * trendSamplesRecent} the trend is ${(recentTrend + 0.5).toInt()}"
+    private fun memoryTrendUpStr(totalTrend: Double, totalDelta : Long, recentTrend: Double, recentDelta: Long, usedMemory: Long): String {
+        val trendStr = "Amount of used memory is growing with ${totalDelta.byteCountString}, trend over last ${interval * memoryUsage.size} is ${(totalTrend + 0.5).toInt()}"
+        val recentStr = "over the most recent ${interval * trendSamplesRecent} memory usage change was ${recentDelta.byteCountString} the trend is ${(recentTrend + 0.5).toInt()}"
         val currentStr = "currently using ${asMB(usedMemory)} MB of available $maxMemory MB"
         return "$trendStr, $recentStr, $currentStr"
     }
@@ -102,7 +102,7 @@ class MemoryMonitor(
             else -> "flat"
         }
 
-        return "$duration: ${memDeltaStr}, trend is $trendStr} ($trendAsInt)"
+        return "$duration: ${memDeltaStr}, trend is $trendStr ($trendAsInt)"
     }
 
 

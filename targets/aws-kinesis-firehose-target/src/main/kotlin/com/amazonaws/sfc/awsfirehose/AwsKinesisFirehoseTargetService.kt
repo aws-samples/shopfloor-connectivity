@@ -17,7 +17,7 @@ import kotlinx.coroutines.runBlocking
  */
 class AwsKinesisFirehoseTargetService : ServiceMain() {
 
-    override fun createServiceInstance(args: Array<String>, configuration: String, logger: Logger): Service {
+    override fun createServiceInstance(args: Array<String>, configuration: String, logger: Logger): Service? {
         return createIpcTargetServer(args, configuration, AWS_KINESIS_FIREHOSE, logger) { _configReader, _targetID, _logger, _resultHandler ->
             AwsFirehoseTargetWriter.newInstance(_configReader, _targetID, _logger, _resultHandler)
         }

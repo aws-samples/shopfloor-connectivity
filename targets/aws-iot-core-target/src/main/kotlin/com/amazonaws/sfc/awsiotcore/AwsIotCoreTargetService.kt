@@ -19,7 +19,7 @@ import kotlinx.coroutines.runBlocking
  */
 class AwsIotCoreTargetService : ServiceMain() {
 
-    override fun createServiceInstance(args: Array<String>, configuration: String, logger: Logger): Service {
+    override fun createServiceInstance(args: Array<String>, configuration: String, logger: Logger): Service? {
         return createIpcTargetServer(args, configuration, AWS_IOT_CORE_TARGET, logger) { _configReader, _targetID, _logger, _resultHandler ->
             AwsIotCoreTargetWriter.newInstance(_configReader, _targetID, _logger, _resultHandler)
         }

@@ -18,7 +18,7 @@ import kotlinx.coroutines.runBlocking
  */
 
 class ModbusTcpProtocolService : ServiceMain() {
-    override fun createServiceInstance(args: Array<String>, configuration: String, logger: Logger): Service {
+    override fun createServiceInstance(args: Array<String>, configuration: String, logger: Logger): Service? {
         return createProtocolAdapterService(args, configuration, logger) { _adapterID: String, _configReader, _logger ->
             createModbusTcpAdapter(_adapterID, _configReader, _logger)
         }

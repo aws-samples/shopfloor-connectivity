@@ -17,7 +17,7 @@ import kotlinx.coroutines.runBlocking
  */
 class AwsSitewiseTargetService : ServiceMain() {
 
-    override fun createServiceInstance(args: Array<String>, configuration: String, logger: Logger): Service {
+    override fun createServiceInstance(args: Array<String>, configuration: String, logger: Logger): Service? {
         return createIpcTargetServer(args, configuration, AWS_SITEWISE, logger) { _configReader, _targetID, _logger, _resultHandler ->
             AwsSiteWiseTargetWriter.newInstance(_configReader, _targetID, _logger, _resultHandler)
         }

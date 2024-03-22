@@ -14,7 +14,7 @@ import kotlinx.coroutines.runBlocking
 
 // S3 target IPC service
 class AwsS3TargetService : ServiceMain() {
-    override fun createServiceInstance(args: Array<String>, configuration: String, logger: Logger): Service {
+    override fun createServiceInstance(args: Array<String>, configuration: String, logger: Logger): Service? {
         return createIpcTargetServer(args, configuration, AWS_S3, logger) { _configReader, _targetID, _logger, _resultHandler ->
             AwsS3TargetWriter.newInstance(_configReader, _targetID, _logger, _resultHandler)
         }

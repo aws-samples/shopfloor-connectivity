@@ -132,7 +132,7 @@ abstract class ServiceMain {
         // create instance of the actual service to run
         try {
             serviceInstance = createServiceInstance(args, configuration, serviceLogger)
-            logs.info("Created instance of service ${serviceInstance!!::class.java.simpleName}")
+            if (serviceInstance!=null ) logs.info("Created instance of service ${serviceInstance!!::class.java.simpleName}")
         } catch (e: Exception) {
             logs.errorEx("Error creating service instance: ${e.message}", e)
         }
@@ -177,7 +177,7 @@ abstract class ServiceMain {
 
     // Inherited classes that run service need to override this method to create an instance of the service
     // from the passed arguments and configuration reader
-    abstract fun createServiceInstance(args: Array<String>, configuration: String, logger: Logger): Service
+    abstract fun createServiceInstance(args: Array<String>, configuration: String, logger: Logger): Service?
 
 
 }

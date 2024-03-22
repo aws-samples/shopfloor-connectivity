@@ -7927,7 +7927,7 @@ For the service base class provided by the SFC framework can be used. The Servic
 ```kotlin
 class AwsCloudWatchMetricsWriterService : ServiceMain() {
 
-    override fun createServiceInstance(args: Array<String>, configuration: String, logger: Logger): Service {
+    override fun createServiceInstance(args: Array<String>, configuration: String, logger: Logger): Service? {
         return createIpcMetricsServer(args, configuration, logger) { _configReader, _logger ->
             AwsCloudWatchMetricsWriter.newInstance(_configReader, _logger)
         }

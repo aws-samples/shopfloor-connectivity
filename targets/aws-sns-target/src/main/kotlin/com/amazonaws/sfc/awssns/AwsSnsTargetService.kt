@@ -17,7 +17,7 @@ import kotlinx.coroutines.runBlocking
  */
 class AwsSnsTargetService : ServiceMain() {
 
-    override fun createServiceInstance(args: Array<String>, configuration: String, logger: Logger): Service {
+    override fun createServiceInstance(args: Array<String>, configuration: String, logger: Logger): Service? {
         return createIpcTargetServer(args, configuration, AWS_SNS, logger) { _configReader, _targetID, _logger, _resultHandler ->
             AwsSnsTargetWriter.newInstance(_configReader, _targetID, _logger, _resultHandler)
         }

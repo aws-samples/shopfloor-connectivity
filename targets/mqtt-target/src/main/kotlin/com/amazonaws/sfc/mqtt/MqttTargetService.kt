@@ -17,7 +17,7 @@ import kotlinx.coroutines.runBlocking
  */
 class MqttTargetService : ServiceMain() {
 
-    override fun createServiceInstance(args: Array<String>, configuration: String, logger: Logger): Service {
+    override fun createServiceInstance(args: Array<String>, configuration: String, logger: Logger): Service? {
         return createIpcTargetServer(args, configuration, MQTT_TARGET, logger) { _configReader, _targetID, _logger, _resultHandler ->
             MqttTargetWriter.newInstance(_configReader, _targetID, _logger, _resultHandler)
         }

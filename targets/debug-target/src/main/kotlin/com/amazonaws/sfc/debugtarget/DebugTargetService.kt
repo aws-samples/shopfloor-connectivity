@@ -17,7 +17,7 @@ import kotlinx.coroutines.runBlocking
  */
 class DebugTargetService : ServiceMain() {
 
-    override fun createServiceInstance(args: Array<String>, configuration: String, logger: Logger): Service {
+    override fun createServiceInstance(args: Array<String>, configuration: String, logger: Logger): Service? {
         return createIpcTargetServer(args, configuration, DEBUG_TARGET, logger) { _configReader, _targetID, _logger, _resultHandler ->
             DebugTargetWriter.newInstance(_configReader, _targetID, _logger, _resultHandler)
         }

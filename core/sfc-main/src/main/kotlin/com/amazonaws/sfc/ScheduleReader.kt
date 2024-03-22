@@ -127,87 +127,38 @@ class ScheduleReader(
         val readResultsChannel =
             Channel<Pair<String, ReadResult?>>(config.tuningConfiguration.scheduleReaderResultsChannelSize, onBufferOverflow = BufferOverflow.SUSPEND)
 
-        val log = logger.getCtxLoggers(className, "readSourceValues")
         val processing = launch(Dispatchers.IO + CoroutineName("processing")) {
-            try {
-                // Combined source results from all readers
-                val combinedReaderResults = mutableMapOf<String, SourceReadResult>()
-                val readersDone = mutableSetOf<String>()
-
-                suspend fun processReceivedData() {
-
-                    if (combinedReaderResults.isNotEmpty()) {
-                        processReceivedData(ReadResult(combinedReaderResults))
-                        combinedReaderResults.clear()
-                        readersDone.clear()
-                    }
-                }
-
-                while (isActive) {
-                    try {
-                        // read result from reader
-                        val result = readResultsChannel.receive()
-
-                        val protocolAdapterID = result.first
-                        val readerResult = result.second
-
-                        if (readerResult == null) {
-                            log.error("No result from  $protocolAdapterID ")
-                            readersDone.add(protocolAdapterID)
-                            continue
-                        }
-
-                        // reader already has result, process these first
-                        if (protocolAdapterID in readersDone) {
-                            processReceivedData()
-                        }
-                        // store results from reader in combined results
-                        readersDone.add(protocolAdapterID)
-                        readerResult.forEach {
-                            combinedReaderResults[it.key] = it.value
-                        }
-                        // if data from all readers was received process the data
-                        if (readersDone.size == readers.size) {
-                            processReceivedData()
-                        }
-                    } catch (e: Exception) {
-                        if (e.isJobCancellationException)
-                            log.info("Processing stopped")
-                        else
-                            log.errorEx("Error processing data from reader", e)
-                    }
-                }
-                processReceivedData()
-            } catch (e: Exception) {
-                if (!e.isJobCancellationException)
-                    log.errorEx("Exception in processing", e)
-            }
+            processingTask(this, readResultsChannel)
         }
 
         val reader = launch(context = Dispatchers.IO) {
-            val readerLog = logger.getCtxLoggers(className, "reader")
-
-            while (isActive) {
-                val readerWorkerQueue =
-                    buildReaderWorkerQueue(readResultsChannel)
-
-                try {
-                    readers.forEach { (protocolID, sourceReader) ->
-                        readerWorkerQueue.submit(protocolID to sourceReader)
-                    }
-                    withTimeout(config.tuningConfiguration.allSourcesReadTimeout) {
-                        readerWorkerQueue.await()
-                    }
-                } catch (t: TimeoutCancellationException) {
-                    readerLog.error("Timeout waiting for source readers to complete")
-                } catch (e: Exception) {
-                    if (!e.isJobCancellationException)
-                        readerLog.errorEx("Error reading from reader", e)
-                    readerWorkerQueue.reset()
-                }
-            }
+            readerTask(readResultsChannel)
         }
         listOf(reader, processing).joinAll()
+    }
+
+    private suspend fun CoroutineScope.readerTask(readResultsChannel: Channel<Pair<String, ReadResult?>>) {
+        val readerLog = logger.getCtxLoggers(className, "readerTask")
+
+        while (isActive) {
+            val readerWorkerQueue =
+                buildReaderWorkerQueue(readResultsChannel)
+
+            try {
+                readers.forEach { (protocolID, sourceReader) ->
+                    readerWorkerQueue.submit(protocolID to sourceReader)
+                }
+                withTimeout(config.tuningConfiguration.allSourcesReadTimeout) {
+                    readerWorkerQueue.await()
+                }
+            } catch (t: TimeoutCancellationException) {
+                readerLog.error("Timeout waiting for source readers to complete")
+            } catch (e: Exception) {
+                if (!e.isJobCancellationException)
+                    readerLog.errorEx("Error reading from reader", e)
+                readerWorkerQueue.reset()
+            }
+        }
     }
 
     private fun buildReaderWorkerQueue(readResultsChannel: Channel<Pair<String, ReadResult?>>) =
@@ -219,6 +170,62 @@ class ScheduleReader(
         ) { (protocolID, reader) ->
             readProtocolTask(protocolID, reader, readResultsChannel)
         }
+
+    private suspend fun processingTask( scope : CoroutineScope, readResultsChannel: Channel<Pair<String, ReadResult?>>) {
+
+        val log = logger.getCtxLoggers(className, "processingTask")
+        try {
+            // Combined source results from all readers
+            val combinedReaderResults = mutableMapOf<String, SourceReadResult>()
+            val readersDone = mutableSetOf<String>()
+
+            suspend fun processReceivedData() {
+
+                if (combinedReaderResults.isNotEmpty()) {
+                    processReceivedData(ReadResult(combinedReaderResults))
+                    combinedReaderResults.clear()
+                    readersDone.clear()
+                }
+            }
+
+            while (scope.isActive) {
+                try {
+                    // read result from reader
+                    val result = readResultsChannel.receive()
+
+                    val protocolAdapterID = result.first
+                    val readerResult = result.second
+
+                    if (readerResult == null) {
+                        log.error("No result from  $protocolAdapterID ")
+                        readersDone.add(protocolAdapterID)
+                        continue
+                    }
+
+                    // reader already has result, process these first
+                    if (protocolAdapterID in readersDone) {
+                        processReceivedData()
+                    }
+                    // store results from reader in combined results
+                    readersDone.add(protocolAdapterID)
+                    readerResult.forEach {
+                        combinedReaderResults[it.key] = it.value
+                    }
+                    // if data from all readers was received process the data
+                    if (readersDone.size == readers.size) {
+                        processReceivedData()
+                    }
+                } catch (e: Exception) {
+                    if (!e.isJobCancellationException) log.errorEx("Error processing data from reader", e)
+                }
+            }
+            processReceivedData()
+        } catch (e: Exception) {
+            if (!e.isJobCancellationException)
+                log.errorEx("Exception in processing", e)
+        }
+
+    }
 
     private fun readProtocolTask(protocolID: String, reader: SourceValuesReader, readResultsChannel: Channel<Pair<String, ReadResult?>>) {
         val log = logger.getCtxLoggers(className, "readTask")

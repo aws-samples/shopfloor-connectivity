@@ -17,7 +17,7 @@ import kotlinx.coroutines.runBlocking
 
 class AwsRouterTargetService : ServiceMain() {
 
-    override fun createServiceInstance(args: Array<String>, configuration: String, logger: Logger): Service {
+    override fun createServiceInstance(args: Array<String>, configuration: String, logger: Logger): Service? {
         return createIpcTargetServer(args, configuration, ROUTER, logger) { configReader, targetID, l, resultHandler ->
             RouterTargetWriter.newInstance(configReader, targetID, l, resultHandler)
         }

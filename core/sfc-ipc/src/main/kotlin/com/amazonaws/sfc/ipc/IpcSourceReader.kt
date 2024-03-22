@@ -78,70 +78,72 @@ class IpcSourceReader(
      */
     override suspend fun read(consumer: ReadResultConsumer) = coroutineScope {
 
-        var reader: Job? = null
+        var reader: Job?
 
         reader = launch(context = Dispatchers.IO, name = "IPC Source Reader") {
-
-            val log = logger.getCtxLoggers(IpcSourceReader::class.java.simpleName, "reader")
-
-            // read loop, remote IPC service is streaming data
-            while (isActive) {
-                try {
-                    log.info("Initializing IPC source adapter service on ${serverConfig.addressStr}")
-
-                    client = getIpcClient()
-
-                    try {
-                        val adapterConfiguration = getAdapterConfiguration(configReader)
-                        _initialized = client?.initializeAsync(adapterConfiguration, serverConfig, logger)?.await() == true
-                    } catch (e : StatusException){
-                        val errorMessage = "${e.cause?.message ?: e.message}"
-                        if (serverConfig.serverConnectionType == ServerConnectionType.PlainText && errorMessage.contains("unknown reason"))
-                            log.error("${ServerConnectionType.PlainText} connection type is configured for client, check if server requires ServerSide or Mutual TLS")
-                        else
-                            log.error("Error initializing IPC source service for ${serverConfig.addressStr}, $errorMessage")
-                        delay(WAIT_AFTER_ERROR)
-                        continue
-                    } catch (e: Exception) {
-                        val errorMessage = "${e.cause?.message ?: e.message}"
-                        log.errorEx("Error initializing IPC source service for ${serverConfig.addressStr}, $errorMessage", e)
-                        delay(WAIT_AFTER_ERROR)
-                        continue
-                    }
-
-
-                    // read the values from the client
-                    client?.readValues(sources, interval)?.collect { r: ReadValuesReply ->
-                        // call handler to process the data
-                        if (!consumer(r.asReadResult)) {
-                            // if handler returns false stop reading from client
-                            reader?.cancel()
-                        }
-                    }
-
-                } catch (e: Exception) {
-                    if (e !is CancellationException) {
-                        if (client?.lastError == null) {
-                            client?.lastError = e
-                        }
-                        if (e.message?.contains("shutdownNow") == true) {
-                            log.info("Source service is shutting down")
-                        } else {
-                            var s = "Error communicating with source connector service on ${serverConfig.addressStr}, "
-                            s += if (e is StatusException) "${e.cause?.message ?: e.message}" else e.message
-                            log.error(s)
-                        }
-                        resetIpcClient()
-                        delay(WAIT_AFTER_ERROR)
-                    }
-                } finally {
-                    resetIpcClient()
-                }
-            }
+             readerTask(serverConfig, consumer, this)
         }
         reader.join()
     }
 
+    private suspend fun readerTask(serverConfig: ServerConfiguration, consumer: ReadResultConsumer, scope: CoroutineScope){
+        val log = logger.getCtxLoggers(IpcSourceReader::class.java.simpleName, "reader")
+
+        // read loop, remote IPC service is streaming data
+        while (scope.isActive) {
+            try {
+                log.info("Initializing IPC source adapter service on ${serverConfig.addressStr}")
+
+                client = getIpcClient()
+
+                try {
+                    val adapterConfiguration = getAdapterConfiguration(configReader)
+                    _initialized = client?.initializeAsync(adapterConfiguration, serverConfig, logger)?.await() == true
+                } catch (e : StatusException){
+                    val errorMessage = "${e.cause?.message ?: e.message}"
+                    if (serverConfig.serverConnectionType == ServerConnectionType.PlainText && errorMessage.contains("unknown reason"))
+                        log.error("${ServerConnectionType.PlainText} connection type is configured for client, check if server requires ServerSide or Mutual TLS")
+                    else
+                        log.error("Error initializing IPC source service for ${serverConfig.addressStr}, $errorMessage")
+                    delay(WAIT_AFTER_ERROR)
+                    continue
+                } catch (e: Exception) {
+                    val errorMessage = "${e.cause?.message ?: e.message}"
+                    log.errorEx("Error initializing IPC source service for ${serverConfig.addressStr}, $errorMessage", e)
+                    delay(WAIT_AFTER_ERROR)
+                    continue
+                }
+
+                // read the values from the client
+                client?.readValues(sources, interval)?.collect { r: ReadValuesReply ->
+                    // call handler to process the data
+                    if (!consumer(r.asReadResult)) {
+                        // if handler returns false stop reading from client
+                        return@collect
+                    }
+                }
+
+            } catch (e: Exception) {
+                if (e !is CancellationException) {
+                    if (client?.lastError == null) {
+                        client?.lastError = e
+                    }
+                    if (e.message?.contains("shutdownNow") == true) {
+                        log.info("Source service is shutting down")
+                    } else {
+                        var s = "Error communicating with source connector service on ${serverConfig.addressStr}, "
+                        s += if (e is StatusException) "${e.cause?.message ?: e.message}" else e.message
+                        log.error(s)
+                    }
+                    resetIpcClient()
+                    delay(WAIT_AFTER_ERROR)
+                }
+            } finally {
+                resetIpcClient()
+            }
+        }
+
+    }
 
     override val metricsProvider: MetricsProvider? by lazy {
 

@@ -116,9 +116,9 @@ class AwsIotCoreTargetConfiguration : AwsServiceConfig, TargetConfiguration() {
 
     companion object {
         private const val CONFIG_TOPIC_NAME = "TopicName"
-        private const val CONFIG_BATCH_SIZE = "BatchSize"
-        private const val CONFIG_BATCH_COUNT = "BatchCount"
-        private const val CONFIG_BATCH_INTERVAL = "BatchInterval"
+        const val CONFIG_BATCH_SIZE = "BatchSize"
+        const val CONFIG_BATCH_COUNT = "BatchCount"
+        const val CONFIG_BATCH_INTERVAL = "BatchInterval"
 
         private val default = AwsIotCoreTargetConfiguration()
 

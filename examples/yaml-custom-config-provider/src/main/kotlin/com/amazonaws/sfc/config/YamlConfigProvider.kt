@@ -9,6 +9,7 @@ import com.amazonaws.sfc.util.FileWatcher
 import com.amazonaws.sfc.util.buildScope
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.isActive
@@ -53,39 +54,44 @@ class YamlConfigProvider(
 
     val worker = scope.launch(Dispatchers.IO) {
 
+        providerTask(ch, this)
+    }
+
+    private suspend fun providerTask(channel: Channel<String>, scope : CoroutineScope) {
         val log = logger.getCtxLoggers(className, "watchYamlConfigFile")
 
-        try{
+        try {
 
-        val jsonConfig = configFromYamlAsJson
+            val jsonConfig = configFromYamlAsJson
 
-        if (jsonConfig != null) {
-            log.info("Sending initial configuration to SFC-Core")
-            log.trace("Configuration: $jsonConfig")
-            ch.send(jsonConfig)
-        } else {
-            log.info("Waiting for updated valid config")
-        }
-
-        val fileWatcher = FileWatcher(config.yamlConfigFile!!)
-
-        while (isActive) {
-            try {
-                // watch yaml config file for updates
-                fileWatcher.changes.collect {
-                    // Send to core if it could be converted to JSON
-                    log.info("YAML config file updated")
-                    val configFromYamlAsJson = configFromYamlAsJson
-
-                    if (configFromYamlAsJson != null) {
-                        log.info("Sending updated configuration to SFC-Core")
-                        ch.send(configFromYamlAsJson)
-                    }
-                }
-            } catch (e: Exception) {
-                log.errorEx("Error watching YAML config file", e)
+            if (jsonConfig != null) {
+                log.info("Sending initial configuration to SFC-Core")
+                log.trace("Configuration: $jsonConfig")
+                channel.send(jsonConfig)
+            } else {
+                log.info("Waiting for updated valid config")
             }
-        }}catch (e : Exception){
+
+            val fileWatcher = FileWatcher(config.yamlConfigFile!!)
+
+            while (scope.isActive) {
+                try {
+                    // watch yaml config file for updates
+                    fileWatcher.changes.collect {
+                        // Send to core if it could be converted to JSON
+                        log.info("YAML config file updated")
+                        val configFromYamlAsJson = configFromYamlAsJson
+
+                        if (configFromYamlAsJson != null) {
+                            log.info("Sending updated configuration to SFC-Core")
+                            channel.send(configFromYamlAsJson)
+                        }
+                    }
+                } catch (e: Exception) {
+                    log.errorEx("Error watching YAML config file", e)
+                }
+            }
+        } catch (e: Exception) {
             log.errorEx("Error watching YAML config file", e)
         }
     }

@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory
 class MainController : ServiceMain() {
 
 
-    override fun createServiceInstance(args: Array<String>, configuration: String, logger: Logger): Service {
+    override fun createServiceInstance(args: Array<String>, configuration: String, logger: Logger): Service? {
         return MainControllerService.createController(args, configuration, logger)
     }
 

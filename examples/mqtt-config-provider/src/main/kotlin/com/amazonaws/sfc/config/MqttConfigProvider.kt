@@ -9,11 +9,8 @@ import com.amazonaws.sfc.mqtt.MqttHelper
 import com.amazonaws.sfc.service.ConfigProvider
 import com.amazonaws.sfc.util.buildScope
 import com.amazonaws.sfc.util.getHostName
+import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import org.eclipse.paho.client.mqttv3.MqttClient
 import java.io.BufferedReader
 import java.io.InputStreamReader
@@ -112,12 +109,15 @@ class MqttConfigProvider(
 
 
     val worker = scope.launch {
+        providerTask( ch,this)
+    }
 
+    private suspend fun providerTask( channel : Channel<String>, coroutineScope: CoroutineScope) {
         val channel = Channel<String>()
         val log = logger.getCtxLoggers(className, "mqtt config provider")
         var loadedLocalFile = false
 
-        if ( providerConfig.useLocalConfigFileAtStartUp && providerConfig.localConfigFile?.exists() == true) {
+        if (providerConfig.useLocalConfigFileAtStartUp && providerConfig.localConfigFile?.exists() == true) {
             log.info("Loading existing local configuration file ${providerConfig.localConfigFile!!.absolutePath}")
             try {
                 val configStr = providerConfig.localConfigFile!!.readText()
@@ -125,12 +125,12 @@ class MqttConfigProvider(
             } catch (e: Exception) {
                 log.errorEx("Error loading configuration from local file", e)
             }
-        } else{
+        } else {
             log.info("Local configuration file ${providerConfig.localConfigFile!!.absolutePath} does not exist")
         }
 
 
-        val client = getClient(coroutineContext)
+        val client = getClient(coroutineScope.coroutineContext)
 
         if (!loadedLocalFile) {
             log.info("No configuration from local configuration file, waiting for configuration from broker  ${providerConfig.endPoint} topic ${providerConfig.topicName}")
@@ -144,9 +144,9 @@ class MqttConfigProvider(
             emitConfiguration(configStr)
         }
 
-        while (isActive) {
+        while (coroutineScope.isActive) {
             try {
-                ch.send(channel.receive())
+                channel.send(channel.receive())
             } catch (e: Exception) {
                 log.errorEx("Error sending configuration to SFC-Core", e)
                 break

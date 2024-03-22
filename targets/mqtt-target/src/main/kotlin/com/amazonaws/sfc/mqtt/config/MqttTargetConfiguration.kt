@@ -202,9 +202,9 @@ class MqttTargetConfiguration : TargetConfiguration(), Validate {
         private const val QOS_DEFAULT = 0
         private const val CONFIG_CONNECT_RETRIES = "ConnectRetries"
         private const val CONNECT_RETRIES_DEFAULT = 10
-        private const val CONFIG_BATCH_SIZE = "BatchSize"
-        private const val CONFIG_BATCH_COUNT = "BatchCount"
-        private const val CONFIG_BATCH_INTERVAL = "BatchInterval"
+        const val CONFIG_BATCH_SIZE = "BatchSize"
+        const val CONFIG_BATCH_COUNT = "BatchCount"
+        const val CONFIG_BATCH_INTERVAL = "BatchInterval"
         private const val CONFIG_MAX_PAYLOAD_SIZE = "MaxPayloadSize"
 
         private val default = MqttTargetConfiguration()

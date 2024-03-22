@@ -9,8 +9,10 @@ package com.amazonaws.sfc.config
 import com.amazonaws.sfc.log.Logger
 import com.amazonaws.sfc.service.ConfigProvider
 import com.amazonaws.sfc.util.buildScope
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import java.security.PublicKey
 
@@ -23,9 +25,13 @@ class CustomConfigProvider(private val configStr: String, private val configVeri
     // this code could for example call out to external sources and combine retrieved information with
     // data from the passed in configuration
     val worker = scope.launch {
+        providerTask(ch, this)
+    }
+
+    private suspend fun CoroutineScope.providerTask(ch: Channel<String>, scope: CoroutineScope) {
         try {
             val errorLog = logger.getCtxErrorLog(this::class.java.name, "worker")
-            while (true) {
+            while (scope.isActive) {
                 if (configVerificationKey != null) {
                     if (!ConfigVerification.verify(configStr, configVerificationKey)) {
                         errorLog("Content of configuration could not be verified")
@@ -33,10 +39,10 @@ class CustomConfigProvider(private val configStr: String, private val configVeri
                     }
                 }
                 // simulate building a new config every minute
-                ch.send(configStr)
+                this@CustomConfigProvider.ch.send(configStr)
                 delay(60000)
             }
-        }catch (e :  Exception){
+        } catch (e: Exception) {
             logger.getCtxErrorLog(this::class.java.name, "worker")("Error in worker thread")
         }
     }

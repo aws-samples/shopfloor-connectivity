@@ -339,36 +339,44 @@ open class OpcuaSource(
 
     // channel to send data changes to the consuming coroutine that is handling data changes
     private val dataValueChangeChannel =
-        if (inSubscriptionReadingMode) Channel<Pair<UaMonitoredItem, ChannelReadValue>>(configuration.changedDataChannelSize) else null
+        if (inSubscriptionReadingMode) Channel<Pair<UaMonitoredItem, ChannelReadValue>>(opcuaAdapterConfiguration.changedDataChannelSize) else null
 
     // coroutine handling changed data for subscriptions
-    private val changedDataWorker =
-        if (inSubscriptionReadingMode) sourceScope.launch(context = Dispatchers.Default, name = "$sourceID Data Subscription Handler") {
-
-            val log = logger.getCtxLoggers(className, "changedDataWorker")
-            if (dataValueChangeChannel == null) return@launch
-
-            while (isActive) {
-                val (monitoredItem, data) = dataValueChangeChannel.receive()
-                try {
-                    // find the node using the client handle
-                    val clientHandle = monitoredItem.clientHandle.toInt()
-                    val node = clientHandlesForNodes[clientHandle]
-
-                    if (node != null) {
-                        log.trace("Received subscription data for source \"$sourceID\", \"${node.channelID}\"")
-                        val duration = measureTime {
-                            dataValueChangesStore?.add(node.channelID, data)
-                        }
-                        log.trace("adding data to data store took $duration")
-                    } else {
-                        log.warning("Received subscription data for source \"$sourceID\" but $clientHandle is unknown")
-                    }
-                } catch (e: Exception) {
-                    logger.getCtxLoggers(className, "onSubscribedNodeData").errorEx("Error processing subscription data for source \"$sourceID\"", e)
-                }
-            }
+    private val changedDataWorker = if (inSubscriptionReadingMode && dataValueChangeChannel != null)
+        sourceScope.launch(context = Dispatchers.Default, name = "$sourceID Data Subscription Handler") {
+            dataChangeTask(dataValueChangeChannel, dataValueChangesStore!!, this)
         } else null
+
+    private suspend fun dataChangeTask(
+        channel: Channel<Pair<UaMonitoredItem, ChannelReadValue>>,
+        store: SourceDataValuesStore<ChannelReadValue>,
+        scope: CoroutineScope
+    ) {
+        val log = logger.getCtxLoggers(className, "changedDataWorker")
+
+        while (scope.isActive) {
+            val (monitoredItem, data) = channel.receive()
+            try {
+                // find the node using the client handle
+                val clientHandle = monitoredItem.clientHandle.toInt()
+                val node = clientHandlesForNodes[clientHandle]
+
+                if (node != null) {
+                    log.trace("Received subscription data for source \"$sourceID\", \"${node.channelID}\"")
+
+                    val duration = measureTime {
+                        store.add(node.channelID, data)
+                    }
+                    log.trace("Storing changed value took $duration, number of items with changed data is ${dataValueChangesStore?.size}")
+
+                } else {
+                    log.warning("Received subscription data for source \"$sourceID\" but $clientHandle is unknown")
+                }
+            } catch (e: Exception) {
+                logger.getCtxLoggers(className, "onSubscribedNodeData").errorEx("Error processing subscription data for source \"$sourceID\"", e)
+            }
+        }
+    }
 
     // *** Event Subscriptions ***
 
@@ -393,7 +401,7 @@ open class OpcuaSource(
                     val duration = measureTime {
                         eventStore?.add(node.channelID, eventPropertiesData)
                     }
-                    log.trace("adding event data to event data store took $duration")
+                    log.trace("Adding event data to event data store took $duration, number of events in store is ${eventStore?.size}")
                 } else {
                     log.warning("Received event data for source \"$sourceID\" but $clientHandle is unknown")
                 }
@@ -555,7 +563,7 @@ open class OpcuaSource(
         return sourceScope.launch("OPCUA Certificate Expiry Watcher", Dispatchers.IO) {
 
             try {
-                while (true) {
+                while (isActive) {
 
                     val now = systemDateUTC()
                     if (certificate.notAfter <= now.add(Period.ofDays(expirationWarningPeriod * -1))) {
@@ -773,75 +781,83 @@ open class OpcuaSource(
 
     private fun onSubscribedDataReceived(): (context: SerializationContext, UaMonitoredItem, DataValue) -> Unit =
         { context: SerializationContext, item: UaMonitoredItem, value: DataValue ->
-            val log = logger.getCtxLoggers(className, "onSubscribedDataReceived")
-            sourceScope.launch("item: ${item.monitoredItemId}") {
-                try {
-                    if ((value.statusCode ?: StatusCode.GOOD).isGood) {
-                        val nativeValue = OpcuaDataTypesConverter(context).asNativeValue(value.value)
-                        dataValueChangeChannel?.submit(
-                            item to ChannelReadValue(nativeValue, value.sourceTime?.javaInstant),
-                            configuration.changedDataChannelTimeout
-                        ) { event ->
-                            channelSubmitEventHandler(
-                                event = event,
-                                channelName = "$className:dataValueChangeChannel",
-                                tuningChannelSizeName = CONFIG_CHANGED_DATA_CHANNEL_SIZE,
-                                currentChannelSize = configuration.changedDataChannelSize,
-                                tuningChannelTimeoutName = CONFIG_CHANGED_DATA_CHANNEL_TIMEOUT,
-                                log = log
-                            )
-                        }
-                    } else {
-                        val nodeChannelID = clientHandlesForNodes[item.clientHandle.toInt()]?.channelID ?: "unknown channel"
-                        val errorLog = logger.getCtxErrorLog(className, "onSubscribedDataReceived")
-                        errorLog("Received bad subscription data source \"$sourceID\", node \"$nodeChannelID\" (${item.readValueId}), ${value.statusCode}")
-                    }
-                } catch (e: Exception) {
-                    val errorLogEx = logger.getCtxErrorLogEx(className, "onSubscribedDataReceived")
-                    errorLogEx("Error processing subscription data source \"$sourceID\", node \"${item.readValueId}\" (${item.statusCode})", e)
-                }
-            }
+            if (dataValueChangeChannel!= null) handleChangedData(dataValueChangeChannel, value, context, item)
         }
+
+    private fun handleChangedData(channel : Channel<Pair<UaMonitoredItem, ChannelReadValue>>,  value: DataValue, context: SerializationContext, item: UaMonitoredItem) {
+        val log = logger.getCtxLoggers(className, "onSubscribedDataReceived")
+        try {
+            if ((value.statusCode ?: StatusCode.GOOD).isGood) {
+                val nativeValue = OpcuaDataTypesConverter(context).asNativeValue(value.value)
+                channel.submit(
+                    item to ChannelReadValue(nativeValue, value.sourceTime?.javaInstant),
+                    opcuaAdapterConfiguration.changedDataChannelTimeout
+                ) { event ->
+                    channelSubmitEventHandler(
+                        event = event,
+                        channelName = "$className:dataValueChangeChannel",
+                        tuningChannelSizeName = CONFIG_CHANGED_DATA_CHANNEL_SIZE,
+                        currentChannelSize = opcuaAdapterConfiguration.changedDataChannelSize,
+                        tuningChannelTimeoutName = CONFIG_CHANGED_DATA_CHANNEL_TIMEOUT,
+                        log = log
+                    )
+                }
+            } else {
+                val nodeChannelID = clientHandlesForNodes[item.clientHandle.toInt()]?.channelID ?: "unknown channel"
+                val errorLog = logger.getCtxErrorLog(className, "onSubscribedDataReceived")
+                errorLog("Received bad subscription data source \"$sourceID\", node \"$nodeChannelID\" (${item.readValueId}), ${value.statusCode}")
+            }
+        } catch (e: Exception) {
+            val errorLogEx = logger.getCtxErrorLogEx(className, "onSubscribedDataReceived")
+            errorLogEx("Error processing subscription data source \"$sourceID\", node \"${item.readValueId}\" (${item.statusCode})", e)
+        }
+    }
 
     private fun onMonitoredEventReceived(): (context: SerializationContext, item: UaMonitoredItem, eventValues: Array<Variant>) -> Unit =
         { context, item, eventPropertyVariantValues ->
-            val log = logger.getCtxLoggers(className, "onMonitoredEventReceived")
-            sourceScope.launch("item: ${item.monitoredItemId}") {
-                try {
-                    val node = clientHandlesForNodes[item.clientHandle.toInt()]
-                    if ((item.statusCode ?: StatusCode.GOOD).isGood) {
-                        val properties = node?.eventProperties ?: eventsHelper?.findEvent(Identifiers.BaseEventType)?.properties
-                        if (properties != null) {
-                            val propertiesValuesMap = eventsHelper?.variantPropertiesToMap(eventPropertyVariantValues, properties, context)
-                            if (propertiesValuesMap != null) receivedEventsChannel?.submit(
-                                item to propertiesValuesMap,
-                                configuration.receivedEventsChannelTimeout
-                            ) { event ->
-                                channelSubmitEventHandler(
-                                    event = event,
-                                    channelName = "$className:receivedEventsChannel",
-                                    tuningChannelSizeName = CONFIG_RECEIVED_EVENTS_CHANNEL_SIZE,
-                                    currentChannelSize = configuration.receivedEventsChannelSize,
-                                    tuningChannelTimeoutName = CONFIG_RECEIVED_EVENTS_CHANNEL_TIMEOUT,
-                                    log = log
-                                )
-                            }
-                        } else {
-                            logger.getCtxErrorLog(className, "onMonitoredEvent")
-                        }
-                    } else {
-                        val nodeChannelID = node?.channelID ?: "unknown channel"
-                        val errorLog = logger.getCtxErrorLog(className, "onMonitoredEventReceived")
-                        errorLog("Error status on monitored event item for source \"$sourceID\", node \"$nodeChannelID\" (${item.readValueId}), ${item.statusCode}")
-                    }
-
-                } catch (e: Exception) {
-                    val errorLogEx = logger.getCtxErrorLogEx(className, "onMonitoredEventReceived")
-                    errorLogEx("Error processing monitored event item for source \"$sourceID\", node \"${item.readValueId}\" (${item.statusCode})", e)
-                }
-
-            }
+            if (receivedEventsChannel!= null) handleEventData(receivedEventsChannel, item, eventPropertyVariantValues, context)
         }
+
+    private fun handleEventData(
+        channel: Channel<Pair<UaMonitoredItem, Map<String, Any>>>,
+        item: UaMonitoredItem,
+        eventPropertyVariantValues: Array<Variant>,
+        context: SerializationContext
+    ) {
+        val log = logger.getCtxLoggers(className, "onMonitoredEventReceived")
+        try {
+            val node = clientHandlesForNodes[item.clientHandle.toInt()]
+            if ((item.statusCode ?: StatusCode.GOOD).isGood) {
+                val properties = node?.eventProperties ?: eventsHelper?.findEvent(Identifiers.BaseEventType)?.properties
+                if (properties != null) {
+                    val propertiesValuesMap = eventsHelper?.variantPropertiesToMap(eventPropertyVariantValues, properties, context)
+                    if (propertiesValuesMap != null) channel.submit(
+                        item to propertiesValuesMap,
+                        configuration.receivedEventsChannelTimeout
+                    ) { event ->
+                        channelSubmitEventHandler(
+                            event = event,
+                            channelName = "$className:receivedEventsChannel",
+                            tuningChannelSizeName = CONFIG_RECEIVED_EVENTS_CHANNEL_SIZE,
+                            currentChannelSize = configuration.receivedEventsChannelSize,
+                            tuningChannelTimeoutName = CONFIG_RECEIVED_EVENTS_CHANNEL_TIMEOUT,
+                            log = log
+                        )
+                    }
+                } else {
+                    logger.getCtxErrorLog(className, "onMonitoredEvent")
+                }
+            } else {
+                val nodeChannelID = node?.channelID ?: "unknown channel"
+                val errorLog = logger.getCtxErrorLog(className, "onMonitoredEventReceived")
+                errorLog("Error status on monitored event item for source \"$sourceID\", node \"$nodeChannelID\" (${item.readValueId}), ${item.statusCode}")
+            }
+
+        } catch (e: Exception) {
+            val errorLogEx = logger.getCtxErrorLogEx(className, "onMonitoredEventReceived")
+            errorLogEx("Error processing monitored event item for source \"$sourceID\", node \"${item.readValueId}\" (${item.statusCode})", e)
+        }
+    }
 
     private var lock = ReentrantLock()
 
@@ -1020,7 +1036,15 @@ open class OpcuaSource(
         )
     }
 
-    private suspend fun serverReadsInSubscriptionMode(channels: List<String>?) = dataValueChangesStore?.read(channels) ?: emptyList()
+    private fun serverReadsInSubscriptionMode(channels: List<String>?): List<Pair<String, ChannelReadValue>> {
+        var values: List<Pair<String, ChannelReadValue>>
+        val duration = measureTime {
+            values = dataValueChangesStore?.read(channels) ?: emptyList()
+        }
+        if (values.isNotEmpty()) logger.getCtxTraceLog(className, "read")("Reading ${values.size} from store took $duration")
+        return values
+
+    }
 
     private suspend fun serverReadsInPollingMode(channels: List<String>?): List<Pair<String, ChannelReadValue>> =
 

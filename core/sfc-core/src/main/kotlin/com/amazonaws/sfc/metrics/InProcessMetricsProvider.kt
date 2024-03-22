@@ -24,19 +24,24 @@ class InProcessMetricsProvider(private val metricsReader: MetricsCollectorReader
         val metricsProvider = MetricsAsFlow(metricsReader, interval, logger)
 
         reader = launch(context = Dispatchers.Default, name = "Collect Read Results") {
-            try {
-                metricsProvider.metricsFlow.buffer(100).cancellable().collect {
-                    try {
-                        if (!consumer(it)) {
-                            cancel()
-                        }
-                    } catch (e: Exception) {
-                        logger.getCtxErrorLog(className, "read")
+            metricsReaderTask(metricsReader, interval, consumer)
+        }
+    }
+
+    private suspend fun metricsReaderTask(metricsReader:MetricsCollectorReader, interval: Duration, consumer: MetricsConsumer ) {
+        try {
+            val metricsProvider = MetricsAsFlow(metricsReader, interval, logger)
+            metricsProvider.metricsFlow.buffer(100).cancellable().collect {
+                try {
+                    if (!consumer(it)) {
+                        return@collect
                     }
+                } catch (e: Exception) {
+                    logger.getCtxErrorLog(className, "read")
                 }
-            }catch (e : Exception) {
-                logger.getCtxErrorLog(className, "reader")
             }
+        }catch (e : Exception) {
+            logger.getCtxErrorLog(className, "reader")
         }
     }
 

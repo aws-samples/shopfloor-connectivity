@@ -117,7 +117,7 @@ class FileTargetWriter(
 
                         buffer.add(targetData, content)
 
-                        log.trace("Received message, buffer size is ${buffer.payloadSize.byteCountString}")
+                        log.trace("Received message, buffered items is ${buffer.size} with a total size of ${buffer.payloadSize.byteCountString}")
 
                         // flush if reached buffer size
                         if (buffer.payloadSize >= targetConfig.bufferSize) {

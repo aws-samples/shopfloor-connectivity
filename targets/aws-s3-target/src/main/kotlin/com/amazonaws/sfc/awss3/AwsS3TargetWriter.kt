@@ -143,7 +143,7 @@ class AwsS3TargetWriter(
                         targetResults?.add(targetData)
                         buffer.add(targetData, payload)
 
-                        loggers.trace("Received message, buffer size is ${buffer.payloadSize.byteCountString}")
+                        loggers.trace("Received message, buffered items is ${buffer.size} with a total size of ${buffer.payloadSize.byteCountString}")
 
                         // flush if reached buffer size
                         if (targetData.noBuffering || buffer.payloadSize >= targetConfig.bufferSize) {

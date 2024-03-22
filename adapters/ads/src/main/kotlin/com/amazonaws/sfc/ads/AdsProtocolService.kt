@@ -19,7 +19,7 @@ import kotlinx.coroutines.runBlocking
  */
 class AdsProtocolService : ServiceMain() {
 
-    override fun createServiceInstance(args: Array<String>, configuration: String, logger: Logger): Service {
+    override fun createServiceInstance(args: Array<String>, configuration: String, logger: Logger): Service? {
         return IpcAdapterService.createProtocolAdapterService(
             args,
             configuration,

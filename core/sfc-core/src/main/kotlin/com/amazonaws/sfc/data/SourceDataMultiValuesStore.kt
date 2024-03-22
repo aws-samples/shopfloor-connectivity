@@ -25,6 +25,9 @@ open class SourceDataMultiValuesStore<T> {
         }
     }
 
+    val size
+        get() = values.size
+
 
     /**
      * Clears all data in the store

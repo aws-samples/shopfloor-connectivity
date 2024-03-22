@@ -18,7 +18,7 @@ import kotlinx.coroutines.runBlocking
  */
 class AwsTimestreamTargetService : ServiceMain() {
 
-    override fun createServiceInstance(args: Array<String>, configuration: String, logger: Logger): Service {
+    override fun createServiceInstance(args: Array<String>, configuration: String, logger: Logger): Service? {
         return createIpcTargetServer(args, configuration, AWS_TIMESTREAM, logger) { _configReader, _targetID, _logger, _resultHandler ->
             AwsTimestreamTargetWriter.newInstance(_configReader, _targetID, _logger, _resultHandler)
         }

@@ -18,7 +18,7 @@ import kotlinx.coroutines.runBlocking
  */
 class AwsStoreForwardTargetService : ServiceMain() {
 
-    override fun createServiceInstance(args: Array<String>, configuration: String, logger: Logger): Service {
+    override fun createServiceInstance(args: Array<String>, configuration: String, logger: Logger): Service? {
         return createIpcTargetServer(args, configuration, STORE_FORWARD, logger) { _configReader, _targetID, _logger, _resultHandler ->
             StoreForwardTargetWriter.newInstance(_configReader, _targetID, _logger, _resultHandler)
         }

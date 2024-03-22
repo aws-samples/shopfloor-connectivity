@@ -1,4 +1,3 @@
-
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: MIT-0
 
@@ -42,7 +41,8 @@ class IpcAdapterService(
     serverConfig: ServerConfiguration,
     private val tuningConfiguration: TuningConfiguration,
     logger: Logger,
-    private val createAdapter: CreateProtocolAdapterMethod) : IpcBaseService(serverConfig, logger), Service {
+    private val createAdapter: CreateProtocolAdapterMethod
+) : IpcBaseService(serverConfig, logger), Service {
 
     override val serviceImplementation: BindableService
         get() = ProtocolService()
@@ -132,7 +132,11 @@ class IpcAdapterService(
                 // Create a reader to feed the channel flow
                 SourcesValuesAsFlow(protocolAdapter, sources, interval, logger).use { reader ->
                     // Loop reading from reader read results channel
-                    reader.sourceReadResults(currentCoroutineContext(), maxConcurrentSourceReads = tuningConfiguration.maxConcurrentSourceReaders, timeout =  tuningConfiguration.allSourcesReadTimeout).buffer(100).cancellable().collect {
+                    reader.sourceReadResults(
+                        currentCoroutineContext(),
+                        maxConcurrentSourceReads = tuningConfiguration.maxConcurrentSourceReaders,
+                        timeout = tuningConfiguration.allSourcesReadTimeout
+                    ).buffer(100).cancellable().collect {
 
                         if (logger.level == LogLevel.TRACE) {
                             it.forEach { source, result ->
@@ -175,7 +179,7 @@ class IpcAdapterService(
 
                     } catch (e: Exception) {
                         if (!e.isJobCancellationException)
-                           log.errorEx("Error building or emitting readMetrics reply", e)
+                            log.errorEx("Error building or emitting readMetrics reply", e)
                     }
                 }
             }
@@ -197,7 +201,8 @@ class IpcAdapterService(
                 val serviceConfiguration: ServiceConfiguration = ConfigReader.createConfigReader(
                     configStr = request.adapterConfiguration,
                     allowUnresolved = true,
-                    secretsManager = null).getConfig()
+                    secretsManager = null
+                ).getConfig()
 
                 val secretsManager = SecretsManager.createSecretsManager(serviceConfiguration, logger)
                 runBlocking {
@@ -206,7 +211,8 @@ class IpcAdapterService(
 
                 val configReader = ConfigReader.createConfigReader(
                     configStr = request.adapterConfiguration, allowUnresolved = false,
-                    secretsManager)
+                    secretsManager
+                )
 
                 val adapter = adapterID ?: serviceConfiguration.protocolAdapters.keys.first()
                 _protocolAdapter = createAdapter(adapter, configReader, logger)
@@ -278,45 +284,52 @@ class IpcAdapterService(
 
     companion object {
 
-        fun createProtocolAdapterService(args: Array<String>,
-                                         configurationStr: String,
-                                         logger: Logger,
-                                         createAdapter: CreateProtocolAdapterMethod): Service {
+        fun createProtocolAdapterService(
+            args: Array<String>,
+            configurationStr: String,
+            logger: Logger,
+            createAdapter: CreateProtocolAdapterMethod
+        ): Service? {
 
-            val cmd = ProtocolServerCommandLine(args)
+            return try {
+                val cmd = ProtocolServerCommandLine(args)
 
-            val serviceConfiguration = ConfigReader.createConfigReader(
-                configStr = configurationStr,
-            ).getConfig<ServiceConfiguration>()
-
-
-            // get protocol id which could be specified on the command line or be read from the configuration if it only has a single protocol
-            val protocolAdapterID = getAdapterProtocolID(cmd, serviceConfiguration)
-            val protocolConfiguration = getProtocolConfig(serviceConfiguration, protocolAdapterID)
-            val protocolServerConfiguration = getProtocolServerConfiguration(serviceConfiguration, protocolConfiguration)
+                val serviceConfiguration = ConfigReader.createConfigReader(
+                    configStr = configurationStr,
+                ).getConfig<ServiceConfiguration>()
 
 
-            val logLevel: LogLevel = cmd.logLevel ?: serviceConfiguration.logLevel
-            logger.level = logLevel
+                // get protocol id which could be specified on the command line or be read from the configuration if it only has a single protocol
+                val protocolAdapterID = getAdapterProtocolID(cmd, serviceConfiguration)
+                val protocolConfiguration = getProtocolConfig(serviceConfiguration, protocolAdapterID)
+                val protocolServerConfiguration = getProtocolServerConfiguration(serviceConfiguration, protocolConfiguration)
 
-            val configuration = buildServerConfiguration(cmd, protocolServerConfiguration)
 
-            return IpcAdapterService(
-                adapterID = protocolAdapterID,
-                serverConfig = configuration,
-                logger = logger,
-                createAdapter = createAdapter,
-                tuningConfiguration = serviceConfiguration.tuningConfiguration
-            )
+                val logLevel: LogLevel = cmd.logLevel ?: serviceConfiguration.logLevel
+                logger.level = logLevel
+
+                val configuration = buildServerConfiguration(cmd, protocolServerConfiguration)
+
+                IpcAdapterService(
+                    adapterID = protocolAdapterID,
+                    serverConfig = configuration,
+                    logger = logger,
+                    createAdapter = createAdapter,
+                    tuningConfiguration = serviceConfiguration.tuningConfiguration
+                )
+            } catch (e: ProtocolAdapterException) {
+                logger.getCtxErrorLog(this::class.java.name, "createProtocolAdapterService")(e.message ?: "")
+                null
+            }
         }
 
         private fun getAdapterProtocolID(cmd: ProtocolServerCommandLine, serviceConfiguration: ServiceConfiguration): String? =
             cmd.protocolAdapterID
-            ?: when (serviceConfiguration.protocolAdapters.size) {
-                0 -> null
-                1 -> serviceConfiguration.activeTargets.keys.first()
-                else -> throw ProtocolAdapterException("There are multiple adapters for this adapter type in the configuration, use the \"$OPTION_PROTOCOL_ADAPTER\" parameter to specify the adapter for this service instance")
-            }
+                ?: when (serviceConfiguration.protocolAdapters.size) {
+                    0 -> null
+                    1 -> serviceConfiguration.activeTargets.keys.first()
+                    else -> throw ProtocolAdapterException("There are multiple adapters for this adapter type in the configuration, use the \"$OPTION_PROTOCOL_ADAPTER\" parameter to specify the adapter for this service instance")
+                }
 
 
         private fun getProtocolServerConfiguration(
@@ -331,13 +344,13 @@ class IpcAdapterService(
             val protocolServerID = protocolAdapterConfig.protocolAdapterServer
 
             return (if (protocolServerID != null) serviceConfiguration.protocolAdapterServers[protocolServerID] else null)
-                   ?: throw ProtocolAdapterException("Server \"protocolServerID\" for does not exist, existing servers are  ${serviceConfiguration.protocolAdapterServers.keys}")
+                ?: throw ProtocolAdapterException("Server \"protocolServerID\" for does not exist, existing servers are  ${serviceConfiguration.protocolAdapterServers.keys}")
 
         }
 
         private fun getProtocolConfig(serviceConfiguration: ServiceConfiguration, protocolAdapterID: String?): ProtocolAdapterConfiguration? {
             return if (serviceConfiguration.protocolAdapters.isNotEmpty()) serviceConfiguration.protocolAdapters[protocolAdapterID]
-                                                                           ?: throw ProtocolAdapterException("Protocol Adapter \"$protocolAdapterID\" does not exist in configuration, existing protocols adapters are ${serviceConfiguration.protocolAdapters.keys}")
+                ?: throw ProtocolAdapterException("Protocol Adapter \"$protocolAdapterID\" does not exist in configuration, existing protocols adapters are ${serviceConfiguration.protocolAdapters.keys}")
             else null
 
         }

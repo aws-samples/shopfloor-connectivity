@@ -19,7 +19,7 @@ import kotlinx.coroutines.runBlocking
  */
 class MqttProtocolService : ServiceMain() {
 
-    override fun createServiceInstance(args: Array<String>, configuration: String, logger: Logger): Service {
+    override fun createServiceInstance(args: Array<String>, configuration: String, logger: Logger): Service? {
         return IpcAdapterService.createProtocolAdapterService(args, configuration, logger) { _adapterID: String, _configReader: ConfigReader, _logger: Logger ->
             MqttAdapter.createMqttAdapter(_adapterID, _configReader, _logger)
 

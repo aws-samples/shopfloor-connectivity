@@ -4,11 +4,13 @@
 
 package com.amazonaws.sfc.mqtt
 
+import com.amazonaws.sfc.config.BaseConfiguration
 import com.amazonaws.sfc.config.ConfigReader
 import com.amazonaws.sfc.data.*
 import com.amazonaws.sfc.data.JsonHelper.Companion.extendedJsonException
 import com.amazonaws.sfc.log.Logger
 import com.amazonaws.sfc.metrics.*
+import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_BYTES_SEND
 import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_DIMENSION_SOURCE
 import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_DIMENSION_SOURCE_CATEGORY_TARGET
 import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_MESSAGES
@@ -18,6 +20,9 @@ import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_WRITE_ERRORS
 import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_WRITE_SIZE
 import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_WRITE_SUCCESS
 import com.amazonaws.sfc.mqtt.config.MqttTargetConfiguration
+import com.amazonaws.sfc.mqtt.config.MqttTargetConfiguration.Companion.CONFIG_BATCH_COUNT
+import com.amazonaws.sfc.mqtt.config.MqttTargetConfiguration.Companion.CONFIG_BATCH_INTERVAL
+import com.amazonaws.sfc.mqtt.config.MqttTargetConfiguration.Companion.CONFIG_BATCH_SIZE
 import com.amazonaws.sfc.mqtt.config.MqttWriterConfiguration
 import com.amazonaws.sfc.mqtt.config.MqttWriterConfiguration.Companion.MQTT_TARGET
 import com.amazonaws.sfc.targets.TargetDataChannel
@@ -172,7 +177,7 @@ class MqttTargetWriter(
     }
 
     private fun bufferReachedMaxSizeOrMessages(log: Logger.ContextLogger): Boolean {
-        val reachedBufferCount =  ((targetConfig.batchCount!= null ) && (buffer.size >= targetConfig.batchCount!!))
+        val reachedBufferCount = ((targetConfig.batchCount != null) && (buffer.size >= targetConfig.batchCount!!))
         if (((targetConfig.batchCount ?: 0)) > 1 && reachedBufferCount) log.trace("${targetConfig.batchCount} batch count reached")
 
         val reachedBufferSize = !reachedBufferCount &&
@@ -183,7 +188,6 @@ class MqttTargetWriter(
 
         return reachedBufferSize || reachedBufferCount
     }
-
 
 
     private fun checkMessagePayloadSize(targetData: TargetData, payloadSize: Int, log: Logger.ContextLogger): Boolean {
@@ -230,7 +234,7 @@ class MqttTargetWriter(
         return compressedData
     }
 
-    private suspend fun writeBufferedMessages(timer : Job) : Job {
+    private suspend fun writeBufferedMessages(timer: Job): Job {
 
         if (timer.isActive) timer.cancel()
 
@@ -243,27 +247,30 @@ class MqttTargetWriter(
 
             val mqttMessage = buildMqttMessage()
 
-            val duration = measureTime {
-                val client = runBlocking {
-                    getClient(coroutineContext)
-                }
+            if (targetConfig.maxPayloadSize != null && mqttMessage.payload.size > targetConfig.maxPayloadSize!!) {
+                log.error("Size of MQTT message ${mqttMessage.payload.size} bytes is beyond max payload size of  ${targetConfig.maxPayloadSize!!.byteCountString} for target, reduce or set $CONFIG_BATCH_SIZE, $CONFIG_BATCH_COUNT or $CONFIG_BATCH_INTERVAL for this target")
+                targetResults?.errorBuffered()
+                runBlocking { metricsCollector?.put(targetID, METRICS_WRITE_ERRORS, 1.0, MetricUnits.COUNT, metricDimensions) }
 
-                // message beyond max payload size
-                if (targetConfig.maxPayloadSize != null && mqttMessage.payload.size > targetConfig.maxPayloadSize!!) {
-                    log.error("Size of MQTT message ${mqttMessage.payload.size} bytes is beyond max payload size  ${targetConfig.maxPayloadSize!!.byteCountString} for target")
-                    targetResults?.errorBuffered()
-                } else {
+            } else {
+
+                val duration = measureTime {
+                    val client = runBlocking {
+                        getClient(coroutineContext)
+                    }
 
                     withTimeout(targetConfig.publishTimeout) {
                         client.publish(targetConfig.topicName, mqttMessage)
                     }
+
                     targetResults?.ackBuffered()
                 }
-            }
+                val compressedStr = if (targetConfig.compressionType != CompressionType.NONE) " compressed " else " "
+                val itemStr = if (doesBatching) " containing ${buffer.size} items " else " "
+                log.trace("Published MQTT${compressedStr}message to topic ${targetConfig.topicName} with size of ${mqttMessage.payload.size.byteCountString} ${itemStr}in $duration")
 
-            val compressedStr = if (targetConfig.compressionType != CompressionType.NONE) " compressed " else " "
-            val itemStr = if (doesBatching) " containing ${buffer.size} items " else " "
-            log.trace("Published MQTT${compressedStr}message with size of ${mqttMessage.payload.size.byteCountString} bytes${itemStr}in $duration")
+                createMetrics(targetID, metricDimensions, mqttMessage.payload.size, duration ?: Duration.ZERO)
+            }
 
         } catch (e: Exception) {
             runBlocking { metricsCollector?.put(targetID, METRICS_WRITE_ERRORS, 1.0, MetricUnits.COUNT, metricDimensions) }
@@ -321,7 +328,8 @@ class MqttTargetWriter(
     private fun createMetrics(
         adapterID: String,
         metricDimensions: MetricDimensions,
-        writeDurationInMillis: Double
+        payloadSize: Int,
+        duration: Duration
     ) {
 
         runBlocking {
@@ -335,38 +343,22 @@ class MqttTargetWriter(
                 ),
                 metricsCollector?.buildValueDataPoint(
                     adapterID,
-                    METRICS_WRITES,
-                    1.0,
-                    MetricUnits.COUNT, metricDimensions
+                    MetricsCollector.METRICS_MEMORY,
+                    MemoryMonitor.getUsedMemoryMB().toDouble(),
+                    MetricUnits.MEGABYTES
                 ),
-                metricsCollector?.buildValueDataPoint(
-                    adapterID,
-                    METRICS_MESSAGES,
-                    buffer.size.toDouble(),
-                    MetricUnits.COUNT,
-                    metricDimensions
-                ),
+                metricsCollector?.buildValueDataPoint(adapterID, METRICS_WRITES, 1.0, MetricUnits.COUNT, metricDimensions),
+                metricsCollector?.buildValueDataPoint(adapterID, METRICS_BYTES_SEND, payloadSize.toDouble(), MetricUnits.COUNT, metricDimensions),
+                metricsCollector?.buildValueDataPoint(adapterID, METRICS_MESSAGES, buffer.size.toDouble(), MetricUnits.COUNT, metricDimensions),
                 metricsCollector?.buildValueDataPoint(
                     adapterID,
                     METRICS_WRITE_DURATION,
-                    writeDurationInMillis,
+                    duration.inWholeMilliseconds.toDouble(),
                     MetricUnits.MILLISECONDS,
                     metricDimensions
                 ),
-                metricsCollector?.buildValueDataPoint(
-                    adapterID,
-                    METRICS_WRITE_SUCCESS,
-                    1.0,
-                    MetricUnits.COUNT,
-                    metricDimensions
-                ),
-                metricsCollector?.buildValueDataPoint(
-                    adapterID,
-                    METRICS_WRITE_SIZE,
-                    buffer.payloadSize.toDouble(),
-                    MetricUnits.BYTES,
-                    metricDimensions
-                )
+                metricsCollector?.buildValueDataPoint(adapterID, METRICS_WRITE_SUCCESS, 1.0, MetricUnits.COUNT, metricDimensions),
+                metricsCollector?.buildValueDataPoint(adapterID, METRICS_WRITE_SIZE, buffer.payloadSize.toDouble(), MetricUnits.BYTES, metricDimensions)
             )
         }
 

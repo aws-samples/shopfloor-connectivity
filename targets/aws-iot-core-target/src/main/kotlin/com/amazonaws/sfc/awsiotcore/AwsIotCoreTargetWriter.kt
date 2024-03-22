@@ -6,8 +6,11 @@ package com.amazonaws.sfc.awsiotcore
 
 
 import com.amazonaws.sfc.awsiotcore.config.AwsIotCoreTargetConfiguration
+import com.amazonaws.sfc.awsiotcore.config.AwsIotCoreTargetConfiguration.Companion.CONFIG_BATCH_COUNT
+import com.amazonaws.sfc.awsiotcore.config.AwsIotCoreTargetConfiguration.Companion.CONFIG_BATCH_INTERVAL
 import com.amazonaws.sfc.awsiotcore.config.AwsIotCoreWriterConfiguration
 import com.amazonaws.sfc.awsiotcore.config.AwsIotCoreWriterConfiguration.Companion.AWS_IOT_CORE_TARGET
+import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_BATCH_SIZE
 import com.amazonaws.sfc.config.ConfigReader
 import com.amazonaws.sfc.data.*
 
@@ -34,7 +37,6 @@ import software.amazon.awssdk.services.iot.model.DescribeEndpointRequest
 import software.amazon.awssdk.services.iotdataplane.IotDataPlaneClient
 import software.amazon.awssdk.services.iotdataplane.IotDataPlaneClientBuilder
 import software.amazon.awssdk.services.iotdataplane.model.PublishRequest
-import software.amazon.awssdk.services.iotdataplane.model.PublishResponse
 import java.io.ByteArrayOutputStream
 import java.net.URI
 import java.util.*
@@ -72,7 +74,7 @@ class AwsIotCoreTargetWriter(
         clientHelper.targetConfig(config, targetID, AWS_IOT_CORE_TARGET)
     }
     private val buffer = TargetDataBuffer(storeFullMessage = false)
-    private val doesBatching by lazy { targetConfig.batchSize != null || targetConfig.batchCount  != null || targetConfig.batchInterval != Duration.INFINITE }
+    private val doesBatching by lazy { targetConfig.batchSize != null || targetConfig.batchCount != null || targetConfig.batchInterval != Duration.INFINITE }
     private val usesCompression = targetConfig.compressionType != CompressionType.NONE
 
     private val dataClientBuilder: IotDataPlaneClientBuilder = IotDataPlaneClient.builder().endpointOverride(URI.create("https://$endpoint"))
@@ -189,7 +191,7 @@ class AwsIotCoreTargetWriter(
                                 targetResults?.add(targetData)
                                 buffer.add(targetData, messagePayload)
 
-                                log.trace("Received message, buffered size is ${buffer.payloadSize.byteCountString}")
+                                log.trace("Received message, buffered items is ${buffer.size} with a total size of ${buffer.payloadSize.byteCountString}")
                                 if (targetData.noBuffering || bufferReachedMaxSizeOrMessages(log)) {
                                     timer = writeBufferedMessages(timer)
                                 }
@@ -275,39 +277,43 @@ class AwsIotCoreTargetWriter(
         val (request, payloadSize) = buildRequest()
 
         try {
-            val duration = measureTime {
+            if (payloadSize > AWS_IOT_CORE_MAX_PAYLOAD_SIZE) {
+                targetResults?.errorBuffered()
+                log.error("Size of MQTT payload is $payloadSize bytes, max payload size of AWS IoT core is $AWS_IOT_CORE_MAX_PAYLOAD_SIZE bytes, reduce or set $CONFIG_BATCH_SIZE, $CONFIG_BATCH_COUNT, $CONFIG_BATCH_INTERVAL for this target")
+                runBlocking { metricsCollector?.put(targetID, METRICS_WRITE_ERRORS, 1.0, MetricUnits.COUNT, metricDimensions) }
+            } else {
+                val duration = measureTime {
 
-                clientHelper.executeServiceCallWithRetries {
-                    try {
-                        val resp = iotDataPlaneClient.publish(request)
-                        log.trace("AWS IoT Core publish response ${resp.sdkHttpResponse().statusCode()}")
-                        targetResults?.ackBuffered()
-                    } catch (e: AwsServiceException) {
-                        log.trace("AWS IoT Core publish error ${e.message}")
-                        // Check the exception, it will throw an AwsServiceRetryableException if the error is recoverable
-                        clientHelper.processServiceException(e)
-                        // Non recoverable service exceptions
-                        throw e
+                    clientHelper.executeServiceCallWithRetries {
+                        try {
+                            val resp = iotDataPlaneClient.publish(request)
+                            log.trace("AWS IoT Core publish response ${resp.sdkHttpResponse().statusCode()}")
+                            targetResults?.ackBuffered()
+                        } catch (e: AwsServiceException) {
+                            log.trace("AWS IoT Core publish error ${e.message}")
+                            // Check the exception, it will throw an AwsServiceRetryableException if the error is recoverable
+                            clientHelper.processServiceException(e)
+                            // Non recoverable service exceptions
+                            throw e
+                        }
                     }
                 }
+
+                val compressedStr = if (targetConfig.compressionType != CompressionType.NONE) " compressed " else " "
+                val itemStr = if (doesBatching) " containing ${buffer.size} items " else " "
+                log.trace("Published MQTT${compressedStr}message to topic ${targetConfig.topicName} with size of ${payloadSize.byteCountString} ${itemStr}in $duration")
+
+                createMetrics(targetID, metricDimensions, buffer.size, payloadSize, duration)
             }
-
-            val compressedStr = if (targetConfig.compressionType != CompressionType.NONE) " compressed " else " "
-            val itemStr = if (doesBatching) " containing ${buffer.size} items " else " "
-            log.trace("Published MQTT${compressedStr}message with size of $payloadSize bytes${itemStr}in $duration")
-
-            createMetrics(targetID, metricDimensions, buffer.size, payloadSize, duration)
-            log.trace("Published message to topic \"${targetConfig.topicName}\"")
-        }catch (e :    Exception){
+        } catch (e: Exception) {
             log.errorEx("Error writing to topic \"${targetConfig.topicName}\"", e)
             runBlocking { metricsCollector?.put(targetID, METRICS_WRITE_ERRORS, 1.0, MetricUnits.COUNT, metricDimensions) }
-
             if (e.isServiceNotReachable) {
                 targetResults?.nackBuffered()
             } else {
                 targetResults?.errorBuffered()
             }
-        }finally {
+        } finally {
             buffer.clear()
         }
         return createTimer()
@@ -342,7 +348,8 @@ class AwsIotCoreTargetWriter(
     }
 
 
-    private fun createMetrics(adapterID: String, metricDimensions: MetricDimensions, messages : Int, size: Int, duration: Duration
+    private fun createMetrics(
+        adapterID: String, metricDimensions: MetricDimensions, messages: Int, size: Int, duration: Duration
     ) {
 
         runBlocking {
@@ -356,7 +363,13 @@ class AwsIotCoreTargetWriter(
                 ),
                 metricsCollector?.buildValueDataPoint(adapterID, METRICS_WRITES, 1.0, MetricUnits.COUNT, metricDimensions),
                 metricsCollector?.buildValueDataPoint(adapterID, METRICS_MESSAGES, messages.toDouble(), MetricUnits.COUNT, metricDimensions),
-                metricsCollector?.buildValueDataPoint(adapterID, METRICS_WRITE_DURATION, duration.inWholeMilliseconds.toDouble(), MetricUnits.MILLISECONDS, metricDimensions),
+                metricsCollector?.buildValueDataPoint(
+                    adapterID,
+                    METRICS_WRITE_DURATION,
+                    duration.inWholeMilliseconds.toDouble(),
+                    MetricUnits.MILLISECONDS,
+                    metricDimensions
+                ),
                 metricsCollector?.buildValueDataPoint(adapterID, METRICS_WRITE_SUCCESS, 1.0, MetricUnits.COUNT, metricDimensions),
                 metricsCollector?.buildValueDataPoint(adapterID, METRICS_WRITE_SIZE, size.toDouble(), MetricUnits.BYTES, metricDimensions)
             )

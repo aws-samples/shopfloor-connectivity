@@ -12,6 +12,8 @@ import com.amazonaws.sfc.metrics.MetricsSourceConfiguration
 import com.amazonaws.sfc.opcua.config.OpcuaConfiguration.Companion.OPC_UA_ADAPTER
 import com.amazonaws.sfc.opcua.config.OpcuaServerConfiguration.Companion.CONFIG_SERVER_PROFILE
 import com.google.gson.annotations.SerializedName
+import kotlin.time.DurationUnit
+import kotlin.time.toDuration
 
 
 @ConfigurationClass
@@ -26,6 +28,16 @@ class OpcuaAdapterConfiguration : ProtocolAdapterConfiguration() {
     private var _serverProfiles = emptyMap<String, OpcuaServerProfileConfiguration>()
     val serverProfiles: Map<String, OpcuaServerProfileConfiguration>
         get() = _serverProfiles
+
+    @SerializedName(OpcuaConfiguration.CONFIG_CHANGED_DATA_CHANNEL_SIZE)
+    protected val _changedDataChannelSize = 1000
+    val changedDataChannelSize
+        get() = _changedDataChannelSize
+
+    @SerializedName(OpcuaConfiguration.CONFIG_CHANGED_DATA_CHANNEL_TIMEOUT)
+    protected val _changedDataChannelTimeout = 1000
+    val changedDataChannelTimeout
+        get() = _changedDataChannelTimeout.toDuration(DurationUnit.MILLISECONDS)
 
 
     /**

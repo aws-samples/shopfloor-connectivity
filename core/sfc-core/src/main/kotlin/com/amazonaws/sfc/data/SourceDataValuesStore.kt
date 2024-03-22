@@ -12,13 +12,16 @@ import java.util.concurrent.locks.ReentrantLock
  * Data store for values received from data updates or events
  */
 
-open class SourceDataValuesStore<T> {
+open class SourceDataValuesStore<T>() {
 
-    private var values = ConcurrentHashMap<String, T>(1024)
+    private var values = ConcurrentHashMap<String, T>()
 
     fun add(channelID: String, value: T) {
         values[channelID] = value
     }
+
+    val size
+        get() = values.size
 
     fun read(channels: List<String>?): List<Pair<String, T>> {
 

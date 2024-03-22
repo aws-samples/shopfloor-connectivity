@@ -17,7 +17,7 @@ import kotlinx.coroutines.runBlocking
  */
 class AwsIotAnalyticsTargetService : ServiceMain() {
 
-    override fun createServiceInstance(args: Array<String>, configuration: String, logger: Logger): Service {
+    override fun createServiceInstance(args: Array<String>, configuration: String, logger: Logger): Service? {
         return createIpcTargetServer(args, configuration, AWS_IOT_ANALYTICS, logger) { _configReader, _targetID, _logger, _resultHandler ->
             AwsIotAnalyticsTargetWriter.newInstance(_configReader, _targetID, _logger, _resultHandler)
         }

@@ -106,14 +106,17 @@ class BufferedWriter(
 
     // Start handling results from targets
     private fun launchResultHandlerWorker() = targetScope.launch("Result processor for target $targetID") {
+        resultsTask(resultChannel, this@BufferedWriter, this)
+    }
 
-        while (isActive) {
+    private suspend fun resultsTask(channel: Channel<TargetResult>, bufferedWriter: BufferedWriter, scope: CoroutineScope) {
+        while (scope.isActive) {
             try {
                 // Read ACK/NACK returned by target
-                val resultData = resultChannel.receive()
+                val resultData = channel.receive()
 
                 // Handle received results
-                handleTargetResults(resultData)
+                bufferedWriter.handleTargetResults(resultData)
 
                 // when receiving NACKs go into buffering mode
                 if (resultData.containsNacks) {
@@ -134,7 +137,7 @@ class BufferedWriter(
                         // Stop cleanup of buffered data
                         bufferCleanupWorker?.cancel()
                         // Resubmit data that was stored in whilst in buffering mode
-                        resubmittingBufferedData()
+                        bufferedWriter.resubmittingBufferedData()
                     }
                 }
             } catch (e: Exception) {

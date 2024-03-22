@@ -33,16 +33,6 @@ class OpcuaConfiguration : SourceAdapterBaseConfiguration() {
     val opcuaProtocolAdapters
         get() = protocolAdapters.filter { it.value.protocolAdapterType == OPC_UA_ADAPTER }
 
-    @SerializedName(CONFIG_CHANGED_DATA_CHANNEL_SIZE)
-    protected val _changedDataChannelSize = 1000
-    val changedDataChannelSize
-        get() = _changedDataChannelSize
-
-    @SerializedName(CONFIG_CHANGED_DATA_CHANNEL_TIMEOUT)
-    protected val _changedDataChannelTimeout = 1000
-    val changedDataChannelTimeout
-        get() = _changedDataChannelTimeout.toDuration(DurationUnit.MILLISECONDS)
-
     @SerializedName(CONFIG_RECEIVED_EVENTS_CHANNEL_SIZE)
     protected val _receivedEventsChannelSize = 1000
     val receivedEventsChannelSize

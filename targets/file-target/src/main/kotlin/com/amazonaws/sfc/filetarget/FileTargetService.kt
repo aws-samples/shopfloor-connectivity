@@ -18,7 +18,7 @@ import kotlinx.coroutines.runBlocking
  */
 class FileTargetService : ServiceMain() {
 
-    override fun createServiceInstance(args: Array<String>, configuration: String, logger: Logger): Service {
+    override fun createServiceInstance(args: Array<String>, configuration: String, logger: Logger): Service? {
         return createIpcTargetServer(args, configuration, FILE_TARGET, logger) { _configReader, _targetID, _logger, _ ->
             FileTargetWriter.newInstance(_configReader, _targetID, _logger, null)
         }
