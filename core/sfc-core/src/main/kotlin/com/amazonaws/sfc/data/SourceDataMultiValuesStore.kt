@@ -32,12 +32,12 @@ open class SourceDataMultiValuesStore<T> {
     /**
      * Clears all data in the store
      */
-    suspend fun clear() {
+    fun clear() {
         values.clear()
     }
 
 
-    suspend fun read(channels: List<String>?): List<Pair<String, List<T>>> {
+    fun read(channels: List<String>?): List<Pair<String, List<T>>> {
 
         // get the data for the requested channels
         val data: Map<String, List<T>> = values.filter {
