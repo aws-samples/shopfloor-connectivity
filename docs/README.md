@@ -3587,19 +3587,6 @@ This section describes the configuration types for the OPCUA protocol adapter an
 <td></td>
 </tr>
 
-<tr class="odd">
-<td>ChangedDataChannelSize</td>
-<td>Size of internal buffer to receive data for event subscriptions</td>
-<td>Int</td>
-<td>Default is 1000</td>
-</tr>
-
-<tr class="odd">
-<td>ChangedDataChannelTimeout</td>
-<td>Timeout in milliseconds to send data to internal buffer for received data for event subscriptions</td>
-<td>Int</td>
-<td>Default is 1000</td>
-</tr>
 </tbody>
 </table>
 

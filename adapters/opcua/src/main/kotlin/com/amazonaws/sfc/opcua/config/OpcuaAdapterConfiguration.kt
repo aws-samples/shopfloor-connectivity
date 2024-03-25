@@ -29,17 +29,6 @@ class OpcuaAdapterConfiguration : ProtocolAdapterConfiguration() {
     val serverProfiles: Map<String, OpcuaServerProfileConfiguration>
         get() = _serverProfiles
 
-    @SerializedName(OpcuaConfiguration.CONFIG_CHANGED_DATA_CHANNEL_SIZE)
-    protected val _changedDataChannelSize = 1000
-    val changedDataChannelSize
-        get() = _changedDataChannelSize
-
-    @SerializedName(OpcuaConfiguration.CONFIG_CHANGED_DATA_CHANNEL_TIMEOUT)
-    protected val _changedDataChannelTimeout = 1000
-    val changedDataChannelTimeout
-        get() = _changedDataChannelTimeout.toDuration(DurationUnit.MILLISECONDS)
-
-
     /**
      * Validates the configuration
      * @throws ConfigurationException
