@@ -1,4 +1,3 @@
-
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: MIT-0
 
@@ -15,6 +14,7 @@ import com.amazonaws.sfc.log.LogWriter
 import com.amazonaws.sfc.log.Logger
 import com.amazonaws.sfc.log.Logger.Companion.createLogger
 import com.amazonaws.sfc.util.MemoryMonitor
+import com.amazonaws.sfc.util.SfcException
 import com.amazonaws.sfc.util.launch
 import com.google.gson.JsonSyntaxException
 import kotlinx.coroutines.Dispatchers
@@ -46,7 +46,7 @@ abstract class ServiceMain {
             // Create factory and new instance of custom provider
             val factory = CustomLogWriterFactory(customConfigProviderConfig, createLogger(configStr))
             return factory.newLogWriterInstance(configStr)
-        } catch( e : JsonSyntaxException){
+        } catch (e: JsonSyntaxException) {
             val msg = "Error creating custom log writer, invalid JSON in configuration ${e.extendedJsonException(configStr)}"
             throw ConfigurationException(msg, Logger.CONF_LOG_WRITER)
         } catch (e: Exception) {
@@ -73,7 +73,7 @@ abstract class ServiceMain {
 
         val logs = serviceLogger.getCtxLoggers(className, "run")
 
-        var memoryMonitor : MemoryMonitor? = null
+        var memoryMonitor: MemoryMonitor? = null
 
         try {
             val configProvider = ConfigProviderFactory.createProvider(args, serviceLogger)
@@ -102,10 +102,9 @@ abstract class ServiceMain {
                     }
                 }
             }
-        }catch (e : Exception){
+        } catch (e: Exception) {
             logs.errorEx("Error running service", e)
-        }
-        finally {
+        } finally {
             memoryMonitor?.stop()
         }
     }
@@ -132,17 +131,18 @@ abstract class ServiceMain {
         // create instance of the actual service to run
         try {
             serviceInstance = createServiceInstance(args, configuration, serviceLogger)
-            if (serviceInstance!=null ) logs.info("Created instance of service ${serviceInstance!!::class.java.simpleName}")
+            if (serviceInstance != null) logs.info("Created instance of service ${serviceInstance!!::class.java.simpleName}")
+        } catch (e: SfcException) {
+            logs.error("Error creating service instance: ${e.message}")
         } catch (e: Exception) {
             logs.errorEx("Error creating service instance: ${e.message}", e)
         }
         // run the service
         try {
-            logs.info("Running service instance")
+            if (serviceInstance != null) logs.info("Running service instance")
             runService()
         } catch (e: Exception) {
             logs.errorEx("Error starting service instance", e)
-
         }
     }
 
@@ -156,7 +156,7 @@ abstract class ServiceMain {
             serviceInstance?.start()
 
             serviceInstance?.blockUntilShutdown()
-        }catch (e : Exception){
+        } catch (e: Exception) {
             serviceLogger.getCtxErrorLogEx(className, "runService")("Error running service", e)
         }
 

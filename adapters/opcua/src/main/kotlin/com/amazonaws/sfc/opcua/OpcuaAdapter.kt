@@ -77,18 +77,20 @@ class OpcuaAdapter(private val adapterID: String, private val configuration: Opc
         } else null
 
 
-    private val adapterSources = sequence {
-        configuration.sources.keys.forEach { sourceID ->
-            val source = try {
-                OpcuaSource(sourceID, configuration, clientHandleAtomic, logger, metricsCollector, adapterMetricDimensions)
-            } catch (_: Exception) {
-                null
+    private val adapterSources by lazy {
+        sequence {
+            configuration.sources.keys.forEach { sourceID ->
+                val source = try {
+                    OpcuaSource(sourceID, configuration, clientHandleAtomic, logger, metricsCollector, adapterMetricDimensions)
+                } catch (_: Exception) {
+                    null
+                }
+                if (source != null) {
+                    yield(sourceID to source)
+                }
             }
-            if (source != null) {
-                yield(sourceID to source)
-            }
-        }
-    }.toMap()
+        }.toMap()
+    }
 
 
     /**

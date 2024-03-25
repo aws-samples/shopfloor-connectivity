@@ -233,7 +233,7 @@ class ScheduleReader(
             try {
                 log.trace("Worker start reading $protocolID")
                 reader.read { result ->
-                    log.trace("Worker finished reading $protocolID")
+                    log.trace("Finished reading $protocolID")
                     readResultsChannel.submit(
                         protocolID to result,
                         config.tuningConfiguration.scheduleReaderResultsChannelTimeout

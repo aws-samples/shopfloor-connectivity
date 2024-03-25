@@ -23,6 +23,8 @@ import com.amazonaws.sfc.util.isJobCancellationException
 import io.grpc.BindableService
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import java.net.InetSocketAddress
 import java.util.concurrent.TimeUnit
 import kotlin.system.exitProcess
@@ -146,7 +148,7 @@ class IpcAdapterService(
                                 }
                             }
                         } else if (logger.level == LogLevel.INFO) {
-                            val valueCount = it.values.filterIsInstance<SourceReadSuccess>().sumOf { w -> (w).values.size }
+                            val valueCount =( it.values.filterIsInstance<SourceReadSuccess>()).map{ v->v.values.values.count()}.sum()
                             if (valueCount != 0) {
                                 val sourceCount = it.values.size
                                 log.info("Read $valueCount values from $sourceCount sources")
@@ -185,53 +187,69 @@ class IpcAdapterService(
             }
         }
 
+
+
         override suspend fun initializeAdapter(request: InitializeAdapterRequest): InitializeAdapterResponse {
-            try {
 
-                val aux = request.auxiliarySettingsMap[CONFIG_CLOUD_SECRETS]
-                val secrets = aux?.settingsMap?.map { (k, v) -> k to v }?.toMap()
-                logger.addSecrets(secrets)
+            initializationLock.withLock {
+                if (request.adapterConfiguration != lastRequest) {
+                    lastRequest = request.adapterConfiguration
+                } else {
 
-                val log = logger.getCtxLoggers(className, "initializeAdapter")
+                    try {
 
-                log.trace("Received adapter configuration ${request.adapterConfiguration}")
+                        val aux = request.auxiliarySettingsMap[CONFIG_CLOUD_SECRETS]
+                        val secrets = aux?.settingsMap?.map { (k, v) -> k to v }?.toMap()
+                        logger.addSecrets(secrets)
 
-                _initialized = false
+                        val log = logger.getCtxLoggers(className, "initializeAdapter")
 
-                val serviceConfiguration: ServiceConfiguration = ConfigReader.createConfigReader(
-                    configStr = request.adapterConfiguration,
-                    allowUnresolved = true,
-                    secretsManager = null
-                ).getConfig()
+                        log.trace("Received adapter configuration ${request.adapterConfiguration}")
 
-                val secretsManager = SecretsManager.createSecretsManager(serviceConfiguration, logger)
-                runBlocking {
-                    secretsManager?.syncSecretsFromService(serviceConfiguration.secretsManagerConfiguration?.cloudSecrets ?: emptyList())
+                        _initialized = false
+
+                        val serviceConfiguration: ServiceConfiguration = ConfigReader.createConfigReader(
+                            configStr = request.adapterConfiguration,
+                            allowUnresolved = true,
+                            secretsManager = null
+                        ).getConfig()
+
+                        val secretsManager = SecretsManager.createSecretsManager(serviceConfiguration, logger)
+                        runBlocking {
+                            secretsManager?.syncSecretsFromService(serviceConfiguration.secretsManagerConfiguration?.cloudSecrets ?: emptyList())
+                        }
+
+                        val configReader = ConfigReader.createConfigReader(
+                            configStr = request.adapterConfiguration, allowUnresolved = false,
+                            secretsManager
+                        )
+
+                        val adapter = adapterID ?: serviceConfiguration.protocolAdapters.keys.first()
+                        //   _protocolAdapter?.stop(1.toDuration(DurationUnit.SECONDS))
+                        _protocolAdapter = createAdapter(adapter, configReader, logger)
+                        runBlocking {
+                            _protocolAdapter?.init()
+
+                            _initialized = true
+
+                            useCompressionForData = getServerCompression(configReader, adapter)
+
+                            initializeHealthProbeService(serviceConfiguration)
+
+                        }
+
+                    } catch (e: java.lang.Exception) {
+                        lastRequest = ""
+                        return InitializeAdapterResponse.newBuilder().setInitialized(false).setError(e.message).build()
+                    }
                 }
 
-                val configReader = ConfigReader.createConfigReader(
-                    configStr = request.adapterConfiguration, allowUnresolved = false,
-                    secretsManager
-                )
-
-                val adapter = adapterID ?: serviceConfiguration.protocolAdapters.keys.first()
-                _protocolAdapter = createAdapter(adapter, configReader, logger)
-                _protocolAdapter?.init()
-                _initialized = true
-
-                useCompressionForData = getServerCompression(configReader, adapter)
-
-                initializeHealthProbeService(serviceConfiguration)
-
-
-            } catch (e: java.lang.Exception) {
-                return InitializeAdapterResponse.newBuilder().setInitialized(false).setError(e.message).build()
+                return InitializeAdapterResponse.newBuilder().setInitialized(true).build()
             }
-
-            return InitializeAdapterResponse.newBuilder().setInitialized(true).build()
         }
 
     }
+
 
     private fun getServerCompression(configReader: ConfigReader, adapter: String): Boolean {
         val serviceConfiguration = configReader.getConfig<ServiceConfiguration>()
@@ -283,6 +301,10 @@ class IpcAdapterService(
     }
 
     companion object {
+
+        private var lastRequest: String? = ""
+            private val initializationLock = Mutex()
+
 
         fun createProtocolAdapterService(
             args: Array<String>,

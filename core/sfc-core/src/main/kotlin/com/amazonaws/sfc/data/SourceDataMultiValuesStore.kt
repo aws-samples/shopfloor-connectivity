@@ -16,7 +16,7 @@ open class SourceDataMultiValuesStore<T> {
     private var values = ConcurrentHashMap<String, MutableList<T>>()
 
     // adds a value to the store
-    suspend fun add(channelID: String, value: T) {
+    fun add(channelID: String, value: T) {
 
         if (values.containsKey(channelID)) {
             values[channelID]?.add(value)
