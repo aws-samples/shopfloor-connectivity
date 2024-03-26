@@ -47,9 +47,10 @@ class MemoryMonitor(
                     )
                 }
                 if (memoryUsage.size > trendSamplesRecent && totalTrend > 0 ) {
-                    log.warning(memoryTrendUpStr(totalTrend, recentTrend, usedMemory))
+                    log.warning(memoryTrendStr(totalTrend, recentTrend, usedMemory))
                     Runtime.getRuntime().gc()
-
+                } else{
+                    log.info(memoryTrendStr(totalTrend, recentTrend, usedMemory))
                 }
                 recentSamplesCount = 0
                 if (memoryUsage.size == trendSamples) {
@@ -61,9 +62,10 @@ class MemoryMonitor(
         }
     }
 
-    private fun memoryTrendUpStr(totalTrend: Double, recentTrend: Double,  usedMemory: Long): String {
-        val trendStr = "Amount of used memory is growing, trend over last ${interval * memoryUsage.size} is ${trendStr(totalTrend)}"
-        val recentStr = "over the most recent ${interval * trendSamplesRecent} the trend is ${trendStr(recentTrend)}"
+    private fun memoryTrendStr(totalTrend: Double, recentTrend: Double, usedMemory: Long): String {
+
+        val trendStr = "Used memory trend over last ${interval * memoryUsage.size} was ${trendUpDownStr(totalTrend)}"
+        val recentStr = "over the last ${interval * trendSamplesRecent} the trend was ${trendUpDownStr(recentTrend)}"
         val currentStr = "currently using ${asMB(usedMemory)} MB of available $maxMemory MB"
         return "$trendStr, $recentStr, $currentStr"
     }
@@ -95,24 +97,25 @@ class MemoryMonitor(
             else -> ""
         }
         val duration = interval * samples.size
-        val trendStr = trendStr(trend)
 
-        return "$duration: ${memDeltaStr}, trend is ${trendStr(trend)}"
+        return "$duration: ${memDeltaStr}, trend is ${trendUpDownStr(trend)}"
     }
 
-    private fun trendStr(trendAsInt: Double): String {
-        val trendStr = when {
-            trendAsInt < 0 -> "down"
-            trendAsInt > 0 -> "up"
-            else -> "flat"
-        }
-        return trendStr
-    }
 
 
     companion object {
         fun asMB(bytes: Long): Long {
             return bytes / (1024 * 1024)
+        }
+
+        fun trendUpDownStr(trend: Double): String {
+            val trendAsInt = (trend + 0.5).toInt()
+            val trendStr = when {
+                trendAsInt < 0 -> "down"
+                trendAsInt > 0 -> "up"
+                else -> "flat"
+            }
+            return trendStr
         }
 
         fun round(value: Double, places: Int): Double {
