@@ -120,7 +120,7 @@ class IpcTargetWriter(private val targetID: String,
                     } else {
                         var s = "Error communicating with target IPC service on ${serverConfig.addressStr}, "
                         s += if (e is StatusException) "${e.cause?.message ?: e.message}" else e.message
-                        log.errorEx(s, e)
+                        log.error(s)
                     }
                     resetIpcClient()
                     delay(IpcSourceReader.WAIT_AFTER_ERROR)
