@@ -35,7 +35,7 @@ dependencies {
 }
 
 application {
-    mainClass.set("com.amazonaws.sfc.awsiot.mqtt.MqttTargetService")
+    mainClass.set("com.amazonaws.sfc.mqtt.MqttTargetService")
     applicationName = project.name
 }
 

@@ -573,6 +573,7 @@ object GrpcTargetValueFromNativeExt {
     }
 
     private fun builderForAnyValue(channelOutput: ChannelOutputData): TargetChannelValue.Builder? {
+        if (channelOutput.value == null) return null
         val builder: TargetChannelValue.Builder? = when (channelOutput.value) {
             is Iterable<*> -> builderForArray(channelOutput.value as Iterable<*>)
             is Byte -> builderForValue(channelOutput.value as Byte)

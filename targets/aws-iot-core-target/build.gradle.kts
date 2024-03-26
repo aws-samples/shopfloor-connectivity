@@ -34,7 +34,7 @@ dependencies {
 }
 
 application {
-    mainClass.set("com.amazonaws.sfc.AwsIotCoreTargetService")
+    mainClass.set("com.amazonaws.sfc.awsiotcore.AwsIotCoreTargetService")
     applicationName = project.name
 }
 
