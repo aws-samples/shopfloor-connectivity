@@ -252,7 +252,7 @@ open class OpcuaSource(
                     }
                 } catch (e: Exception) {
                     if (!e.isJobCancellationException) {
-                        log.errorEx("Unable to read from server ${opcuaServerConfiguration.endPoint} for source \"${sourceID}\"", e)
+                        log.error("Unable to read from server ${opcuaServerConfiguration.endPoint} for source \"${sourceID}\"")
                         resetClient(1000)
                         delay(opcuaServerConfiguration.waitAfterReadError)
                     }
@@ -1027,13 +1027,15 @@ open class OpcuaSource(
 
     }
 
-    private suspend fun serverReadsInPollingMode(channels: List<String>?): List<Pair<String, ChannelReadValue>> =
+    private suspend fun serverReadsInPollingMode(channels: List<String>?): List<Pair<String, ChannelReadValue>> {
 
+        if (client == null) return emptyList()
+
+        val log = logger.getCtxLoggers(className, "read")
 
         // partition nodes in smaller batches
-        sequence {
+        return sequence {
 
-            if (client == null) return@sequence
 
             val opcuaDataTypesConverter = OpcuaDataTypesConverter(client?.serializationContext)
 
@@ -1046,7 +1048,7 @@ open class OpcuaSource(
                     val response: ReadResponse = deferredResult.join()
 
                     if (!response.responseHeader.serviceResult.isGood) {
-                        // to do reset connection
+                        resetClient(0)
                         return@sequence
                     }
 
@@ -1059,10 +1061,7 @@ open class OpcuaSource(
                                 yield(s to ChannelReadValue(nativeValue, value.sourceTime?.javaInstant))
                             }
                         } else {
-                            logger.getCtxErrorLog(
-                                className,
-                                "read"
-                            )("Error reading value for channel \"$s\" from source \"$sourceID\", ${value.statusCode}")
+                            log.error("Error reading value for channel \"$s\" from source \"$sourceID\", ${value.statusCode}")
                         }
                     }
 
@@ -1071,6 +1070,7 @@ open class OpcuaSource(
                 }
             }
         }.toList()
+    }
 
     companion object {
         val DEFAULT_INTERVAL = 1.toDuration(DurationUnit.SECONDS)

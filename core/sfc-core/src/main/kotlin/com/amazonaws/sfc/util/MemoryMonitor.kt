@@ -47,7 +47,7 @@ class MemoryMonitor(
                     )
                 }
                 if (memoryUsage.size > trendSamplesRecent && totalTrend > 0 ) {
-                    log.warning(memoryTrendUpStr(totalTrend, memoryUsage.last() - memoryUsage.first(), recentTrend, recentSamples.last() - recentSamples.first(), usedMemory))
+                    log.warning(memoryTrendUpStr(totalTrend, recentTrend, usedMemory))
                     Runtime.getRuntime().gc()
 
                 }
@@ -61,9 +61,9 @@ class MemoryMonitor(
         }
     }
 
-    private fun memoryTrendUpStr(totalTrend: Double, totalDelta : Long, recentTrend: Double, recentDelta: Long, usedMemory: Long): String {
-        val trendStr = "Amount of used memory is growing with ${totalDelta.byteCountString}, trend over last ${interval * memoryUsage.size} is ${(totalTrend + 0.5).toInt()}"
-        val recentStr = "over the most recent ${interval * trendSamplesRecent} memory usage change was ${recentDelta.byteCountString} the trend is ${(recentTrend + 0.5).toInt()}"
+    private fun memoryTrendUpStr(totalTrend: Double, recentTrend: Double,  usedMemory: Long): String {
+        val trendStr = "Amount of used memory is growing, trend over last ${interval * memoryUsage.size} is ${trendStr(totalTrend)}"
+        val recentStr = "over the most recent ${interval * trendSamplesRecent} the trend is ${trendStr(recentTrend)}"
         val currentStr = "currently using ${asMB(usedMemory)} MB of available $maxMemory MB"
         return "$trendStr, $recentStr, $currentStr"
     }
@@ -95,14 +95,18 @@ class MemoryMonitor(
             else -> ""
         }
         val duration = interval * samples.size
-        val trendAsInt = (trend + 0.5).toInt()
-        val trendStr = when{
+        val trendStr = trendStr(trend)
+
+        return "$duration: ${memDeltaStr}, trend is ${trendStr(trend)}"
+    }
+
+    private fun trendStr(trendAsInt: Double): String {
+        val trendStr = when {
             trendAsInt < 0 -> "down"
-            trendAsInt >0 ->"up"
+            trendAsInt > 0 -> "up"
             else -> "flat"
         }
-
-        return "$duration: ${memDeltaStr}, trend is $trendStr ($trendAsInt)"
+        return trendStr
     }
 
 
