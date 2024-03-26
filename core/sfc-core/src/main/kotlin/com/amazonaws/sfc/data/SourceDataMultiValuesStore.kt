@@ -5,6 +5,8 @@
 package com.amazonaws.sfc.data
 
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.ConcurrentLinkedQueue
+import java.util.concurrent.ConcurrentSkipListMap
 
 /**
  * Data store for multiple values received from data updates or events
@@ -13,16 +15,13 @@ open class SourceDataMultiValuesStore<T> {
 
 
     // the stored data values
-    private var values = ConcurrentHashMap<String, MutableList<T>>()
+    private var values = ConcurrentHashMap<String, ConcurrentLinkedQueue<T>>()
 
     // adds a value to the store
     fun add(channelID: String, value: T) {
 
-        if (values.containsKey(channelID)) {
-            values[channelID]?.add(value)
-        } else {
-            values[channelID] = mutableListOf(value)
-        }
+        val list = values.computeIfAbsent(channelID) { _ -> ConcurrentLinkedQueue<T>() }
+        list.add(value)
     }
 
     val size
@@ -40,7 +39,7 @@ open class SourceDataMultiValuesStore<T> {
     fun read(channels: List<String>?): List<Pair<String, List<T>>> {
 
         // get the data for the requested channels
-        val data: Map<String, List<T>> = values.filter {
+        val data: Map<String, ConcurrentLinkedQueue<T>> = values.filter {
             (channels == null || it.key in channels)
         }
 
@@ -52,8 +51,8 @@ open class SourceDataMultiValuesStore<T> {
             }
         }
 
-        return data.map {
-            it.key to it.value
+        return data.map { it ->
+            it.key to it.value.map { it }
         }
 
     }

@@ -330,80 +330,11 @@ open class OpcuaSource(
     // store for values changes for a monitored data node
     private val dataValueChangesStore = if (inSubscriptionReadingMode) SourceDataValuesStore<ChannelReadValue>() else null
 
-//    // channel to send data changes to the consuming coroutine that is handling data changes
-//    private val dataValueChangeChannel =
-//        if (inSubscriptionReadingMode) Channel<Pair<UaMonitoredItem, ChannelReadValue>>(opcuaAdapterConfiguration.changedDataChannelSize) else null
-
-//    // coroutine handling changed data for subscriptions
-//    private val changedDataWorker = if (inSubscriptionReadingMode && dataValueChangeChannel != null)
-//        sourceScope.launch(context = Dispatchers.Default, name = "$sourceID Data Subscription Handler") {
-//            dataChangeTask(dataValueChangeChannel, dataValueChangesStore!!, this)
-//        } else null
-
-//    private suspend fun dataChangeTask(
-//        channel: Channel<Pair<UaMonitoredItem, ChannelReadValue>>,
-//        store: SourceDataValuesStore<ChannelReadValue>,
-//        scope: CoroutineScope
-//    ) {
-//        val log = logger.getCtxLoggers(className, "changedDataWorker")
-//
-//        while (scope.isActive) {
-//            val (monitoredItem, data) = channel.receive()
-//            try {
-//                // find the node using the client handle
-//                val clientHandle = monitoredItem.clientHandle.toInt()
-//                val node = clientHandlesForNodes[clientHandle]
-//
-//                if (node != null) {
-//                    log.trace("Received subscription data for source \"$sourceID\", \"${node.channelID}\"")
-//
-//                    val duration = measureTime {
-//                        store.add(node.channelID, data)
-//                    }
-//                    log.trace("Storing changed value took $duration, number of items with changed data is ${dataValueChangesStore?.size}")
-//
-//                } else {
-//                    log.warning("Received subscription data for source \"$sourceID\" but $clientHandle is unknown")
-//                }
-//            } catch (e: Exception) {
-//                logger.getCtxLoggers(className, "onSubscribedNodeData").errorEx("Error processing subscription data for source \"$sourceID\"", e)
-//            }
-//        }
-//    }
 
     // *** Event Subscriptions ***
 
     // store for received event data for monitored event nodes
     private val eventStore = if (anyEventNodes) SourceDataMultiValuesStore<Map<String, Any>>() else null
-
-//    // channel to send received events to the coroutine that is handling these changes
-//    private val receivedEventsChannel = if (anyEventNodes) Channel<Pair<UaMonitoredItem, Map<String, Any>>>(configuration.receivedEventsChannelSize) else null
-
-    // coroutine handling received events
-//    private val eventHandingWorker = if (receivedEventsChannel != null) sourceScope.launch(context = Dispatchers.Default, name = "Event Data Handler") {
-//
-//        val log = logger.getCtxLoggers(className, "onSubscribedEventData")
-//        while (isActive) {
-//            val (monitoredItem, eventPropertiesData) = receivedEventsChannel.receive()
-//            try {
-//                val clientHandle = monitoredItem.clientHandle.toInt()
-//                val node: OpcuaNodeData? = clientHandlesForNodes[clientHandle]
-//
-//                if (node != null) {
-//                    log.trace("Received event data for source \"$sourceID\", \"${node.channelID}\"")
-//                    val duration = measureTime {
-//                        eventStore?.add(node.channelID, eventPropertiesData)
-//                    }
-//                    log.trace("Adding event data to event data store took $duration, number of events in store is ${eventStore?.size}")
-//                } else {
-//                    log.warning("Received event data for source \"$sourceID\" but $clientHandle is unknown")
-//                }
-//            } catch (e: Exception) {
-//                logger.getCtxLoggers(className, "eventHandingWorker").errorEx("Error processing event data for source \"$sourceID\"", e)
-//            }
-//        }
-//    }
-//    else null
 
 
     // creates the client to communicate with the server the source is reading from
