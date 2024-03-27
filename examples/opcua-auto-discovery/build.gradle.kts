@@ -17,7 +17,6 @@ val kotlinVersion = "1.9.0"
 val opcuaMiloVersion = "0.5.1"
 
 
-
 plugins {
     java
     id("sfc.kotlin-library-conventions")
