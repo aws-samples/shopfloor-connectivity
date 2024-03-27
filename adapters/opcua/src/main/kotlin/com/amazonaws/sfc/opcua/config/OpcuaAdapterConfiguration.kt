@@ -12,8 +12,7 @@ import com.amazonaws.sfc.metrics.MetricsSourceConfiguration
 import com.amazonaws.sfc.opcua.config.OpcuaConfiguration.Companion.OPC_UA_ADAPTER
 import com.amazonaws.sfc.opcua.config.OpcuaServerConfiguration.Companion.CONFIG_SERVER_PROFILE
 import com.google.gson.annotations.SerializedName
-import kotlin.time.DurationUnit
-import kotlin.time.toDuration
+
 
 
 @ConfigurationClass
