@@ -58,7 +58,8 @@ class S7FieldChannelConfiguration : ChannelConfiguration(), Validate {
                    transformation: String? = default._transformationID,
                    metadata: Map<String, String> = default._metadata,
                    changeFilter: String? = default._changeFilterID,
-                   valueFilter: String? = default._valueFilterID): S7FieldChannelConfiguration {
+                   valueFilter: String? = default._valueFilterID,
+                   conditionFilter : String? = default._conditionFilterID): S7FieldChannelConfiguration {
 
             val instance = createChannelConfiguration<S7FieldChannelConfiguration>(
                 name = name,
@@ -66,7 +67,8 @@ class S7FieldChannelConfiguration : ChannelConfiguration(), Validate {
                 transformation = transformation,
                 metadata = metadata,
                 changeFilter = changeFilter,
-                valueFilter = valueFilter)
+                valueFilter = valueFilter,
+                conditionFilter = conditionFilter)
 
             with(instance) {
                 _address = address

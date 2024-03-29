@@ -263,6 +263,8 @@ open class BaseConfiguration : Validate, HasSecretsManager {
         const val CONFIG_TRANSFORMATIONS = "Transformations"
         const val CONFIG_VALUE_FILTER = "ValueFilter"
         const val CONFIG_VALUE_FILTERS = "ValueFilters"
+        const val CONFIG_CONDITION_FILTER = "ConditionFilter"
+        const val CONFIG_CONDITION_FILTERS = "ConditionFilters"
         const val CONFIG_VERSION = "Version"
         const val CONFIG_CERTIFICATE = "CertificateFile"
         const val CONFIG_PRIVATE_KEY = "PrivateKeyFile"

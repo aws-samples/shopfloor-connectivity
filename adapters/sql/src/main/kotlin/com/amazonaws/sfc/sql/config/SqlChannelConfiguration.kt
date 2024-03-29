@@ -52,7 +52,8 @@ class SqlChannelConfiguration : ChannelConfiguration() {
                    transformation: String? = default._transformationID,
                    metadata: Map<String, String> = default._metadata,
                    changeFilter: String? = default._changeFilterID,
-                   valueFilter: String? = default._valueFilterID): SqlChannelConfiguration {
+                   valueFilter: String? = default._valueFilterID,
+                   conditionFilter : String? = default._conditionFilterID): SqlChannelConfiguration {
 
             val instance = createChannelConfiguration<SqlChannelConfiguration>(
                 name = name,
@@ -60,8 +61,8 @@ class SqlChannelConfiguration : ChannelConfiguration() {
                 transformation = transformation,
                 metadata = metadata,
                 changeFilter = changeFilter,
-                valueFilter = valueFilter
-            )
+                valueFilter = valueFilter,
+                conditionFilter = conditionFilter)
 
             with(instance) {
                 _columnNames = columnNames

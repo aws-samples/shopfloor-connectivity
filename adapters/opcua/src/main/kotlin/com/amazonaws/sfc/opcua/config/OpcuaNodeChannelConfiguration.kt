@@ -153,7 +153,8 @@ class OpcuaNodeChannelConfiguration : ChannelConfiguration() {
                    metadata: Map<String, String> = default._metadata,
                    changeFilter: String? = default._changeFilterID,
                    valueFilter: String? = default._valueFilterID,
-                   nodeEventType: String? = default._nodeEventType): OpcuaNodeChannelConfiguration {
+                   nodeEventType: String? = default._nodeEventType,
+                   conditionFilter : String? = default._conditionFilterID): OpcuaNodeChannelConfiguration {
 
             val instance = createChannelConfiguration<OpcuaNodeChannelConfiguration>(
                 name = name,
@@ -161,7 +162,8 @@ class OpcuaNodeChannelConfiguration : ChannelConfiguration() {
                 transformation = transformation,
                 metadata = metadata,
                 changeFilter = changeFilter,
-                valueFilter = valueFilter)
+                valueFilter = valueFilter,
+                conditionFilter = conditionFilter)
 
             with(instance) {
                 _nodeID = nodeId

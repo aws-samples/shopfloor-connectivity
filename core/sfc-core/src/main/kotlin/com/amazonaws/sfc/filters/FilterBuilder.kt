@@ -1,21 +1,44 @@
+// Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: MIT-0
+
 package com.amazonaws.sfc.filters
 
-typealias CreateFilterFunction = (c: FilterConfiguration) -> Filter
+import com.amazonaws.sfc.data.JmesPathExtended
+import io.burt.jmespath.Expression
 
-/**
- * Build instances of known filter operators from Filter configuration data
- */
-object FilterBuilder {
+typealias CreateFilterFunction = (f: FilterBuilder, c: FilterConfiguration) -> Filter?
 
-    private var knownFilterOperators = mutableMapOf<String, CreateFilterFunction>()
+abstract class FilterBuilder {
 
-    init {
-        registerFilters()
-    }
+    abstract fun registerFilters()
 
     // Mapping of known operators, indexed by the function name and alternative name. The
     // stored value is the method to call to create the instance of the operator.
     //   private val knownFilterOperators = mutableMapOf<String, CreateFilterFunction>()
+    private var _knownFilterOperators = mutableMapOf<String, CreateFilterFunction>()
+
+    val filterOperators: Set<String>
+        get() = _knownFilterOperators.keys
+
+    /**
+     * Registers a known filter
+     * @param filterName String Name of the filter, e.g. eq, ne
+     * @param filterAltName String? Alternative name eg. ==, !=
+     * @param fn Function1<[@kotlin.ParameterName] FilterConfiguration, Filter>
+     */
+    fun registerFilter(filterName: String, filterAltName: String? = null, fn: CreateFilterFunction) {
+        if (filterName in _knownFilterOperators && _knownFilterOperators[filterName] != fn) {
+            throw IllegalArgumentException("Filter with filter name \"$filterName\" is already in use")
+        }
+        _knownFilterOperators[filterName] = fn
+
+        if (filterAltName != null) {
+            if (filterAltName in _knownFilterOperators && _knownFilterOperators[filterAltName] != fn) {
+                throw IllegalArgumentException("Filter with alt filter name \"$filterName\" is already in use")
+            }
+            _knownFilterOperators[filterAltName] = fn
+        }
+    }
 
     /**
      * Registers a known operator
@@ -24,16 +47,16 @@ object FilterBuilder {
      * @param fn Function1<[@kotlin.ParameterName] FilterConfiguration, Filter>
      */
     fun registerOperator(operatorName: String, operatorAltName: String? = null, fn: CreateFilterFunction) {
-        if (operatorName in knownFilterOperators && knownFilterOperators[operatorName] != fn) {
+        if (operatorName in _knownFilterOperators && _knownFilterOperators[operatorName] != fn) {
             throw IllegalArgumentException("Operator with filter name \"$operatorName\" is already in use")
         }
-        knownFilterOperators[operatorName] = fn
+        _knownFilterOperators[operatorName] = fn
 
         if (operatorAltName != null) {
-            if (operatorAltName in knownFilterOperators && knownFilterOperators[operatorAltName] != fn) {
+            if (operatorAltName in _knownFilterOperators && _knownFilterOperators[operatorAltName] != fn) {
                 throw IllegalArgumentException("Operator with alt filter name \"$operatorName\" is already in use")
             }
-            knownFilterOperators[operatorAltName] = fn
+            _knownFilterOperators[operatorAltName] = fn
         }
     }
 
@@ -42,7 +65,7 @@ object FilterBuilder {
      * @param v Any
      * @return List<Filter>
      */
-    internal fun buildFilterList(v: Any): List<Filter> =
+    internal fun buildFilterList(filterBuilder: FilterBuilder, v: Any): List<Filter> =
         when (v) {
 
             // Handle slightly incorrect configurations where an AND or OR filters only have a single nested condition
@@ -69,22 +92,27 @@ object FilterBuilder {
      * @return Filter? Instance of the filter
      */
     fun build(configuration: FilterConfiguration): Filter? {
-        val op = knownFilterOperators[configuration.operator]
-        return if (op != null) op(configuration) else null
+        val createFilterFunction = _knownFilterOperators[configuration.operator]
+        return if (createFilterFunction != null) createFilterFunction(this, configuration) else null
     }
 
-}
+    fun buildExpressions(configuration: FilterConfiguration): List<Expression<Any>> {
+        val expressions: List<Expression<Any>> = when (configuration.conditionValue) {
+            is String -> listOf(jmesPath.compile(configuration.conditionValue.toString()))
+            is Iterable<*> -> (configuration.conditionValue as Iterable<*>).map {
+                jmesPath.compile(it.toString())
+            }
 
-/**
- * Registers all know filters to filter-builder
- */
-fun registerFilters() {
-    AndFilter.register()
-    OrFilter.register()
-    EqualFilter.register()
-    NotEqualFilter.register()
-    GreaterFilter.register()
-    GreaterOrEqualFilter.register()
-    LessFilter.register()
-    LessOrEqualFilter.register()
+            else -> emptyList()
+        }
+        return expressions
+    }
+
+    companion object {
+
+        private val jmesPath = JmesPathExtended.create()
+
+
+    }
+
 }

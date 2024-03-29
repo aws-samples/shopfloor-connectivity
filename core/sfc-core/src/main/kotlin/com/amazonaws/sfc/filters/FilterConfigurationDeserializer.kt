@@ -1,5 +1,7 @@
 package com.amazonaws.sfc.filters
 
+import com.amazonaws.sfc.filters.FilterConfiguration.Companion.CONFIG_FILTER_OPERATOR
+import com.amazonaws.sfc.filters.FilterConfiguration.Companion.CONFIG_FILTER_VALUE
 import com.google.gson.JsonDeserializationContext
 import com.google.gson.JsonDeserializer
 import com.google.gson.JsonElement
@@ -9,7 +11,7 @@ import java.lang.reflect.Type
 /**
  * Custom deserializer for FilterConfiguration
  */
-class FilterConfigurationDeserializer : JsonDeserializer<FilterConfiguration> {
+open class FilterConfigurationDeserializer : JsonDeserializer<FilterConfiguration> {
     override fun deserialize(
         json: JsonElement?,
         typeOfT: Type?,
@@ -18,16 +20,16 @@ class FilterConfigurationDeserializer : JsonDeserializer<FilterConfiguration> {
         return json?.asJsonObject?.let { filterOperatorConfigurationFromJsonObject(it) }
     }
 
-    private fun filterOperatorConfigurationFromJsonObject(o: JsonObject): FilterConfiguration? {
+    internal fun filterOperatorConfigurationFromJsonObject(o: JsonObject): FilterConfiguration? {
 
         // Get the operator
-        val operator = o.getAsJsonPrimitive(FilterConfiguration.CONFIG_FILTER_OPERATOR).asString
-                       ?: throw IllegalStateException("FilterConfiguration operator name ${FilterConfiguration.CONFIG_FILTER_OPERATOR} can not be null")
+        val operator = o.getAsJsonPrimitive(CONFIG_FILTER_OPERATOR).asString
+            ?: throw IllegalStateException("FilterConfiguration operator name ${CONFIG_FILTER_OPERATOR} can not be null")
 
         // Get the value the operator is using for it's logic
         val operatorValue =
-            o.get(FilterConfiguration.CONFIG_FILTER_VALUE)
-            ?: throw IllegalStateException("FilterConfiguration ${FilterConfiguration.CONFIG_FILTER_VALUE} can not be null")
+            o.get(CONFIG_FILTER_VALUE)
+                ?: throw IllegalStateException("FilterConfiguration $CONFIG_FILTER_VALUE can not be null")
 
         // Build the Configuration instance
         val filter = FilterConfiguration.from(
@@ -41,14 +43,18 @@ class FilterConfigurationDeserializer : JsonDeserializer<FilterConfiguration> {
                         else -> operatorValue.asJsonPrimitive.asString
                     }
                 }
-                // operator has nested filters (eg. AND, OR)
+
                 operatorValue.isJsonArray -> {
+
                     operatorValue.asJsonArray.mapNotNull {
-                        // Build a nested filter for all config items in the value
-                        val valueJsonObjectArray = it as? JsonObject?
-                        if (valueJsonObjectArray != null) {
-                            filterOperatorConfigurationFromJsonObject(valueJsonObjectArray)
-                        } else null
+
+                        when {
+                            // operator is a list of strings
+                            it.isJsonPrimitive && it.asJsonPrimitive.isString -> it.asJsonPrimitive.asString
+                            // operator has nested filters (e.g. AND, OR)
+                            it as? JsonObject? != null -> filterOperatorConfigurationFromJsonObject(it)
+                            else -> null
+                        }
                     }
                 }
                 // handle nested single filters
@@ -60,6 +66,8 @@ class FilterConfigurationDeserializer : JsonDeserializer<FilterConfiguration> {
                 }
             }
         )
+
         return if (filter.conditionValue != null) filter else null
     }
 }
+

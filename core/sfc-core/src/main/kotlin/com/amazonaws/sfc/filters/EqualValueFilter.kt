@@ -1,3 +1,6 @@
+// Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: MIT-0
+
 package com.amazonaws.sfc.filters
 
 import com.amazonaws.sfc.data.DataTypes.numericCompare
@@ -8,7 +11,7 @@ import com.amazonaws.sfc.data.DataTypes.numericCompare
  * @property value Any Value to test against (can be String boolean or a number)
  * @constructor
  */
-class EqualFilter(private val value: Any) : Filter {
+class EqualValueFilter(private val value: Any) : Filter {
 
     /**
      * Tests strings, booleans and numbers for equality
@@ -45,14 +48,14 @@ class EqualFilter(private val value: Any) : Filter {
          * @return Filter
          */
         private fun create(configuration: FilterConfiguration): Filter {
-            return EqualFilter(configuration.conditionValue!!)
+            return EqualValueFilter(configuration.conditionValue!!)
         }
 
         /**
          * Registers operator as known instance
          */
-        fun register() {
-            FilterBuilder.registerOperator(OPERATOR_EQ, OPERATOR_EQ_STR) { c -> create(c) }
+        fun register(filterBuilder: FilterBuilder) {
+            filterBuilder.registerOperator(OPERATOR_EQ, OPERATOR_EQ_STR) { _: FilterBuilder, c -> create(c) }
         }
     }
 

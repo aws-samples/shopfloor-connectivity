@@ -41,7 +41,8 @@ class AdsChannelConfiguration : ChannelConfiguration() {
             transformation: String? = default._transformationID,
             metadata: Map<String, String> = default._metadata,
             changeFilter: String? = default._changeFilterID,
-            valueFilter: String? = default._valueFilterID
+            valueFilter: String? = default._valueFilterID,
+            conditionFilter: String? = default._conditionFilterID
         ): AdsChannelConfiguration {
 
             val instance = createChannelConfiguration<AdsChannelConfiguration>(
@@ -50,7 +51,8 @@ class AdsChannelConfiguration : ChannelConfiguration() {
                 transformation = transformation,
                 metadata = metadata,
                 changeFilter = changeFilter,
-                valueFilter = valueFilter
+                valueFilter = valueFilter,
+                conditionFilter = conditionFilter
             )
 
             with(instance) {

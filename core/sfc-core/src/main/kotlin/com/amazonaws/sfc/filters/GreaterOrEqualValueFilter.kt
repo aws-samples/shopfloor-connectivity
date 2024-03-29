@@ -1,3 +1,6 @@
+// Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: MIT-0
+
 package com.amazonaws.sfc.filters
 
 import com.amazonaws.sfc.data.DataTypes.numericCompare
@@ -6,7 +9,7 @@ import com.amazonaws.sfc.data.DataTypes.numericCompare
  * Implements GE (>=) operator
  * @property value Any Tested value
  */
-class GreaterOrEqualFilter(private val value: Any) : Filter {
+class GreaterOrEqualValueFilter(private val value: Any) : Filter {
 
 
     /**
@@ -36,14 +39,14 @@ class GreaterOrEqualFilter(private val value: Any) : Filter {
          * @return Filter
          */
         private fun create(configuration: FilterConfiguration): Filter {
-            return GreaterOrEqualFilter(configuration.conditionValue!!)
+            return GreaterOrEqualValueFilter(configuration.conditionValue!!)
         }
 
         /**
          * Registers operator as known type
          */
-        fun register() {
-            FilterBuilder.registerOperator(OPERATOR_GE, OPERATOR_GE_STR) { c -> create(c) }
+        fun register(filterBuilder: FilterBuilder) {
+            filterBuilder.registerOperator(OPERATOR_GE, OPERATOR_GE_STR) { _: FilterBuilder, c -> create(c) }
         }
     }
 

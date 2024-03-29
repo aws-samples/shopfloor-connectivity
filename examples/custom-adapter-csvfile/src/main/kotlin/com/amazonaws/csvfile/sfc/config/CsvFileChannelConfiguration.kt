@@ -65,7 +65,8 @@ class CsvFileChannelConfiguration : ChannelConfiguration() {
             transformation: String? = default._transformationID,
             metadata: Map<String, String> = default._metadata,
             changeFilter: String? = default._changeFilterID,
-            valueFilter: String? = default._valueFilterID): CsvFileChannelConfiguration {
+            valueFilter: String? = default._valueFilterID,
+            conditionFilter: String? = default._conditionFilterID): CsvFileChannelConfiguration {
 
             val instance = createChannelConfiguration<CsvFileChannelConfiguration>(
                 name = name,
@@ -73,7 +74,8 @@ class CsvFileChannelConfiguration : ChannelConfiguration() {
                 transformation = transformation,
                 metadata = metadata,
                 changeFilter = changeFilter,
-                valueFilter = valueFilter
+                valueFilter = valueFilter,
+                conditionFilter = conditionFilter
             )
 
             with(instance) {

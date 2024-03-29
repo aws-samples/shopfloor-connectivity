@@ -161,7 +161,8 @@ class MqttChannelConfiguration : ChannelConfiguration() {
                    transformation: String? = default._transformationID,
                    metadata: Map<String, String> = default._metadata,
                    changeFilter: String? = default._changeFilterID,
-                   valueFilter: String? = default._valueFilterID): MqttChannelConfiguration {
+                   valueFilter: String? = default._valueFilterID,
+                   conditionFilter : String? = default._conditionFilterID): MqttChannelConfiguration {
 
             val instance = createChannelConfiguration<MqttChannelConfiguration>(
                 name = name,
@@ -169,7 +170,8 @@ class MqttChannelConfiguration : ChannelConfiguration() {
                 transformation = transformation,
                 metadata = metadata,
                 changeFilter = changeFilter,
-                valueFilter = valueFilter
+                valueFilter = valueFilter,
+                conditionFilter = conditionFilter
             )
 
             with(instance) {

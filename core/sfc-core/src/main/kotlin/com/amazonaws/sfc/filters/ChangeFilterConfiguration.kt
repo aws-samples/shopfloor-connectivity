@@ -1,4 +1,3 @@
-
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: MIT-0
 
@@ -77,9 +76,11 @@ class ChangeFilterConfiguration : Validate {
 
         private val default = ChangeFilterConfiguration()
 
-        fun create(value: Double = default._filterValue,
-                   type: ChangeFilterType = default._filterType,
-                   atLeast: Long? = default._atLeast): ChangeFilterConfiguration {
+        fun create(
+            value: Double = default._filterValue,
+            type: ChangeFilterType = default._filterType,
+            atLeast: Long? = default._atLeast
+        ): ChangeFilterConfiguration {
 
             val instance = ChangeFilterConfiguration()
 

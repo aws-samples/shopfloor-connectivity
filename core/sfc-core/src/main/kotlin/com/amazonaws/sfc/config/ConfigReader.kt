@@ -7,8 +7,7 @@ package com.amazonaws.sfc.config
 
 import com.amazonaws.sfc.data.JsonHelper.Companion.extendedJsonException
 import com.amazonaws.sfc.data.JsonHelper.Companion.fromJsonExtended
-import com.amazonaws.sfc.filters.FilterConfiguration
-import com.amazonaws.sfc.filters.FilterConfigurationDeserializer
+import com.amazonaws.sfc.filters.*
 import com.amazonaws.sfc.secrets.SecretsManager
 import com.amazonaws.sfc.transformations.TransformationOperator
 import com.amazonaws.sfc.transformations.TransformationsDeserializer
@@ -120,7 +119,9 @@ class ConfigReader private constructor(val config: String, private val allowUnre
         fun getPlaceHolders(config: String) = CONFIG_PLACEHOLDER_REGEX.findAll(config)
 
         private fun createJsonConfigReader() = GsonBuilder()
-            .registerTypeAdapter(FilterConfiguration::class.java, FilterConfigurationDeserializer())
+            .registerTypeAdapter(ValueFilterConfiguration::class.java, FilterConfigurationDeserializer())
+            .registerTypeAdapter(ValueFilterConfiguration::class.java, ValueFilterConfigurationDeserializer())
+            .registerTypeAdapter(ConditionFilterConfiguration::class.java, ConditionFilterConfigurationDeserializer())
             .registerTypeAdapter(TransformationOperator::class.java, TransformationsDeserializer())
             .create()
 

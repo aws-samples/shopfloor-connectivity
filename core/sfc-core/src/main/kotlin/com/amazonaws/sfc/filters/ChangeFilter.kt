@@ -1,4 +1,3 @@
-
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: MIT-0
 
@@ -116,8 +115,8 @@ class ChangeFilter(private val configuration: ChangeFilterConfiguration) : Filte
 
     override fun toString(): String {
         return "ChangeFilter(Type: ${configuration.filterType}, " +
-               "Value: ${configuration.filterValue}${if (configuration.filterType == ChangeFilterType.PERCENT) "%" else ""}" +
-               "${if (low != null && high != null) ", Exclusion range: $low...$high" else ", datatype of value not supported by filter"})"
+                "Value: ${configuration.filterValue}${if (configuration.filterType == ChangeFilterType.PERCENT) "%" else ""}" +
+                "${if (low != null && high != null) ", Exclusion range: $low...$high" else ", datatype of value not supported by filter"})"
     }
 
 

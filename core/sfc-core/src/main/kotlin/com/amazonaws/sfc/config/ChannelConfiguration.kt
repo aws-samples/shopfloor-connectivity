@@ -5,6 +5,7 @@
 package com.amazonaws.sfc.config
 
 import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_CHANGE_FILTER
+import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_CONDITION_FILTER
 import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_DESCRIPTION
 import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_NAME
 import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_VALUE_FILTER
@@ -17,6 +18,7 @@ import com.google.gson.annotations.SerializedName
 @Suppress("unused")
 @ConfigurationClass
 open class ChannelConfiguration : Validate {
+
 
     @SerializedName(CONFIG_NAME)
     @Suppress("PropertyName")
@@ -77,6 +79,12 @@ open class ChannelConfiguration : Validate {
     val valueFilterID: String?
         get() = _valueFilterID
 
+    @SerializedName(CONFIG_CONDITION_FILTER)
+    @Suppress("PropertyName")
+    protected var _conditionFilterID: String? = null
+    val conditionFilterID: String?
+        get() = _conditionFilterID
+
 
     /**
      * Validates the configuration
@@ -95,26 +103,35 @@ open class ChannelConfiguration : Validate {
 
         private val default = ChannelConfiguration()
 
-        fun create(name: String? = default._name,
-                   description: String = default._description,
-                   transformation: String? = default._transformationID,
-                   metadata: Map<String, String> = default._metadata,
-                   changeFilter: String? = default._changeFilterID,
-                   valueFilter: String? = default._valueFilterID): ChannelConfiguration = createChannelConfiguration(name = name,
+        fun create(
+            name: String? = default._name,
+            description: String = default._description,
+            transformation: String? = default._transformationID,
+            metadata: Map<String, String> = default._metadata,
+            changeFilter: String? = default._changeFilterID,
+            valueFilter: String? = default._valueFilterID,
+            conditionFilter: String? = default._conditionFilterID
+        ): ChannelConfiguration = createChannelConfiguration(
+            name = name,
             description = description,
             transformation = transformation,
             metadata = metadata,
             changeFilter = changeFilter,
-            valueFilter = valueFilter)
+            valueFilter = valueFilter,
+            conditionFilter = conditionFilter
+        )
 
 
         @JvmStatic
-        protected inline fun <reified T : ChannelConfiguration> createChannelConfiguration(name: String?,
-                                                                                           description: String,
-                                                                                           transformation: String?,
-                                                                                           metadata: Map<String, String>,
-                                                                                           changeFilter: String?,
-                                                                                           valueFilter: String?): T {
+        protected inline fun <reified T : ChannelConfiguration> createChannelConfiguration(
+            name: String?,
+            description: String,
+            transformation: String?,
+            metadata: Map<String, String>,
+            changeFilter: String?,
+            valueFilter: String?,
+            conditionFilter: String?
+        ): T {
 
             val parameterLessConstructor = T::class.java.constructors.firstOrNull { it.parameters.isEmpty() }
             assert(parameterLessConstructor != null)
@@ -127,6 +144,7 @@ open class ChannelConfiguration : Validate {
                 _metadata = metadata
                 _changeFilterID = changeFilter
                 _valueFilterID = valueFilter
+                _conditionFilterID = conditionFilter
             }
             return instance
 

@@ -1,3 +1,6 @@
+// Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: MIT-0
+
 package com.amazonaws.sfc.filters
 
 /**
@@ -5,10 +8,10 @@ package com.amazonaws.sfc.filters
  * @property value Any Value to test against (can be String boolean or a number)
  * @constructor
  */
-class NotEqualFilter(private val value: Any) : Filter {
+class NotEqualValueFilter(private val value: Any) : Filter {
 
     // used EQ operator to implement NE
-    private val eq = EqualFilter(value)
+    private val eq = EqualValueFilter(value)
 
     /**
      * Tests strings, booleans and numbers for non equality
@@ -37,14 +40,14 @@ class NotEqualFilter(private val value: Any) : Filter {
          * @return Filter
          */
         private fun create(configuration: FilterConfiguration): Filter {
-            return NotEqualFilter(configuration.conditionValue!!)
+            return NotEqualValueFilter(configuration.conditionValue!!)
         }
 
         /**
          * Registers operator as known instance
          */
-        fun register() {
-            FilterBuilder.registerOperator(OPERATOR_NE, OPERATOR_NE_STR) { c -> create(c) }
+        fun register(filterBuilder: FilterBuilder) {
+            filterBuilder.registerOperator(OPERATOR_NE, OPERATOR_NE_STR) { _: FilterBuilder, c -> create(c) }
         }
     }
 }

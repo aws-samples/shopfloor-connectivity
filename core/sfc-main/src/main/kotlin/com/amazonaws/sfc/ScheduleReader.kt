@@ -11,6 +11,7 @@ import com.amazonaws.sfc.config.*
 import com.amazonaws.sfc.config.ChannelConfiguration.Companion.CHANNEL_SEPARATOR
 import com.amazonaws.sfc.data.*
 import com.amazonaws.sfc.filters.ChangeFiltersCache
+import com.amazonaws.sfc.filters.ConditionFiltersCache
 import com.amazonaws.sfc.filters.Filter
 import com.amazonaws.sfc.filters.ValueFiltersCache
 import com.amazonaws.sfc.log.LogLevel
@@ -71,6 +72,7 @@ class ScheduleReader(
     private val changeFilters = ChangeFiltersCache(config)
 
     private val valueFilters = ValueFiltersCache(config.valueFilters)
+    private val conditionFilters = ConditionFiltersCache(config.conditionFilters, logger)
 
     private val blockStoppedChannel = Channel<Any>()
 
@@ -171,7 +173,7 @@ class ScheduleReader(
             readProtocolTask(protocolID, reader, readResultsChannel)
         }
 
-    private suspend fun processingTask( scope : CoroutineScope, readResultsChannel: Channel<Pair<String, ReadResult?>>) {
+    private suspend fun processingTask(scope: CoroutineScope, readResultsChannel: Channel<Pair<String, ReadResult?>>) {
 
         val log = logger.getCtxLoggers(className, "processingTask")
         try {
@@ -349,14 +351,15 @@ class ScheduleReader(
 
         val noChangeFiltersConfigured = config.changeFilters.isEmpty()
         val noValueFiltersConfigured = config.valueFilters.isEmpty()
-        val noChangeAndValueFiltersConfigured = noChangeFiltersConfigured && noValueFiltersConfigured
+        val noConditionFiltersConfigured = config.conditionFilters.isEmpty()
+        val noFiltersConfigured = noChangeFiltersConfigured && noValueFiltersConfigured && noConditionFiltersConfigured
 
-        if (noChangeAndValueFiltersConfigured) return data
+
+        if (noFiltersConfigured) return data
 
         val trace = if (logger.level == LogLevel.TRACE) logger.getCtxTraceLog(className, "applyFilters") else null
 
-        return data.map { (sourceID, sourceValues) ->
-
+        val sourceOutputData: Map<String, SourceReadSuccess> = data.map { (sourceID, sourceValues) ->
 
             // apply filter on the values of a source, the filter will return the true if it passes the filter, else false
             val filteredSourceValues = sourceValues.values.filter { (channelID, channelReadValue) ->
@@ -383,9 +386,36 @@ class ScheduleReader(
 
             // new ReadSuccess for the source containing the filtered channel values
             sourceID to SourceReadSuccess(values = filteredSourceValues, timestamp = sourceValues.timestamp)
-            // filter out sources that don't have channels with values left after filtering
         }.toMap().filter { it.value.values.isNotEmpty() }
+
+        return if (noConditionFiltersConfigured)
+            sourceOutputData
+        else
+            applyConditionFilters(sourceOutputData)
     }
+
+    private fun applyConditionFilters(sourceOutputData: Map<String, SourceReadSuccess>) =
+        sourceOutputData.map { (sourceID: String, sourceData: SourceReadSuccess) ->
+            val trace = logger.getCtxTraceLog(className, "applyConditionFilters")
+            val filtered = sourceData.values.filter { (channelID: String, channelData: ChannelReadValue) ->
+
+                val conditionFilterID = config.sources[sourceID]?.channels?.get(channelID)?.conditionFilterID
+                var filter: Filter? = null
+
+                val conditionFilterResult = if (conditionFilterID == null) true else {
+                    filter = conditionFilters[conditionFilterID]
+                    filter == null || filter.apply(sourceData.valuesMap)
+                }
+
+                if (!conditionFilterResult) {
+                    val value = sourceData.values[channelID]?.value
+                    trace("Source \"$sourceID\", Channel \"$channelID\", Value $value (${value!!::class.java.simpleName}) filtered out by condition filter \"$conditionFilterID\" ($filter)")
+                }
+
+                conditionFilterResult
+            }
+            sourceID to SourceReadSuccess(timestamp = sourceData.timestamp, values = filtered)
+        }.toMap().filter { it.value.values.isNotEmpty() }
 
 
     private fun applyValueFilter(sourceID: String, channelID: String, value: Any): Pair<Filter?, Boolean> {

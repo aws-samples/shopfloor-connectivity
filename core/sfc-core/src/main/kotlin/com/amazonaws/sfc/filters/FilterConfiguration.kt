@@ -1,3 +1,6 @@
+// Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: MIT-0
+
 package com.amazonaws.sfc.filters
 
 import com.amazonaws.sfc.config.ConfigurationClass
@@ -7,32 +10,42 @@ import com.google.gson.annotations.SerializedName
 /**
  * Data filter operator configuration
  * NOTE this configuration is using a custom deserializer to handle nested filter configurations
- * @see  FilterConfigurationDeserializer
+ * @see  ValueFilterConfigurationDeserializer
  */
 @ConfigurationClass
-class FilterConfiguration {
+open class FilterConfiguration {
+
+    override fun toString(): String {
+        return "${this::class.java.simpleName}(operator='$conditionValue', value=$_conditionValue)"
+    }
 
     @SerializedName(CONFIG_FILTER_OPERATOR)
-    private var _operator: String = ""
+    protected var _operator: String = ""
     val operator: String
         get() = _operator
 
     @SerializedName(CONFIG_FILTER_VALUE)
-    private var _conditionValue: Any? = null
+    protected var _conditionValue: Any? = null
     val conditionValue: Any?
         get() = _conditionValue
 
 
-    override fun toString(): String {
-        return "FilterConfiguration(operator='$conditionValue', value=$_conditionValue)"
+    fun validate(filterBuilder: FilterBuilder) {
+
+        ConfigurationException.check(
+            filterBuilder.filterOperators.contains(operator),
+            "$CONFIG_FILTER_OPERATOR \"$operator\" is not a valid filter operator, valid operators are ${filterBuilder.filterOperators}",
+            CONFIG_FILTER_OPERATOR,
+            this
+        )
     }
 
     fun validate() {
         if (validated) return
 
         ConfigurationException.check(
-            FilterBuilder.build(this) != null,
-            "$CONFIG_FILTER_OPERATOR \"$operator\" is not a valid filter operator",
+            operator.isNotEmpty(),
+            "$CONFIG_FILTER_OPERATOR must be set",
             CONFIG_FILTER_OPERATOR,
             this
         )
@@ -67,18 +80,6 @@ class FilterConfiguration {
         internal const val CONFIG_FILTER_VALUE = "Value"
         internal const val CONFIG_FILTER_OPERATOR = "Operator"
 
-        private val default = FilterConfiguration()
-
-        fun create(operator: String = default._operator,
-                   value: Any? = default._conditionValue): FilterConfiguration {
-
-            val instance = FilterConfiguration()
-            with(instance) {
-                _operator = operator
-                _conditionValue = value
-            }
-            return instance
-        }
     }
 
 

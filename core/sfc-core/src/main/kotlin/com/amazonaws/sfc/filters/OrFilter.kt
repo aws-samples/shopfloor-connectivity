@@ -1,3 +1,6 @@
+// Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: MIT-0
+
 package com.amazonaws.sfc.filters
 
 /**
@@ -5,7 +8,8 @@ package com.amazonaws.sfc.filters
  * @property conditions List<Filter> List of conditions
  */
 class OrFilter(
-    private val conditions: List<Filter>) : Filter {
+    private val conditions: List<Filter>
+) : Filter {
 
     /**
      * Returns true is any conditions is true
@@ -21,7 +25,7 @@ class OrFilter(
      * String representation of operator
      * @return String
      */
-    override fun toString(): String = "(${conditions.joinToString(separator = " $OPERATOR_OR_STR ")})"
+    override fun toString(): String = "(${conditions.joinToString(separator = " $OPERATOR_OR ")})"
 
     companion object {
 
@@ -33,16 +37,16 @@ class OrFilter(
          * @param configuration FilterConfiguration
          * @return Filter
          */
-        private fun create(configuration: FilterConfiguration): Filter {
-            val conditions = FilterBuilder.buildFilterList(configuration.conditionValue!!)
+        private fun create(filterBuilder: FilterBuilder, configuration: FilterConfiguration): Filter {
+            val conditions = filterBuilder.buildFilterList(filterBuilder, configuration.conditionValue!!)
             return OrFilter(conditions)
         }
 
         /**
          * Registers OR operator as known operator to FilterOperatorFactory
          */
-        fun register() {
-            FilterBuilder.registerOperator(OPERATOR_OR, OPERATOR_OR_STR) { c -> create(c) }
+        fun register(filterBuilder: FilterBuilder) {
+            filterBuilder.registerOperator(OPERATOR_OR, OPERATOR_OR_STR) { f: FilterBuilder, c -> create(f, c) }
         }
 
     }

@@ -5,7 +5,7 @@ package com.amazonaws.sfc.filters
  * Implements AND / && data filter
  * @property conditions List<Filter> List of conditions
  */
-class AndFilter private constructor(private val conditions: List<Filter>) : Filter {
+class AndFilter private constructor(private val filters: List<Filter>) : Filter {
 
     /**
      * Returns true is all conditions are true
@@ -13,14 +13,14 @@ class AndFilter private constructor(private val conditions: List<Filter>) : Filt
      * @return Boolean
      */
     override fun apply(value: Any): Boolean {
-        return conditions.find { !it.apply(value) } == null
+        return filters.find { !it.apply(value) } == null
     }
 
     /**
      * String representation of operator
      * @return String
      */
-    override fun toString(): String = conditions.joinToString(separator = " $OPERATOR_AND_STR ")
+    override fun toString(): String = filters.joinToString(separator = " $OPERATOR_AND ")
 
 
     companion object {
@@ -33,16 +33,16 @@ class AndFilter private constructor(private val conditions: List<Filter>) : Filt
          * @param configuration FilterConfiguration
          * @return Filter
          */
-        private fun create(configuration: FilterConfiguration): Filter {
-            val conditions = FilterBuilder.buildFilterList(configuration.conditionValue!!)
+        private fun create(filterBuilder: FilterBuilder, configuration: FilterConfiguration): Filter {
+            val conditions = filterBuilder.buildFilterList(filterBuilder, configuration.conditionValue!!)
             return AndFilter(conditions)
         }
 
         /**
          * Registers AND operator as known operator to FilterOperatorFactory
          */
-        fun register() {
-            FilterBuilder.registerOperator(OPERATOR_AND, OPERATOR_AND_STR) { c: FilterConfiguration -> create(c) }
+        fun register(filterBuilder: FilterBuilder) {
+            filterBuilder.registerOperator(OPERATOR_AND, OPERATOR_AND_STR) { f: FilterBuilder, c: FilterConfiguration -> create(f, c) }
         }
 
     }

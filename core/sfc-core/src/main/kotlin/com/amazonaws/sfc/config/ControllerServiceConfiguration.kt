@@ -11,8 +11,7 @@ import com.amazonaws.sfc.config.BaseSourceConfiguration.Companion.CONFIG_SOURCE_
 import com.amazonaws.sfc.config.ChannelConfiguration.Companion.CONFIG_TRANSFORMATION
 import com.amazonaws.sfc.config.ScheduleConfiguration.Companion.CONFIG_SCHEDULE_SOURCES
 import com.amazonaws.sfc.config.ServerConfiguration.Companion.CONFIG_HEALTH_PROBE
-import com.amazonaws.sfc.filters.ChangeFilterConfiguration
-import com.amazonaws.sfc.filters.FilterConfiguration
+import com.amazonaws.sfc.filters.*
 import com.amazonaws.sfc.log.LogLevel
 import com.amazonaws.sfc.transformations.TransformValidationError
 import com.amazonaws.sfc.transformations.Transformation
@@ -58,13 +57,22 @@ class ControllerServiceConfiguration : ServiceConfiguration() {
 
 
     @SerializedName(CONFIG_VALUE_FILTERS)
-    private var _valueFilters = mapOf<String, FilterConfiguration>()
+    private var _valueFilters = mapOf<String, ValueFilterConfiguration>()
 
     /**
      * All configured Value  filters
      */
-    val valueFilters: Map<String, FilterConfiguration>
+    val valueFilters: Map<String, ValueFilterConfiguration>
         get() = _valueFilters
+
+    @SerializedName(CONFIG_CONDITION_FILTERS)
+    private var _conditionFilters = mapOf<String, ConditionFilterConfiguration>()
+
+    /**
+     * All configured Condition filters
+     */
+    val conditionFilters: Map<String, ConditionFilterConfiguration>
+        get() = _conditionFilters
 
 
     @SerializedName(CONFIG_HEALTH_PROBE)
@@ -102,6 +110,7 @@ class ControllerServiceConfiguration : ServiceConfiguration() {
         validateAggregationSourceTransformations()
         validateTargetsCredentialClients()
         validateValueFilters()
+        validateConditionFilters()
         validateTargets()
         usedProtocolAdapterInProcTypes.forEach { it.value.validate() }
         usedProtocolServers.forEach { it.value.validate() }
@@ -142,6 +151,14 @@ class ControllerServiceConfiguration : ServiceConfiguration() {
     private fun validateValueFilters() {
         valueFilters.values.forEach {
             it.validate()
+            it.validate(ValueFilterBuilder)
+        }
+    }
+
+    private fun validateConditionFilters() {
+        conditionFilters.values.forEach {
+            it.validate()
+            it.validate(ConditionFilterBuilder)
         }
     }
 
@@ -203,6 +220,7 @@ class ControllerServiceConfiguration : ServiceConfiguration() {
         validateChannelTransformation(sourceID, channelID, channel)
         validateChannelValueFilter(sourceID, channelID, channel)
         validateChannelChangeFilter(sourceID, channelID, channel)
+        validateChannelConditionFilter(sourceID, channelID, channel)
     }
 
     private fun validateChannelValueFilter(sourceID: String, channelID: String, channel: ChannelConfiguration) {
@@ -211,13 +229,26 @@ class ControllerServiceConfiguration : ServiceConfiguration() {
 
         ConfigurationException.check(
             (valueFilters.containsKey(valueFilterID)),
-            "$CONFIG_VALUE_FILTER \"${valueFilterID}\" in channel \"${channelID}\" for source \"${sourceID}\"  does not exist, existing value filters are are ${valueFilters.keys}",
+            "$CONFIG_VALUE_FILTER \"${valueFilterID}\" in channel \"${channelID}\" for source \"${sourceID}\"  does not exist, existing value filters are ${valueFilters.keys}",
             "Channel.$CONFIG_VALUE_FILTER",
             channel
         )
 
         val filterConfig = valueFilters[valueFilterID]
         filterConfig?.validate()
+
+    }
+
+    private fun validateChannelConditionFilter(sourceID: String, channelID: String, channel: ChannelConfiguration) {
+
+        val conditionFilterID = channel.conditionFilterID ?: return
+
+        ConfigurationException.check(
+            (_conditionFilters.containsKey(conditionFilterID)),
+            "$CONFIG_CONDITION_FILTER \"${conditionFilterID}\" in channel \"${channelID}\" for source \"${sourceID}\"  does not exist, existing condition filters are are ${conditionFilters.keys}",
+            "Channel.$CONFIG_CONDITION_FILTER",
+            channel
+        )
 
     }
 
@@ -229,9 +260,6 @@ class ControllerServiceConfiguration : ServiceConfiguration() {
             "Channel.$CONFIG_CHANGE_FILTER",
             channel
         )
-
-        val filterConfig = valueFilters[changeFilterID]
-        filterConfig?.validate()
     }
 
     private fun validateSourceChangeFilter(sourceID: String, source: SourceConfiguration) {
@@ -378,8 +406,8 @@ class ControllerServiceConfiguration : ServiceConfiguration() {
                 )
             }
         }
-
     }
+
 
     companion object {
         private val default = ControllerServiceConfiguration()
@@ -387,7 +415,8 @@ class ControllerServiceConfiguration : ServiceConfiguration() {
         fun create(sources: Map<String, SourceConfiguration> = default._sources,
                    transformations: Map<String, Transformation> = default._transformations,
                    changeFilters: Map<String, ChangeFilterConfiguration> = default._changeFilters,
-                   valueFilters: Map<String, FilterConfiguration> = default._valueFilters,
+                   valueFilters: Map<String, ValueFilterConfiguration> = default._valueFilters,
+                   conditionFilters : Map<String, ConditionFilterConfiguration> = default._conditionFilters,
                    targets: Map<String, TargetConfiguration> = default._targets,
                    protocolAdapters: Map<String, ProtocolAdapterConfiguration> = default._protocols,
                    name: String = default._name,
@@ -432,6 +461,7 @@ class ControllerServiceConfiguration : ServiceConfiguration() {
                 _transformations = transformations
                 _changeFilters = changeFilters
                 _valueFilters = valueFilters
+                _conditionFilters = conditionFilters
                 _healthProbeConfiguration = healthProbeConfiguration
             }
             return instance

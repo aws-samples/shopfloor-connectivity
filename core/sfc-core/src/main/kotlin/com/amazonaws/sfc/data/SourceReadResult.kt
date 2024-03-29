@@ -33,6 +33,9 @@ class SourceReadSuccess(val values: Map<String, ChannelReadValue>, timestamp: In
      */
     override fun toString(): String =
         gson.toJson(mapOf("timestamp" to timestamp.toString(), "values" to values.map { it.key to it.value.asMap() }.toMap()))
+
+    val valuesMap
+        get() = values.map { it.key to it.value.value }.toMap()
 }
 
 
