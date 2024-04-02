@@ -919,7 +919,7 @@ combinations of values do exist, or do not exist in in the same source. Operator
 
 ```json
   {
-        "Operator" : "and",
+        "Operator" : "any",
         "Value"    : ["a","b"]
   }
 ```
