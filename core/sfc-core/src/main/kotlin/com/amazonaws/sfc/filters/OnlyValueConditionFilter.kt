@@ -38,7 +38,7 @@ class OnlyValueConditionFilter(private val b: Boolean) : Filter {
          * Registers operator as known type
          */
         fun register(filterBuilder: FilterBuilder) {
-            filterBuilder.registerOperator(OPERATOR_ONLY, OPERATOR_ONLY_STR) { f: FilterBuilder, c -> create(c) }
+            filterBuilder.registerOperator(OPERATOR_ONLY, OPERATOR_ONLY_STR) { _: FilterBuilder, c -> create(c) }
         }
     }
 }

@@ -38,7 +38,7 @@ class OrFilter(
          * @return Filter
          */
         private fun create(filterBuilder: FilterBuilder, configuration: FilterConfiguration): Filter {
-            val conditions = filterBuilder.buildFilterList(filterBuilder, configuration.conditionValue!!)
+            val conditions = filterBuilder.buildFilterList(configuration.conditionValue!!)
             return OrFilter(conditions)
         }
 

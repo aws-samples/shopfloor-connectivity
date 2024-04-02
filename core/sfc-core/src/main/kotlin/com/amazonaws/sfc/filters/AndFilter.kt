@@ -34,7 +34,7 @@ class AndFilter private constructor(private val filters: List<Filter>) : Filter 
          * @return Filter
          */
         private fun create(filterBuilder: FilterBuilder, configuration: FilterConfiguration): Filter {
-            val conditions = filterBuilder.buildFilterList(filterBuilder, configuration.conditionValue!!)
+            val conditions = filterBuilder.buildFilterList(configuration.conditionValue!!)
             return AndFilter(conditions)
         }
 

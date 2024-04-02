@@ -2,10 +2,11 @@ SFC documentation
 =================
 
 ### TOC
-  - [Installation & Deployment tooling](../deployment/README.md)
+
+- [Installation & Deployment tooling](../deployment/README.md)
     - [SFC release as Greengrass components - CDK](../deployment/greengrass-sfc-components/release-version-as-components-cdk/README.md)
     - [SFC local build as Greengrass components - Python](../deployment/greengrass-sfc-components/local-build-as-components-py/README.md)
-  - [Examples](../examples)
+- [Examples](../examples)
     - [Quickstart Lab](../README.md#quickstart-example)
     - [Greengrass SFC In-Process step-by-step Lab](../examples/greengrass-in-process/README.md)
     - [Greengrass SFC IPC step-by-step Lab](../examples/greengrass-ipc/README.md)
@@ -18,7 +19,7 @@ SFC documentation
     - [OPCUA Auto Discovery Configuration provider](../examples/opcua-auto-discovery/README.md)
     - [Custom User Interface and API Config Provider](../examples/custom-api-ui-config-provider/README.md)
     - [CSV File Adapter Example](../examples/custom-adapter-csvfile/README.md)
-  - [Introduction](#introduction)
+- [Introduction](#introduction)
     - [SFC Components](#sfc-components)
     - [Protocol Adapters](#protocol-adapters)
     - [Core](#core)
@@ -26,7 +27,7 @@ SFC documentation
     - [SFC data collection](#sfc-data-collection)
     - [Terminology and concepts](#terminology-and-concepts)
     - [Execution environments](#execution-environments)
-  - [High level design overview and tenets](#high-level-design-overview-and-tenets)
+- [High level design overview and tenets](#high-level-design-overview-and-tenets)
     - [Execution environment and platform dependencies](#execution-environment-and-platform-dependencies)
     - [Extensibility](#extensibility)
     - [Networking](#networking)
@@ -38,7 +39,7 @@ SFC documentation
     - [High availability](#high-availability)
     - [Data types and formats](#data-types-and-formats)
     - [Metadata](#metadata)
-  - [Deployment](#deployment)
+- [Deployment](#deployment)
     - [In-process and IPC deployment models](#in-process-and-ipc-deployment-models)
     - [Mixed models](#mixed-models)
     - [Target chaining](#target-chaining)
@@ -46,38 +47,39 @@ SFC documentation
     - [Store and forward target](#store-and-forward-target.)
     - [Retention strategies](#retention-strategies)
     - [Router Target](#router-target)
-  - [Output data format](#output-data-format)
-  - [Dataflow and processing](#dataflow-and-processing)
-  - [Data Filtering](#data-filtering)
+- [Output data format](#output-data-format)
+- [Dataflow and processing](#dataflow-and-processing)
+- [Data Filtering](#data-filtering)
     - [Data Change Filters](#data-change-filters)
     - [Value Change Filters](#value-change-filters)
-  - [Configuration](#configuration-1)
+    - [Condition Filters](#condition-filters)
+- [Configuration](#configuration-1)
     - [Configuration placeholders](#configuration-placeholders)
     - [Configuration secrets](#configuration-secrets)
     - [Deferred placeholder replacement](#deferred-placeholder-replacement)
     - [Configuration providers](#configuration-providers)
     - [Custom configuration](#custom-configuration)
     - [Configuration verification](#configuration-verification)
-  - [Logging](#logging)
-  - [Metrics collection](#metrics-collection)
-  - [Securing Network Traffic between SFC components](#securing-network-traffic-between-sfc-components)
+- [Logging](#logging)
+- [Metrics collection](#metrics-collection)
+- [Securing Network Traffic between SFC components](#securing-network-traffic-between-sfc-components)
     - [Plaintext](#plaintext)
     - [ServerSideTLS](#serversidetls)
     - [MutualTLS](#mutualtls)
-  - [Providing session credentials for targets accessing AWS Services](#providing-session-credentials-for-targets-accessing-aws-services)
-  - [Securing the configuration](#securing-the-configuration)
-  - [Output Structure Transformation](#output-structure-transformation)
+- [Providing session credentials for targets accessing AWS Services](#providing-session-credentials-for-targets-accessing-aws-services)
+- [Securing the configuration](#securing-the-configuration)
+- [Output Structure Transformation](#output-structure-transformation)
     - [CSV output](#csv-output)
     - [XML format](#xml-format)
     - [YAML format](#yaml-format)
-  - [Service Health Probes](#service-health-probes)
-  - [OPCUA Alarm and Events types](#opcua-alarm-and-events-types)
-  - [OPCUA security profiles and certificates](#opcua-security-profiles-and-certificates)
-  - [SFC Tuning](#sfc-tuning)
+- [Service Health Probes](#service-health-probes)
+- [OPCUA Alarm and Events types](#opcua-alarm-and-events-types)
+- [OPCUA security profiles and certificates](#opcua-security-profiles-and-certificates)
+- [SFC Tuning](#sfc-tuning)
     - [SFC Channel Tuning](#sfc-channel-tuning)
     - [SFC Memory Monitoring](#sfc-memory-monitoring)
     - [Concurrent reading from sources](#concurrent-reading-from-sources)
-  - [SFC configuration](#sfc-configuration)
+- [SFC configuration](#sfc-configuration)
     - [SFC top level configuration](#sfc-top-level-configuration)
     - [Schedule](#schedule)
     - [SourceConfiguration](#sourceconfiguration)
@@ -96,8 +98,9 @@ SFC documentation
     - [ServerConfiguration](#serverconfiguration)
     - [ChangeFilterConfiguration](#changefilterconfiguration)
     - [ValueFilterConfiguration](#valuefilterconfiguration)
+    - [ConditionFilterConfiguration](#conditionfilterconfiguration)
     - [TransformationOperator](#transformationoperator)
-  - [OPCUA Protocol Configuration](#opcua-protocol-configuration)
+- [OPCUA Protocol Configuration](#opcua-protocol-configuration)
     - [OpcuaSourceConfiguration](#opcuasourceconfiguration)
     - [OpcuaNodeChannelConfiguration](#opcuanodechannelconfiguration)
     - [OpcuaNodeChangeFilter](#opcuanodechangefilter)
@@ -109,117 +112,120 @@ SFC documentation
     - [SelfSignedCertificateConfiguration](#selfsignedcertificateconfiguration)
     - [CertificateValidationConfiguration](#certificatevalidationconfiguration)
     - [CertificateValidationOptions](#certificatevalidationoptions)
-  - [OPCDA Protocol Configuration](#opcda-protocol-configuration)
+- [OPCDA Protocol Configuration](#opcda-protocol-configuration)
     - [OpcdaSourceConfiguration](#opcdasourceconfiguration)
     - [OpcdaChannelConfiguration](#opcdachannelconfiguration)
     - [OpcdaAdapterConfiguration](#opcdaadapterconfiguration)
     - [OpcdaServerConfiguration](#opcdaserverconfiguration)
-  - [S7 Protocol Configuration](#s7-protocol-configuration)
+- [S7 Protocol Configuration](#s7-protocol-configuration)
     - [S7SourceConfiguration](#s7sourceconfiguration)
     - [S7FieldChannelConfiguration](#s7fieldchannelconfiguration)
     - [S7AdapterConfiguration](#s7adapterconfiguration)
     - [S7ControllerConfiguration](#s7controllerconfiguration)
-  - [MQTT Protocol Configuration](#mqtt-protocol-configuration)
+- [MQTT Protocol Configuration](#mqtt-protocol-configuration)
     - [MqttSourceConfiguration](#mqttsourceconfiguration)
     - [MqttChannelConfiguration](#mqttchannelconfiguration)
     - [TopicNameMapping](#topicnamemapping)
     - [MqttAdapterConfiguration](#mqttadapterconfiguration)
     - [MqttBrokerConfiguration](#mqttbrokerconfiguration)
-  - [SQL Adapter Configuration](#sql-adapter-configuration)
+- [SQL Adapter Configuration](#sql-adapter-configuration)
     - [SqlSourceConfiguration](#sqlsourceconfiguration)
     - [SqlChannelConfiguration](#sqlchannelconfiguration)
     - [SqlAdapterConfiguration](#sqladapterconfiguration)
     - [DbServerConfiguration](#dbserverconfiguration)
-  - [Modbus TCP Protocol Configuration](#modbus-tcp-protocol-configuration)
+- [Modbus TCP Protocol Configuration](#modbus-tcp-protocol-configuration)
     - [ModbusSourceConfiguration](#modbussourceconfiguration)
     - [ModbusOptimization](#modbusoptimization)
     - [ModbusChannelConfiguration](#modbuschannelconfiguration)
     - [ModbusTcpAdapterConfiguration](#modbustcpadapterconfiguration)
     - [ModbusTcpDeviceConfiguration](#modbustcpdeviceconfiguration)
-  - [SNMP Protocol Configuration](#snmp-protocol-configuration)
+- [SNMP Protocol Configuration](#snmp-protocol-configuration)
     - [SnmpSourceConfiguration](#snmpsourceconfiguration)
     - [SnmpChannelConfiguration](#snmpchannelconfiguration)
     - [SnmpAdapterConfiguration](#snmpadapterconfiguration)
     - [SnmpDeviceConfiguration](#snmpdeviceconfiguration)
-  - [PCCC Protocol Configuration](#pccc-protocol-configuration)
+- [PCCC Protocol Configuration](#pccc-protocol-configuration)
     - [PcccSourceConfiguration](#pcccsourceconfiguration)
     - [PcccChannelConfiguration](#pcccchannelconfiguration)
     - [PCCC Addressing](#pccc-addressing)
     - [PcccAdapterConfiguration](#pcccadapterconfiguration)
     - [PcccControllerConfiguration](#pccccontrollerconfiguration)
     - [PcccConnectPathConfiguration](#pcccconnectpathconfiguration)
-  - [ADS Protocol Configuration](#ads-protocol-configuration)
+- [ADS Protocol Configuration](#ads-protocol-configuration)
     - [AdsSourceConfiguration](#adssourceconfiguration)
     - [AdsChannelConfiguratio](#adschannelconfiguration)
     - [AdsAdapterConfiguration](#adsadapterconfiguration)
     - [AdsDeviceConfiguration](#adsdeviceconfiguration)
-  - [AWS IoT Analytics Service Target](#aws-iot-analytics-service-target)
+- [AWS IoT Analytics Service Target](#aws-iot-analytics-service-target)
     - [AwsIotAnalyticsTargetConfiguration](#awsiotanalyticstargetconfiguration)
-  - [AWS IoT Core Service Target](#aws-iot-core-service-target)
+- [AWS IoT Core Service Target](#aws-iot-core-service-target)
     - [AwsIotCoreTargetConfiguration](#awsiotcoretargetconfiguration)
-  - [AWS MSK Service Target](#aws-msk-service-target)
+- [AWS MSK Service Target](#aws-msk-service-target)
     - [AwsMskTargetConfiguration](#awsmsktargetconfiguration)
-  - [AWS Kinesis Firehose Service Target](#aws-kinesis-firehose-service-target)
+- [AWS Kinesis Firehose Service Target](#aws-kinesis-firehose-service-target)
     - [AwsKinesisFirehoseTargetConfiguration](#awskinesisfirehosetargetconfiguration)
-  - [AWS Kinesis Service Target](#aws-kinesis-service-target)
+- [AWS Kinesis Service Target](#aws-kinesis-service-target)
     - [AwsKinesisTargetConfiguration](#awskinesistargetconfiguration)
-  - [AWS Lambda Service Target](#aws-lambda-service-target)
+- [AWS Lambda Service Target](#aws-lambda-service-target)
     - [AwsLambdaTargetConfiguration](#awslambdatargetconfiguration)
-  - [AWS S3 Service Target](#aws-s3-service-target)
+- [AWS S3 Service Target](#aws-s3-service-target)
     - [Aws3TargetConfiguration](#aws3targetconfiguration)
-  - [AWS SiteWise Target](#aws-sitewise-target)
+- [AWS SiteWise Target](#aws-sitewise-target)
     - [AwsSitewiseTargetConfiguration](#awssitewisetargetconfiguration)
     - [AwsSiteWiseAssetConfiguration](#awssitewiseassetconfiguration)
     - [AwsSiteWiseAssetPropertyConfiguration](#awssitewiseassetpropertyconfiguration)
-  - [AWS SNS Service Target](#aws-sns-service-target)
-  - [AWS SQS Service Target](#aws-sqs-service-target)
+- [AWS SNS Service Target](#aws-sns-service-target)
+- [AWS SQS Service Target](#aws-sqs-service-target)
     - [AwsSqsTargetConfiguration](#awssqstargetconfiguration)
-  - [AWS Timestream Target](#aws-timestream-target)
+- [AWS Timestream Target](#aws-timestream-target)
     - [AwsTimestreamTargetConfiguration](#awstimestreamtargetconfiguration)
     - [AwsTimestreamRecordConfiguration](#awstimestreamrecordconfiguration)
     - [AwsTimestreamDimensionConfiguration](#awstimestreamdimensionconfiguration)
-  - [MQTT Target](#mqtt-target)
+- [MQTT Target](#mqtt-target)
     - [MqttTargetConfiguration](#mqtttargetconfiguration)
-  - [File Target](#file-target)
+- [File Target](#file-target)
     - [FileConfiguration](#fileconfiguration)
-  - [Debug Target](#debug-target)
+- [Debug Target](#debug-target)
     - [DebugConfiguration](#debugconfiguration)
-  - [Store and Forward Target](#store-and-forward-target)
+- [Store and Forward Target](#store-and-forward-target)
     - [StoreForwardTargetConfiguration](#storeforwardtargetconfiguration)
-  - [ Router Target](#-router-target)
+- [ Router Target](#-router-target)
     - [RouterTargetConfiguration](#routertargetconfiguration)
     - [RoutesConfiguration](#routesconfiguration)
-  - [MetricsWriters](#metricswriters)
+- [MetricsWriters](#metricswriters)
     - [AwsCloudWatchConfiguration](#awscloudwatchconfiguration)
-  - [Running the SFC core process](#running-the-sfc-core-process)
-  - [Running the JVM protocol adapters as an IPC Service](#running-the-jvm-protocol-adapters-as-an-ipc-service)
-  - [Running targets and as an IPC Service](#running-targets-and-as-an-ipc-service)
-  - [Running protocol adapters in-process](#running-protocol-adapters-in-process)
-  - [Running targets in-process](#running-targets-in-process)
-  - [Metrics Collection](#metrics-collection)
+- [Running the SFC core process](#running-the-sfc-core-process)
+- [Running the JVM protocol adapters as an IPC Service](#running-the-jvm-protocol-adapters-as-an-ipc-service)
+- [Running targets and as an IPC Service](#running-targets-and-as-an-ipc-service)
+- [Running protocol adapters in-process](#running-protocol-adapters-in-process)
+- [Running targets in-process](#running-targets-in-process)
+- [Metrics Collection](#metrics-collection)
     - [Running Metrics writers as an IPC service](#running-metrics-writers-as-an-ipc-service)
     - [Running metric writers in-process](#running-metric-writers-in-process)
-  - [Extending the SFC Framework](#extending-the-sfc-framework)
+- [Extending the SFC Framework](#extending-the-sfc-framework)
     - [Implementing a protocol adapter](#implementing-a-protocol-adapter)
     - [Read function](#read-function)
-  - [Creating in-process adapter instances](#creating-in-process-adapter-instances)
+- [Creating in-process adapter instances](#creating-in-process-adapter-instances)
     - [IPC service adapters](#ipc-service-adapters)
     - [Using JVM protocol adapter classes as IPC services](#using-jvm-protocol-adapter-classes-as-ipc-services)
-  - [Custom Configuration Handlers](#custom-configuration-handlers)
-  - [Custom Logging](#custom-logging)
-  - [Custom Metric Writers](#custom-metric-writers)
-  - [.NET Core based protocol adapters](#net-core-based-protocol-adapters)
+- [Custom Configuration Handlers](#custom-configuration-handlers)
+- [Custom Logging](#custom-logging)
+- [Custom Metric Writers](#custom-metric-writers)
+- [.NET Core based protocol adapters](#net-core-based-protocol-adapters)
     - [Running the .NET Core protocol adapters as an IPC Service](#running-the-net-core-protocol-adapters-as-an-ipc-service)
     - [Output logging format](#output-logging-format)
     - [Implementing a .NET Core Protocol adapter](#implementing-a-net-core-protocol-adapter)
     - [Service](#service)
 
-
-# Introduction 
+# Introduction
 
 Shop Floor Connectivity (SFC) is a data ingestion technology that can deliver data to multiple AWS Services.
 
-SFC addresses limitations of, and unifies data collection of our existing IoT data collection services, allowing customers to collect data in a consistent way to any AWS Service, not just the AWS IoT Services, that can collect and process data. It allows customers to collect data from their industrial equipment and deliver it the AWS services that work best for their requirements. Customers get the cost and functional benefits of specific AWS services and save costs on licenses for additional connectivity products.
+SFC addresses limitations of, and unifies data collection of our existing IoT data collection services, allowing
+customers to collect data in a consistent way to any AWS Service, not just the AWS IoT Services, that can collect and
+process data. It allows customers to collect data from their industrial equipment and deliver it the AWS services that
+work best for their requirements. Customers get the cost and functional benefits of specific AWS services and save costs
+on licenses for additional connectivity products.
 
 [^top](#toc)
 
@@ -227,9 +233,10 @@ SFC addresses limitations of, and unifies data collection of our existing IoT da
 
 There are three main type of components that make up SFC.
 
--   Protocol Adapters
--   SFC Core
--   Target Adapters
+- Protocol Adapters
+- SFC Core
+- Target Adapters
+
 <p align="center">
   <img src="img/fig01.png" width="75%"/>
 </p>
@@ -237,108 +244,174 @@ There are three main type of components that make up SFC.
     <em>Fig. 1. SFC components</em>
 </p>
 
-
-
 ## Protocol Adapters
 
-An SFC protocol adapter is used to read data from one or more industrial devices. This adapter interface abstracts the used protocol from and delivers the data with additional metadata in a common format to the SFC Core. The interface is designed so that AWS, 3rd parties, or customers can easily extend SFC with new protocol adapters without any modifications to the rest of the framework.
+An SFC protocol adapter is used to read data from one or more industrial devices. This adapter interface abstracts the
+used protocol from and delivers the data with additional metadata in a common format to the SFC Core. The interface is
+designed so that AWS, 3rd parties, or customers can easily extend SFC with new protocol adapters without any
+modifications to the rest of the framework.
 
 ## Core
 
-The SFC-Core component is the controller of the SFC Framework. It handles configuration and scheduling of the data collection through the protocol adapters. It can optionally transform each received data value using a combination of one or more of the 60+ transformation functions available functions, which can address complex data transformations requirements. The core has end-to-end datatype fidelity, the data can be sent to the targets in the data format it was read from the source, including complex structured datatypes and multidimensional arrays.
+The SFC-Core component is the controller of the SFC Framework. It handles configuration and scheduling of the data
+collection through the protocol adapters. It can optionally transform each received data value using a combination of
+one or more of the 60+ transformation functions available functions, which can address complex data transformations
+requirements. The core has end-to-end datatype fidelity, the data can be sent to the targets in the data format it was
+read from the source, including complex structured datatypes and multidimensional arrays.
 
-Optionally the data can be buffered and  aggregated at the edge to reduce network traffic, by using one or more of the 12 available aggregation functions. After the aggregation has taken place, an additional transformation step can be performed on the aggregated data. Before sending it to one or more SFC target adapters.
+Optionally the data can be buffered and aggregated at the edge to reduce network traffic, by using one or more of the 12
+available aggregation functions. After the aggregation has taken place, an additional transformation step can be
+performed on the aggregated data. Before sending it to one or more SFC target adapters.
 
-The core integrates with AWS Secrets Manager and allows the use of placeholders for secrets used in the configuration, which will be transparently retrieved from AWS Secrets manager and substituted into the configuration.  
-  
-In order to adapt to customer environments, logging, (dynamic) configuration and metrics collection is fully configurable. Default implementations are provided, but can be replaced by custom ones by implementing a minimal interface, and adding the implementation (JAR file) to the configuration.
+The core integrates with AWS Secrets Manager and allows the use of placeholders for secrets used in the configuration,
+which will be transparently retrieved from AWS Secrets manager and substituted into the configuration.
+
+In order to adapt to customer environments, logging, (dynamic) configuration and metrics collection is fully
+configurable. Default implementations are provided, but can be replaced by custom ones by implementing a minimal
+interface, and adding the implementation (JAR file) to the configuration.
 
 [^top](#toc)
 
 ## Target Adapters
 
-SFC target adapters are components that receive the data from the SFC Core and send it to their specific AWS or local services. Components can optionally apply data transformations using an Apache Velocity template, to deliver the data in the required format for the receiving service. At the moment of writing there are adapters for the following AWS Services: IoT Analytics, IoT Core, Kinesis Streams, Kinesis Firehose, Lambda functions, IoT Core, S3, SiteWise, Timestream, MKS, SNS, and SQS, with additional targets for the local filesystem, terminal output, and MQTT clients.
+SFC target adapters are components that receive the data from the SFC Core and send it to their specific AWS or local
+services. Components can optionally apply data transformations using an Apache Velocity template, to deliver the data in
+the required format for the receiving service. At the moment of writing there are adapters for the following AWS
+Services: IoT Analytics, IoT Core, Kinesis Streams, Kinesis Firehose, Lambda functions, IoT Core, S3, SiteWise,
+Timestream, MKS, SNS, and SQS, with additional targets for the local filesystem, terminal output, and MQTT clients.
 
-Target buffering can be applied to reduce the number of required service API calls. All this is part of the SFC infrastructure and makes it easier to develop new target types for additional AWS services Targets can be daisy-chained in order to provide additional functionality which is discussed in this document.
+Target buffering can be applied to reduce the number of required service API calls. All this is part of the SFC
+infrastructure and makes it easier to develop new target types for additional AWS services Targets can be daisy-chained
+in order to provide additional functionality which is discussed in this document.
 
-##  SFC data collection
+## SFC data collection
 
-Configuring data collection with SFC involves defining one or more collection schedules that specify the interval and sources of data collection, as well as the targets for sending the collected data. These sources can include multiple protocol adapter types, and individual data items can be transformed, filtered, or aggregated as needed. SFC's active mode handles all steps defined in the schedules automatically, without requiring additional coding.
+Configuring data collection with SFC involves defining one or more collection schedules that specify the interval and
+sources of data collection, as well as the targets for sending the collected data. These sources can include multiple
+protocol adapter types, and individual data items can be transformed, filtered, or aggregated as needed. SFC's active
+mode handles all steps defined in the schedules automatically, without requiring additional coding.
 
 ## Terminology and concepts
 
 SFC data collection is based on the following concepts
 
--   The SFC Core process runs one or more configured **schedules**.
+- The SFC Core process runs one or more configured **schedules**.
 
--   A schedule defines from which **sources** the data is read, to **targets** the data is sent and the **interval** at which this happens.
+- A schedule defines from which **sources** the data is read, to **targets** the data is sent and the **interval** at
+  which this happens.
 
--   A **source** defines from which protocol adapter the data is read and defines the **channels**, which represent the actual values in a protocol agnostic way. A **schedule** can read from multiple sources which can read from different protocol adapters.
+- A **source** defines from which protocol adapter the data is read and defines the **channels**, which represent the
+  actual values in a protocol agnostic way. A **schedule** can read from multiple sources which can read from different
+  protocol adapters.
 
--   A **channel** defines the protocol specific details, like node id's, addresses etc., which are used by the adapter to read the values for that channel. Channels also can specify a **transformation** which will be applied to the read values, **filters** and **selectors**.
+- A **channel** defines the protocol specific details, like node id's, addresses etc., which are used by the adapter to
+  read the values for that channel. Channels also can specify a **transformation** which will be applied to the read
+  values, **filters** and **selectors**.
 
--   A **transformation** is a configured set of data transformation operators which can be used to transform each individual value read from a **source**.
+- A **transformation** is a configured set of data transformation operators which can be used to transform each
+  individual value read from a **source**.
 
--   A **filter** is a configured set of conditions to filter values based on relative or absolute values changes since the last time a value was read, of based on the actual value, defining a combination of boundaries and ranges.
+- A **filter** is a configured set of conditions to filter values based on relative or absolute values changes since the
+  last time a value was read, of based on the actual value, defining a combination of boundaries and ranges.
 
--   In order to reduce the amount of data written, or number of write actions to the **targets, aggregation** can be applied for a schedule. An aggregation defines the number of values to combine per batch, the aggregation functions that are applies to the aggregated data and the **transformations** for these values.
+- In order to reduce the amount of data written, or number of write actions to the **targets, aggregation** can be
+  applied for a schedule. An aggregation defines the number of values to combine per batch, the aggregation functions
+  that are applies to the aggregated data and the **transformations** for these values.
 
--   A **target** defines which target adapter is used to send the data to. It does contain target specific configuration for the specific adapter as well as common configuration items as buffer size, compression, applied transformation parameters, credentials providers etc.
+- A **target** defines which target adapter is used to send the data to. It does contain target specific configuration
+  for the specific adapter as well as common configuration items as buffer size, compression, applied transformation
+  parameters, credentials providers etc.
 
--   A **schedule** can send data to one or more **targets** of different types.
+- A **schedule** can send data to one or more **targets** of different types.
 
 ## Execution environments
 
-Shop Floor Connectivity (SFC) is a versatile data ingestion solution that can be deployed in a variety of environments, including standalone applications, Docker containers, and Kubernetes pods. With no additional requirements beyond a Java JVM 1.8 runtime, SFC can be deployed on Linux and Windows systems. To optimize hardware utilization, SFC uses parallel and non-blocking async patterns in its software.
+Shop Floor Connectivity (SFC) is a versatile data ingestion solution that can be deployed in a variety of environments,
+including standalone applications, Docker containers, and Kubernetes pods. With no additional requirements beyond a Java
+JVM 1.8 runtime, SFC can be deployed on Linux and Windows systems. To optimize hardware utilization, SFC uses parallel
+and non-blocking async patterns in its software.
 
+SFC protocol and target adapters can be implemented as a JVM component or as an external microservices using the gRPC
+protocol for communication. When running as stand-alone services, protocol adapters can be deployed on separate machines
+from the SFC Core process, with secure communication facilitated by gRPC. The SFC Core provides a consistent
+infrastructure allowing all JVM based protocol and target adapters to run in the same process as the SFC Core or as a
+separate microservice.
 
-SFC protocol and target adapters can be implemented as a JVM component or as an external microservices using the gRPC protocol for communication. When running as stand-alone services, protocol adapters can be deployed on separate machines from the SFC Core process, with secure communication facilitated by gRPC. The SFC Core provides a consistent infrastructure allowing all JVM based protocol and target adapters to run in the same process as the SFC Core or as a separate microservice.
+Distributed deployment using microservices is required to deploy in environments that use segregated OT and IT networks,
+with components connected to devices, protocol adapters, deployed in the OT network and components requiring internet
+access, targets adapters, in a DMZ.
 
-Distributed deployment using microservices is required to deploy in environments that use segregated OT and IT networks, with components connected to devices, protocol adapters, deployed in the OT network and components requiring internet access, targets adapters, in a DMZ.
-
-The SFC core will provide the services, protocol and target adapters, with the required configuration after these are bootstrapped, providing a single, monitored and consistent source and location of configuration.
+The SFC core will provide the services, protocol and target adapters, with the required configuration after these are
+bootstrapped, providing a single, monitored and consistent source and location of configuration.
 
 [^top](#toc)
 
 # High level design overview and tenets
 
-SFC design and implementation tenets of the software are based on the experience from working with our industrial customers. A major learning point is that hardly any assumptions can be made about the environment in which the software is operated and integrated.
+SFC design and implementation tenets of the software are based on the experience from working with our industrial
+customers. A major learning point is that hardly any assumptions can be made about the environment in which the software
+is operated and integrated.
 
 ## Execution environment and platform dependencies
 
-Edge software in industrial environments is typically running on a mix of different hardware architectures, operating systems and runtimes. SFC can be deployed on platforms supporting a JVM and does not have platform or OS specific requirements. SFC protocol and targets adapters can be implemented and executed in other runtimes, e.g., .NET, as well.
+Edge software in industrial environments is typically running on a mix of different hardware architectures, operating
+systems and runtimes. SFC can be deployed on platforms supporting a JVM and does not have platform or OS specific
+requirements. SFC protocol and targets adapters can be implemented and executed in other runtimes, e.g., .NET, as well.
 
 SFC components can be deployed and executed as:
 
--   Standalone applications
--   Containers in Docker or Kubernetes
--   Greengrass components
+- Standalone applications
+- Containers in Docker or Kubernetes
+- Greengrass components
 
 ## Extensibility
 
-SFC can be extended with additional protocol and target adapters. New adapters can be implemented and added without modifications to the SFC Core software. Using the infrastructure (JVM) code which is part of the framework, which reduces the effort to implement new adapters and allows developers to focus on just the protocol or target specific logic. Adapters can be implemented using a JVM language, or if due to the availability of protocol libraries or other technical reasons this is not possible, alternative languages and runtimes can be used. JVM based adapters can run either in-process with the SFC Core or as separate services in their own process. Adapters which are not JVM based implementations can only run in their own process.
+SFC can be extended with additional protocol and target adapters. New adapters can be implemented and added without
+modifications to the SFC Core software. Using the infrastructure (JVM) code which is part of the framework, which
+reduces the effort to implement new adapters and allows developers to focus on just the protocol or target specific
+logic. Adapters can be implemented using a JVM language, or if due to the availability of protocol libraries or other
+technical reasons this is not possible, alternative languages and runtimes can be used. JVM based adapters can run
+either in-process with the SFC Core or as separate services in their own process. Adapters which are not JVM based
+implementations can only run in their own process.
 
 It is also possible to build and configure the following extensions to the SFC Core:
 
--   *Logging*: the standard logging, which writes the output to the process console, can be replaced by a custom logger. The SFC configuration allows a custom logger to be configured by adding the library which implements it to the configuration.
+- *Logging*: the standard logging, which writes the output to the process console, can be replaced by a custom logger.
+  The SFC configuration allows a custom logger to be configured by adding the library which implements it to the
+  configuration.
 
--   *Configuration*: the default configuration is using a JSON file, which is monitored for updates to the actual file, or updates to environment variables used for which the configuration file can contain placeholders. As configuration data, in customer environments, may be managed and stored in external systems, it is possible to implement and configure a custom configuration provider, that can actively and periodically call out to external systems, or wait for incoming calls, to obtain the configuration data to build or extend the SFC configuration dynamically.
+- *Configuration*: the default configuration is using a JSON file, which is monitored for updates to the actual file, or
+  updates to environment variables used for which the configuration file can contain placeholders. As configuration
+  data, in customer environments, may be managed and stored in external systems, it is possible to implement and
+  configure a custom configuration provider, that can actively and periodically call out to external systems, or wait
+  for incoming calls, to obtain the configuration data to build or extend the SFC configuration dynamically.
 
--   *Metrics*: SFC comes with a metrics collector for to the AWS CloudWatch Metrics service, which can be optionally added to the SFC configuration. Custom metrics collectors can be implemented and configured.
+- *Metrics*: SFC comes with a metrics collector for to the AWS CloudWatch Metrics service, which can be optionally added
+  to the SFC configuration. Custom metrics collectors can be implemented and configured.
 
 [^top](#toc)
 
-## Networking 
+## Networking
 
 In industrial environments there are two different types of networks that have distinct characteristics and purposes.
 
-IT (Information Technology) networks are used for communication and data management in a traditional office or enterprise environment. These networks are designed for supporting business processes, data storage and retrieval, and user communication.
+IT (Information Technology) networks are used for communication and data management in a traditional office or
+enterprise environment. These networks are designed for supporting business processes, data storage and retrieval, and
+user communication.
 
-OT (Operational Technology) networks, on the other hand, are used for controlling and monitoring physical processes in industrial and manufacturing environments. These networks are designed for real-time monitoring and control of machinery, production processes, and other industrial systems. They typically use specialized protocols and are managed by operations or engineering departments. OT networks are often modelled after the [Perdue network model](https://en.wikipedia.org/wiki/Purdue_Enterprise_Reference_Architecture).
+OT (Operational Technology) networks, on the other hand, are used for controlling and monitoring physical processes in
+industrial and manufacturing environments. These networks are designed for real-time monitoring and control of
+machinery, production processes, and other industrial systems. They typically use specialized protocols and are managed
+by operations or engineering departments. OT networks are often modelled after
+the [Perdue network model](https://en.wikipedia.org/wiki/Purdue_Enterprise_Reference_Architecture).
 
-In reality in most industrial environments OT and IT networks are not directly connected. Industrial devices are unlikely to connect to the public internet. Solutions that retrieve data from these devices and submit this machine data to a cloud service must be capable of handling this network separation, restrictions due to firewalls, proxies, DMZ’s and offline and/or intermittent connectivity.
+In reality in most industrial environments OT and IT networks are not directly connected. Industrial devices are
+unlikely to connect to the public internet. Solutions that retrieve data from these devices and submit this machine data
+to a cloud service must be capable of handling this network separation, restrictions due to firewalls, proxies, DMZ’s
+and offline and/or intermittent connectivity.
 
-SFC is designed so that protocol adapters, the SFC Core and target adapters can be deployed as separate services in different networking or cloud environments The diagrams below show some of the possible deployment scenarios.
+SFC is designed so that protocol adapters, the SFC Core and target adapters can be deployed as separate services in
+different networking or cloud environments The diagrams below show some of the possible deployment scenarios.
 <p align="center">
 <img src="img/fig02.png" width="75%" align="center"/>
 </p>
@@ -351,19 +424,37 @@ By configuring the required X509 certificates all network traffic can be secured
 
 ## Scalability
 
-As protocol and target adapters can run as standalone services, multiple instances can be instantiated on the same system as the SFC Core, or on external systems to distribute the load and footprint of the components. By distributing the load and footprint of these components, the overall throughput and scalability of the system can be improved. This approach also enables better resource utilization and fault tolerance.
+As protocol and target adapters can run as standalone services, multiple instances can be instantiated on the same
+system as the SFC Core, or on external systems to distribute the load and footprint of the components. By distributing
+the load and footprint of these components, the overall throughput and scalability of the system can be improved. This
+approach also enables better resource utilization and fault tolerance.
 
 [^top](#toc)
 
 ## Configuration
 
-SFC is based on the concept of configuration providers, that collect data from internal or external sources. These providers can constantly monitor resources, periodically make calls or wait for incoming configuration data, and apply the providers logic to build the actual SFC configuration that is provided to a configuration data stream of the SFC core. If an updated version of configuration data is provided to the SFC core , it will automatically restart its internal processes to let the internal and external processes use this updates version of the configuration data, without the need to restart the core process.
+SFC is based on the concept of configuration providers, that collect data from internal or external sources. These
+providers can constantly monitor resources, periodically make calls or wait for incoming configuration data, and apply
+the providers logic to build the actual SFC configuration that is provided to a configuration data stream of the SFC
+core. If an updated version of configuration data is provided to the SFC core , it will automatically restart its
+internal processes to let the internal and external processes use this updates version of the configuration data,
+without the need to restart the core process.
 
-As SFC is deployed in a distributed mode, where protocol and target adapters can be running as standalone services, potentially on different systems, the SFC core will automatically extract the subsets of relevant data and send this to the adapter services when the SFC core is started or when it received an update configuration from its configuration provider. This means that there is no need to manually distribute the confirmation data to these services, even when they run remotely, as they will automatically and constantly receive a consistent in of the SFC configuration. The only information that is required to bootstrap these services is the port number on which they can receive the configuration update.
+As SFC is deployed in a distributed mode, where protocol and target adapters can be running as standalone services,
+potentially on different systems, the SFC core will automatically extract the subsets of relevant data and send this to
+the adapter services when the SFC core is started or when it received an update configuration from its configuration
+provider. This means that there is no need to manually distribute the confirmation data to these services, even when
+they run remotely, as they will automatically and constantly receive a consistent in of the SFC configuration. The only
+information that is required to bootstrap these services is the port number on which they can receive the configuration
+update.
 
 This feature ensures that the SFC system is always up-to-date with the latest configuration data.
 
-The default SFC configuration provider is based on reading a JSON format configuration file. This file can contain placeholders for environment variables as well as secrets which are stored in the AWS Secrets Manager's secure store. The provider is constantly monitoring the actual configuration files, and environment variables for the used placeholders, and if the files or the environment variables are updated, will provide a new version of the configuration to the SFC Core.
+The default SFC configuration provider is based on reading a JSON format configuration file. This file can contain
+placeholders for environment variables as well as secrets which are stored in the AWS Secrets Manager's secure store.
+The provider is constantly monitoring the actual configuration files, and environment variables for the used
+placeholders, and if the files or the environment variables are updated, will provide a new version of the configuration
+to the SFC Core.
 
 <p align="center">
 <img src="img/fig03.png" width="50%"/>
@@ -372,7 +463,11 @@ The default SFC configuration provider is based on reading a JSON format configu
     <em>Fig. 3. SFC default config provider</em>
 </p>
 
-As in customer environment configuration data may be managed and stored in external systems, it is possible to implement and configure a custom configuration provider to retrieve that data. An instance of a configured custom provider will be created by the SFC Core at startup. It will receive the content of the initial configuration file, which can be a subset of the SFC configuration, combined with (or just) custom provider specific configuration data it needs to obtain the data it will use to build the SFC configuration.
+As in customer environment configuration data may be managed and stored in external systems, it is possible to implement
+and configure a custom configuration provider to retrieve that data. An instance of a configured custom provider will be
+created by the SFC Core at startup. It will receive the content of the initial configuration file, which can be a subset
+of the SFC configuration, combined with (or just) custom provider specific configuration data it needs to obtain the
+data it will use to build the SFC configuration.
 
 <p align="center">
 <img src="img/fig04.png" width="50%"/>
@@ -381,27 +476,46 @@ As in customer environment configuration data may be managed and stored in exter
     <em>Fig. 4. Extensible config providers</em>
 </p>
 
-As different protocol and target adapters need specific configuration data the SFC configuration data the SFC configuration consists of generic and non-adapter specific data which is abstract and used by the SFC Core, and extensions of the generic core data classes that contain additional and specific data for that adapter. The core will only use the generic configuration data and will pass the adapter specific configuration data to the adapters. The implementation of the adapters is responsible for handling the specific configuration data. This separation of generic and specific data makes it possible to add new adapters, using their own specific configuration data, without the need to make changes to the SFC core. Additionally, the adapter can optionally implement specific logic to validate the provided configuration data. The SFC Core does provide a configuration reader, which is used by the core, as well as by the target adapters, to read, validate and replace placeholders in a consistent way.
+As different protocol and target adapters need specific configuration data the SFC configuration data the SFC
+configuration consists of generic and non-adapter specific data which is abstract and used by the SFC Core, and
+extensions of the generic core data classes that contain additional and specific data for that adapter. The core will
+only use the generic configuration data and will pass the adapter specific configuration data to the adapters. The
+implementation of the adapters is responsible for handling the specific configuration data. This separation of generic
+and specific data makes it possible to add new adapters, using their own specific configuration data, without the need
+to make changes to the SFC core. Additionally, the adapter can optionally implement specific logic to validate the
+provided configuration data. The SFC Core does provide a configuration reader, which is used by the core, as well as by
+the target adapters, to read, validate and replace placeholders in a consistent way.
 
-To protect the configuration from unauthorized modification SFC has tooling and an API to sign the configuration data. The SFC Core will use the digital signature from the configuration data and reject it verification fails.
+To protect the configuration from unauthorized modification SFC has tooling and an API to sign the configuration data.
+The SFC Core will use the digital signature from the configuration data and reject it verification fails.
 
 [^top](#toc)
 
 ## Logging
 
-By default, SFC logs its output to the console standard and error output. The logging level determines the type and level of detail included in the output. However, users can configure SFC to use a custom writer that sends the logging data, which includes a timestamp, level, source, and message, to alternative destinations.
+By default, SFC logs its output to the console standard and error output. The logging level determines the type and
+level of detail included in the output. However, users can configure SFC to use a custom writer that sends the logging
+data, which includes a timestamp, level, source, and message, to alternative destinations.
 
 ## Metrics
 
-SFC provides the ability for the core, protocol and targets adapters to gather metrics and send them to a configurable metrics writer. SFC includes an AWS CloudWatch Metrics writer implementation that can be configured to run in the same SFC process or as a separate IPC service. Customers can also create their own custom metrics writers to send metrics data to other destinations.
+SFC provides the ability for the core, protocol and targets adapters to gather metrics and send them to a configurable
+metrics writer. SFC includes an AWS CloudWatch Metrics writer implementation that can be configured to run in the same
+SFC process or as a separate IPC service. Customers can also create their own custom metrics writers to send metrics
+data to other destinations.
 
-Metrics collection can be enabled or disabled at the top level, as well as at the protocol or target adapter level. Customers can specify metrics dimensions at each level.
+Metrics collection can be enabled or disabled at the top level, as well as at the protocol or target adapter level.
+Customers can specify metrics dimensions at each level.
 
 Furthermore, the metrics collector automatically gathers warning and error messages from the SFC logging.
 
 ## Connectivity
 
-For targets that require network access to send the collected data to their destinations, it is possible to use intermediate store and forward targets. Intermediate targets can be configured in between the SFC Core and one or more target adapters by using target daisy-chaining. If the end target loses connectivity the intermediate target will store the data, optionally encrypted, for a configured amount of time, data volume or number of messages, and will resubmit the data when the target regains network connectivity, in either FIFO or LIFO mode.
+For targets that require network access to send the collected data to their destinations, it is possible to use
+intermediate store and forward targets. Intermediate targets can be configured in between the SFC Core and one or more
+target adapters by using target daisy-chaining. If the end target loses connectivity the intermediate target will store
+the data, optionally encrypted, for a configured amount of time, data volume or number of messages, and will resubmit
+the data when the target regains network connectivity, in either FIFO or LIFO mode.
 <p align="center">
 <img src="img/fig05.png" width="75%"/>
 </p>
@@ -409,31 +523,48 @@ For targets that require network access to send the collected data to their dest
     <em>Fig. 5. Example of target daisy chaining</em>
 </p>
 
-Target chaining is generic mechanism in SFC for adding additional processing steps, like store and forwarding as described above, for target data without changes to the actual end targets.
+Target chaining is generic mechanism in SFC for adding additional processing steps, like store and forwarding as
+described above, for target data without changes to the actual end targets.
 
 ## High availability
 
-All SFC components that can run as microservices in their own processes can be configured to have an endpoint for handling health probes. Mechanisms used to manage the service instances, (e.g., Docker Compose, Kubernetes) can use these endpoints in their configuration to check the status of a service and recycle instances failing to respond to the health probe requests. This approach can help ensure the reliability and availability of microservices-based systems.
+All SFC components that can run as microservices in their own processes can be configured to have an endpoint for
+handling health probes. Mechanisms used to manage the service instances, (e.g., Docker Compose, Kubernetes) can use
+these endpoints in their configuration to check the status of a service and recycle instances failing to respond to the
+health probe requests. This approach can help ensure the reliability and availability of microservices-based systems.
 
 [^top](#toc)
 
 ## Data types and formats
 
-SFC provides full end to end data type-fidelity. Data which is read from the protocol adapters is delivered to the target adapters as the same type of data as it was read. It does support numeric types, (Unicode)strings, time formats, structured types, as well as vectors of these types.
+SFC provides full end to end data type-fidelity. Data which is read from the protocol adapters is delivered to the
+target adapters as the same type of data as it was read. It does support numeric types, (Unicode)strings, time formats,
+structured types, as well as vectors of these types.
 
-By applying configured transformations, which consists of a sequence of one or more provided transformation operators, the SFC can transform every individual value that is read from a protocol adapter. Transformations can be used to standardize data values and types read from different devices to be delivered in a consistent way to the consuming target adapters. The SFC framework comes with a set of 80 transformation operators.
+By applying configured transformations, which consists of a sequence of one or more provided transformation operators,
+the SFC can transform every individual value that is read from a protocol adapter. Transformations can be used to
+standardize data values and types read from different devices to be delivered in a consistent way to the consuming
+target adapters. The SFC framework comes with a set of 80 transformation operators.
 
-The SFC core can also aggregate the data into batches and apply aggregation function to that data, which then can be sent instead of, or with the individual values. This can be used to reduce the data volume by sending only the output of selected aggregation functions or the number of data messages to the consuming targets. Additionally, transformations, as described above, can be applied to the aggregated data.
+The SFC core can also aggregate the data into batches and apply aggregation function to that data, which then can be
+sent instead of, or with the individual values. This can be used to reduce the data volume by sending only the output of
+selected aggregation functions or the number of data messages to the consuming targets. Additionally, transformations,
+as described above, can be applied to the aggregated data.
 
-The data is delivered to the target in a defined hierarchical structure. An additional, template based, transformation, using Apache Velocity, can be configured for each target to select subsets, restructure or transform the data or transform it into formats like CSV, YAML or XML.
+The data is delivered to the target in a defined hierarchical structure. An additional, template based, transformation,
+using Apache Velocity, can be configured for each target to select subsets, restructure or transform the data or
+transform it into formats like CSV, YAML or XML.
 
 ## Metadata
 
 The data can be enriched with additional information before it is sent to the targets.
 
-In the configuration information at schedule-level, source and channel level maps of (string) data can be configured that will be added to the output data.
+In the configuration information at schedule-level, source and channel level maps of (string) data can be configured
+that will be added to the output data.
 
-Configuration top-level metadata will be merged with the data at schedule-level and added to the target data under the metadata node at top-level. If a value is defined at both top-level and schedule-level, the schedule-level value is used (allowing the overwriting of top-level values at schedule-level).
+Configuration top-level metadata will be merged with the data at schedule-level and added to the target data under the
+metadata node at top-level. If a value is defined at both top-level and schedule-level, the schedule-level value is
+used (allowing the overwriting of top-level values at schedule-level).
 
 Metadata at source-level will be added under a metadata node at source-level.
 
@@ -448,26 +579,35 @@ Metadata at channel-level will be added to the values under a metadata-level nod
 
 ## `TODO`: map SFC metadata approach to Unified Namespace (UNS) & IDF
 
-
 # Deployment
 
-The SFC core module is implemented to run in a Java virtual machine. Input adapters and targets can be implemented for the JVM as well, or other runtimes, depending on the platforms where these are deployed and libraries required for the implementation of the protocol.
+The SFC core module is implemented to run in a Java virtual machine. Input adapters and targets can be implemented for
+the JVM as well, or other runtimes, depending on the platforms where these are deployed and libraries required for the
+implementation of the protocol.
 
-JVM implementations only have the option to be loaded in the same processes as the SFC Core. When other runtimes are used, any language can be used for the implementation. These adapters and targets run as separate processed and use streaming gRPC IPC to communicate with the SFC core.
+JVM implementations only have the option to be loaded in the same processes as the SFC Core. When other runtimes are
+used, any language can be used for the implementation. These adapters and targets run as separate processed and use
+streaming gRPC IPC to communicate with the SFC core.
 
-The framework contains classes that speed up the development of JVM protocol and target services as well as an abstraction layer for the GRPC IPC layer.
+The framework contains classes that speed up the development of JVM protocol and target services as well as an
+abstraction layer for the GRPC IPC layer.
 
 The components don’t have any runtime environment-specific dependencies, they can be deployed as:
 
--   *Standalone applications* on the target platform supporting the JVM or runtimes are used to implement additional adapters and targets.
--   *AWS IoT Greengrass v2 components* or containers
--   *Docker* or *Kubernetes* containers
+- *Standalone applications* on the target platform supporting the JVM or runtimes are used to implement additional
+  adapters and targets.
+- *AWS IoT Greengrass v2 components* or containers
+- *Docker* or *Kubernetes* containers
 
 [^top](#toc)
 
 ## In-process and IPC deployment models
 
-If implemented as jar files containing Java bytecode Protocol, adapters and targets can be configured to be loaded and executed in the SFC core process. The configuration for the adapter or target type contains a list of jar files, which are explicitly loaded by the SFC core process, as well as the name of a static factory class that implements a method, named newInstance, called by the core to create a new instance. The configuration is passed to this method and is used to initialize the adapter or the target instance.
+If implemented as jar files containing Java bytecode Protocol, adapters and targets can be configured to be loaded and
+executed in the SFC core process. The configuration for the adapter or target type contains a list of jar files, which
+are explicitly loaded by the SFC core process, as well as the name of a static factory class that implements a method,
+named newInstance, called by the core to create a new instance. The configuration is passed to this method and is used
+to initialize the adapter or the target instance.
 
 <p align="center">
 <img src="img/fig07.png" width="35%"/>
@@ -476,20 +616,30 @@ If implemented as jar files containing Java bytecode Protocol, adapters and targ
     <em>Fig. 7. SFC In-process deployment (e.g. in a single host context)</em>
 </p>
 
-As an alternative, they can be deployed to run in their processes and communicate with the core using GRPC. Use cases for this deployment model are to allow the following scenarios:
+As an alternative, they can be deployed to run in their processes and communicate with the core using GRPC. Use cases
+for this deployment model are to allow the following scenarios:
 
 - Non-JVM execution environment or language to build/execute components
 - Flexible deployment on IT/OT networks
 - Distribute the load over multiple systems
 - Apply lifecycle control with GreenGrass2 or Docker/Kubernetes.
 
-When the processes running the adapter or target services are started, a port number is passed as a parameter on which the service is listening for requests from the core. Alternatively, the path to a configuration file can be used from which the process will retrieve just the port number (using an additional target identifier parameter if the configuration file does contain more than one target for a target type).
+When the processes running the adapter or target services are started, a port number is passed as a parameter on which
+the service is listening for requests from the core. Alternatively, the path to a configuration file can be used from
+which the process will retrieve just the port number (using an additional target identifier parameter if the
+configuration file does contain more than one target for a target type).
 
-When the SFC core initializes it will send an initialization request to the protocol source and/or target servers, containing just the sections of its configuration that are used by that adapter or target. When the configuration is modified, and the core process is restarted, it will send an initialization request to each adapter or target with the newly updated subset of relevant configuration data.
+When the SFC core initializes it will send an initialization request to the protocol source and/or target servers,
+containing just the sections of its configuration that are used by that adapter or target. When the configuration is
+modified, and the core process is restarted, it will send an initialization request to each adapter or target with the
+newly updated subset of relevant configuration data.
 
-If an adapter or target server is stopped, it will be detected by the SFC Core. It will try to re-connect to the service and send an initialization request when it succeeds to connect to a new instance of the server.
+If an adapter or target server is stopped, it will be detected by the SFC Core. It will try to re-connect to the service
+and send an initialization request when it succeeds to connect to a new instance of the server.
 
-As the SFC core acts as the provider for configuration data to the servers, these will always work with the latest and consistent configuration data from a single source. No additions configuration files need to be distributed to the protocol and adapter processes.
+As the SFC core acts as the provider for configuration data to the servers, these will always work with the latest and
+consistent configuration data from a single source. No additions configuration files need to be distributed to the
+protocol and adapter processes.
 
 <p align="center">
 <img src="img/fig08.png" width="50%"/>
@@ -509,22 +659,39 @@ It is possible to mix instances of in-process and IPC adapters and targets in a 
     <em>Fig. 9. SFC Mixed deployment options</em>
 </p>
 
-
 ## Target chaining
 
-To enable scenarios like store and forward, compression and encryption of data sent to targets, targets can now be chained. Intermediate adapters can be placed in between the core and the adapters that deliver the data to the actual destination. These intermediate targets are responsible for creating the adapter instances which are configured to forward the data to.
+To enable scenarios like store and forward, compression and encryption of data sent to targets, targets can now be
+chained. Intermediate adapters can be placed in between the core and the adapters that deliver the data to the actual
+destination. These intermediate targets are responsible for creating the adapter instances which are configured to
+forward the data to.
 
-When an intermediate target creates the target instances, it can optionally pass an implementation of the TargetResultHandler interface. The instance of the created targets can use the instance of the passed interface implementation to acknowledge, dis-acknowledge or report the forwarded data messages as failed back to the forwarding intermediate target. The same interface can be used to query the data that the result of the forwarding target expects . This can be just the serial number, the complete message or no data, for acknowledged, dis-acknowledged or error messages.
+When an intermediate target creates the target instances, it can optionally pass an implementation of the
+TargetResultHandler interface. The instance of the created targets can use the instance of the passed interface
+implementation to acknowledge, dis-acknowledge or report the forwarded data messages as failed back to the forwarding
+intermediate target. The same interface can be used to query the data that the result of the forwarding target expects .
+This can be just the serial number, the complete message or no data, for acknowledged, dis-acknowledged or error
+messages.
 
 [^top](#toc)
 
 ## Target chaining and buffering
 
-Targets receive data from the SFC core in order to deliver this data to a target specific destination, which could be a local store, a local service or a cloud service.
+Targets receive data from the SFC core in order to deliver this data to a target specific destination, which could be a
+local store, a local service or a cloud service.
 
-In order to add functionality to the delivery of target data, special targets can be configured in between the sfc-core and the targets that do the actual delivery of the data. For the sfc-core intermediate targets look like other targets when writing the data. The intermediate targets implement their specific logic acting on the received data, and pass the data to the configured next targets in the chain. The intermediate targets do pass a handler to these targets, that these targets can use to report back the results of delivering the data to their destinations. The data messages can either be acknowledged if the data was delivered successfully to the destination, not-acknowledged if the destination of the target was not available (e.g., due to loss of connectivity, or reported as error if the data could not be processed by the target (e.g., die to invalid data for that target). The intermediate target can the take action based on the result received from the next targets in the chain.
+In order to add functionality to the delivery of target data, special targets can be configured in between the sfc-core
+and the targets that do the actual delivery of the data. For the sfc-core intermediate targets look like other targets
+when writing the data. The intermediate targets implement their specific logic acting on the received data, and pass the
+data to the configured next targets in the chain. The intermediate targets do pass a handler to these targets, that
+these targets can use to report back the results of delivering the data to their destinations. The data messages can
+either be acknowledged if the data was delivered successfully to the destination, not-acknowledged if the destination of
+the target was not available (e.g., due to loss of connectivity, or reported as error if the data could not be processed
+by the target (e.g., die to invalid data for that target). The intermediate target can the take action based on the
+result received from the next targets in the chain.
 
-Using this strategy additional functionality can be added to delivering data to target destinations without making changes to the actual end-targets.
+Using this strategy additional functionality can be added to delivering data to target destinations without making
+changes to the actual end-targets.
 
 <p align="center">
 <img src="img/fig10.png" width="50%"/>
@@ -533,47 +700,69 @@ Using this strategy additional functionality can be added to delivering data to 
     <em>Fig. 10. SFC Target Chaining</em>
 </p>
 
-Store and forwarding functionality for SFC targets is implemented using an intermediate target of type store-forward-target. It will use the returned results from the targets to buffer messages that could not be delivered to the destinations of the targets behind the store and forward target. When the targets can resume delivering data to their destinations the store and forward target will resubmit the data to these targets.
+Store and forwarding functionality for SFC targets is implemented using an intermediate target of type
+store-forward-target. It will use the returned results from the targets to buffer messages that could not be delivered
+to the destinations of the targets behind the store and forward target. When the targets can resume delivering data to
+their destinations the store and forward target will resubmit the data to these targets.
 
 [^top](#toc)
 
 ## Store and forward target
 
-As described above store and forwarding for SFC targets is implemented by an intermediate target that can be configured in between the SFC-Core and the actual targets. This target stores the buffered data to disk if it cannot be delivered to the destination of the targets that are configured as next targets in the chain.
+As described above store and forwarding for SFC targets is implemented by an intermediate target that can be configured
+in between the SFC-Core and the actual targets. This target stores the buffered data to disk if it cannot be delivered
+to the destination of the targets that are configured as next targets in the chain.
 
-Buffering will also take place in situation where the next targets in the chain are IPC targets which cannot be reached by the store and forwarding targets die to network issues.
+Buffering will also take place in situation where the next targets in the chain are IPC targets which cannot be reached
+by the store and forwarding targets die to network issues.
 
 The store and forward target using to following logic:
 
--   In normal situations the target will forward the target data to the next targets.
--   For messages that can be delivered to their destinations these targets will send ACKs containing the serial number of the delivered messages.
--   When the targets cannot deliver messages, NACKS, including the full message will be returned.
--   When receiving NACKs the store and forward target will go into buffering mode and will start buffering data received by the core to disk.
--   In buffering mode, the store and forward target will periodically send a buffered message, which is the oldest message that falls in the retention strategy (see below) of the buffer if the buffer is configured to operate in FIFO mode, which is the default. In LIFO mode the most recent message is used. An internal flag is set in the message to indicate to the target that this message should not be buffered but send directly to their destinations.
--   The target will try to deliver this message to the destination and report an ACK or NACK for that message.
--   When an ACK is received the store and forward target will switch back from buffering mode into normal mode after submitting the buffered data. This will happen in FIFO or LIFO mode based on configuration.
--   Messages for which an ERROR is received are not stored and in case they are buffered removed from the store as this means they cannot be processed by the target.
+- In normal situations the target will forward the target data to the next targets.
+- For messages that can be delivered to their destinations these targets will send ACKs containing the serial number of
+  the delivered messages.
+- When the targets cannot deliver messages, NACKS, including the full message will be returned.
+- When receiving NACKs the store and forward target will go into buffering mode and will start buffering data received
+  by the core to disk.
+- In buffering mode, the store and forward target will periodically send a buffered message, which is the oldest message
+  that falls in the retention strategy (see below) of the buffer if the buffer is configured to operate in FIFO mode,
+  which is the default. In LIFO mode the most recent message is used. An internal flag is set in the message to indicate
+  to the target that this message should not be buffered but send directly to their destinations.
+- The target will try to deliver this message to the destination and report an ACK or NACK for that message.
+- When an ACK is received the store and forward target will switch back from buffering mode into normal mode after
+  submitting the buffered data. This will happen in FIFO or LIFO mode based on configuration.
+- Messages for which an ERROR is received are not stored and in case they are buffered removed from the store as this
+  means they cannot be processed by the target.
 
 [^top](#toc)
 
 ## Retention strategies
 
-In order to prevent running out of disk space of the device that is used to store the buffered messages a retention strategy must be defined for a store and forward target. This can either be a period in minutes, a number of messages per target the total size in MB per target. Data in the buffer that falls outside the used retention criteria will not be resubmitted and automatically deleted from the storage device.
+In order to prevent running out of disk space of the device that is used to store the buffered messages a retention
+strategy must be defined for a store and forward target. This can either be a period in minutes, a number of messages
+per target the total size in MB per target. Data in the buffer that falls outside the used retention criteria will not
+be resubmitted and automatically deleted from the storage device.
 
-In order to reduce the storage of buffered messages the target will try to use hard links for messages that need to be stored for multiple end targets, if the file system of that device supports it.
+In order to reduce the storage of buffered messages the target will try to use hard links for messages that need to be
+stored for multiple end targets, if the file system of that device supports it.
 
 *PLEASE NOTE*  
-Storing messages to a physical device can reduce the throughput of the SFC deployment. It is strongly recommended to run process that contains the store and forward target, in memory or as an IPC service, on a device that has a fast storage device.
+Storing messages to a physical device can reduce the throughput of the SFC deployment. It is strongly recommended to run
+process that contains the store and forward target, in memory or as an IPC service, on a device that has a fast storage
+device.
 
 ## Router Target
 
-The router target can be used to forward data to one or more targets in a target chain. For each target an alternative target can be configured to which the data is routed if that data cannot be written to its primary target.
+The router target can be used to forward data to one or more targets in a target chain. For each target an alternative
+target can be configured to which the data is routed if that data cannot be written to its primary target.
 
-Each primary target can also have a target configured to which the data is routed if it has been written successfully to its primary target or the alternative target of its primary target,
+Each primary target can also have a target configured to which the data is routed if it has been written successfully to
+its primary target or the alternative target of its primary target,
 
 Used cases for the router target are:
 
--   *Bundling* of (compressed) message data over a network to a system on which a group of targets, running as external services, are hosted.
+- *Bundling* of (compressed) message data over a network to a system on which a group of targets, running as external
+  services, are hosted.
 
 <p align="center">
 <img src="img/fig11.png" width="50%"/>
@@ -591,7 +780,9 @@ Used cases for the router target are:
     <em>Fig. 12. SFC Router target - failover target</em>
 </p>
 
-- *Routing* of data to a *success target* after it has been written to primary targets or their alternative targets. The success target can be used to archive delivered messages or a custom target van notify the source of the data that the data has been delivered.
+- *Routing* of data to a *success target* after it has been written to primary targets or their alternative targets. The
+  success target can be used to archive delivered messages or a custom target van notify the source of the data that the
+  data has been delivered.
 
 <p align="center">
 <img src="img/fig13.png" width="50%"/>
@@ -609,7 +800,7 @@ Used cases for the router target are:
 
 [^top](#toc)
 
-# Output data format 
+# Output data format
 
 ```sh
 [schedule]  -- schedule name
@@ -637,187 +828,421 @@ Used cases for the router target are:
 [metadata] --name* -- value
 ```
 
-Custom element names in brackets can be set for all elements above in brackets using the "ElementNames" configuration setting. The name keys for the sources and value maps get the value of the "Name" element for the source and channel in their configuration (default is the key used as the id for the source/value in the configuration).
+Custom element names in brackets can be set for all elements above in brackets using the "ElementNames" configuration
+setting. The name keys for the sources and value maps get the value of the "Name" element for the source and channel in
+their configuration (default is the key used as the id for the source/value in the configuration).
 
 The root contains 4 elements
 
--   **schedule**: This element contains the name of the schedule that outputs the data
+- **schedule**: This element contains the name of the schedule that outputs the data
 
--   **serial**: A unique serial number for the target data
+- **serial**: A unique serial number for the target data
 
--   **timestamp**: Timestamp when the target output data was created
+- **timestamp**: Timestamp when the target output data was created
 
--   **sources**: This element contains a map with a node for each source of the schedule that has output data
+- **sources**: This element contains a map with a node for each source of the schedule that has output data
 
-    -   **values**: The values node contains a map for each channel of its source that has an output value
+    - **values**: The values node contains a map for each channel of its source that has an output value
 
-        -   **value**: This node contains the actual value of a channel or an aggregated value
+        - **value**: This node contains the actual value of a channel or an aggregated value
 
-        -   **metadata**: This node contains a map with (optional) metadata for a channel
+        - **metadata**: This node contains a map with (optional) metadata for a channel
 
-        -   **timestamp**: Timestamp for the value (only if timestamp level = "value" or "both")
-For aggregated data the timestamp is only available for the aggregation outputs first, last and values.
+        - **timestamp**: Timestamp for the value (only if timestamp level = "value" or "both")
+          For aggregated data the timestamp is only available for the aggregation outputs first, last and values.
 
--   **timestamp**: Timestamp at source level (only if timestamp level = "source" or "both")
+- **timestamp**: Timestamp at source level (only if timestamp level = "source" or "both")
 
--   **metadata**: This node contains a map with (optional) metadata for a schedule
+- **metadata**: This node contains a map with (optional) metadata for a schedule
 
-#  Dataflow and processing
+# Dataflow and processing
 
-The data collected by the SFC source connector is processed by an internal data pipeline that consists of the following steps:
+The data collected by the SFC source connector is processed by an internal data pipeline that consists of the following
+steps:
 
--   Data collected is read from connector
--   Data transformations are applied on individual values if a transformation for a value has been configured.
--   Data change filtering is applied at value or source level. Data change filters only let values pass if the new value differs from a previously passed value with at least a configured percentage or absolute value, or when a configured time period has passed since passing the last value. If a change filter is configured at source and value level, then the filter at value level takes precedence.
--   Data value filter is applied at value level is applied if a filter has been configured for that value. The value is passed if it matches the filter expression which can consist of a combination of one or more `==`, `!=`, `>`, `>=`, `<`, `<=`, `&&`, `||` operators. For non-numeric values only the `==` and `!=` operators van be used.
--   If data aggregation is specified the values are buffered until the specified aggregation size is reached. The output of an aggregation can be one or more output values from an aggregation (`avg`, `min`, `max`, etc.) on the collected values and/or the collected values.
--   Data transformations are applied on the aggregated data output values if a transformation is configured for that specific output.
--   Data values are named according to their configured names. Metadata and timestamp information is added at configured levels (top, source and value) as configured.
--   The data is transmitted to the configured targets where additional buffering or target specific processing is done. Selected targets support the transformation of the data submitted to their destinations by configuring an Apache Velocity template that is applied on that data.
+- Data collected is read from connector
+- Data transformations are applied on individual values if a transformation for a value has been configured.
+- Data change filtering is applied at value or source level. Data change filters only let values pass if the new value
+  differs from a previously passed value with at least a configured percentage or absolute value, or when a configured
+  time period has passed since passing the last value. If a change filter is configured at source and value level, then
+  the filter at value level takes precedence.
+- Data value filter is applied at value level is applied if a filter has been configured for that value. The value is
+  passed if it matches the filter expression which can consist of a combination of one or
+  more `==`, `!=`, `>`, `>=`, `<`, `<=`, `&&`, `||` operators. For non-numeric values only the `==` and `!=` operators
+  van be used.
+- If data aggregation is specified the values are buffered until the specified aggregation size is reached. The output
+  of an aggregation can be one or more output values from an aggregation (`avg`, `min`, `max`, etc.) on the collected
+  values and/or the collected values.
+- Data transformations are applied on the aggregated data output values if a transformation is configured for that
+  specific output.
+- Data values are named according to their configured names. Metadata and timestamp information is added at configured
+  levels (top, source and value) as configured.
+- The data is transmitted to the configured targets where additional buffering or target specific processing is done.
+  Selected targets support the transformation of the data submitted to their destinations by configuring an Apache
+  Velocity template that is applied on that data.
 
 ```
 Source data -> Transformation(value)(*) -> Change Filter (*) -> Value Filter(*) -> Aggregation(*) -> Transformation (value)(*) -> Naming of data and adding timestamp and metadata -> Transformation template (structure) (*) ->  Data to Target
 ```
+
 (`*`) optional, only applied if configured
 
 [^top](#toc)
 
 # Data Filtering
 
-The data read from the source can be filtered in two steps. First data change filtering is applied, then data value filtering. Both steps are optional and can be applied individually.
+The data read from the source can be filtered in two steps. First data change filtering is applied, then data value
+filtering. Both steps are optional and can be applied individually.
 
 ## Data Change Filters
 
-A data change filter can be configured at source and channel values level. If a filter is configured at source level it is applied on all values for that source. Filters configured at value level take precedence over a filter at source level. Values only pass a filter if a value has changed at least, or beyond, a configured value since the last value that was passed. This value can be a percentage or absolute value. The initial value will always pass the filter. It is also possible to specify a time interval in which at least a value will pass the filter. These filters can only be applied on single numeric values.
+A data change filter can be configured at source and channel values level. If a filter is configured at source level it
+is applied on all values for that source. Filters configured at value level take precedence over a filter at source
+level. Values only pass a filter if a value has changed at least, or beyond, a configured value since the last value
+that was passed. This value can be a percentage or absolute value. The initial value will always pass the filter. It is
+also possible to specify a time interval in which at least a value will pass the filter. These filters can only be
+applied on single numeric values.
 
 ## Value Change Filters
 
-A value change filter will pass a value if it matches a filter expression. A filter expression can consist of one or more operators like `==`,`!=`,`>`,`>=`,`<`,`<=`, combined in `&&` and `||` groups. For non-numeric values, only the == and != operators can be used.
+A value change filter will pass a value if it matches a filter expression. A filter expression can consist of one or
+more operators like `==`,`!=`,`>`,`>=`,`<`,`<=`, combined in `&&` and `||` groups. For non-numeric values, only the ==
+and != operators can be used.
+
+## Condition Filters
+
+After the Data Change and Value Change filters, if any, have been applied Condition filter can be used to select values
+based on other values of the same source. This makes it posible to include or exclude values if other values, or
+combinations of values do exist, or do not exist in in the same source. Operators that can be used are :
+
+- ***any*** : Any of a list of values must exist
+
+  ```json
+    {
+        "Operator" : "and",
+        "Value"    : ["a","b"]
+    }
+  ```
+
+Both field a and b must exist for this source to include the value on which this filter is applied,
+
+- ***none*** : None of a list of values must exist
+
+```json
+    {
+  "Operator": "none",
+  "Value": [
+    "a",
+    "b"
+  ]
+}
+```
+
+Value a and b must not exist for source to include the value on which this filter is applied
+
+- ***all*** : All values of a list of other values must exist
+
+```json
+    {
+  "Operator": "all",
+  "Value": [
+    "a",
+    "b"
+  ]
+}
+```
+
+Both value a and b must exist for source to include the value on which this filter is applied
+
+- ***present*** : A specified value must exist
+
+```json
+    {
+  "Operator": "present",
+  "Value": [
+    "a"
+  ]
+}
+```
+
+Value a must exist for source to include the value on which this filter is applied
+
+- **absent**:  A specified value may not exist
+
+```json
+    {
+  "Operator": "absent",
+  "Value": [
+    "a"
+  ]
+}
+```
+
+Value a must not exist for source to include the value on which this filter is applied
+
+- ***only*** : The value must be the only value from a source
+
+```json
+    {
+  "Operator": "only",
+  "Value": true
+}
+```
+
+If value is true then the value on which the filter is applied is only included if it is the only value for that source.
+
+If value is false then the value on which the filter is applied is only included if it is not the only value for that
+source.
+
+- ***notonly*** : The value must not be the only value from a source
+
+```json
+    {
+  "Operator": "notonly",
+  "Value": true
+}
+```
+
+If value is true then the value on which the filter is applied is only included if it not the only value for that
+source.
+
+If value is false then the value on thich the filter is applied is only included if it is the only value for that
+source.
+
+All of the operators above can be combined using the ***and*** and ***or*** operator, which take filter or a list of
+filters as the filter value.
+
+```json
+    {
+  "Operator": "and",
+  "Value": [
+    {
+      "Operator": "only",
+      "Value": "false"
+    },
+    {
+      "Operator": "all",
+      "Value": [
+        "a",
+        "b"
+      ]
+    }
+  ]
+}
+```
+
+The value on which the filter is applies is include when it is not the only value for that source and value a and b must
+exist for that source.
+
+The names as values for the filters are the names which are used as the keys in the channel configuration of the
+source (not the name value which is used to set the name of the value in the output). If a value is a structured value,
+including sub values these can be specified by adding a "." plus the name of these fields, e.g. ServerStatus.state.
+
+The condition filters use the JMESPath syntax (https://jmespath.org/) to match the name of the values and their sub
+values, allowing to use the full JMESPath syntax to build complex filters.
+
+If a name of a field, or a part of it does contain other than alphanumeric characters, then these must be included in
+double quotes, e.g. "System-Status", "System-Status".state, "System.Status".state.
+
+Condition filters are as a map in the "ConditionFilters" section of the configuration. The name of the entry which
+defines a filter can be used as the value of the "ConditionFilter" for a channel to apply that filter for the channel.
 
 # Configuration
 
-As the core only is aware of its input sources and output targets by name. The parts of the configuration model which are used by the core do not contain any protocol or target-specific information. The core knows its input and outputs only by its identifiers.
+As the core only is aware of its input sources and output targets by name. The parts of the configuration model which
+are used by the core do not contain any protocol or target-specific information. The core knows its input and outputs
+only by its identifiers.
 
-The configuration model for each type of input protocol and a target does contain their specific details. SFC implements a configuration layer that gives each adapter or target its specific view of the configuration data.
+The configuration model for each type of input protocol and a target does contain their specific details. SFC implements
+a configuration layer that gives each adapter or target its specific view of the configuration data.
 
-As a result, the core and each protocol or target can have their view of its specific configuration data, without dependencies, mix-up, or re-definition of attributes used by other types.
+As a result, the core and each protocol or target can have their view of its specific configuration data, without
+dependencies, mix-up, or re-definition of attributes used by other types.
 
-To load the configuration data from a JSON source, the consumer makes a call to the configuration layer, specifying the class that implements the type-specific model of the data. These classes can optionally implement additional logic to validate the loaded data, which can raise a configuration exception, including a detailed description if the data is not valid according to the validation logic.
+To load the configuration data from a JSON source, the consumer makes a call to the configuration layer, specifying the
+class that implements the type-specific model of the data. These classes can optionally implement additional logic to
+validate the loaded data, which can raise a configuration exception, including a detailed description if the data is not
+valid according to the validation logic.
 
 [^top](#toc)
 
 ## Configuration placeholders
 
-The JSON configuration can contain placeholders in the format **${name}**. These placeholders are replaced by the value of environment variables with the specified name or a configured secret (see below). Using placeholders will help to keep consistency between (repeated) values in the configuration and values used in other configuration types.
+The JSON configuration can contain placeholders in the format **${name}**. These placeholders are replaced by the value
+of environment variables with the specified name or a configured secret (see below). Using placeholders will help to
+keep consistency between (repeated) values in the configuration and values used in other configuration types.
 
 ## Configuration secrets
 
-SFC integrates with AWS Secrets Manager following the same logic as used in GreenGrass Secret manager. Secrets are defined in the configuration file using the SecutityManager Element. This element includes a list of configured secrets. Each secret has an id, which can either be the arn or name of the secret, and an optional alias. Secrets can be used by using placeholders of the format \${name} in the configuration file. Name can be the name, arn or alias of the secret. If just an arn is used for a configured secret either this arn or the name of the secret in the AWS Secrets manager service can be used as name in the placeholder.
+SFC integrates with AWS Secrets Manager following the same logic as used in GreenGrass Secret manager. Secrets are
+defined in the configuration file using the SecutityManager Element. This element includes a list of configured secrets.
+Each secret has an id, which can either be the arn or name of the secret, and an optional alias. Secrets can be used by
+using placeholders of the format \${name} in the configuration file. Name can be the name, arn or alias of the secret.
+If just an arn is used for a configured secret either this arn or the name of the secret in the AWS Secrets manager
+service can be used as name in the placeholder.
 
-When resolving the placeholders, the configuration manager will first try to replace the placeholder with the value of an environment variable with that name, or when no variable with that name exists it will try to replace it with configured secret value.
+When resolving the placeholders, the configuration manager will first try to replace the placeholder with the value of
+an environment variable with that name, or when no variable with that name exists it will try to replace it with
+configured secret value.
 
-If the device running SFC does not have access at startup, or when a configuration is updated and reloaded, it uses the values stored from the last time the secrets were read from the AWS Secrets Manager service.
+If the device running SFC does not have access at startup, or when a configuration is updated and reloaded, it uses the
+values stored from the last time the secrets were read from the AWS Secrets Manager service.
 
-In order to read the secrets stored in the AWS Secrets Manager service a reference to a Credentials Client, configured in the configuration, can be used. The certificate/role alias configured for that client must give permission to make a getSecretValue API request for the configured secrets. Without client the normal credential chain path for the AWS SDK is used to obtain the required credentials.
+In order to read the secrets stored in the AWS Secrets Manager service a reference to a Credentials Client, configured
+in the configuration, can be used. The certificate/role alias configured for that client must give permission to make a
+getSecretValue API request for the configured secrets. Without client the normal credential chain path for the AWS SDK
+is used to obtain the required credentials.
 
-Secrets which are stored locally are encrypted using a file with a secret key, which can be configured to point to an existing file, or as a reference to a GreenGrass deployment in which case the GreenGrass configured private key will be used. If a path to a file with a private key is used then there is also an option to automatically generate this file containing the secret key at first use, if it does not exist.
+Secrets which are stored locally are encrypted using a file with a secret key, which can be configured to point to an
+existing file, or as a reference to a GreenGrass deployment in which case the GreenGrass configured private key will be
+used. If a path to a file with a private key is used then there is also an option to automatically generate this file
+containing the secret key at first use, if it does not exist.
 
 [^top](#toc)
 
 ## Deferred placeholder replacement
 
-In normal case placeholders for environment variables and secrets are resolved in the SFC core Configuration logic. When the core build subsets of the configuration, used to initialize external IPC servers for source protocol adapter or target IPC services, the placeholders are replaced with their environment variable or secret values. It is possible to defer the replacement of these placeholders on the receiving service, allowing to resolve environment variables by the system/process running the service or preventing secret values to be passed over the network. (please note that IPC traffic between the core and external services can be configured to be encrypted) Deferring placeholder can be done by using placeholders in the format **${{name}}**. If the placeholders are used for replacement by configured secrets from AWS Systems Manager, all required configuration elements to resolve the secrets by the service process will be included in the configuration that is used to initialize it. (SecretsManager with selected configured secrets, credentials manager client etc.)
+In normal case placeholders for environment variables and secrets are resolved in the SFC core Configuration logic. When
+the core build subsets of the configuration, used to initialize external IPC servers for source protocol adapter or
+target IPC services, the placeholders are replaced with their environment variable or secret values. It is possible to
+defer the replacement of these placeholders on the receiving service, allowing to resolve environment variables by the
+system/process running the service or preventing secret values to be passed over the network. (please note that IPC
+traffic between the core and external services can be configured to be encrypted) Deferring placeholder can be done by
+using placeholders in the format **${{name}}**. If the placeholders are used for replacement by configured secrets from
+AWS Systems Manager, all required configuration elements to resolve the secrets by the service process will be included
+in the configuration that is used to initialize it. (SecretsManager with selected configured secrets, credentials
+manager client etc.)
 
 ## Configuration providers
 
-In the architecture of the SFC core the configuration method is abstracted by using configuration providers. These plug-able providers read the configuration data from their specific source and method and provide the initial configuration and updates to an SFC service process, which can be the Service, a source service or a target service, g as a channel of configuration versions. An SFC service process will receive the new configuration version and apply these to the internal service stance that will use these new settings without the need to restart the service.
+In the architecture of the SFC core the configuration method is abstracted by using configuration providers. These
+plug-able providers read the configuration data from their specific source and method and provide the initial
+configuration and updates to an SFC service process, which can be the Service, a source service or a target service, g
+as a channel of configuration versions. An SFC service process will receive the new configuration version and apply
+these to the internal service stance that will use these new settings without the need to restart the service.
 
 Service providers can read configuration data from files, by making service calls or listening to service requests.
 
-By default, the configuration is read from a configuration file which is specified by the -config command line parameter for all services. The ConfigFileServiceProvider, which is used for configuration files, will detect updated to the configuration file, or changes made to environment variables used in placeholders in the configuration file, and provide the updated configuration data to the service.
+By default, the configuration is read from a configuration file which is specified by the -config command line parameter
+for all services. The ConfigFileServiceProvider, which is used for configuration files, will detect updated to the
+configuration file, or changes made to environment variables used in placeholders in the configuration file, and provide
+the updated configuration data to the service.
 
 ## Custom configuration
 
-The ConfigFileServiceProvider, which is used when a config file is specified by using the -config parameter, can be used to configure a handler for custom or additional processing to the configuration file processing. Example of custom processing are the dynamic creation of enriching the passed in configuration data with additional data that could come from an additional source/service/logic.
+The ConfigFileServiceProvider, which is used when a config file is specified by using the -config parameter, can be used
+to configure a handler for custom or additional processing to the configuration file processing. Example of custom
+processing are the dynamic creation of enriching the passed in configuration data with additional data that could come
+from an additional source/service/logic.
 
-When such a handler is configured, by specifying the jar files that implement it and a factory class, an instance of that handler is created. The data that was in the specified configuration file is passed to the instance. The data is passed "as-is" and could include custom handler specific data. The custom handler is responsible for interpreting this data and (periodically) returning a valid version of an SFC configuration as a channel.
+When such a handler is configured, by specifying the jar files that implement it and a factory class, an instance of
+that handler is created. The data that was in the specified configuration file is passed to the instance. The data is
+passed "as-is" and could include custom handler specific data. The custom handler is responsible for interpreting this
+data and (periodically) returning a valid version of an SFC configuration as a channel.
 
-If the configuration file specified by the -config parameter or its reference environment variables a new instance of the custom handler is created.
+If the configuration file specified by the -config parameter or its reference environment variables a new instance of
+the custom handler is created.
 
 ## Configuration verification
 
-In order to secure the content of configuration data passed to the SFC Core the content can be digitally signed with a secret key. The digital signature, which is added to the configuration, will be checked using the public key related to the key that was used to sign the configuration data. See section [Securing the configuration](#securing-the-configuration) for details.
+In order to secure the content of configuration data passed to the SFC Core the content can be digitally signed with a
+secret key. The digital signature, which is added to the configuration, will be checked using the public key related to
+the key that was used to sign the configuration data. See
+section [Securing the configuration](#securing-the-configuration) for details.
 
 # Logging
 
 By default, log information is written to the console.
 
-There are 4 trace levels, Error (stderr), Warning(stdout), Info(stdout) and Trace(stdout) which can be specified when starting the SCF core or a protocol adapter or target writer service.
+There are 4 trace levels, Error (stderr), Warning(stdout), Info(stdout) and Trace(stdout) which can be specified when
+starting the SCF core or a protocol adapter or target writer service.
 
-Logging output will contain the system date and time, the logging level, source of the event and a message. The logging infrastructure will intercept and blank the values of secrets configured in the SFC configuration.
+Logging output will contain the system date and time, the logging level, source of the event and a message. The logging
+infrastructure will intercept and blank the values of secrets configured in the SFC configuration.
 
-Instead of writing to the console custom log writer can be implemented and configured. Details on how to implement a custom log writer can be found in section [Custom Logging](#custom-logging).
+Instead of writing to the console custom log writer can be implemented and configured. Details on how to implement a
+custom log writer can be found in section [Custom Logging](#custom-logging).
 
 [^top](#toc)
 
 # Metrics collection
 
-The SFC core, protocol adapters and targets can collect metrics and write these to a configurable metrics writer. SFC comes with an implementation of a writer for AWS CloudWatch Metrics with can be configured to run in the same process as the SFC core or as an IPC service. Custom metrics writers can be implemented and configured to collect metrics data, see details in section [Custom Metrics Writers](#custom-metric-writers).
+The SFC core, protocol adapters and targets can collect metrics and write these to a configurable metrics writer. SFC
+comes with an implementation of a writer for AWS CloudWatch Metrics with can be configured to run in the same process as
+the SFC core or as an IPC service. Custom metrics writers can be implemented and configured to collect metrics data, see
+details in section [Custom Metrics Writers](#custom-metric-writers).
 
-Metrics collection is enabled by adding a Metrics configuration section in top level of the SFC configuration. In this section the writer for metrics data is specified, which can an in-process metrics writer (by specifying the jar files that implement it and a factory class name to create an instance) or a MetricsServer (by specifying the address and port number of the service). Metrics can be disabled, by setting a property "Enabled", to false.
+Metrics collection is enabled by adding a Metrics configuration section in top level of the SFC configuration. In this
+section the writer for metrics data is specified, which can an in-process metrics writer (by specifying the jar files
+that implement it and a factory class name to create an instance) or a MetricsServer (by specifying the address and port
+number of the service). Metrics can be disabled, by setting a property "Enabled", to false.
 
-Metrics collection can be disabled from the metrics sources by setting a property, named Enabled, in the Metrics section to false. A property metrics Namespace, which defaults to "SFC" can be set for use by the writer implementation.
+Metrics collection can be disabled from the metrics sources by setting a property, named Enabled, in the Metrics section
+to false. A property metrics Namespace, which defaults to "SFC" can be set for use by the writer implementation.
 
-Every 60 seconds, which is the default which can be modified by setting a property named Interval, to the interval time in seconds.
+Every 60 seconds, which is the default which can be modified by setting a property named Interval, to the interval time
+in seconds.
 
 For each metrics data point the following information is collected:
 
--   name
--   value
--   units
--   timestamp
--   dimensions
+- name
+- value
+- units
+- timestamp
+- dimensions
 
 By default, the dimensions are:
--   source: name of the component that generated the datapoint. For protocol adapters this is the identifier of the adapter or the adapter and the source (separated by a ":" ) from the configuration. For targets the source is the identifier of the target from the configuration. For the code it is "SfcCore".
--   category: can be "Target", "Adapter" or "Core"
--   type: the actual type of the connector (e.g., "OpcuaAdapter"), target (e.g., "AwsSqsTargetWriter") or "SfcCore"
 
-Additional dimensions can be added by adding a "CommonDimensions" property in the metrics section which is a map with name-value pairs.
+- source: name of the component that generated the datapoint. For protocol adapters this is the identifier of the
+  adapter or the adapter and the source (separated by a ":" ) from the configuration. For targets the source is the
+  identifier of the target from the configuration. For the code it is "SfcCore".
+- category: can be "Target", "Adapter" or "Core"
+- type: the actual type of the connector (e.g., "OpcuaAdapter"), target (e.g., "AwsSqsTargetWriter") or "SfcCore"
 
-Additionally, each adapter or target can have a Metrics section with an Enabled property to enable or disable the collection of metrics for that component, and a map of CommonDimensions which will be added to every data point collected for that component.
+Additional dimensions can be added by adding a "CommonDimensions" property in the metrics section which is a map with
+name-value pairs.
 
-Additional settings can be set for the actual configured writer. For the AWS CloudWatch Metrics writer, a section named "CloudWatch" can be added with the following properties:
+Additionally, each adapter or target can have a Metrics section with an Enabled property to enable or disable the
+collection of metrics for that component, and a map of CommonDimensions which will be added to every data point
+collected for that component.
 
--   CredentialProviderClient: name of a configured client in the AwsIotCredentialProviderClients section of the SFC configuration to use to obtain credentials to put metrics data. (The role used for the client must give permission for calls to the PutMetricData API call for the AWS CloudWatch service). If no client is configured the [AWS Java SDK credential provider chain is used](https://docs.aws.amazon.com/sdk-for-java/latest/developer-guide/credentials.html#credentials-chain).
--   Region: Region used for the AWS CloudWatch Service
--   Interval: Interval in seconds to write to AWS CloudWatch. Metrics are written at least once with this interval or earlier if the maximum of 1000 data points or the configured buffer size is reached.
--   BatchSize: Size of the buffer used to store datapoints before these are written to CloudWatch, or earlier if the interval period is reached.
+Additional settings can be set for the actual configured writer. For the AWS CloudWatch Metrics writer, a section
+named "CloudWatch" can be added with the following properties:
+
+- CredentialProviderClient: name of a configured client in the AwsIotCredentialProviderClients section of the SFC
+  configuration to use to obtain credentials to put metrics data. (The role used for the client must give permission for
+  calls to the PutMetricData API call for the AWS CloudWatch service). If no client is configured
+  the [AWS Java SDK credential provider chain is used](https://docs.aws.amazon.com/sdk-for-java/latest/developer-guide/credentials.html#credentials-chain).
+- Region: Region used for the AWS CloudWatch Service
+- Interval: Interval in seconds to write to AWS CloudWatch. Metrics are written at least once with this interval or
+  earlier if the maximum of 1000 data points or the configured buffer size is reached.
+- BatchSize: Size of the buffer used to store datapoints before these are written to CloudWatch, or earlier if the
+  interval period is reached.
 
 The following metric values are collected:
 
-| **Metric name**         | **Description**                                              | **Collected by**                    |
-|-------------------------|--------------------------------------------------------------|-------------------------------------|
-| BytesReceived           | Bytes read by the adapter                                    | ModbusTCP connector                 |
-| BytesSend               | Bytes send by the adapter                                    | ModbusTCP connector                 |
-| BytesWritten            | Bytes written by target                                      | Selected adapters                   |
-| Connection              | Number of connections                                        | All connectors                      |
-| ConnectionErrors        | Number of failed connections                                 | All connectors                      |
-| Errors                  | Number of logged errors                                      | Core and all connectors and targets |
-| Memory                  | Used memory by process in MB                                 | Core and all connectors and targets |
-| MessageBufferedSize     | Size of buffered messages in bytes                           | StoreForwardTarget                  |
-| Messages                | Number of messages processed                                 | All targets                         |
-| MessagesBufferedCount   | Number of buffered messages                                  | StoreForwardTarget                  |
-| MessagesBufferedDeleted | Number of messaged deleted                                   | StoreForwardTarget                  |
+| **Metric name**         | **Description**                                               | **Collected by**                    |
+|-------------------------|---------------------------------------------------------------|-------------------------------------|
+| BytesReceived           | Bytes read by the adapter                                     | ModbusTCP connector                 |
+| BytesSend               | Bytes send by the adapter                                     | ModbusTCP connector                 |
+| BytesWritten            | Bytes written by target                                       | Selected adapters                   |
+| Connection              | Number of connections                                         | All connectors                      |
+| ConnectionErrors        | Number of failed connections                                  | All connectors                      |
+| Errors                  | Number of logged errors                                       | Core and all connectors and targets |
+| Memory                  | Used memory by process in MB                                  | Core and all connectors and targets |
+| MessageBufferedSize     | Size of buffered messages in bytes                            | StoreForwardTarget                  |
+| Messages                | Number of messages processed                                  | All targets                         |
+| MessagesBufferedCount   | Number of buffered messages                                   | StoreForwardTarget                  |
+| MessagesBufferedDeleted | Number of messaged deleted                                    | StoreForwardTarget                  |
 | ReadDuration            | Time in milliseconds used by adapter to read data from source | All adapters                        |
-| ReadErrors              | Number of read errors                                        | All adapters                        |
-| Reads                   | Number of reads                                              | All adapters                        |
-| ReadSuccess             | Number of succeeded reads                                    | All adapters                        |
-| Values read             | Number of values read                                        | All adapters                        |
-| Warnings                | Number of logged warnings                                    | Core and all connectors and targets |
-| WriteDuration           | Time in milliseconds used by target to write data            | All targets                         |
-| WriteErrors             | Number of failed writes                                      | All Targets                         |
-| Writes                  | Writes by targets                                            | All targets                         |
+| ReadErrors              | Number of read errors                                         | All adapters                        |
+| Reads                   | Number of reads                                               | All adapters                        |
+| ReadSuccess             | Number of succeeded reads                                     | All adapters                        |
+| Values read             | Number of values read                                         | All adapters                        |
+| Warnings                | Number of logged warnings                                     | Core and all connectors and targets |
+| WriteDuration           | Time in milliseconds used by target to write data             | All targets                         |
+| WriteErrors             | Number of failed writes                                       | All Targets                         |
+| Writes                  | Writes by targets                                             | All targets                         |
 
 [^top](#toc)
 
@@ -831,29 +1256,49 @@ The network traffic between SFC components is not encrypted.
 
 ## ServerSideTLS
 
-The network traffic is encrypted using the private key of the service, the service is providing its X509 server certificate to the client to decrypt the traffic. The service process needs to be started using the -key and -cert parameters specifying the files containing servers private key and server certificate. The -connection type parameter must be set to ServerSideTLS. In the SFC configuration the ConnectionType in the ServiceConfiguration for the server must be set to ServerSideTLS.
+The network traffic is encrypted using the private key of the service, the service is providing its X509 server
+certificate to the client to decrypt the traffic. The service process needs to be started using the -key and -cert
+parameters specifying the files containing servers private key and server certificate. The -connection type parameter
+must be set to ServerSideTLS. In the SFC configuration the ConnectionType in the ServiceConfiguration for the server
+must be set to ServerSideTLS.
 
 The value used for the connection type parameter used for the service and the configured ConnectionType must match.
 
-Note that the address which is configured to communicate with the service must be present as DNS name or IP address as one of the Alternative Subject Names in the server certificate.
+Note that the address which is configured to communicate with the service must be present as DNS name or IP address as
+one of the Alternative Subject Names in the server certificate.
 
 ## MutualTLS
 
-The network traffic is encrypted using the private key of the service and the private key of the client, the service and service provide their X509 certificates to each other to decrypt the traffic. The service process needs to be started using the -key, -cert and -ca parameters specifying the files containing servers private key and server and CA certificates. The -connection type parameter must be set to MutualTLS. In the SFC configuration the ConnectionType in the ServiceConfiguration for the server must be set to MutualTLS. The ClientPrivateKey, ClientCertificate and CaCertificate must be set to the files containing the clients private key, client certificate and CA certificate.
+The network traffic is encrypted using the private key of the service and the private key of the client, the service and
+service provide their X509 certificates to each other to decrypt the traffic. The service process needs to be started
+using the -key, -cert and -ca parameters specifying the files containing servers private key and server and CA
+certificates. The -connection type parameter must be set to MutualTLS. In the SFC configuration the ConnectionType in
+the ServiceConfiguration for the server must be set to MutualTLS. The ClientPrivateKey, ClientCertificate and
+CaCertificate must be set to the files containing the clients private key, client certificate and CA certificate.
 
 The value used for the connection type parameter used for the service and the configured ConnectionType must match.
 
-The address which is configured to communicate with the service must be present as DNS name or IP address as one of the Alternative Subject Names in the server certificate.
+The address which is configured to communicate with the service must be present as DNS name or IP address as one of the
+Alternative Subject Names in the server certificate.
 
-The address of the client must be present as DNS name or IP address as one of the Alternative Subject Names in the client certificate.
+The address of the client must be present as DNS name or IP address as one of the Alternative Subject Names in the
+client certificate.
 
-The script below can be used to create the required keys and certificates to which can be used for ServerSideTLS and MutualTLS connections in test environments
+The script below can be used to create the required keys and certificates to which can be used for ServerSideTLS and
+MutualTLS connections in test environments
 
 *NOTE*:
 
--   The script is provided to generate self-signed certificates for test purposed only and should not be used in production environments.
--   For convenience the script includes the IP addresses of all available network interfaces as IP addresses, and the hostname (plus localhost) of the system on which the script is executed, in the as IP addresses of the sand DNS names as alternative subject names of the generated certificates. This assumes a test setup where both the SFC core and service are executed on the same system. When the SFC core and SFC services run on different systems the script must be executed on both of the systems and the relevant certificates must be used on that system as key and certificate parameters for the server, or configuration values used by the SFC core.
--   In production environments the IP addresses and DNS names should be included in the certificate to the expected client and service addresses for that environment.
+- The script is provided to generate self-signed certificates for test purposed only and should not be used in
+  production environments.
+- For convenience the script includes the IP addresses of all available network interfaces as IP addresses, and the
+  hostname (plus localhost) of the system on which the script is executed, in the as IP addresses of the sand DNS names
+  as alternative subject names of the generated certificates. This assumes a test setup where both the SFC core and
+  service are executed on the same system. When the SFC core and SFC services run on different systems the script must
+  be executed on both of the systems and the relevant certificates must be used on that system as key and certificate
+  parameters for the server, or configuration values used by the SFC core.
+- In production environments the IP addresses and DNS names should be included in the certificate to the expected client
+  and service addresses for that environment.
 
 ```sh
 rrm *.pem
@@ -918,83 +1363,119 @@ openssl x509 -in client-cert.pem -noout -text
 
 # Providing session credentials for targets accessing AWS Services
 
-Targets publishing their data to AWS services need credentials to get access to these services. Besides using the standard chain credential (environment variables, credentials files) used by the (Java) AWS SDK's, SFC has additional support for using device certificates to obtain session credentials from the [AWS IoT Credentials Provider Service](https://aws.amazon.com/blogs/security/how-to-eliminate-the-need-for-hardcoded-aws-credentials-in-devices-by-using-the-aws-iot-credentials-provider/). Targets can refer to a client configuration that contains entries for the files with for the required device certificate, private key and root CA certificate. SFC provides helpers, that can be used by the targets, to obtain session credentials using these certificates and key files. These client configurations are in the AwsIotCredentialProviderClients section of the configuration file and are referred by the targets by setting the CredentialProviderClient to an entry in that section. If the CredentialProviderClient is not set then SFC will fall back on the default credentials provider chain as described [here](https://docs.aws.amazon.com/sdk-for-java/v1/developer-guide/credentials.html).
+Targets publishing their data to AWS services need credentials to get access to these services. Besides using the
+standard chain credential (environment variables, credentials files) used by the (Java) AWS SDK's, SFC has additional
+support for using device certificates to obtain session credentials from
+the [AWS IoT Credentials Provider Service](https://aws.amazon.com/blogs/security/how-to-eliminate-the-need-for-hardcoded-aws-credentials-in-devices-by-using-the-aws-iot-credentials-provider/).
+Targets can refer to a client configuration that contains entries for the files with for the required device
+certificate, private key and root CA certificate. SFC provides helpers, that can be used by the targets, to obtain
+session credentials using these certificates and key files. These client configurations are in the
+AwsIotCredentialProviderClients section of the configuration file and are referred by the targets by setting the
+CredentialProviderClient to an entry in that section. If the CredentialProviderClient is not set then SFC will fall back
+on the default credentials provider chain as
+described [here](https://docs.aws.amazon.com/sdk-for-java/v1/developer-guide/credentials.html).
 
-The logic for obtaining the session credentials is ported from Greengrass V2 into SFC and is fully compatible with, but not dependent on Greengrass. Certificates can be deployed manually to the device running SFC, or in case Greengrass is deployed on the same machine make use of the Greengrass certificate management and deployment functionality. The configuration provides a shortcut option to specify that the certificate and key files of a Greengrass deployment on that device can use, without the need to specify the location of each certificate or key file.
+The logic for obtaining the session credentials is ported from Greengrass V2 into SFC and is fully compatible with, but
+not dependent on Greengrass. Certificates can be deployed manually to the device running SFC, or in case Greengrass is
+deployed on the same machine make use of the Greengrass certificate management and deployment functionality. The
+configuration provides a shortcut option to specify that the certificate and key files of a Greengrass deployment on
+that device can use, without the need to specify the location of each certificate or key file.
 
-The SFC core will provide the content of the certificate and key files as part of the configuration to the targets. The targets can use this content to obtain session credentials, using SFC helper classes that will cache the session access key id, secret access key, and session token, and obtain a new session if it expires.
+The SFC core will provide the content of the certificate and key files as part of the configuration to the targets. The
+targets can use this content to obtain session credentials, using SFC helper classes that will cache the session access
+key id, secret access key, and session token, and obtain a new session if it expires.
 
-In scenarios where a target is running as an IPC service on a different device as the device running the SFC core the configuration data, including the device certificate and private key, over the network, this data needs to be protected. This can be done using the following methods:
+In scenarios where a target is running as an IPC service on a different device as the device running the SFC core the
+configuration data, including the device certificate and private key, over the network, this data needs to be protected.
+This can be done using the following methods:
 
--   Protect all data exchanged between the SFC core and the target over the network by specifying a certificate and key for that IPC server. If these are used the traffic is encrypted using TLS/SSL.
--   Per client configuration, there is the option to set the CertificatesAndKeysByFileReference option to true. When this option is set for a target the SFC core will not pass the content of the certificate and key files over the network, but only the configured paths for these files. This means that these files should either be accessible in a secure way from the device running the target or physically be deployed to that device, manually or using Greengrass certificate management.
+- Protect all data exchanged between the SFC core and the target over the network by specifying a certificate and key
+  for that IPC server. If these are used the traffic is encrypted using TLS/SSL.
+- Per client configuration, there is the option to set the CertificatesAndKeysByFileReference option to true. When this
+  option is set for a target the SFC core will not pass the content of the certificate and key files over the network,
+  but only the configured paths for these files. This means that these files should either be accessible in a secure way
+  from the device running the target or physically be deployed to that device, manually or using Greengrass certificate
+  management.
 
-As targets may need to access the internet over a proxy server, to obtain the session credentials as described above, and to make the required AWS service calls, the client configuration referred by the target can also include proxy configuration information.
+As targets may need to access the internet over a proxy server, to obtain the session credentials as described above,
+and to make the required AWS service calls, the client configuration referred by the target can also include proxy
+configuration information.
 
 [^top](#toc)
 
 # Securing the configuration
 
-In order to secure the content of configuration data passed to the SFC Core the content can be digitally signed with a secret key. The digital signature, which is added to the configuration, will be checked using the public key related to the key that was used to sign the configuration data.
+In order to secure the content of configuration data passed to the SFC Core the content can be digitally signed with a
+secret key. The digital signature, which is added to the configuration, will be checked using the public key related to
+the key that was used to sign the configuration data.
 
 The configuration can be signed using a command line application as shown below:
 
 ```kotlin
-import com.amazonaws.sfc.config.ConfigVerification  
-import File  
-import kotlin.system.exitProcess  
-  
-fun main(args: Array<String>){  
-checkArguments(args)  
-val privateKeyFile = File(args[0])  
-val inputConfigFile = File(args[1])  
-val signedConfigFile = File(args[2])  
-ConfigVerification.sign(inputConfigFile, privateKeyFile, signedConfigFile)  
-println("Signed configuration file written to ${signedConfigFile.*absoluteFile}")  
-  
-}  
-  
-private fun checkArguments(args: Array<String>) {  
-if (args.size != 3) {  
-println("Usage: sign-sfc-config <private-key-file> <config-file> <signed-config-file>")  
-exitProcess(0)  
-}  
+import com.amazonaws.sfc.config.ConfigVerification
+import File
+import kotlin.system.exitProcess
+
+fun main(args: Array<String>) {
+    checkArguments(args)
+    val privateKeyFile = File(args[0])
+    val inputConfigFile = File(args[1])
+    val signedConfigFile = File(args[2])
+    ConfigVerification.sign(inputConfigFile, privateKeyFile, signedConfigFile)
+    println("Signed configuration file written to ${signedConfigFile.* absoluteFile}")
+
+}
+
+private fun checkArguments(args: Array<String>) {
+    if (args.size != 3) {
+        println("Usage: sign-sfc-config <private-key-file> <config-file> <signed-config-file>")
+        exitProcess(0)
+    }
 }
 ```
 
-This code loads the input configuration file to be signed, and adds an entry named "ConfigSignature", containing the digital signature of the configuration data, to the signed configuration output file.
+This code loads the input configuration file to be signed, and adds an entry named "ConfigSignature", containing the
+digital signature of the configuration data, to the signed configuration output file.
 
-In order to check the digital signature, the -verify parameter of the sfc-main module, which runs the SFC core, is used to specify the file containing the public key for the private key that was used to sign the configuration.
+In order to check the digital signature, the -verify parameter of the sfc-main module, which runs the SFC core, is used
+to specify the file containing the public key for the private key that was used to sign the configuration.
 
-If the verification of the signature fails, because of the configuration being changed after signing it or the signature is missing the SFC core will not process the configuration.
+If the verification of the signature fails, because of the configuration being changed after signing it or the signature
+is missing the SFC core will not process the configuration.
 
-In situation where the configuration file is generated programmatically by an application or a custom config provider, the one of the ConfigVerification's sign methods can be used to calculate and add the digital signature.
+In situation where the configuration file is generated programmatically by an application or a custom config provider,
+the one of the ConfigVerification's sign methods can be used to calculate and add the digital signature.
 
 ```kotlin
-fun sign(configFile, privateKeyFile: File, signedConfigFile: File): Unit  
-fun sign(configFile: File, privateKeyFile: File, signedConfig: OutputStream): Unit  
-fun sign(configFile: File, privateKey: PrivateKey, signedConfigFile: File): kotlin.  
-fun sign(configFile: File, privateKey: PrivateKey, signedConfig: OutputStream): Unit  
-fun sign(config: InputStream, privateKeyFile: File, signedConfigFile: File): Unit  
-fun sign(configStream: InputStream, privateKeyFile: File, signedConfig: OutputStream): Unit  
-fun sign(config: InputStream, privateKey: PrivateKey, signedConfigFile: File): Unit  
-fun sign(configStream: InputStream, privateKey: PrivateKey, signedConfig: OutputStream): Unit  
-fun sign(configJson: String, privateKeyFile: File): String  
-fun sign(configJson: String, privateKeyFile: File, signed: OutputStream): Unit  
-fun sign(configJson: String, privateKey: PrivateKey): String  
+fun sign(configFile, privateKeyFile: File, signedConfigFile: File): Unit
+fun sign(configFile: File, privateKeyFile: File, signedConfig: OutputStream): Unit
+fun sign(configFile: File, privateKey: PrivateKey, signedConfigFile: File): kotlin.
+fun sign(configFile: File, privateKey: PrivateKey, signedConfig: OutputStream): Unit
+fun sign(config: InputStream, privateKeyFile: File, signedConfigFile: File): Unit
+fun sign(configStream: InputStream, privateKeyFile: File, signedConfig: OutputStream): Unit
+fun sign(config: InputStream, privateKey: PrivateKey, signedConfigFile: File): Unit
+fun sign(configStream: InputStream, privateKey: PrivateKey, signedConfig: OutputStream): Unit
+fun sign(configJson: String, privateKeyFile: File): String
+fun sign(configJson: String, privateKeyFile: File, signed: OutputStream): Unit
+fun sign(configJson: String, privateKey: PrivateKey): String
 fun sign(configJson: String, privateKey: PrivateKey, signedConfig: OutputStream): Unit
 ```
 
-If a custom configuration provider is used, the public key read from the public key file specified by the -very parameter of the sfc-main application will be passed to the instance of the provider, where it can be used to verify the initial configuration passed to the instance. If the public key is provided, meaning it was passed to the sfc-main module for verification pf the configuration, the data which is produced by the provider needs to be signed using one of the sign methods listed above.
+If a custom configuration provider is used, the public key read from the public key file specified by the -very
+parameter of the sfc-main application will be passed to the instance of the provider, where it can be used to verify the
+initial configuration passed to the instance. If the public key is provided, meaning it was passed to the sfc-main
+module for verification pf the configuration, the data which is produced by the provider needs to be signed using one of
+the sign methods listed above.
 
-To verify the input configuration passed to the custom provider one of the following ConfigValidation's verify methods can be used:
+To verify the input configuration passed to the custom provider one of the following ConfigValidation's verify methods
+can be used:
 
 ```kotlin
-fun verify(configFile: File, publicKeyFile: File): Boolean  
-fun verify(configFile: File, publicKey: PublicKey): Boolean  
-fun verify(configStream: InputStream, publicKeyFile: File): Boolean  
-fun verify(configStream: InputStream, publicKey: PublicKey):Boolean  
-fun verify(configJson: String, publicKeyFile: File): Boolean  
+fun verify(configFile: File, publicKeyFile: File): Boolean
+fun verify(configFile: File, publicKey: PublicKey): Boolean
+fun verify(configStream: InputStream, publicKeyFile: File): Boolean
+fun verify(configStream: InputStream, publicKey: PublicKey): Boolean
+fun verify(configJson: String, publicKeyFile: File): Boolean
 fun verify(configJson: String, publicKey: PublicKey): Boolean
 ```
 
@@ -1002,7 +1483,10 @@ fun verify(configJson: String, publicKey: PublicKey): Boolean
 
 # Output Structure Transformation
 
-For situations where the structure of the data needs to be converted, this can be another JSON format, XML, CSV etc., targets can have a configurable template. This template is the name of an [Apache Velocity template file](https://velocity.apache.org/engine/2.3/user-guide.html). Before the data is transmitted the actual destination of the target the template is applied to transform the data.
+For situations where the structure of the data needs to be converted, this can be another JSON format, XML, CSV etc.,
+targets can have a configurable template. This template is the name of
+an [Apache Velocity template file](https://velocity.apache.org/engine/2.3/user-guide.html). Before the data is
+transmitted the actual destination of the target the template is applied to transform the data.
 
 The context of the input data contains 3 variables:
 
@@ -1012,9 +1496,10 @@ The context of the input data contains 3 variables:
 
 Below are examples of templates that transform the data (not-aggregated) into different formats.
 
-## CSV output 
+## CSV output
 
-This template flattens the data into CSV format. Each line consists of the name of the source, the name of the value, the actual value and its timestamp.
+This template flattens the data into CSV format. Each line consists of the name of the source, the name of the value,
+the actual value and its timestamp.
 
 ```vtl
 #foreach($sourceName in $sources.keySet())
@@ -1025,7 +1510,8 @@ This template flattens the data into CSV format. Each line consists of the name 
 #end
 ```
 
-The template below flattens the values for the "`count`", "`avg`", "`min`", "`max`", "`stddev`" aggregations of a dataset into CSV format.
+The template below flattens the values for the "`count`", "`avg`", "`min`", "`max`", "`stddev`" aggregations of a
+dataset into CSV format.
 
 ```vtl
 #foreach($sourceName in $sources.keySet())
@@ -1041,21 +1527,23 @@ The template below flattens the values for the "`count`", "`avg`", "`min`", "`ma
 #end
 ```
 
-## XML format 
+## XML format
 
-The following example template converts the data into XML format, including timestamps and metadata at each level if these are available
+The following example template converts the data into XML format, including timestamps and metadata at each level if
+these are available
 
 ```vtl
+
 <schedule id="$schedule" #metadata_attributes($metadata)>
-#foreach($sourceName in $sources.keySet())
-    #set( $source = $sources[$sourceName])
-    <source name="sourceName" #metadata_attributes($source["metadata"]) #timestamp_attr($source)>
-#foreach($valueName in $source["values"].keySet())
-#set($value = $source["values"][$valueName])
-         <value name="$valueName" #metadata_attributes($value["metadata"])#timestamp_attr($value)>$value["value"]</value>
-#end
-    </source>
-#end
+    #foreach($sourceName in $sources.keySet())
+        #set( $source = $sources[$sourceName])
+        <source name="sourceName" #metadata_attributes($source["metadata"]) #timestamp_attr($source)>
+    #foreach($valueName in $source["values"].keySet())
+    #set($value = $source["values"][$valueName])
+             <value name="$valueName" #metadata_attributes($value["metadata"])#timestamp_attr($value)>$value["value"]</value>
+    #end
+        </source>
+    #end
 </schedule>
 
 #macro(metadata_attributes $metadata)
@@ -1074,14 +1562,15 @@ $timestamp#end
 #end
 ```
 
-## YAML format 
+## YAML format
 
-The following example template converts the data into YAML format, including timestamps and metadata at each level if these are available
+The following example template converts the data into YAML format, including timestamps and metadata at each level if
+these are available
 
 ```vtl
----  
-$schedule:
-  sources:
+---
+    $schedule:
+sources:
 #foreach($sourceName in $sources.keySet())
 #set( $source = $sources[$sourceName])
     $sourceName:
@@ -1118,35 +1607,48 @@ $schedule:
 #set($src_timestamp = "")
 #end
 #if( $metadata != "")
-  metadata:
-#foreach($key in $metadata.keySet())
-    $key: $metadata[$key]
-#end
+metadata:
+    #foreach($key in $metadata.keySet())
+        $key: $metadata[$key]
+    #end
 #end
 ```
 
 [^top](#toc)
 
-#  Service Health Probes
+# Service Health Probes
 
-In order to check the state of an SFC process (sfc-main service and protocol adapters, target adapters and metric writer, running as a service on the local or a remote server) each of these can be configured to have a health probe endpoint. This endpoint can be polled by the platform used to control the service instances (e.g., Docker Compose, Kubernetes). Servers will respond with a configurable response (default is "OK") if the service is in non-faulty state, which is determined by the logic of that service implementation.
+In order to check the state of an SFC process (sfc-main service and protocol adapters, target adapters and metric
+writer, running as a service on the local or a remote server) each of these can be configured to have a health probe
+endpoint. This endpoint can be polled by the platform used to control the service instances (e.g., Docker Compose,
+Kubernetes). Servers will respond with a configurable response (default is "OK") if the service is in non-faulty state,
+which is determined by the logic of that service implementation.
 
-The health probe endpoints of the adapter, target and metric services, become active after they have been initialized by the initialization call made by the sfc-main process, as the request for that call contains the required information to start the health probe.
+The health probe endpoints of the adapter, target and metric services, become active after they have been initialized by
+the initialization call made by the sfc-main process, as the request for that call contains the required information to
+start the health probe.
 
-Optionally the health probe can be configured use a different network adapter/network as used by the data streams between the core process and the service.
+Optionally the health probe can be configured use a different network adapter/network as used by the data streams
+between the core process and the service.
 
-After receiving the initialization data, the health probe will listen for HTTP GET and HEAD requests on the configured port on the default or explicit configured network interface (`http://address:port/`) . Optionally a path can be configured to be appended to the endpoint address (`http://address:port/path`)
+After receiving the initialization data, the health probe will listen for HTTP GET and HEAD requests on the configured
+port on the default or explicit configured network interface (`http://address:port/`) . Optionally a path can be
+configured to be appended to the endpoint address (`http://address:port/path`)
 
-Optionally a period can be configured after which repeated health probe requests did not return a positive result the process will be stopped. This option can be used if the environment which is controlling the instances does not try to stop the unhealthy service instances itself before a new instance is started.
+Optionally a period can be configured after which repeated health probe requests did not return a positive result the
+process will be stopped. This option can be used if the environment which is controlling the instances does not try to
+stop the unhealthy service instances itself before a new instance is started.
 
 In order to protect the service from extensive load and unwanted the request the handler for this service:
 
--   A configurable rate limiter is used to limit the number of calls per second (default is 10 request/second)
--   The status of the service is cached by the probe handler and retained for a configurable period before being re-evaluated (default is 1000 milliseconds)
--   A list of IP filters can be configured to restrict the IP addresses from which requests can be made
--   The handler is restricted to only use a single thread for handling probe requests
+- A configurable rate limiter is used to limit the number of calls per second (default is 10 request/second)
+- The status of the service is cached by the probe handler and retained for a configurable period before being
+  re-evaluated (default is 1000 milliseconds)
+- A list of IP filters can be configured to restrict the IP addresses from which requests can be made
+- The handler is restricted to only use a single thread for handling probe requests
 
-Health probe endpoints for SFC service are configured by adding a HealthProbe configuration sections at the following locations:
+Health probe endpoints for SFC service are configured by adding a HealthProbe configuration sections at the following
+locations:
 
 <table>
 <colgroup>
@@ -1190,43 +1692,61 @@ For details on the HealthProbe configuration see HealthProbeConfiguration table 
 
 [^top](#toc)
 
-# OPCUA Alarm and Events types 
+# OPCUA Alarm and Events types
 
-The OPCUA protocol adapter supports the collection of data from events and alarms. This can be done by adding the event name or identifier of the alarm or event type to a node channel configuration. The name of the event can be the name of the OPCUA alarms from the model at <https://reference.opcfoundation.org/Core/Part9/v105/docs/5.8>, or an OPCUA event from the model at <https://reference.opcfoundation.org/Core/Part3/v104/docs/9.1>
+The OPCUA protocol adapter supports the collection of data from events and alarms. This can be done by adding the event
+name or identifier of the alarm or event type to a node channel configuration. The name of the event can be the name of
+the OPCUA alarms from the model at <https://reference.opcfoundation.org/Core/Part9/v105/docs/5.8>, or an OPCUA event
+from the model at <https://reference.opcfoundation.org/Core/Part3/v104/docs/9.1>
 
-The adapter will monitor nodes with a specified event type the adapter and add the received to the collected data for the OPCUA source, using the name for that node. The event data consist of a map of properties, which are based on the type of the event used for the node. As multiple events may be received during a read interval, the value of these event nodes is always of type array, containing one or more maps with the event data. The maximum number of items that can be collected is configurable. If more events are received the oldest event is omitted from the output.
+The adapter will monitor nodes with a specified event type the adapter and add the received to the collected data for
+the OPCUA source, using the name for that node. The event data consist of a map of properties, which are based on the
+type of the event used for the node. As multiple events may be received during a read interval, the value of these event
+nodes is always of type array, containing one or more maps with the event data. The maximum number of items that can be
+collected is configurable. If more events are received the oldest event is omitted from the output.
 
-The OPCUA adapter can operate in Polling or Subscription mode to collect data values from the OPCUA server. For events the adapter will use a subscription with monitored event nodes, independent of in which mode the adapter collects the data nodes.
+The OPCUA adapter can operate in Polling or Subscription mode to collect data values from the OPCUA server. For events
+the adapter will use a subscription with monitored event nodes, independent of in which mode the adapter collects the
+data nodes.
 
-As industry specific companion specification define additional event and alarm types, SFC allows configuration of additional types, which are grouped in server profiles. An event is configured by a given name, the node identifier of the event type (e.g., ns=99;i=9999), and a list of properties for that event with their qualified names consisting of a namespace and browse name (e.g., 9:Property1)
+As industry specific companion specification define additional event and alarm types, SFC allows configuration of
+additional types, which are grouped in server profiles. An event is configured by a given name, the node identifier of
+the event type (e.g., ns=99;i=9999), and a list of properties for that event with their qualified names consisting of a
+namespace and browse name (e.g., 9:Property1)
 
-In order to reduce the configuration for these events it is possible to inherit from other events in the profile or the types defined in the OPCUA specifications, by specifying that that type by its type name or node identifier. All properties defined in the type a type inherits from are added, as well as all other properties in types up in the type hierarchy.
+In order to reduce the configuration for these events it is possible to inherit from other events in the profile or the
+types defined in the OPCUA specifications, by specifying that that type by its type name or node identifier. All
+properties defined in the type a type inherits from are added, as well as all other properties in types up in the type
+hierarchy.
 
-The names or node identifiers can be used as event types in the nodes for which event and alarm data needs to be collected. The event name is used to:
+The names or node identifiers can be used as event types in the nodes for which event and alarm data needs to be
+collected. The event name is used to:
 
--   Filter the evens raised by the node, if multiple event types need to be received then a channel needs to be configured for each of these event types.
+- Filter the evens raised by the node, if multiple event types need to be received then a channel needs to be configured
+  for each of these event types.
 
--   Collect the values from the received events as defined for that event type.
+- Collect the values from the received events as defined for that event type.
 
-As for data nodes selectors, it is possible to use a selector to filter specific properties from the events and add additional metadata at node level. Index ranges and node change filters are not supported for events data.
+As for data nodes selectors, it is possible to use a selector to filter specific properties from the events and add
+additional metadata at node level. Index ranges and node change filters are not supported for events data.
 
 Example of mixed OPCUA source nodes for an alarm event and two data nodes.
 
 ```json
 "Channels": {
-  "LevelAlarm": {
-    "Name": "LevelAlarm",
-    "NodeId": "ns=6;s=MyLevel.Alarm",
-    "EventType": "ExclusiveLevelAlarmType"
-  },
-  "SimulationRandom": {
-    "Name": "Random",
-    "NodeId": "ns=3;i=1002"
-  },
-  "SimulationCounter": {
-    "Name": "Counter",
-    "NodeId": "ns=3;i=1001"
-  }
+"LevelAlarm": {
+"Name": "LevelAlarm",
+"NodeId": "ns=6;s=MyLevel.Alarm",
+"EventType": "ExclusiveLevelAlarmType"
+},
+"SimulationRandom": {
+"Name": "Random",
+"NodeId": "ns=3;i=1002"
+},
+"SimulationCounter": {
+"Name": "Counter",
+"NodeId": "ns=3;i=1001"
+}
 }
 ```
 
@@ -1253,7 +1773,24 @@ The collected data from the event and data nodes is shown below.
             "LowLowLimit": 10.0,
             "InputNode": "ns=0;i=0",
             "Retain": true,
-            "EventId": [0, 0, 0, 0, 0, 0, 6, 72, 0, 0, 0, 0, 0, 0, 6, 71],
+            "EventId": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              6,
+              72,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              6,
+              71
+            ],
             "EventType": "ns=0;i=9482",
             "SourceNode": "ns=6;s=MyLevel",
             "SourceName": "MyLevel",
@@ -1273,9 +1810,15 @@ The collected data from the event and data nodes is shown below.
 
 [^top](#toc)
 
-The snippet below shows the configuration of an OPCUA adapter with a profile named "CustomEventsProfile" that defines two additional event types, "CustomEventType1" and "CustomEventType2", each with two properties. CustomEventType1 inherits from the OPCUA defined BaseEventType type and will contain all properties from that class in addition to the two properties defined for the event. CustomEventType2 will inherit from and therefore contain all properties from CustomEventTYpe1 and the two properties defined for the event.
+The snippet below shows the configuration of an OPCUA adapter with a profile named "CustomEventsProfile" that defines
+two additional event types, "CustomEventType1" and "CustomEventType2", each with two properties. CustomEventType1
+inherits from the OPCUA defined BaseEventType type and will contain all properties from that class in addition to the
+two properties defined for the event. CustomEventType2 will inherit from and therefore contain all properties from
+CustomEventTYpe1 and the two properties defined for the event.
 
-Sources are configured to read from adapter "OPCUA" and server "OPCUA-SERVER", which has a service profile set to "CustomEventsProfile", can use both defined event types in addition to all OPCUA defined event types, as event type for their nodes to collect the data in the properties for these events.
+Sources are configured to read from adapter "OPCUA" and server "OPCUA-SERVER", which has a service profile set to "
+CustomEventsProfile", can use both defined event types in addition to all OPCUA defined event types, as event type for
+their nodes to collect the data in the properties for these events.
 
 ```json
 {
@@ -1295,12 +1838,18 @@ Sources are configured to read from adapter "OPCUA" and server "OPCUA-SERVER", w
           "EventTypes": {
             "CustomEventType1": {
               "NodeId": "ns=9;i=9000",
-              "Properties": ["99:CustomProperty1", "99:CustomProperty2"],
+              "Properties": [
+                "99:CustomProperty1",
+                "99:CustomProperty2"
+              ],
               "Inherits": "BaseEventType"
             },
             "CustomEventType2": {
               "NodeId": "ns=9;i=9001",
-              "Properties": ["99:CustomProperty3", "99:CustomProperty4"],
+              "Properties": [
+                "99:CustomProperty3",
+                "99:CustomProperty4"
+              ],
               "Inherits": "CustomEventType1"
             }
           }
@@ -1313,11 +1862,13 @@ Sources are configured to read from adapter "OPCUA" and server "OPCUA-SERVER", w
 
 Further details on OPCUA alarms and event can be found in the OPCUA configuration tables in this document.
 
-#  OPCUA security profiles and certificates
+# OPCUA security profiles and certificates
 
-In order to secure the traffic between the OPCUA protocol adapter and the OPCUA Server it can be signed and encrypted using certificates.
+In order to secure the traffic between the OPCUA protocol adapter and the OPCUA Server it can be signed and encrypted
+using certificates.
 
-In the configuration for the OPCUA server in the adapter the security policies can be used by setting the SecurityPolicy of the server to any of the following policy names:
+In the configuration for the OPCUA server in the adapter the security policies can be used by setting the SecurityPolicy
+of the server to any of the following policy names:
 
 | Name                | Sign / Encrypt   | Security Policy                                                  |
 |---------------------|------------------|------------------------------------------------------------------|
@@ -1329,23 +1880,54 @@ In the configuration for the OPCUA server in the adapter the security policies c
 
 The Certificate section of the OPCUA Server contains the settings for the certificate used by the client of the adapter.
 
-The CertificateName contains the filename of the client certificate, which can be in pem or Pkcs12 format. If a pem format file is used, additionally the name of the corresponding private key file must be set in PrivateKeyFile. This is not required for PFX certificates as this type of file is a container which holds the certificate and private key. If the PFX file is password protected then the Password attribute must be set. (Avoid clear passwords in the configuration, use placeholders for secrets obtained from AWS Secrets manager instead). If an alias is used in the PFX container the value of that alias must be set in the Alias attribute of the configuration.
+The CertificateName contains the filename of the client certificate, which can be in pem or Pkcs12 format. If a pem
+format file is used, additionally the name of the corresponding private key file must be set in PrivateKeyFile. This is
+not required for PFX certificates as this type of file is a container which holds the certificate and private key. If
+the PFX file is password protected then the Password attribute must be set. (Avoid clear passwords in the configuration,
+use placeholders for secrets obtained from AWS Secrets manager instead). If an alias is used in the PFX container the
+value of that alias must be set in the Alias attribute of the configuration.
 
-The type of the certificate can be determined by the prefix of the filename (either ".pem "or ".pfx") optionally followed by ".cer", ".cert" or ".crt"). If another extension is used then the type can be explicitly set by setting the server configuration's Format attribute to either "Pem" or "Pkcs12".
+The type of the certificate can be determined by the prefix of the filename (either ".pem "or ".pfx") optionally
+followed by ".cer", ".cert" or ".crt"). If another extension is used then the type can be explicitly set by setting the
+server configuration's Format attribute to either "Pem" or "Pkcs12".
 
-If either the PEM or PFX certificate file does not exist, it is possible to let the OPCUA adapter generate a self-signed certificate and store that certificate in the specified file name. For PEM format certificates the name of the private key file must be set as well. If the private key file does exist it will be used to generate a pem or Pkcs12 formatted certificate. If it does not exist the keypair is generated and, if a pem formatted certificate is generated, stored in the specified file. For Pkcs12 formatted certificates the key will be stored with the certificate in the pfx file.
+If either the PEM or PFX certificate file does not exist, it is possible to let the OPCUA adapter generate a self-signed
+certificate and store that certificate in the specified file name. For PEM format certificates the name of the private
+key file must be set as well. If the private key file does exist it will be used to generate a pem or Pkcs12 formatted
+certificate. If it does not exist the keypair is generated and, if a pem formatted certificate is generated, stored in
+the specified file. For Pkcs12 formatted certificates the key will be stored with the certificate in the pfx file.
 
-To enable the generation of these self-signed certificates the SelfSignedCertificate section must be present in the server configuration. In this section the CommonName of the certificate must be set and optionally the X509Name fields for Organization, OrganizationalUnit, LocalityName, StateName and CountryCode. The default period in which the generated certificate is valid start from (notBefore) the current date to an end date (notAfter) of the current date plus 3 years. The duration in which the certificate is valid can be modified by setting the ValidPeriodDays attribute.
+To enable the generation of these self-signed certificates the SelfSignedCertificate section must be present in the
+server configuration. In this section the CommonName of the certificate must be set and optionally the X509Name fields
+for Organization, OrganizationalUnit, LocalityName, StateName and CountryCode. The default period in which the generated
+certificate is valid start from (notBefore) the current date to an end date (notAfter) of the current date plus 3 years.
+The duration in which the certificate is valid can be modified by setting the ValidPeriodDays attribute.
 
-A number of days can be set in ExpirationWarningPeriod. At startup and at midnight the OPCUA adapter will check if the client certificate will expire within that period and generate a warning and metric for an expiring (or expired) certificate.
+A number of days can be set in ExpirationWarningPeriod. At startup and at midnight the OPCUA adapter will check if the
+client certificate will expire within that period and generate a warning and metric for an expiring (or expired)
+certificate.
 
-If the OPCUA server does validate the DNS name or the DNS name and IP addresses of the client must be present in the certificate Subject Alternative Names. A list of IP Addresses and DNS names can be set in the SelfSignedCertificate IpAddresses and DnsNames attributes. If these are not set then all known IP addresses and DNS name of the host on which the OPCUA adapter generates the certificate will be set as Subject Alternative Names. To exclude the IP addresses and DNS names from the generated certificate, specify an empty list for these attributes.
+If the OPCUA server does validate the DNS name or the DNS name and IP addresses of the client must be present in the
+certificate Subject Alternative Names. A list of IP Addresses and DNS names can be set in the SelfSignedCertificate
+IpAddresses and DnsNames attributes. If these are not set then all known IP addresses and DNS name of the host on which
+the OPCUA adapter generates the certificate will be set as Subject Alternative Names. To exclude the IP addresses and
+DNS names from the generated certificate, specify an empty list for these attributes.
 
-If the certificate contains an ApplicationUri as an Alternative Subject Name, the Application Description used by the OPCUA client will be the name part from that URI. For self-signed certificates the alternative subject name for the application uri will be set to urn:aws-sfc-opcua@\[hostname\]. (Application Name used by client is aws-sfc-opcua@\[hostname\]). OPCUA servers van validate the application name used by the client against the ApplicationUri from the certificate.
+If the certificate contains an ApplicationUri as an Alternative Subject Name, the Application Description used by the
+OPCUA client will be the name part from that URI. For self-signed certificates the alternative subject name for the
+application uri will be set to urn:aws-sfc-opcua@\[hostname\]. (Application Name used by client is
+aws-sfc-opcua@\[hostname\]). OPCUA servers van validate the application name used by the client against the
+ApplicationUri from the certificate.
 
-*NOTE: The certificate used by the client must be trusted by the OPCUA server, for which the procedure depends on the used sever. As an example, when a ProSys OPCUA (simulation) server is used, an unknown certificate is rejected but stored on the server, where it can be manually marked through the UI as trusted.*
+*NOTE: The certificate used by the client must be trusted by the OPCUA server, for which the procedure depends on the
+used sever. As an example, when a ProSys OPCUA (simulation) server is used, an unknown certificate is rejected but
+stored on the server, where it can be manually marked through the UI as trusted.*
 
-The OPCUA adapter can also validate the certificate it receives from the OPCUA server. It will validate it using a set of know trusted certificates and issuers and certificate revocation lists (CRL). To enable the validation a CertificateValidation section must be present in the configuration. The Directory attribute in this section is set to the location where the certificates and revocation lists are stored in a number of subdirectories, which will be created by the adapter if these do not exist.
+The OPCUA adapter can also validate the certificate it receives from the OPCUA server. It will validate it using a set
+of know trusted certificates and issuers and certificate revocation lists (CRL). To enable the validation a
+CertificateValidation section must be present in the configuration. The Directory attribute in this section is set to
+the location where the certificates and revocation lists are stored in a number of subdirectories, which will be created
+by the adapter if these do not exist.
 
 ```sh
 [Configured directory name]
@@ -1358,54 +1940,64 @@ The OPCUA adapter can also validate the certificate it receives from the OPCUA s
 |----- rejected
 ```
 
-The certs directories contain trusted certificates and certificates of issuers in order to validate signed certificates. The crl directories contain the certification revocation lists. When a server certificate does not pass the validation it will be stored in PEM format in the rejected directory, from where it can after inspection be moved into the trusted certificate directory.
+The certs directories contain trusted certificates and certificates of issuers in order to validate signed certificates.
+The crl directories contain the certification revocation lists. When a server certificate does not pass the validation
+it will be stored in PEM format in the rejected directory, from where it can after inspection be moved into the trusted
+certificate directory.
 
-A number of optional checks (see <https://reference.opcfoundation.org/v104/Core/docs/Part4/6.1.3/>) can be configured in a ValidationOptions section in the CertificateValidation section. It can contain the following attributes that can be set to a value of false to disable the optional validation, which by default are all enabled)
+A number of optional checks (see <https://reference.opcfoundation.org/v104/Core/docs/Part4/6.1.3/>) can be configured in
+a ValidationOptions section in the CertificateValidation section. It can contain the following attributes that can be
+set to a value of false to disable the optional validation, which by default are all enabled)
 
 Validation options:
 
--   HostOrIP: End certificates must contain their host name or IP address in the Subject Alternate Names which will be validated
--   Validity: Checks certificate expiry
--   KeyUsageEndEntity: Key usage extensions for end entity certificates must be present and will be checked.
--   ExtKeyUsageEndEntity: : Extended key usage extensions for end entity certificates must be present and will be checked.
--   KeyUsageIssuer: Key usage extensions must be present and will be checked for CA certificates.
--   Revocation: Revocation will be checked against CLRs.
--   ApplicationUri: Checks the Application name in the Subject Alternative Names against the Application description.
+- HostOrIP: End certificates must contain their host name or IP address in the Subject Alternate Names which will be
+  validated
+- Validity: Checks certificate expiry
+- KeyUsageEndEntity: Key usage extensions for end entity certificates must be present and will be checked.
+- ExtKeyUsageEndEntity: : Extended key usage extensions for end entity certificates must be present and will be checked.
+- KeyUsageIssuer: Key usage extensions must be present and will be checked for CA certificates.
+- Revocation: Revocation will be checked against CLRs.
+- ApplicationUri: Checks the Application name in the Subject Alternative Names against the Application description.
 
-Example of OPCUA server configuration using Basic256Sha256 security profile for signed and encrypted traffic using a X509 certificate and private key, which can be generated by the adapter as a self-signed certificated which is valid for 365 days. A daily warning and metric value will be generated staring 30 days before the certificate expires. Server certificates will be checked using certificates and certificate revocation lists stored in subdirectories under the specified base directory for that server.
+Example of OPCUA server configuration using Basic256Sha256 security profile for signed and encrypted traffic using a
+X509 certificate and private key, which can be generated by the adapter as a self-signed certificated which is valid for
+365 days. A daily warning and metric value will be generated staring 30 days before the certificate expires. Server
+certificates will be checked using certificates and certificate revocation lists stored in subdirectories under the
+specified base directory for that server.
 
 ```json
 "OPCUA-SERVER-1": {
-  "Address": "opc.tcp://myserver.com",
-  "Path": "OPCUA/SimulationServer",
-  "Port": 53530,
-  "SecurityPolicy": "Basic256Sha256",
-  "CertificateValidation": {
-    "Directory": "/etc/certificates/opcua1 ",
-    "ValidationOptions": {
-      "HostOrIP" : true,
-      "Validity" : true,
-      "KeyUsageEndEntity" : true,
-      "ExtKeyUsageEndEntity" : true,
-      "KeyUsageIssuer" : true,
-      "Revocation" : true,
-      "ApplicationUri" : true
-    }
-  },
-  "Certificate": {
-    "CertificateFile": "/etc/certificates/certificate.pem",
-    "PrivateKeyFile": "/etc/certificates/ /private-key.pem",
-    "ExpirationWarningPeriod" : 30,
-    "SelfSignedCertificate": {
-      "CommonName": "OPCUA-CONNECTOR",
-      "Organization": "AWS",
-      "OrganizationalUnit": "AIP",
-      "LocalityName": "AMS",
-      "StateName": "NH",
-      "CountryCode": "NL",
-      "ValidPeriodDays": 365
-    }
-  }
+"Address": "opc.tcp://myserver.com",
+"Path": "OPCUA/SimulationServer",
+"Port": 53530,
+"SecurityPolicy": "Basic256Sha256",
+"CertificateValidation": {
+"Directory": "/etc/certificates/opcua1 ",
+"ValidationOptions": {
+"HostOrIP": true,
+"Validity": true,
+"KeyUsageEndEntity": true,
+"ExtKeyUsageEndEntity" : true,
+"KeyUsageIssuer": true,
+"Revocation": true,
+"ApplicationUri": true
+}
+},
+"Certificate": {
+"CertificateFile": "/etc/certificates/certificate.pem",
+"PrivateKeyFile": "/etc/certificates/ /private-key.pem",
+"ExpirationWarningPeriod": 30,
+"SelfSignedCertificate": {
+"CommonName": "OPCUA-CONNECTOR",
+"Organization": "AWS",
+"OrganizationalUnit": "AIP",
+"LocalityName": "AMS",
+"StateName": "NH",
+"CountryCode": "NL",
+"ValidPeriodDays": 365
+}
+}
 }
 ```
 
@@ -1413,35 +2005,48 @@ Example of OPCUA server configuration using Basic256Sha256 security profile for 
 
 # SFC tuning
 
-
-This section describes the tuning of SFC using the elements of the “Tuning” configuration at the top level of the SFC configuration file.
+This section describes the tuning of SFC using the elements of the “Tuning” configuration at the top level of the SFC
+configuration file.
 
 ## SFC channel tuning
 
-The internal processes of SFC use memory buffered channels to communicate. These channels are used to decouple the process and allow processing of the data in parallel. When SFC is writing data to a channel then it first makes a non-blocking call to send the data to the channel. If this fails, because the channel has reached it maximum capacity, as warning is generated, which included the name of the channel, the current size of the parameter and the name of the tunning parameter that can be used to change the capacity of the channel. SFC will then make blocking call to send the data to the channel, waiting for available capacity in the channel. If a timeout whilst waiting for the item to be sent occurs an error message is generated. The message includes the name of the channel, the timeout period and the name of the tuning parameter to change the timeout period.
+The internal processes of SFC use memory buffered channels to communicate. These channels are used to decouple the
+process and allow processing of the data in parallel. When SFC is writing data to a channel then it first makes a
+non-blocking call to send the data to the channel. If this fails, because the channel has reached it maximum capacity,
+as warning is generated, which included the name of the channel, the current size of the parameter and the name of the
+tunning parameter that can be used to change the capacity of the channel. SFC will then make blocking call to send the
+data to the channel, waiting for available capacity in the channel. If a timeout whilst waiting for the item to be sent
+occurs an error message is generated. The message includes the name of the channel, the timeout period and the name of
+the tuning parameter to change the timeout period.
 
-As the sizing of the channels is specified by the number of items the actual memory used by the channels depends on the size of the items which are sent to the channel. All timeouts are specified in milliseconds.
+As the sizing of the channels is specified by the number of items the actual memory used by the channels depends on the
+size of the items which are sent to the channel. All timeouts are specified in milliseconds.
 
-The channel warning and errors typically occur when SFC collects data from the sources faster than it can process and deliver it to the targets. If this happens incidentally, due to peaks in collected data or targets temporary processing the data slower, size of the buffer can be incremented.
-Other solutions are redcing the interval the schedule uses to read the data or enable batching for targets which support it.
+The channel warning and errors typically occur when SFC collects data from the sources faster than it can process and
+deliver it to the targets. If this happens incidentally, due to peaks in collected data or targets temporary processing
+the data slower, size of the buffer can be incremented.
+Other solutions are redcing the interval the schedule uses to read the data or enable batching for targets which support
+it.
 
 ### Channel capacity warnings
 
 Channel reached full capacity and data cannot be sent directly
-Sending data to channelName is blocking, consider setting tuning parameter tuningChannelSizeName to a higher value, current value is currentChannelSize
+Sending data to channelName is blocking, consider setting tuning parameter tuningChannelSizeName to a higher value,
+current value is currentChannelSize
 
 Data was sent to channel after waiting for available capcity in channel
-Sending date to channelName  was blocking for duration, consider setting tuning parameter tuningChannelSizeName to a higher value, current value is currentChannelSize
+Sending date to channelName was blocking for duration, consider setting tuning parameter tuningChannelSizeName to a
+higher value, current value is currentChannelSize
 
 ### Channel capacity errors
 
 Timeout occurred whilst waiting for capacity in channe
-Sending data to channelName timeout after timeout, consider setting tuning parameter tuningChannelTimeoutName to a longer value
+Sending data to channelName timeout after timeout, consider setting tuning parameter tuningChannelTimeoutName to a
+longer value
 
 Out of memory occurred sending the data to the channel
-Out of memory while submitting element to channelName, outIfMemoryError, consider setting tuning parameter tuningChannelSizeName to a lower value, current value is currentChannelSize
-
-
+Out of memory while submitting element to channelName, outIfMemoryError, consider setting tuning parameter
+tuningChannelSizeName to a lower value, current value is currentChannelSize
 
 The picture below shows the main channels used by SFC.
 
@@ -1450,22 +2055,27 @@ The picture below shows the main channels used by SFC.
 
 **Aggregation Channel**
 
-When a schedule is configured to apply aggregation on the collected data then this channel is used to send the data to the aggregation process. Note that the aggregation process reads the data from the channel and stores it until the configured size is reached and the data is aggregated.
+When a schedule is configured to apply aggregation on the collected data then this channel is used to send the data to
+the aggregation process. Note that the aggregation process reads the data from the channel and stores it until the
+configured size is reached and the data is aggregated.
 Tuning parameters: AggregatorChannelSize/AggregatorChannelTimeout
 
 **Writer Channel**
 
-Processed data from either the reading or aggregation process is sent to this channel from where the SFC writer will read it and send it to the configured targets
+Processed data from either the reading or aggregation process is sent to this channel from where the SFC writer will
+read it and send it to the configured targets
 Tuning parameters: WriterInputChannelSize / WriterInputChannelTimeout
 
 **Target Output Channel**
 
-Target output data is written to the target output channel of a target from where it is read for sending it to the target’s specific destination.
+Target output data is written to the target output channel of a target from where it is read for sending it to the
+target’s specific destination.
 Tuning parameters: TargetChannelSize/TargetChannelTimeout
 
 **Metrics Output Channel**
 
-If metrics collection is enabled then this channel is used to send data to an instance of a metrics writer that writes the metrics data.
+If metrics collection is enabled then this channel is used to send data to an instance of a metrics writer that writes
+the metrics data.
 Tuning parameters : ChannelSizePerMetricsProvider/MetricsChannelTimeout
 
 **Targets Results Channel**
@@ -1476,23 +2086,32 @@ Tuning parameters: TargetResultsChannelSize/TargetResultsChannelTimeout
 **Additional channel parameters (not in picture)**
 
 Tuning parameters: TargetForwardingChannelSize/TargetForwardingChannelTimeout
-Used by targets that do forward data (e.g.  store-and-forward-target and router-target) to the next adapter in a configured adapter chain.
+Used by targets that do forward data (e.g. store-and-forward-target and router-target) to the next adapter in a
+configured adapter chain.
 
 Tuning parameters: TargetResubmitChannelSize/TargetResubmitChannelTimeout
-Used by targets that do resubmit data (e.g.  store-and-forward-target) to the next adapter in a configured adapter chain.
-
+Used by targets that do resubmit data (e.g. store-and-forward-target) to the next adapter in a configured adapter chain.
 
 ## SFC memory monitoring
 
-Every minute each SFC component will check the amount of memory it is using. At 10-minute interval the memory allocation trend will be calculated for the last 10 and 60 minutes. The trend will be a number which is positive if the amount of memory increases, or negative if it decreases. If the memory usage  trend over the last 60 minutes goes up then a warning is generated. This situation will typically happen if SFC collects data faster than is can process and deliver it to targets. As too much data in flight will be stored in the channels further in the processing pipeline, the memory used by these items may cause out of memory errors.
+Every minute each SFC component will check the amount of memory it is using. At 10-minute interval the memory allocation
+trend will be calculated for the last 10 and 60 minutes. The trend will be a number which is positive if the amount of
+memory increases, or negative if it decreases. If the memory usage trend over the last 60 minutes goes up then a warning
+is generated. This situation will typically happen if SFC collects data faster than is can process and deliver it to
+targets. As too much data in flight will be stored in the channels further in the processing pipeline, the memory used
+by these items may cause out of memory errors.
 It the memory usage trend goes up over a 60-minute period a warning will be generated.
 
-If tracing is enabled for logging then each minute interval sampling and 10-minute trends will be sent to the logging output.
+If tracing is enabled for logging then each minute interval sampling and 10-minute trends will be sent to the logging
+output.
 
 ## Concurrent reading from sources.
-When a schedule is reading data from multiple sources then this will happen in parallel. By default, the maximum number of sources that are read in parallel is 5. This number can be modified by setting the MaxConcurrentSourceReaders tuning parameter. This number can be increased to read from more sources at the same time. This number is typically lowered to limit the load on network and system resources.
-The parameter AllSourcesReadTimeout can be used to specify the period within reading from all sources must be completed.
 
+When a schedule is reading data from multiple sources then this will happen in parallel. By default, the maximum number
+of sources that are read in parallel is 5. This number can be modified by setting the MaxConcurrentSourceReaders tuning
+parameter. This number can be increased to read from more sources at the same time. This number is typically lowered to
+limit the load on network and system resources.
+The parameter AllSourcesReadTimeout can be used to specify the period within reading from all sources must be completed.
 
 # SFC configuration
 
@@ -1757,6 +2376,16 @@ The parameter AllSourcesReadTimeout can be used to specify the period within rea
 				<p>}</p>
 			</td>
 		</tr>
+
+
+<tr class="odd">
+			<td>ConditionFilters</td>
+			<td>Filters that can be applied at channel values level. Values are passed if the value matches the filter expression</td>
+			<td>Map[String,<a href="#conditionfilterconfiguration">ConditionFilterConfiguration</a>]</td>
+			<td>
+			</td>
+		</tr>
+
 		<tr class="even">
 			<td>AwsIotCredentialProviderClients</td>
 			<td>Configuration for clients using the AWS IoT Credential Provider Service to obtain session credentials.</td>
@@ -1793,7 +2422,7 @@ The parameter AllSourcesReadTimeout can be used to specify the period within rea
 			<td><a href="#tuningconfiguration">TuningConfiguration</a></td>
 			<td></td>
 		</tr>
-	</tbody>
+
 </table>
 
 [^top](#toc)
@@ -1939,16 +2568,65 @@ The parameter AllSourcesReadTimeout can be used to specify the period within rea
 </tbody>
 </table>
 
-
 ## ChannelConfiguration
 
-| The ChannelConfiguration element contains a set of generic source configuration attributes used to process the read data. Each input protocol implementation should implement its specific channel configuration type, and include that in its source type, which contains the required configuration data for that protocol. |                                                                                                                                                                                                                                                                                                                                          |        |                                                                                     |
-|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------|-------------------------------------------------------------------------------------|
-| Name                                                                                                                                                                                                                                                                                                                          | Name of the channel. If this element is specified, it is used as the channel key in the map of output values for its source. If no value is specified then the channel identifier is used. This name can be used to give a descriptive name in the output the data read from the channel (e.g., "InputTemperature", "RotationSpeed/RPM", | String | Optional                                                                            |
-| Description                                                                                                                                                                                                                                                                                                                   | User-defined description                                                                                                                                                                                                                                                                                                                 | String | Optional                                                                            |
-| ChangeFilter                                                                                                                                                                                                                                                                                                                  | ChangeFilter to apply to this channel value. (Overwrites change filter at source level if any)                                                                                                                                                                                                                                           | String | Optional, if used it must refer to a configured filter in the ChangeFilters element |
-| Value Filter                                                                                                                                                                                                                                                                                                                  |                                                                                                                                                                                                                                                                                                                                          | String | Optional, if used it must refer to a configured filter in the ValueFilters element  |
-| Transformation                                                                                                                                                                                                                                                                                                                | Transformation identifier of the transformation that will be applied to each value read from the channel. The transformation must exist in the Transformations configuration element. The input data type of the first transformation operator in a transformation must be compatible with the data type of the channel value.           |        |                                                                                     |
+<table>
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 27%" />
+<col style="width: 28%" />
+<col style="width: 24%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th colspan="4">TThe ChannelConfiguration element contains a set of generic source configuration attributes used to process the read data. Each input protocol implementation should implement its specific channel configuration type, and include that in its source type, which contains the required configuration data for that protocol.</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Name</strong></td>
+<td><strong>Description</strong></td>
+<td><strong>Type</strong></td>
+<td><strong>Comments</strong></td>
+</tr>
+<tr class="even">
+<td>Name</td>
+<td> Name of the channel. If this element is specified, it is used as the channel key in the map of output values for its source. If no value is specified then the channel identifier is used. This name can be used to give a descriptive name in the output the data read from the channel (e.g., "InputTemperature", "RotationSpeed/RPM"</td>
+<td>String</td>
+<td>Optional</td>
+</tr>
+<tr class="odd">
+<td>Description</td>
+<td>User-defined description of the channel</td>
+<td>String</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>ChangeFilter</td>
+<td>ChangeFilter to apply to this channel value. (Overwrites change filter at source level if any)</td>
+<td>String</td>
+<td>Optional, if used it must refer to a configured filter in the ChangeFilters element.</td>
+</tr>
+<tr class="odd">
+<td>ValueFilter</td>
+<td>ValueFilter to apply to this channel value.</td>
+<td>String</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>ChangeFilter</td>
+<td>Change filter to apply to the value of the channel.</td>
+<td>String</td>
+<td>Optional, if used it must refer to a configured filter in the ChangeFilters element</td>
+</tr>
+<tr class="odd">
+<td>ConditionFilter</td>
+<td>ConditionFilter to apply to this channel, see <a href="#condtionfilters">condtion filters</a></td>
+<td>String</td>
+<td>Optional, if used it must refer to a configured filter in the ConditionFilters element </td>
+</tr>
+</tbody>
+</table>
 
 ## Aggregation
 
@@ -2207,19 +2885,18 @@ see <a href="#sfc-tuning">SFC TuningC</a> for more details
 
 ## SecretsManagerConfiguration
 
-| Configuration data for reading secrets stored in AWS Secrets manger and storing these locally in situations where connectivity is lost. |                                                                                                                                                                    |                              |                                                                                                                                                                                                                                                          |
-|-----------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **Name**                                                                                                                                | **Description**                                                                                                                                                    | **Type**                     | **Comments**                                                                                                                                                                                                                                             |
+| Configuration data for reading secrets stored in AWS Secrets manger and storing these locally in situations where connectivity is lost. |                                                                                                                                                                    |                                                           |                                                                                                                                                                                                                                                          |
+|-----------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **Name**                                                                                                                                | **Description**                                                                                                                                                    | **Type**                                                  | **Comments**                                                                                                                                                                                                                                             |
 | Secrets                                                                                                                                 | Configured secrets                                                                                                                                                 | \[[CloudSecretConfiguration](#cloudsecretconfiguration)\] | Configured cloud secrets                                                                                                                                                                                                                                 |
-| PrivateKeyFile                                                                                                                          | Name of file containing the private key used to encrypt locally stores secrets                                                                                     | String                       | Default is "sfc-secrets-manager-private-key.pem"                                                                                                                                                                                                         |
-| CertificatesAndKeysByFileReference                                                                                                      | Can be set to true to transmit private key by filename to external IPC services. The file name must exist and be accessible in the environment running the service | Boolean                      | Default is false                                                                                                                                                                                                                                         |
-| StoredSecretsFile                                                                                                                       | Name of the file used to store secrets.                                                                                                                            | String                       | Default is " sfc-secrets-manager-secrets"                                                                                                                                                                                                                |
-| StoredSecretsDir                                                                                                                        | Name of the directory where stored secrets file and optionally also the private key file are created,                                                              | String                       | Default is home directory of user running the process                                                                                                                                                                                                    |
-| CreatePrivateKeyIfNotExists                                                                                                             | If set the file containing a secret key that will be used to encrypt locally stored secrets will be created if it does not exist.                                  | Boolean                      | Default is true                                                                                                                                                                                                                                          |
-| CredentialProviderClient                                                                                                                | Name of configured credentials client that will be used to read secrets stored in the AWS Secrets Manager service.                                                 |                              | If not set the AWS SDK credential provider chain is used.                                                                                                                                                                                                |
-| Region                                                                                                                                  | Region of the used AWS Secrets Manager Service                                                                                                                     | String                       | AWS Service region                                                                                                                                                                                                                                       |
-| GreenGrassDeploymentPath                                                                                                                | Path to an existing and accessible GreenGrass V2 deployment. If set then the private key used in that deployment is used to encrypt local secrets.                 | String                       | The typical root directory for Greengrass 2 deployment is /greengrass/v2. The process running the core or target must have access to the file effectiveConfig.yaml in subdirectory config. Note that these directories and files have restricted access. |
-
+| PrivateKeyFile                                                                                                                          | Name of file containing the private key used to encrypt locally stores secrets                                                                                     | String                                                    | Default is "sfc-secrets-manager-private-key.pem"                                                                                                                                                                                                         |
+| CertificatesAndKeysByFileReference                                                                                                      | Can be set to true to transmit private key by filename to external IPC services. The file name must exist and be accessible in the environment running the service | Boolean                                                   | Default is false                                                                                                                                                                                                                                         |
+| StoredSecretsFile                                                                                                                       | Name of the file used to store secrets.                                                                                                                            | String                                                    | Default is " sfc-secrets-manager-secrets"                                                                                                                                                                                                                |
+| StoredSecretsDir                                                                                                                        | Name of the directory where stored secrets file and optionally also the private key file are created,                                                              | String                                                    | Default is home directory of user running the process                                                                                                                                                                                                    |
+| CreatePrivateKeyIfNotExists                                                                                                             | If set the file containing a secret key that will be used to encrypt locally stored secrets will be created if it does not exist.                                  | Boolean                                                   | Default is true                                                                                                                                                                                                                                          |
+| CredentialProviderClient                                                                                                                | Name of configured credentials client that will be used to read secrets stored in the AWS Secrets Manager service.                                                 |                                                           | If not set the AWS SDK credential provider chain is used.                                                                                                                                                                                                |
+| Region                                                                                                                                  | Region of the used AWS Secrets Manager Service                                                                                                                     | String                                                    | AWS Service region                                                                                                                                                                                                                                       |
+| GreenGrassDeploymentPath                                                                                                                | Path to an existing and accessible GreenGrass V2 deployment. If set then the private key used in that deployment is used to encrypt local secrets.                 | String                                                    | The typical root directory for Greengrass 2 deployment is /greengrass/v2. The process running the core or target must have access to the file effectiveConfig.yaml in subdirectory config. Note that these directories and files have restricted access. |
 
 [^top](#toc)
 
@@ -2232,19 +2909,19 @@ see <a href="#sfc-tuning">SFC TuningC</a> for more details
 | Alias                                                                                                                                                                                                                                                     | Alias for the secret      | String     | Optional. Alternative local name to reference a secret from a placeholder.                                                 |
 | Labels                                                                                                                                                                                                                                                    | Secret labels             | \[String\] | Labels to specify specific values to read for the secret. Default is AWSCURRENT which is the current value of a secret,    |
 
-## 
+##  
 
 ## MetricsConfiguration
 
-| Configuration for metrics configuration. In order to collect and write metrics this section must include a metrics writers |                                                                         |                           |                  |
-|----------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------|---------------------------|------------------|
-| **Name**                                                                                                                   | **Description**                                                         | **Type**                  | **Comments**     |
-| Enabled                                                                                                                    | Set to false to disable metrics collection                              | Boolean                   | Default= true    |
-| CommonDimensions                                                                                                           | Set of extra dimensions added to every datapoint                        | Map(String,String)        | Optional         |
-| CollectCoreMetrics                                                                                                         | Set to false to disable collection from core metrics data               | Boolean                   | Default= true    |
-| Interval                                                                                                                   | Interval in seconds for reading metrics from adapters, targets and core | Integer                   | 10               |
+| Configuration for metrics configuration. In order to collect and write metrics this section must include a metrics writers |                                                                         |                                                          |                  |
+|----------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------|----------------------------------------------------------|------------------|
+| **Name**                                                                                                                   | **Description**                                                         | **Type**                                                 | **Comments**     |
+| Enabled                                                                                                                    | Set to false to disable metrics collection                              | Boolean                                                  | Default= true    |
+| CommonDimensions                                                                                                           | Set of extra dimensions added to every datapoint                        | Map(String,String)                                       | Optional         |
+| CollectCoreMetrics                                                                                                         | Set to false to disable collection from core metrics data               | Boolean                                                  | Default= true    |
+| Interval                                                                                                                   | Interval in seconds for reading metrics from adapters, targets and core | Integer                                                  | 10               |
 | Writer                                                                                                                     | Used writer for metrics data                                            | [MetricWriterConfiguration](#metricswriterconfiguration) |                  |
-| Namespace                                                                                                                  | Namespace for collected metrics                                         | String                    | Default is "SFC" |
+| Namespace                                                                                                                  | Namespace for collected metrics                                         | String                                                   | Default is "SFC" |
 
 ## MetricsWriterConfiguration
 
@@ -2793,7 +3470,7 @@ Absolute value if type is "Absolute"</p>
 </tbody>
 </table>
 
-[^top](#toc) 
+[^top](#toc)
 
 ## ValueFilterConfiguration
 
@@ -2835,7 +3512,7 @@ Absolute value if type is "Absolute"</p>
 <tr class="odd">
 <td>Value</td>
 <td><p>Filter value.</p>
-<p>If the operator is "and" ("&amp;&amp;") or "or" ("||")it is a nested list of ValueFilterConfigurations that all (and) or any (or) must match for the expression to pass. Each filter that is part of an "and" or "or" list can have additional nested "and" ("&amp;&amp;") or "or" ("||") operators.</p></td>
+<p>If the operator is "and" ("&amp;&amp;") or "or" ("||")it is a nested list of ValueFilterConfigurations that all (and) or any (or) must match for the value to pass. Each filter that is part of an "and" or "or" list can have additional nested "and" ("&amp;&amp;") or "or" ("||") operators.</p></td>
 <td>Value to test against using the operator, or a list of nested ValueFilterConfigurations if the operator is "and" ("&amp;&amp;") or "or" ("||").</td>
 <td><p>Example of a more complex filter that passes a value if the is equal to 0, or in the range 5 to 10 except when the value is 8:</p>
 <p>{</p>
@@ -2864,6 +3541,55 @@ Absolute value if type is "Absolute"</p>
 <p>}</p>
 <p>]</p>
 <p>}</p></td>
+</tr>
+</tbody>
+</table>
+
+## ConditionFilterConfiguration
+
+<table>
+<colgroup>
+<col style="width: 18%" />
+<col style="width: 27%" />
+<col style="width: 28%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th colspan="4">Configuration for value filter that let only pass values if they match the condition filter expression. When log level is trace then there will be log entries that show the filter expression how it is interpreted by SFC.
+See <a href="#condition-filters">Condition Filters</a> for more information.</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Name</strong></td>
+<td><strong>Description</strong></td>
+<td><strong>Type</strong></td>
+<td><strong>Comments</strong></td>
+</tr>
+<tr class="even">
+<td>Operator</td>
+<td>Filter operator to apply</td>
+<td><p>String, value must be any of these operators:</p>
+<ul>
+<li><p>"all" or "##"</p></li>
+<li><p>"any" or "**"</p></li>
+<li><p>"none" or "!!"</p></li>
+<li><p>"present" or "#"</p></li>
+<li><p>"absent" or "&!"</p></li>
+<li><p>"only" or "^"</p></li>
+<li><p>"notonly" or "$"</p></li>
+<li><p>"and" or "&amp;&amp;"</p></li>
+<li><p>"or" or "||"</p></li>
+</ul></td>
+<td>Must be specified</td>
+</tr>
+<tr class="odd">
+<td>Value</td>
+<td><p>Filter value.</p>
+<p>If the operator is "and" ("&amp;&amp;") or "or" ("||")it is a nested list of Condition that all (and) or any (or) must match for the value to pass. Each filter that is part of an "and" or "or" list can have additional nested "and" ("&amp;&amp;") or "or" ("||") operators.</p></td>
+<td>String, String[], Boolean or list of Conditions</td>
+<td>Value used by the filter operator, or a list of nested ConditionConfigurations if the operator is "and" ("&amp;&amp;") or "or" ("||"). If the value for an operator is a value name or a list of value names, the name is the key of the value in the channels table for a source. Valid JMESPath expressions van be used as well to specify values names to match against.</td>
 </tr>
 </tbody>
 </table>
@@ -3361,7 +4087,8 @@ Absolute value if type is "Absolute"</p>
 
 # OPCUA Protocol Configuration
 
-This section describes the configuration types for the OPCUA protocol adapter and contains the extensions and specific configuration types
+This section describes the configuration types for the OPCUA protocol adapter and contains the extensions and specific
+configuration types
 
 ## OpcuaSourceConfiguration
 
@@ -3592,9 +4319,9 @@ This section describes the configuration types for the OPCUA protocol adapter an
 
 ## OpcuaServerProfileConfiguration
 
-| Profile that can be applied to configured OPCUA server, for example to additional event and alarm types for that server. |                                                       |                                          |              |
-|--------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------|------------------------------------------|--------------|
-| **Name**                                                                                                                 | **Description**                                       | **Type**                                 | **Comments** |
+| Profile that can be applied to configured OPCUA server, for example to additional event and alarm types for that server. |                                                       |                                                                          |              |
+|--------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------|--------------------------------------------------------------------------|--------------|
+| **Name**                                                                                                                 | **Description**                                       | **Type**                                                                 | **Comments** |
 | EventTypes                                                                                                               | Additional event types that can be used for a server, | Map\[String,[OpcUaEvenTypeConfiguration](#opcuaeventtypeconfiguration)\] |              |
 
 ## OpcuaEventTypeConfiguration
@@ -3783,16 +4510,16 @@ This section describes the configuration types for the OPCUA protocol adapter an
 
 ## CertificateConfiguration
 
-| Client certificate configuration for OPCUA client |                                                                                                                            |                                    |                                                                                                                                                                           |
-|---------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------|------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **Name**                                          | **Description**                                                                                                            | **Type**                           | Comments                                                                                                                                                                  |
-| CertificateFile                                   | Pathname to pem or pkcs12 certificate file                                                                                 | String                             |                                                                                                                                                                           |
-| PrivateKeyFile                                    | Path name to pem private key file (optional for pkcs12, required for pem)                                                  | String                             |                                                                                                                                                                           |
-| Alias                                             | Alias to use for pkcs12 certificate files                                                                                  | String                             | Default is "alias"                                                                                                                                                        |
-| Password                                          | Password for pkcs12 certificate files                                                                                      | String                             |                                                                                                                                                                           |
+| Client certificate configuration for OPCUA client |                                                                                                                            |                                                                           |                                                                                                                                                                           |
+|---------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **Name**                                          | **Description**                                                                                                            | **Type**                                                                  | Comments                                                                                                                                                                  |
+| CertificateFile                                   | Pathname to pem or pkcs12 certificate file                                                                                 | String                                                                    |                                                                                                                                                                           |
+| PrivateKeyFile                                    | Path name to pem private key file (optional for pkcs12, required for pem)                                                  | String                                                                    |                                                                                                                                                                           |
+| Alias                                             | Alias to use for pkcs12 certificate files                                                                                  | String                                                                    | Default is "alias"                                                                                                                                                        |
+| Password                                          | Password for pkcs12 certificate files                                                                                      | String                                                                    |                                                                                                                                                                           |
 | SelfSignedCertificate                             | Self-signed certificate configuration used to generate a self-signed certificate                                           | [SelfSignedCertificateConfiguration](#selfsignedcertificateconfiguration) | If the certificate specified by CertificateFile does not exist a certificate is generated using this configuration. If this section does not exist an error is generated. |
-| Format                                            | Format of the certificate file, can either be Pem or Pkcs12.                                                               | String                             | If not specified the adapter will attempt to determine the type from the filename of the key file.                                                                        |
-| ExpirationWarningPeriod                           | Period in days in which the adapter will generate a daily warning and metrics value before the client certificate expires. | Integer                            | Default is 30, set to 0 to disable.                                                                                                                                       |
+| Format                                            | Format of the certificate file, can either be Pem or Pkcs12.                                                               | String                                                                    | If not specified the adapter will attempt to determine the type from the filename of the key file.                                                                        |
+| ExpirationWarningPeriod                           | Period in days in which the adapter will generate a daily warning and metrics value before the client certificate expires. | Integer                                                                   | Default is 30, set to 0 to disable.                                                                                                                                       |
 
 ## SelfSignedCertificateConfiguration
 
@@ -3866,18 +4593,16 @@ This section describes the configuration types for the OPCUA protocol adapter an
 
 ## CertificateValidationConfiguration
 
-| Configuration for validating certificates |                                                                                                 |                              |                                                                                                |
-|-------------------------------------------|-------------------------------------------------------------------------------------------------|------------------------------|------------------------------------------------------------------------------------------------|
-| **Name**                                  | **Description**                                                                                 | **Type**                     | Comments                                                                                       |
-| Active                                    | Flag to set to enable or disable the validation of server certificates                          | Boolean                      | Default is true                                                                                |
-| Directory                                 | Pathname to base directory under which certificates and certificate revocation lists are stored | String                       | This directory must exist, subdirectories will be created by the adapter if they do not exist. |
+| Configuration for validating certificates |                                                                                                 |                                                               |                                                                                                |
+|-------------------------------------------|-------------------------------------------------------------------------------------------------|---------------------------------------------------------------|------------------------------------------------------------------------------------------------|
+| **Name**                                  | **Description**                                                                                 | **Type**                                                      | Comments                                                                                       |
+| Active                                    | Flag to set to enable or disable the validation of server certificates                          | Boolean                                                       | Default is true                                                                                |
+| Directory                                 | Pathname to base directory under which certificates and certificate revocation lists are stored | String                                                        | This directory must exist, subdirectories will be created by the adapter if they do not exist. |
 | ValidationOptions                         | Configuration of op optional checks                                                             | [CertificateValidationOptions](#certificatevalidationoptions) | When not set then all options are enabled                                                      |
-
 
 [^top](#toc)
 
 ## CertificateValidationOptions
- 
 
 | Optional validation options configuration |                                                                                                |          |                 |
 |-------------------------------------------|------------------------------------------------------------------------------------------------|----------|-----------------|
@@ -3890,12 +4615,13 @@ This section describes the configuration types for the OPCUA protocol adapter an
 | Revocation                                | Revocation checking                                                                            | Boolean  | Default is true |
 | ApplicationUri                            | Check Application description against the ApplicationUri from Subject Alternative Names        | Boolean  | Default is true |
 
-
 [^top](#toc)
 
 # OPCDA Protocol Configuration
 
-This section describes the configuration types for the OPCDA protocol adapter and contains the extensions and specific configuration types. Note that the OPCDA connector is a .NET Core based connector, which required Microsoft DCOM and can only be configures as an external IPC Protocol Server.
+This section describes the configuration types for the OPCDA protocol adapter and contains the extensions and specific
+configuration types. Note that the OPCDA connector is a .NET Core based connector, which required Microsoft DCOM and can
+only be configures as an external IPC Protocol Server.
 
 ## OpcdaSourceConfiguration
 
@@ -3950,7 +4676,6 @@ This section describes the configuration types for the OPCDA protocol adapter an
 </table>
 
 ## OpcdaChannelConfiguration
-
 
 <table>
 <colgroup>
@@ -4030,7 +4755,8 @@ This section describes the configuration types for the OPCDA protocol adapter an
 
 # S7 Protocol Configuration
 
-This section describes the configuration types for the S7 protocol adapter and contains the extensions and specific configuration types
+This section describes the configuration types for the S7 protocol adapter and contains the extensions and specific
+configuration types
 
 ## S7SourceConfiguration
 
@@ -4117,7 +4843,7 @@ This section describes the configuration types for the S7 protocol adapter and c
 
 ## S7AdapterConfiguration
 
-## 
+##  
 
 <table>
 <colgroup>
@@ -4262,7 +4988,8 @@ This section describes the configuration types for the S7 protocol adapter and c
 
 # MQTT Protocol Configuration
 
-This section describes the configuration types for the MQTT protocol adapter and contains the extensions and specific configuration types
+This section describes the configuration types for the MQTT protocol adapter and contains the extensions and specific
+configuration types
 
 ## MqttSourceConfiguration
 
@@ -4471,6 +5198,7 @@ This section describes the configuration types for the MQTT protocol adapter and
 </table>
 
 ## MqttBrokerConfiguration
+
 <table>  
 <colgroup>  
 <col style="width: 17%" />  
@@ -4502,10 +5230,11 @@ If no scheme is specified in the address, then it will be added based on the Con
 <td>
 
 Commonly port numbers are
--  1883 for PlaintText
--  8883 for ServerSideTLS
--  8884 for MutualTLS.
--  443 for AWS IoT Core endpoints
+
+- 1883 for PlaintText
+- 8883 for ServerSideTLS
+- 8884 for MutualTLS.
+- 443 for AWS IoT Core endpoints
 
 In no port number is specified then the EndPoint address is searched for a training port number.
 
@@ -4517,9 +5246,10 @@ In no port number is specified then the EndPoint address is searched for a train
 <td>String</td>  
 <td>
 
--  "PlainText" (Default)
--  "ServerSideTLS"
--  "MutualTLS"
+- "PlainText" (Default)
+- "ServerSideTLS"
+- "MutualTLS"
+
 </td>  
 </tr>  
 <tr class="even">  
@@ -4577,7 +5307,8 @@ In no port number is specified then the EndPoint address is searched for a train
 
 # SQL Adapter Configuration
 
-This section describes the configuration types for the SQL adapter and contains the extensions and specific configuration types
+This section describes the configuration types for the SQL adapter and contains the extensions and specific
+configuration types
 
 ## SqlSourceConfiguration
 
@@ -4796,7 +5527,8 @@ This section describes the configuration types for the SQL adapter and contains 
 
 # Modbus TCP Protocol Configuration
 
-This section describes the configuration types for the Modbus TCP protocol adapter and contains the extensions and specific configuration types
+This section describes the configuration types for the Modbus TCP protocol adapter and contains the extensions and
+specific configuration types
 
 ## ModbusSourceConfiguration
 
@@ -4866,7 +5598,7 @@ This section describes the configuration types for the Modbus TCP protocol adapt
 
 ## ModbusChannelConfiguration
 
-## 
+##  
 
 <table>
 <colgroup>
@@ -4944,7 +5676,7 @@ This section describes the configuration types for the Modbus TCP protocol adapt
 
 ## ModbusTcpDeviceConfiguration
 
-## 
+##  
 
 | Configuration data for connecting to and reading from a Modbus TCP device. |                                                                |          |                                             |
 |----------------------------------------------------------------------------|----------------------------------------------------------------|----------|---------------------------------------------|
@@ -4960,7 +5692,9 @@ This section describes the configuration types for the Modbus TCP protocol adapt
 
 # SNMP Protocol Configuration
 
-This section describes the configuration types for the SNMP protocol adapter and contains the extensions and specific configuration types. The SNMP protocol adapter can be configured as an in-process, as well as an ipc server running as a service.
+This section describes the configuration types for the SNMP protocol adapter and contains the extensions and specific
+configuration types. The SNMP protocol adapter can be configured as an in-process, as well as an ipc server running as a
+service.
 
 ## SnmpSourceConfiguration
 
@@ -5007,7 +5741,7 @@ This section describes the configuration types for the SNMP protocol adapter and
 
 ## SnmpChannelConfiguration
 
-## 
+##  
 
 <table>
 <colgroup>
@@ -5038,11 +5772,11 @@ This section describes the configuration types for the SNMP protocol adapter and
 </tbody>
 </table>
 
-## 
+##  
 
 ## SnmpAdapterConfiguration
 
-## 
+##  
 
 <table>
 <colgroup>
@@ -5087,12 +5821,12 @@ This section describes the configuration types for the SNMP protocol adapter and
 | SnmpVersion                                                          | Used SNMP version                                           | Integer  | Supported versions are 1 and 2, default is 2 |
 | Community                                                            | SNMP community string for SNMP V1 and V2                    | String   | Default is "public"                          |
 
-
 [^top](#toc)
 
 # PCCC Protocol Configuration
 
-This section describes the configuration types for the PCCC protocol adapter and contains the extensions and specific configuration types
+This section describes the configuration types for the PCCC protocol adapter and contains the extensions and specific
+configuration types
 
 ## PcccSourceConfiguration
 
@@ -5179,7 +5913,8 @@ Default file number 0
 
 Syntax: 0\<filenumber\>:\<element index\>\[/bit offset\]\[,arraylen\]
 
-**O0:0** First 16 output bits as Boolean values in logical order, the bit at offset 0 becomes the first item in the array.
+**O0:0** First 16 output bits as Boolean values in logical order, the bit at offset 0 becomes the first item in the
+array.
 
 <img src="./img/pccc/image1.png" style="width:4.42951in;height:0.58019in" />
 
@@ -5205,7 +5940,8 @@ Default file number 1
 
 Syntax: 0\<file number\>:\<element index\>\[/bit offset\]\[,array len\]
 
-**I1:0** First 16 input bits as Boolean values in logical order, the bit at offset 0 becomes the first item in the array.
+**I1:0** First 16 input bits as Boolean values in logical order, the bit at offset 0 becomes the first item in the
+array.
 
 <img src="./img/pccc/image6.png" style="width:4.20977in;height:0.55456in" />
 
@@ -5231,7 +5967,8 @@ Default file number 3
 
 Syntax: B\<file number\>:\<element index\>\[/bit offset\]
 
-**B3:0** First 16 binary bits as Boolean values in logical order, the bit shown below at offset 0 becomes the first item in the array.
+**B3:0** First 16 binary bits as Boolean values in logical order, the bit shown below at offset 0 becomes the first item
+in the array.
 
 <img src="./img/pccc/image11.png" style="width:4.16323in;height:0.55777in" />
 
@@ -5554,7 +6291,8 @@ Syntax: A\<file number\>:\<element index\>\[/character offset\]
 
 # ADS Protocol Configuration
 
-This section describes the configuration types for the ADS protocol adapter and contains the extensions and specific configuration types
+This section describes the configuration types for the ADS protocol adapter and contains the extensions and specific
+configuration types
 
 ## AdsSourceConfiguration
 
@@ -5614,6 +6352,7 @@ This section describes the configuration types for the ADS protocol adapter and 
 - Runtime system 4: 854 (in TwinCAT 2: 831)
 - Runtime system 5: 855
 - Runtime system n: 850 + n, etc.</td>
+
 </tr>
 
 <tr class="even">
@@ -5904,6 +6643,7 @@ Whenever the number of messages, total message size or an interval is reached th
 - "None"
 - "Zip"
 - "GZip"
+
 </td>  
 <td>Default is "None"</td>
 </tr> 
@@ -5971,7 +6711,8 @@ aws kafka get-bootstrap-brokers --cluster-arn `ClusterArn` and use the addresses
 - "json" (default)
 - "protobuf", see [protobuf schema](../core/sfc-ipc/src/main/proto/TargetAdapterService.proto)
 
-If a [Template](##TargetConfiguration) is specified to transform the data for this target then this setting is not used and the transformation output is written as a string to the topic.</td>
+If a [Template](##TargetConfiguration) is specified to transform the data for this target then this setting is not used
+and the transformation output is written as a string to the topic.</td>
 </tr>
 <tr class="odd">
 <td>Acknowledgements</td>
@@ -5982,6 +6723,7 @@ If a [Template](##TargetConfiguration) is specified to transform the data for th
 - "all" = 0
 - "leader" = 1 (default)
 - "all" = -1
+
 </td>
 </tr>
 <tr class="even">
@@ -5990,7 +6732,8 @@ If a [Template](##TargetConfiguration) is specified to transform the data for th
 <td>Map[String,String]</td>
 <td>Default is an empty map
 
-A description af producer options can be found in the <a href="https://kafka.apache.org/documentation/#producerconfigs">Kafka documentation</a>
+A description af producer options can be found in the <a href="https://kafka.apache.org/documentation/#producerconfigs">
+Kafka documentation</a>
 
 The following properties are set by the adapter
 
@@ -6005,6 +6748,7 @@ The following properties are set by the adapter
 - sasl.jaas.config =  "software.amazon.msk.auth.iam.IAMLoginModule required;"
 - sasl.mechanism = "AWS_MSK_IAM"
 - batch.size from `BatchSize`
+
 </td>
 </tr>
 <tr class="odd">
@@ -6347,15 +7091,13 @@ The following properties are set by the adapter
 
 ## AwsSiteWiseAssetConfiguration
 
-| SiteWise asset to write to |                                  |                                               |          |
-|----------------------------|----------------------------------|-----------------------------------------------|----------|
-| **Name**                   | **Description**                  | **Type**                                      | Comments |
-| AssetId                    | Asset to write to                | String                                        |          |
+| SiteWise asset to write to |                                  |                                                                                         |          |
+|----------------------------|----------------------------------|-----------------------------------------------------------------------------------------|----------|
+| **Name**                   | **Description**                  | **Type**                                                                                | Comments |
+| AssetId                    | Asset to write to                | String                                                                                  |          |
 | Properties                 | Properties to write to the asset | List of [AwsSiteWiseAssetPropertyConfiguration](#awssitewiseassetpropertyconfiguration) |          |
 
-
 ## AwsSiteWiseAssetPropertyConfiguration
-
 
 <table>
 <colgroup>
@@ -6715,7 +7457,6 @@ The following properties are set by the adapter
 
 [^top](#toc)
 
-
 # MQTT Target
 
 ## MqttTargetConfiguration
@@ -6766,10 +7507,11 @@ aws iot describe-endpoint --endpoint-type iot:Data-ATS</p>
 <td>
 
 Commonly port numbers are
--  1883 for PlainText
--  8883 for ServerSideTLS
--  8884 for MutualTLS.
--  443 for AWS IoT Core endpoints
+
+- 1883 for PlainText
+- 8883 for ServerSideTLS
+- 8884 for MutualTLS.
+- 443 for AWS IoT Core endpoints
 
 In no port number is specified then the EndPoint address is searched for a training port number.
 
@@ -6781,9 +7523,10 @@ In no port number is specified then the EndPoint address is searched for a train
 <td>String</td>  
 <td>
 
--  "PlainText" (Default)
--  "ServerSideTLS"
--  "MutualTLS"
+- "PlainText" (Default)
+- "ServerSideTLS"
+- "MutualTLS"
+
 </td>  
 </tr>  
 <tr class="even">  
@@ -6899,6 +7642,7 @@ of messages will be sent to the topic when this size is reached.</td>
 - "None"
 - "Zip"
 - "GZip"
+
 </td>  
 <td>Default is "None"</td>
 </tr> 
@@ -6907,7 +7651,6 @@ of messages will be sent to the topic when this size is reached.</td>
 </tbody></table>
 
 [^top](#toc)
-
 
 # File Target
 
@@ -7068,7 +7811,7 @@ of messages will be sent to the topic when this size is reached.</td>
 
 [^top](#toc)
 
-#  Router Target
+# Router Target
 
 ## RouterTargetConfiguration
 
@@ -7132,8 +7875,8 @@ of messages will be sent to the topic when this size is reached.</td>
 | Interval                                                                                                                                                                                 | Interval in seconds in which metrics are written to the service (or earlier if buffer size is reached)             | Integer  |                                                           | Default is 60                        |
 | BatchSize                                                                                                                                                                                | Number of data points to buffer to write as a batch to CloudWatch service                                          | Int      |                                                           | Default and max value is 1000        |
 | CredentialProviderClient                                                                                                                                                                 | Name of configured credentials client that will be used to read secrets stored in the AWS Secrets Manager service. |          | If not set the AWS SDK credential provider chain is used. |                                      |
-| CloudWatchMetricsChannelSize|Size of internal buffer to send metrics  data to CloudWatch| Int| Default is 1000|
-|CloudWatchMetricsChannelTimeout|Time in milliseconds to send data to internal buffer|Int|Default = 10000|
+| CloudWatchMetricsChannelSize                                                                                                                                                             | Size of internal buffer to send metrics  data to CloudWatch                                                        | Int      | Default is 1000                                           |
+| CloudWatchMetricsChannelTimeout                                                                                                                                                          | Time in milliseconds to send data to internal buffer                                                               | Int      | Default = 10000                                           |
 
 [^top](#toc)
 
@@ -7141,7 +7884,9 @@ of messages will be sent to the topic when this size is reached.</td>
 
 # Running the SFC core process
 
-The main class for running the SFC core process is `com.amazonaws.sfc.MainController`. The build process creates a sfc-main application in the sfc-main/build/distributions directory. The sfc-main.tar.gz file contains script files (**bin/sfc-main** and **bin/sfc-main.bat**) to launch the applications, and all required libraries (/lib/*.jar)
+The main class for running the SFC core process is `com.amazonaws.sfc.MainController`. The build process creates a
+sfc-main application in the sfc-main/build/distributions directory. The sfc-main.tar.gz file contains script files (*
+*bin/sfc-main** and **bin/sfc-main.bat**) to launch the applications, and all required libraries (/lib/*.jar)
 
 The main class for running the SFC core is `com.amazonaws.sfc.MainController`
 
@@ -7157,12 +7902,14 @@ The `sfc-main` application has the following command-line arguments:
 | -trace                  | Set log output level to most detailed trace level (Info, warning, error, and detailed trace messages)                                        |
 | -warning                | Set log output level to warning level. (Error and warning messages)                                                                          |
 
-
 [^top](#toc)
 
 # Running the JVM protocol adapters as an IPC Service
 
-The adapters have a service wrapper that enables these adapters can be executed as an IPC Service process. For each adapter, a tar file is generated by the build process that includes the application script file to start the service, as well as all required library files. The application tar file contains script files (`bin/<adapter type>` *and* `bin/<adaptertype>.bat`) to launch the applications, and all required libraries (`/lib/*.jar`).
+The adapters have a service wrapper that enables these adapters can be executed as an IPC Service process. For each
+adapter, a tar file is generated by the build process that includes the application script file to start the service, as
+well as all required library files. The application tar file contains script files (`bin/<adapter type>`
+*and* `bin/<adaptertype>.bat`) to launch the applications, and all required libraries (`/lib/*.jar`).
 
 | **Protocol** | **Application name** | **Main class**                                         |
 |--------------|----------------------|--------------------------------------------------------|
@@ -7259,15 +8006,21 @@ The port number, used by the service, can be specified using different methods w
 
 - The value of the `-port` command line parameter
 - The value of the environment variable specified by the `-envport` parameter
-- From the `configuration file`, specified by the `-config` parameter, the port number for the server referred to in the ProtocolSource/Server element will be used
+- From the `configuration file`, specified by the `-config` parameter, the port number for the server referred to in the
+  ProtocolSource/Server element will be used
 
-To protect the ICP traffic between the core and the adapter SSL can be used. For this, both the -cert and the -key parameter must be used to specify the pathname to the certificate and the key file. If the -conf parameter is used then the values of the Cert and Key elements of the server referred to in the ProtocolSource/Server element will be used.
+To protect the ICP traffic between the core and the adapter SSL can be used. For this, both the -cert and the -key
+parameter must be used to specify the pathname to the certificate and the key file. If the -conf parameter is used then
+the values of the Cert and Key elements of the server referred to in the ProtocolSource/Server element will be used.
 
 [^top](#toc)
 
 # Running targets as an IPC Service
 
-The adapters have a service wrapper that enables these targets can be executed as an IPC Service process. For each target, a tar file is generated by the build process that includes the application script file to start the service, as well as all required library files. The application tar file contains script files (`bin/<targettype>` *and* `bin/<targettype>.bat`) to launch the applications, and all required libraries (/lib/*.jar)
+The adapters have a service wrapper that enables these targets can be executed as an IPC Service process. For each
+target, a tar file is generated by the build process that includes the application script file to start the service, as
+well as all required library files. The application tar file contains script files (`bin/<targettype>`
+*and* `bin/<targettype>.bat`) to launch the applications, and all required libraries (/lib/*.jar)
 
 | **Target**    | **Application name**        | **Main class**                                                |
 |---------------|-----------------------------|---------------------------------------------------------------|
@@ -7367,37 +8120,56 @@ The applications do have all the following command line parameters in common.
 
 The port number, used by the service, can be specified using different methods which are applied in the following order
 
--   The value of the` -port` command line parameter
--   The value of the environment variable specified by the `-envport` parameter
--   From the configuration file, specified by the `-config` parameter, the port number for the server referred to in the target element will be used. As a configuration can contain multiple targets the following methods are used to determine the target.
-    -   The value of the -target command line parameter
-    -   If the configuration file contains a single target then that target is used
+- The value of the` -port` command line parameter
+- The value of the environment variable specified by the `-envport` parameter
+- From the configuration file, specified by the `-config` parameter, the port number for the server referred to in the
+  target element will be used. As a configuration can contain multiple targets the following methods are used to
+  determine the target.
+    - The value of the -target command line parameter
+    - If the configuration file contains a single target then that target is used
 
-To protect the ICP traffic between the core and the adapter SSL can be used. For this, both the -cert and the -key parameter must be used to specify the pathname to the certificate and the key file. If the -conf parameter is used then the values of the Cert and Key elements of the server referred to in the ProtocolSource/Server element will be used.
+To protect the ICP traffic between the core and the adapter SSL can be used. For this, both the -cert and the -key
+parameter must be used to specify the pathname to the certificate and the key file. If the -conf parameter is used then
+the values of the Cert and Key elements of the server referred to in the ProtocolSource/Server element will be used.
 
 **Example running the adapter and target services as Docker containers:**
 
--   Each project directory for the adapters and targets contains an example Docker file to build a container for the service.
--   The root of the SFC project contains an example docker-compose.yml file for running an adapter, the SFC core, and multiple target processes. The project root also contains an **.env variable file** that defines the variables used in the docker-compose.yml file. The directory config-docker contains the configuration for the SFC deployment, it is mounted as a volume to give the container running the SFC core access to the config.json file in that directory.
--   Note that the SFC configuration file config.json in the config-docker directory uses ${name} placeholders, which are replaced by the environment variables set from the docker file for the container running the sfc-main core process.
+- Each project directory for the adapters and targets contains an example Docker file to build a container for the
+  service.
+- The root of the SFC project contains an example docker-compose.yml file for running an adapter, the SFC core, and
+  multiple target processes. The project root also contains an **.env variable file** that defines the variables used in
+  the docker-compose.yml file. The directory config-docker contains the configuration for the SFC deployment, it is
+  mounted as a volume to give the container running the SFC core access to the config.json file in that directory.
+- Note that the SFC configuration file config.json in the config-docker directory uses ${name} placeholders, which are
+  replaced by the environment variables set from the docker file for the container running the sfc-main core process.
 
 [^top](#toc)
 
 # Running protocol adapters in-process
 
-To run protocol adapters in the same process as the SFC core, they need to be implemented for the same JDK as used for the core. To make it possible to add new adapters without making changes to the SFC code, there are no links in the core to the libraries that implement the adapters. In the configuration of an in-process adapter type, the pathnames of the jar files that contain the classes that implement the adapter need to be explicitly configured. When the SFC core creates an instance of the adapter, it loads the configured jar files and uses a static factory method to create the actual instance. The name of the factory class, which could be the actual adapter class itself, needs to be configured as well. The name of the factory method is "newInstance" and has 3 parameters:
+To run protocol adapters in the same process as the SFC core, they need to be implemented for the same JDK as used for
+the core. To make it possible to add new adapters without making changes to the SFC code, there are no links in the core
+to the libraries that implement the adapters. In the configuration of an in-process adapter type, the pathnames of the
+jar files that contain the classes that implement the adapter need to be explicitly configured. When the SFC core
+creates an instance of the adapter, it loads the configured jar files and uses a static factory method to create the
+actual instance. The name of the factory class, which could be the actual adapter class itself, needs to be configured
+as well. The name of the factory method is "newInstance" and has 3 parameters:
 
 - **configReader**: ConfigReader, the reader used by the adapter to read its configuration
 - **scheduleName**: String, the schedule name that is using the adapter
 - **logger**: Logger, the logger for output of the newly created adapter instance
 
-The jar files are part of the adapter deployment and can be found in the lib directory of the deployment package. To specify the path to the jar files it is recommended to use a placeholder, instead of hard-coding, the directory where the adapter, and targets, are deployed and set an environment variable for this directory.
+The jar files are part of the adapter deployment and can be found in the lib directory of the deployment package. To
+specify the path to the jar files it is recommended to use a placeholder, instead of hard-coding, the directory where
+the adapter, and targets, are deployed and set an environment variable for this directory.
 
 ```sh
 ${<environment variable name>}/adapter name/lib/<jar file>
 ```
 
-e.g., if the adapter is deployment tar file for an adapter, mqtt in this example, is deployed in `/sfc/mqtt` the environment variable is set to "/sfc". In the configuration for the jar pathnames, this variable can be used as a placeholder in the pathname of the jar file.
+e.g., if the adapter is deployment tar file for an adapter, mqtt in this example, is deployed in `/sfc/mqtt` the
+environment variable is set to "/sfc". In the configuration for the jar pathnames, this variable can be used as a
+placeholder in the pathname of the jar file.
 
 ```sh
 SFC_DEPLOYMENT_DIR=/sfc
@@ -7405,7 +8177,9 @@ SFC_DEPLOYMENT_DIR=/sfc
 
 In the configuration, the values for the jar files are "${SFC_DEPLOYMENT_DIR}/mqtt/lib".
 
-Example AdapterTypes section, including all in-process protocol configuration with environment variable placeholders. Each adapter is in a subdirectory with the name of the adapter in the deployment directory. It is not required to include all adapter type, the ones that are not needed can be removed from this section.
+Example AdapterTypes section, including all in-process protocol configuration with environment variable placeholders.
+Each adapter is in a subdirectory with the name of the adapter in the deployment directory. It is not required to
+include all adapter type, the ones that are not needed can be removed from this section.
 
 Used environment variable
 
@@ -7413,34 +8187,34 @@ SFC_DEPLOYMENT_DIR: Directory in which deployment packed is deployed, with the s
 
 ```json
 "AdapterTypes": {
-    "MQTT": {
-      "JarFiles": ["${SFC_DEPLOYMENT_DIR}/mqtt/lib"],
-      "FactoryClassName": "com.amazonaws.sfc.mqtt.MqttAdapter"
-    },
-    "MODBUS-TCP" : {
-      "JarFiles": ["${SFC_DEPLOYMENT_DIR}/modbus-tcp/lib/"],
-      "FactoryClassName": "com.amazonaws.sfc.modbus.tcp.ModbusTcpAdapter"
-    },
-    "OPCUA": {
-      "JarFiles": ["${SFC_DEPLOYMENT_DIR}/opcua/lib"],
-      "FactoryClassName": "com.amazonaws.sfc.opcua.OpcuaAdapter"
-    },
-    "SNMP": {
-      "JarFiles": ["${SFC_DEPLOYMENT_DIR}/snmp/lib"],
-      "FactoryClassName": "com.amazonaws.sfc.snmp.SnmpAdapter"
-    },
-    "SQL": {
-      "JarFiles": ["${SFC_DEPLOYMENT_DIR}/sql/lib"],
-      "FactoryClassName": "com.amazonaws.sfc.sql.SqlAdapter"
-    },
-    "S7": {
-      "JarFiles": ["${SFC_DEPLOYMENT_DIR}/s7/lib"],
-      "FactoryClassName": "com.amazonaws.sfc.s7.S7Adapter"
-    },
-    "PCCC": {
-      "JarFiles": ["${SFC_DEPLOYMENT_DIR}/pccc/lib"],
-      "FactoryClassName": "com.amazonaws.sfc.pccc.PcccAdapter"
-    }
+"MQTT": {
+"JarFiles": ["${SFC_DEPLOYMENT_DIR}/mqtt/lib"],
+"FactoryClassName": "com.amazonaws.sfc.mqtt.MqttAdapter"
+},
+"MODBUS-TCP": {
+"JarFiles": ["${SFC_DEPLOYMENT_DIR}/modbus-tcp/lib/"],
+"FactoryClassName": "com.amazonaws.sfc.modbus.tcp.ModbusTcpAdapter"
+},
+"OPCUA": {
+"JarFiles": ["${SFC_DEPLOYMENT_DIR}/opcua/lib"],
+"FactoryClassName": "com.amazonaws.sfc.opcua.OpcuaAdapter"
+},
+"SNMP": {
+"JarFiles": ["${SFC_DEPLOYMENT_DIR}/snmp/lib"],
+"FactoryClassName": "com.amazonaws.sfc.snmp.SnmpAdapter"
+},
+"SQL": {
+"JarFiles": ["${SFC_DEPLOYMENT_DIR}/sql/lib"],
+"FactoryClassName": "com.amazonaws.sfc.sql.SqlAdapter"
+},
+"S7": {
+"JarFiles": ["${SFC_DEPLOYMENT_DIR}/s7/lib"],
+"FactoryClassName": "com.amazonaws.sfc.s7.S7Adapter"
+},
+"PCCC": {
+"JarFiles": ["${SFC_DEPLOYMENT_DIR}/pccc/lib"],
+"FactoryClassName": "com.amazonaws.sfc.pccc.PcccAdapter"
+}
 }
 ```
 
@@ -7448,129 +8222,139 @@ SFC_DEPLOYMENT_DIR: Directory in which deployment packed is deployed, with the s
 
 # Running targets in-process
 
-To run targets in the same process as the SFC core, they need to be implemented for the same JDK as used for the core. To make it possible to add a new target without making changes to the SFC code, there are no links in the core to the libraries that implement the target. In the configuration of an in-process target type, the pathnames of the jar files that contain the classes that implement the target need to be explicitly configured. When the SFC core creates an instance of the target, it loads the configured jar files and uses a static factory method to create the actual instance. The name of the factory class, which could be the actual target class itself, needs to be configured as well.
+To run targets in the same process as the SFC core, they need to be implemented for the same JDK as used for the core.
+To make it possible to add a new target without making changes to the SFC code, there are no links in the core to the
+libraries that implement the target. In the configuration of an in-process target type, the pathnames of the jar files
+that contain the classes that implement the target need to be explicitly configured. When the SFC core creates an
+instance of the target, it loads the configured jar files and uses a static factory method to create the actual
+instance. The name of the factory class, which could be the actual target class itself, needs to be configured as well.
 
 The signature if the function is:
 
 ```kotlin
-fun newInstance(vararg createParameters : Any?) : TargetWriter?
+fun newInstance(vararg createParameters: Any?): TargetWriter?
 ```
 
 The core passes values to the function through the createParameters parameter.
 
--   **configReader**: ConfigReader, the reader used by the target to read its configuration
--   **targetID**: String, the target identifier
--   **logger**: Logger, the logger for output of the newly created target instance
--   **resultHandler**: TargetResultHandler?, a handler passed to the writer to pass the result of delivering the data by the data back to a previous target in a target chain.
+- **configReader**: ConfigReader, the reader used by the target to read its configuration
+- **targetID**: String, the target identifier
+- **logger**: Logger, the logger for output of the newly created target instance
+- **resultHandler**: TargetResultHandler?, a handler passed to the writer to pass the result of delivering the data by
+  the data back to a previous target in a target chain.
 
-The jar files are part of the target deployment and can be found in the lib directory of the deployment package. To specify the path to the jar files it is recommended to use a placeholder, instead of hard-coding, the directory where the adapter, and targets, are deployed and set an environment variable for this directory.
+The jar files are part of the target deployment and can be found in the lib directory of the deployment package. To
+specify the path to the jar files it is recommended to use a placeholder, instead of hard-coding, the directory where
+the adapter, and targets, are deployed and set an environment variable for this directory.
 
 **Example configurations for in-process targets configuration with environment variable placeholders:**
 
-- Used environment variable is `SFC_DEPLOYMENT_DIR`: Directory in which deployment packed is deployed, with a subdirectory for each target.
+- Used environment variable is `SFC_DEPLOYMENT_DIR`: Directory in which deployment packed is deployed, with a
+  subdirectory for each target.
 
-*<u>Note that only target types which are used, and run in-process with the SFC core need to be included in the configuration file.</u>*
+*<u>Note that only target types which are used, and run in-process with the SFC core need to be included in the
+configuration file.</u>*
 
 ```json
 
-  "TargetTypes": {
-    "DEBUG-TARGET": {
-      "JarFiles": [
-        "${SFC_DEPLOYMENT_DIR}/debug-target/lib"
-      ],
-      "FactoryClassName": "com.amazonaws.sfc.debugtarget.DebugTargetWriter"
-    },
-    "AWS-FIREHOSE": {
-      "JarFiles": [
-        "${SFC_DEPLOYMENT_DIR}/aws-kinesis-firehose-target/lib"
-      ],
-      "FactoryClassName": "com.amazonaws.sfc.awsfirehose.AwsFirehoseTargetWriter"
-    },
-    "AWS-IOT-CORE": {
-      "JarFiles": [
-        "${SFC_DEPLOYMENT_DIR}/aws-iot-core-target/lib"
-      ],
-      "FactoryClassName": "com.amazonaws.sfc.awsiocore.AwsIotCoreTargetWriter"
-    },
-    "MQTT-TARGET": {
-      "JarFiles": [
-        "${SFC_DEPLOYMENT_DIR}/mqtt-target/lib/"
-      ],
-      "FactoryClassName": "com.amazonaws.sfc.awsiot.mqtt.MqttTargetWriter"
-    },
-   "AWS-MSK": {
-      "JarFiles": [
-        "${SFC_DEPLOYMENT_DIR}/aws-msk-target/lib/"
-      ],
-      "FactoryClassName": "com.amazonaws.sfc.awsiot.msk.AwsMskTargetWriter"
-  },
-    "AWS-KINESIS": {
-      "JarFiles": [
-        "${SFC_DEPLOYMENT_DIR}/aws-kinesis-target/lib"
-      ],
-      "FactoryClassName": "com.amazonaws.sfc.awskinesis.AwsKinesisTargetWriter"
-    },
-    "AWS-LAMBDA": {
-      "JarFiles": [
-        "${SFC_DEPLOYMENT_DIR}/aws-lambda-target/lib"
-      ],
-      "FactoryClassName": "com.amazonaws.sfc.awslambda.AwsLambdaTargetWriter"
-    },
-    "AWS-SQS": {
-      "JarFiles": [
-        "${SFC_DEPLOYMENT_DIR}/aws-sqs-target/lib"
-      ],
-      "FactoryClassName": "com.amazonaws.sfc.awssqs.AwsSqsTargetWriter"
-    },
-    "AWS-IOT-ANALYTICS": {
-      "JarFiles": [
-        "${SFC_DEPLOYMENT_DIR}/debug-target/lib"
-      ],
-      "FactoryClassName": "com.amazonaws.sfc.awsiota.AwsIotAnalyticsTargetWriter"
-    },
-    "AWS-S3": {
-      "JarFiles": [
-        "${SFC_DEPLOYMENT_DIR}/aws-s3-target/lib"
-      ],
-      "FactoryClassName": "com.amazonaws.sfc.awsfirehose.AwsS3TargetWriter"
-    },
-    "AWS-SITEWISE": {
-      "JarFiles": [
-        "${SFC_DEPLOYMENT_DIR}/aws-sitewise-target/lib"
-      ],
-      "FactoryClassName": "com.amazonaws.sfc.awssitewise.AwsSiteWiseTargetWriter"
-    },
-    "AWS-SNS": {
-      "JarFiles": [
-        "${SFC_DEPLOYMENT_DIR}/aws-sns-target/lib/"
-      ],
-      "FactoryClassName": "com.amazonaws.sfc.awssns.AwsSnsTargetWriter"
-    },
-    "AWS-TIMESTREAM": {
-      "JarFiles": [
-        "${SFC_DEPLOYMENT_DIR}/aws-timestream-target/lib"
-      ],
-      "FactoryClassName": "com.amazonaws.sfc.awstimestream.AwsTimestreamTargetWriter"
-    },
-    "FILE-TARGET": {
-      "JarFiles": [
-        "${SFC_DEPLOYMENT_DIR}/aws-file-target/lib"
-      ],
-      "FactoryClassName": "com.amazonaws.sfc.filetarget.FileTargetWriter"
-    },
-    "ROUTER": {
-      "JarFiles": [
-        "${SFC_DEPLOYMENT_DIR}/router-target/lib"
-      ],
-      "FactoryClassName": "com.amazonaws.sfc.router.RouterTargetWriter"
-    },
-    "STORE-FORWARD": {
-      "JarFiles": [
-        "${SFC_DEPLOYMENT_DIR}/store-forward-target/lib"
-      ],
-      "FactoryClassName": "com.amazonaws.sfc.storeforward.StoreForwardTargetWriter"
-    }
-  }
+"TargetTypes": {
+"DEBUG-TARGET": {
+"JarFiles": [
+"${SFC_DEPLOYMENT_DIR}/debug-target/lib"
+],
+"FactoryClassName": "com.amazonaws.sfc.debugtarget.DebugTargetWriter"
+},
+"AWS-FIREHOSE": {
+"JarFiles": [
+"${SFC_DEPLOYMENT_DIR}/aws-kinesis-firehose-target/lib"
+],
+"FactoryClassName": "com.amazonaws.sfc.awsfirehose.AwsFirehoseTargetWriter"
+},
+"AWS-IOT-CORE": {
+"JarFiles": [
+"${SFC_DEPLOYMENT_DIR}/aws-iot-core-target/lib"
+],
+"FactoryClassName": "com.amazonaws.sfc.awsiocore.AwsIotCoreTargetWriter"
+},
+"MQTT-TARGET": {
+"JarFiles": [
+"${SFC_DEPLOYMENT_DIR}/mqtt-target/lib/"
+],
+"FactoryClassName": "com.amazonaws.sfc.awsiot.mqtt.MqttTargetWriter"
+},
+"AWS-MSK": {
+"JarFiles": [
+"${SFC_DEPLOYMENT_DIR}/aws-msk-target/lib/"
+],
+"FactoryClassName": "com.amazonaws.sfc.awsiot.msk.AwsMskTargetWriter"
+},
+"AWS-KINESIS": {
+"JarFiles": [
+"${SFC_DEPLOYMENT_DIR}/aws-kinesis-target/lib"
+],
+"FactoryClassName": "com.amazonaws.sfc.awskinesis.AwsKinesisTargetWriter"
+},
+"AWS-LAMBDA": {
+"JarFiles": [
+"${SFC_DEPLOYMENT_DIR}/aws-lambda-target/lib"
+],
+"FactoryClassName": "com.amazonaws.sfc.awslambda.AwsLambdaTargetWriter"
+},
+"AWS-SQS": {
+"JarFiles": [
+"${SFC_DEPLOYMENT_DIR}/aws-sqs-target/lib"
+],
+"FactoryClassName": "com.amazonaws.sfc.awssqs.AwsSqsTargetWriter"
+},
+"AWS-IOT-ANALYTICS": {
+"JarFiles": [
+"${SFC_DEPLOYMENT_DIR}/debug-target/lib"
+],
+"FactoryClassName": "com.amazonaws.sfc.awsiota.AwsIotAnalyticsTargetWriter"
+},
+"AWS-S3": {
+"JarFiles": [
+"${SFC_DEPLOYMENT_DIR}/aws-s3-target/lib"
+],
+"FactoryClassName": "com.amazonaws.sfc.awsfirehose.AwsS3TargetWriter"
+},
+"AWS-SITEWISE": {
+"JarFiles": [
+"${SFC_DEPLOYMENT_DIR}/aws-sitewise-target/lib"
+],
+"FactoryClassName": "com.amazonaws.sfc.awssitewise.AwsSiteWiseTargetWriter"
+},
+"AWS-SNS": {
+"JarFiles": [
+"${SFC_DEPLOYMENT_DIR}/aws-sns-target/lib/"
+],
+"FactoryClassName": "com.amazonaws.sfc.awssns.AwsSnsTargetWriter"
+},
+"AWS-TIMESTREAM": {
+"JarFiles": [
+"${SFC_DEPLOYMENT_DIR}/aws-timestream-target/lib"
+],
+"FactoryClassName": "com.amazonaws.sfc.awstimestream.AwsTimestreamTargetWriter"
+},
+"FILE-TARGET": {
+"JarFiles": [
+"${SFC_DEPLOYMENT_DIR}/aws-file-target/lib"
+],
+"FactoryClassName": "com.amazonaws.sfc.filetarget.FileTargetWriter"
+},
+"ROUTER": {
+"JarFiles": [
+"${SFC_DEPLOYMENT_DIR}/router-target/lib"
+],
+"FactoryClassName": "com.amazonaws.sfc.router.RouterTargetWriter"
+},
+"STORE-FORWARD": {
+"JarFiles": [
+"${SFC_DEPLOYMENT_DIR}/store-forward-target/lib"
+],
+"FactoryClassName": "com.amazonaws.sfc.storeforward.StoreForwardTargetWriter"
+}
+}
 
 ```
 
@@ -7578,13 +8362,21 @@ The jar files are part of the target deployment and can be found in the lib dire
 
 # Metrics Collection
 
-Protocol adapters and targets which do support the collection of metrics must return a non-null instance of an implementation of the MetricsProvider interface as defined in the ProtocolAdapter or TargetWriter interface. The component using the adapter or the target will use the interface to read the collected metrics.
+Protocol adapters and targets which do support the collection of metrics must return a non-null instance of an
+implementation of the MetricsProvider interface as defined in the ProtocolAdapter or TargetWriter interface. The
+component using the adapter or the target will use the interface to read the collected metrics.
 
-If the adapter or target is hosted in an IPC service process, then the base classes for these services will provide the metrics provider as part of the exposed service that will provide metrics as a server-side streaming methos. The IPC client classes for adapters and targets,do implement a MetricsProvider implementation that will invoke and read the data from the method that will stream the data to the client.
+If the adapter or target is hosted in an IPC service process, then the base classes for these services will provide the
+metrics provider as part of the exposed service that will provide metrics as a server-side streaming methos. The IPC
+client classes for adapters and targets,do implement a MetricsProvider implementation that will invoke and read the data
+from the method that will stream the data to the client.
 
 ## Running Metrics writers as an IPC service.
 
-The writers have a service wrapper that enables these targets can be executed as an IPC Service process. For each writer, a tar file is generated by the build process that includes the application script file to start the service, as well as all required library files. The application tar file contains script files (`bin/<targettype>` *and* `bin/<targettype>.bat`) to launch the applications, and all required libraries (/lib/*.jar)
+The writers have a service wrapper that enables these targets can be executed as an IPC Service process. For each
+writer, a tar file is generated by the build process that includes the application script file to start the service, as
+well as all required library files. The application tar file contains script files (`bin/<targettype>`
+*and* `bin/<targettype>.bat`) to launch the applications, and all required libraries (/lib/*.jar)
 
 | **Writer**             | **Application name**   | **Main class**                                                 |
 |------------------------|------------------------|----------------------------------------------------------------|
@@ -7661,16 +8453,27 @@ The writers do have all the following command line parameters in common.
 
 The port number, used by the service, can be specified using different methods which are applied in the following order
 
--   The value of the `-port` command line parameter
--   The value of the environment variable specified by the `-envport` parameter
+- The value of the `-port` command line parameter
+- The value of the environment variable specified by the `-envport` parameter
 
-After the service is started is it waiting for an initialization call on the specified port. The core is using an IPC client to send the configuration data, which has common but also writer type specific elements, to the service that will use it to initialize the actual writer. The client will use a client streaming method call to stream the metrics data to the writer.
+After the service is started is it waiting for an initialization call on the specified port. The core is using an IPC
+client to send the configuration data, which has common but also writer type specific elements, to the service that will
+use it to initialize the actual writer. The client will use a client streaming method call to stream the metrics data to
+the writer.
 
 ## Running metric writers in-process
 
-To run metric writers in the same process as the SFC core, they need to be implemented for the same JDK as used for the core. To make it possible to use a custom writer without making changes to the SFC code, there are no links in the core to the libraries that implement the target. In the configuration of an in-process metric writer type, the pathnames of the jar files that contain the classes that implement the writer need to be explicitly configured. When the SFC core creates an instance of the writer, it loads the configured jar files and uses a static factory method to create the actual instance. The name of the factory class, which could be the actual writer class itself, needs to be configured as well.
+To run metric writers in the same process as the SFC core, they need to be implemented for the same JDK as used for the
+core. To make it possible to use a custom writer without making changes to the SFC code, there are no links in the core
+to the libraries that implement the target. In the configuration of an in-process metric writer type, the pathnames of
+the jar files that contain the classes that implement the writer need to be explicitly configured. When the SFC core
+creates an instance of the writer, it loads the configured jar files and uses a static factory method to create the
+actual instance. The name of the factory class, which could be the actual writer class itself, needs to be configured as
+well.
 
-The jar files are part of the target deployment and can be found in the lib directory of the deployment package. To specify the path to the jar files it is recommended to use a placeholder, instead of hard-coding, the directory where the adapter, and targets, are deployed and set an environment variable for this directory.
+The jar files are part of the target deployment and can be found in the lib directory of the deployment package. To
+specify the path to the jar files it is recommended to use a placeholder, instead of hard-coding, the directory where
+the adapter, and targets, are deployed and set an environment variable for this directory.
 
 [^top](#toc)
 
@@ -7678,13 +8481,23 @@ The jar files are part of the target deployment and can be found in the lib dire
 
 This section describes how additional protocol adapters and targets can be implemented.
 
-Both protocol adapters and targets can be implemented in languages like Java, Kotlin, or any other JVM language. These adapters and targets have the option to run in the same process as the SFC core module or as an external IPC service. The SFC framework, which is a JVM-based application, provides a set of classes that implements most of the infrastructure for adapter and target servers, logging, and configuration, so developers can focus on implementing the actual protocol.
+Both protocol adapters and targets can be implemented in languages like Java, Kotlin, or any other JVM language. These
+adapters and targets have the option to run in the same process as the SFC core module or as an external IPC service.
+The SFC framework, which is a JVM-based application, provides a set of classes that implements most of the
+infrastructure for adapter and target servers, logging, and configuration, so developers can focus on implementing the
+actual protocol.
 
-For protocols or targets that require libraries or languages that cannot be executed in a JVM environment, an IPC server implementation can be used. The requirement is that the language and runtime must support the gRPC protocol.
+For protocols or targets that require libraries or languages that cannot be executed in a JVM environment, an IPC server
+implementation can be used. The requirement is that the language and runtime must support the gRPC protocol.
 
-## Implementing a protocol adapter 
+## Implementing a protocol adapter
 
-The main activity of a protocol adapter is to read data from industrial devices using a specific protocol. The SFC core instructs the protocol adapter which data to read. The core itself is not aware of the actual protocol used by the adapter and the instructions are generic, so they can be used for any type of adapter. The implementation of an adapter will use these instructions, and its specific configuration data, to translate to execute protocol-specific API or service calls to read the data. The data is returned to the SFC core in a format that is not specific to the used protocol.
+The main activity of a protocol adapter is to read data from industrial devices using a specific protocol. The SFC core
+instructs the protocol adapter which data to read. The core itself is not aware of the actual protocol used by the
+adapter and the instructions are generic, so they can be used for any type of adapter. The implementation of an adapter
+will use these instructions, and its specific configuration data, to translate to execute protocol-specific API or
+service calls to read the data. The data is returned to the SFC core in a format that is not specific to the used
+protocol.
 
 For JVM implementations the SFC core defines the following interface:
 
@@ -7702,94 +8515,151 @@ Protocol implementations **need to implement** this interface.
 
 ## Read function
 
-This method takes the source ID which refers to a protocol-specific source configuration. The schedules running in the SFC core can request data from multiple sources that use the same protocol, so the adapter may receive requests for different sources. The channels parameter is a list of value names, which are a part of the source configuration. Note that all of these values are simple protocol agnostic string identifiers. The adapter implementation will need to map these identifiers, using its specific configuration for the source and values to the required API or service calls.
+This method takes the source ID which refers to a protocol-specific source configuration. The schedules running in the
+SFC core can request data from multiple sources that use the same protocol, so the adapter may receive requests for
+different sources. The channels parameter is a list of value names, which are a part of the source configuration. Note
+that all of these values are simple protocol agnostic string identifiers. The adapter implementation will need to map
+these identifiers, using its specific configuration for the source and values to the required API or service calls.
 
 Examples of sources and channels for protocols are:
 
--   OPCUA, sources are OPCUA server, channels are OPCUA nodes
--   MODBUS, sources are MODBUS devices, channels are (ranges of) registers or discrete input or outputs
--   MQTT, sources are brokers, channels are topic names
+- OPCUA, sources are OPCUA server, channels are OPCUA nodes
+- MODBUS, sources are MODBUS devices, channels are (ranges of) registers or discrete input or outputs
+- MQTT, sources are brokers, channels are topic names
 
-The returned SourceReadResult can be an instance of either a SourceReadSuccess if the values were read successfully from the source, or a SourceReadError if the reading of the values failed.
+The returned SourceReadResult can be an instance of either a SourceReadSuccess if the values were read successfully from
+the source, or a SourceReadError if the reading of the values failed.
 
-A SourceReadSuccess contains a map of ChannelReadValues, indexed by their abstract channel name. Each ChannelReadValue holds the actual value that was read, which could be of any type, and optionally a timestamp for that value. The besides this per value timestamp, the SourceReadSuccess also contains a timestamp at the source level. If the timestamp is the same for each read value are the same then this source level timestamp can be used to reduce the volume of data. The SFC core will automatically use the source level timestamp if a value does not have a per value timestamp.
+A SourceReadSuccess contains a map of ChannelReadValues, indexed by their abstract channel name. Each ChannelReadValue
+holds the actual value that was read, which could be of any type, and optionally a timestamp for that value. The besides
+this per value timestamp, the SourceReadSuccess also contains a timestamp at the source level. If the timestamp is the
+same for each read value are the same then this source level timestamp can be used to reduce the volume of data. The SFC
+core will automatically use the source level timestamp if a value does not have a per value timestamp.
 
 If no timestamps are set by the adapter the SFC core will use the local date and time as the moment of reading.
 
-The SourceReadError, which is returned if reading from a source failed, contains a description of the error and a timestamp. The SFC core will automatically log these errors.
+The SourceReadError, which is returned if reading from a source failed, contains a description of the error and a
+timestamp. The SFC core will automatically log these errors.
 
-When the SFC core is stopped it will create the adapter stop method to let the adapter cleanup resources or close any sessions.
+When the SFC core is stopped it will create the adapter stop method to let the adapter cleanup resources or close any
+sessions.
 
 [^top](#toc)
 
 # Creating in-process adapter instances
 
-The SFC core is responsible for creating and closing down instances of adapters that run in the same process. As the SFC core is not aware of the actual protocol it depends solely on the InProcess configuration for the protocol source. This configuration contains which jar files that implement the adapter will need to be explicitly loaded by the SCF core process and the name of a factory class. After loading the jar files the core will create an instance of the factory class and call it the static "newInstance" method.
+The SFC core is responsible for creating and closing down instances of adapters that run in the same process. As the SFC
+core is not aware of the actual protocol it depends solely on the InProcess configuration for the protocol source. This
+configuration contains which jar files that implement the adapter will need to be explicitly loaded by the SCF core
+process and the name of a factory class. After loading the jar files the core will create an instance of the factory
+class and call it the static "newInstance" method.
 
 Each adapter implementation must implement a factory class that implements this method with the following signature:
 
 ```kotlin
-fun newInstance(vararg createParameters : Any?): SourceValuesReader?
+fun newInstance(vararg createParameters: Any?): SourceValuesReader?
 ```
 
 4 values are passed through createParameters by the core when creating an in-process instance of the adapter.
 
 These values are:
 
--   *configReader*: ConfigReader,
--   *scheduleName*: String,
--   *logger*: Logger
--   *resultHandler*: TargetResultHandler
+- *configReader*: ConfigReader,
+- *scheduleName*: String,
+- *logger*: Logger
+- *resultHandler*: TargetResultHandler
 
-The *configReader* is an abstraction of the SFC configuration, as each protocol implementation has, besides the common SFC core values, its specific configuration and overridden configuration types. The adapter implementation can simply obtain an instance of its configuration by calling the getConfig method, specifying configuration type to return parsed from the JSON data held by the configReader.
+The *configReader* is an abstraction of the SFC configuration, as each protocol implementation has, besides the common
+SFC core values, its specific configuration and overridden configuration types. The adapter implementation can simply
+obtain an instance of its configuration by calling the getConfig method, specifying configuration type to return parsed
+from the JSON data held by the configReader.
 
 The *scheduleName* is the name of the schedule which is using the protocol adapter.
 
 The *logger* is an abstraction for logging error, information, warning, and trace level messages.
 
-The *resultHandler* is an interface that can be passed by a previous intermediate target if the target is part of a chain of targets. The interface is used to return the results from delivering the data to the destination, e.g. a cloud service, of the target. The interface has two methods:
+The *resultHandler* is an interface that can be passed by a previous intermediate target if the target is part of a
+chain of targets. The interface is used to return the results from delivering the data to the destination, e.g. a cloud
+service, of the target. The interface has two methods:
 
-- *returnedData*: which returns an instance of ResultHandlerData that contains information that the calling target expects to receive for acknowledged (ack), not acknowledged (nack) or error messages (error). This can either be the complete message, or just the serial number of the message or nothing.
+- *returnedData*: which returns an instance of ResultHandlerData that contains information that the calling target
+  expects to receive for acknowledged (ack), not acknowledged (nack) or error messages (error). This can either be the
+  complete message, or just the serial number of the message or nothing.
 
-- *handleResult*: is called by the target to result of delivering the message to the previous target in a chain. An instance of the TargetResult class is passed a parameter that includes the ID of the target and a list of serials numbers , or complete messages (see returnedData above) for delivered messages (ack), messages that could not be delivered due to loss of network connection or the destination service not available (nack) or messages that could not be processed by the target (error).
+- *handleResult*: is called by the target to result of delivering the message to the previous target in a chain. An
+  instance of the TargetResult class is passed a parameter that includes the ID of the target and a list of serials
+  numbers , or complete messages (see returnedData above) for delivered messages (ack), messages that could not be
+  delivered due to loss of network connection or the destination service not available (nack) or messages that could not
+  be processed by the target (error).
 
-The TargetResultHelper and TargetBufferedResultHelper classes can be used to simplify reporting the result data by the target.
+The TargetResultHelper and TargetBufferedResultHelper classes can be used to simplify reporting the result data by the
+target.
 
-The newInstance method uses the configuration to create an instance of adapter class that implements the SourceValuesReader. If creating the instance fails due to configuration or other issues the reason can be logged using the provided logger and the method returns null.
+The newInstance method uses the configuration to create an instance of adapter class that implements the
+SourceValuesReader. If creating the instance fails due to configuration or other issues the reason can be logged using
+the provided logger and the method returns null.
 
 ## IPC service adapters
 
-To run the adapter in a different process, or on a different device, as the SFC core, for reasons of scaling, runtime/JVM requirements, etc., it needs to implement a gRPC IPC service. The service needs to be started explicitly by a system service, as a GreenGrass component or a Docker container.
+To run the adapter in a different process, or on a different device, as the SFC core, for reasons of scaling,
+runtime/JVM requirements, etc., it needs to implement a gRPC IPC service. The service needs to be started explicitly by
+a system service, as a GreenGrass component or a Docker container.
 
-The gRPC service, which can be implemented in any language or runtime supporting gRPC, needs to implement the ProtocolAdapterService:
+The gRPC service, which can be implemented in any language or runtime supporting gRPC, needs to implement the
+ProtocolAdapterService:
 
 ```kotlin
 service ProtocolAdapterService {
-  // Reads values, server-side streaming
-  rpc ReadValues(ReadValuesRequest) returns(stream ReadValuesReply) {}
-  rpc InitializeAdapter(InitializeAdapterRequest) returns (InitializeAdapterResponse){}
+    // Reads values, server-side streaming
+    rpc ReadValues (ReadValuesRequest) returns (stream ReadValuesReply) {}
+    rpc InitializeAdapter (InitializeAdapterRequest) returns (InitializeAdapterResponse){}
 }
 ```
 
-The InitializeAdapter message is sent by the core to the service, providing it with the subset of the configuration information that is relevant for the adapter instance. This allows the service to bootstrap with a minimum of configuration, just enough to bootstrap and listen for the InitializeAdapter request. When the SFC core starts, it will send a specific InitializeAdapterRequest to the adapter service. The service uses the configuration information in the request to (re-)configure the protocol adapter. The service returns a response containing an indication of whether the configuration of the adapter was successful, and if this is not the case additional error information. When the request fails, a timeout occurs or the service is not reachable, then the SFC core will periodically retry by re-sending the request. The configuration, as JSON format in the adapterConfiguration field, contains all relevant configuration data selected by the SFC core for that adapter. The adapter can use an instance of the SFC ConfigReader class, to read the configuration data as an instance of the configuration type class for the adapter.
+The InitializeAdapter message is sent by the core to the service, providing it with the subset of the configuration
+information that is relevant for the adapter instance. This allows the service to bootstrap with a minimum of
+configuration, just enough to bootstrap and listen for the InitializeAdapter request. When the SFC core starts, it will
+send a specific InitializeAdapterRequest to the adapter service. The service uses the configuration information in the
+request to (re-)configure the protocol adapter. The service returns a response containing an indication of whether the
+configuration of the adapter was successful, and if this is not the case additional error information. When the request
+fails, a timeout occurs or the service is not reachable, then the SFC core will periodically retry by re-sending the
+request. The configuration, as JSON format in the adapterConfiguration field, contains all relevant configuration data
+selected by the SFC core for that adapter. The adapter can use an instance of the SFC ConfigReader class, to read the
+configuration data as an instance of the configuration type class for the adapter.
 
-The ReadValues method is a streaming server request, meaning that after receiving the ReadValues request from the SCF core it can stream values it read with the specified interval back to the client, that resides in the SFC core until the SFC core closes the connection. The SourceReadValueRequest contains the identifier of the source and a list of channels to read for that source, similar to the ProtocolAdapters interface read method parameters, used for JVM implementations of an adapter. This makes it possible to provide a JVM implementation of an adapter that can run in the SFC core process, as well as an IPC service, with little effort as the SFC implementation contains generic Service helper classes to wrap the adapter classes.
+The ReadValues method is a streaming server request, meaning that after receiving the ReadValues request from the SCF
+core it can stream values it read with the specified interval back to the client, that resides in the SFC core until the
+SFC core closes the connection. The SourceReadValueRequest contains the identifier of the source and a list of channels
+to read for that source, similar to the ProtocolAdapters interface read method parameters, used for JVM implementations
+of an adapter. This makes it possible to provide a JVM implementation of an adapter that can run in the SFC core
+process, as well as an IPC service, with little effort as the SFC implementation contains generic Service helper classes
+to wrap the adapter classes.
 
-The data returned by the service as stream to the core contains the ID of the source, a map indexed by the channel names containing the values, a timestamp, and in case of an error description. The structure of the returned data is the same as returned by the ProtocolAdapters read method. A major difference is that, to provide type-fidelity between the data read by the adapter and received by the SFC core, that the message for returning the ChannelValues has a specific one-of field in the message for every datatype supported by the SFC core. The SFC framework has helpers that abstract storing the value in the distinctive field for the type of the data by the adapter. The SFC core has internal helpers to extract the data in the original format. Additional wrappers for other than JVM implementation will be part of future adapter implementations.
-
+The data returned by the service as stream to the core contains the ID of the source, a map indexed by the channel names
+containing the values, a timestamp, and in case of an error description. The structure of the returned data is the same
+as returned by the ProtocolAdapters read method. A major difference is that, to provide type-fidelity between the data
+read by the adapter and received by the SFC core, that the message for returning the ChannelValues has a specific one-of
+field in the message for every datatype supported by the SFC core. The SFC framework has helpers that abstract storing
+the value in the distinctive field for the type of the data by the adapter. The SFC core has internal helpers to extract
+the data in the original format. Additional wrappers for other than JVM implementation will be part of future adapter
+implementations.
 
 ## Using JVM protocol adapter classes as IPC services
 
-An adapter class that implements the ProtocolAdapter interface can simply be wrapped in a ServiceMain class to execute it as a gRPC IPC service.
+An adapter class that implements the ProtocolAdapter interface can simply be wrapped in a ServiceMain class to execute
+it as a gRPC IPC service.
 
-The code below shows the implementation of the MQTT service that uses the ServiceMain class to wrap an instance of the MqttAdapter class as a standalone service application.
+The code below shows the implementation of the MQTT service that uses the ServiceMain class to wrap an instance of the
+MqttAdapter class as a standalone service application.
 
 ```kotlin
 class MqttServiceMain(logger: Logger) : ServiceMain(logger) {
 
     override fun createServiceInstance(args: Array<String>, logger: Logger): Service {
-        return ProtocolAdapterService.createProtocolAdapterService(args, logger) { 
-    _configReader: ConfigReader, _logger: Logger ->
+        return ProtocolAdapterService.createProtocolAdapterService(
+            args,
+            logger
+        ) { _configReader: ConfigReader, _logger: Logger ->
             MqttAdapter.createMqttAdapter(_configReader, _logger)
 
         }
@@ -7805,7 +8675,10 @@ class MqttServiceMain(logger: Logger) : ServiceMain(logger) {
 }
 ```
 
-The MqttServiceMain class simply inherits from the Service main class. It overrides the createServiceInstance method so that it creates an instance of the MqttAdapter class returned by the ProtocolAdapterService.createProtocolAdapterService helper method. The MqttAdapter.createMqttAdapter is a static method of the MqttAdapter that hides the actual creation of the instance.
+The MqttServiceMain class simply inherits from the Service main class. It overrides the createServiceInstance method so
+that it creates an instance of the MqttAdapter class returned by the ProtocolAdapterService.createProtocolAdapterService
+helper method. The MqttAdapter.createMqttAdapter is a static method of the MqttAdapter that hides the actual creation of
+the instance.
 
 ```kotlin
 fun createMqttAdapter(configReader: ConfigReader, logger: Logger): ProtocolAdapter {
@@ -7821,67 +8694,76 @@ fun createMqttAdapter(configReader: ConfigReader, logger: Logger): ProtocolAdapt
 }
 ```
 
-The main method of the server application can simply create an instance of the class, passing the command line parameters which are parsed consistently for all servers and call the run method to run the service.
+The main method of the server application can simply create an instance of the class, passing the command line
+parameters which are parsed consistently for all servers and call the run method to run the service.
 
 [^top](#toc)
 
 # Custom Configuration Handlers
 
-Custom configuration handlers can be configured for custom handling, modifying or creating SFC configurations. The jar files that implement the handler and the factory class to create instances of the handler can be configured in the configuration file.
+Custom configuration handlers can be configured for custom handling, modifying or creating SFC configurations. The jar
+files that implement the handler and the factory class to create instances of the handler can be configured in the
+configuration file.
 
 A custom handler is a class that implements the ConfigProviderInterface
 
 ```kotlin
-interface ConfigProvider { 
-     val configuration: Channel<String>?
+interface ConfigProvider {
+    val configuration: Channel<String>?
 }
 ```
 
-This interface has a single property, which is a channel to which versions of the configuration file are written. Each time a new version of the configuration data, which must be a valid SFC configuration file, it is read by the SFC core which will apply the changed configuration. The handler can use the date from the configuration file, which may contain specific sections for this the type of handler, which is passed as a configuration string when the instance is created.
+This interface has a single property, which is a channel to which versions of the configuration file are written. Each
+time a new version of the configuration data, which must be a valid SFC configuration file, it is read by the SFC core
+which will apply the changed configuration. The handler can use the date from the configuration file, which may contain
+specific sections for this the type of handler, which is passed as a configuration string when the instance is created.
 
 Each handler implementation must implement a factory class that implements a method with the following signature:
 
 ```kotlin
-fun newInstance(vararg createParameters : Any?): ConfigProvider?
+fun newInstance(vararg createParameters: Any?): ConfigProvider?
 ```
 
 2 values are passed through createParameters by the core when creating an in-process instance of the adapter.
 
 These values are:
 
--   configString : String containing the input data from the configuration file
--   configVerificationKey: PublicKey? Used to verify the content of the configuration
--   logger: Logger, Logger log results of handler
-
+- configString : String containing the input data from the configuration file
+- configVerificationKey: PublicKey? Used to verify the content of the configuration
+- logger: Logger, Logger log results of handler
 
 [^top](#toc)
 
 # Custom Logging
 
-Custom logging writers can be configured for writing log data, which is by default written to the console. The jar files that implement the writer and the factory class to create instances of the writer can be configured in the configuration file.
+Custom logging writers can be configured for writing log data, which is by default written to the console. The jar files
+that implement the writer and the factory class to create instances of the writer can be configured in the configuration
+file.
 
 A custom writer is a class that implements the ConfigWriter interface
 
 ```kotlin
-interface LogWriter {  
-fun write(logLevel: LogLevel, timestamp: Long, source: String?, message: String)  
-fun close()  
+interface LogWriter {
+    fun write(logLevel: LogLevel, timestamp: Long, source: String?, message: String)
+    fun close()
 }
 ```
 
 Each writer implementation must implement a factory class that implements a method with the following signature:
 
 ```kotlin
-fun newInstance(vararg createParameters : Any?): ConfigWriter?
+fun newInstance(vararg createParameters: Any?): ConfigWriter?
 ```
 
-A single value is through createParameters by the core when creating an in-process instance of the writer which is the configuration that may contain specific section for the type of the writer.
+A single value is through createParameters by the core when creating an in-process instance of the writer which is the
+configuration that may contain specific section for the type of the writer.
 
 [^top](#toc)
 
 # Custom Metric Writers
 
-Metrics Writers are used to write metrics datapoints collected by SFC to a metrics storage or processing destination (e.g., AWS CloudWatchMetrics)
+Metrics Writers are used to write metrics datapoints collected by SFC to a metrics storage or processing destination (
+e.g., AWS CloudWatchMetrics)
 
 A metrics Writer is a class that implements the MetricWriter Interface
 
@@ -7892,15 +8774,18 @@ interface MetricsWriter {
 }
 ```
 
-Each metrics writer implementation must implement a factory class that implements a static method with the following signature:
+Each metrics writer implementation must implement a factory class that implements a static method with the following
+signature:
 
 ```kotlin
-fun newInstance(configReader : ConfigReader) : MetricsWriter?
+fun newInstance(configReader: ConfigReader): MetricsWriter?
 ```
 
-The core passes a configuration reader to the method that the implementation can use to load a (writer specific) configuration from the SFC configuration.
+The core passes a configuration reader to the method that the implementation can use to load a (writer specific)
+configuration from the SFC configuration.
 
-An implementation of a metrics writer can be exposed as an IPC service. This IPC service is defined in Metrics.proto as MetricsWriterService
+An implementation of a metrics writer can be exposed as an IPC service. This IPC service is defined in Metrics.proto as
+MetricsWriterService
 
 ```kotlin
 Service MetricsWriterService {
@@ -7909,7 +8794,8 @@ Service MetricsWriterService {
 }
 ```
 
-For the service base class provided by the SFC framework can be used. The Service class for the writer needs to override the abstract method createServiceInstance of that class by a method that creates an instance of the actual writer.
+For the service base class provided by the SFC framework can be used. The Service class for the writer needs to override
+the abstract method createServiceInstance of that class by a method that creates an instance of the actual writer.
 
 ```kotlin
 class AwsCloudWatchMetricsWriterService : ServiceMain() {
@@ -7930,13 +8816,17 @@ class AwsCloudWatchMetricsWriterService : ServiceMain() {
 }
 ```
 
-The method creating the instance of the writer is provided as function parameter of the createIpcMetricsServer method. This method is receiving a config reader and a logger instance.
+The method creating the instance of the writer is provided as function parameter of the createIpcMetricsServer method.
+This method is receiving a config reader and a logger instance.
 
 [^top](#toc)
 
 # .NET Core based protocol adapters
 
-In situations where .NET libraries are used to implement a protocol adapter the SFC framework provides a subset of the full of classes that are required to implement the adapter, in a consistent with the JVM implementation, way using C#. As these adapters cannot be loaded into the SFC core process these are implemented as server providing an IPC service for the SFC core to configure and read the data from the adapter.
+In situations where .NET libraries are used to implement a protocol adapter the SFC framework provides a subset of the
+full of classes that are required to implement the adapter, in a consistent with the JVM implementation, way using C#.
+As these adapters cannot be loaded into the SFC core process these are implemented as server providing an IPC service
+for the SFC core to configure and read the data from the adapter.
 
 This section describes the steps to implement such a server and the key differences with a JVM based adapter.
 
@@ -7990,39 +8880,50 @@ The applications do have all the following command line parameters in common.
 
 The port number, used by the service, can be specified using different methods which are applied in the following order
 
--   The value of the -port command line parameter
+- The value of the -port command line parameter
 
--   The value of the environment variable specified by the -envport parameter
+- The value of the environment variable specified by the -envport parameter
 
--   From the configuration file, specified by the -config parameter, the port number for the server referred to in the ProtocolSource/Server element will be used
+- From the configuration file, specified by the -config parameter, the port number for the server referred to in the
+  ProtocolSource/Server element will be used
 
-To protect the ICP traffic between the core and the adapter SSL can be used. For this, the --cert and if required the --password parameter must be used to specify the pathname to the certificate and the key file.
+To protect the ICP traffic between the core and the adapter SSL can be used. For this, the --cert and if required the
+--password parameter must be used to specify the pathname to the certificate and the key file.
 
 ## Output logging format
 
 In order to integrate with the Microsoft logging extensions, the command line  
-the parameters for logging (-trace, -info, -warning, -error) are not available for the [.NET Core based adapter](https://docs.microsoft.com/en-us/dotnet/core/extensions/logging?tabs=command-line) implementations. Instead of these parameters the level of output logging is configured in the appsettings.json file.
+the parameters for logging (-trace, -info, -warning, -error) are not available for
+the [.NET Core based adapter](https://docs.microsoft.com/en-us/dotnet/core/extensions/logging?tabs=command-line)
+implementations. Instead of these parameters the level of output logging is configured in the appsettings.json file.
 
 ## Implementing a .NET Core Protocol adapter
 
--   Create a project for the adapter and reference the sfc-core and sfc-ipc projects
+- Create a project for the adapter and reference the sfc-core and sfc-ipc projects
 
--   Build an adapter for the protocol that that implements the SFC IProtocolAdapter interface
+- Build an adapter for the protocol that that implements the SFC IProtocolAdapter interface
 
--   Create the host for the adapter service by creating a class that inherits from ProtocolServiceMain.
+- Create the host for the adapter service by creating a class that inherits from ProtocolServiceMain.
 
-    -   In this class implement the abstract method named CreateAdapterService that:
+    - In this class implement the abstract method named CreateAdapterService that:
 
-    -   Sets the ProtocolAdapterServiceImpl.CreateAdapter delegate to a method  
-        that does create the instance of the adapter used by the gRPC service.
+    - Sets the ProtocolAdapterServiceImpl.CreateAdapter delegate to a method  
+      that does create the instance of the adapter used by the gRPC service.
 
-    -   Returns an instance of the Service class passing the  
-        ProtocolAdapterServiceImpl class as its type parameter.
+    - Returns an instance of the Service class passing the  
+      ProtocolAdapterServiceImpl class as its type parameter.
 
--   Implement the configuration types required for the adapter. When initializing the adapter using the InitializeAdapter service call the JSON configuration for the adapter is passed as JSON data. When the CreateAdapter method (see above) is called, an instance of the sfc ConfigReader is passed as a parameter. An instance of the configuration class, containing the deserialized data can be obtained by calling the readers GetConfig method, passing the type of the configuration class. This configuration data is used to create and initialize the adapter. The configuration class must inherit from the SFC BaseConfiguration class. The IValidate class can be implemented which will be called to execute the configuration validation  
-    logic after reading the data from the JSON configuration data.
+- Implement the configuration types required for the adapter. When initializing the adapter using the InitializeAdapter
+  service call the JSON configuration for the adapter is passed as JSON data. When the CreateAdapter method (see above)
+  is called, an instance of the sfc ConfigReader is passed as a parameter. An instance of the configuration class,
+  containing the deserialized data can be obtained by calling the readers GetConfig method, passing the type of the
+  configuration class. This configuration data is used to create and initialize the adapter. The configuration class
+  must inherit from the SFC BaseConfiguration class. The IValidate class can be implemented which will be called to
+  execute the configuration validation  
+  logic after reading the data from the JSON configuration data.
 
--   Implement a static main method for the service class that creates a (singleton) instance of that class, and calls it's from ProtocolServiceMain inherited Run method to start the service.
+- Implement a static main method for the service class that creates a (singleton) instance of that class, and calls it's
+  from ProtocolServiceMain inherited Run method to start the service.
 
 ```c#
 public sealed class OpcdaProtocolService : ProtocolServiceMain
@@ -8074,6 +8975,9 @@ public sealed class OpcdaProtocolService : ProtocolServiceMain
 
 [^top](#toc)
 
-## Service 
+## Service
 
-In order to integrate with the [Microsoft logging extensions](https://docs.microsoft.com/en-us/dotnet/core/extensions/logging?tabs=command-line) the command line parameters for logging (-trace, -info, -warning, -error) are not available for the .NET Core based adapter implementations. The level of the logging output is configured in the appsettings.json file.
+In order to integrate with
+the [Microsoft logging extensions](https://docs.microsoft.com/en-us/dotnet/core/extensions/logging?tabs=command-line)the
+command line parameters for logging (-trace, -info, -warning, -error) are not available for the .NET Core based adapter
+implementations. The level of the logging output is configured in the appsettings.json file.

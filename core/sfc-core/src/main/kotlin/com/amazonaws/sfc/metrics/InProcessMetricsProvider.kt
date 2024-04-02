@@ -21,8 +21,6 @@ class InProcessMetricsProvider(private val metricsReader: MetricsCollectorReader
 
     override suspend fun read(interval: Duration, consumer: MetricsConsumer): Unit = coroutineScope {
 
-        val metricsProvider = MetricsAsFlow(metricsReader, interval, logger)
-
         reader = launch(context = Dispatchers.Default, name = "Collect Read Results") {
             metricsReaderTask(metricsReader, interval, consumer)
         }

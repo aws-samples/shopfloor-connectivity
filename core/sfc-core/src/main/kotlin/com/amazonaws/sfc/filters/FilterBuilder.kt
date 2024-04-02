@@ -65,7 +65,7 @@ abstract class FilterBuilder {
      * @param v Any
      * @return List<Filter>
      */
-    internal fun buildFilterList(filterBuilder: FilterBuilder, v: Any): List<Filter> =
+    internal fun buildFilterList(v: Any): List<Filter> =
         when (v) {
 
             // Handle slightly incorrect configurations where an AND or OR filters only have a single nested condition

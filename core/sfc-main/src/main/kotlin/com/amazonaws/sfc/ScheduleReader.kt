@@ -397,7 +397,7 @@ class ScheduleReader(
     private fun applyConditionFilters(sourceOutputData: Map<String, SourceReadSuccess>) =
         sourceOutputData.map { (sourceID: String, sourceData: SourceReadSuccess) ->
             val trace = logger.getCtxTraceLog(className, "applyConditionFilters")
-            val filtered = sourceData.values.filter { (channelID: String, channelData: ChannelReadValue) ->
+            val filtered = sourceData.values.filter { (channelID: String, _: ChannelReadValue) ->
 
                 val conditionFilterID = config.sources[sourceID]?.channels?.get(channelID)?.conditionFilterID
                 var filter: Filter? = null
