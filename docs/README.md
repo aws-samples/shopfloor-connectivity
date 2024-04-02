@@ -917,24 +917,20 @@ combinations of values do exist, or do not exist in in the same source. Operator
 
 - ***any*** : Any of a list of values must exist
 
-  ```json
-    {
+```json
+  {
         "Operator" : "and",
         "Value"    : ["a","b"]
-    }
-  ```
+  }
+```
 
 Both field a and b must exist for this source to include the value on which this filter is applied,
 
 - ***none*** : None of a list of values must exist
-
 ```json
-    {
+{
   "Operator": "none",
-  "Value": [
-    "a",
-    "b"
-  ]
+  "Value": ["a", "b" ]
 }
 ```
 
@@ -943,12 +939,9 @@ Value a and b must not exist for source to include the value on which this filte
 - ***all*** : All values of a list of other values must exist
 
 ```json
-    {
+{
   "Operator": "all",
-  "Value": [
-    "a",
-    "b"
-  ]
+  "Value": ["a", "b"]
 }
 ```
 
@@ -957,7 +950,7 @@ Both value a and b must exist for source to include the value on which this filt
 - ***present*** : A specified value must exist
 
 ```json
-    {
+{
   "Operator": "present",
   "Value": [
     "a"
@@ -970,7 +963,7 @@ Value a must exist for source to include the value on which this filter is appli
 - **absent**:  A specified value may not exist
 
 ```json
-    {
+{
   "Operator": "absent",
   "Value": [
     "a"
@@ -983,7 +976,7 @@ Value a must not exist for source to include the value on which this filter is a
 - ***only*** : The value must be the only value from a source
 
 ```json
-    {
+{
   "Operator": "only",
   "Value": true
 }
@@ -997,7 +990,7 @@ source.
 - ***notonly*** : The value must not be the only value from a source
 
 ```json
-    {
+{
   "Operator": "notonly",
   "Value": true
 }
@@ -1013,7 +1006,7 @@ All of the operators above can be combined using the ***and*** and ***or*** oper
 filters as the filter value.
 
 ```json
-    {
+{
   "Operator": "and",
   "Value": [
     {
