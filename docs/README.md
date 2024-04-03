@@ -2558,6 +2558,20 @@ The parameter AllSourcesReadTimeout can be used to specify the period within rea
 <td>Map(String, Any)</td>
 <td></td>
 </tr>
+
+<tr class="even">
+<td>SourceTimestampAdjustment</td>
+<td>Time in ms to adjust the value of the source timestamp value.</td>
+<td>Long</td>
+<td>To set the timestamp to a later value use a positive value, for an earlier value use a negative value.</td>
+</tr>
+<tr class="odd">
+<td>ChannelTimestampAdjustment</td>
+<td>Time in ms to adjust the value of the timestamp for all values in the source.</td>
+<td>Long</td>
+<td>To set the timestamp to a later value use a positive value, for an earlier value use a negative value.</td>
+</tr>
+
 </tbody>
 </table>
 
@@ -3711,6 +3725,18 @@ See <a href="#condition-filters">Condition Filters</a> for more information.</th
 <td></td>
 </tr>
 <tr class="even">
+<td>EpocMilliSecondsToTimestamp</td>
+<td>Obtains a DateTime using milliseconds from the epoch of 1970-01-01T00:00:00Z.</td>
+<td>Datatypes: Long</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>EpocSecondsToTimestamp</td>
+<td>Obtains a DateTime using seconds from the epoch of 1970-01-01T00:00:00Z.</td>
+<td>Datatypes: Long</td>
+<td></td>
+</tr>
+<tr class="even">
 <td>Floor</td>
 <td>Calculates the largest integer less than or equal to the value.</td>
 <td>Datatypes: Numeric</td>
@@ -3734,6 +3760,21 @@ See <a href="#condition-filters">Condition Filters</a> for more information.</th
 <td>Datatype: 32-bit Value</td>
 <td></td>
 </tr>
+<tr class="even">
+<td>IsoTimeStrToMilliSeconds</td>
+<td>Converts a string in ISO-8601 duration format into milliseconds.
+Converts a string in a format such as 2007-12-03T10:15:30.00Z into the number of milliseconds from the epoch of 1970-01-01T00:00:00Z.
+The string must represent a valid instant in UTC</td>
+<td>Datatype : String</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>IsoTimeStrSeconds</td>
+<td>Converts a string in ISO-8601 duration format into milliseconds.
+Converts a string in a format such as 2007-12-03T10:15:30.00Z into the number of seconds from the epoch of 1970-01-01T00:00:00Z.
+The string must represent a valid instant in UTC</td>
+<td>Datatype : String</td>
+<td></td>
 <tr class="even">
 <td>IsoTimeStrToMilliSeconds</td>
 <td>Converts a string in ISO-8601 duration format into milliseconds</td>
@@ -3821,7 +3862,7 @@ See <a href="#condition-filters">Condition Filters</a> for more information.</th
 </tr>
 <tr class="even">
 <td><p>Minus</p>
-<p>alias is "-"</p></td>
+<p>alias is "-"</p></td> 
 <td>Subtracts parameter value from value.</td>
 <td>Datatype: Numeric</td>
 <td>Numeric value to subtract</td>
@@ -3992,6 +4033,18 @@ See <a href="#condition-filters">Condition Filters</a> for more information.</th
 <td>Tanh</td>
 <td>Computes the hyperbolic tangent of the value</td>
 <td>Datatype: Numeric</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>TimestampToEpocMilliSeconds</td>
+<td>Converts a datetime value  to the number of milliseconds from the epoch of 1970-01-01T00:00:00Z.</td>
+<td>Datatype: DateTime/Timestamp</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>TimestampToEpocSeconds</td>
+<td>Converts a datetime value  to the number of seconds from the epoch of 1970-01-01T00:00:00Z.</td>
+<td>Datatype: DateTime/Timestamp</td>
 <td></td>
 </tr>
 <tr class="odd">

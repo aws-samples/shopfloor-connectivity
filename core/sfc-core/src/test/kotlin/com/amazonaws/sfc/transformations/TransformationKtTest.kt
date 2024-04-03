@@ -113,7 +113,7 @@ class TransformationKtTest {
         ).validateOperatorTypes()
 
         assertNotNull(error)
-        assertEquals(0, error?.Order)
+        assertEquals(0, error?.order)
     }
 
 
@@ -125,7 +125,7 @@ class TransformationKtTest {
         ).validateOperatorTypes()
 
         assertNotNull(error)
-        assertEquals(1, error?.Order)
+        assertEquals(1, error?.order)
     }
 
 
@@ -138,7 +138,7 @@ class TransformationKtTest {
         ).validateOperatorTypes()
 
         assertNotNull(error)
-        assertEquals(2, error?.Order)
+        assertEquals(2, error?.order)
     }
 
 
@@ -150,7 +150,7 @@ class TransformationKtTest {
         ).validateOperatorTypes()
 
         assertNotNull(error)
-        assertEquals(2, error?.Order)
+        assertEquals(2, error?.order)
     }
 
     @Test
@@ -162,7 +162,7 @@ class TransformationKtTest {
         ).validateOperatorTypes()
 
         assertNotNull(error)
-        assertEquals(1, error?.Order)
+        assertEquals(1, error?.order)
 
     }
 
@@ -176,7 +176,7 @@ class TransformationKtTest {
         ).validateOperatorTypes()
 
         assertNotNull(error)
-        assertEquals(2, error?.Order)
+        assertEquals(2, error?.order)
 
     }
 
@@ -191,7 +191,7 @@ class TransformationKtTest {
         ).validateOperatorTypes()
 
         assertNotNull(error)
-        assertEquals(3, error?.Order)
+        assertEquals(3, error?.order)
 
     }
 }

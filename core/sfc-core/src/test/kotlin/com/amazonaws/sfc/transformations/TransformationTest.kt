@@ -112,7 +112,7 @@ internal class TransformationTest {
         val invalidThreeOperators = listOf(And.create(0), LowerCase(), And.create(0))
         val errType = invalidThreeOperators.validateOperatorTypes()
         assertNotNull(errType)
-        assertEquals(1, errType?.Order ?: -1, "Output type of first operator not valid for second operator")
+        assertEquals(1, errType?.order ?: -1, "Output type of first operator not valid for second operator")
     }
 
     @Test
@@ -124,12 +124,12 @@ internal class TransformationTest {
         val invalidFirstOperator = listOf(InvalidTransformationOperator("", "", ""), And.create(0))
         val errFirst = invalidFirstOperator.validateOperatorTypes()
         assertNotNull(errFirst)
-        assertEquals(1, errFirst?.Order ?: -1, "First operator invalid ")
+        assertEquals(1, errFirst?.order ?: -1, "First operator invalid ")
 
         val invalidMiddleOperator = listOf(And.create(0), InvalidTransformationOperator("", "", ""), And.create(0))
         val errSecond = invalidMiddleOperator.validateOperatorTypes()
         assertNotNull(errSecond, "Second operator is invalid")
-        assertEquals(2, errSecond?.Order ?: -1, "Second operator invalid ")
+        assertEquals(2, errSecond?.order ?: -1, "Second operator invalid ")
 
     }
 

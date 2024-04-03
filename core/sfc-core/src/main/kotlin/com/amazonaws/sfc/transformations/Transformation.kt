@@ -87,9 +87,9 @@ fun Transformation.validateOperatorTypes(): TransformValidationError? {
     if (this.size == 1)
         if (this.first() is InvalidTransformationOperator) {
             val e = this.first() as InvalidTransformationOperator
-            return TransformValidationError(Operator = e,
-                Order = 0,
-                Error = "Transformation operator ${e.operatorName} is an invalid operator, $e}")
+            return TransformValidationError(operator = e,
+                order = 0,
+                error = "Transformation operator ${e.operatorName} is an invalid operator, $e}")
         }
 
     var operator = this.first()
@@ -104,9 +104,9 @@ fun Transformation.validateOperatorTypes(): TransformValidationError? {
 
         if (nextOperator is InvalidTransformationOperator) {
 
-            return TransformValidationError(Operator = nextOperator,
-                Order = order + 2,
-                Error = "Transformation operator ${nextOperator.operatorName} is an invalid operator, $nextOperator}")
+            return TransformValidationError(operator = nextOperator,
+                order = order + 2,
+                error = "Transformation operator ${nextOperator.operatorName} is an invalid operator, $nextOperator}")
         }
 
         if (operatorOutputType != Any::class.java) {
@@ -117,9 +117,9 @@ fun Transformation.validateOperatorTypes(): TransformValidationError? {
 
                 if (!assignableTypes(nextOperator.inputType, operatorOutputType)) {
                     return TransformValidationError(
-                        Operator = nextOperator,
-                        Order = order + 1,
-                        Error = "operator output type '${operatorOutputType.simpleName}' of operator ${operator::class.simpleName} is invalid for input type '${nextInputType.simpleName}' of the next operator ${nextOperator::class.simpleName}"
+                        operator = nextOperator,
+                        order = order + 1,
+                        error = "operator output type '${operatorOutputType.simpleName}' of operator ${operator::class.simpleName} is invalid for input type '${nextInputType.simpleName}' of the next operator ${nextOperator::class.simpleName}"
                     )
                 }
             }

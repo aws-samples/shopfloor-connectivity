@@ -15,7 +15,7 @@ import java.time.Instant
  */
 
 sealed class SourceReadResult(ts: Instant?) {
-    val timestamp: Instant = ts ?: systemDateTime()
+    var timestamp: Instant = ts ?: systemDateTime()
     val gson: Gson by lazy { JsonHelper.gsonPretty() }
 }
 
@@ -36,6 +36,7 @@ class SourceReadSuccess(val values: Map<String, ChannelReadValue>, timestamp: In
 
     val valuesMap
         get() = values.map { it.key to it.value.value }.toMap()
+
 }
 
 

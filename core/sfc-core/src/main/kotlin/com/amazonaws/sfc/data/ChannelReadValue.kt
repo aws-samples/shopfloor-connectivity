@@ -12,7 +12,7 @@ import kotlin.reflect.KClass
  * A data value, read from a source, with optional timestamp for the value
  */
 
-class ChannelReadValue(value: Any?, val timestamp: Instant? = null) {
+class ChannelReadValue(value: Any?, var timestamp: Instant? = null) {
 
     /**
      * Value as a string
@@ -93,6 +93,7 @@ class ChannelReadValue(value: Any?, val timestamp: Instant? = null) {
         val gson by lazy {
             JsonHelper.gsonExtended()
         }
+
     }
 
 }

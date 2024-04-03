@@ -196,13 +196,15 @@ class ScheduleReader(
                     val result = readResultsChannel.receive()
 
                     val protocolAdapterID = result.first
-                    val readerResult = result.second
+                    val readerResult: ReadResult? = result.second
 
                     if (readerResult == null) {
                         log.error("No result from  $protocolAdapterID ")
                         readersDone.add(protocolAdapterID)
                         continue
                     }
+
+                    adjustTimestamps(readerResult)
 
                     // reader already has result, process these first
                     if (protocolAdapterID in readersDone) {
@@ -227,6 +229,30 @@ class ScheduleReader(
                 log.errorEx("Exception in processing", e)
         }
 
+    }
+
+    private fun adjustTimestamps(readerResult: ReadResult) {
+
+        readerResult.forEach { sourceID: String, sourceReadResult: SourceReadResult ->
+
+            if (sourceReadResult is SourceReadSuccess) {
+
+                val sourceTimestampAdjustment = config.sources[sourceID]?.sourceTimestampAdjustment ?: 0L
+
+                if ( sourceTimestampAdjustment != 0L) {
+                    sourceReadResult.timestamp = sourceReadResult.timestamp.plusMillis(sourceTimestampAdjustment)
+                }
+
+                val channelTimestampAdjustment = config.sources[sourceID]?.channelTimestampAdjustment ?: 0L
+                if ( channelTimestampAdjustment != 0L) {
+                    sourceReadResult.values.values.forEach { readValue->
+                        if (readValue.timestamp != null) {
+                            readValue.timestamp = readValue.timestamp?.plusMillis(channelTimestampAdjustment)
+                        }
+                    }
+                }
+            }
+        }
     }
 
     private fun readProtocolTask(protocolID: String, reader: SourceValuesReader, readResultsChannel: Channel<Pair<String, ReadResult?>>) {

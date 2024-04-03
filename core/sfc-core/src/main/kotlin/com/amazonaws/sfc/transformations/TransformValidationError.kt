@@ -7,8 +7,12 @@ package com.amazonaws.sfc.transformations
 
 /**
  * Data class for returning detailed validation errors
- * @property Operator Operator
- * @property Order Int
- * @property Error String
+ * @property operator Operator
+ * @property order Int
+ * @property error String
  */
-data class TransformValidationError(val Operator: TransformationOperator, val Order: Int, val Error: String)
+data class TransformValidationError(val operator: TransformationOperator, val order: Int, val error: String){
+    override fun toString(): String {
+        return "TransformValidationError(Operator=$operator, Order=$order, Error='$error')"
+    }
+}
