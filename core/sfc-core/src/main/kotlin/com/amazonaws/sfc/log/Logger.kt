@@ -163,7 +163,7 @@ class Logger(
     // method for emitting error messages
     private fun logError(message: String, source: String? = this.source, exception: Exception? = null) {
         if (exception != null) {
-            emit(level, source, message + " : ${exception.toStringEx()}")
+            emit(LogLevel.ERROR, source, message + " : ${exception.toStringEx()}")
         } else {
             emit(LogLevel.ERROR, source, message)
         }

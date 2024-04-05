@@ -49,7 +49,7 @@ class InProcessConfiguration private constructor(jars: List<String> = emptyList(
         jarFiles?.forEach { jar ->
             ConfigurationException.check(
                 jar.exists(),
-                "${jar.absolutePath} jar file does not exist",
+                "${jar.absolutePath} file does not exist",
                 CONFIG_JAR_FILES,
                 this
             )

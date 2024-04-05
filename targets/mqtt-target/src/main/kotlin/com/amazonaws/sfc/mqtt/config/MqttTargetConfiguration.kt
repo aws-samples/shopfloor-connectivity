@@ -68,7 +68,7 @@ class MqttTargetConfiguration : TargetConfiguration(), Validate {
             if (certificate != null || privateKey != null || rootCA != null) {
                 "${MqttConnectionProtocol.SSL.protocolPrefix}_endPoint"
             } else {
-                "${MqttConnectionProtocol.SSL.protocolPrefix}_endPoint"
+                "${MqttConnectionProtocol.TCP.protocolPrefix}_endPoint"
             }
         }
     }

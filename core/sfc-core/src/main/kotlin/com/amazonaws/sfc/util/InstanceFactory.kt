@@ -6,6 +6,7 @@
 package com.amazonaws.sfc.util
 
 import com.amazonaws.sfc.config.InProcessConfiguration
+import com.amazonaws.sfc.data.ProtocolAdapterException
 import com.amazonaws.sfc.log.Logger
 import java.io.File
 import java.net.URLClassLoader
@@ -54,7 +55,13 @@ open class InstanceFactory<T>(private val config: InProcessConfiguration, privat
             @Suppress("UNCHECKED_CAST")
             return creatorMethod?.invoke(null, createParameters) as T?
         } catch (e: java.lang.reflect.InvocationTargetException) {
-            logs.errorEx("Error creating instance of \"${config.factoryClassName}\" from jar ${config.jarFiles?.joinToString()}, cause is ${e.targetException}", e)
+            if (e.cause is ProtocolAdapterException){
+                logs.error("Error creating instance of \"${config.factoryClassName}\" because a required class was not fond at ${config.jarFiles?.joinToString()}, ${(e.cause as ProtocolAdapterException).message}")
+            } else {
+                logs.errorEx(
+                    "Error creating instance of \"${config.factoryClassName}\" from  ${config.jarFiles?.joinToString()}, cause is ${e.targetException}", e)
+            }
+
         }
         return null
     }
