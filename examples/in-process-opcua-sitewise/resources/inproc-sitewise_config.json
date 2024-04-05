@@ -1,0 +1,176 @@
+{
+  "AWSVersion": "2022-04-02",
+  "Name": "OPCUA to SiteWise, using in process source and targets",
+  "Version": 1,
+  "LogLevel": "Info",
+  "ElementNames": {
+    "Value": "value",
+    "Timestamp": "timestamp",
+    "Metadata": "metadata"
+  },
+  "Schedules": [
+    {
+      "Name": "OpcuaToSitewise",
+      "Interval": 200,
+      "Description": "Read OPCUA and send to Sitewise",
+      "Active": true,
+      "TimestampLevel": "Both",
+      "Sources": {
+        "OPCUA-SOURCE": [
+          "*"
+        ]
+      },
+      "Targets": [
+        "SitewiseTarget",
+        "#DebugTarget"
+      ]
+    }
+  ],
+  "Sources": {
+    "OPCUA-SOURCE": {
+      "Name": "OPCUA-SOURCE",
+      "ProtocolAdapter": "OPC-UA",
+      "AdapterOpcuaServer": "OPCUA-SERVER-1",
+      "Description": "OPCUA local test server",
+      "SourceReadingMode": "Polling",
+      "SubscribePublishingInterval": 100,
+      "Channels": {
+        "ServerStatus": {
+          "Name": "ServerStatus",
+          "NodeId": "ns=0;i=2256"
+        },
+        "ServerTime": {
+          "Name": "ServerTime",
+          "NodeId": "ns=0;i=2256",
+          "Selector": "@.currentTime"
+        },
+        "State": {
+          "Name": "State",
+          "NodeId": "ns=0;i=2259"
+        },
+        "Machine1AbsoluteErrorTime": {
+          "Name": "AbsoluteErrorTime",
+          "NodeId": "ns=21;i=59048"
+        },
+        "Machine1AbsoluteLength": {
+          "Name": "AbsoluteLength",
+          "NodeId": "ns=21;i=59066"
+        },
+        "Machine1AbsoluteMachineOffTime": {
+          "Name": "AbsoluteMachineOffTime",
+          "NodeId": "ns=21;i=59041"
+        },
+        "Machine1AbsoluteMachineOnTime": {
+          "Name": "AbsoluteMachineOnTime",
+          "NodeId": "ns=21;i=59050"
+        },
+        "Machine1AbsolutePiecesIn": {
+          "Name": "AbsolutePiecesIn",
+          "NodeId": "ns=21;i=59068"
+        },
+        "Machine1FeedSpeed": {
+          "Name": "FeedSpeed",
+          "NodeId": "ns=21;i=59039"
+        }
+      }
+    }
+  },
+  "Targets": {
+    "DebugTarget": {
+      "Active": true,
+      "TargetType": "DEBUG-TARGET"
+    },
+    "SitewiseTarget": {
+      "Active": true,
+      "TargetType": "AWS-SITEWISE",
+      "Region": "[REGION]",
+      "Assets": [
+        {
+          "AssetId": "[ASSET_ID]",
+          "Properties": [
+            {
+              "PropertyId":"[PROPERTY_ID]",
+              "DataType": "string",
+              "DataPath": "sources.OPCUA-SOURCE.values.ServerStatus"
+            },
+            {
+              "PropertyId":"[PROPERTY_ID]",
+              "DataType": "string",
+              "DataPath": "sources.OPCUA-SOURCE.values.ServerTime"
+            },
+            {
+              "PropertyId":"[PROPERTY_ID]",
+              "DataType": "integer",
+              "DataPath": "sources.OPCUA-SOURCE.values.State"
+            },
+            {
+              "PropertyId":"[PROPERTY_ID]",
+              "DataType": "double",
+              "DataPath": "sources.OPCUA-SOURCE.values.AbsoluteErrorTime"
+            },
+            {
+              "PropertyId": "[PROPERTY_ID]",
+              "DataType": "double",
+              "DataPath": "sources.OPCUA-SOURCE.values.AbsoluteLength"
+            },
+            {
+              "PropertyId": "[PROPERTY_ID]",
+              "DataType": "double",
+              "DataPath": "sources.OPCUA-SOURCE.values.AbsoluteMachineOffTime"
+            },
+            {
+              "PropertyId": "[PROPERTY_ID]",
+              "DataType": "double",
+              "DataPath": "sources.OPCUA-SOURCE.values.AbsoluteMachineOnTime"
+            },
+            {
+              "PropertyId": "[PROPERTY_ID]",
+              "DataType": "double",
+              "DataPath": "sources.OPCUA-SOURCE.values.AbsolutePiecesIn"
+            },
+            {
+              "PropertyId": "[PROPERTY_ID]",
+              "DataType": "double",
+              "DataPath": "sources.OPCUA-SOURCE.values.FeedSpeed"
+            }
+          ]
+        }
+    ]
+  }},
+  "TargetTypes": {
+    "DEBUG-TARGET": {
+      "JarFiles": [
+        "sfc/debug-target/lib"
+      ],
+      "FactoryClassName": "com.amazonaws.sfc.debugtarget.DebugTargetWriter"
+    },
+    "AWS-SITEWISE": {
+      "JarFiles": [
+        "sfc/aws-sitewise-target/lib"
+      ],
+      "FactoryClassName": "com.amazonaws.sfc.awssitewise.AwsSiteWiseTargetWriter"
+    }
+  },
+  "AdapterTypes": {
+    "OPCUA": {
+      "JarFiles": [
+        "sfc/opcua/lib"
+      ],
+      "FactoryClassName": "com.amazonaws.sfc.opcua.OpcuaAdapter"
+    }
+  },
+  "ProtocolAdapters": {
+    "OPC-UA": {
+      "AdapterType": "OPCUA",
+      "OpcuaServers": {
+        "OPCUA-SERVER-1": {
+          "Address": "opc.tcp://[PRIVATE_IP]",
+          "Path": "/",
+          "Port": 4840,
+          "ConnectTimeout": "10000",
+          "ReadBatchSize": 500
+        }
+      }
+    }
+  }
+}

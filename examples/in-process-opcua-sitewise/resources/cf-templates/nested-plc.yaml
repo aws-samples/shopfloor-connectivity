@@ -1,0 +1,78 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: This nested template creates a PLC instance and attaches the SFC-SSM-ManagedInstanceCoreRole to it,
+  to enable access from Systems Manager. The instance simulates the OPC-UA server running on a private subnet.
+
+Outputs:
+  PlcPrivateIP:
+    Description: The private IP of the PLC instance
+    Value: !GetAtt PlcInstance.PrivateIp
+    Export:
+      Name: PlcPrivateIP
+
+Parameters:
+    PrivateSubnet1Param:
+      Type: String
+      Description: The private subnet created in the base-infrastructure stack.
+    VPC:
+      Type: String
+      Description: The VPC created in the base-infrastructure stack.
+
+Resources:
+  PlcInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: ami-03614aa887519d781 # Amazon Linux 2 AMI (HVM), SSD Volume Type
+      InstanceType: t2.micro
+      SubnetId: !Ref PrivateSubnet1Param
+      IamInstanceProfile:
+        !Ref SFCSSMManagedInstanceCoreRole
+      SecurityGroupIds:
+        - !GetAtt PlcSecurityGroup.GroupId
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash -xe
+          sudo yum update -y
+          sudo yum install docker -y
+          sudo systemctl start docker
+          sudo chmod 666 /var/run/docker.sock
+          docker run -d -p 4840:4840 ghcr.io/umati/sample-server:main
+      Tags:
+        - Key: Name
+          Value: plc-opcua-server
+
+  SFCSSMManagedInstanceCoreRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      RoleName: Ec2RoleForSSM
+      Description: EC2 IAM role for SSM access
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - ec2.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+      ManagedPolicyArns:
+        - 'arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore'
+
+  Ec2InstanceProfile:
+    Type: 'AWS::IAM::InstanceProfile'
+    Properties:
+      InstanceProfileName: Ec2RoleForSSM
+      Roles:
+        - Ref: SFCSSMManagedInstanceCoreRole
+
+  PlcSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: !Join ["-", [plc]]
+      GroupDescription: "Allow inbound and outbound access to the OPC-UA server and SSH traffic"
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 4840
+          ToPort: 4840
+          CidrIp: 0.0.0.0/0

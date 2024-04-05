@@ -1,0 +1,29 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: This template will create a Cloud9 Environment for the SFC Component. This is part of the public subnet.
+
+Outputs:
+  Cloud9URL:
+    Description: Cloud9 Environment for the SFC Component
+    Value:
+      Fn::Join:
+      - ''
+      - - !Sub https://${AWS::Region}.console.aws.amazon.com/cloud9/ide/
+        - !Ref 'Cloud9SFC'
+
+Parameters:
+    PublicSubnet1Param:
+      Type: String
+      Description: The private subnet created in the base-infrastructure stack.
+
+Resources:
+  Cloud9SFC:
+    Type: AWS::Cloud9::EnvironmentEC2
+    Properties:
+      Name: "sfc"
+      Description: "The Cloud9 environment that will simulate the PLC."
+      AutomaticStopTimeMinutes: 60
+      ConnectionType: CONNECT_SSH
+      ImageId: "amazonlinux-2-x86_64"
+      InstanceType: "t2.micro"
+      SubnetId: !Ref PublicSubnet1Param

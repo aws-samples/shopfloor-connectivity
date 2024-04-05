@@ -1,0 +1,81 @@
+{
+  "assetModels" : [ {
+    "assetModelId" : "8151640f-91d5-4083-af5a-e82894852b3c",
+    "assetModelName" : "DemoModel",
+    "assetModelProperties" : [ {
+      "id" : "7b6e26d0-cb2d-48c3-86ef-6f508f2b82e1",
+      "name" : "ServerStatus",
+      "dataType" : "STRING",
+      "type" : {
+        "measurement" : { }
+      }
+    }, {
+      "id" : "a6c8d979-3302-464c-a3ac-43f7744556b5",
+      "name" : "ServerTime",
+      "dataType" : "STRING",
+      "type" : {
+        "measurement" : { }
+      }
+    }, {
+      "id" : "a40a53f9-a23e-4a0e-a21c-53c0157bc545",
+      "name" : "State",
+      "dataType" : "INTEGER",
+      "type" : {
+        "measurement" : { }
+      }
+    }, {
+      "id" : "d30ed1be-7851-4527-8dba-e403db6a8904",
+      "name" : "AbsoluteErrorTime",
+      "dataType" : "DOUBLE",
+      "type" : {
+        "measurement" : { }
+      }
+    }, {
+      "id" : "8cd60042-8adf-4058-8215-295ad1e12f3a",
+      "name" : "AbsoluteLength",
+      "dataType" : "DOUBLE",
+      "type" : {
+        "measurement" : { }
+      }
+    }, {
+      "id" : "cc3ff4df-6298-4f0a-b998-5ab6d5cd3905",
+      "name" : "AbsoluteMachineOffTime",
+      "dataType" : "DOUBLE",
+      "type" : {
+        "measurement" : { }
+      }
+    }, {
+      "id" : "66d5676c-5010-4e83-ba29-06a979a8cae7",
+      "name" : "AbsoluteMachineOnTime",
+      "dataType" : "DOUBLE",
+      "type" : {
+        "measurement" : { }
+      }
+    }, {
+      "id" : "69f73745-3bfb-4e7f-b445-b390c2656bab",
+      "name" : "AbsolutePiecesIn",
+      "dataType" : "DOUBLE",
+      "type" : {
+        "measurement" : { }
+      }
+    }, {
+      "id" : "73e2306d-26f0-418d-ace2-740d1b55cb22",
+      "name" : "FeedSpeed",
+      "dataType" : "DOUBLE",
+      "type" : {
+        "measurement" : { }
+      }
+    } ],
+    "assetModelCompositeModels" : [ ],
+    "assetModelHierarchies" : [ ],
+    "tags" : [ ]
+  } ],
+  "assets" : [ {
+    "assetId" : "48aa5370-d557-4b29-bcdc-f66cc5edbb44",
+    "assetModelId" : "8151640f-91d5-4083-af5a-e82894852b3c",
+    "assetName" : "Machine1",
+    "assetProperties" : [ ],
+    "assetHierarchies" : [ ],
+    "tags" : [ ]
+  } ]
+}

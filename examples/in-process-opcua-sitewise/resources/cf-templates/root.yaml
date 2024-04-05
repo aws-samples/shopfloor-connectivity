@@ -1,0 +1,70 @@
+AWSTemplateFormatVersion: '2010-09-09'
+
+Description: >
+  This template deploys a VPC, with a pair of public and private subnets in one Availabilty Zone. 
+  It deploys an Internet Gateway, with a default route on the public subnets.
+  It deploys a NAT Gateway and default routes to the private subnets.
+  Finally, it deploys an EC2 instance in the private subnet, simulating the OPC-UA server, and a Cloud9 instance in the public subnet, that is used as the SFC component.
+
+
+Outputs:
+  nestedPlcStackName:
+    Description: The name of the nested PLC stack
+    Value: !GetAtt nestedPlcStack.Outputs.PlcStackName
+    Export:
+      Name: nestedPlcStackName
+
+  nestedSfcComponentStackName:
+    Description: The name of the nested SFC Component stack
+    Value: !GetAtt nestedSfcComponentStack.Outputs.SfcComponentStackName
+    Export:
+      Name: SfcComponentStackName
+
+Parameters:
+  EnvironmentName:
+    Description: An environment name that is prefixed to resource names
+    Type: String
+    Default: sfc-workshop
+
+  VpcCIDR:
+    Description: Please enter the IP range (CIDR notation) for this VPC
+    Type: String
+    Default: 10.0.0.0/16
+
+  PublicSubnet1CIDR:
+    Description: Please enter the IP range (CIDR notation) for the public subnet in the first Availability Zone
+    Type: String
+    Default: 10.0.150.0/24
+
+  PrivateSubnet1CIDR:
+    Description: Please enter the IP range (CIDR notation) for the private subnet in the first Availability Zone
+    Type: String
+    Default: 10.0.100.0/24
+
+Resources:
+  nestedBaseInfrastructureStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: https://sfc-cloudformation-20240123.s3.eu-central-1.amazonaws.com/nested-base-infrastructure.yaml
+      Parameters:
+        EnvironmentName: !Ref EnvironmentName
+        VpcCIDR: !Ref VpcCIDR
+        PublicSubnet1CIDR: !Ref PublicSubnet1CIDR
+        PrivateSubnet1CIDR: !Ref PrivateSubnet1CIDR
+
+  nestedPlcStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: https://sfc-cloudformation-20240123.s3.eu-central-1.amazonaws.com/nested-plc.yaml
+      Parameters:
+        PrivateSubnet1Param: !GetAtt nestedBaseInfrastructureStack.Outputs.PrivateSubnet1
+        VPC: !GetAtt nestedBaseInfrastructureStack.Outputs.VPC
+
+  nestedSfcComponentStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: https://sfc-cloudformation-20240123.s3.eu-central-1.amazonaws.com/nested-sfc-component.yaml
+      Parameters:
+        PublicSubnet1Param: !GetAtt nestedBaseInfrastructureStack.Outputs.PublicSubnet1
+
+
