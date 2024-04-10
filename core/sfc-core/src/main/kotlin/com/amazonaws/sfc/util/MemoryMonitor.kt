@@ -47,7 +47,7 @@ class MemoryMonitor(
                     )
                 }
                 if (memoryUsage.size > trendSamplesRecent && totalTrend > 0 ) {
-                    log.warning(memoryTrendStr(totalTrend, recentTrend, usedMemory))
+                    log.info(memoryTrendStr(totalTrend, recentTrend, usedMemory))
                     Runtime.getRuntime().gc()
                 } else{
                     log.info(memoryTrendStr(totalTrend, recentTrend, usedMemory))
