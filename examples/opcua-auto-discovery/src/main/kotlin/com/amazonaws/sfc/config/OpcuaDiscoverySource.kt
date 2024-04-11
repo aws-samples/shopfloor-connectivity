@@ -8,6 +8,9 @@ import com.amazonaws.sfc.opcua.OpcuaProfileEventsHelper
 import com.amazonaws.sfc.opcua.OpcuaSource
 import com.amazonaws.sfc.opcua.config.OpcuaConfiguration
 import com.amazonaws.sfc.opcua.config.OpcuaServerProfileConfiguration
+import com.amazonaws.sfc.service.RateLimiter
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
 import org.eclipse.milo.opcua.sdk.client.AddressSpace
 import org.eclipse.milo.opcua.sdk.client.OpcUaClient
 import org.eclipse.milo.opcua.sdk.client.nodes.UaNode
@@ -24,10 +27,25 @@ class OpcuaDiscoverySource(
     val sourceID: String,
     configuration: OpcuaConfiguration,
     serverProfile: OpcuaServerProfileConfiguration?,
+    private val rateLimit : Int = 0,
     private val logger: Logger
 ) : OpcuaSource(sourceID, configuration, AtomicInteger(), logger, null, emptyMap()) {
 
     private val className = this::class.java.simpleName
+
+    private val rateLimiter = if (rateLimit != 0) RateLimiter(rateLimit) else null
+
+    private suspend fun acquireClientReadAccess() : Boolean{
+        if (rateLimiter==null) return true
+        var retries = 10
+        while (true) {
+            if (rateLimiter.tryAcquire()) {
+                return true
+            }
+            retries -= 1
+            if (retries > 0) delay(100) else return false
+        }
+    }
 
     // helper to get all OPCUA and configured companion spec event/alarm types
     private val eventsHelper by lazy {
@@ -38,6 +56,7 @@ class OpcuaDiscoverySource(
     suspend fun discoverNodes(
         nodeID: NodeId,
         discoveryDepth: Int,
+        rateLimit : Int,
         nodeTypesToDiscover: DiscoveredNodeTypes
     ): DiscoveredNodes {
 
@@ -66,7 +85,7 @@ class OpcuaDiscoverySource(
     }
 
     // browses sub nodes of a given node and return these as a list of nodes
-    private fun browseNodes(
+    private  fun browseNodes(
         client: OpcUaClient,
         nodeID: NodeId,
         path: List<UaNode> = emptyList(),
@@ -88,13 +107,22 @@ class OpcuaDiscoverySource(
         val shouldDiscoverEvents =
             nodeTypesToDiscover == DiscoveredNodeTypes.Events || nodeTypesToDiscover == DiscoveredNodeTypes.VariablesAndEvents
 
+
         val nodes = try {
-            client.addressSpace?.browseNodes(
-                nodeID,
-                AddressSpace.BrowseOptions.builder()
-                    .setNodeClassMask(setOf(NodeClass.Object, NodeClass.Variable))
-                    .build()
-            )
+            runBlocking {
+                if (acquireClientReadAccess()) {
+                    client.addressSpace?.browseNodes(
+                        nodeID,
+                        AddressSpace.BrowseOptions.builder()
+                            .setIncludeSubtypes(false)
+                            .setNodeClassMask(setOf(NodeClass.Object, NodeClass.Variable))
+                            .build()
+                    )
+                } else {
+                    log.error("Error  browsing nodes for node ${nodeID.toParseableString()} as reading exceeded number of $rateLimit reads per second.")
+                    emptyList()
+                }
+            }
         } catch (e: Exception) {
             log.errorEx("Error  browsing nodes for node ${nodeID.toParseableString()}", e)
             return emptyList()
@@ -146,16 +174,23 @@ class OpcuaDiscoverySource(
     }
 
     // THis method reads an event node and returns the event type, this can be a OPCUA standard node or configured type
-    private fun getEventType(client: OpcUaClient, node: UaNode): String? {
+    private  fun getEventType(client: OpcUaClient, node: UaNode): String? {
 
         val log = logger.getCtxLoggers(className, "getEventType")
 
         // get sub nodes for an event
         val subNodes = try {
-            client.addressSpace?.browseNodes(
-                node.nodeId,
-                AddressSpace.BrowseOptions.builder().setNodeClassMask(setOf(NodeClass.Variable)).build()
-            )
+            runBlocking {
+                if (acquireClientReadAccess()) {
+                    client.addressSpace?.browseNodes(
+                        node.nodeId,
+                        AddressSpace.BrowseOptions.builder().setNodeClassMask(setOf(NodeClass.Variable)).build()
+                    )
+                } else {
+                    log.error("Error reading sub nodes for node ${node.nodeId} as reading exceeded number of $rateLimit reads per second.")
+                    null
+                }
+            }
         } catch (e: Exception) {
             log.errorEx("Error reading sub nodes for node ${node.nodeId}", e)
             return null
@@ -167,18 +202,25 @@ class OpcuaDiscoverySource(
         // read the event type for event node
         val readValue = ReadValueId(eventTypeNode.nodeId, AttributeId.Value.uid(), null, QualifiedName.NULL_VALUE)
         return try {
-            val readResponse = client.read(0.0, TimestampsToReturn.Both, mutableListOf(readValue)).get()
-            val eventTypeNodeID: NodeId? = readResponse.results.first().value.value as NodeId?
-            log.trace("Read event type for node ${node.nodeId} from sub node ${eventTypeNode.nodeId}, $eventTypeNodeID")
+            runBlocking {
+                if (acquireClientReadAccess()) {
+                    val readResponse = client.read(0.0, TimestampsToReturn.Both, mutableListOf(readValue)).get()
+                    val eventTypeNodeID: NodeId? = readResponse.results.first().value.value as NodeId?
+                    log.trace("Read event type for node ${node.nodeId} from sub node ${eventTypeNode.nodeId}, $eventTypeNodeID")
 
-            // Check id this is a known event type, either an OPCUA type event or a configured event defined in the
-            // profile used to read from the  server
-            val i = eventsHelper.allEventClassIdentifiers.indexOf(eventTypeNodeID)
-            if (i == -1) {
-                log.error("Event ${eventTypeNode.nodeId} for node ${node.nodeId} is not a known event type")
-                null
-            } else {
-                eventsHelper.allEventClassNames[i]
+                    // Check id this is a known event type, either an OPCUA type event or a configured event defined in the
+                    // profile used to read from the  server
+                    val i = eventsHelper.allEventClassIdentifiers.indexOf(eventTypeNodeID)
+                    if (i == -1) {
+                        log.error("Event ${eventTypeNode.nodeId} for node ${node.nodeId} is not a known event type")
+                        null
+                    } else {
+                        eventsHelper.allEventClassNames[i]
+                    }
+                } else {
+                    log.error("Error reading event type for node ${node.nodeId} from sub node ${eventTypeNode.nodeId} as reading exceeded number of $rateLimit reads per second.")
+                    null
+                }
             }
         } catch (e: Exception) {
             log.errorEx("Error reading event type for node ${node.nodeId} from sub node ${eventTypeNode.nodeId}", e)

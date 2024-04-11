@@ -36,6 +36,11 @@ class AutoDiscoveryProviderConfiguration : Validate {
     val savedLastConfig : File?
         get() = if (_savedLastConfig != null) File(_savedLastConfig!!) else null
 
+    @SerializedName(CONFIG_MAX_SERVER_READS_PER_SECONDS)
+    private var _maxServerReadsPerSecond: Int = 0
+    val maxServerReadsPerSecond
+        get() = _maxServerReadsPerSecond
+
 
     private var _validated = false
 
@@ -72,6 +77,7 @@ class AutoDiscoveryProviderConfiguration : Validate {
         const val CONFIG_NODES_TO_DISCOVER = "DiscoveredNodeTypes"
         const val CONFIG_SAVED_LAST_CONFIG = "SavedLastConfig"
         const val CONFIG_WAIT_FOR_RETRY = "WaitForRetry"
+        const val CONFIG_MAX_SERVER_READS_PER_SECONDS = "MaxServerReadsPerSecond"
 
         const val CONFIG_DEFAULT_MAX_RETRIES = 10
         const val CONFIG_DEFAULT_WAIT_BEFORE_RETRY = 60000L

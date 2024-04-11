@@ -223,6 +223,7 @@ class OpcuaAutoDiscoveryConfigProvider(
             sourceID = sourceID,
             configuration = opcuaConfigInput,
             serverProfile = serverProfile,
+            rateLimit = providerConfig?.maxServerReadsPerSecond?:0,
             logger = logger
         )
 
@@ -242,6 +243,7 @@ class OpcuaAutoDiscoveryConfigProvider(
                     source.discoverNodes(
                         nodeID = node.nodeID,
                         discoveryDepth = node.discoveryDepth,
+                        rateLimit = providerConfig?.maxServerReadsPerSecond?:0,
                         nodeTypesToDiscover = node.nodeTypesToDiscover
                     )
                 }
