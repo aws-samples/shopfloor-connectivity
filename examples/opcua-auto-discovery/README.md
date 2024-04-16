@@ -62,7 +62,7 @@ The __AutoDiscovery__ configuration section contains the configuration for the a
                "Exclusions": [ "ServerDiagnostics/.*"]
            },
            {
-               "Prefix" " "MyDeviceData",   
+               "Prefix" : "MyDeviceData",   
                "NodeId": "ns=6;s=MyDevice",
                "DiscoveredNodeTypes": "VariablesAndEvents",
                "Inclusions" : [".*/MyLevel.*"]
@@ -74,7 +74,7 @@ The __AutoDiscovery__ configuration section contains the configuration for the a
        "MaxRetries": 10,
        "SavedLastConfig" : "generated-config.json"
      },
-...
+
 ```
 
 The __Sources__ section contains a table with an entry for each source for which nodes will be recovered. The key in this
