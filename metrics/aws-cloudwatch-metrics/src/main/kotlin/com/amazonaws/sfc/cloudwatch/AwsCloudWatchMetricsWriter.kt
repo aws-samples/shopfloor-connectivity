@@ -155,7 +155,7 @@ class AwsCloudWatchMetricsWriter(private val configReader: ConfigReader, private
         try {
             val resp = clientHelper.executeServiceCallWithRetries {
                 try {
-                    log.info("Writing ${metricDatumBuffer.size} metric data points")
+                    log.info("Writing ${metricDatumBuffer.size} metric data points to CloudWatch}")
                     val resp = metricsClient.putMetricData(request)
                     resp
                 } catch (e: AwsServiceException) {

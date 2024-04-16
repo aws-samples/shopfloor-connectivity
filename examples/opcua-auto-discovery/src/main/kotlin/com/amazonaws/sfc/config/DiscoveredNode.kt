@@ -6,15 +6,15 @@ package com.amazonaws.sfc.config
 import org.eclipse.milo.opcua.sdk.client.nodes.UaNode
 
 // Base lass to hold data for discovered nodes
-sealed class DiscoveredNode(val node: UaNode, val parents: List<UaNode>) {
+sealed class DiscoveredNode(val node: UaNode, val parents: List<UaNode>, val prefix : String?) {
     val path: String by lazy { (parents.map { it.browseName.name }.plus(node.browseName.name)).joinToString(separator = "/") }
 }
 
 // Discovered variable node
-class VariableNode(node: UaNode, parents: List<UaNode>) : DiscoveredNode(node, parents)
+class VariableNode(node: UaNode, parents: List<UaNode>, prefix: String?) : DiscoveredNode(node, parents, prefix)
 
 
 // Discovered event node
-class EventNode(node: UaNode, parents: List<UaNode>, val eventType: String) : DiscoveredNode(node, parents)
+class EventNode(node: UaNode, parents: List<UaNode>, val eventType: String, prefix: String?) : DiscoveredNode(node, parents, prefix)
 
 typealias DiscoveredNodes = List<DiscoveredNode>

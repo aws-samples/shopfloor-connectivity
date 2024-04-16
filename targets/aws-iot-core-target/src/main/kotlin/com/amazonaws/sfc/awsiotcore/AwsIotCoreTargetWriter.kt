@@ -74,7 +74,7 @@ class AwsIotCoreTargetWriter(
         clientHelper.targetConfig(config, targetID, AWS_IOT_CORE_TARGET)
     }
     private val buffer = TargetDataBuffer(storeFullMessage = false)
-    private val doesBatching by lazy { targetConfig.batchSize != null || targetConfig.batchCount != null || targetConfig.batchInterval != Duration.INFINITE }
+    private val doesBatching by lazy { targetConfig.batchSize> 0 || targetConfig.batchCount > 0 || targetConfig.batchInterval != Duration.INFINITE }
     private val usesCompression = targetConfig.compressionType != CompressionType.NONE
 
     private val dataClientBuilder: IotDataPlaneClientBuilder = IotDataPlaneClient.builder().endpointOverride(URI.create("https://$endpoint"))
@@ -184,7 +184,7 @@ class AwsIotCoreTargetWriter(
 
                             if (checkMessagePayloadSize(targetData, messagePayload.length, log)) {
                                 if (exceedBufferOrMaxPayloadWhenBufferingMessage(messagePayload)) {
-                                    log.trace("Batch size of ${targetConfig.batchSize?.byteCountString} or AWS IoT Core max payload ise of ${AWS_IOT_CORE_MAX_PAYLOAD_SIZE.byteCountString} reached")
+                                    log.trace("Batch size of ${targetConfig.batchSize.byteCountString} or AWS IoT Core max payload ise of ${AWS_IOT_CORE_MAX_PAYLOAD_SIZE.byteCountString} reached")
                                     timer = writeBufferedMessages(timer)
                                 }
 
@@ -192,7 +192,7 @@ class AwsIotCoreTargetWriter(
                                 buffer.add(targetData, messagePayload)
 
                                 log.trace("Received message, buffered items is ${buffer.size} with a total size of ${buffer.payloadSize.byteCountString}")
-                                if (targetData.noBuffering || bufferReachedMaxSizeOrMessages(log)) {
+                                if (targetData.noBuffering || !doesBatching || bufferReachedMaxSizeOrMessages(log)) {
                                     timer = writeBufferedMessages(timer)
                                 }
 
@@ -231,7 +231,7 @@ class AwsIotCoreTargetWriter(
     private fun exceedBufferOrMaxPayloadWhenBufferingMessage(payload: String): Boolean {
         if (usesCompression) return false
         val bufferedPayloadSizeWhenAddingMessage = payload.length + (2 + (buffer.size - 1)) + buffer.payloadSize
-        val bufferSizeExceededWhenAddingMessage = targetConfig.batchSize != null && bufferedPayloadSizeWhenAddingMessage > targetConfig.batchSize!!
+        val bufferSizeExceededWhenAddingMessage = (targetConfig.batchSize > 0) && (bufferedPayloadSizeWhenAddingMessage > targetConfig.batchSize)
         val maxPayloadSizeExceededWhenAddingMessage = bufferedPayloadSizeWhenAddingMessage > AWS_IOT_CORE_MAX_PAYLOAD_SIZE
         val reachedMaxSizeWhenAddingToBuffer = (bufferSizeExceededWhenAddingMessage || maxPayloadSizeExceededWhenAddingMessage)
         return reachedMaxSizeWhenAddingToBuffer
@@ -239,14 +239,13 @@ class AwsIotCoreTargetWriter(
 
     private fun bufferReachedMaxSizeOrMessages(log: Logger.ContextLogger): Boolean {
 
-        val reachedBufferCount = targetConfig.batchCount != null && buffer.size >= targetConfig.batchCount!!
-        if (((targetConfig.batchCount ?: 0) > 1) && reachedBufferCount) log.trace("${targetConfig.batchCount} batch count reached")
+        val reachedBufferCount = buffer.size >= targetConfig.batchCount
+        if (((targetConfig.batchCount) > 1) && reachedBufferCount) log.trace("${targetConfig.batchCount} batch count reached")
 
         val reachedBufferSize = !reachedBufferCount &&
-                targetConfig.batchSize != null &&
-                (buffer.payloadSize + (2 + (buffer.size - 1)) >= targetConfig.batchSize!!)
+                (buffer.payloadSize + (2 + (buffer.size - 1)) >= targetConfig.batchSize)
 
-        if (reachedBufferSize) log.trace("${targetConfig.batchSize?.byteCountString} batch size reached")
+        if (reachedBufferSize) log.trace("${targetConfig.batchSize.byteCountString} batch size reached")
 
         return reachedBufferSize || reachedBufferCount
     }

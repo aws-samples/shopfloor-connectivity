@@ -50,6 +50,7 @@ The __AutoDiscovery__ configuration section contains the configuration for the a
          "OPCUA-SOURCE": 
          [
            {
+               "Prefix" : "Simulation",    
                "NodeId": "ns=3;s=85/0:Simulation",
                "DiscoveryDepth": "10",
                "DiscoveredNodeTypes": "VariablesAndEvents",
@@ -61,6 +62,7 @@ The __AutoDiscovery__ configuration section contains the configuration for the a
                "Exclusions": [ "ServerDiagnostics/.*"]
            },
            {
+               "Prefix" " "MyDeviceData",   
                "NodeId": "ns=6;s=MyDevice",
                "DiscoveredNodeTypes": "VariablesAndEvents",
                "Inclusions" : [".*/MyLevel.*"]
@@ -70,7 +72,7 @@ The __AutoDiscovery__ configuration section contains the configuration for the a
        "IncludeDescription": true,
        "WaitForRetry": 60000,
        "MaxRetries": 10,
-       "SavedLastConfig" : "generated-config.json",
+       "SavedLastConfig" : "generated-config.json"
      },
 ...
 ```
@@ -109,6 +111,15 @@ the channel created for that node
 - __MaxRetries__ (optional): Max number of retries, default is 10 retries. Set to 0 to disable retries.
 - __SavedLastConfig__ (optional): This is the name of the file to which the last generated configuration will be saved. 
 Note that if the file already exists it will be overwritten by the provider.
+- __MaxServerReadsPerSecond__ (optional): Maximum of browse and read operations per second the configuration provider will execute. As autodiscovery
+is an intensive operation because of the required browse and read actions it can potentially overload the server, in which case this option can be used
+to limit the amount of actions. 
+- __Prefix__ (optional): This is an optional prefix which will be used for the names of the channels.
+
+The required node read actions for are executed in batches. The number of nodes in each batch is the value configured of the __ReadBatchSize__ 
+option for the OPCUA server configuration. At message level, the client will use the values of __MaxMessageSize__, __MaxChunkSize__ and __MaxChunk__ 
+configured for the OPCUA server. These 4 and the MaxServerReadsPerSecond options can be used to reduce the load on the OPCUA server during the 
+auto discovery process.
 
 When the content of the file which is used as value for the -config parameter is updated, the provider will automatically run the discovery
 process.

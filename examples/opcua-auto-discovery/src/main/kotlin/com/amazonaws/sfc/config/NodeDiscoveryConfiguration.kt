@@ -7,6 +7,7 @@ import com.amazonaws.sfc.config.AutoDiscoveryProviderConfiguration.Companion.CON
 import com.amazonaws.sfc.config.AutoDiscoveryProviderConfiguration.Companion.CONFIG_EXCLUSIONS
 import com.amazonaws.sfc.config.AutoDiscoveryProviderConfiguration.Companion.CONFIG_INCLUSIONS
 import com.amazonaws.sfc.config.AutoDiscoveryProviderConfiguration.Companion.CONFIG_NODES_TO_DISCOVER
+import com.amazonaws.sfc.config.AutoDiscoveryProviderConfiguration.Companion.CONFIG_PREFIX
 import com.amazonaws.sfc.opcua.config.OpcuaConfiguration.Companion.CONFIG_NODE_ID
 import com.google.gson.annotations.SerializedName
 import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId
@@ -47,6 +48,11 @@ class NodeDiscoveryConfiguration : Validate {
     private var _discoveryDepth: Int = 0
     val discoveryDepth
         get() = _discoveryDepth
+
+    @SerializedName(CONFIG_PREFIX)
+    private var _prefix: String? = null
+    val prefix
+        get() = _prefix
 
     override fun validate() {
 

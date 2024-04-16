@@ -78,6 +78,7 @@ class AutoDiscoveryProviderConfiguration : Validate {
         const val CONFIG_SAVED_LAST_CONFIG = "SavedLastConfig"
         const val CONFIG_WAIT_FOR_RETRY = "WaitForRetry"
         const val CONFIG_MAX_SERVER_READS_PER_SECONDS = "MaxServerReadsPerSecond"
+        const val CONFIG_PREFIX = "Prefix"
 
         const val CONFIG_DEFAULT_MAX_RETRIES = 10
         const val CONFIG_DEFAULT_WAIT_BEFORE_RETRY = 60000L

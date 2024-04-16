@@ -4,7 +4,6 @@
 
 package com.amazonaws.sfc.mqtt
 
-import com.amazonaws.sfc.config.BaseConfiguration
 import com.amazonaws.sfc.config.ConfigReader
 import com.amazonaws.sfc.data.*
 import com.amazonaws.sfc.data.JsonHelper.Companion.extendedJsonException
@@ -59,7 +58,7 @@ class MqttTargetWriter(
     )
 
     private val buffer = TargetDataBuffer(storeFullMessage = false)
-    private val doesBatching by lazy { targetConfig.batchSize != null || targetConfig.batchCount != null || targetConfig.batchInterval != Duration.INFINITE }
+    private val doesBatching by lazy { targetConfig.batchSize != 0 || targetConfig.batchCount != 0 || targetConfig.batchInterval != Duration.INFINITE }
     private val usesCompression = targetConfig.compressionType != CompressionType.NONE
 
     private var _mqttClient: MqttClient? = null
@@ -136,7 +135,7 @@ class MqttTargetWriter(
                         if (checkMessagePayloadSize(targetData, messagePayload.length, log)) {
 
                             if (exceedBufferOrMaxPayloadWhenBufferingMessage(messagePayload)) {
-                                log.trace("Batch size of ${targetConfig.batchSize?.byteCountString}${if (targetConfig.maxPayloadSize != null) " or ${targetConfig.maxPayloadSize!!.byteCountString}" else ""}}reached")
+                                log.trace("Batch size of ${targetConfig.batchSize.byteCountString}${if (targetConfig.maxPayloadSize != null) " or ${targetConfig.maxPayloadSize!!.byteCountString}" else ""}}reached")
                                 timer = writeBufferedMessages(timer)
                             }
                             targetResults?.add(targetData)
@@ -144,7 +143,7 @@ class MqttTargetWriter(
 
                             log.trace("Received message, buffered size is ${buffer.payloadSize.byteCountString}")
 
-                            if (targetData.noBuffering || bufferReachedMaxSizeOrMessages(log)) {
+                            if (targetData.noBuffering || !doesBatching || bufferReachedMaxSizeOrMessages(log)) {
                                 timer = writeBufferedMessages(timer)
                             }
                         }
@@ -177,14 +176,13 @@ class MqttTargetWriter(
     }
 
     private fun bufferReachedMaxSizeOrMessages(log: Logger.ContextLogger): Boolean {
-        val reachedBufferCount = ((targetConfig.batchCount != null) && (buffer.size >= targetConfig.batchCount!!))
-        if (((targetConfig.batchCount ?: 0)) > 1 && reachedBufferCount) log.trace("${targetConfig.batchCount} batch count reached")
+        val reachedBufferCount =  (buffer.size >= targetConfig.batchCount)
+        if ((targetConfig.batchCount ) > 1 && reachedBufferCount) log.trace("${targetConfig.batchCount} batch count reached")
 
         val reachedBufferSize = !reachedBufferCount &&
-                targetConfig.batchSize != null &&
-                (buffer.payloadSize + (2 + (buffer.size - 1)) >= targetConfig.batchSize!!)
+                (buffer.payloadSize + (2 + (buffer.size - 1)) >= targetConfig.batchSize)
 
-        if (reachedBufferSize) log.trace("${targetConfig.batchSize?.byteCountString} batch size reached")
+        if (reachedBufferSize) log.trace("${targetConfig.batchSize.byteCountString} batch size reached")
 
         return reachedBufferSize || reachedBufferCount
     }
@@ -202,7 +200,7 @@ class MqttTargetWriter(
     private fun exceedBufferOrMaxPayloadWhenBufferingMessage(payload: String): Boolean {
         if (usesCompression) return false
         val bufferedPayloadSizeWhenAddingMessage = payload.length + (2 + (buffer.size - 1)) + buffer.payloadSize
-        val bufferSizeExceededWhenAddingMessage = targetConfig.batchSize != null && bufferedPayloadSizeWhenAddingMessage > targetConfig.batchSize!!
+        val bufferSizeExceededWhenAddingMessage = (targetConfig.batchSize > 0) && (bufferedPayloadSizeWhenAddingMessage > targetConfig.batchSize)
         val maxPayloadSizeExceededWhenAddingMessage =
             targetConfig.maxPayloadSize != null && bufferedPayloadSizeWhenAddingMessage > targetConfig.maxPayloadSize!!
         val reachedMaxSizeWhenAddingToBuffer = (bufferSizeExceededWhenAddingMessage || maxPayloadSizeExceededWhenAddingMessage)

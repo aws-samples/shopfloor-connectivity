@@ -20,7 +20,6 @@ class AwsCloudWatchConfiguration : AwsServiceConfig, Validate {
     @SerializedName(BaseConfiguration.CONFIG_REGION)
     private var _region: String? = null
 
-
     override val region: Region?
         get() = if (_region.isNullOrEmpty()) null else Region.of(_region!!.lowercase())
 

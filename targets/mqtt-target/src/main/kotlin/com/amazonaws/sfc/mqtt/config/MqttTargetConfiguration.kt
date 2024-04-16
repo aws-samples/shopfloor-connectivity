@@ -115,12 +115,12 @@ class MqttTargetConfiguration : TargetConfiguration(), Validate {
     @SerializedName(CONFIG_BATCH_COUNT)
     private var _batchCount: Int? = null
     val batchCount
-        get() = _batchCount
+        get() = _batchCount?:0
 
     @SerializedName(CONFIG_BATCH_SIZE)
     private var _batchSize: Int? = null
     val batchSize
-        get() = if (_batchSize != null) _batchSize!! * 1024 else null
+        get() = if (_batchSize != null) _batchSize!! * 1024 else 0
 
     @SerializedName(CONFIG_BATCH_INTERVAL)
     private var _batchInterval: Int? = null

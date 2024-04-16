@@ -105,7 +105,6 @@ abstract class AwsServiceClientHelper(
             .advancedOptions(mutableMapOf(SdkAdvancedClientOption.USER_AGENT_PREFIX to SFC_USER_AGENT_PREFIX))
             .build())
 
-
         builder.build() as SdkClient
 
     }

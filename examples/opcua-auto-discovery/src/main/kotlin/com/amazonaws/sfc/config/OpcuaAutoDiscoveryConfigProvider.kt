@@ -37,7 +37,7 @@ class OpcuaAutoDiscoveryConfigProvider(
 ) : ConfigProvider {
 
     private val className = this::class.java.simpleName
-    private val scope = buildScope("CustomConfigProvider")
+    private val scope = buildScope("OpcuaAutoDiscoveryConfigProvider")
 
     private var waitBeforeRetry: Duration? = null
     private var maxRetries = CONFIG_DEFAULT_MAX_RETRIES
@@ -160,11 +160,13 @@ class OpcuaAutoDiscoveryConfigProvider(
         if (nodesForSource.isEmpty()) return 0
 
         // discover nodes for this source
-        val discoveredNodesForSource = discoverSourceNodesNodes(sourceID, sourceConfig, opcuaConfigInput, nodesForSource)
+        val discoveredNodesForSource =
+            discoverSourceNodesNodes(sourceID, sourceConfig, opcuaConfigInput, nodesForSource)
 
         // channels configuration for source
         @Suppress("UNCHECKED_CAST")
         var outputChannelsForSource = configOutputSources[sourceID]?.get(CONFIG_CHANNELS) as MutableMap<String, Map<String, Any>>?
+
         if (outputChannelsForSource == null) {
             outputChannelsForSource = mutableMapOf()
             (configOutputSources[sourceID] as MutableMap<String, Any>?)?.set(CONFIG_CHANNELS, outputChannelsForSource)
@@ -213,7 +215,10 @@ class OpcuaAutoDiscoveryConfigProvider(
         val adapterForSource = getProtocolAdapterForSource(sourceID, opcuaConfigInput, sourceConfig)
 
         // get the server used to read this source
-        val server = if (adapterForSource != null) getServerForSource(sourceID, sourceConfig.sourceAdapterOpcuaServerID, adapterForSource) else null
+        val server = if (adapterForSource != null)
+            getServerForSource(sourceID, sourceConfig.sourceAdapterOpcuaServerID, adapterForSource)
+        else
+            null
 
         // get the server profile, as it is needed to validate the event type of discovered event nodes
         val serverProfile = adapterForSource?.serverProfiles?.get(server?.serverProfile)
@@ -222,8 +227,9 @@ class OpcuaAutoDiscoveryConfigProvider(
         val opcuaSource = OpcuaDiscoverySource(
             sourceID = sourceID,
             configuration = opcuaConfigInput,
+            serverConfig = server,
             serverProfile = serverProfile,
-            rateLimit = providerConfig?.maxServerReadsPerSecond?:0,
+            rateLimit = providerConfig?.maxServerReadsPerSecond ?: 0,
             logger = logger
         )
 
@@ -232,7 +238,7 @@ class OpcuaAutoDiscoveryConfigProvider(
     }
 
 
-    private fun discoverNodes(source: OpcuaDiscoverySource, nodesForSource: NodeDiscoveryConfigurations): DiscoveredNodes {
+    private fun discoverNodes( source: OpcuaDiscoverySource, nodesForSource: NodeDiscoveryConfigurations): DiscoveredNodes {
 
         val log = logger.getCtxLoggers(className, "discoverNodes")
 
@@ -243,8 +249,8 @@ class OpcuaAutoDiscoveryConfigProvider(
                     source.discoverNodes(
                         nodeID = node.nodeID,
                         discoveryDepth = node.discoveryDepth,
-                        rateLimit = providerConfig?.maxServerReadsPerSecond?:0,
-                        nodeTypesToDiscover = node.nodeTypesToDiscover
+                        nodeTypesToDiscover = node.nodeTypesToDiscover,
+                        prefix = node.prefix
                     )
                 }
 
@@ -294,9 +300,11 @@ class OpcuaAutoDiscoveryConfigProvider(
                     if (!included) {
                         // include if pathname of node matches this include pattern
                         included = includePattern.matcher(node.path).matches()
-                        if (included) trace("Node \"${node.path}\" is included by pattern \"${includePattern.pattern()}\"")
+                        if (included)
+                            trace("Node \"${node.path}\" is included by pattern \"${includePattern.pattern()}\"")
                     }
                 }
+                if (!included) trace("Node \"${node.path}\" is not included by any of the include patterns pattern")
                 included
             }
         }
@@ -306,7 +314,7 @@ class OpcuaAutoDiscoveryConfigProvider(
     private fun buildNodeChannelMapEntry(discoveredNode: DiscoveredNode): Pair<String, MutableMap<String, Any>> {
 
         // build the channelID to use as key in the map
-        val channelID: String = buildChannelIDForNode(discoveredNode.parents, discoveredNode.node)
+        val channelID: String = buildChannelIDForNode(discoveredNode)
 
         val newChannel = mutableMapOf<String, Any>()
 
@@ -329,7 +337,7 @@ class OpcuaAutoDiscoveryConfigProvider(
     }
 
 
-    private suspend fun emitConfiguration(channel : Channel<String>, configStr: String) {
+    private suspend fun emitConfiguration(channel: Channel<String>, configStr: String) {
         if (lastConfig != configStr) {
             val log = logger.getCtxLoggers(className, "emitConfiguration")
             log.trace("Emitting configuration to SFC core\n$configStr")
@@ -408,23 +416,30 @@ class OpcuaAutoDiscoveryConfigProvider(
             return gson.toJson(configOutput)
         }
 
-        private fun buildChannelIDForNode(parents: List<UaNode>, node: UaNode) =
+        private fun buildChannelIDForNode(discoveredNode: DiscoveredNode): String {
             // the channel is a concatenation, with a '/' separator of cleaned up browse names of the path for the node
-            (parents + listOf(node))
+            val s = (discoveredNode.parents + listOf(discoveredNode.node))
                 .joinToString(separator = "/") {
                     cleanupNameForNode(it)
                 }
+            return if (discoveredNode.prefix != null)
+                "${cleanupName(discoveredNode.prefix)}/$s"
+            else s
+        }
 
 
         private fun cleanupNameForNode(node: UaNode): String {
             // cleanup browse name for use as channelID for the generated channels
-            return node.browseName.name.toString()
-                .replace("http://", "http_")
+            return cleanupName(node.browseName.name.toString())
+
+        }
+
+        private fun cleanupName(s: String) =
+            s.replace("http://", "http_")
                 .replace("/", "_")
                 .replace(":", "_")
                 .replace(" ", "")
                 .trim('_')
-        }
 
         @JvmStatic
         @Suppress("unused")
