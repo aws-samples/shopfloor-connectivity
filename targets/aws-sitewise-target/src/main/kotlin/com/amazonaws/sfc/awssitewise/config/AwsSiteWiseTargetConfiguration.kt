@@ -26,13 +26,18 @@ import kotlin.time.toDuration
  */
 @ConfigurationClass
 class AwsSiteWiseTargetConfiguration : AwsServiceConfig, TargetConfiguration() {
-    @SerializedName("Assets")
+    @SerializedName(CONFIG_ASSETS)
     private var _assets: List<AwsSiteWiseAssetConfiguration> = emptyList()
 
     val assets: List<AwsSiteWiseAssetConfiguration>
         get() {
             return _assets
         }
+
+    @SerializedName(CONFIG_ASSET_CREATION)
+    private var _assetCreationConfiguration: AwsSiteWiseAssetCreationConfiguration? = null
+    val assetCreationConfiguration: AwsSiteWiseAssetCreationConfiguration?
+        get() =  _assetCreationConfiguration
 
     /**
      * AWS region
@@ -101,10 +106,13 @@ class AwsSiteWiseTargetConfiguration : AwsServiceConfig, TargetConfiguration() {
 
     companion object {
         private const val DEFAULT_BATCH_SIZE = 10
+        private const val CONFIG_ASSETS = "Assets"
+        private const val CONFIG_ASSET_CREATION = "AssetCreation"
 
         private val default = AwsSiteWiseTargetConfiguration()
 
         fun create(assets: List<AwsSiteWiseAssetConfiguration> = default.assets,
+                   assetCreation : AwsSiteWiseAssetCreationConfiguration? = default._assetCreationConfiguration,
                    region: String? = default._region,
                    batchSize: Int = default._batchSize,
                    interval: Int? = default._interval,
@@ -125,6 +133,7 @@ class AwsSiteWiseTargetConfiguration : AwsServiceConfig, TargetConfiguration() {
 
             with(instance) {
                 _assets = assets
+                _assetCreationConfiguration = assetCreation
                 _region = region
                 _batchSize = batchSize
                 _interval = interval

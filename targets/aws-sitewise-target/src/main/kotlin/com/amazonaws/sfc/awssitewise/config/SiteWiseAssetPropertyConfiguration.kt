@@ -163,7 +163,7 @@ class SiteWiseAssetPropertyConfiguration : Validate {
         private const val CONFIG_PROPERTY_ALIAS = "PropertyAlias"
         private const val CONFIG_DATA_TYPE = "DataType"
         private const val CONFIG_DATA_PATH = "DataPath"
-        private const val CONFIG_TIMESTAMP_PATH = "TimestampPath"
+        const val CONFIG_TIMESTAMP_PATH = "TimestampPath"
 
 
         private val jmespath by lazy {

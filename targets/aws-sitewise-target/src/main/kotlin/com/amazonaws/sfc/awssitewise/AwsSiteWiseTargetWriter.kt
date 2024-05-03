@@ -28,13 +28,13 @@ import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_WRITE_ERRORS
 import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_WRITE_SIZE
 import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_WRITE_SUCCESS
 import com.amazonaws.sfc.system.DateTime
+import com.amazonaws.sfc.system.DateTime.systemDateTime
 import com.amazonaws.sfc.targets.AwsServiceTargetClientHelper
 import com.amazonaws.sfc.targets.TargetDataChannel
 import com.amazonaws.sfc.targets.TargetException
 import com.amazonaws.sfc.util.*
 import io.burt.jmespath.Expression
 import kotlinx.coroutines.*
-import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.selects.select
 import software.amazon.awssdk.awscore.exception.AwsServiceException
 import software.amazon.awssdk.services.iotsitewise.IoTSiteWiseClient
@@ -78,6 +78,14 @@ class AwsSiteWiseTargetWriter(
             IoTSiteWiseClient.builder(),
             logger
         )
+
+    private val assetHelper by lazy {
+        val assetCreationConfiguration = targetConfig.assetCreationConfiguration
+        if (assetCreationConfiguration != null)
+            SiteWiseAssetHelper(clientHelper.serviceClient as IoTSiteWiseClient, targetID, assetCreationConfiguration, logger)
+        else
+            null
+    }
 
     private val targetResults = if (resultHandler != null) TargetResultBufferedHelper(targetID, resultHandler, logger) else null
     private val sitewiseClient: AwsSiteWiseClient
@@ -168,7 +176,7 @@ class AwsSiteWiseTargetWriter(
         }
     }
 
-    private fun handleTargetData(targetData: TargetData) {
+    private suspend fun handleTargetData(targetData: TargetData) {
 
         val log = logger.getCtxLoggers(className, "handleTargetData")
 
@@ -178,6 +186,22 @@ class AwsSiteWiseTargetWriter(
         }
 
         targetResults?.add(targetData)
+
+        handleTargetDataForCreatedAssets(targetData)
+        handleDataForConfiguredAssets(targetData)
+
+        // Keeps track of reads in batch, flush if configured value is reached
+        batchCount += 1
+        if (targetData.noBuffering || batchCount >= targetConfig.batchSize) {
+            flush()
+            batchCount = 0
+        }
+    }
+
+    private fun handleDataForConfiguredAssets( targetData: TargetData) {
+
+        val log = logger.getCtxLoggers(className, "handleDataForConfiguredAssets")
+
         // Remapping keys of the data to escape unsupported characters for jmespath queries
         val data = targetData.toMap(config.elementNames, jmesPathCompatibleKeys = true)
         // For every configured asset
@@ -200,11 +224,40 @@ class AwsSiteWiseTargetWriter(
                 }
             }
         }
-        // Keeps track of reads in batch, flush if configured value is reached
-        batchCount += 1
-        if (targetData.noBuffering || batchCount >= targetConfig.batchSize) {
-            flush()
-            batchCount = 0
+    }
+
+    private suspend fun handleTargetDataForCreatedAssets(targetData: TargetData) {
+
+        val log = logger.getCtxLoggers(className, "handleTargetDataForCreatedAssets")
+
+        if (assetHelper != null) {
+            targetData.sources.forEach { (sourceName, sourceData) ->
+                try {
+                    val (asset, channelToAssetPropertyMap) = assetHelper!!.assetAndPropertiesForSource(sourceName, targetData)
+                    sourceData.channels.filter { it.value.value != null }.forEach { (channelName, channelData) ->
+                        val channelPropertyName = targetConfig.assetCreationConfiguration!!.renderAssetPropertyName(
+                            targetID,
+                            targetData.schedule,
+                            sourceName,
+                            channelName,
+                            sourceData.metadata
+                        )
+                        val assetProperty: AssetProperty? = channelToAssetPropertyMap[channelPropertyName]
+                        if (assetProperty != null) {
+                            val dataType = SiteWiseDataType.from(assetProperty.dataType())
+                            val assetValue =
+                                buildAssetValue(dataType, channelData.value!!, channelData.timestamp ?: systemDateTime())
+                            storeValueAndTimestampInBuffer(
+                                asset,
+                                SiteWiseAssetPropertyConfiguration.create(propertyId = assetProperty.id(), dataType = dataType),
+                                assetValue
+                            )
+                        }
+                    }
+                } catch (e: Exception) {
+                    log.errorEx("Error getting asset for source $sourceName", e)
+                }
+            }
         }
     }
 
@@ -248,7 +301,7 @@ class AwsSiteWiseTargetWriter(
     private fun buildAssetValue(dataType: SiteWiseDataType, value: Any, timestamp: Instant): AssetPropertyValue {
 
         // Use configured datatype, if unspecified determine type of data from the value
-        val usedDataType = if (dataType != SiteWiseDataType.UNSPECIFIED) dataType else siteWiseDataType(value)
+        val usedDataType = if (dataType != SiteWiseDataType.UNSPECIFIED) dataType else SiteWiseDataType.fromValue(value)
 
         // Build the AssetPropertyValue
         return AssetPropertyValue.builder()
@@ -425,7 +478,12 @@ class AwsSiteWiseTargetWriter(
         runBlocking {
             metricsCollector?.put(
                 adapterID,
-                metricsCollector?.buildValueDataPoint(adapterID, MetricsCollector.METRICS_MEMORY, MemoryMonitor.getUsedMemoryMB().toDouble(),MetricUnits.MEGABYTES ),
+                metricsCollector?.buildValueDataPoint(
+                    adapterID,
+                    MetricsCollector.METRICS_MEMORY,
+                    MemoryMonitor.getUsedMemoryMB().toDouble(),
+                    MetricUnits.MEGABYTES
+                ),
                 metricsCollector?.buildValueDataPoint(adapterID, METRICS_WRITES, 1.0, MetricUnits.COUNT, metricDimensions),
                 metricsCollector?.buildValueDataPoint(adapterID, METRICS_MESSAGES, request.entries().size.toDouble(), MetricUnits.COUNT, metricDimensions),
                 metricsCollector?.buildValueDataPoint(adapterID, METRICS_WRITE_DURATION, writeDurationInMillis, MetricUnits.MILLISECONDS, metricDimensions),
@@ -539,28 +597,6 @@ class AwsSiteWiseTargetWriter(
                 throw TargetException("Error creating AWS SiteWise target writer, ${e.message}")
             }
         }
-
-        /**
-         * Determined the SiteWise DataType from a value
-         * @param value Any The data value
-         * @return SiteWiseDataType
-         */
-        private fun siteWiseDataType(value: Any): SiteWiseDataType =
-            when (value) {
-                is String -> SiteWiseDataType.STRING
-                is Boolean -> SiteWiseDataType.BOOLEAN
-                is Byte -> SiteWiseDataType.INTEGER
-                is Short -> SiteWiseDataType.INTEGER
-                is Int -> SiteWiseDataType.INTEGER
-                is Long -> SiteWiseDataType.INTEGER
-                is UByte -> SiteWiseDataType.INTEGER
-                is UShort -> SiteWiseDataType.INTEGER
-                is UInt -> SiteWiseDataType.INTEGER
-                is ULong -> SiteWiseDataType.INTEGER
-                is Double -> SiteWiseDataType.DOUBLE
-                is Float -> SiteWiseDataType.DOUBLE
-                else -> SiteWiseDataType.STRING
-            }
 
 
         /**
