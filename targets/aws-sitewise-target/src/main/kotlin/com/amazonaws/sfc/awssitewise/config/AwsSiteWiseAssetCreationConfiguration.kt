@@ -6,7 +6,6 @@ package com.amazonaws.sfc.awssitewise.config
 import com.amazonaws.sfc.config.ConfigurationClass
 import com.amazonaws.sfc.system.DateTime.systemDateTime
 import com.google.gson.annotations.SerializedName
-import io.burt.jmespath.Expression
 
 @ConfigurationClass
 class AwsSiteWiseAssetCreationConfiguration {

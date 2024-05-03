@@ -423,7 +423,7 @@ class AwsSiteWiseTargetWriter(
         buildBatchRequests().forEach { request ->
             try {
 
-                val start = DateTime.systemDateTime().toEpochMilli()
+                val start = systemDateTime().toEpochMilli()
                 val resp = clientHelper.executeServiceCallWithRetries {
                     try {
                         log.info(
