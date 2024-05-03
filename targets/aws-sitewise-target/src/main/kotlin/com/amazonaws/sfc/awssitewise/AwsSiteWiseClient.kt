@@ -1,4 +1,3 @@
-
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: MIT-0
 
@@ -13,7 +12,19 @@ import software.amazon.awssdk.services.iotsitewise.model.BatchPutAssetPropertyVa
  * Interface for SiteWise client, abstracted to allow testing with mocked client.
  * @see <a href="https://https://sdk.amazonaws.com/java/api/latest/software/amazon/awssdk/services/iotsitewise/IoTSiteWiseClient.html">IotSiteWiseClient</a>
  */
-@AwsServicePermissions("iotsitewise", ["BatchPutAssetPropertyValue", "DescribeEndpoint"])
+@AwsServicePermissions(
+    "iotsitewise", [
+        "BatchPutAssetPropertyValue",
+        "CreateAsset",
+        "CreateAssetModel",
+        "DescribeAsset",
+        "DescribeAssetModel",
+        "DescribeEndpoint",
+        "ListAssetModelProperties",
+        "ListAssets",
+        "UpdateAssetModel"
+    ]
+)
 interface AwsSiteWiseClient {
     fun batchPutAssetPropertyValue(batchPutAssetPropertyValueRequest: BatchPutAssetPropertyValueRequest): BatchPutAssetPropertyValueResponse
     fun close()
