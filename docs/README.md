@@ -172,6 +172,7 @@ SFC documentation
     - [Aws3TargetConfiguration](#aws3targetconfiguration)
 - [AWS SiteWise Target](#aws-sitewise-target)
     - [AwsSitewiseTargetConfiguration](#awssitewisetargetconfiguration)
+    - [AwsSiteWiseAssetCreationConfiguration](#awssitewiseassetcreationconfiguration)
     - [AwsSiteWiseAssetConfiguration](#awssitewiseassetconfiguration)
     - [AwsSiteWiseAssetPropertyConfiguration](#awssitewiseassetpropertyconfiguration)
 - [AWS SNS Service Target](#aws-sns-service-target)
@@ -7269,7 +7270,7 @@ The default value is "%target%-%schedule%-%source%-%channel%"
 
 
 <tr class="odd">
-<td>MeasurementTimestamp</td>
+<td>PropertyTimestamp</td>
 <td>Specified which value to use for the timestamp of the measurement values written to the asset properties.</td>
 <td>String</td>
 <td>

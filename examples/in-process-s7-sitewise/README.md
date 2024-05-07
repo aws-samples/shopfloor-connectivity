@@ -4,6 +4,9 @@ The file [`in-process-s7-sitewise.json`](in-process-s7-sitewise.json) contains a
 reading data from a Siemens S7-1200 controller using S7 protocol and
 sending the data to AWS IoT Sitewise.
 
+A second configuration file [`in-process-s7-sitewise-autocreate-assets.json`](in-process-s7-sitewise-autocreate-assets.json) is using the option of the sitewise target adapter
+to automatically create the required sitewise asset models and assets to store the data from the S7 controller.
+
 In order to use the configuration, make the changes described below, and
 use it as the value of the --config parameter when starting sfc-main.
 

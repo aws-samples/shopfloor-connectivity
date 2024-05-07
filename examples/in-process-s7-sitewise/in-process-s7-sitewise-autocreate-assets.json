@@ -1,0 +1,138 @@
+{
+  "AWSVersion": "2022-04-02",
+  "Name": "S7 to Sitewise",
+  "Version": 1,
+  "LogLevel": "Trace",
+  "Schedules": [
+    {
+      "Name": "TestSchedule",
+      "Interval": 500,
+      "Description": "Read S7 values from S7-1200 PLC, send to Sitewise API",
+      "Active": true,
+      "TimestampLevel": "Both",
+      "Sources": {
+        "S7-SOURCE": [
+          "*"
+        ]
+      },
+      "Targets": [
+        "#DebugTarget",
+        "SitewiseTarget"
+      ]
+    }
+  ],
+  "Sources": {
+    "S7-SOURCE": {
+      "Name": "S7-SOURCE",
+      "ProtocolAdapter": "S7",
+      "AdapterController": "S7-PLC-1",
+      "Description": "S7 PLC local server",
+      "Channels": {
+        "RealValueLn-DB1": {
+          "Name": "Ln",
+          "Address": "%DB1:60:REAL"
+        },
+        "RealValueExp-DB1": {
+          "Name": "Exp",
+          "Address": "%DB1:52:REAL"
+        },
+        "RealValueSqrt-DB1": {
+          "Name": "Sqrt",
+          "Address": "%DB1:56:REAL"
+        }
+      }
+    }
+  },
+  "Targets": {
+    "DebugTarget": {
+      "Active": true,
+      "LogLevel": "Trace",
+      "TargetType": "DEBUG-TARGET"
+    },
+    "SitewiseTarget": {
+      "Active": true,
+      "TargetType": "AWS-SITEWISE",
+      "Region": "<REGION>",
+      "CredentialProviderClient": "AwsIotClient",
+      "AssetCreation": {
+
+        "AssetModelName": "%target%-%schedule%-%source%-Model",
+        "AssetModelDescription": "Asset model for SFC %target%, schedule %schedule%, source %source%, created by SFC target %target% at %datetime%",
+        "AssetModelTags": {
+          "Target": "%target%",
+          "Source": "%source%",
+          "Created": "%datetime%",
+          "CreatedBy": "SFC target %target%"
+        },
+
+        "AssetName": "%target%-%schedule%-%source%",
+        "AssetDescription": "Asset for SFC %target%, schedule %schedule%, source %source%, created by SFC target %target% at %datetime%",
+        "AssetTags": {
+          "Target": "%target%",
+          "Source": "%source%",
+          "Created": "%datetime%",
+          "CreatedBy": "SFC target %target%"
+        },
+
+        "PropertyName": "%schedule%-%source%-%channel%",
+        "PropertyTimestamp": "Channel"
+
+
+      }
+    }
+  },
+  "TargetTypes": {
+    "DEBUG-TARGET": {
+      "JarFiles": [
+        "${SFC_DEPLOYMENT_DIR}/debug-target/lib"
+      ],
+      "FactoryClassName": "com.amazonaws.sfc.debugtarget.DebugTargetWriter"
+    },
+    "AWS-SITEWISE": {
+      "JarFiles": [
+        "${SFC_DEPLOYMENT_DIR}/aws-sitewise-target/lib"
+      ],
+      "FactoryClassName": "com.amazonaws.sfc.awssitewise.AwsSiteWiseTargetWriter"
+    }
+  },
+  "AdapterTypes": {
+    "S7": {
+      "JarFiles": [
+        "${SFC_DEPLOYMENT_DIR}/s7/lib"
+      ],
+      "FactoryClassName": "com.amazonaws.sfc.s7.S7Adapter"
+    }
+  },
+  "ProtocolAdapters": {
+    "S7": {
+      "AdapterType": "S7",
+      "Controllers": {
+        "S7-PLC-1": {
+          "Address": "192.168.0.2",
+          "ReadPerSingleField": false,
+          "LocalRack": 0,
+          "LocalSlot": 1,
+          "RemoteRack": 0,
+          "RemoteSlot": 1,
+          "PduSize": 1024,
+          "MaxAmqCaller": 8,
+          "MaxAmqCallee": 8,
+          "ControllerType": "S7-1200",
+          "ReadTimeout": 10000,
+          "ConnectTimeout": 10000
+        }
+      }
+    }
+  },
+  "AwsIotCredentialProviderClients": {
+    "AwsIotClient": {
+      "IotCredentialEndpoint": "<ID>.credentials.iot.<YOUR REGION>.amazonaws.com",
+      "RoleAlias": "<ROLE EXCHANGE ALIAS, e.g.GreengrassV2TokenExchangeRoleAlias>",
+      "ThingName": "<THING NAME> e.g. GreengrassCore-1",
+      "Certificate": "<PATH TO DEVICE CERTIFICATE .crt FILE>",
+      "PrivateKey": "<PATH TO PRIVATE KEY .key FILE>",
+      "RootCa": "<PATH TO ROOT CERTIFICATE .pem FILE>",
+      "#GreenGrassDeploymentPath": "<GREENGRASS DEPLOYMENT DIR>/v2"
+    }
+  }
+}
