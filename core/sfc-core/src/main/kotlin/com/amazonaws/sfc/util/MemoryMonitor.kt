@@ -63,11 +63,10 @@ class MemoryMonitor(
     }
 
     private fun memoryTrendStr(totalTrend: Double, recentTrend: Double, usedMemory: Long): String {
-
-        val trendStr = "Used memory trend over last ${interval * memoryUsage.size} was ${trendUpDownStr(totalTrend)}"
-        val recentStr = "over the last ${interval * trendSamplesRecent} the trend was ${trendUpDownStr(recentTrend)}"
+        val trendStr = "Used memory trend over last ${interval * memoryUsage.size} was ${trendUpDownStr(totalTrend)}, "
+        val recentStr = if (memoryUsage.size > trendSamplesRecent) "over the last ${interval * trendSamplesRecent} the trend was ${trendUpDownStr(recentTrend)}, " else ""
         val currentStr = "currently using ${asMB(usedMemory)} MB of available $maxMemory MB"
-        return "$trendStr, $recentStr, $currentStr"
+        return "$trendStr$recentStr$currentStr"
     }
 
     fun stop() {

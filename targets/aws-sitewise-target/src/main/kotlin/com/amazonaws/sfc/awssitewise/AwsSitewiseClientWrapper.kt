@@ -6,8 +6,9 @@
 package com.amazonaws.sfc.awssitewise
 
 import software.amazon.awssdk.services.iotsitewise.IoTSiteWiseClient
-import software.amazon.awssdk.services.iotsitewise.model.BatchPutAssetPropertyValueRequest
-import software.amazon.awssdk.services.iotsitewise.model.BatchPutAssetPropertyValueResponse
+import software.amazon.awssdk.services.iotsitewise.model.*
+import software.amazon.awssdk.services.iotsitewise.paginators.ListAssetModelsIterable
+import software.amazon.awssdk.services.iotsitewise.paginators.ListAssetsIterable
 
 
 /**
@@ -18,6 +19,27 @@ import software.amazon.awssdk.services.iotsitewise.model.BatchPutAssetPropertyVa
 class AwsSiteWiseClientWrapper(private val client: IoTSiteWiseClient) : AwsSiteWiseClient {
     override fun batchPutAssetPropertyValue(batchPutAssetPropertyValueRequest: BatchPutAssetPropertyValueRequest): BatchPutAssetPropertyValueResponse =
         client.batchPutAssetPropertyValue(batchPutAssetPropertyValueRequest)
+
+    override fun listAssetModelsPaginator(listAssetModelsPagRequest: ListAssetModelsRequest): ListAssetModelsIterable =
+        client.listAssetModelsPaginator(listAssetModelsPagRequest)
+
+    override fun describeAssetModel(describeAssetModelRequest: DescribeAssetModelRequest): DescribeAssetModelResponse =
+        client.describeAssetModel(describeAssetModelRequest)
+
+    override fun listAssetsPaginator(listAssetRequest: ListAssetsRequest): ListAssetsIterable =
+        client.listAssetsPaginator(listAssetRequest)
+
+    override fun describeAsset(describeAssetRequest: DescribeAssetRequest): DescribeAssetResponse =
+        client.describeAsset(describeAssetRequest)
+
+    override fun createAsset(createAssetRequest: CreateAssetRequest): CreateAssetResponse =
+        client.createAsset(createAssetRequest)
+
+    override fun updateAssetModel(updateAssetModelRequest: UpdateAssetModelRequest): UpdateAssetModelResponse =
+        client.updateAssetModel(updateAssetModelRequest)
+
+    override fun createAssetModel(createAssetModelRequest: CreateAssetModelRequest): CreateAssetModelResponse =
+        client.createAssetModel(createAssetModelRequest)
 
     override fun close() = client.close()
 }

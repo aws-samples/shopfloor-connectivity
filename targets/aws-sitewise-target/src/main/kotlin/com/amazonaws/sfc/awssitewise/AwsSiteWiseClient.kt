@@ -5,8 +5,9 @@
 package com.amazonaws.sfc.awssitewise
 
 import com.amazonaws.sfc.services.AwsServicePermissions
-import software.amazon.awssdk.services.iotsitewise.model.BatchPutAssetPropertyValueRequest
-import software.amazon.awssdk.services.iotsitewise.model.BatchPutAssetPropertyValueResponse
+import software.amazon.awssdk.services.iotsitewise.model.*
+import software.amazon.awssdk.services.iotsitewise.paginators.ListAssetModelsIterable
+import software.amazon.awssdk.services.iotsitewise.paginators.ListAssetsIterable
 
 /**
  * Interface for SiteWise client, abstracted to allow testing with mocked client.
@@ -22,10 +23,19 @@ import software.amazon.awssdk.services.iotsitewise.model.BatchPutAssetPropertyVa
         "DescribeEndpoint",
         "ListAssetModelProperties",
         "ListAssets",
-        "UpdateAssetModel"
+        "UpdateAssetModel",
+        "TagResource"
     ]
 )
 interface AwsSiteWiseClient {
     fun batchPutAssetPropertyValue(batchPutAssetPropertyValueRequest: BatchPutAssetPropertyValueRequest): BatchPutAssetPropertyValueResponse
+    fun listAssetModelsPaginator(listAssetModelsPagRequest: ListAssetModelsRequest): ListAssetModelsIterable
+    fun describeAssetModel(describeAssetModelRequest: DescribeAssetModelRequest): DescribeAssetModelResponse
+    fun listAssetsPaginator(listAssetRequest: ListAssetsRequest): ListAssetsIterable
+    fun describeAsset(describeAssetRequest: DescribeAssetRequest): DescribeAssetResponse
+    fun createAsset(createAssetRequest: CreateAssetRequest): CreateAssetResponse
+    fun updateAssetModel(updateAssetModelRequest: UpdateAssetModelRequest): UpdateAssetModelResponse
+    fun createAssetModel(createAssetModelRequest: CreateAssetModelRequest): CreateAssetModelResponse
+
     fun close()
 }

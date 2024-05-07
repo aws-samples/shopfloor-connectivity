@@ -7096,7 +7096,7 @@ The following properties are set by the adapter
 <thead>
 <tr class="header">
 <th colspan="4"><p>AwsSitewiseTargetConfiguration extends the type TargetConfiguration with specific configuration data for sending data to Timestream tables. The Targets configuration element can contain entries of this type, the TargetType of these entries must be set to <strong>"AWS-SITEWISE"</strong></p>
-<p>Requires IAM permission iotsitewise:BatchPutAssetPropertyValue to write to the configured tables.</p></th>
+<p>Requires IAM permission iotsitewise:BatchPutAssetPropertyValue to write to the configured assets.</p></th>
 </tr>
 </thead>
 <tbody>
@@ -7110,26 +7110,229 @@ The following properties are set by the adapter
 <td>Assets</td>
 <td>Assets to write to</td>
 <td>List of <a href="#awssitewiseassetconfiguration">AwsSiteWiseAssetConfiguration</a></td>
-<td></td>
+<td>This setting is used to map data to existing assets and asset properties. It is possible to combine these with assets 
+ which are automatically created by the target adapter using the <a href="#AwsSiteWiseAssetCreationConfiguration">
+AssetCreation</a> setting. 
+</td>
 </tr>
 <tr class="odd">
+<td>AssetCreation</td>
+<td>Settings for AssetModels and Assets automatically created by the adapter.</td>
+<td><a href="#AwsSiteWiseAssetCreationConfiguration">
+AwsSiteWiseAssetCreationConfiguration</a></td>
+<td>When present automatic creation of AssetModels and Assets is enables, can be empty when using the default settings.</td>
+</tr>
+<tr class="even">
 <td>Region</td>
 <td>AWS Region for SiteWise service</td>
 <td>String</td>
 <td></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Interval</td>
 <td>Interval in milliseconds after which data is sent to stream even if the buffer is not full</td>
 <td>Integer</td>
 <td>Optional, if not set only BatchSize is used, minimum value is 10</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Batch Size</td>
 <td>Batch size for writing asset data</td>
 <td>Integer</td>
 <td>Default is 10</td>
 </tr>
+</tbody>
+</table>
+
+[^top](#toc)
+
+## AwsSiteWiseAssetCreationConfiguration
+
+<table>
+<col style="width: 18%" />
+<col style="width: 27%" />
+<col style="width: 29%" />
+<col style="width: 23%" />
+<tbody>
+<tr>
+<td colspan="4"><p>The SiteWise target adapter can automatically create and update AssetModels and Assets using the target data received by the adapter.
+Each source in the target  data will be mapped to a SiteWise AssetModel and Asset using configurable naming templates.</p>
+<p>Additionally, to the IAM permission iotsitewise:BatchPutAssetPropertyValue to write to the configured assets, the following permissions are required when 
+automatic creation of the SiteWise AssetModels and Assets is enabled: iotsitewise:CreateAsset, iotsitewise:CreateAssetModel,iotsitewise:DescribeAsset",
+iotsitewise:DescribeAssetModel, iotsitewise:DescribeEndpoint, iotsitewise:ListAssetModelProperties, iotsitewise:ListAssets, iotsitewise:UpdateAssetModel,iotsitewise:TagResource
+</p>
+</td>
+
+<tr class="odd">
+<td><strong>Name</strong></td>
+<td><strong>Description</strong></td>
+<td><strong>Type</strong></td>
+<td>Comments</td>
+</tr>
+<tr class="even">
+<td>AssetName</td>
+<td>Template for name of created or updated assets.</td>
+<td>String</td>
+<td>
+The value is as template used tro create the name for the created or updated asset.
+In template, besides placeholders for environment variables (${name}) the following placeholders are
+available:
+
+- %schedule%
+- %target%
+- %source%
+
+To use the values of metadata at the top or source level of the target data, the name af the metadata value can be used with a '%' prefix and postfix.
+
+The default value is "%target%-%schedule%-%source%"
+</td>
+</tr>
+<tr class="odd">
+<td>AssetDescription </td>
+<td>Template for description of created assets.</td>
+<td>String</td>
+<td>
+The value is as template used tro create the name for a created asset.
+In template, besides placeholders for environment variables (${name}) the following placeholders are
+available:
+
+- %schedule%
+- %target%
+- %source%
+- %datetime%
+
+To use the values of metadata at the top or source level of the target data, the name af the metadata value can be used with a '%' prefix and postfix.
+
+The default value is "Asset for target %target%, schedule %schedule%, source %source%"
+</td>
+</tr>
+
+
+<tr class="even">
+<td>AssetModelName</td>
+<td>Template for name of created or updated asset models.</td>
+<td>String</td>
+<td>
+The value is as template used tro create the name for the created or updated asset model.
+In template, besides placeholders for environment variables (${name}) the following placeholders are
+available:
+
+- %schedule%
+- %target%
+- %source%
+
+To use the values of metadata at the top or source level of the target data, the name af the metadata value can be used with a '%' prefix and postfix.
+
+The default value is "%target%-%schedule%-%source%-model"
+</td>
+</tr>
+<tr class="odd">
+<td>AssetDescription </td>
+<td>Template for description of created asset models.</td>
+<td>String</td>
+<td>
+The value is as template used tro create the name for a created asset model.
+In template, besides placeholders for environment variables (${name}) the following placeholders are
+available:
+
+- %schedule%
+- %target%
+- %source%
+- %datetime%
+
+To use the values of metadata at the top or source level of the target data, the name af the metadata value can be used with a '%' prefix and postfix.
+
+
+The default value is "Asset model for target %target%, schedule %schedule%, source %source%"
+</td>
+</tr>
+
+
+<tr class="even">
+<td>AssetPropertyName</td>
+<td>Template for name of created measurement asset properties.</td>
+<td>String</td>
+<td>
+The value is as template used tro create the name for the created measurement asset properties,
+In template, besides placeholders for environment variables (${name}) the following placeholders are
+available:
+
+- %schedule%
+- %target%
+- %source%
+- %channel%
+
+To use the values of metadata at the top, source or channel level of the target data, the name af the metadata value can be used with a '%' prefix and postfix.
+
+The default value is "%target%-%schedule%-%source%-%channel%"
+</td>
+</tr>
+
+
+<tr class="odd">
+<td>MeasurementTimestamp</td>
+<td>Specified which value to use for the timestamp of the measurement values written to the asset properties.</td>
+<td>String</td>
+<td>
+
+The value specifies the starting point in the target output data from where a timestamp is searched for. The following values
+can be used. If no timestamp is available at the level in the output data the next level up is tried. Depending on configuration
+and availability at the source it can happen that a timestamp is not available at source or channel level. The Schedule timestamp, which is at the top level of the
+target output data, is always available as it is added by the SFC core.
+
+- "Channel" : Value timestamp, Source timestamp, Schedule timestamp
+- "Source" : Source timestamp, Schedule timestamp
+- "Schedule" : Schedule timestamp
+- "System": Current UTC date and time
+
+
+Default value is "Channel"
+
+</td>
+</tr>
+
+
+<tr class="even">
+<td>AssetModelTags</td>
+<td>Map containing the names and value templates to add to an AssetModel when it is created by the adapter.</td>
+<td>Map[String,String]</td>
+<td>
+Optional
+
+The value is as template used tro create the tag values for the created measurement asset models,
+In template, besides placeholders for environment variables (${name}) the following placeholders are
+available:
+
+- %schedule%
+- %target%
+- %source%
+
+To use the values of metadata at the top or source level of the target data, the name af the metadata value can be used with a '%' prefix and postfix.
+
+</td>
+</tr>
+
+<tr class="odd">
+<td>AssetTags</td>
+<td>Map containing the names and value templates to add to an Asset when it is created by the adapter.</td>
+<td>Map[String,String]</td>
+<td>
+Optional
+
+The value is as template used tro create the tag values for the created measurement assets,
+In template, besides placeholders for environment variables (${name}) the following placeholders are
+available:
+
+- %schedule%
+- %target%
+- %source%
+
+To use the values of metadata at the top or source level of the target data, the name af the metadata value can be used with a '%' prefix and postfix.
+
+</td>
+</tr>
+
+
+
 </tbody>
 </table>
 

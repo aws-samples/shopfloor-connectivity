@@ -144,9 +144,7 @@ class SiteWiseAssetPropertyConfiguration : Validate {
 
         other as SiteWiseAssetPropertyConfiguration
 
-        if (_propertyID != other._propertyID) return false
-
-        return true
+        return _propertyID == other._propertyID
     }
 
     override fun hashCode(): Int {

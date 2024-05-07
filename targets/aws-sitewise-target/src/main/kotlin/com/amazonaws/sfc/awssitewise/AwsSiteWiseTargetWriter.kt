@@ -27,7 +27,6 @@ import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_WRITE_DURATI
 import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_WRITE_ERRORS
 import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_WRITE_SIZE
 import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_WRITE_SUCCESS
-import com.amazonaws.sfc.system.DateTime
 import com.amazonaws.sfc.system.DateTime.systemDateTime
 import com.amazonaws.sfc.targets.AwsServiceTargetClientHelper
 import com.amazonaws.sfc.targets.TargetDataChannel
@@ -82,7 +81,7 @@ class AwsSiteWiseTargetWriter(
     private val assetHelper by lazy {
         val assetCreationConfiguration = targetConfig.assetCreationConfiguration
         if (assetCreationConfiguration != null)
-            SiteWiseAssetHelper(clientHelper.serviceClient as IoTSiteWiseClient, targetID, assetCreationConfiguration, logger)
+            SiteWiseAssetHelper(sitewiseClient, targetID, assetCreationConfiguration, logger)
         else
             null
     }
@@ -149,7 +148,7 @@ class AwsSiteWiseTargetWriter(
     private val writer = scope.launch("Writer") {
 
         val log = logger.getCtxLoggers(AwsSiteWiseTargetWriter::class.java.simpleName, "writer")
-        log.info("AWS SiteWise writer for target \"$targetID\" sending to ${targetConfig.assets.size} assets in region ${targetConfig.region}")
+        log.info("AWS SiteWise writer for target \"$targetID\" in region ${targetConfig.region}")
 
         var timer = timerJob()
 
@@ -242,20 +241,22 @@ class AwsSiteWiseTargetWriter(
                             channelName,
                             sourceData.metadata
                         )
+
                         val assetProperty: AssetProperty? = channelToAssetPropertyMap[channelPropertyName]
                         if (assetProperty != null) {
                             val dataType = SiteWiseDataType.from(assetProperty.dataType())
-                            val assetValue =
-                                buildAssetValue(dataType, channelData.value!!, channelData.timestamp ?: systemDateTime())
+                            val assetValue = buildAssetValue(dataType, channelData.value!!, assetHelper?.getPropertyTimestamp(targetData, sourceData, channelData)?:systemDateTime())
                             storeValueAndTimestampInBuffer(
                                 asset,
                                 SiteWiseAssetPropertyConfiguration.create(propertyId = assetProperty.id(), dataType = dataType),
                                 assetValue
                             )
+                        } else{
+                            log.warning("No property for channel \"$channelName\" with name \"$channelPropertyName\" in asset \"$asset\"")
                         }
                     }
                 } catch (e: Exception) {
-                    log.errorEx("Error getting asset for source $sourceName", e)
+                    log.error("Error getting asset for source $sourceName, $e")
                 }
             }
         }
@@ -339,7 +340,11 @@ class AwsSiteWiseTargetWriter(
         }
 
         // Add to list of stored values
-        propertyEntry!!.add(propValue)
+        val entryWithSameTimestamp= propertyEntry!!.find{it.timestamp() == propValue.timestamp()}
+        if (entryWithSameTimestamp != null) {
+            propertyEntry.remove(entryWithSameTimestamp)
+        }
+        propertyEntry.add(propValue)
     }
 
 
@@ -432,7 +437,7 @@ class AwsSiteWiseTargetWriter(
                             } properties for ${request.entries().groupBy { it.assetId() }.count()} assets(s)"
                         )
                         val r = sitewiseClient.batchPutAssetPropertyValue(request)
-                        val writeDurationInMillis = (DateTime.systemDateTime().toEpochMilli() - start).toDouble()
+                        val writeDurationInMillis = (systemDateTime().toEpochMilli() - start).toDouble()
                         createMetrics(targetID, metricDimensions, request, writeDurationInMillis)
 
                         r
@@ -456,6 +461,8 @@ class AwsSiteWiseTargetWriter(
                     logErrorEntry(request, errorEntry, log.error)
 
                 }
+            } catch( e : IllegalStateException){
+                log.info("SiteWise target \"$targetID\" adapter closing down \"$targetID\"")
             } catch (e: Exception) {
                 log.errorEx("Error sending to SiteWise \"$targetID\"", e)
                 if (canNotReachAwsService(e)) {

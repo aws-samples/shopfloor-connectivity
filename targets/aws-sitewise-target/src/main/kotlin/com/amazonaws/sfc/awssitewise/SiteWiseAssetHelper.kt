@@ -1,29 +1,30 @@
 package com.amazonaws.sfc.awssitewise
 
+import com.amazonaws.sfc.awssitewise.config.AssetTimestamp
 import com.amazonaws.sfc.awssitewise.config.AwsSiteWiseAssetCreationConfiguration
+import com.amazonaws.sfc.awssitewise.config.AwsSiteWiseAssetCreationConfiguration.Companion.TEMPLATE_CHANNEL
+import com.amazonaws.sfc.awssitewise.config.AwsSiteWiseAssetCreationConfiguration.Companion.TEMPLATE_DATETIME
+import com.amazonaws.sfc.awssitewise.config.AwsSiteWiseAssetCreationConfiguration.Companion.TEMPLATE_PRE_POSTFIX
+import com.amazonaws.sfc.awssitewise.config.AwsSiteWiseAssetCreationConfiguration.Companion.TEMPLATE_SCHEDULE
+import com.amazonaws.sfc.awssitewise.config.AwsSiteWiseAssetCreationConfiguration.Companion.TEMPLATE_SOURCE
+import com.amazonaws.sfc.awssitewise.config.AwsSiteWiseAssetCreationConfiguration.Companion.TEMPLATE_TARGET
 import com.amazonaws.sfc.data.ChannelOutputData
 import com.amazonaws.sfc.data.SourceOutputData
 import com.amazonaws.sfc.data.TargetData
 import com.amazonaws.sfc.log.Logger
+import com.amazonaws.sfc.system.DateTime.systemDateTime
 import kotlinx.coroutines.delay
-import software.amazon.awssdk.services.iotsitewise.IoTSiteWiseClient
 import software.amazon.awssdk.services.iotsitewise.model.*
+import java.time.Instant
 
 class SiteWiseAssetHelper(
-    private val client: IoTSiteWiseClient,
+    private val client: AwsSiteWiseClient,
     private val target: String,
     private val assetCreationConfiguration: AwsSiteWiseAssetCreationConfiguration,
     private val logger: Logger
 ) {
 
     private val className = this::class.java.name
-
-    fun initialize() {
-        assetModelDetailsById
-        assetDetailsById
-        assetDetailsByName
-        assetModelDetailsByName
-    }
 
     private val assetModelSummaries: List<AssetModelSummary>
         get() {
@@ -42,7 +43,7 @@ class SiteWiseAssetHelper(
             }
         }.toMap().toMutableMap()
 
-        logger.getCtxTraceLog(className, assetModelDetailsById)("${assetModelDetails.size} asset models loaded")
+        logger.getCtxTraceLog(className, "assetModelDetailsById")("${assetModelDetails.size} asset models loaded")
         assetModelDetails
     }
 
@@ -67,7 +68,7 @@ class SiteWiseAssetHelper(
             val describeAssetModelResponse: DescribeAssetResponse = client.describeAsset(describeAsseRequest)
             it.assetModelId() to describeAssetModelResponse
         }.toMutableMap()
-        logger.getCtxTraceLog(className, assetModelDetailsById)("${assetDetails.size} assets loaded")
+        logger.getCtxTraceLog(className, "assetModelDetailsById")("${assetDetails.size} assets loaded")
         assetDetails
     }
 
@@ -129,7 +130,7 @@ class SiteWiseAssetHelper(
         description: String,
         assetModelId: String,
         tags: Map<String, String>?
-    ): CreateAssetRequest? {
+    ): CreateAssetRequest {
         val builder = CreateAssetRequest.builder()
         builder
             .assetName(name)
@@ -148,9 +149,11 @@ class SiteWiseAssetHelper(
     private suspend fun getOrBuildAssetForSource(source: String, targetOutputData: TargetData): DescribeAssetResponse {
 
         val sourceOutputData: SourceOutputData? = targetOutputData.sources[source]
-        val assetName = assetCreationConfiguration.renderAssetName(target, targetOutputData.schedule, source, sourceOutputData?.metadata)
 
-        val asset: DescribeAssetResponse? = assetDetailsByName[assetName]
+        val metadataForAsset = targetOutputData.metadata + (sourceOutputData?.metadata ?: emptyMap())
+        val assetName = assetCreationConfiguration.renderAssetName(target, targetOutputData.schedule, source, metadataForAsset)
+
+        var asset: DescribeAssetResponse? = assetDetailsByName[assetName]
 
         if (asset != null) {
             val assetModel: DescribeAssetModelResponse =
@@ -160,27 +163,25 @@ class SiteWiseAssetHelper(
             if (allValuesHaveMeasurementProperty) return asset
 
             updateSourceAssetModelById(assetModel.assetModelId(), source, targetOutputData)
+
+            val describeAssetResponse = client.describeAsset(DescribeAssetRequest.builder().assetId(asset.assetId()).build())
+            asset =  describeAssetResponse
+            assetDetailsById[asset.assetId()] = asset
+            assetDetailsByName[asset.assetName()] = asset
+
             return asset
 
         }
-        var assetModel: DescribeAssetModelResponse? = assetModelDetailsByName[assetName]
+
+        val assetModelName = assetCreationConfiguration.renderAssetModelName(target, targetOutputData.schedule, source, metadataForAsset)
+        var assetModel: DescribeAssetModelResponse? = assetModelDetailsByName[assetModelName]
         if (assetModel == null) {
             assetModel = createAssetModelForSource(source, targetOutputData)
         }
-        val assetDescription = assetCreationConfiguration.renderAssetDescription(target, targetOutputData.schedule, source, sourceOutputData?.metadata)
-        return createAsset(assetName, assetDescription, assetModel.assetModelId(), sourceOutputData?.metadata)
+        val assetDescription = assetCreationConfiguration.renderAssetDescription(target, targetOutputData.schedule, source, metadataForAsset)
+        val assetTags = assetCreationConfiguration.renderAssetTags(target, targetOutputData.schedule, source, metadataForAsset)
+        return createAsset(assetName, assetDescription, assetModel.assetModelId(), assetTags)
     }
-
-
-//    fun measurementsMapByNameForAssetByID(assetID: String): Map<String, AssetProperty>? {
-//        val asset: DescribeAssetResponse = assetDetailsById[assetID] ?: throw Exception("Asset $assetID not found")
-//        return measurementsMapByNameForAsset(asset)
-//    }
-//
-//    fun measurementsMapByNameForAssetByName(name: String): Map<String, AssetProperty>? {
-//        val asset: DescribeAssetResponse = assetDetailsByName[name] ?: throw Exception("Asset $name not found")
-//        return measurementsMapByNameForAsset(asset)
-//    }
 
 
     private fun measurementsMapByNameForAsset(asset: DescribeAssetResponse): Map<String, AssetProperty>? {
@@ -193,11 +194,13 @@ class SiteWiseAssetHelper(
         val assetForSource = getOrBuildAssetForSource(source, targetData)
         val measurementPropertiesForAsset = measurementsMapByNameForAsset(assetForSource) ?: emptyMap()
         val sourceData: SourceOutputData = targetData.sources[source] ?: return assetForSource.assetId() to emptyMap()
+        val sourceMetadata = targetData.metadata + (sourceData.metadata ?: emptyMap())
 
         return assetForSource.assetId() to (sequence {
             sourceData.channels.forEach { (channelName, channelData) ->
+                val propertyMetadata = sourceMetadata + (channelData.metadata ?: emptyMap())
                 val channelPropertyName =
-                    assetCreationConfiguration.renderAssetPropertyName(target, targetData.schedule, source, channelName, channelData.metadata)
+                    assetCreationConfiguration.renderAssetPropertyName(target, targetData.schedule, source, channelName, propertyMetadata)
                 val propertyForChannel = measurementPropertiesForAsset[channelPropertyName]
                 if (propertyForChannel != null)
                     yield(channelName to propertyForChannel)
@@ -234,6 +237,7 @@ class SiteWiseAssetHelper(
 
         assetModelDetailsById[assetModelId] = describeAssetModelResponse
         assetModelDetailsByName[describeAssetModelResponse.assetModelName()] = describeAssetModelResponse
+
         return describeAssetModelResponse
 
     }
@@ -241,7 +245,7 @@ class SiteWiseAssetHelper(
     private fun buildUpdateAssetModelRequest(
         assetModelDetails: DescribeAssetModelResponse,
         assetModelProperties: MutableList<AssetModelProperty>
-    ): UpdateAssetModelRequest? =
+    ): UpdateAssetModelRequest =
 
         UpdateAssetModelRequest.builder()
             .assetModelId(assetModelDetails.assetModelId())
@@ -261,11 +265,13 @@ class SiteWiseAssetHelper(
     ) {
 
         val log = logger.getCtxLoggers(className, "addMissingChannelProperties")
+        val sourceMetadata = targetOutputData.metadata + (sourceOutputData?.metadata ?: emptyMap())
 
         sourceOutputData?.channels?.filter { it.value.value != null }?.forEach { (channelName, channelData) ->
 
+            val propertyMetadata = (channelData.metadata ?: emptyMap()) + sourceMetadata
             val propertyNameForChannel =
-                assetCreationConfiguration.renderAssetPropertyName(target, targetOutputData.schedule, source, channelName, channelData.metadata)
+                assetCreationConfiguration.renderAssetPropertyName(target, targetOutputData.schedule, source, channelName, propertyMetadata)
             if (assetModelProperties.find { it.name() == propertyNameForChannel } == null) {
                 if (channelData.value == null) {
                     log.warning("Channel \"$channelName\" from source \"$source\" has no value and will be ignored")
@@ -301,25 +307,30 @@ class SiteWiseAssetHelper(
 
         val sourceOutputData: SourceOutputData? = targetOutputData.sources[source]
 
-        val assetModelName = assetCreationConfiguration.renderAssetModelName(target, targetOutputData.schedule, source, sourceOutputData?.metadata)
+        val sourceMetadata = (targetOutputData.metadata) + (sourceOutputData?.metadata ?: emptyMap())
+        val assetModelName = assetCreationConfiguration.renderAssetModelName(target, targetOutputData.schedule, source, sourceMetadata)
 
         val assetModelDescription =
-            assetCreationConfiguration.renderAssetModelDescription(target, targetOutputData.schedule, source, sourceOutputData?.metadata)
+            assetCreationConfiguration.renderAssetModelDescription(target, targetOutputData.schedule, source, sourceMetadata)
 
         log.info("Creating asset model \"$assetModelName\" for source \"$source\"")
 
         val measurementPropertiesDefinitions = sourceOutputData?.channels?.filter { it.value.value != null }?.map { (channelName, channelData) ->
 
+            val metadata = sourceMetadata + (channelData.metadata ?: emptyMap())
             val propertyNameForChannel =
-                assetCreationConfiguration.renderAssetPropertyName(target, targetOutputData.schedule, source, channelName, channelData.metadata)
+                assetCreationConfiguration.renderAssetPropertyName(target, targetOutputData.schedule, source, channelName, metadata)
 
             createAssetModelMeasurementPropertyDefinition(propertyNameForChannel, channelName, channelData)
         }
+
+        val assetModelTags = assetCreationConfiguration.renderAssetModelTags(target, targetOutputData.schedule, source, sourceMetadata)
 
         val createAssetModelRequest = CreateAssetModelRequest.builder()
             .assetModelName(assetModelName)
             .assetModelDescription(assetModelDescription)
             .assetModelProperties((measurementPropertiesDefinitions ?: emptyList()).toMutableList())
+            .tags(assetModelTags)
             .build()
 
         val creatAssetModelResponse = client.createAssetModel(createAssetModelRequest)
@@ -338,6 +349,15 @@ class SiteWiseAssetHelper(
         assetModelDetailsById[creatAssetModelResponse.assetModelId()] = describeAssetModelResponse
         assetModelDetailsByName[assetModelName] = describeAssetModelResponse
         return describeAssetModelResponse
+    }
+
+    fun getPropertyTimestamp(targetOutputData: TargetData, sourceData: SourceOutputData, channelData: ChannelOutputData): Instant {
+        return when (assetCreationConfiguration.assetTimestamp) {
+            AssetTimestamp.SYSTEM -> systemDateTime()
+            AssetTimestamp.CHANNEL -> channelData.timestamp ?: sourceData.timestamp ?: targetOutputData.timestamp
+            AssetTimestamp.SOURCE -> sourceData.timestamp ?: targetOutputData.timestamp
+            AssetTimestamp.SCHEDULE -> targetOutputData.timestamp
+        }
     }
 
 
@@ -362,20 +382,11 @@ class SiteWiseAssetHelper(
         val DescribeAssetModelResponse.isAvailable
             get() = MODEL_AVAILABLE_STATUS.contains(this.assetModelStatus())
 
-        val AssetModelSummary.isBusy
-            get() = MODEL_BUSY_STATUS.contains(this.status())
-
         val AssetModelSummary.isAvailable
             get() = MODEL_AVAILABLE_STATUS.contains(this.status())
 
         val DescribeAssetResponse.isBusy
             get() = ASSET_BUSY_STATUS.contains(this.assetStatus())
-
-        val DescribeAssetResponse.isAvailable
-            get() = ASSET_AVAILABLE_STATUS.contains(this.assetStatus())
-
-        val AssetSummary.isBusy
-            get() = ASSET_BUSY_STATUS.contains(this.status())
 
         val AssetSummary.isAvailable
             get() = ASSET_AVAILABLE_STATUS.contains(this.status())
@@ -407,13 +418,125 @@ class SiteWiseAssetHelper(
         private val ASSET_STATE_ACTIVE: AssetStatus = AssetStatus.builder().state(AssetState.ACTIVE).build()
         private val ASSET_STATE_UPDATING: AssetStatus = AssetStatus.builder().state(AssetState.UPDATING).build()
 
-        private val ASSET_BUSY_STATUS: Set<AssetStatus> = setOf(ASSET_STATE_CREATING, ASSET_STATE_ACTIVE)
+        private val ASSET_BUSY_STATUS: Set<AssetStatus> = setOf(ASSET_STATE_CREATING, ASSET_STATE_UPDATING)
         private val ASSET_AVAILABLE_STATUS: Set<AssetStatus> = setOf(ASSET_STATE_ACTIVE, ASSET_STATE_CREATING, ASSET_STATE_UPDATING)
 
         private val MEASUREMENT: Measurement = Measurement.builder().build()
         private val MEASUREMENT_TYPE: PropertyType = PropertyType.builder().measurement(MEASUREMENT).build()
 
-
     }
 
 }
+
+private fun renderTemplate(
+    template: String,
+    target: String,
+    schedule: String,
+    source: String,
+    maxLength: Int,
+    metadata: Map<String, String>?,
+    useDateTime: Boolean = true
+): String {
+    var s = template
+        .replace(TEMPLATE_SCHEDULE, schedule.replace(TEMPLATE_PRE_POSTFIX, ""))
+        .replace(TEMPLATE_SOURCE, source.replace(TEMPLATE_PRE_POSTFIX, ""))
+        .replace(TEMPLATE_TARGET, target.replace(TEMPLATE_PRE_POSTFIX, ""))
+    if (useDateTime) {
+        s = s.replace(TEMPLATE_DATETIME, systemDateTime().toString())
+    }
+    if (metadata != null) {
+        for (entry in metadata) {
+            s = s.replace("${TEMPLATE_PRE_POSTFIX}entry.key$TEMPLATE_PRE_POSTFIX", entry.value.replace(TEMPLATE_PRE_POSTFIX, ""))
+        }
+    }
+    return s.trim().substring(0, minOf(s.length, maxLength))
+}
+
+private fun renderTemplate(
+    template: String,
+    target: String,
+    schedule: String,
+    source: String,
+    channel: String,
+    maxLength: Int,
+    metadata: Map<String, String>?,
+    useDateTime: Boolean = true
+): String {
+    return renderTemplate(template, target, schedule, source, maxLength, metadata, useDateTime)
+        .replace(TEMPLATE_CHANNEL, channel.replace(TEMPLATE_PRE_POSTFIX, ""))
+}
+
+fun AwsSiteWiseAssetCreationConfiguration.renderAssetName(target: String, schedule: String, source: String, metadata: Map<String, String>?): String =
+    renderTemplate(assetName, target, schedule, source, 256, metadata)
+
+fun AwsSiteWiseAssetCreationConfiguration.renderAssetDescription(target: String, schedule: String, source: String, metadata: Map<String, String>?): String =
+    renderTemplate(assetDescription, target, schedule, source, 22048, metadata, true)
+
+fun AwsSiteWiseAssetCreationConfiguration.renderAssetModelName(target: String, schedule: String, source: String, metadata: Map<String, String>?): String =
+    renderTemplate(assetModelName, target, schedule, source, 256, metadata)
+
+fun AwsSiteWiseAssetCreationConfiguration.renderAssetModelDescription(
+    target: String,
+    schedule: String,
+    source: String,
+    metadata: Map<String, String>?
+): String =
+    renderTemplate(assetModelDescription, target, schedule, source, 2048, metadata, true)
+
+fun AwsSiteWiseAssetCreationConfiguration.renderAssetPropertyName(
+    target: String,
+    schedule: String,
+    source: String,
+    channel: String,
+    metadata: Map<String, String>?
+): String =
+    renderTemplate(assetPropertyName, target, schedule, source, channel, 256, metadata)
+
+private fun renderTags(
+    tagsTemplate: Map<String, String>?,
+    target: String,
+    schedule: String,
+    source: String,
+    metadata: Map<String, String>?
+): Map<String, String> =
+    if (tagsTemplate.isNullOrEmpty())
+        emptyMap()
+    else {
+        val tags = sequence {
+            tagsTemplate.forEach { (key, value) ->
+
+                var tagValue = value
+                    .replace(TEMPLATE_SCHEDULE, schedule.replace(TEMPLATE_PRE_POSTFIX, ""))
+                    .replace(TEMPLATE_SOURCE, source.replace(TEMPLATE_PRE_POSTFIX, ""))
+                    .replace(TEMPLATE_TARGET, target.replace(TEMPLATE_PRE_POSTFIX, ""))
+                    .replace(TEMPLATE_DATETIME, systemDateTime().toString())
+
+                for (entry in metadata ?: emptyMap()) {
+                    tagValue = tagValue.replace("${TEMPLATE_PRE_POSTFIX}entry.key$TEMPLATE_PRE_POSTFIX", entry.value.replace(TEMPLATE_PRE_POSTFIX, ""))
+                }
+
+                tagValue = tagValue.trim().substring(0, minOf(tagValue.length, 256))
+
+                if (tagValue.isNotEmpty()) this.yield(key.substring(0, minOf(key.length, 128)) to tagValue)
+
+            }
+        }.toList()
+        tags.subList(0, minOf(tags.size, 50)).toMap()
+
+    }
+
+
+private fun AwsSiteWiseAssetCreationConfiguration.renderAssetModelTags(
+    target: String,
+    schedule: String,
+    source: String,
+    metadata: Map<String, String>?
+): Map<String, String> = renderTags(this.assetModelTags, target, schedule, source, metadata)
+
+private fun AwsSiteWiseAssetCreationConfiguration.renderAssetTags(
+    target: String,
+    schedule: String,
+    source: String,
+    metadata: Map<String, String>?
+): Map<String, String> = renderTags(this.assetTags, target, schedule, source, metadata)
+
