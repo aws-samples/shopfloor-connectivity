@@ -242,7 +242,7 @@ class AwsSiteWiseTargetWriter(
                             sourceData.metadata
                         )
 
-                        val assetProperty: AssetProperty? = channelToAssetPropertyMap[channelPropertyName]
+                        val assetProperty: AssetProperty? = channelToAssetPropertyMap[channelName]
                         if (assetProperty != null) {
                             val dataType = SiteWiseDataType.from(assetProperty.dataType())
                             val assetValue = buildAssetValue(dataType, channelData.value!!, assetHelper?.getPropertyTimestamp(targetData, sourceData, channelData)?:systemDateTime())

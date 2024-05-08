@@ -159,7 +159,11 @@ class SiteWiseAssetHelper(
             val assetModel: DescribeAssetModelResponse =
                 assetModelDetailsById[asset.assetModelId()] ?: throw Exception("Asset model ${asset.assetModelId()}  for asset ${asset.assetId()} not found")
             val measurements = assetModel.measurementsMap
-            val allValuesHaveMeasurementProperty = sourceOutputData?.channels?.keys?.all { measurements.containsKey(it) } ?: true
+            val allValuesHaveMeasurementProperty = sourceOutputData?.channels?.all { (channelName, channelData) ->
+                val propertyMetadata = metadataForAsset + (channelData.metadata ?: emptyMap())
+                val channelPropertyName = assetCreationConfiguration.renderAssetPropertyName(target, targetOutputData.schedule, source, channelName, propertyMetadata)
+                measurements.containsKey(channelPropertyName)
+            } ?: true
             if (allValuesHaveMeasurementProperty) return asset
 
             updateSourceAssetModelById(assetModel.assetModelId(), source, targetOutputData)
