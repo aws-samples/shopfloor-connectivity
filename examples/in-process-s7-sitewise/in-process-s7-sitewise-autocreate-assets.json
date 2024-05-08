@@ -74,7 +74,7 @@
           "CreatedBy": "SFC target %target%"
         },
 
-        "PropertyName": "%schedule%-%source%-%channel%",
+        "AssetPropertyName": "%schedule%-%source%-%channel%",
         "PropertyTimestamp": "Channel"
 
 

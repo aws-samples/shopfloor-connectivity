@@ -65,7 +65,7 @@ class AwsSiteWiseAssetCreationConfiguration {
         private const val CONFIG_ASSET_MODEL_NAME = "AssetModelName"
         private const val CONFIG_ASSET_PROPERTY_NAME = "AssetPropertyName"
         private const val CONFIG_ASSET_PROPERTY_METADATA_UNIT_NAME = "AssetPropertyMetadataUnitName"
-        private const val CONFIG_ASSET_TIMESTAMP = "PropertyTimestamp"
+        private const val CONFIG_ASSET_TIMESTAMP = "AssetPropertyTimestamp"
 
         const val TEMPLATE_PRE_POSTFIX = "%"
         const val TEMPLATE_SCHEDULE = "${TEMPLATE_PRE_POSTFIX}schedule${TEMPLATE_PRE_POSTFIX}"

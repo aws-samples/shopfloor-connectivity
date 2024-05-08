@@ -7270,7 +7270,7 @@ The default value is "%target%-%schedule%-%source%-%channel%"
 
 
 <tr class="odd">
-<td>PropertyTimestamp</td>
+<td>AssetPropertyTimestamp</td>
 <td>Specified which value to use for the timestamp of the measurement values written to the asset properties.</td>
 <td>String</td>
 <td>
