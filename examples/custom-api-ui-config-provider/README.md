@@ -24,8 +24,8 @@ We will create step by step a working SFC environment with our UX Config Provide
 - Prepare other needed SFC components and copy the built artifact
     ```shell
     # Define sfc version and directory
-    export VERSION="1.0.7"
-    export BUNDLE_URI="https://github.com/aws-samples/shopfloor-connectivity/releases/download/v$VERSION"
+    export VERSION=$(git describe --tags --abbrev=0)
+    export BUNDLE_URI="https://github.com/aws-samples/shopfloor-connectivity/releases/download/$VERSION"
     export SFC_DEPLOYMENT_DIR="sfc"
     # Download and extract bundles into folder ./sfc
     mkdir $SFC_DEPLOYMENT_DIR && cd $SFC_DEPLOYMENT_DIR

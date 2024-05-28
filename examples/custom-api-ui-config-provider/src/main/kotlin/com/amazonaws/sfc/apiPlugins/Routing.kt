@@ -14,8 +14,6 @@ fun Application.configureRouting() {
             call.respondRedirect("/sfc/editor.html#sfc-editor")
         }
         // Static plugin. Try to access `/static/index.html`
-        static("/sfc") {
-            resources("static")
-        }
+        staticResources("/sfc", "static")
     }
 }
