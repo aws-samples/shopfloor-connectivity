@@ -57,6 +57,9 @@ SFC documentation
     - [Configuration placeholders](#configuration-placeholders)
     - [Configuration secrets](#configuration-secrets)
     - [Deferred placeholder replacement](#deferred-placeholder-replacement)
+    - [Configuration templates](#configuration-templates)
+    - [Including configuration sections](#including-configuration-sections)
+    - [Combining templates and inclusions](#combining-templates-and-inclusions)
     - [Configuration providers](#configuration-providers)
     - [Custom configuration](#custom-configuration)
     - [Configuration verification](#configuration-verification)
@@ -116,6 +119,7 @@ SFC documentation
     - [OpcdaSourceConfiguration](#opcdasourceconfiguration)
     - [OpcdaChannelConfiguration](#opcdachannelconfiguration)
     - [OpcdaAdapterConfiguration](#opcdaadapterconfiguration)
+    - [OpcdaServerConfiguration](#opcdaserverconfiguration)
     - [OpcdaServerConfiguration](#opcdaserverconfiguration)
 - [S7 Protocol Configuration](#s7-protocol-configuration)
     - [S7SourceConfiguration](#s7sourceconfiguration)
@@ -1106,6 +1110,221 @@ using placeholders in the format **${{name}}**. If the placeholders are used for
 AWS Systems Manager, all required configuration elements to resolve the secrets by the service process will be included
 in the configuration that is used to initialize it. (SecretsManager with selected configured secrets, credentials
 manager client etc.)
+
+## Configuration templates
+
+
+SFC configuration templates are used to make the configuration more modular and enable re-use of repeating sections of configuration. Replacing repeating sections of a configuration will also reduce the size of the configuration file.
+
+Templates are JSON elements containing configuration data and are defined in the “Templates” section of the SFC configuration file. These templates in the "Templates" section are indexed by a unique name.
+
+Below is a snippet of an SFC configuration file defining an S3 Target
+```json
+"Targets": {
+  "S3Target": {
+    "Active": true,
+    "TargetType": "AWS-S3",
+    "Region": "eu-west-1",
+    "BucketName": "sfc-bucket",
+    "Interval": 60,
+    "BufferSize": 1,
+    "Prefix": "data",
+    "CredentialProviderClient": "AwsClient",
+    "CertificatesAndKeysByFileReference": false,
+    "Compression": "Zip"
+  }
+```
+
+We can define a template for this section:
+
+```json
+"Templates" : {
+  "S3Target": {
+    "Active": true,
+    "TargetType": "AWS-S3",
+    "Region": "eu-west-1",
+    "BucketName": "sfc-bucket",
+    "Interval": 60,
+    "BufferSize": 1,
+    "Prefix": "data",
+    "CredentialProviderClient": "AwsIotClient",
+    "Compression": "Zip"
+  }
+}
+```
+
+The template can be used from its original location in the Targets section. The syntax for using a template is **"$(name of the template)"**.
+
+```json
+"Targets": {
+  "S3Target": "$(S3Target)"
+}
+```
+
+
+Within a template it is possible to have placeholders for values making these templates more generic. In the example below the name of the bucket and its region are replaces by placeholders. Placeholders consist of the name of the placeholder within a "%" prefix and suffix.
+
+
+```json
+"Templates" : {
+  "S3Target": {
+    "Active": true,
+    "TargetType": "AWS-S3",
+    "Region": "%region%",
+    "BucketName": "%bucket-name%",
+    "Interval": 60,
+    "BufferSize": 1,
+    "Prefix": "data",
+    "CredentialProviderClient": "AwsIotClient",
+    "Compression": "Zip"
+  }
+}
+```
+
+Now this template can be used by specifying in an SFC  its name and the names of the placeholders with their values. Below is an example and Targets with two S3 targets defined using the template. The values for the placeholders used by the template are provided by a comma separated list, which is separated from the name of the template by a comma as well, including the names and values of the placeholders. The actual values should nor be included in quotes. Leading and training whitespaces will be trimmed from the values".
+
+```json
+"Targets": {
+  "S3Target-1": "$(S3Target, bucket-name=sfc-bucket-1, region=eu-west-1)",
+  "S3Target-2": "$(S3Target, bucket-name=sfc-bucket-2, region=eu-west-1)"
+}
+```
+
+
+It is also possible to use nested  templates within templates, Below is the S3 template using a second template named S3Prefix.
+
+```json
+"Templates" : {
+  "S3Target": {
+    "Active": true,
+    "TargetType": "AWS-S3",
+    "Region": "%region%",
+    "BucketName": "%bucket-name%",
+    "Interval": 60,
+    "BufferSize": 1,
+    "Prefix": "$(S3Prefix)",
+    "CredentialProviderClient": "AwsIotClient",
+    "CertificatesAndKeysByFileReference": false,
+    "Compression": "Zip"
+  },
+
+  "S3Prefix" : "data"
+}
+```
+
+
+Templates can be used for all values in and SFC configuration file to replace values.
+
+It is possible to partially replace parts of  values. Note that this works only for single value templates, not for structured values. Below is a template used to define the S3 and debug  target types. A third template named "DeploymentDir" is used in the other two templates to specify the directory in which the targets are deployed.
+
+```json
+"Templates" : {
+  "S3Type" : {
+      "JarFiles": ["$(DeploymentDir)/aws-s3-target/lib"],
+      "FactoryClassName": "com.amazonaws.sfc.awss3.AwsS3TargetWriter"
+  },
+  "DebugType" : {
+      "JarFiles": ["$(DeploymentDir)/debug-target/lib"],
+       "FactoryClassName":"com.amazonaws.sfc.debugtarget.DebugTargetWriter"
+  },
+  
+  "DeploymentDir" : "/Users/leeuwest/Desktop/deploy"
+}
+```
+
+When rendering the templates the SFC core will check for circular dependencies between templates. After resolving the templates SFC will remove the “Templates” section from the configuration.
+
+
+## Including configuration sections
+
+
+When processing a configuration file, SFC has the option to include sections from external sources. These sources can be external files or content retrieved from making a http get request. The content from the file of the http get response must be a valid JSON object.
+
+In order to include configuration data from an external the file the syntax is **“@file:\<pathname of the file>”**.   For including data from a get request he syntax is **“@http://\<url>”** or **“@https://\<url>**”.
+After reading the content from the file or the get response SFC will replace the reference to the file or the url with this content.
+
+Below is an example where the value of “AwsIoTClient” is read from a file named “aws-iot-client.json”.
+
+```json
+"AwsIotCredentialProviderClients": {
+  "AwsIotClient": "@file:aws-iot-client.json"
+}
+```
+
+This file contains the following JSON data:
+
+```json
+{
+  "IotCredentialEndpoint": "abcdefghijklmn.credentials.iot.eu-west-1.amazonaws.com",
+  "RoleAlias": "GreengrassV2TokenExchangeRoleAlias",
+  "ThingName": "GreengrassCore-1",
+  "CertificateFile": "../thingCert.crt",
+  "PrivateKeyFile": "../privKey.key",
+  "RootCa": "../rootCA.pem"
+}
+```
+
+
+For getting the content from a hypothetical configuration server named "config-server" the syntax would be:
+
+```json
+"AwsIotCredentialProviderClients": {
+  "AwsIotClient": "@https:config-server/sfc/aws-iot-client.json"
+}
+```
+
+
+It is possible to nest, mixing includes from files and from get requests, in the included content. When including the content SFC will detect circular references between include sections.
+
+SFC will check if the included configuration content is changed by external processes, and if this is the case reloaded the SFC configuration file. For included files SFC will monitor the file system to detect changes to the included file. Monitoring the included files can be disabled by including a configuration item **"MonitorIncludedConfigFiles" : false** at the top level of the SFC configuration.
+
+To check if the content loaded from he get-request to the configured url is updated, SFC will make a request every 60 seconds to that url. If the content was retrieved successfully, it will compare a checksum of that data with the crc from a previous request to detect changes to the data. If a change is detected then the SFC config will be reloaded. The interval can bet set by including a configuration item **“MonitorIncludedConfigContentInterval” : <interval in seconds>** at the top level of the SFC configuration. To disable set the value to 0.
+
+SFC will cache the content included content, as long as it is not modified, for faster re-loading of the data.
+
+
+## Combining Templates and Inclusions
+
+
+Templates can be loaded from external sources, making it possible to use them as building blocks in different configuration files.
+
+For example the file s3-target.json does include the following definition of an S3 bucket, and using the **"%region%"** and **"bucket-name"**.
+
+```json
+{
+  "Active": true,
+  "TargetType": "AWS-S3",
+  "Region": "%region%",
+  "BucketName": "%bucket-name%",
+  "Interval": 60,
+  "BufferSize": 1,
+  "CredentialProviderClient": "AwsIotClient",
+  "CertificatesAndKeysByFileReference": false,
+  "Compression": "Zip"
+}
+```
+
+
+This file is loaded from the templates section:
+
+```json
+"Templates" : {
+  "S3Target": "@file:s3-target.json"
+}
+```
+
+
+The template then can be used as a normal template in the targets section:
+
+```json
+"Targets": {
+  "S3Target": "$(S3Target, bucket-name=sfc-bucket, region=eu-west-1)"
+}
+```
+
+
+When processing a configuration file SFC will first load all included content and then resolve all templates in the file.
+
 
 ## Configuration providers
 
@@ -2380,7 +2599,7 @@ The parameter AllSourcesReadTimeout can be used to specify the period within rea
 			</td>
 		</tr>
 
-		<tr class="even">
+<tr class="even">
 			<td>AwsIotCredentialProviderClients</td>
 			<td>Configuration for clients using the AWS IoT Credential Provider Service to obtain session credentials.</td>
 			<td>Map[String,<a href="#awsiotcredentialproviderclientconfiguration">AwsIotCredentialProviderClientConfiguration</a>]</td>
@@ -2416,6 +2635,20 @@ The parameter AllSourcesReadTimeout can be used to specify the period within rea
 			<td><a href="#tuningconfiguration">TuningConfiguration</a></td>
 			<td></td>
 		</tr>
+		<tr class="even">
+			<td>MonitorIncludedConfigFiles</td>
+			<td>Controls the monitoring of included configuration files see <a href="#including-configuration-sections">Including configuration sections</a></td>
+			<td>Boolean</td>
+			<td>Default is true, set to false to disable monitoring</td>
+		</tr>
+        <tr class="odd">
+			<td>MonitorIncludedConfigContentInterval</td>
+			<td>Set the interval in seconds of checking the content from external configuration sources loaded by configured urls, see <a href="#including-configuration-sections">Including configuration sections</a>	</td>
+           <td>Integer</td>
+           <td>Default is 60, set to 0 to disable</td>
+		</tr>
+
+
 
 </table>
 
@@ -2495,6 +2728,8 @@ The parameter AllSourcesReadTimeout can be used to specify the period within rea
 <td><a href="#aggregation">Aggregation</a></td>
 <td>Default is no aggregation of data</td>
 </tr>
+
+
 </tbody>
 </table>
 
