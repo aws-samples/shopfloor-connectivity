@@ -3,7 +3,6 @@ package com.amazonaws.sfc.util
 import com.amazonaws.sfc.log.Logger
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
-import java.util.concurrent.TimeoutException
 import kotlin.coroutines.CoroutineContext
 import kotlin.time.Duration
 

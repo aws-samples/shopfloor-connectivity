@@ -11,7 +11,6 @@ import io.ktor.websocket.*
 import java.io.EOFException
 import java.time.Duration
 import java.util.*
-import kotlin.collections.LinkedHashSet
 
 fun Application.configureSockets(log: Logger) {
 

@@ -27,7 +27,6 @@ import com.amazonaws.sfc.targets.TargetDataChannel
 import com.amazonaws.sfc.targets.TargetException
 import com.amazonaws.sfc.util.*
 import kotlinx.coroutines.*
-import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.selects.select
 import software.amazon.awssdk.awscore.exception.AwsServiceException
 import software.amazon.awssdk.services.sns.SnsClient

@@ -7,9 +7,12 @@ package com.amazonaws.sfc.metrics
 
 import com.amazonaws.sfc.log.Logger
 import com.amazonaws.sfc.util.launch
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.buffer
 import kotlinx.coroutines.flow.cancellable
+import kotlinx.coroutines.withTimeoutOrNull
 import kotlin.time.Duration
 
 class InProcessMetricsProvider(private val metricsReader: MetricsCollectorReader,

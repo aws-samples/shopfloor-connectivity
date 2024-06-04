@@ -9,7 +9,6 @@ import com.amazonaws.sfc.config.ConfigurationClass
 import com.amazonaws.sfc.config.ConfigurationException
 import com.amazonaws.sfc.config.Validate
 import com.amazonaws.sfc.mqtt.MqttConnectionOptions
-import com.amazonaws.sfc.mqtt.MqttConnectionProtocol
 import com.google.gson.annotations.SerializedName
 import kotlin.time.Duration
 import kotlin.time.DurationUnit

@@ -5,14 +5,13 @@
 package com.amazonaws.sfc.data
 
 import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.locks.ReentrantLock
 
 
 /**
  * Data store for values received from data updates or events
  */
 
-open class SourceDataValuesStore<T>() {
+open class SourceDataValuesStore<T> {
 
     private var values = ConcurrentHashMap<String, T>()
 

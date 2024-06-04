@@ -8,6 +8,9 @@ import com.amazonaws.sfc.awsiot.AwsIotCredentialProviderClientConfiguration
 import com.amazonaws.sfc.log.LogLevel
 import com.amazonaws.sfc.secrets.CloudSecretConfiguration
 import com.google.gson.annotations.SerializedName
+import kotlin.time.Duration
+import kotlin.time.DurationUnit
+import kotlin.time.toDuration
 
 
 interface HasCredentialClients {
@@ -190,6 +193,21 @@ open class BaseConfiguration : Validate, HasSecretsManager {
     val tuningConfiguration: TuningConfiguration
         get() = _tuningConfiguration
 
+    @SerializedName(CONFIG_TEMPLATES)
+    protected var _templates : TemplatesConfiguration? = null
+    val templates : TemplatesConfiguration?
+        get() = _templates
+
+    @SerializedName(CONFIG_MONITOR_INCLUDED_CONFIG_FILES)
+    protected var _monitorIncludedConfigFiles : Boolean = DEFAULT_MONITOR_INCLUDED_CONFIG_FILES
+    val monitorIncludedConfigFiles : Boolean
+        get() = _monitorIncludedConfigFiles
+
+    @SerializedName(CONFIG_MONITOR_INCLUDED_CONFIG_CONTENT_INTERVAL)
+    protected var _monitorIncludedConfigFilesInterval : Int = DEFAULT_MONITOR_INCLUDED_CONFIG_CONTENT_INTERVAL
+    val monitorIncludedConfigFilesInterval : Duration
+        get() = _monitorIncludedConfigFilesInterval.toDuration(DurationUnit.SECONDS)
+
 
     /**
      * Validates the configuration
@@ -271,7 +289,12 @@ open class BaseConfiguration : Validate, HasSecretsManager {
         const val CONFIG_CERTIFICATES_AND_KEYS_BY_FILE_REFERENCE = "CertificatesAndKeysByFileReference"
         const val CONFIG_INTERVAL = "Interval"
         const val CONFIG_BYTES_SUFFIX = "Bytes"
+        const val CONFIG_TEMPLATES = "Templates"
+        const val CONFIG_MONITOR_INCLUDED_CONFIG_FILES = "MonitorIncludedConfigFiles"
+        const val CONFIG_MONITOR_INCLUDED_CONFIG_CONTENT_INTERVAL = "MonitorIncludedConfigContentInterval"
 
+        const val DEFAULT_MONITOR_INCLUDED_CONFIG_FILES = true
+        const val DEFAULT_MONITOR_INCLUDED_CONFIG_CONTENT_INTERVAL = 60
 
         const val CONFIG_DISABLED_COMMENT = "#"
 
@@ -294,7 +317,10 @@ open class BaseConfiguration : Validate, HasSecretsManager {
             adapterTypes: Map<String, InProcessConfiguration> = default._protocolTypes,
             awsIotCredentialProviderClients: Map<String, AwsIotCredentialProviderClientConfiguration> = default._awsIoTCredentialProviderClients,
             secretsManagerConfiguration: SecretsManagerConfiguration? = default._secretsManagerConfiguration,
-            tuningConfiguration: TuningConfiguration = default._tuningConfiguration
+            tuningConfiguration: TuningConfiguration = default._tuningConfiguration,
+            monitorIncludedConfigFiles : Boolean = default._monitorIncludedConfigFiles,
+            monitorIncludedConfigFilesInterval : Duration = default._monitorIncludedConfigFilesInterval.toDuration(DurationUnit.SECONDS),
+            templates: TemplatesConfiguration?
         ): BaseConfiguration = createBaseConfiguration(
 
             name = name,
@@ -311,6 +337,9 @@ open class BaseConfiguration : Validate, HasSecretsManager {
             adapterTypes = adapterTypes,
             awsIotCredentialProviderClients = awsIotCredentialProviderClients,
             secretsManagerConfiguration = secretsManagerConfiguration,
+            templates = templates,
+            monitorIncludedConfigFiles = monitorIncludedConfigFiles,
+            monitorIncludedConfigFilesInterval = monitorIncludedConfigFilesInterval,
             tuningConfiguration = tuningConfiguration
         )
 
@@ -331,13 +360,16 @@ open class BaseConfiguration : Validate, HasSecretsManager {
             adapterTypes: Map<String, InProcessConfiguration>,
             awsIotCredentialProviderClients: Map<String, AwsIotCredentialProviderClientConfiguration>,
             secretsManagerConfiguration: SecretsManagerConfiguration?,
-            tuningConfiguration: TuningConfiguration = TuningConfiguration()): T {
+            tuningConfiguration: TuningConfiguration = TuningConfiguration(),
+            templates: TemplatesConfiguration?,
+            monitorIncludedConfigFilesInterval: Duration,
+            monitorIncludedConfigFiles: Boolean
+        ): T {
 
             val parameterLessConstructor = T::class.java.constructors.firstOrNull { it.parameters.isEmpty() }
             assert(parameterLessConstructor != null)
             val instance = parameterLessConstructor!!.newInstance() as T
 
-            @Suppress("DuplicatedCode")
             with(instance) {
                 _name = name
                 _version = version
@@ -354,6 +386,9 @@ open class BaseConfiguration : Validate, HasSecretsManager {
                 _awsIoTCredentialProviderClients = awsIotCredentialProviderClients
                 _secretsManagerConfiguration = secretsManagerConfiguration
                 _tuningConfiguration = tuningConfiguration
+                _monitorIncludedConfigFiles = monitorIncludedConfigFiles
+                _monitorIncludedConfigFilesInterval = monitorIncludedConfigFilesInterval.inWholeSeconds.toInt()
+                _templates = templates
             }
 
             return instance

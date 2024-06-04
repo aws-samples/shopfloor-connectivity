@@ -10,6 +10,7 @@ import com.amazonaws.sfc.config.ScheduleConfiguration.Companion.CONFIG_SCHEDULE_
 import com.amazonaws.sfc.log.LogLevel
 import com.amazonaws.sfc.opcua.config.OpcuaSourceConfiguration.Companion.CONFIG_SOURCE_ADAPTER_OPCUA_SERVER
 import com.google.gson.annotations.SerializedName
+import kotlin.time.Duration
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration
 
@@ -136,7 +137,10 @@ class OpcuaConfiguration : SourceAdapterBaseConfiguration() {
             adapterServers: Map<String, ServerConfiguration> = default._protocolAdapterServers,
             adapterTypes: Map<String, InProcessConfiguration> = default._protocolTypes,
             awsIotCredentialProviderClients: Map<String, AwsIotCredentialProviderClientConfiguration> = default._awsIoTCredentialProviderClients,
-            secretsManager: SecretsManagerConfiguration? = default._secretsManagerConfiguration
+            secretsManager: SecretsManagerConfiguration? = default._secretsManagerConfiguration,
+            monitorIncludedConfigFiles: Boolean = default._monitorIncludedConfigFiles,
+            monitorIncludedConfigFilesInterval : Duration = default._monitorIncludedConfigFilesInterval.toDuration(DurationUnit.SECONDS),
+            templatesConfiguration: TemplatesConfiguration? = default._templates
         ): OpcuaConfiguration {
 
             val instance = createBaseConfiguration<OpcuaConfiguration>(
@@ -153,7 +157,10 @@ class OpcuaConfiguration : SourceAdapterBaseConfiguration() {
                 adapterServers = adapterServers,
                 adapterTypes = adapterTypes,
                 awsIotCredentialProviderClients = awsIotCredentialProviderClients,
-                secretsManagerConfiguration = secretsManager
+                secretsManagerConfiguration = secretsManager,
+                templates = templatesConfiguration,
+                monitorIncludedConfigFilesInterval = monitorIncludedConfigFilesInterval,
+                monitorIncludedConfigFiles = monitorIncludedConfigFiles
             )
 
             with(instance) {

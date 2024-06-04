@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import 'source-map-support/register';
 import * as cdk from 'aws-cdk-lib';
-import { GreengrassSfcComponentsStack } from '../lib/greengrass-sfc-components-stack';
+import {GreengrassSfcComponentsStack} from '../lib/greengrass-sfc-components-stack';
 
 const app = new cdk.App();
 new GreengrassSfcComponentsStack(app, 'GreengrassSfcComponentsStack', {

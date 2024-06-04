@@ -9,6 +9,9 @@ import com.amazonaws.sfc.awsiot.AwsIotCredentialProviderClientConfiguration
 import com.amazonaws.sfc.config.*
 import com.amazonaws.sfc.log.LogLevel
 import com.google.gson.annotations.SerializedName
+import kotlin.time.Duration
+import kotlin.time.DurationUnit
+import kotlin.time.toDuration
 
 /**
  * File target configuration
@@ -45,7 +48,11 @@ class FileTargetWriterConfiguration : BaseConfigurationWithMetrics(), Validate {
                    adapterServers: Map<String, ServerConfiguration> = default._protocolAdapterServers,
                    adapterTypes: Map<String, InProcessConfiguration> = default._protocolTypes,
                    awsIotCredentialProviderClients: Map<String, AwsIotCredentialProviderClientConfiguration> = default._awsIoTCredentialProviderClients,
-                   secretsManagerConfiguration: SecretsManagerConfiguration? = default._secretsManagerConfiguration): FileTargetWriterConfiguration {
+                   secretsManagerConfiguration: SecretsManagerConfiguration? = default._secretsManagerConfiguration,
+                   monitorIncludedConfigFiles: Boolean = default._monitorIncludedConfigFiles,
+                   monitorIncludedConfigFilesInterval : Duration = default._monitorIncludedConfigFilesInterval.toDuration(DurationUnit.SECONDS),
+                   templatesConfiguration: TemplatesConfiguration? = default._templates): FileTargetWriterConfiguration {
+
             val instance = createBaseConfiguration<FileTargetWriterConfiguration>(
                 name = name,
                 version = version,
@@ -60,7 +67,11 @@ class FileTargetWriterConfiguration : BaseConfigurationWithMetrics(), Validate {
                 adapterServers = adapterServers,
                 adapterTypes = adapterTypes,
                 awsIotCredentialProviderClients = awsIotCredentialProviderClients,
-                secretsManagerConfiguration = secretsManagerConfiguration)
+                secretsManagerConfiguration = secretsManagerConfiguration,
+                templates = templatesConfiguration,
+                monitorIncludedConfigFilesInterval = monitorIncludedConfigFilesInterval,
+                monitorIncludedConfigFiles = monitorIncludedConfigFiles
+            )
 
             instance._targets = targets
             return instance

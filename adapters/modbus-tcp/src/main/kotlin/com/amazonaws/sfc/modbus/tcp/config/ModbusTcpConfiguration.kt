@@ -14,6 +14,9 @@ import com.amazonaws.sfc.modbus.config.ModbusConfiguration
 import com.amazonaws.sfc.modbus.config.ModbusSourceConfiguration
 import com.amazonaws.sfc.modbus.config.ModbusSourceConfiguration.Companion.CONFIG_SOURCE_ADAPTER_DEVICE
 import com.google.gson.annotations.SerializedName
+import kotlin.time.Duration
+import kotlin.time.DurationUnit
+import kotlin.time.toDuration
 
 /**
  * Modbus TCP protocol adapter configuration
@@ -133,7 +136,10 @@ open class ModbusTcpConfiguration : ModbusConfiguration() {
                    adapterServers: Map<String, ServerConfiguration> = default._protocolAdapterServers,
                    adapterTypes: Map<String, InProcessConfiguration> = default._protocolTypes,
                    awsIotCredentialProviderClients: Map<String, AwsIotCredentialProviderClientConfiguration> = default._awsIoTCredentialProviderClients,
-                   secretsManagerConfiguration: SecretsManagerConfiguration? = default._secretsManagerConfiguration): ModbusTcpConfiguration {
+                   secretsManagerConfiguration: SecretsManagerConfiguration? = default._secretsManagerConfiguration,
+                   monitorIncludedConfigFiles: Boolean = default._monitorIncludedConfigFiles,
+                   monitorIncludedConfigFilesInterval : Duration = default._monitorIncludedConfigFilesInterval.toDuration(DurationUnit.SECONDS),
+                   templatesConfiguration: TemplatesConfiguration? = default._templates): ModbusTcpConfiguration {
 
             val instance = createBaseConfiguration<ModbusTcpConfiguration>(
                 name = name,
@@ -149,7 +155,11 @@ open class ModbusTcpConfiguration : ModbusConfiguration() {
                 adapterServers = adapterServers,
                 adapterTypes = adapterTypes,
                 awsIotCredentialProviderClients = awsIotCredentialProviderClients,
-                secretsManagerConfiguration = secretsManagerConfiguration)
+                secretsManagerConfiguration = secretsManagerConfiguration,
+                templates = templatesConfiguration,
+                monitorIncludedConfigFilesInterval = monitorIncludedConfigFilesInterval,
+                monitorIncludedConfigFiles = monitorIncludedConfigFiles
+            )
 
             with(instance) {
                 _protocolAdapters = protocolAdapters

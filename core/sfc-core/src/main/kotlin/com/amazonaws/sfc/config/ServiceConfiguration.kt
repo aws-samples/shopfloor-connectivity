@@ -10,6 +10,9 @@ import com.amazonaws.sfc.config.ServerConfiguration.Companion.CONFIG_SERVER_ADDR
 import com.amazonaws.sfc.log.LogLevel
 import com.amazonaws.sfc.metrics.MetricsConfiguration
 import com.google.gson.annotations.SerializedName
+import kotlin.time.Duration
+import kotlin.time.DurationUnit
+import kotlin.time.toDuration
 
 /**
  * Base class for services that run an SFC source, target or the SC core
@@ -137,7 +140,10 @@ open class ServiceConfiguration : BaseConfiguration() {
                                                                                            adapterTypes: Map<String, InProcessConfiguration>,
                                                                                            awsIotCredentialProviderClients: Map<String, AwsIotCredentialProviderClientConfiguration>,
                                                                                            secretsManagerConfiguration: SecretsManagerConfiguration?,
-                                                                                           tuningConfiguration: TuningConfiguration): T {
+                                                                                           tuningConfiguration: TuningConfiguration,
+                                                                                           monitorIncludedConfigFiles: Boolean = default._monitorIncludedConfigFiles,
+                                                                                           monitorIncludedConfigFilesInterval : Duration = default._monitorIncludedConfigFilesInterval.toDuration(DurationUnit.SECONDS),
+                                                                                           templates : TemplatesConfiguration?): T {
 
             val instance = createBaseConfiguration<T>(
                 name = name,
@@ -154,7 +160,11 @@ open class ServiceConfiguration : BaseConfiguration() {
                 adapterTypes = adapterTypes,
                 awsIotCredentialProviderClients = awsIotCredentialProviderClients,
                 secretsManagerConfiguration = secretsManagerConfiguration,
-                tuningConfiguration = tuningConfiguration)
+                tuningConfiguration = tuningConfiguration,
+                templates = templates,
+                monitorIncludedConfigFilesInterval = monitorIncludedConfigFilesInterval,
+                monitorIncludedConfigFiles = monitorIncludedConfigFiles
+            )
 
             with(instance) {
                 _targets = targets
@@ -179,7 +189,10 @@ open class ServiceConfiguration : BaseConfiguration() {
                    adapterTypes: Map<String, InProcessConfiguration> = default._protocolTypes,
                    awsIotCredentialProviderClients: Map<String, AwsIotCredentialProviderClientConfiguration> = default._awsIoTCredentialProviderClients,
                    secretsManagerConfiguration: SecretsManagerConfiguration? = default._secretsManagerConfiguration,
-                   tuningConfiguration: TuningConfiguration): ServiceConfiguration =
+                   tuningConfiguration: TuningConfiguration = default._tuningConfiguration,
+                   monitorIncludedConfigFiles: Boolean = default._monitorIncludedConfigFiles,
+                   monitorIncludedConfigFilesInterval : Duration = default._monitorIncludedConfigFilesInterval.toDuration(DurationUnit.SECONDS),
+                   templates: TemplatesConfiguration? = default._templates): ServiceConfiguration =
             createServiceConfiguration(targets = targets,
                 protocolAdapters = protocolAdapters,
                 name = name,
@@ -196,7 +209,10 @@ open class ServiceConfiguration : BaseConfiguration() {
                 adapterTypes = adapterTypes,
                 awsIotCredentialProviderClients = awsIotCredentialProviderClients,
                 secretsManagerConfiguration = secretsManagerConfiguration,
-                tuningConfiguration = tuningConfiguration)
+                tuningConfiguration = tuningConfiguration,
+                monitorIncludedConfigFiles = monitorIncludedConfigFiles,
+                monitorIncludedConfigFilesInterval = monitorIncludedConfigFilesInterval,
+                templates = templates)
 
 
     }

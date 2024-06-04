@@ -1,4 +1,3 @@
-
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: MIT-0
 
@@ -9,9 +8,8 @@ import com.amazonaws.sfc.awsiot.AwsIotCredentialProviderClientConfiguration
 import com.amazonaws.sfc.config.*
 import com.amazonaws.sfc.config.ScheduleConfiguration.Companion.CONFIG_SCHEDULE_SOURCES
 import com.amazonaws.sfc.log.LogLevel
-import com.amazonaws.sfc.mqtt.config.MqttAdapterConfiguration.Companion.CONFIG_RECEIVED_DATA_CHANNEL_SIZE
-import com.amazonaws.sfc.mqtt.config.MqttAdapterConfiguration.Companion.CONFIG_RECEIVED_DATA_CHANNEL_TIMEOUT
 import com.google.gson.annotations.SerializedName
+import kotlin.time.Duration
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration
 
@@ -97,22 +95,27 @@ class MqttConfiguration : SourceAdapterBaseConfiguration() {
 
         private val default = MqttConfiguration()
 
-        fun create(sources: Map<String, MqttSourceConfiguration> = default._sources,
-                   protocolAdapters: Map<String, MqttAdapterConfiguration> = default._protocolAdapters,
-                   name: String = default._name,
-                   version: String = default._version,
-                   awsVersion: String? = default._awsVersion,
-                   description: String = default._description,
-                   schedules: List<ScheduleConfiguration> = default._schedules,
-                   logLevel: LogLevel? = default._logLevel,
-                   metadata: Map<String, String> = default._metadata,
-                   elementNames: ElementNamesConfiguration = default._elementNames,
-                   targetServers: Map<String, ServerConfiguration> = default._targetServers,
-                   targetTypes: Map<String, InProcessConfiguration> = default._targetTypes,
-                   adapterServers: Map<String, ServerConfiguration> = default._protocolAdapterServers,
-                   adapterTypes: Map<String, InProcessConfiguration> = default._protocolTypes,
-                   awsIotCredentialProviderClients: Map<String, AwsIotCredentialProviderClientConfiguration> = default._awsIoTCredentialProviderClients,
-                   secretsManagerConfiguration: SecretsManagerConfiguration? = default._secretsManagerConfiguration): MqttConfiguration {
+        fun create(
+            sources: Map<String, MqttSourceConfiguration> = default._sources,
+            protocolAdapters: Map<String, MqttAdapterConfiguration> = default._protocolAdapters,
+            name: String = default._name,
+            version: String = default._version,
+            awsVersion: String? = default._awsVersion,
+            description: String = default._description,
+            schedules: List<ScheduleConfiguration> = default._schedules,
+            logLevel: LogLevel? = default._logLevel,
+            metadata: Map<String, String> = default._metadata,
+            elementNames: ElementNamesConfiguration = default._elementNames,
+            targetServers: Map<String, ServerConfiguration> = default._targetServers,
+            targetTypes: Map<String, InProcessConfiguration> = default._targetTypes,
+            adapterServers: Map<String, ServerConfiguration> = default._protocolAdapterServers,
+            adapterTypes: Map<String, InProcessConfiguration> = default._protocolTypes,
+            awsIotCredentialProviderClients: Map<String, AwsIotCredentialProviderClientConfiguration> = default._awsIoTCredentialProviderClients,
+            secretsManagerConfiguration: SecretsManagerConfiguration? = default._secretsManagerConfiguration,
+            monitorIncludedConfigFiles: Boolean = default._monitorIncludedConfigFiles,
+            monitorIncludedConfigFilesInterval : Duration = default._monitorIncludedConfigFilesInterval.toDuration(DurationUnit.SECONDS),
+            templates: TemplatesConfiguration?
+        ): MqttConfiguration {
 
             val instance = createBaseConfiguration<MqttConfiguration>(
                 name = name,
@@ -128,7 +131,11 @@ class MqttConfiguration : SourceAdapterBaseConfiguration() {
                 adapterServers = adapterServers,
                 adapterTypes = adapterTypes,
                 awsIotCredentialProviderClients = awsIotCredentialProviderClients,
-                secretsManagerConfiguration = secretsManagerConfiguration)
+                secretsManagerConfiguration = secretsManagerConfiguration,
+                templates = templates,
+                monitorIncludedConfigFilesInterval = monitorIncludedConfigFilesInterval,
+                monitorIncludedConfigFiles = monitorIncludedConfigFiles
+            )
 
             with(instance) {
                 _sources = sources

@@ -8,8 +8,6 @@ import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import java.util.concurrent.ConcurrentHashMap
 import java.util.function.Function
 
@@ -121,10 +119,14 @@ open class LookupCacheHandler<K, T, I>(
         }
     }
 
-    suspend fun clear() {
+    fun clear() {
 
         cache.clear()
 
+    }
+
+    fun remove(key: K) {
+        cache.remove(key)
     }
 
     val keys: Set<K>

@@ -12,7 +12,6 @@ import com.amazonaws.sfc.util.buildScope
 import com.amazonaws.sfc.util.isJobCancellationException
 import com.amazonaws.sfc.util.launch
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.isActive
 import java.io.File
 import java.time.Period
@@ -25,7 +24,7 @@ class CertificateExpiryChecker(certificateFiles: List<File>, private val expirat
     private val scope = buildScope(className)
 
 
-    val certificates = certificateFiles.flatMap { f ->
+    private val certificates = certificateFiles.flatMap { f ->
         try {
             CertificateHelper.loadX509Certificates(f)
         } catch (e: Exception) {

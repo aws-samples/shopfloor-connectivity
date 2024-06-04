@@ -17,7 +17,6 @@ import com.amazonaws.sfc.sql.config.SqlConfiguration
 import com.amazonaws.sfc.sql.config.SqlConfiguration.Companion.SQL_ADAPTER
 import com.amazonaws.sfc.sql.config.SqlSourceConfiguration
 import com.amazonaws.sfc.sql.config.SqlSourceConfiguration.Companion.CONFIG_ADAPTER_DB_SERVER
-import com.amazonaws.sfc.system.DateTime
 import com.amazonaws.sfc.system.DateTime.systemDateTime
 import com.amazonaws.sfc.targets.TargetException
 import com.amazonaws.sfc.util.InstanceFactory

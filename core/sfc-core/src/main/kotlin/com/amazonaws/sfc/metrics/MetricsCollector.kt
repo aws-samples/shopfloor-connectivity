@@ -10,8 +10,6 @@ import com.amazonaws.sfc.system.DateTime
 import com.amazonaws.sfc.util.buildScope
 import com.amazonaws.sfc.util.toConcurrentMap
 import kotlinx.coroutines.*
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import java.time.Instant
 import kotlin.time.DurationUnit
 import kotlin.time.measureTime
@@ -201,7 +199,7 @@ class MetricsCollector(
     }
 
     // stores a collection of data points
-    suspend fun put(metricSource: String, dataPoints: List<MetricsDataPoint>) {
+    fun put(metricSource: String, dataPoints: List<MetricsDataPoint>) {
 
         if (dataPoints.isNotEmpty()) {
             metricsCache[metricSource]?.addAll(dataPoints)
@@ -223,7 +221,7 @@ class MetricsCollector(
 
 
     // cleanup of data points older than configured max age
-    private suspend fun cleanUp() {
+    private fun cleanUp() {
         val deleteBefore = DateTime.systemDateTimeUTC().minusSeconds(60L * METRICS_MAX_AGE)
         val log = logger.getCtxInfoLog(className, "cleanup")
 

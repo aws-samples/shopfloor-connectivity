@@ -30,6 +30,7 @@ val kotlinCoroutinesVersion = "1.6.2"
 val kotlinReflectionVersion = "1.6.0"
 val kotlinVersion = "1.9.0"
 val pahoVersion = "1.2.5"
+val ktorVersion = "2.3.10"
 
 dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion")
@@ -48,6 +49,8 @@ dependencies {
     implementation("software.amazon.awssdk:aws-core:$awsSdkVersion")
     implementation("org.bouncycastle:bcpkix-jdk15on:$bouncyCastleVersion")
     implementation("org.bouncycastle:bcprov-jdk15on:$bouncyCastleVersion")
+    implementation("io.ktor:ktor-client-core:$ktorVersion")
+    implementation("io.ktor:ktor-client-cio:$ktorVersion")
     api("io.burt:jmespath-core:$jmesPathVersion")
     api("org.apache.velocity:velocity-engine-core:$velocityVersion")
     api("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:$fasterXmlVersion")

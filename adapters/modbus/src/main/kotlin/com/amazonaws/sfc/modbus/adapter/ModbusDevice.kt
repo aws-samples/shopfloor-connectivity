@@ -24,9 +24,7 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.Semaphore
-import kotlinx.coroutines.sync.withLock
 import java.lang.ref.WeakReference
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -199,7 +197,7 @@ class ModbusDevice(
     private var _transactionID = AtomicInteger()
 
     // generate next transaction id
-    private suspend fun nextTransactionID(): UShort? {
+    private fun nextTransactionID(): UShort? {
 
         if (requestDepth == 0) {
             return null

@@ -8,7 +8,6 @@ package com.amazonaws.sfc
 import com.amazonaws.sfc.log.Logger
 import com.amazonaws.sfc.service.Service
 import com.amazonaws.sfc.service.ServiceMain
-import com.amazonaws.sfc.util.toStringEx
 import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
 
@@ -19,7 +18,7 @@ import org.slf4j.LoggerFactory
 class MainController : ServiceMain() {
 
 
-    override fun createServiceInstance(args: Array<String>, configuration: String, logger: Logger): Service? {
+    override fun createServiceInstance(args: Array<String>, configuration: String, logger: Logger): Service {
         return MainControllerService.createController(args, configuration, logger)
     }
 

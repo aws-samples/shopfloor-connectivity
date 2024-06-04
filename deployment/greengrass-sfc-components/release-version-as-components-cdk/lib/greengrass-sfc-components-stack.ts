@@ -1,8 +1,8 @@
 import * as cdk from 'aws-cdk-lib';
-import { Construct } from 'constructs';
-import { aws_s3 as s3 } from 'aws-cdk-lib';
+import {aws_s3 as s3} from 'aws-cdk-lib';
+import {Construct} from 'constructs';
 import * as codebuild from "aws-cdk-lib/aws-codebuild";
-import { Asset } from 'aws-cdk-lib/aws-s3-assets';
+import {Asset} from 'aws-cdk-lib/aws-s3-assets';
 import * as path from 'path';
 import * as iam from "aws-cdk-lib/aws-iam";
 
