@@ -17,6 +17,9 @@ import com.amazonaws.sfc.transformations.TransformValidationError
 import com.amazonaws.sfc.transformations.Transformation
 import com.amazonaws.sfc.transformations.validateOperatorTypes
 import com.google.gson.annotations.SerializedName
+import kotlin.time.Duration
+import kotlin.time.DurationUnit
+import kotlin.time.toDuration
 
 /**
  * Configuration for SFC core controller
@@ -434,7 +437,10 @@ class ControllerServiceConfiguration : ServiceConfiguration() {
                    healthProbeConfiguration: HealthProbeConfiguration? = default._healthProbeConfiguration,
                    awsIotCredentialProviderClients: Map<String, AwsIotCredentialProviderClientConfiguration> = default._awsIoTCredentialProviderClients,
                    secretsManagerConfiguration: SecretsManagerConfiguration? = default._secretsManagerConfiguration,
-                   tuningConfiguration: TuningConfiguration = default._tuningConfiguration): ControllerServiceConfiguration {
+                   tuningConfiguration: TuningConfiguration = default._tuningConfiguration,
+                   monitorIncludedConfigFiles: Boolean = default._monitorIncludedConfigFiles,
+                   monitorIncludedConfigFilesInterval : Duration = default._monitorIncludedConfigFilesInterval.toDuration(DurationUnit.SECONDS),
+                   templates : TemplatesConfiguration): ControllerServiceConfiguration {
 
             val instance = createServiceConfiguration<ControllerServiceConfiguration>(
                 targets = targets,
@@ -453,7 +459,10 @@ class ControllerServiceConfiguration : ServiceConfiguration() {
                 adapterTypes = adapterTypes,
                 awsIotCredentialProviderClients = awsIotCredentialProviderClients,
                 secretsManagerConfiguration = secretsManagerConfiguration,
-                tuningConfiguration = tuningConfiguration)
+                tuningConfiguration = tuningConfiguration,
+                monitorIncludedConfigFiles = monitorIncludedConfigFiles,
+                monitorIncludedConfigFilesInterval = monitorIncludedConfigFilesInterval,
+                templates =templates)
 
 
             with(instance) {

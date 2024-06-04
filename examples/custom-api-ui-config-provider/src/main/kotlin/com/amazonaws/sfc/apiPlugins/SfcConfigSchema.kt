@@ -4,7 +4,6 @@
 package com.amazonaws.sfc.apiPlugins
 
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.*
@@ -50,8 +49,8 @@ class SfcConfigSchema(private val connection: Connection) {
         val statement = connection.prepareStatement(INSERT_CONFIG, Statement.RETURN_GENERATED_KEYS)
         statement.setString(1, config.name)
         val jsonObject = PGobject()
-        jsonObject.setType("json");
-        jsonObject.setValue(config.baseConfig.toString());
+        jsonObject.setType("json")
+        jsonObject.setValue(config.baseConfig.toString())
         statement.setObject(2, jsonObject.toString())
         statement.executeUpdate()
 
@@ -110,8 +109,8 @@ class SfcConfigSchema(private val connection: Connection) {
         val statement = connection.prepareStatement(UPDATE_CONFIG)
         statement.setString(1, config.name)
         val jsonObject = PGobject()
-        jsonObject.setType("json");
-        jsonObject.setValue(config.baseConfig.toString());
+        jsonObject.setType("json")
+        jsonObject.setValue(config.baseConfig.toString())
         statement.setObject(2, jsonObject.toString())
         statement.setInt(3, id)
         statement.executeUpdate()

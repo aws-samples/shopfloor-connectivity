@@ -5,6 +5,7 @@
 
 package com.amazonaws.sfc.data
 
+
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonSyntaxException
@@ -181,9 +182,9 @@ class JsonHelper {
                 .registerTypeAdapter(ULong::class.java, ULongAdapter())
         }
 
-        fun <T> fromJsonExtended(json: String, classOfT: Class<T>): T {
+        fun <T> fromJsonExtended(g : Gson, json: String, classOfT: Class<T>): T {
             return try {
-                gsonExtended().fromJson(json, classOfT as Type?)
+                g.fromJson(json, classOfT as Type?)
             } catch (e: JsonSyntaxException) {
                 throw enrichedJsonSyntaxErrorException(e, BufferedReader(json.reader()).readText())
             } catch (e: Exception) {
@@ -191,11 +192,18 @@ class JsonHelper {
             }
         }
 
+        fun <T> fromJsonExtended(json: String, classOfT: Class<T>): T {
+            return fromJsonExtended(gsonExtended(), json, classOfT)
+        }
+
         fun <T> fromJsonExtended(jsonInputStream: InputStream, classOfT: Class<T>): T {
             val json = jsonInputStream.bufferedReader().use(BufferedReader::readText)
             return fromJsonExtended(json, classOfT)
 
         }
+
+
+
 
         private fun enrichedJsonSyntaxErrorException(e: JsonSyntaxException, json: String): JsonSyntaxException {
             val r = """.*line\s(\d+)\s""".toRegex()
@@ -216,6 +224,55 @@ class JsonHelper {
                 }
             }
             return e
+        }
+
+        fun forEachStringNode(s : String, trail: List<String> = emptyList(), fnFilter: (String)->Boolean = {true}, fnAction: (String, List<String>) -> Pair<String?, Any>): String {
+              val node = fromJsonExtended(s, Map::class.java)
+              val processed = forEachStringNode(node, trail, fnFilter = fnFilter, fnAction =fnAction)
+              return gsonPretty().toJson(processed)
+        }
+
+        fun forEachStringNode(node: Any, trail: List<String> = emptyList(), fnFilter: (String)->Boolean = {true}, fnAction: (String, List<String>) -> Pair<String?, Any>): Any {
+            return when (node) {
+
+                is Map<*, *> -> {
+                    @Suppress("UNCHECKED_CAST")
+                    val mm = node as Map<String, Any>
+                    mm.mapNotNull { (key, item) ->
+                        key to forEachStringNode(item, trail, fnFilter, fnAction)
+                    }.toMap()
+                }
+
+                is List<*> -> {
+                    @Suppress("UNCHECKED_CAST")
+                    val list = (node as MutableList<Any>)
+                    list.map { item ->
+                        forEachStringNode(item, trail, fnFilter, fnAction)
+                    }
+                }
+
+                is String -> {
+                    val item = if (fnFilter(node) )fnAction(node, trail) else null to node
+                    return if (item.second != node) forEachStringNode(item.second, if (item.first == null) trail else trail + item.first!!, fnFilter, fnAction) else item.second
+                }
+                else -> node
+            }
+        }
+
+        private val integerJsonValueRegex = """(".+":\s)(\d+.0+([\n,}]+?))""".toRegex()
+        fun isStructuredValue(v: String) = (v.startsWith("{") && v.endsWith("}"))
+
+        fun reformatJsonString(s: String): String {
+            if (!isStructuredValue(s)) return s
+            // build formated JSON string
+            var structured = gsonExtended().toJson(fromJsonExtended(s, Map::class.java))
+            //  strip trailing ".0" from integers
+            integerJsonValueRegex.findAll(structured, 0).forEach {
+                val oldValue = it.groups[0]?.value
+                val newValue = it.groups[1]?.value + it.groups[2]?.value?.split('.')?.first() + it.groups[3]?.value
+                structured = structured.replace(oldValue ?: "", newValue)
+            }
+            return structured
         }
 
         fun JsonSyntaxException.extendedJsonException(json : String) = enrichedJsonSyntaxErrorException(this, json)

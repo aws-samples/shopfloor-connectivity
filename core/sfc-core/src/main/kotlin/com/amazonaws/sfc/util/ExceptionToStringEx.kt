@@ -2,8 +2,6 @@ package com.amazonaws.sfc.util
 
 import java.io.ByteArrayOutputStream
 import java.io.PrintWriter
-import java.io.StringWriter
-import java.lang.Exception
 
 fun Throwable.toStringEx(): String {
     return exceptionToStringEx(this)

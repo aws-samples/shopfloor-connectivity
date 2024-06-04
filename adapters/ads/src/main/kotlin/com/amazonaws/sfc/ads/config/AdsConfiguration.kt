@@ -10,6 +10,9 @@ import com.amazonaws.sfc.config.*
 import com.amazonaws.sfc.config.ScheduleConfiguration.Companion.CONFIG_SCHEDULE_SOURCES
 import com.amazonaws.sfc.log.LogLevel
 import com.google.gson.annotations.SerializedName
+import kotlin.time.Duration
+import kotlin.time.DurationUnit
+import kotlin.time.toDuration
 
 @ConfigurationClass
 class AdsConfiguration : SourceAdapterBaseConfiguration() {
@@ -116,7 +119,10 @@ class AdsConfiguration : SourceAdapterBaseConfiguration() {
             adapterServers: Map<String, ServerConfiguration> = default._protocolAdapterServers,
             adapterTypes: Map<String, InProcessConfiguration> = default._protocolTypes,
             awsIotCredentialProviderClients: Map<String, AwsIotCredentialProviderClientConfiguration> = default._awsIoTCredentialProviderClients,
-            secretsManagerConfiguration: SecretsManagerConfiguration? = default._secretsManagerConfiguration
+            secretsManagerConfiguration: SecretsManagerConfiguration? = default._secretsManagerConfiguration,
+            monitorIncludedConfigFiles: Boolean = default._monitorIncludedConfigFiles,
+            monitorIncludedConfigFilesInterval : Duration = default._monitorIncludedConfigFilesInterval.toDuration(DurationUnit.SECONDS),
+            templates : TemplatesConfiguration? = default._templates
         ): AdsConfiguration {
 
             val instance = createBaseConfiguration<AdsConfiguration>(
@@ -133,7 +139,10 @@ class AdsConfiguration : SourceAdapterBaseConfiguration() {
                 adapterServers = adapterServers,
                 adapterTypes = adapterTypes,
                 awsIotCredentialProviderClients = awsIotCredentialProviderClients,
-                secretsManagerConfiguration = secretsManagerConfiguration
+                secretsManagerConfiguration = secretsManagerConfiguration,
+                templates = templates,
+                monitorIncludedConfigFilesInterval = monitorIncludedConfigFilesInterval,
+                monitorIncludedConfigFiles = monitorIncludedConfigFiles
             )
 
             with(instance) {

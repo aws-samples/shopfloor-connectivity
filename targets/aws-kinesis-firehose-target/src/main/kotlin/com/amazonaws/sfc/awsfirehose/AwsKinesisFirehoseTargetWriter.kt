@@ -28,7 +28,6 @@ import com.amazonaws.sfc.targets.TargetException
 import com.amazonaws.sfc.util.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.plus
 import kotlinx.coroutines.runBlocking
 import software.amazon.awssdk.awscore.exception.AwsServiceException

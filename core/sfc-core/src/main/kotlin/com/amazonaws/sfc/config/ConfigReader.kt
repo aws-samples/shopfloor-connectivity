@@ -1,12 +1,13 @@
-
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: MIT-0
 
 
 package com.amazonaws.sfc.config
 
+import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_TEMPLATES
 import com.amazonaws.sfc.data.JsonHelper.Companion.extendedJsonException
 import com.amazonaws.sfc.data.JsonHelper.Companion.fromJsonExtended
+import com.amazonaws.sfc.data.JsonHelper.Companion.gsonPretty
 import com.amazonaws.sfc.filters.*
 import com.amazonaws.sfc.secrets.SecretsManager
 import com.amazonaws.sfc.transformations.TransformationOperator
@@ -35,7 +36,7 @@ class ConfigReader private constructor(val config: String, private val allowUnre
     inline fun <reified T : Validate> getConfig(validate: Boolean = true): T {
 
         return try {
-            val config = jsonConfigReader.fromJson(jsonConfig, T::class.java)
+            val config = fromJsonExtended(jsonConfigReader,jsonConfig, T::class.java)
             if (validate) {
                 config.validate()
             }
@@ -59,11 +60,16 @@ class ConfigReader private constructor(val config: String, private val allowUnre
     }
 
     // replaces environment variable placeholders in configuration
+    @Suppress("UNCHECKED_CAST")
     private fun processConfig(): String {
-        return setPlaceholders(config)
+        val configMap = fromJsonExtended(config, Map::class.java) as Map<String,Any>
+        val included = IncludeResolver.resolve(configMap) as Map<String,Any>
+        val resolved = TemplateResolver(CONFIG_TEMPLATES).resolve(included)
+        val configStr = gsonPretty().toJson(resolved)
+        return setPlaceholders(configStr)
     }
 
-    fun setPlaceholders(inputStr: String): String {
+    private fun setPlaceholders(inputStr: String): String {
         var outputStr = setEnvironmentValues(inputStr)
         outputStr = setSecretValues(outputStr)
         if (!allowUnresolved) {
@@ -79,9 +85,13 @@ class ConfigReader private constructor(val config: String, private val allowUnre
             val s = if (!single) "s" else ""
             val m = if (secretsManager != null) "or configured secrets " else ""
             val t = if (single) "that" else "these"
-            throw ConfigurationException("Placeholder$s $unresolved could not be replaced as there ${if (single) "is" else "are"} no environment variable$s $m available with $t name$s", "")
+            throw ConfigurationException(
+                "Placeholder$s $unresolved could not be replaced as there ${if (single) "is" else "are"} no environment variable$s $m available with $t name$s",
+                ""
+            )
         }
     }
+
 
 
     private fun setSecretValues(config: String): String {
@@ -165,6 +175,13 @@ class ConfigReader private constructor(val config: String, private val allowUnre
 
             val configAsMap = fromJsonExtended(configStr, Any::class.java) as Map<*, *>
             return parsePlaceHolders(configAsMap)
+        }
+
+        fun getIncludedItems(configString : String): List<String> {
+            var includedItems = emptyList<String>()
+            val configMap = fromJsonExtended(configString, Map::class.java)
+            IncludeResolver.resolve(configMap, fnResolved = { l -> includedItems = l} )
+            return includedItems
         }
     }
 }

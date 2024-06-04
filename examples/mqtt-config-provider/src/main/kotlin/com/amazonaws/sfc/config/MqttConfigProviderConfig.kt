@@ -3,7 +3,6 @@
 package com.amazonaws.sfc.config
 
 import com.amazonaws.sfc.mqtt.MqttConnectionOptions
-import com.amazonaws.sfc.mqtt.MqttConnectionProtocol
 import com.google.gson.annotations.SerializedName
 import java.io.File
 import kotlin.time.Duration

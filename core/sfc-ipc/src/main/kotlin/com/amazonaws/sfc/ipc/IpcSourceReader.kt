@@ -44,7 +44,6 @@ import com.amazonaws.sfc.service.ConfigFileProvider.Companion.CONFIG_CUSTOM_CONF
 import com.amazonaws.sfc.service.ServerConnectionType
 import com.amazonaws.sfc.service.addExternalSecretsConfig
 import com.amazonaws.sfc.util.launch
-import io.grpc.Status
 import io.grpc.StatusException
 import kotlinx.coroutines.*
 import kotlin.time.Duration

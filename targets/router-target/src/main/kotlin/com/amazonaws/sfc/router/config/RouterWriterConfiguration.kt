@@ -12,6 +12,9 @@ import com.amazonaws.sfc.router.config.RouterTargetConfiguration.Companion.CONFI
 import com.amazonaws.sfc.router.config.RoutesConfiguration.Companion.CONFIG_ALTERNATE_TARGET
 import com.amazonaws.sfc.router.config.RoutesConfiguration.Companion.CONFIG_SUCCESS_TARGET
 import com.google.gson.annotations.SerializedName
+import kotlin.time.Duration
+import kotlin.time.DurationUnit
+import kotlin.time.toDuration
 
 
 @ConfigurationClass
@@ -150,7 +153,10 @@ class RouterWriterConfiguration : BaseConfigurationWithMetrics() {
                    adapterServers: Map<String, ServerConfiguration> = default._protocolAdapterServers,
                    adapterTypes: Map<String, InProcessConfiguration> = default._protocolTypes,
                    awsIotCredentialProviderClients: Map<String, AwsIotCredentialProviderClientConfiguration> = default._awsIoTCredentialProviderClients,
-                   secretsManagerConfiguration: SecretsManagerConfiguration? = default._secretsManagerConfiguration): RouterWriterConfiguration {
+                   secretsManagerConfiguration: SecretsManagerConfiguration? = default._secretsManagerConfiguration,
+                   monitorIncludedConfigFiles: Boolean = default._monitorIncludedConfigFiles,
+                   monitorIncludedConfigFilesInterval : Duration = default._monitorIncludedConfigFilesInterval.toDuration(DurationUnit.SECONDS),
+                   templatesConfiguration: TemplatesConfiguration? = default._templates): RouterWriterConfiguration {
 
             val instance = createBaseConfiguration<RouterWriterConfiguration>(
                 name = name,
@@ -166,7 +172,11 @@ class RouterWriterConfiguration : BaseConfigurationWithMetrics() {
                 adapterServers = adapterServers,
                 adapterTypes = adapterTypes,
                 awsIotCredentialProviderClients = awsIotCredentialProviderClients,
-                secretsManagerConfiguration = secretsManagerConfiguration)
+                secretsManagerConfiguration = secretsManagerConfiguration,
+                templates = templatesConfiguration,
+                monitorIncludedConfigFilesInterval = monitorIncludedConfigFilesInterval,
+                monitorIncludedConfigFiles = monitorIncludedConfigFiles
+            )
 
             instance._targets = targets
             return instance

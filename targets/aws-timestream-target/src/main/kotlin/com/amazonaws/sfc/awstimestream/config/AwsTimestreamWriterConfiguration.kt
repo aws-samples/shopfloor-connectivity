@@ -12,6 +12,9 @@ import com.amazonaws.sfc.data.JmesPathExtended
 import com.amazonaws.sfc.log.LogLevel
 import com.google.gson.annotations.SerializedName
 import io.burt.jmespath.Expression
+import kotlin.time.Duration
+import kotlin.time.DurationUnit
+import kotlin.time.toDuration
 
 /**
  * AWS Timestream target configuration
@@ -85,7 +88,10 @@ class AwsTimestreamWriterConfiguration : AwsServiceTargetsConfig<AwsTimestreamTa
                    adapterServers: Map<String, ServerConfiguration> = default._protocolAdapterServers,
                    adapterTypes: Map<String, InProcessConfiguration> = default._protocolTypes,
                    awsIotCredentialProviderClients: Map<String, AwsIotCredentialProviderClientConfiguration> = default._awsIoTCredentialProviderClients,
-                   secretsManagerConfiguration: SecretsManagerConfiguration? = default._secretsManagerConfiguration): AwsTimestreamWriterConfiguration {
+                   secretsManagerConfiguration: SecretsManagerConfiguration? = default._secretsManagerConfiguration,
+                   monitorIncludedConfigFiles: Boolean = default._monitorIncludedConfigFiles,
+                   monitorIncludedConfigFilesInterval : Duration = default._monitorIncludedConfigFilesInterval.toDuration(DurationUnit.SECONDS),
+                   templatesConfiguration: TemplatesConfiguration? = default._templates): AwsTimestreamWriterConfiguration {
 
             val instance = createBaseConfiguration<AwsTimestreamWriterConfiguration>(
                 name = name,
@@ -101,7 +107,11 @@ class AwsTimestreamWriterConfiguration : AwsServiceTargetsConfig<AwsTimestreamTa
                 adapterServers = adapterServers,
                 adapterTypes = adapterTypes,
                 awsIotCredentialProviderClients = awsIotCredentialProviderClients,
-                secretsManagerConfiguration = secretsManagerConfiguration)
+                secretsManagerConfiguration = secretsManagerConfiguration,
+                templates = templatesConfiguration,
+                monitorIncludedConfigFilesInterval = monitorIncludedConfigFilesInterval,
+                monitorIncludedConfigFiles = monitorIncludedConfigFiles
+            )
 
             instance._targets = targets
             return instance
