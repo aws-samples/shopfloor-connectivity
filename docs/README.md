@@ -2630,6 +2630,12 @@ The parameter AllSourcesReadTimeout can be used to specify the period within rea
 			<td></td>
 		</tr>
         <tr class="odd">
+			<td>Templates</td>
+			<td><a href="#configuration templates">Configuration Templates</a></td>
+			<td>Map[String,String]</td>
+			<td>Map indexed by template names containing JSON objects used as <a href="#configuration templates">SFC configuration templates</a></td>
+		</tr>
+        <tr class="even">
 			<td>Tuning</td>
 			<td>SFC tuning parameters</td>
 			<td><a href="#tuningconfiguration">TuningConfiguration</a></td>
@@ -2639,7 +2645,7 @@ The parameter AllSourcesReadTimeout can be used to specify the period within rea
 			<td>MonitorIncludedConfigFiles</td>
 			<td>Controls the monitoring of included configuration files see <a href="#including-configuration-sections">Including configuration sections</a></td>
 			<td>Boolean</td>
-			<td>Default is true, set to false to disable monitoring</td>
+			<td>Default value is true, set value to false to disable monitoring</td>
 		</tr>
         <tr class="odd">
 			<td>MonitorIncludedConfigContentInterval</td>
