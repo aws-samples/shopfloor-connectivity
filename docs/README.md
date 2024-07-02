@@ -1310,7 +1310,7 @@ The following included file "s3-inproc.json" contains two elements. The first el
 }
 ```
 
-The "S3TargetType" and "S3Target" are selected in the "TargetTypes" and "Target" sections of the SFC configuration by appending a "@" to the filename followed by the JMESPath expression to select that section,  as shown below.
+The "S3TargetType" and "S3Target" are selected in the "TargetTypes" and "Target" sections of the SFC configuration by appending a "@" to the filename followed by the JMESPath expression to select that section, as shown below.
 
 ```json
 "TargetTypes": {
