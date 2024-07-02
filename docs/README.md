@@ -1282,6 +1282,47 @@ To check if the content loaded from he get-request to the configured url is upda
 
 SFC will cache the content included content, as long as it is not modified, for faster re-loading of the data.
 
+## Selective Inclusions
+
+Instead of including the complete content obtained from an included file or response of a service call it is also possible to select a subset of this content.
+In order to select a subset the filename or the url must be followed by a "@" and a valid <a href="https://jmespath.org/">JMESPath expression</a> that selects the section of the content to include.  Selectors allow
+to combine related configuration sections in a combined inclusion  content obtained from a file or a service call.
+
+The following included file "s3-inproc.json" contains two elements. The first element "S3TargetType" defined the type of the in-process S3 target. The second element "S3Target" defined the actual S3 target.
+
+```json
+{
+   "S3TargetType" : {
+         "JarFiles": ["/sfc/s3-target/aws-s3-target/lib"],
+         "FactoryClassName": "com.amazonaws.sfc.awss3.AwsS3TargetWriter" 
+      },
+
+   "S3Target": {
+      "TargetType": "AWS-S3",
+      "Region": "eu-west-1",
+      "BucketName": "sfc-bucket-name",
+      "Interval": 60,
+      "BufferSize": 1,
+      "CredentialProviderClient": "AwsIotClient",
+      "Compression": "Zip"
+    }
+
+}
+```
+
+The "S3TargetType" and "S3Target" are selected in the "TargetTypes" and "Target" sections of the SFC configuration by appending a "@" to the filename followed by the JMESPath expression to select that section,  as shown below.
+
+```json
+"TargetTypes": {
+    "AWS-S3":  "@file:s3-inproc.json@S3TargetType"
+  }
+```
+
+```json
+"Targets": {
+   "S3Target": "@file:s3-inproc.json@S3Target"
+}
+```
 
 ## Combining Templates and Inclusions
 

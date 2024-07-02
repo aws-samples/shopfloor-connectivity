@@ -3,6 +3,7 @@
 
 package com.amazonaws.sfc.config
 
+import com.amazonaws.sfc.data.JmesPathExtended
 import com.amazonaws.sfc.data.JsonHelper.Companion.forEachStringNode
 import com.amazonaws.sfc.data.JsonHelper.Companion.fromJsonExtended
 import com.amazonaws.sfc.util.FileReaderCache
@@ -47,20 +48,35 @@ object IncludeResolver {
         return resolved
     }
 
-    private fun processIncludeFile(stringNode: String, trail: List<String>, fnResolved: (String) -> Unit = {}): Pair<String?, Any> {
+    private fun processIncludeFile(
+        stringNode: String,
+        trail: List<String>,
+        fnResolved: (String) -> Unit = {}
+    ): Pair<String?, Any> {
         val node = ConfigReader.setEnvironmentValues(stringNode)
-
-        val urlString = node.substring(1)
 
         return try {
 
-            when {
-                // from file
-                (node.startsWith("@file:", true)) -> loadFromFile(node, trail, fnResolved)
-                // from url
-                (node.startsWith("@") && isUrl(urlString)) -> loadFromUrl(urlString, trail, fnResolved)
-                // use string as is
-                else -> null to node
+            if ((!node.startsWith("@")) || (node.length < 2)) null to node else {
+
+                val i = node.indexOf('@', 1)
+                val base = if (i == -1) node else node.substring(0,i)
+                val selector = if (i != -1) node.substring(i+1) else null
+
+                val urlString = base.substring(1)
+
+                val includedData = when {
+                    // from file
+                    (base.startsWith("@file:", true)) -> loadFromFile(base, trail, fnResolved)
+                    // from url
+                    (base.startsWith("@") && isUrl(urlString)) -> loadFromUrl(urlString, trail, fnResolved)
+                    // use string as is
+                    else -> null to node
+                }
+                if (includedData.first != null && selector == null) includedData else {
+                    val jmesPath = JmesPathExtended.create().compile(selector)
+                    base to jmesPath.search(includedData.second)
+                }
             }
 
         } catch (e: JsonSyntaxException) {
@@ -93,10 +109,10 @@ object IncludeResolver {
 
 
     private fun trailString(trail: List<String>) = trail.joinToString(separator = " > ")
-    val urlRegex = "https?://(www\\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)".toRegex()
+    val urlRegex =
+        "https?://(www\\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)".toRegex()
+
     private fun isUrl(s: String): Boolean = urlRegex.matches(s.lowercase())
-
-
 
 
 }
