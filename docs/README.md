@@ -59,6 +59,7 @@ SFC documentation
     - [Deferred placeholder replacement](#deferred-placeholder-replacement)
     - [Configuration templates](#configuration-templates)
     - [Including configuration sections](#including-configuration-sections)
+    - [Selective Inclusions](#selective-inclusions)
     - [Combining templates and inclusions](#combining-templates-and-inclusions)
     - [Configuration providers](#configuration-providers)
     - [Custom configuration](#custom-configuration)
