@@ -20,6 +20,7 @@ import com.amazonaws.sfc.metrics.*
 import com.amazonaws.sfc.secrets.SecretsManager.Companion.createSecretsManager
 import com.amazonaws.sfc.service.HealthProbeService
 import com.amazonaws.sfc.service.Service
+import com.amazonaws.sfc.services.CommandLineOptionsException
 import com.amazonaws.sfc.system.DateTime
 import com.amazonaws.sfc.targets.TargetWriterFactory
 import com.amazonaws.sfc.util.buildScope
@@ -467,7 +468,12 @@ class MainControllerService(
             logger: Logger
         ): MainControllerService {
 
-            val cmd = ControllerCommandLineOptions(args)
+           val cmd = try {
+                ControllerCommandLineOptions(args)
+            } catch (e: Exception) {
+                logger.getCtxErrorLog(SFC_CORE, "createController")("Error parsing command line options: ${e.message ?: ""}")
+                throw CommandLineOptionsException("Error parsing command line options, ${e.message}")
+            }
 
             var configReader = createConfigReader(configuration, allowUnresolved = true, secretsManager = null)
             var controllerConfiguration: ControllerServiceConfiguration = configReader.getConfig()

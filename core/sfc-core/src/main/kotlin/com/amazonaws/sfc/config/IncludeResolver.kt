@@ -39,7 +39,7 @@ object IncludeResolver {
         urlCache.remove(url)
     }
 
-    fun resolve(node: Any, fnResolved: (List<String>) -> Unit = {}): Any {
+    fun resolve(node: Any, fnResolved: (List<String>) -> Unit = {}): Any? {
         val resolvedItems = mutableSetOf<String>()
         val resolved = forEachStringNode(node) { n, trail ->
             processIncludeFile(n, trail) { s -> resolvedItems.add(s) }
@@ -52,37 +52,45 @@ object IncludeResolver {
         stringNode: String,
         trail: List<String>,
         fnResolved: (String) -> Unit = {}
-    ): Pair<String?, Any> {
+    ): Pair<String, Any> {
         val node = ConfigReader.setEnvironmentValues(stringNode)
 
         return try {
 
-            if ((!node.startsWith("@")) || (node.length < 2)) null to node else {
+            if ((!node.startsWith("@")) || (node.length < 2)) node to node else {
 
                 val i = node.indexOf('@', 1)
-                val base = if (i == -1) node else node.substring(0,i)
-                val selector = if (i != -1) node.substring(i+1) else null
+                val base: String = if (i == -1) node else node.substring(0, i)
+                val selector = if (i != -1) node.substring(i + 1) else null
 
                 val urlString = base.substring(1)
 
-                val includedData = when {
+                val includedData: Pair<String, Any> = when {
                     // from file
                     (base.startsWith("@file:", true)) -> loadFromFile(base, trail, fnResolved)
                     // from url
                     (base.startsWith("@") && isUrl(urlString)) -> loadFromUrl(urlString, trail, fnResolved)
                     // use string as is
-                    else -> null to node
+                    else -> base to node
                 }
-                if (includedData.first != null && selector == null) includedData else {
+                if (selector == null) includedData
+                else {
                     val jmesPath = JmesPathExtended.create().compile(selector)
-                    base to jmesPath.search(includedData.second)
+                    val search = jmesPath.search(includedData.second)
+                    if (search == null) {
+                        val hint = if ("^[a-zA-B0-9_]".toRegex()
+                                .containsMatchIn(selector.toString())
+                        ) ", selector may contain restricted characters, see https://jmespath.org/specification.html for more info" else ""
+                        throw IncludeResolverException("Selector \"$selector\" in \"$node\" is invalid or returns no selected dat$hint")
+                    }
+                    base to search
                 }
             }
 
         } catch (e: JsonSyntaxException) {
             throw IncludeResolverException("Invalid JSON loaded from $stringNode, $e")
         } catch (e: Exception) {
-            throw IncludeResolverException("Error loading configuration from ,$stringNode,  $e")
+            throw IncludeResolverException("Error loading configuration from, $stringNode,  $e")
         }
     }
 
@@ -93,7 +101,8 @@ object IncludeResolver {
         if (trail.contains(includedFile.absolutePath))
             throw IncludeResolverException("Recursion processing included file $includedFile, $ ${trailString(trail + includedFile.absolutePath)}")
 
-        val includedText = fileCache[includedFile] ?: "{}"
+        var includedText = fileCache[includedFile] ?: "{}"
+        includedText = includedText.replace("\\u003d", "=")
         fnResolved("file:${includedFile.absolutePath}")
         return includedFile.absolutePath to fromJsonExtended(includedText, Any::class.java)
     }

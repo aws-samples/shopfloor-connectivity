@@ -151,7 +151,7 @@ class ConfigFileProvider(private val configFile: File, private val configVerific
         @Suppress("UNCHECKED_CAST")
         val map = fromJsonExtended(config, Any::class.java) as Map<String, Any?>
         val watchFiles = (map[CONFIG_MONITOR_INCLUDED_CONFIG_FILES]?: DEFAULT_MONITOR_INCLUDED_CONFIG_FILES) as Boolean
-        val interval = ((map[CONFIG_MONITOR_INCLUDED_CONFIG_CONTENT_INTERVAL]?: DEFAULT_MONITOR_INCLUDED_CONFIG_CONTENT_INTERVAL) as Double).toInt().toDuration(DurationUnit.SECONDS)
+        val interval = ((map[CONFIG_MONITOR_INCLUDED_CONFIG_CONTENT_INTERVAL]?: DEFAULT_MONITOR_INCLUDED_CONFIG_CONTENT_INTERVAL)as Int).toDuration(DurationUnit.SECONDS)
         return Pair(watchFiles, interval)
     }
 

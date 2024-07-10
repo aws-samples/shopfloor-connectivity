@@ -16,7 +16,7 @@ class TemplateResolver( private val templateSection : String) {
 
 
         val configMap = forEachStringNode(config) { node, trail ->
-            val templateMatch = templateRegex.find(node) ?: return@forEachStringNode (null to node)
+            val templateMatch = templateRegex.find(node) ?: return@forEachStringNode ("" to node)
             val template = parseTemplate(templateMatch.value)
 
             val resolved = resolve(templates, template, trail)
@@ -54,7 +54,7 @@ class TemplateResolver( private val templateSection : String) {
 
 
 
-    private fun resolve(templates: Map<String, Any>, templateValue: Template, trail: List<String>): Any {
+    private fun resolve(templates: Map<String, Any>, templateValue: Template, trail: List<String>): Any? {
 
         // check for recursive templates
         if (trail.contains(templateValue.name)) {
@@ -79,7 +79,7 @@ class TemplateResolver( private val templateSection : String) {
 
     }
 
-    private fun replacePlaceHolders(template: Any, trail: List<String>, templateValue: Template): Any {
+    private fun replacePlaceHolders(template: Any, trail: List<String>, templateValue: Template): Any? {
 
         val replaced = forEachStringNode(template, trail) { node, t ->
 
@@ -92,7 +92,7 @@ class TemplateResolver( private val templateSection : String) {
                 replacedStr = replacedStr.replace("%$t%", u)
             }
 
-            null to replacedStr
+            "" to replacedStr
         }
         return replaced
     }

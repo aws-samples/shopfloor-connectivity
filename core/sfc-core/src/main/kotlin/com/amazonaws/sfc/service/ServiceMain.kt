@@ -13,6 +13,7 @@ import com.amazonaws.sfc.log.LogLevel
 import com.amazonaws.sfc.log.LogWriter
 import com.amazonaws.sfc.log.Logger
 import com.amazonaws.sfc.log.Logger.Companion.createLogger
+import com.amazonaws.sfc.services.CommandLineOptionsException
 import com.amazonaws.sfc.util.MemoryMonitor
 import com.amazonaws.sfc.util.SfcException
 import com.amazonaws.sfc.util.launch
@@ -134,8 +135,10 @@ abstract class ServiceMain {
             if (serviceInstance != null) logs.info("Created instance of service ${serviceInstance!!::class.java.simpleName}")
         } catch (e: SfcException) {
             logs.error("Error creating service instance ${e.message}")
-        }catch(e : ConfigurationException){
+        }catch(e : ConfigurationException) {
             logs.error("Error creating service instance because of configuration error, ${e.message}")
+        }catch ( e : CommandLineOptionsException){
+            logs.error("Error creating service instance because of command line options error, ${e.message}")
         } catch (e: Exception) {
             logs.errorEx("Error creating service instance: ${e.message}", e)
         }

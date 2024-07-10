@@ -239,12 +239,10 @@ class AwsIotCoreTargetWriter(
 
     private fun bufferReachedMaxSizeOrMessages(log: Logger.ContextLogger): Boolean {
 
-        val reachedBufferCount = buffer.size >= targetConfig.batchCount
-        if (((targetConfig.batchCount) > 1) && reachedBufferCount) log.trace("${targetConfig.batchCount} batch count reached")
+        val reachedBufferCount = if (targetConfig.batchCount > 1)  buffer.size >= targetConfig.batchCount else false
+        if (reachedBufferCount) log.trace("${targetConfig.batchCount} batch count reached")
 
-        val reachedBufferSize = !reachedBufferCount &&
-                (buffer.payloadSize + (2 + (buffer.size - 1)) >= targetConfig.batchSize)
-
+        val reachedBufferSize = if (targetConfig.batchSize != 0)  (buffer.payloadSize + (2 + (buffer.size - 1)) >= targetConfig.batchSize) else false
         if (reachedBufferSize) log.trace("${targetConfig.batchSize.byteCountString} batch size reached")
 
         return reachedBufferSize || reachedBufferCount

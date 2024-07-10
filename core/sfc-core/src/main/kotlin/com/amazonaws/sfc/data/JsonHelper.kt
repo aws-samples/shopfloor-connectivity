@@ -226,13 +226,7 @@ class JsonHelper {
             return e
         }
 
-        fun forEachStringNode(s : String, trail: List<String> = emptyList(), fnFilter: (String)->Boolean = {true}, fnAction: (String, List<String>) -> Pair<String?, Any>): String {
-              val node = fromJsonExtended(s, Map::class.java)
-              val processed = forEachStringNode(node, trail, fnFilter = fnFilter, fnAction =fnAction)
-              return gsonPretty().toJson(processed)
-        }
-
-        fun forEachStringNode(node: Any, trail: List<String> = emptyList(), fnFilter: (String)->Boolean = {true}, fnAction: (String, List<String>) -> Pair<String?, Any>): Any {
+        fun forEachStringNode(node: Any?, trail: List<String> = emptyList(), fnFilter: (String?)->Boolean = {true}, fnAction: (String, List<String>) -> Pair<String, Any?>): Any? {
             return when (node) {
 
                 is Map<*, *> -> {
@@ -246,14 +240,14 @@ class JsonHelper {
                 is List<*> -> {
                     @Suppress("UNCHECKED_CAST")
                     val list = (node as MutableList<Any>)
-                    list.map { item ->
+                    list.mapNotNull { item ->
                         forEachStringNode(item, trail, fnFilter, fnAction)
                     }
                 }
 
                 is String -> {
                     val item = if (fnFilter(node) )fnAction(node, trail) else null to node
-                    return if (item.second != node) forEachStringNode(item.second, if (item.first == null) trail else trail + item.first!!, fnFilter, fnAction) else item.second
+                    return if (item.second != node) forEachStringNode(item.second, if (item.first == null) trail else trail + (item.first?:""), fnFilter, fnAction) else item.second
                 }
                 else -> node
             }
