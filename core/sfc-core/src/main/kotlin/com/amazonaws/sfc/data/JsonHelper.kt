@@ -40,7 +40,7 @@ class JsonHelper {
 
         override fun read(reader: JsonReader?): Instant {
 
-            return Instant.parse(reader?.nextString())
+            return Instant.parse(reader?.nextString().toString())
         }
     }
 
