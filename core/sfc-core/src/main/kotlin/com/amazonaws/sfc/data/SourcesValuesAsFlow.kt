@@ -13,6 +13,8 @@ import com.amazonaws.sfc.util.isJobCancellationException
 import com.amazonaws.sfc.util.launch
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flow
 import java.io.Closeable
 import java.util.concurrent.locks.ReentrantLock
@@ -49,13 +51,23 @@ class SourcesValuesAsFlow(
         }
     }
 
-    fun sourceReadResults(context: CoroutineContext, maxConcurrentSourceReads: Int, timeout: Duration): Flow<ReadResult> {
+    fun sourceReadResults(
+        context: CoroutineContext,
+        maxConcurrentSourceReads: Int,
+        timeout: Duration,
+        fnContinue: () -> Boolean
+    ): Flow<ReadResult> {
 
         val log = logger.getCtxLoggers(classname, "SourcesValuesAsFlow")
 
+        // declared here to make it available for flow catch
+        var workerQueue: WorkerQueue<Pair<String, List<String>?>, Pair<String, SourceReadResult>>? = null
+
+        if (!fnContinue()) return emptyFlow()
+
         return flow {
             // wait for initialization has been finished
-            initJob?.join()
+            if (!fnContinue()) initJob?.join()
 
             // create map of sources and channels to read
             val sourcesToRead = sourceChannels.map { (sourceID, sourceChannels) ->
@@ -65,16 +77,21 @@ class SourcesValuesAsFlow(
 
             while (context.isActive) {
 
-                val workerQueue = WorkerQueue<Pair<String, List<String>?>, Pair<String, SourceReadResult>>(
+                if (!fnContinue()) currentCoroutineContext().cancel()
+
+                workerQueue = WorkerQueue(
                     maxConcurrentSourceReads,
                     context = Dispatchers.Default,
                     logger = logger
                 ) { (sourceID, channels) ->
+
+
                     try {
                         val taskLogger = logger.getCtxLoggers(classname, "sourceReadResultWorker-$sourceID")
                         // make call to adapter and get the result
                         taskLogger.trace("Start reading ${channels.channelList?.size ?: "all"} channels from source $sourceID")
 
+                        // lock the source to prevent simultaneous reads
                         runBlocking {
                             val result = adapter.read(sourceID, channels)
                             taskLogger.trace("Finished reading from source, read $sourceID ${if (result is SourceReadSuccess) "succeeded" else "failed"}")
@@ -93,24 +110,13 @@ class SourcesValuesAsFlow(
                     // create map, indexed by the sourceID, with deferred read results
 
                     sourcesToRead.forEach { (sourceID, channels) ->
-                        workerQueue.submit(sourceID to channels)
+                        workerQueue?.submit(sourceID to channels)
                     }
 
-                    try {
-                        withTimeout(timeout) {
-                            val result = workerQueue.await().filterNotNull().toMap()
-                            emit(ReadResult(result))
-                        }
-                    } catch (e: TimeoutCancellationException) {
-                        log.error("Timeout waiting for read results from sources ${sourcesToRead.keys}")
-                        workerQueue.reset()
-                    } catch (e: Exception) {
-                        if (!e.isJobCancellationException) {
-                            log.errorEx("Error reading from sources", e)
-                        } else {
-                            workerQueue.reset()
-                        }
+                    val result = withTimeoutOrNull(timeout) {
+                        workerQueue?.await()?.filterNotNull()?.toMap()
                     }
+                    if (result != null) emit(ReadResult(result))
 
                 }
 
@@ -120,9 +126,17 @@ class SourcesValuesAsFlow(
                 } else {
                     log.trace("Read cycle took $duration")
                     runBlocking {
-                        delay(interval - duration)
+                        if (fnContinue()) {
+                            delay(interval - duration)
+                        }
                     }
                 }
+            }
+        }.catch { e ->
+            if (!e.isJobCancellationException) {
+                log.errorEx("Error reading from sources", e as Exception)
+            } else {
+                workerQueue?.reset()
             }
         }
     }

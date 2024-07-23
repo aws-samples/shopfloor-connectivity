@@ -6,6 +6,7 @@ import com.amazonaws.sfc.config.TcpConfiguration
 import com.amazonaws.sfc.log.LogLevel
 import com.amazonaws.sfc.log.Logger
 import com.amazonaws.sfc.util.buildScope
+import com.amazonaws.sfc.util.isJobCancellationException
 import com.amazonaws.sfc.util.launch
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
@@ -145,7 +146,8 @@ open class TcpClient(private val config: TcpConfiguration, readBufferSize : Int 
                                 delay(config.connectTimeout.inWholeMilliseconds)
                                 connectedChannel.send(null)
                             }catch (e : Exception){
-                                logs.error("Error setting up connection timeout, ${e.message}")
+                                if (!e.isJobCancellationException)
+                                    logs.error("Error setting up connection timeout, ${e.message}")
                             }
                         }
 
@@ -208,7 +210,8 @@ open class TcpClient(private val config: TcpConfiguration, readBufferSize : Int 
             try {
                 receiveData()
             }catch(e : Exception){
-                logger.getCtxErrorLog(className,"receiver")("Error receiving data, ${e.message}")
+                if (!e.isJobCancellationException)
+                   logger.getCtxErrorLog(className,"receiver")("Error receiving data, ${e.message}")
             }
         }
 
@@ -216,7 +219,8 @@ open class TcpClient(private val config: TcpConfiguration, readBufferSize : Int 
             try {
                 transmitData()
             }catch(e : Exception){
-                logger.getCtxErrorLog(className, "transmitter")("Error transmitting data, ${e.message}")
+                if (!e.isJobCancellationException)
+                   logger.getCtxErrorLog(className, "transmitter")("Error transmitting data, ${e.message}")
             }
         }
     }
@@ -238,7 +242,13 @@ open class TcpClient(private val config: TcpConfiguration, readBufferSize : Int 
                         outputStream?.flush()
 
                     } catch (e: SocketException) {
-                        log.errorEx("Error writing data to ${config.address}:${config.port}", e)
+                        if (!e.isJobCancellationException){
+                            if (e.message?.contains("Broken pipe") == true){
+                                log.warning("Error writing data to ${config.address}:${config.port}, $e")
+                            } else{
+                                log.errorEx("Error writing data to ${config.address}:${config.port}", e)
+                            }
+                        }
                         flagForReconnect()
                         delay(config.waitAfterWriteError.inWholeMilliseconds)
                     }
@@ -330,13 +340,17 @@ open class TcpClient(private val config: TcpConfiguration, readBufferSize : Int 
                 launch("Close Transport") {
                     transmitter?.join()
                     receiver?.join()
+                    clientSocket?.close()
                 }.onJoin { true }
 
                 launch("Timeout") {
                     delay(waitForClose)
+                    clientSocket?.close()
 
                 }.onJoin { false }
             }
+
+
         }
 
         closeResult.await()

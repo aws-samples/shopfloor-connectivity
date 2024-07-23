@@ -22,6 +22,8 @@ class InProcessMetricsProvider(private val metricsReader: MetricsCollectorReader
 
     var reader: Job? = null
 
+    var closing = false
+
     override suspend fun read(interval: Duration, consumer: MetricsConsumer): Unit = coroutineScope {
 
         reader = launch(context = Dispatchers.Default, name = "Collect Read Results") {
@@ -29,9 +31,9 @@ class InProcessMetricsProvider(private val metricsReader: MetricsCollectorReader
         }
     }
 
-    private suspend fun metricsReaderTask(metricsReader:MetricsCollectorReader, interval: Duration, consumer: MetricsConsumer ) {
+    private suspend fun metricsReaderTask(metricsReader:MetricsCollectorReader, interval: Duration, consumer: MetricsConsumer) {
         try {
-            val metricsProvider = MetricsAsFlow(metricsReader, interval, logger)
+            val metricsProvider = MetricsAsFlow(metricsReader, interval, logger){closing}
             metricsProvider.metricsFlow.buffer(100).cancellable().collect {
                 try {
                     if (!consumer(it)) {
@@ -47,6 +49,7 @@ class InProcessMetricsProvider(private val metricsReader: MetricsCollectorReader
     }
 
     override suspend fun close() {
+        closing = true
         withTimeoutOrNull(1000L) {
             reader?.cancel()
             reader?.join()

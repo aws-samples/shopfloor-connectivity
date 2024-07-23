@@ -13,6 +13,7 @@ import com.amazonaws.sfc.log.Logger
 import com.amazonaws.sfc.metrics.MetricDimensions
 import com.amazonaws.sfc.metrics.MetricUnits
 import com.amazonaws.sfc.metrics.MetricsCollector
+import com.amazonaws.sfc.tcp.TcpClientCache
 import kotlinx.coroutines.runBlocking
 import java.io.Closeable
 

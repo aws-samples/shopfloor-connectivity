@@ -1,0 +1,11 @@
+{
+  "STRUCT1": {
+    "A1": "WORD",
+    "B1": "WORD"
+  },
+  "STRUCT2": {
+    "A2": "STRUCT1[2]",
+    "B2": "WORD[12]",
+    "C2": "STRING(32)[2]"
+  }
+}

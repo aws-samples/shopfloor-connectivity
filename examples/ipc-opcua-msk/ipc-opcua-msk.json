@@ -93,6 +93,7 @@
   "ProtocolAdapters": {
     "OPC-UA": {
       "AdapterType": "OPCUA",
+      "AdapterServer" : "OpcuaAdapterServer",
       "OpcuaServers": {
         "OPCUA-SERVER": {
           "Address": "opc.tcp://localhost",

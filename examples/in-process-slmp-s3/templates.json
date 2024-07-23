@@ -1,0 +1,13 @@
+{
+  "S3Target": {
+    "Active": true,
+    "TargetType": "AWS-S3",
+    "Region": "%region%",
+    "BucketName": "%bucket%",
+    "Interval": 60,
+    "BufferSize": 1,
+    "Prefix": "%prefix%",
+    "CredentialProviderClient": "AwsIotClient",
+    "Compression": "Zip"
+  }
+}

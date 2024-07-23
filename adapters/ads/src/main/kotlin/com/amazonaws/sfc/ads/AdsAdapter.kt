@@ -10,10 +10,8 @@ import com.amazonaws.sfc.ads.config.AdsConfiguration
 import com.amazonaws.sfc.ads.config.AdsDeviceConfiguration
 import com.amazonaws.sfc.ads.config.AdsSourceConfiguration
 import com.amazonaws.sfc.ads.config.AdsSourceConfiguration.Companion.CONFIG_ADAPTER_DEVICE
-import com.amazonaws.sfc.ads.protocol.LockableTcpClient
 import com.amazonaws.sfc.config.BaseConfiguration.Companion.WILD_CARD
 import com.amazonaws.sfc.config.ConfigReader
-import com.amazonaws.sfc.config.TcpConfiguration
 import com.amazonaws.sfc.data.*
 import com.amazonaws.sfc.log.Logger
 import com.amazonaws.sfc.metrics.*
@@ -21,7 +19,8 @@ import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_DIMENSION_SO
 import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_DIMENSION_SOURCE_CATEGORY_ADAPTER
 import com.amazonaws.sfc.system.DateTime.systemDateTime
 import com.amazonaws.sfc.targets.TargetException
-import com.amazonaws.sfc.util.LookupCacheHandler
+import com.amazonaws.sfc.tcp.LockableTcpClient
+import com.amazonaws.sfc.tcp.TcpClientCache
 import com.amazonaws.sfc.util.MemoryMonitor.Companion.getUsedMemoryMB
 import com.amazonaws.sfc.util.isJobCancellationException
 import kotlinx.coroutines.runBlocking
@@ -31,10 +30,6 @@ import kotlinx.coroutines.withTimeoutOrNull
 import kotlin.time.Duration
 import kotlin.time.measureTime
 
-// Cache for sharing lockable TCP clients as ADS only supports a singleTCP client connection
-// from the same client IP address. If multiple sources read from same device these will share the same
-// TCP client connection. The client can be locked to prevent overlapping read/writes for different sources.
-typealias TcpClientCache = LookupCacheHandler<String, LockableTcpClient?, TcpConfiguration>
 
 class AdsAdapter(
     private val adapterID: String,

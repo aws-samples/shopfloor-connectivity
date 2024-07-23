@@ -1,0 +1,24 @@
+{
+  "Targets": {
+    "DEBUG-TARGET": {
+      "JarFiles": [
+        "< DEPLOYMENT DIRECTORY >/debug-target/lib"
+      ],
+      "FactoryClassName": "com.amazonaws.sfc.debugtarget.DebugTargetWriter"
+    },
+    "AWS-S3": {
+      "JarFiles": [
+        "< DEPLOYMENT DIRECTORY >/aws-s3-target/lib"
+      ],
+      "FactoryClassName": "com.amazonaws.sfc.awss3.AwsS3TargetWriter"
+    }
+  },
+  "Adapters": {
+    "SLMP": {
+      "JarFiles": [
+        "< DEPLOYMENT DIRECTORY >/slmp/lib"
+      ],
+      "FactoryClassName": "com.amazonaws.sfc.slmp.SlmpAdapter"
+    }
+  }
+}

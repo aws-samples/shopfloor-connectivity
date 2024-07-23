@@ -17,7 +17,8 @@ import kotlin.time.measureTime
 
 class MetricsAsFlow(private var metricsReader: MetricsCollectorReader?,
                     private val interval: Duration,
-                    private val logger: Logger) {
+                    private val logger: Logger,
+                    private val fnCancelled : () -> Boolean) {
 
     private val className = this::class.java.simpleName
 
@@ -27,9 +28,7 @@ class MetricsAsFlow(private var metricsReader: MetricsCollectorReader?,
 
         flow {
 
-            var cancelled = false
-
-            while (!cancelled) {
+            while (!fnCancelled()) {
 
                 // measure time it takes to handle a read cycle
                 val duration = measureTime {
@@ -43,7 +42,6 @@ class MetricsAsFlow(private var metricsReader: MetricsCollectorReader?,
                                 emitAll(availableMetrics.asFlow())
                             } catch (e: Exception) {
                                 log.errorEx("Error emitting metrics", e)
-                                cancelled = true
                             }
                         }
                     }

@@ -51,6 +51,7 @@ class MetricsProcessor(
     val isRunning: Boolean
         get() = metricReaderJobs?.values?.all { it.isActive } ?: true
 
+    var closing = false
 
     private var metricReaderJobs: Map<String, Job>? = null
 
@@ -90,7 +91,7 @@ class MetricsProcessor(
                     )
                 }
             }
-            true
+            !closing
         }
     }
 
@@ -143,6 +144,7 @@ class MetricsProcessor(
 
 
     suspend fun close() {
+        closing = false
         reader.cancel()
         metricReaderJobs?.values?.forEach { it.cancel() }
         metricReaderJobs = null

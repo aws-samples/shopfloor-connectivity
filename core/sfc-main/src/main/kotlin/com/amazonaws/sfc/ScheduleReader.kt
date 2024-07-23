@@ -76,6 +76,8 @@ class ScheduleReader(
 
     private val blockStoppedChannel = Channel<Any>()
 
+    private var closing = false
+
     // true is the schedule has any transformations
     private val scheduleHasTransformations =
         transformations.isNotEmpty() || sources.values.any { s -> s.channels.any { c -> c.value.transformationID != null } }
@@ -95,6 +97,7 @@ class ScheduleReader(
      * Closes the reader
      */
     override fun close() {
+        closing = true
         readerWorker.cancel()
         aggregationChannel?.close()
         readerOutputChannel.close()
@@ -108,7 +111,7 @@ class ScheduleReader(
     }
 
     val isRunning: Boolean
-        get() = readerWorker.isActive
+        get() = readerWorker.isActive && !closing
 
 
     /**
@@ -170,7 +173,9 @@ class ScheduleReader(
             Dispatchers.IO,
             logger = logger
         ) { (protocolID, reader) ->
-            readProtocolTask(protocolID, reader, readResultsChannel)
+            readProtocolTask(protocolID, reader, readResultsChannel){
+                !closing
+            }
         }
 
     private suspend fun processingTask(scope: CoroutineScope, readResultsChannel: Channel<Pair<String, ReadResult?>>) {
@@ -255,7 +260,7 @@ class ScheduleReader(
         }
     }
 
-    private fun readProtocolTask(protocolID: String, reader: SourceValuesReader, readResultsChannel: Channel<Pair<String, ReadResult?>>) {
+    private fun readProtocolTask(protocolID: String, reader: SourceValuesReader, readResultsChannel: Channel<Pair<String, ReadResult?>>, fnStop: () -> Boolean) {
         val log = logger.getCtxLoggers(className, "readTask")
         runBlocking {
             try {
@@ -275,7 +280,7 @@ class ScheduleReader(
                             log = log
                         )
                     }
-                    readerWorker.isActive
+                    fnStop()
                 }
             } catch (e: Exception) {
                 if (!e.isJobCancellationException)

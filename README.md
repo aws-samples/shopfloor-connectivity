@@ -11,9 +11,9 @@ SFC extends and unifies data collection capabilities additionally to our existin
   <img src="./docs/img/s7-iot-core-mqtt.gif" width="75%"/>
 </p>
 
-**Supported protocols:** `Siemens S7`, `Rockwell PCCC`, `Beckhoff ADS`, `SNMP`, `OPC-UA`, `MQTT`, `SQL`,` Modbus-TCP`
+**Supported protocols:** `Siemens S7`, `Rockwell PCCC`, `Mitsubishi/Melsec SLMP`, `Beckhoff ADS`, `SNMP`, `OPC-UA`, `MQTT`, `SQL`,` Modbus-TCP`
 
-**Supported AWS targets:** `IoT Core HTTP`, `IoT Core MQTT`, `Sitewise`, `IoT Analytics`, `Kinesis`, `Firehose`, `Lambda`, `MSK`, `S3`, `SNS`, `SQS`, `Timestream`
+**Supported AWS targets:** `IoT Core HTTP`, `IoT Core`, `Sitewise`, `IoT Analytics`, `Kinesis`, `Firehose`, `Lambda`, `MSK`, `S3`, `SNS`, `SQS`, `Timestream`
 
 ### [<code style="background-color:cyan; color:black">SFC Docs</code>](./docs/README.md) ++ [<code style="background-color:cyan; color:black">Greengrass Deployment</code>](./deployment/greengrass-sfc-components/release-version-as-components-cdk/README.md) ++ [<code style="background-color:cyan; color:black">Greengrass Lab</code>](./examples/greengrass-in-process/README.md) ++ [<code style="background-color:cyan; color:black">Siemens S7 sample</code>](./examples/in-process-s7-sitewise/README.md) ++ [<code style="background-color:cyan; color:black">Rockwell PCCC sample</code>](./examples/in-process-pccc-s3/README.md) ++ [<code style="background-color:cyan; color:black">Quickstart</code>](#quickstart-example)
 
@@ -49,9 +49,9 @@ The SFC core will provide the services, protocol and target adapters, with the r
 
 ### Installation
 
-In this Quick start you will set up following architecture: A local SFC installation will receive data from an OPC-UA server and send it according to its' configuration to an S3 Bucket. *As a side note here: SFC can deal with more industrial protocols - [have a look at the docs here!](./docs/README.md#running-the-jvm-protocol-adapters-as-an-ipc-service)*
+In this Quick start you will set up following architecture: A local SFC installation will receive data from an OPC-UA server and send it according to its configuration to an S3 Bucket. *As a side note here: SFC can deal with more industrial protocols - [have a look at the docs here!](./docs/README.md#running-the-jvm-protocol-adapters-as-an-ipc-service)*
 
-At first we have to download and extract the SFC bundles. These are precompiled executables to get started quickly:
+At first, we have to download and extract the SFC bundles. These are precompiled executables to get started quickly:
 
 ```shell
 # Define sfc version and directory
@@ -91,7 +91,7 @@ If you do not have a S3 bucket yet, you will have to create one:
 aws s3api create-bucket --bucket ${SFC_S3_BUCKET_NAME} --region ${AWS_REGION}
 ```
 
-Next we will have to configure the SFC. This is done via a configuration file you can specify at execution time (e.g. `sfc-main -config example.json`) We are first defining following variables which we will then use in a example configuration file. The following configuration sets SFC up, to connect to a OPCUA-Server and forward it to the S3 Bucket in your AWS Account:
+Next we will have to configure the SFC. This is done via a configuration file you can specify at execution time (e.g. `sfc-main -config example.json`) We are first defining following variables which we will then use in an example configuration file. The following configuration sets SFC up, to connect to a OPCUA-Server and forward it to the S3 Bucket in your AWS Account:
 > Note: **Please** expand the section below, to see the json config...
 <details>
   <summary><b>Expand</b></summary>

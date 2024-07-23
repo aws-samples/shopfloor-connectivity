@@ -1,0 +1,18 @@
+{
+  "Adapters": {
+    "SlmpAdapterServer": {
+      "Address": "< IP ADDRESS OF SERVICE >",
+      "Port": 50001
+    }
+  },
+  "Targets": {
+    "S3TargetServer": {
+      "Address": "< IP ADDRESS OF SERVICE >",
+      "Port": 50003
+    },
+    "DebugTargetServer": {
+      "Address": "< IP ADDRESS OF SERVICE >",
+      "Port": 50002
+    }
+  }
+}

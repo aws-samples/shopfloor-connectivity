@@ -4,224 +4,232 @@ SFC documentation
 ### TOC
 
 - [Installation & Deployment tooling](../deployment/README.md)
-    - [SFC release as Greengrass components - CDK](../deployment/greengrass-sfc-components/release-version-as-components-cdk/README.md)
-    - [SFC local build as Greengrass components - Python](../deployment/greengrass-sfc-components/local-build-as-components-py/README.md)
+  - [SFC release as Greengrass components - CDK](../deployment/greengrass-sfc-components/release-version-as-components-cdk/README.md)
+  - [SFC local build as Greengrass components - Python](../deployment/greengrass-sfc-components/local-build-as-components-py/README.md)
 - [Examples](../examples)
-    - [Quickstart Lab](../README.md#quickstart-example)
-    - [Greengrass SFC In-Process step-by-step Lab](../examples/greengrass-in-process/README.md)
-    - [Greengrass SFC IPC step-by-step Lab](../examples/greengrass-ipc/README.md)
-    - [Rockwell PCCC to S3 sample](../examples/in-process-pccc-s3/README.md)
-    - [Beckhoff ADS to S3 sample](../examples/in-process-ads-s3/README.md)
-    - [Siemens S7 to Sitewise sample](../examples/in-process-s7-sitewise/README.md)
-    - [OPCUA to MSK In-Process sample](../examples/in-process-opcua-msk/README.md)
-    - [OPCUA to MSK IPC sample](../examples/ipc-opcua-msk/README.md)
-    - [YAML Custom Configuration Provider](../examples/yaml-custom-config-provider/README.md)
-    - [OPCUA Auto Discovery Configuration provider](../examples/opcua-auto-discovery/README.md)
-    - [Custom User Interface and API Config Provider](../examples/custom-api-ui-config-provider/README.md)
-    - [CSV File Adapter Example](../examples/custom-adapter-csvfile/README.md)
+  - [Quickstart Lab](../README.md#quickstart-example)
+  - [Greengrass SFC In-Process step-by-step Lab](../examples/greengrass-in-process/README.md)
+  - [Greengrass SFC IPC step-by-step Lab](../examples/greengrass-ipc/README.md)
+  - [Rockwell PCCC to S3 sample](../examples/in-process-pccc-s3/README.md)
+  - [Beckhoff ADS to S3 sample](../examples/in-process-ads-s3/README.md)
+  - [Mitsubishi/Melsec SLMP in process sample](../examples/in-process-slmp-s3/README.md)
+  - [Mitsubishi/Melsec SLMP IPC sample](../examples/ipc-slmp-s3/README.md)
+  - [Siemens S7 to Sitewise sample](../examples/in-process-s7-sitewise/README.md)
+  - [OPCUA to MSK In-Process sample](../examples/in-process-opcua-msk/README.md)
+  - [OPCUA to MSK IPC sample](../examples/ipc-opcua-msk/README.md)
+  - [YAML Custom Configuration Provider](../examples/yaml-custom-config-provider/README.md)
+  - [OPCUA Auto Discovery Configuration provider](../examples/opcua-auto-discovery/README.md)
+  - [Custom User Interface and API Config Provider](../examples/custom-api-ui-config-provider/README.md)
+  - [CSV File Adapter Example](../examples/custom-adapter-csvfile/README.md)
 - [Introduction](#introduction)
-    - [SFC Components](#sfc-components)
-    - [Protocol Adapters](#protocol-adapters)
-    - [Core](#core)
-    - [Target Adapters](#target-adapters)
-    - [SFC data collection](#sfc-data-collection)
-    - [Terminology and concepts](#terminology-and-concepts)
-    - [Execution environments](#execution-environments)
+  - [SFC Components](#sfc-components)
+  - [Protocol Adapters](#protocol-adapters)
+  - [Core](#core)
+  - [Target Adapters](#target-adapters)
+  - [SFC data collection](#sfc-data-collection)
+  - [Terminology and concepts](#terminology-and-concepts)
+  - [Execution environments](#execution-environments)
 - [High level design overview and tenets](#high-level-design-overview-and-tenets)
-    - [Execution environment and platform dependencies](#execution-environment-and-platform-dependencies)
-    - [Extensibility](#extensibility)
-    - [Networking](#networking)
-    - [Scalability](#scalability)
-    - [Configuration](#configuration)
-    - [Logging](#logging)
-    - [Metrics](#metrics)
-    - [Connectivity](#connectivity)
-    - [High availability](#high-availability)
-    - [Data types and formats](#data-types-and-formats)
-    - [Metadata](#metadata)
+  - [Execution environment and platform dependencies](#execution-environment-and-platform-dependencies)
+  - [Extensibility](#extensibility)
+  - [Networking](#networking)
+  - [Scalability](#scalability)
+  - [Configuration](#configuration)
+  - [Logging](#logging)
+  - [Metrics](#metrics)
+  - [Connectivity](#connectivity)
+  - [High availability](#high-availability)
+  - [Data types and formats](#data-types-and-formats)
+  - [Metadata](#metadata)
 - [Deployment](#deployment)
-    - [In-process and IPC deployment models](#in-process-and-ipc-deployment-models)
-    - [Mixed models](#mixed-models)
-    - [Target chaining](#target-chaining)
-    - [Target chaining and buffering](#target-chaining-and-buffering)
-    - [Store and forward target](#store-and-forward-target.)
-    - [Retention strategies](#retention-strategies)
-    - [Router Target](#router-target)
+  - [In-process and IPC deployment models](#in-process-and-ipc-deployment-models)
+  - [Mixed models](#mixed-models)
+  - [Target chaining](#target-chaining)
+  - [Target chaining and buffering](#target-chaining-and-buffering)
+  - [Store and forward target](#store-and-forward-target)
+  - [Retention strategies](#retention-strategies)
+  - [Router Target](#router-target)
 - [Output data format](#output-data-format)
 - [Dataflow and processing](#dataflow-and-processing)
 - [Data Filtering](#data-filtering)
-    - [Data Change Filters](#data-change-filters)
-    - [Value Change Filters](#value-change-filters)
-    - [Condition Filters](#condition-filters)
+  - [Data Change Filters](#data-change-filters)
+  - [Value Change Filters](#value-change-filters)
+  - [Condition Filters](#condition-filters)
 - [Configuration](#configuration-1)
-    - [Configuration placeholders](#configuration-placeholders)
-    - [Configuration secrets](#configuration-secrets)
-    - [Deferred placeholder replacement](#deferred-placeholder-replacement)
-    - [Configuration templates](#configuration-templates)
-    - [Including configuration sections](#including-configuration-sections)
-    - [Selective Inclusions](#selective-inclusions)
-    - [Combining templates and inclusions](#combining-templates-and-inclusions)
-    - [Configuration providers](#configuration-providers)
-    - [Custom configuration](#custom-configuration)
-    - [Configuration verification](#configuration-verification)
+  - [Configuration placeholders](#configuration-placeholders)
+  - [Configuration secrets](#configuration-secrets)
+  - [Deferred placeholder replacement](#deferred-placeholder-replacement)
+  - [Configuration templates](#configuration-templates)
+  - [Including configuration sections](#including-configuration-sections)
+  - [Selective Inclusions](#selective-inclusions)
+  - [Combining templates and inclusions](#combining-templates-and-inclusions)
+  - [Configuration providers](#configuration-providers)
+  - [Custom configuration](#custom-configuration)
+  - [Configuration verification](#configuration-verification)
 - [Logging](#logging)
 - [Metrics collection](#metrics-collection)
 - [Securing Network Traffic between SFC components](#securing-network-traffic-between-sfc-components)
-    - [Plaintext](#plaintext)
-    - [ServerSideTLS](#serversidetls)
-    - [MutualTLS](#mutualtls)
+  - [Plaintext](#plaintext)
+  - [ServerSideTLS](#serversidetls)
+  - [MutualTLS](#mutualtls)
 - [Providing session credentials for targets accessing AWS Services](#providing-session-credentials-for-targets-accessing-aws-services)
 - [Securing the configuration](#securing-the-configuration)
 - [Output Structure Transformation](#output-structure-transformation)
-    - [CSV output](#csv-output)
-    - [XML format](#xml-format)
-    - [YAML format](#yaml-format)
+  - [CSV output](#csv-output)
+  - [XML format](#xml-format)
+  - [YAML format](#yaml-format)
 - [Service Health Probes](#service-health-probes)
 - [OPCUA Alarm and Events types](#opcua-alarm-and-events-types)
 - [OPCUA security profiles and certificates](#opcua-security-profiles-and-certificates)
 - [SFC Tuning](#sfc-tuning)
-    - [SFC Channel Tuning](#sfc-channel-tuning)
-    - [SFC Memory Monitoring](#sfc-memory-monitoring)
-    - [Concurrent reading from sources](#concurrent-reading-from-sources)
+  - [SFC Channel Tuning](#sfc-channel-tuning)
+  - [SFC Memory Monitoring](#sfc-memory-monitoring)
+  - [Concurrent reading from sources](#concurrent-reading-from-sources)
 - [SFC configuration](#sfc-configuration)
-    - [SFC top level configuration](#sfc-top-level-configuration)
-    - [Schedule](#schedule)
-    - [SourceConfiguration](#sourceconfiguration)
-    - [ChannelConfiguration](#channelconfiguration)
-    - [Aggregation](#aggregation)
-    - [ProtocolAdapterConfiguration](#protocoladapterconfiguration)
-    - [TargetConfiguration](#targetconfiguration)
-    - [SecretsManagerConfiguration](#secretsmanagerconfiguration)
-    - [CloudSecretConfiguration](#cloudsecretconfiguration)
-    - [MetricsConfiguration](#metricsconfiguration)
-    - [MetricsWriterConfiguration](#metricswriterconfiguration)
-    - [HealthProbeConfiguration](#healthprobeconfiguration)
-    - [AwsIotCredentialProviderClientConfiguration](#awsiotcredentialproviderclientconfiguration)
-    - [ClientProxyConfiguration](#clientproxyconfiguration)
-    - [InProcessConfiguration](#inprocessconfiguration)
-    - [ServerConfiguration](#serverconfiguration)
-    - [ChangeFilterConfiguration](#changefilterconfiguration)
-    - [ValueFilterConfiguration](#valuefilterconfiguration)
-    - [ConditionFilterConfiguration](#conditionfilterconfiguration)
-    - [TransformationOperator](#transformationoperator)
+  - [SFC top level configuration](#sfc-top-level-configuration)
+  - [Schedule](#schedule)
+  - [SourceConfiguration](#sourceconfiguration)
+  - [ChannelConfiguration](#channelconfiguration)
+  - [Aggregation](#aggregation)
+  - [ProtocolAdapterConfiguration](#protocoladapterconfiguration)
+  - [TargetConfiguration](#targetconfiguration)
+  - [SecretsManagerConfiguration](#secretsmanagerconfiguration)
+  - [CloudSecretConfiguration](#cloudsecretconfiguration)
+  - [MetricsConfiguration](#metricsconfiguration)
+  - [MetricsWriterConfiguration](#metricswriterconfiguration)
+  - [HealthProbeConfiguration](#healthprobeconfiguration)
+  - [AwsIotCredentialProviderClientConfiguration](#awsiotcredentialproviderclientconfiguration)
+  - [ClientProxyConfiguration](#clientproxyconfiguration)
+  - [InProcessConfiguration](#inprocessconfiguration)
+  - [ServerConfiguration](#serverconfiguration)
+  - [ChangeFilterConfiguration](#changefilterconfiguration)
+  - [ValueFilterConfiguration](#valuefilterconfiguration)
+  - [ConditionFilterConfiguration](#conditionfilterconfiguration)
+  - [TransformationOperator](#transformationoperator)
 - [OPCUA Protocol Configuration](#opcua-protocol-configuration)
-    - [OpcuaSourceConfiguration](#opcuasourceconfiguration)
-    - [OpcuaNodeChannelConfiguration](#opcuanodechannelconfiguration)
-    - [OpcuaNodeChangeFilter](#opcuanodechangefilter)
-    - [OpcuaAdapterConfiguration](#opcuaadapterconfiguration)
-    - [OpcuaServerProfileConfiguration](#opcuaserverprofileconfiguration)
-    - [OpcuaEventTypeConfiguration](#opcuaeventtypeconfiguration)
-    - [OpcuaServerConfiguration](#opcuaserverconfiguration)
-    - [CertificateConfiguration](#certificateconfiguration)
-    - [SelfSignedCertificateConfiguration](#selfsignedcertificateconfiguration)
-    - [CertificateValidationConfiguration](#certificatevalidationconfiguration)
-    - [CertificateValidationOptions](#certificatevalidationoptions)
+  - [OpcuaSourceConfiguration](#opcuasourceconfiguration)
+  - [OpcuaNodeChannelConfiguration](#opcuanodechannelconfiguration)
+  - [OpcuaNodeChangeFilter](#opcuanodechangefilter)
+  - [OpcuaAdapterConfiguration](#opcuaadapterconfiguration)
+  - [OpcuaServerProfileConfiguration](#opcuaserverprofileconfiguration)
+  - [OpcuaEventTypeConfiguration](#opcuaeventtypeconfiguration)
+  - [OpcuaServerConfiguration](#opcuaserverconfiguration)
+  - [CertificateConfiguration](#certificateconfiguration)
+  - [SelfSignedCertificateConfiguration](#selfsignedcertificateconfiguration)
+  - [CertificateValidationConfiguration](#certificatevalidationconfiguration)
+  - [CertificateValidationOptions](#certificatevalidationoptions)
 - [OPCDA Protocol Configuration](#opcda-protocol-configuration)
-    - [OpcdaSourceConfiguration](#opcdasourceconfiguration)
-    - [OpcdaChannelConfiguration](#opcdachannelconfiguration)
-    - [OpcdaAdapterConfiguration](#opcdaadapterconfiguration)
-    - [OpcdaServerConfiguration](#opcdaserverconfiguration)
-    - [OpcdaServerConfiguration](#opcdaserverconfiguration)
+  - [OpcdaSourceConfiguration](#opcdasourceconfiguration)
+  - [OpcdaChannelConfiguration](#opcdachannelconfiguration)
+  - [OpcdaAdapterConfiguration](#opcdaadapterconfiguration)
+  - [OpcdaServerConfiguration](#opcdaserverconfiguration)
+  - [OpcdaServerConfiguration](#opcdaserverconfiguration)
 - [S7 Protocol Configuration](#s7-protocol-configuration)
-    - [S7SourceConfiguration](#s7sourceconfiguration)
-    - [S7FieldChannelConfiguration](#s7fieldchannelconfiguration)
-    - [S7AdapterConfiguration](#s7adapterconfiguration)
-    - [S7ControllerConfiguration](#s7controllerconfiguration)
+  - [S7SourceConfiguration](#s7sourceconfiguration)
+  - [S7FieldChannelConfiguration](#s7fieldchannelconfiguration)
+  - [S7AdapterConfiguration](#s7adapterconfiguration)
+  - [S7ControllerConfiguration](#s7controllerconfiguration)
 - [MQTT Protocol Configuration](#mqtt-protocol-configuration)
-    - [MqttSourceConfiguration](#mqttsourceconfiguration)
-    - [MqttChannelConfiguration](#mqttchannelconfiguration)
-    - [TopicNameMapping](#topicnamemapping)
-    - [MqttAdapterConfiguration](#mqttadapterconfiguration)
-    - [MqttBrokerConfiguration](#mqttbrokerconfiguration)
+  - [MqttSourceConfiguration](#mqttsourceconfiguration)
+  - [MqttChannelConfiguration](#mqttchannelconfiguration)
+  - [TopicNameMapping](#topicnamemapping)
+  - [MqttAdapterConfiguration](#mqttadapterconfiguration)
+  - [MqttBrokerConfiguration](#mqttbrokerconfiguration)
 - [SQL Adapter Configuration](#sql-adapter-configuration)
-    - [SqlSourceConfiguration](#sqlsourceconfiguration)
-    - [SqlChannelConfiguration](#sqlchannelconfiguration)
-    - [SqlAdapterConfiguration](#sqladapterconfiguration)
-    - [DbServerConfiguration](#dbserverconfiguration)
+  - [SqlSourceConfiguration](#sqlsourceconfiguration)
+  - [SqlChannelConfiguration](#sqlchannelconfiguration)
+  - [SqlAdapterConfiguration](#sqladapterconfiguration)
+  - [DbServerConfiguration](#dbserverconfiguration)
 - [Modbus TCP Protocol Configuration](#modbus-tcp-protocol-configuration)
-    - [ModbusSourceConfiguration](#modbussourceconfiguration)
-    - [ModbusOptimization](#modbusoptimization)
-    - [ModbusChannelConfiguration](#modbuschannelconfiguration)
-    - [ModbusTcpAdapterConfiguration](#modbustcpadapterconfiguration)
-    - [ModbusTcpDeviceConfiguration](#modbustcpdeviceconfiguration)
+  - [ModbusSourceConfiguration](#modbussourceconfiguration)
+  - [ModbusOptimization](#modbusoptimization)
+  - [ModbusChannelConfiguration](#modbuschannelconfiguration)
+  - [ModbusTcpAdapterConfiguration](#modbustcpadapterconfiguration)
+  - [ModbusTcpDeviceConfiguration](#modbustcpdeviceconfiguration)
 - [SNMP Protocol Configuration](#snmp-protocol-configuration)
-    - [SnmpSourceConfiguration](#snmpsourceconfiguration)
-    - [SnmpChannelConfiguration](#snmpchannelconfiguration)
-    - [SnmpAdapterConfiguration](#snmpadapterconfiguration)
-    - [SnmpDeviceConfiguration](#snmpdeviceconfiguration)
+  - [SnmpSourceConfiguration](#snmpsourceconfiguration)
+  - [SnmpChannelConfiguration](#snmpchannelconfiguration)
+  - [SnmpAdapterConfiguration](#snmpadapterconfiguration)
+  - [SnmpDeviceConfiguration](#snmpdeviceconfiguration)
 - [PCCC Protocol Configuration](#pccc-protocol-configuration)
-    - [PcccSourceConfiguration](#pcccsourceconfiguration)
-    - [PcccChannelConfiguration](#pcccchannelconfiguration)
-    - [PCCC Addressing](#pccc-addressing)
-    - [PcccAdapterConfiguration](#pcccadapterconfiguration)
-    - [PcccControllerConfiguration](#pccccontrollerconfiguration)
-    - [PcccConnectPathConfiguration](#pcccconnectpathconfiguration)
+  - [PcccSourceConfiguration](#pcccsourceconfiguration)
+  - [PcccChannelConfiguration](#pcccchannelconfiguration)
+  - [PCCC Addressing](#pccc-addressing)
+  - [PcccAdapterConfiguration](#pcccadapterconfiguration)
+  - [PcccControllerConfiguration](#pccccontrollerconfiguration)
+  - [PcccConnectPathConfiguration](#pcccconnectpathconfiguration)
 - [ADS Protocol Configuration](#ads-protocol-configuration)
-    - [AdsSourceConfiguration](#adssourceconfiguration)
-    - [AdsChannelConfiguratio](#adschannelconfiguration)
-    - [AdsAdapterConfiguration](#adsadapterconfiguration)
-    - [AdsDeviceConfiguration](#adsdeviceconfiguration)
+  - [AdsSourceConfiguration](#adssourceconfiguration)
+  - [AdsChannelConfiguratio](#adschannelconfiguration)
+  - [AdsAdapterConfiguration](#adsadapterconfiguration)
+  - [AdsDeviceConfiguration](#adsdeviceconfiguration)
+- [SLMP Protocol Configuration](#slmp-protocol-configuration)
+  - [SlmpSourceConfiguration](#slmpsourceconfiguration)
+  - [SlmpChannelConfiguratio](#slmpchannelconfiguration)
+  - [SLMP channel reading optimization](#slmp-channel-reading-optimization) 
+  - [SlmpAdapterConfiguration](#slmpadapterconfiguration)
+  - [SlmpControllerConfiguration](#slmpcontrollerconfiguration)
 - [AWS IoT Analytics Service Target](#aws-iot-analytics-service-target)
-    - [AwsIotAnalyticsTargetConfiguration](#awsiotanalyticstargetconfiguration)
+  - [AwsIotAnalyticsTargetConfiguration](#awsiotanalyticstargetconfiguration)
 - [AWS IoT Core Service Target](#aws-iot-core-service-target)
-    - [AwsIotCoreTargetConfiguration](#awsiotcoretargetconfiguration)
+  - [AwsIotCoreTargetConfiguration](#awsiotcoretargetconfiguration)
 - [AWS MSK Service Target](#aws-msk-service-target)
-    - [AwsMskTargetConfiguration](#awsmsktargetconfiguration)
+  - [AwsMskTargetConfiguration](#awsmsktargetconfiguration)
 - [AWS Kinesis Firehose Service Target](#aws-kinesis-firehose-service-target)
-    - [AwsKinesisFirehoseTargetConfiguration](#awskinesisfirehosetargetconfiguration)
+  - [AwsKinesisFirehoseTargetConfiguration](#awskinesisfirehosetargetconfiguration)
 - [AWS Kinesis Service Target](#aws-kinesis-service-target)
-    - [AwsKinesisTargetConfiguration](#awskinesistargetconfiguration)
+  - [AwsKinesisTargetConfiguration](#awskinesistargetconfiguration)
 - [AWS Lambda Service Target](#aws-lambda-service-target)
-    - [AwsLambdaTargetConfiguration](#awslambdatargetconfiguration)
+  - [AwsLambdaTargetConfiguration](#awslambdatargetconfiguration)
 - [AWS S3 Service Target](#aws-s3-service-target)
-    - [Aws3TargetConfiguration](#aws3targetconfiguration)
+  - [Aws3TargetConfiguration](#aws3targetconfiguration)
 - [AWS SiteWise Target](#aws-sitewise-target)
-    - [AwsSitewiseTargetConfiguration](#awssitewisetargetconfiguration)
-    - [AwsSiteWiseAssetCreationConfiguration](#awssitewiseassetcreationconfiguration)
-    - [AwsSiteWiseAssetConfiguration](#awssitewiseassetconfiguration)
-    - [AwsSiteWiseAssetPropertyConfiguration](#awssitewiseassetpropertyconfiguration)
+  - [AwsSitewiseTargetConfiguration](#awssitewisetargetconfiguration)
+  - [AwsSiteWiseAssetCreationConfiguration](#awssitewiseassetcreationconfiguration)
+  - [AwsSiteWiseAssetConfiguration](#awssitewiseassetconfiguration)
+  - [AwsSiteWiseAssetPropertyConfiguration](#awssitewiseassetpropertyconfiguration)
 - [AWS SNS Service Target](#aws-sns-service-target)
 - [AWS SQS Service Target](#aws-sqs-service-target)
-    - [AwsSqsTargetConfiguration](#awssqstargetconfiguration)
+  - [AwsSqsTargetConfiguration](#awssqstargetconfiguration)
 - [AWS Timestream Target](#aws-timestream-target)
-    - [AwsTimestreamTargetConfiguration](#awstimestreamtargetconfiguration)
-    - [AwsTimestreamRecordConfiguration](#awstimestreamrecordconfiguration)
-    - [AwsTimestreamDimensionConfiguration](#awstimestreamdimensionconfiguration)
+  - [AwsTimestreamTargetConfiguration](#awstimestreamtargetconfiguration)
+  - [AwsTimestreamRecordConfiguration](#awstimestreamrecordconfiguration)
+  - [AwsTimestreamDimensionConfiguration](#awstimestreamdimensionconfiguration)
 - [MQTT Target](#mqtt-target)
-    - [MqttTargetConfiguration](#mqtttargetconfiguration)
+  - [MqttTargetConfiguration](#mqtttargetconfiguration)
 - [File Target](#file-target)
-    - [FileConfiguration](#fileconfiguration)
+  - [FileConfiguration](#fileconfiguration)
 - [Debug Target](#debug-target)
-    - [DebugConfiguration](#debugconfiguration)
+  - [DebugConfiguration](#debugconfiguration)
 - [Store and Forward Target](#store-and-forward-target)
-    - [StoreForwardTargetConfiguration](#storeforwardtargetconfiguration)
-- [ Router Target](#-router-target)
-    - [RouterTargetConfiguration](#routertargetconfiguration)
-    - [RoutesConfiguration](#routesconfiguration)
+  - [StoreForwardTargetConfiguration](#storeforwardtargetconfiguration)
+- [ Router Target](#router-target)
+  - [RouterTargetConfiguration](#routertargetconfiguration)
+  - [RoutesConfiguration](#routesconfiguration)
 - [MetricsWriters](#metricswriters)
-    - [AwsCloudWatchConfiguration](#awscloudwatchconfiguration)
+  - [AwsCloudWatchConfiguration](#awscloudwatchconfiguration)
 - [Running the SFC core process](#running-the-sfc-core-process)
 - [Running the JVM protocol adapters as an IPC Service](#running-the-jvm-protocol-adapters-as-an-ipc-service)
-- [Running targets and as an IPC Service](#running-targets-and-as-an-ipc-service)
+- [Running targets and as an IPC Service](#running-targets-as-an-ipc-service)
 - [Running protocol adapters in-process](#running-protocol-adapters-in-process)
 - [Running targets in-process](#running-targets-in-process)
 - [Metrics Collection](#metrics-collection)
-    - [Running Metrics writers as an IPC service](#running-metrics-writers-as-an-ipc-service)
-    - [Running metric writers in-process](#running-metric-writers-in-process)
+  - [Running Metrics writers as an IPC service](#running-metrics-writers-as-an-ipc-service)
+  - [Running metric writers in-process](#running-metric-writers-in-process)
 - [Extending the SFC Framework](#extending-the-sfc-framework)
-    - [Implementing a protocol adapter](#implementing-a-protocol-adapter)
-    - [Read function](#read-function)
+  - [Implementing a protocol adapter](#implementing-a-protocol-adapter)
+  - [Read function](#read-function)
 - [Creating in-process adapter instances](#creating-in-process-adapter-instances)
-    - [IPC service adapters](#ipc-service-adapters)
-    - [Using JVM protocol adapter classes as IPC services](#using-jvm-protocol-adapter-classes-as-ipc-services)
+  - [IPC service adapters](#ipc-service-adapters)
+  - [Using JVM protocol adapter classes as IPC services](#using-jvm-protocol-adapter-classes-as-ipc-services)
 - [Custom Configuration Handlers](#custom-configuration-handlers)
 - [Custom Logging](#custom-logging)
 - [Custom Metric Writers](#custom-metric-writers)
 - [.NET Core based protocol adapters](#net-core-based-protocol-adapters)
-    - [Running the .NET Core protocol adapters as an IPC Service](#running-the-net-core-protocol-adapters-as-an-ipc-service)
-    - [Output logging format](#output-logging-format)
-    - [Implementing a .NET Core Protocol adapter](#implementing-a-net-core-protocol-adapter)
-    - [Service](#service)
+  - [Running the .NET Core protocol adapters as an IPC Service](#running-the-net-core-protocol-adapters-as-an-ipc-service)
+  - [Output logging format](#output-logging-format)
+  - [Implementing a .NET Core Protocol adapter](#implementing-a-net-core-protocol-adapter)
+  - [Service](#service)
 
 # Introduction
 
@@ -692,7 +700,7 @@ when writing the data. The intermediate targets implement their specific logic a
 data to the configured next targets in the chain. The intermediate targets do pass a handler to these targets, that
 these targets can use to report back the results of delivering the data to their destinations. The data messages can
 either be acknowledged if the data was delivered successfully to the destination, not-acknowledged if the destination of
-the target was not available (e.g., due to loss of connectivity, or reported as error if the data could not be processed
+the target was not available ,e.g. due to loss of connectivity, or reported as error if the data could not be processed
 by the target (e.g., die to invalid data for that target). The intermediate target can the take action based on the
 result received from the next targets in the chain.
 
@@ -848,14 +856,14 @@ The root contains 4 elements
 
 - **sources**: This element contains a map with a node for each source of the schedule that has output data
 
-    - **values**: The values node contains a map for each channel of its source that has an output value
+  - **values**: The values node contains a map for each channel of its source that has an output value
 
-        - **value**: This node contains the actual value of a channel or an aggregated value
+    - **value**: This node contains the actual value of a channel or an aggregated value
 
-        - **metadata**: This node contains a map with (optional) metadata for a channel
+    - **metadata**: This node contains a map with (optional) metadata for a channel
 
-        - **timestamp**: Timestamp for the value (only if timestamp level = "value" or "both")
-          For aggregated data the timestamp is only available for the aggregation outputs first, last and values.
+    - **timestamp**: Timestamp for the value (only if timestamp level = "value" or "both")
+      For aggregated data the timestamp is only available for the aggregation outputs first, last and values.
 
 - **timestamp**: Timestamp at source level (only if timestamp level = "source" or "both")
 
@@ -919,7 +927,7 @@ and != operators can be used.
 
 After the Data Change and Value Change filters, if any, have been applied Condition filter can be used to select values
 based on other values of the same source. This makes it posible to include or exclude values if other values, or
-combinations of values do exist, or do not exist in in the same source. Operators that can be used are :
+combinations of values do exist, or do not exist in the same source. Operators that can be used are :
 
 - ***any*** : Any of a list of values must exist
 
@@ -1008,7 +1016,7 @@ source.
 If value is false then the value on thich the filter is applied is only included if it is the only value for that
 source.
 
-All of the operators above can be combined using the ***and*** and ***or*** operator, which take filter or a list of
+All the operators above can be combined using the ***and*** and ***or*** operator, which take filter or a list of
 filters as the filter value.
 
 ```json
@@ -1182,7 +1190,7 @@ Within a template it is possible to have placeholders for values making these te
 }
 ```
 
-Now this template can be used by specifying in an SFC  its name and the names of the placeholders with their values. Below is an example and Targets with two S3 targets defined using the template. The values for the placeholders used by the template are provided by a comma separated list, which is separated from the name of the template by a comma as well, including the names and values of the placeholders. The actual values should nor be included in quotes. Leading and training whitespaces will be trimmed from the values".
+Now this template can be used by specifying in an SFC  its name and the names of the placeholders with their values. Below is an example and Targets with two S3 targets defined using the template. The values for the placeholders used by the template are provided by a comma separated list, which is separated from the name of the template by a comma as well, including the names and values of the placeholders. The actual values should nor be included in quotes. Leading and training whitespaces will be trimmed from the values.
 
 ```json
 "Targets": {
@@ -1229,7 +1237,7 @@ It is possible to partially replace parts of  values. Note that this works only 
        "FactoryClassName":"com.amazonaws.sfc.debugtarget.DebugTargetWriter"
   },
   
-  "DeploymentDir" : "/Users/leeuwest/Desktop/deploy"
+  "DeploymentDir" : "/sfc"
 }
 ```
 
@@ -1471,7 +1479,7 @@ named "CloudWatch" can be added with the following properties:
 - Region: Region used for the AWS CloudWatch Service
 - Interval: Interval in seconds to write to AWS CloudWatch. Metrics are written at least once with this interval or
   earlier if the maximum of 1000 data points or the configured buffer size is reached.
-- BatchSize: Size of the buffer used to store datapoints before these are written to CloudWatch, or earlier if the
+- BatchSize: Size of the buffer used to store data points before these are written to CloudWatch, or earlier if the
   interval period is reached.
 
 The following metric values are collected:
@@ -2202,7 +2210,7 @@ certificate directory.
 
 A number of optional checks (see <https://reference.opcfoundation.org/v104/Core/docs/Part4/6.1.3/>) can be configured in
 a ValidationOptions section in the CertificateValidation section. It can contain the following attributes that can be
-set to a value of false to disable the optional validation, which by default are all enabled)
+set to a value of false to disable the optional validation, which by default are all enabled.
 
 Validation options:
 
@@ -2269,7 +2277,7 @@ The internal processes of SFC use memory buffered channels to communicate. These
 process and allow processing of the data in parallel. When SFC is writing data to a channel then it first makes a
 non-blocking call to send the data to the channel. If this fails, because the channel has reached it maximum capacity,
 as warning is generated, which included the name of the channel, the current size of the parameter and the name of the
-tunning parameter that can be used to change the capacity of the channel. SFC will then make blocking call to send the
+tuning parameter that can be used to change the capacity of the channel. SFC will then make blocking call to send the
 data to the channel, waiting for available capacity in the channel. If a timeout whilst waiting for the item to be sent
 occurs an error message is generated. The message includes the name of the channel, the timeout period and the name of
 the tuning parameter to change the timeout period.
@@ -2280,7 +2288,7 @@ size of the items which are sent to the channel. All timeouts are specified in m
 The channel warning and errors typically occur when SFC collects data from the sources faster than it can process and
 deliver it to the targets. If this happens incidentally, due to peaks in collected data or targets temporary processing
 the data slower, size of the buffer can be incremented.
-Other solutions are redcing the interval the schedule uses to read the data or enable batching for targets which support
+Other solutions are reducing the interval the schedule uses to read the data or enable batching for targets which support
 it.
 
 ### Channel capacity warnings
@@ -2289,13 +2297,13 @@ Channel reached full capacity and data cannot be sent directly
 Sending data to channelName is blocking, consider setting tuning parameter tuningChannelSizeName to a higher value,
 current value is currentChannelSize
 
-Data was sent to channel after waiting for available capcity in channel
+Data was sent to channel after waiting for available capacity in channel
 Sending date to channelName was blocking for duration, consider setting tuning parameter tuningChannelSizeName to a
 higher value, current value is currentChannelSize
 
 ### Channel capacity errors
 
-Timeout occurred whilst waiting for capacity in channe
+Timeout occurred whilst waiting for capacity in channel.
 Sending data to channelName timeout after timeout, consider setting tuning parameter tuningChannelTimeoutName to a
 longer value
 
@@ -2485,7 +2493,7 @@ The parameter AllSourcesReadTimeout can be used to specify the period within rea
 		<tr class="odd">
 			<td>ProtocolAdapterTypes</td>
 			<td>
-				<p>This section includes the information for each protocol adapter type that is used by the SFC core to create instances of that adaptertype if that adapter runs in the same process as the SFC core.</p>
+				<p>This section includes the information for each protocol adapter type that is used by the SFC core to create instances of that adapter type if that adapter runs in the same process as the SFC core.</p>
 				<p>The element is a map indexed by the adapter type (e.g., OPCUA, MODBUS). Each entry contains information on which jar files, that contain the protocol adapter implementation, to load and the factory class to create the instances.</p>
 				<p>The SFC core itself is not aware of the actual target implementations and only uses this configuration data to explicitly load the jar files to create and use the adapter instances. This makes it possible to add new protocol adapter types without modifications to the SFC core.</p>
 				<p>Note Only types that run in the same process as the SFC core need to be configured. If the core uses IPC to send the data to a target that runs in its process, the type does not have to be defined in the ProtocolAdapterTypes section.</p>
@@ -2912,7 +2920,7 @@ The parameter AllSourcesReadTimeout can be used to specify the period within rea
 </tr>
 <tr class="odd">
 <td>ConditionFilter</td>
-<td>ConditionFilter to apply to this channel, see <a href="#condtionfilters">condtion filters</a></td>
+<td>ConditionFilter to apply to this channel, see <a href="#condtionfilters">condition filters</a></td>
 <td>String</td>
 <td>Optional, if used it must refer to a configured filter in the ConditionFilters element </td>
 </tr>
@@ -3322,7 +3330,7 @@ Nothing is returned if the service is not healthy.</td>
 </tr>
 <tr class="even">
 <td>MaxConcurrentSourceReaders</td>
-<td>Max number of sources read concurrently by an SFC Schedule</td></td>
+<td>Max number of sources read concurrently by an SFC Schedule</td>
 <td>Int</td>
 <td>Default is 5</td>
 </tr>
@@ -3330,21 +3338,21 @@ Nothing is returned if the service is not healthy.</td>
 
 <tr class="even">
 <td>AllSourcesReadTimeout</td>
-<td>Timeout in which reading from all sources must be completed. </td></td>
+<td>Timeout in which reading from all sources must be completed. </td>
 <td>Int</td>
 <td>Default is 60000</td>
 </tr>
 
 <tr class="odd">
 <td>ScheduleReaderResultsChannelSize</td>
-<td>Internal buffer size for reading from sources</td></td>
+<td>Internal buffer size for reading from sources</td>
 <td>Int</td>
 <td>Default is 5000
 
 Increment when getting timeouts on ScheduleReader:writerInputChannel, reduce to limit memory use by reader</td>
 </tr><tr class="even">
 <td>ScheduleReaderResultsChannelTimeout</td>
-<td>Timeout writing to internal buffer for reading from sources in milliseconds</td></td>
+<td>Timeout writing to internal buffer for reading from sources in milliseconds</td>
 <td>Int</td>
 <td>Default is 1000
 
@@ -3352,7 +3360,7 @@ Increment when getting timeouts on ScheduleReader:resultsChannel and available m
 </tr>
 <tr class="odd">
 <td>AggregatorChannelSize</td>
-<td>Internal buffer size for sending data to aggregator</td></td>
+<td>Internal buffer size for sending data to aggregator</td>
 <td>Int</td>
 <td>Default is 1000
 
@@ -3360,7 +3368,7 @@ Increment when getting timeouts on ScheduleReader:aggregationChannel, reduce to 
 </tr>
 <tr class="even">
 <td>ScheduleReaderResultsChannelTimeout</td>
-<td>Timeout writing to internal buffer used to send data to aggregation in milliseconds</td></td>
+<td>Timeout writing to internal buffer used to send data to aggregation in milliseconds</td>
 <td>Int</td>
 <td>Default is 1000
 
@@ -3369,7 +3377,7 @@ Increment when getting timeouts on ScheduleReader:aggregationChannel and availab
 
 <tr class="odd">
 <td>WriterInputChannelSize</td>
-<td>Internal buffer size for sending data to writers</td></td>
+<td>Internal buffer size for sending data to writers</td>
 <td>Int</td>
 <td>Default is 10000
 
@@ -3378,7 +3386,7 @@ Increment when getting timeouts on ScheduleController:writerInputChannel, reduce
 
 <tr class="even">
 <td>WriterInputChannelSizeTimeout</td>
-<td>Timeout writing to internal buffer used to send data to writers in milliseconds</td></td>
+<td>Timeout writing to internal buffer used to send data to writers in milliseconds</td>
 <td>Int</td>
 <td>Default is 1000
 
@@ -3387,7 +3395,7 @@ Increment when getting timeouts on writerInputChannel and available memory is li
 
 <tr class="odd">
 <td>ChannelSizePerMetricsProvider</td>
-<td>Buffer size per metrics provider used for internal metrics processor</td></td>
+<td>Buffer size per metrics provider used for internal metrics processor</td>
 <td>Int</td>
 <td>Default is 1000
 
@@ -3395,7 +3403,7 @@ Increment when getting timeouts on MetricsProcessor:metricsChannel, reduce to li
 </tr>
 <tr class="even">
 <td>MetricsChannelTimeout</td>
-<td>Timeout writing to internal metrics processor buffer in milliseconds</td></td>
+<td>Timeout writing to internal metrics processor buffer in milliseconds</td>
 <td>Int</td>
 <td>Default is 5000
 
@@ -3405,7 +3413,7 @@ Increment when getting timeouts on metrics channels and available memory is limi
 
 <tr class="odd">
 <td>TargetResultsChannelSize</td>
-<td>Buffer size for internal buffer to send target results</td></td>
+<td>Buffer size for internal buffer to send target results</td>
 <td>Int</td>
 <td>Default is 1000
 
@@ -3413,7 +3421,7 @@ Increment when getting timeouts on resultChannels, reduce to limit memory use </
 </tr>
 <tr class="even">
 <td>TargetResultsChannelTimeout</td>
-<td>Timeout writing to target results buffer in milliseconds</td></td>
+<td>Timeout writing to target results buffer in milliseconds</td>
 <td>Int</td>
 <td>Default is 5000
 
@@ -3423,7 +3431,7 @@ Increment when getting timeouts on result channels and available memory is limit
 
 <tr class="odd">
 <td>TargetForwardingChannelSize</td>
-<td>Buffer size for internal buffer to forward target data used by chained targets</td></td>
+<td>Buffer size for internal buffer to forward target data used by chained targets</td>
 <td>Int</td>
 <td>Default is 1000
 
@@ -3431,7 +3439,7 @@ Increment when getting timeouts on forwarding channels, reduce to limit memory u
 </tr>
 <tr class="even">
 <td>TargetForwardingChannelTimeout</td>
-<td>Timeout writing to forwarding buffer in milliseconds</td></td>
+<td>Timeout writing to forwarding buffer in milliseconds</td>
 <td>Int</td>
 <td>Default is 1000
 
@@ -3440,7 +3448,7 @@ Increment when getting timeouts on forwarding channels and available memory is l
 
 <tr class="odd">
 <td>TargetResubmitChannelSize</td>
-<td>Buffer size for internal buffer to resubmit target data used by chained targets</td></td>
+<td>Buffer size for internal buffer to resubmit target data used by chained targets</td>
 <td>Int</td>
 <td>Default is 1000
 
@@ -3448,7 +3456,7 @@ Increment when getting timeouts on resubmit channels, reduce to limit memory use
 </tr>
 <tr class="even">
 <td>TargetResubmitChannelTimeout</td>
-<td>Timeout writing to resubmit buffer in milliseconds</td></td>
+<td>Timeout writing to resubmit buffer in milliseconds</td>
 <td>Int</td>
 <td>Default is 1000
 
@@ -5459,7 +5467,7 @@ configuration types
 <p>"Mappings": {<br />
 "test/(\\w+)": "test-$1"<br />
 }</p>
-<p>The mapping above matches updates for sublevels of the test topic, it will use the name of the sublevel to create a name for the received data.</p>
+<p>The mapping above matches updates for sub-levels of the test topic, it will use the name of the sub-level to create a name for the received data.</p>
 <p>If an update is received for data in topic "test/a" then the name of the data value will be "test-a"</p></td>
 </tr>
 <tr class="odd">
@@ -6095,7 +6103,7 @@ service.
 </tr>
 <tr class="even">
 <td>ObjectId</td>
-<td>Id of the object to read</td>
+<td>ID of the object to read</td>
 <td>string</td>
 <td>Must be in valid dot format notation</td>
 </tr>
@@ -6787,7 +6795,7 @@ To authorize the client this AMS Net ID must be added as an AMS route in the SYS
 <thead>
 <tr class="header">
 <th colspan="4"><p><strong>AdsDeviceConfiguration</strong></p>
-<p>Configuration data for connecting to and reading from sources for devices using ADS protocol</p></th>
+<p>Configuration data for connecting to and reading from sources from devices using ADS protocol</p></th>
 </tr>
 </thead>
 <tbody>
@@ -6811,7 +6819,7 @@ To authorize the client this AMS Net ID must be added as an AMS route in the SYS
 </tr>
 <tr class="even">
 <td>CommandTimeout</td>
-<td>Timeout for executing commands in milliseconfs</td>
+<td>Timeout for executing commands in millisecond fs</td>
 <td>Integer</td>
 <td>Default is 10000 milliseconds</td>
 </tr>
@@ -6851,7 +6859,353 @@ To authorize the client this AMS Net ID must be added as an AMS route in the SYS
 
 [^top](#toc)
 
+
 ---
+
+
+# SLMP Protocol Configuration
+
+This section describes the configuration types for the SLMP protocol adapter and contains the extensions and specific
+configuration types.
+
+
+**IMPORTANT : SLMP controllers only supports a single concurrent session with the controller. When reading data by multiple schedules or adapters instances, or from another SLMP client, from the same controller, timeout and 
+broken TCP pipe errors will occur.**
+
+
+## SlmpSourceConfiguration
+
+<table>
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 25%" />
+<col style="width: 32%" />
+<col style="width: 22%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th colspan="4"><p><strong>SlmpSourceConfiguration</strong> Extends SourceConfiguration</p>
+<p>The SLMPSourceConfiguration extends the common Source configuration with SLMP specific source configuration data.</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Name</strong></td>
+<td><strong>Description</strong></td>
+<td><strong>Type</strong></td>
+<td><strong>Comments</strong></td>
+</tr>
+<tr class="even">
+<td>Channels</td>
+<td><p>The channels configuration for an SLMP source holds configuration data to read values from fields on the source controller.</p>
+<p>The element is a map indexed by the channel identifier.</p>
+<p>Channels can be "commented" out by adding a "#" at the beginning of the identifier of that channel.</p></td>
+<td>Map[String,<a href="#slmpchannelconfiguration">SLMPChannelConfiguration</a>]</td>
+<td>At least 1 channel must be configured.</td>
+</tr>
+<tr class="odd">
+<td>AdapterController</td>
+<td>Controller Identifier for the controller to read from. This referenced server must be present in the Devices section of the adapter referred to by the ProtocolAdapter attribute of the source.</td>
+<td>String</td>
+<td>Must be an identifier of a server in the Controllers section of the SLMP adapter used by the source.</td>
+</tr>
+
+
+</tbody>
+</table>
+
+[^top](#toc)
+
+## SlmpChannelConfiguration
+
+<table>
+<colgroup>
+<col style="width: 15%" />
+<col style="width: 19%" />
+<col style="width: 22%" />
+<col style="width: 43%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th colspan="4"><p><strong>SlmpChannelConfiguration</strong></p>
+<p><strong>Extends ChannelConfiguration</strong></p>
+<p>The SlmpChannelConfiguration extends the common Channel configuration with SLMP specific channel configuration data</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Name</strong></td>
+<td><strong>Description</strong></td>
+<td><strong>Type</strong></td>
+<td><strong>Comments</strong></td>
+</tr>
+<tr class="even">
+<td>AccessPoint</td>
+<td>A string containing the access point for the value to read from the device.</td>
+<td>String</td>
+<td>
+An access points consists of a device code and a decimal device number, e.g. "D200" for Data register 200, "X0" for Input 0 and "Y0" for output 0.
+<p>
+<p>Valid devices codes and their data types are listed below.
+<p>
+
+- "B" 		Link relay (BIT)
+- "CC"		Counter coil (BIT)
+- "CN"		Counter timer current value (WORD)
+- "CS"		Counter contact (BIT)
+- "D"		Data register (WORD)
+- "DX"		Direct access input (BIT)
+- "DY"		Direct access output (BIT)
+- "F" 		Alarm (BIT)
+- "L" 		Latching relay (BIT)
+- "LCC"	    Counter coil (BIT)
+- "LCN"	    Counter timer current value (DOUBLEWORD)
+- "LCS"	    Counter contact (BIT)
+- "LSTC"	Long retentive timer coil (BIT)
+- "LSTN"	Long retentive timer current value (DOUBLEWORD)
+- "LSTS"	Long retentive timer contact (BIT)
+- "LTC"	    Long timer coil (BIT)
+- "LTN"	    Long timer current value (DOUBLEWORD)
+- "LTS"	    Long timer contact (BIT)
+- "LZ"		Long index register (DOUBLEWORD)
+- "M" 		Internal relay (BIT)
+- "R"		File register (WORD)
+- "S"		Step relay (BIT)
+- "SB"		Link special relay (BIT)
+- "SD"  	Special register (WORD)
+- "SM"     	Special relay (Bit)
+- "SW"		Link special register (WORD)
+- "TC"		Timer coil (BIT)
+- "TN"		Timer current value (WORD)
+- "TS"		Timer contact (BIT)
+- "V" 		Edge relay (BIT)
+- "W"		Link register (WORD)
+- "X"   	Input (BIT)
+- "Y" 		Output (BIT)
+- "Z"		Index register (WORD)
+- "ZR"		File register ZR (WORD)
+ </td>
+</tr>
+
+
+
+<tr class="odd">
+<td>DataType</td>
+<td>The type of data to read from the device. If no type is specified then a single value of the default type of the device is read.</td>
+<td>String</td>
+<td>
+Valid data types are:
+<p>
+
+- "BIT" (read as a boolean value)
+- "WORD" (read as a 16-bit integer value)
+- "DOUBLEWORD" (read as 32-bit integer)
+- "STRING(x)" (read as words and decoded to as a string of length x or shorter if the string is zero terminated)
+
+It is possible to define custom structures and use these as a data type as well. These structures are defined in the "Structures" section of the SLMP adapter configuration. All fiels which can be any the types mentioned above, or another custom structure type, are mapped from the read word data to the fields of the structure in the order in which they are declared in the type.
+
+<p>
+In order to read multiple values, returned as an array, starting at the specified access point the number of items can be appended to the data type.
+
+E.g. <p>
+"BIT[4]" reads 4 BIT values and returns an array of 4 boolean values.
+"WORD[8]" reads 16 word values and returns an array of 8 16-bit integers.
+"STRING(16)[2]" reads and array of 16 characters
+
+ </td>
+</tr>
+
+<tr class="even">
+<td>Size</td>
+<td>The number of values to read starting from the access point.</td>
+<td>Integer</td>
+<td>
+The number of items to read can be specified as well in the DataType of the channel, e.g. WORD[size]. The Size setting can be used if the DataType field is ommitted to read the default data type for the device. If the length is both specified in the DataType in both the Size setting a configuration error is raised.
+ </td>
+</tr>
+
+</tbody>
+</table>
+
+
+### SLMP channel reading optimization
+In order to reduce the number of interactions between the adapter and the controller  read action for  single BIT, WORD and DOUBLEWORD elements are combined in batches of maximum 192 values using the SLMP Read Random request.   For reading arrays of multiple values, STRING values and values of custom structured types a per channel SLMP Read request is used.
+
+
+[^top](#toc)
+
+## SlmpAdapterConfiguration
+
+<table>
+<colgroup>
+<col style="width: 14%" />
+<col style="width: 19%" />
+<col style="width: 27%" />
+<col style="width: 39%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th colspan="4"><p><strong>SlmpAdapterConfiguration</strong></p>
+<p><strong>Extends ProtocolAdapterConfiguration</strong></p>
+<p>The SlmpAdapterConfiguration extends the common adapter configuration with SLMP specific adapter configuration settings. The AdapterType to use for this adapter is "SLMP".</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Name</strong></td>
+<td><strong>Description</strong></td>
+<td><strong>Type</strong></td>
+<td><strong>Comments</strong></td>
+</tr>
+<tr class="even">
+<td>Controllers</td>
+<td>Controllers configured for this adapter. The SLMP source using the adapter must have a reference to one of these in its AdapterController attribute.</td>
+<td>Map[String,<a href="#slmpdeviceconfiguration">SlmpControllerConfiguration</a>]</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>Structures</td>
+<td>Custom data structures configured for this adapter. Structured defined in this section can be uses as custom structured data types for channel values. If a structure has a field which is of a custome structure type,t hen this type must be defined first.</td>
+<td>Map[String,Map{String,String]]</td>
+<td>
+Below is an example defining a custom structure "STRUCT1" containing two fields "A1" and "B1" of type word. This type used in a second type "STRUCT2" having a field "A2" containing an array of size 2 containing values of "STRUCT1", as well as a field "B2", containing 16 words and a field "C2" containing a 32 character string.
+
+
+
+```json
+ "Structures": {
+   "STRUCT1": {
+      "A1": "WORD",
+      "B1" : "WORD"
+    },
+    "STRUCT2": {
+      "A2": "STRUCT1[2]",
+      "B2": "WORD[16]",
+      "C2": "STRING(32)"
+    }
+}
+```
+
+A SLMP channel can now use both type "STRUCT1" as "STRUCT2" as a DataType. The data is returned as a map of values indexed by the names of the fields.
+
+</td>
+</tr>
+
+</tbody>
+</table>
+
+[^top](#toc)
+
+## SlmpControllerConfiguration
+
+<table>
+<colgroup>
+<col style="width: 18%" />
+<col style="width: 27%" />
+<col style="width: 28%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th colspan="4"><p><strong>SlmpControllerConfiguration</strong></p>
+<p>Configuration data for connecting to and reading from sources from devices using SLMP protocol</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Name</strong></td>
+<td><strong>Description</strong></td>
+<td><strong>Type</strong></td>
+<td>Comments</td>
+</tr>
+<tr class="even">
+<td>Address</td>
+<td>IP Address of the device</td>
+<td>String</td>
+<td>IP address in format aaa.bbb.ccc.ddd or a hostname</td>
+</tr>
+<tr class="odd">
+<td>Port</td>
+<td>Port number</td>
+<td>Integer</td>
+<td>Default is 48898</td>
+</tr>
+<tr class="even">
+<td>CommandTimeout</td>
+<td>Timeout for executing commands in milliseconds</td>
+<td>Integer</td>
+<td>Default is 10000 milliseconds</td>
+</tr>
+<tr class="odd">
+<td>ConnectTimeout</td>
+<td>Timeout for connecting to the device in milliseconds</td>
+<td>Integer</td>
+<td>Default is 10000</td>
+</tr>
+<tr class="even">
+<td>ReadTimeout</td>
+<td>Timeout for reading response packets from the controller in milliseconds</td>
+<td>Integer</td>
+<td>Default is 50000</td>
+</tr>
+<tr class="odd">
+<td>WaitAfterConnectError</td>
+<td>Time to wait before (re)connecting after a connection error in milliseconds</td>
+<td>Integer</td>
+<td>Default is 10000</td>
+</tr>
+<tr class="even">
+<td>WaitAfterReadError</td>
+<td>Time to wait before reading values from the controller after a read error in milliseconds</td>
+<td>Integer</td>
+<td>Default is 10000</td>
+</tr>
+<tr class="odd">
+<td>WaitAfterWriteError</td>
+<td>Time to wait after an error writing request packets to the controller in milliseconds</td>
+<td>Integer</td>
+<td>Default is 10000</td>
+</tr>
+<tr class="even">
+<td>NetworkNumber</td>
+<td>Request destination network number</td>
+<td>Integer</td>
+<td>Default is 0 (0x00)</td>
+</tr>
+<tr class="odd">
+<td>StationNumber</td>
+<td>Request station number</td>
+<td>Integer</td>
+<td>Default is 255 (0xFF) </td>
+</tr>
+<tr class="even">
+<td>ModuleNumber</td>
+<td>Request module number</td>
+<td>Integer</td>
+<td>Default is 1023 (0x03FF) </td>
+</tr>
+<tr class="odd">
+<td>MultiDropStationNumber</td>
+<td>Request multidrop station number</td>
+<td>Integer</td>
+<td>Default is 0 (0x00)</td>
+</tr>
+<tr class="even">
+<td>MonitoringTimer</td>
+<td>Timer to set the waiting time until the access destination send back a response after the SLMP compatible device
+which received a request message from the external device requests a processing to the destination in units of 250ms</td>
+<td>Integer</td>
+<td>Default is 0 (unlimited wait)</td>
+</tr>
+
+</tbody>
+</table>
+
+
+[^top](#toc)
+
+---
+
 
 # AWS IoT Analytics Service Target
 
@@ -7041,7 +7395,7 @@ aws kafka get-bootstrap-brokers --cluster-arn `ClusterArn` and use the addresses
 - "json" (default)
 - "protobuf", see [protobuf schema](../core/sfc-ipc/src/main/proto/TargetAdapterService.proto)
 
-If a [Template](##TargetConfiguration) is specified to transform the data for this target then this setting is not used
+If a [Template](#targetconfiguration) is specified to transform the data for this target then this setting is not used
 and the transformation output is written as a string to the topic.</td>
 </tr>
 <tr class="odd">
@@ -7653,7 +8007,7 @@ To use the values of metadata at the top or source level of the target data, the
 </tr>
 <tr class="even">
 <td>PropertyId</td>
-<td>Id of the asset property</td>
+<td>ID of the asset property</td>
 <td>String</td>
 <td>Either property id or alias must be specified, but not both</td>
 </tr>
@@ -8658,8 +9012,8 @@ The port number, used by the service, can be specified using different methods w
 - From the configuration file, specified by the `-config` parameter, the port number for the server referred to in the
   target element will be used. As a configuration can contain multiple targets the following methods are used to
   determine the target.
-    - The value of the -target command line parameter
-    - If the configuration file contains a single target then that target is used
+  - The value of the -target command line parameter
+  - If the configuration file contains a single target then that target is used
 
 To protect the ICP traffic between the core and the adapter SSL can be used. For this, both the -cert and the -key
 parameter must be used to specify the pathname to the certificate and the key file. If the -conf parameter is used then
@@ -8719,36 +9073,64 @@ Used environment variable
 SFC_DEPLOYMENT_DIR: Directory in which deployment packed is deployed, with the subdirectory for the adapter.
 
 ```json
-"AdapterTypes": {
-"MQTT": {
-"JarFiles": ["${SFC_DEPLOYMENT_DIR}/mqtt/lib"],
-"FactoryClassName": "com.amazonaws.sfc.mqtt.MqttAdapter"
-},
-"MODBUS-TCP": {
-"JarFiles": ["${SFC_DEPLOYMENT_DIR}/modbus-tcp/lib/"],
-"FactoryClassName": "com.amazonaws.sfc.modbus.tcp.ModbusTcpAdapter"
-},
-"OPCUA": {
-"JarFiles": ["${SFC_DEPLOYMENT_DIR}/opcua/lib"],
-"FactoryClassName": "com.amazonaws.sfc.opcua.OpcuaAdapter"
-},
-"SNMP": {
-"JarFiles": ["${SFC_DEPLOYMENT_DIR}/snmp/lib"],
-"FactoryClassName": "com.amazonaws.sfc.snmp.SnmpAdapter"
-},
-"SQL": {
-"JarFiles": ["${SFC_DEPLOYMENT_DIR}/sql/lib"],
-"FactoryClassName": "com.amazonaws.sfc.sql.SqlAdapter"
-},
-"S7": {
-"JarFiles": ["${SFC_DEPLOYMENT_DIR}/s7/lib"],
-"FactoryClassName": "com.amazonaws.sfc.s7.S7Adapter"
-},
-"PCCC": {
-"JarFiles": ["${SFC_DEPLOYMENT_DIR}/pccc/lib"],
-"FactoryClassName": "com.amazonaws.sfc.pccc.PcccAdapter"
-}
-}
+ 
+  "AdapterTypes": {
+    "MQTT": {
+      "JarFiles": [
+        "${SFC_DEPLOYMENT_DIR}/mqtt/lib"
+      ],
+      "FactoryClassName": "com.amazonaws.sfc.mqtt.MqttAdapter"
+    },
+    "MODBUS-TCP": {
+      "JarFiles": [
+        "${SFC_DEPLOYMENT_DIR}/modbus-tcp/lib/"
+      ],
+      "FactoryClassName": "com.amazonaws.sfc.modbus.tcp.ModbusTcpAdapter"
+    },
+    "OPCUA": {
+      "JarFiles": [
+        "${SFC_DEPLOYMENT_DIR}/opcua/lib"
+      ],
+      "FactoryClassName": "com.amazonaws.sfc.opcua.OpcuaAdapter"
+    },
+    "SNMP": {
+      "JarFiles": [
+        "${SFC_DEPLOYMENT_DIR}/snmp/lib"
+      ],
+      "FactoryClassName": "com.amazonaws.sfc.snmp.SnmpAdapter"
+    },
+    "SQL": {
+      "JarFiles": [
+        "${SFC_DEPLOYMENT_DIR}/sql/lib"
+      ],
+      "FactoryClassName": "com.amazonaws.sfc.sql.SqlAdapter"
+    },
+    "S7": {
+      "JarFiles": [
+        "${SFC_DEPLOYMENT_DIR}/s7/lib"
+      ],
+      "FactoryClassName": "com.amazonaws.sfc.s7.S7Adapter"
+    },
+    "PCCC": {
+      "JarFiles": [
+        "${SFC_DEPLOYMENT_DIR}/pccc/lib"
+      ],
+      "FactoryClassName": "com.amazonaws.sfc.pccc.PcccAdapter"
+    },
+    "ADS": {
+      "JarFiles": [
+        "${SFC_DEPLOYMENT_DIR}/ads/lib"
+      ],
+      "FactoryClassName": "com.amazonaws.sfc.ads.AdsAdapter"
+    },
+    "SMLP": {
+      "JarFiles": [
+        "${SFC_DEPLOYMENT_DIR}/slmp/lib"
+      ],
+      "FactoryClassName": "com.amazonaws.sfc.slmp.SlmpAdapter"
+    }
+  }
+
 ```
 
 [^top](#toc)
@@ -8765,7 +9147,7 @@ instance. The name of the factory class, which could be the actual target class 
 The signature if the function is:
 
 ```kotlin
-fun newInstance(vararg createParameters: Any?): TargetWriter?
+fun newInstance(vararg createParameters: Any?): TargetWriter? {}
 ```
 
 The core passes values to the function through the createParameters parameter.
@@ -8790,104 +9172,106 @@ configuration file.</u>*
 
 ```json
 
-"TargetTypes": {
-"DEBUG-TARGET": {
-"JarFiles": [
-"${SFC_DEPLOYMENT_DIR}/debug-target/lib"
-],
-"FactoryClassName": "com.amazonaws.sfc.debugtarget.DebugTargetWriter"
-},
-"AWS-FIREHOSE": {
-"JarFiles": [
-"${SFC_DEPLOYMENT_DIR}/aws-kinesis-firehose-target/lib"
-],
-"FactoryClassName": "com.amazonaws.sfc.awsfirehose.AwsFirehoseTargetWriter"
-},
-"AWS-IOT-CORE": {
-"JarFiles": [
-"${SFC_DEPLOYMENT_DIR}/aws-iot-core-target/lib"
-],
-"FactoryClassName": "com.amazonaws.sfc.awsiocore.AwsIotCoreTargetWriter"
-},
-"MQTT-TARGET": {
-"JarFiles": [
-"${SFC_DEPLOYMENT_DIR}/mqtt-target/lib/"
-],
-"FactoryClassName": "com.amazonaws.sfc.awsiot.mqtt.MqttTargetWriter"
-},
-"AWS-MSK": {
-"JarFiles": [
-"${SFC_DEPLOYMENT_DIR}/aws-msk-target/lib/"
-],
-"FactoryClassName": "com.amazonaws.sfc.awsiot.msk.AwsMskTargetWriter"
-},
-"AWS-KINESIS": {
-"JarFiles": [
-"${SFC_DEPLOYMENT_DIR}/aws-kinesis-target/lib"
-],
-"FactoryClassName": "com.amazonaws.sfc.awskinesis.AwsKinesisTargetWriter"
-},
-"AWS-LAMBDA": {
-"JarFiles": [
-"${SFC_DEPLOYMENT_DIR}/aws-lambda-target/lib"
-],
-"FactoryClassName": "com.amazonaws.sfc.awslambda.AwsLambdaTargetWriter"
-},
-"AWS-SQS": {
-"JarFiles": [
-"${SFC_DEPLOYMENT_DIR}/aws-sqs-target/lib"
-],
-"FactoryClassName": "com.amazonaws.sfc.awssqs.AwsSqsTargetWriter"
-},
-"AWS-IOT-ANALYTICS": {
-"JarFiles": [
-"${SFC_DEPLOYMENT_DIR}/debug-target/lib"
-],
-"FactoryClassName": "com.amazonaws.sfc.awsiota.AwsIotAnalyticsTargetWriter"
-},
-"AWS-S3": {
-"JarFiles": [
-"${SFC_DEPLOYMENT_DIR}/aws-s3-target/lib"
-],
-"FactoryClassName": "com.amazonaws.sfc.awsfirehose.AwsS3TargetWriter"
-},
-"AWS-SITEWISE": {
-"JarFiles": [
-"${SFC_DEPLOYMENT_DIR}/aws-sitewise-target/lib"
-],
-"FactoryClassName": "com.amazonaws.sfc.awssitewise.AwsSiteWiseTargetWriter"
-},
-"AWS-SNS": {
-"JarFiles": [
-"${SFC_DEPLOYMENT_DIR}/aws-sns-target/lib/"
-],
-"FactoryClassName": "com.amazonaws.sfc.awssns.AwsSnsTargetWriter"
-},
-"AWS-TIMESTREAM": {
-"JarFiles": [
-"${SFC_DEPLOYMENT_DIR}/aws-timestream-target/lib"
-],
-"FactoryClassName": "com.amazonaws.sfc.awstimestream.AwsTimestreamTargetWriter"
-},
-"FILE-TARGET": {
-"JarFiles": [
-"${SFC_DEPLOYMENT_DIR}/aws-file-target/lib"
-],
-"FactoryClassName": "com.amazonaws.sfc.filetarget.FileTargetWriter"
-},
-"ROUTER": {
-"JarFiles": [
-"${SFC_DEPLOYMENT_DIR}/router-target/lib"
-],
-"FactoryClassName": "com.amazonaws.sfc.router.RouterTargetWriter"
-},
-"STORE-FORWARD": {
-"JarFiles": [
-"${SFC_DEPLOYMENT_DIR}/store-forward-target/lib"
-],
-"FactoryClassName": "com.amazonaws.sfc.storeforward.StoreForwardTargetWriter"
-}
-}
+
+  "TargetTypes": {
+    "DEBUG-TARGET": {
+      "JarFiles": [
+        "${SFC_DEPLOYMENT_DIR}/debug-target/lib"
+      ],
+      "FactoryClassName": "com.amazonaws.sfc.debugtarget.DebugTargetWriter"
+    },
+    "AWS-FIREHOSE": {
+      "JarFiles": [
+        "${SFC_DEPLOYMENT_DIR}/aws-kinesis-firehose-target/lib"
+      ],
+      "FactoryClassName": "com.amazonaws.sfc.awsfirehose.AwsFirehoseTargetWriter"
+    },
+    "AWS-IOT-CORE": {
+      "JarFiles": [
+        "${SFC_DEPLOYMENT_DIR}/aws-iot-core-target/lib"
+      ],
+      "FactoryClassName": "com.amazonaws.sfc.awsiocore.AwsIotCoreTargetWriter"
+    },
+    "MQTT-TARGET": {
+      "JarFiles": [
+        "${SFC_DEPLOYMENT_DIR}/mqtt-target/lib/"
+      ],
+      "FactoryClassName": "com.amazonaws.sfc.awsiot.mqtt.MqttTargetWriter"
+    },
+    "AWS-MSK": {
+      "JarFiles": [
+        "${SFC_DEPLOYMENT_DIR}/aws-msk-target/lib/"
+      ],
+      "FactoryClassName": "com.amazonaws.sfc.awsiot.msk.AwsMskTargetWriter"
+    },
+    "AWS-KINESIS": {
+      "JarFiles": [
+        "${SFC_DEPLOYMENT_DIR}/aws-kinesis-target/lib"
+      ],
+      "FactoryClassName": "com.amazonaws.sfc.awskinesis.AwsKinesisTargetWriter"
+    },
+    "AWS-LAMBDA": {
+      "JarFiles": [
+        "${SFC_DEPLOYMENT_DIR}/aws-lambda-target/lib"
+      ],
+      "FactoryClassName": "com.amazonaws.sfc.awslambda.AwsLambdaTargetWriter"
+    },
+    "AWS-SQS": {
+      "JarFiles": [
+        "${SFC_DEPLOYMENT_DIR}/aws-sqs-target/lib"
+      ],
+      "FactoryClassName": "com.amazonaws.sfc.awssqs.AwsSqsTargetWriter"
+    },
+    "AWS-IOT-ANALYTICS": {
+      "JarFiles": [
+        "${SFC_DEPLOYMENT_DIR}/debug-target/lib"
+      ],
+      "FactoryClassName": "com.amazonaws.sfc.awsiota.AwsIotAnalyticsTargetWriter"
+    },
+    "AWS-S3": {
+      "JarFiles": [
+        "${SFC_DEPLOYMENT_DIR}/aws-s3-target/lib"
+      ],
+      "FactoryClassName": "com.amazonaws.sfc.awsfirehose.AwsS3TargetWriter"
+    },
+    "AWS-SITEWISE": {
+      "JarFiles": [
+        "${SFC_DEPLOYMENT_DIR}/aws-sitewise-target/lib"
+      ],
+      "FactoryClassName": "com.amazonaws.sfc.awssitewise.AwsSiteWiseTargetWriter"
+    },
+    "AWS-SNS": {
+      "JarFiles": [
+        "${SFC_DEPLOYMENT_DIR}/aws-sns-target/lib/"
+      ],
+      "FactoryClassName": "com.amazonaws.sfc.awssns.AwsSnsTargetWriter"
+    },
+    "AWS-TIMESTREAM": {
+      "JarFiles": [
+        "${SFC_DEPLOYMENT_DIR}/aws-timestream-target/lib"
+      ],
+      "FactoryClassName": "com.amazonaws.sfc.awstimestream.AwsTimestreamTargetWriter"
+    },
+    "FILE-TARGET": {
+      "JarFiles": [
+        "${SFC_DEPLOYMENT_DIR}/aws-file-target/lib"
+      ],
+      "FactoryClassName": "com.amazonaws.sfc.filetarget.FileTargetWriter"
+    },
+    "ROUTER": {
+      "JarFiles": [
+        "${SFC_DEPLOYMENT_DIR}/router-target/lib"
+      ],
+      "FactoryClassName": "com.amazonaws.sfc.router.RouterTargetWriter"
+    },
+    "STORE-FORWARD": {
+      "JarFiles": [
+        "${SFC_DEPLOYMENT_DIR}/store-forward-target/lib"
+      ],
+      "FactoryClassName": "com.amazonaws.sfc.storeforward.StoreForwardTargetWriter"
+    }
+  }
+
 
 ```
 
@@ -9036,11 +9420,11 @@ For JVM implementations the SFC core defines the following interface:
 
 ```kotlin
 interface ProtocolAdapter {
-    // Read channel values from a source
-    suspend fun read(sourceID: String, channels: List<String>?): SourceReadResult
+  // Read channel values from a source
+  suspend fun read(sourceID: String, channels: List<String>?): SourceReadResult
 
-    // Stop the adapter
-    suspend fun stop(timeout: Duration)
+  // Stop the adapter
+  suspend fun stop(timeout: Duration)
 }
 ```
 
@@ -9143,9 +9527,9 @@ ProtocolAdapterService:
 
 ```kotlin
 service ProtocolAdapterService {
-    // Reads values, server-side streaming
-    rpc ReadValues (ReadValuesRequest) returns (stream ReadValuesReply) {}
-    rpc InitializeAdapter (InitializeAdapterRequest) returns (InitializeAdapterResponse){}
+  // Reads values, server-side streaming
+  rpc ReadValues (ReadValuesRequest) returns (stream ReadValuesReply) {}
+  rpc InitializeAdapter (InitializeAdapterRequest) returns (InitializeAdapterResponse){}
 }
 ```
 
@@ -9188,23 +9572,23 @@ MqttAdapter class as a standalone service application.
 ```kotlin
 class MqttServiceMain(logger: Logger) : ServiceMain(logger) {
 
-    override fun createServiceInstance(args: Array<String>, logger: Logger): Service {
-        return ProtocolAdapterService.createProtocolAdapterService(
-            args,
-            logger
-        ) { _configReader: ConfigReader, _logger: Logger ->
-            MqttAdapter.createMqttAdapter(_configReader, _logger)
+  override fun createServiceInstance(args: Array<String>, logger: Logger): Service {
+    return ProtocolAdapterService.createProtocolAdapterService(
+      args,
+      logger
+    ) { _configReader: ConfigReader, _logger: Logger ->
+      MqttAdapter.createMqttAdapter(_configReader, _logger)
 
-        }
     }
+  }
 
-    companion object {
-        @JvmStatic
-        @JvmName("main")
-        fun main(args: Array<String>) = runBlocking {
-            MqttServiceMain(logger = Logger.defaultLogger()).run(args)
-        }
+  companion object {
+    @JvmStatic
+    @JvmName("main")
+    fun main(args: Array<String>) = runBlocking {
+      MqttServiceMain(logger = Logger.defaultLogger()).run(args)
     }
+  }
 }
 ```
 
@@ -9216,14 +9600,14 @@ the instance.
 ```kotlin
 fun createMqttAdapter(configReader: ConfigReader, logger: Logger): ProtocolAdapter {
 
-    // obtain mqtt configuration
-    val config: MqttConfiguration = try {
-        configReader.getConfig()
-    } catch (e: Exception) {
-        throw Exception("Error loading configuration: ${e.message}")
-    }
-    // create instance of adapter    
-    return MqttAdapter(config, logger)
+  // obtain mqtt configuration
+  val config: MqttConfiguration = try {
+    configReader.getConfig()
+  } catch (e: Exception) {
+    throw Exception("Error loading configuration: ${e.message}")
+  }
+  // create instance of adapter    
+  return MqttAdapter(config, logger)
 }
 ```
 
@@ -9242,7 +9626,7 @@ A custom handler is a class that implements the ConfigProviderInterface
 
 ```kotlin
 interface ConfigProvider {
-    val configuration: Channel<String>?
+  val configuration: Channel<String>?
 }
 ```
 
@@ -9277,8 +9661,8 @@ A custom writer is a class that implements the ConfigWriter interface
 
 ```kotlin
 interface LogWriter {
-    fun write(logLevel: LogLevel, timestamp: Long, source: String?, message: String)
-    fun close()
+  fun write(logLevel: LogLevel, timestamp: Long, source: String?, message: String)
+  fun close()
 }
 ```
 
@@ -9302,8 +9686,8 @@ A metrics Writer is a class that implements the MetricWriter Interface
 
 ```kotlin
 interface MetricsWriter {
-    suspend fun writeMetricsData(metricsData: MetricsData)
-    suspend fun close()
+  suspend fun writeMetricsData(metricsData: MetricsData)
+  suspend fun close()
 }
 ```
 
@@ -9322,8 +9706,8 @@ MetricsWriterService
 
 ```kotlin
 Service MetricsWriterService {
-    rpc WriteMetrics (stream MetricsDataMessage) returns (google.protobuf.Empty)
-    rpc InitializeMetricsWriter (InitializeMetricsWriterRequest) returns (InitializeMetricsWriterResponse){}
+  rpc WriteMetrics (stream MetricsDataMessage) returns (google.protobuf.Empty)
+  rpc InitializeMetricsWriter (InitializeMetricsWriterRequest) returns (InitializeMetricsWriterResponse){}
 }
 ```
 
@@ -9333,19 +9717,19 @@ the abstract method createServiceInstance of that class by a method that creates
 ```kotlin
 class AwsCloudWatchMetricsWriterService : ServiceMain() {
 
-    override fun createServiceInstance(args: Array<String>, configuration: String, logger: Logger): Service? {
-        return createIpcMetricsServer(args, configuration, logger) { _configReader, _logger ->
-            AwsCloudWatchMetricsWriter.newInstance(_configReader, _logger)
-        }
+  override fun createServiceInstance(args: Array<String>, configuration: String, logger: Logger): Service? {
+    return createIpcMetricsServer(args, configuration, logger) { _configReader, _logger ->
+      AwsCloudWatchMetricsWriter.newInstance(_configReader, _logger)
     }
+  }
 
-    companion object {
-        @JvmStatic
-        @JvmName("main")
-        fun main(args: Array<String>): Unit = runBlocking {
-            AwsCloudWatchMetricsWriterService().run(args)
-        }
+  companion object {
+    @JvmStatic
+    @JvmName("main")
+    fun main(args: Array<String>): Unit = runBlocking {
+      AwsCloudWatchMetricsWriterService().run(args)
     }
+  }
 }
 ```
 
@@ -9438,13 +9822,13 @@ implementations. Instead of these parameters the level of output logging is conf
 
 - Create the host for the adapter service by creating a class that inherits from ProtocolServiceMain.
 
-    - In this class implement the abstract method named CreateAdapterService that:
+  - In this class implement the abstract method named CreateAdapterService that:
 
-    - Sets the ProtocolAdapterServiceImpl.CreateAdapter delegate to a method  
-      that does create the instance of the adapter used by the gRPC service.
+  - Sets the ProtocolAdapterServiceImpl.CreateAdapter delegate to a method  
+    that does create the instance of the adapter used by the gRPC service.
 
-    - Returns an instance of the Service class passing the  
-      ProtocolAdapterServiceImpl class as its type parameter.
+  - Returns an instance of the Service class passing the  
+    ProtocolAdapterServiceImpl class as its type parameter.
 
 - Implement the configuration types required for the adapter. When initializing the adapter using the InitializeAdapter
   service call the JSON configuration for the adapter is passed as JSON data. When the CreateAdapter method (see above)

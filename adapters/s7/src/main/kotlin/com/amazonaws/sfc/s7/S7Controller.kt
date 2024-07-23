@@ -250,7 +250,7 @@ class S7Controller(
             )
         )
         return@coroutineScope data}catch (e : Exception){
-            logger.getCtxErrorLogEx(className, "read")("Error reading from source \"$sourceID\"", e)
+            logger.getCtxErrorLog(className, "read")("Error reading from source \"$sourceID\", $e")
             throw e
         }
     }

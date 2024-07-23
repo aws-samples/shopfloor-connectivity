@@ -33,6 +33,7 @@ class InProcessSourcesReader(
     private val logger: Logger
 ) : SourceValuesReader {
 
+    private var closing = false
     /**
      * Reads data from a reader until the readResultConsumer that is called for every received read result return false
      * @param consumer readResultConsumer Consumer of read data, return true to continue reading, false to stop
@@ -49,8 +50,10 @@ class InProcessSourcesReader(
                     sourcesReader.sourceReadResults(
                         currentCoroutineContext(),
                         tuningConfiguration.maxConcurrentSourceReaders,
-                        tuningConfiguration.allSourcesReadTimeout
-                    )
+                        tuningConfiguration.allSourcesReadTimeout,
+                    ){
+                        !closing
+                    }
                         .buffer(1000)
                         .cancellable()
                         .collect {
@@ -85,6 +88,7 @@ class InProcessSourcesReader(
      * Closes the reader
      */
     override suspend fun close() {
+        closing = true
     }
 
     companion object {

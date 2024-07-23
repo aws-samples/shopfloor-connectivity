@@ -1,0 +1,55 @@
+{
+  "AWSVersion": "2022-04-02",
+  "Version": 1,
+  "LogLevel": "Info",
+  "Schedules": [
+    {
+      "Name": "SLMP-DATA",
+      "Interval": 100,
+      "TimestampLevel": "Both",
+      "Sources": {
+        "SLMP-SOURCE": [
+          "*"
+        ]
+      },
+      "Targets": [
+        "#DebugTarget",
+        "S3Target"
+      ]
+    }
+  ],
+  "Sources": {
+    "SLMP-SOURCE": {
+      "Name": "SLMP-SOURCE",
+      "ProtocolAdapter": "SLMP",
+      "AdapterController": "SLMP-CONTROLLER",
+      "Channels": "@file:slmp-channels.json"
+    }
+  },
+  "ProtocolAdapters": {
+    "SLMP": {
+      "AdapterType": "SLMP",
+      "AdapterServer": "SlmpAdapterServer",
+      "Controllers": {
+        "SLMP-CONTROLLER": {
+          "Address": "192.168.1.200",
+          "MonitoringTimer": 10
+        }
+      },
+      "Structures": "@file:structures.json"
+    }
+  },
+  "AdapterServers": "@file:servers.json@Adapters",
+  "TargetServers": "@file:servers.json@Targets",
+
+  "Targets": {
+    "S3Target": "$(S3TargetIPC, bucket=< YOUR BUCKET >>,region=< YOUR REGION >>,prefix=< YOUR PREFIX >,targetServer=S3TargetServer)",
+    "DebugTarget": {
+      "TargetType": "DEBUG-TARGET",
+      "TargetServer": "DebugTargetServer"
+    }
+  },
+
+  "AwsIotCredentialProviderClients": "@file:credential-providers.json",
+  "Templates": "@file:templates.json"
+}

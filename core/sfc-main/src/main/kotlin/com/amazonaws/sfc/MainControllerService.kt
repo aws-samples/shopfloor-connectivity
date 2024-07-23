@@ -112,7 +112,7 @@ class MainControllerService(
      */
     override suspend fun stop() = coroutineScope {
         try {
-            withTimeout(CLOSING_TIMEOUT) {
+            withTimeout(CLOSING_TIMEOUT ) {
                 listOf(
                     stopMetricsProcessing(),
                     stopScheduleControllers(),
@@ -492,7 +492,7 @@ class MainControllerService(
             return MainControllerService(configReader, controllerConfiguration, logger)
         }
 
-        const val CLOSING_TIMEOUT = 10000L
+        const val CLOSING_TIMEOUT = 30000L
         const val SFC_CORE = "SfcCore"
 
         private var healthProbeService: HealthProbeService? = null

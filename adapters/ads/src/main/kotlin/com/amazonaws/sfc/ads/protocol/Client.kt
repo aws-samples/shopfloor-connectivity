@@ -7,6 +7,7 @@ package com.amazonaws.sfc.ads.protocol
 import com.amazonaws.sfc.ads.protocol.Decoder.toInt32
 import com.amazonaws.sfc.ads.protocol.RequestResponse.Companion.AMS_TCP_HEADER_LEN
 import com.amazonaws.sfc.log.Logger
+import com.amazonaws.sfc.tcp.LockableTcpClient
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.withTimeout
 import kotlinx.coroutines.withTimeoutOrNull

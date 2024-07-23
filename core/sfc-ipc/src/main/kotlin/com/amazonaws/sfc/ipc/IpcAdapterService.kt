@@ -47,7 +47,9 @@ class IpcAdapterService(
 ) : IpcBaseService(serverConfig, logger), Service {
 
     override val serviceImplementation: BindableService
-        get() = ProtocolService()
+        get() = ProtocolService(_protocolAdapter) {
+            !closing
+        }
 
     private val className = this::class.java.simpleName
     private val serverScope = buildScope(className)
@@ -62,7 +64,8 @@ class IpcAdapterService(
 
     private var healthProbeService: HealthProbeService? = null
 
-    private var _protocolAdapter: ProtocolAdapter? = null
+   private var _protocolAdapter: ProtocolAdapter? = null
+
     private val protocolAdapter: ProtocolAdapter
         get() {
             if (_protocolAdapter == null) {
@@ -70,6 +73,8 @@ class IpcAdapterService(
             }
             return _protocolAdapter!!
         }
+
+    private var closing = false
 
 
     /**
@@ -97,6 +102,7 @@ class IpcAdapterService(
      * Stops the server
      */
     override suspend fun stop() {
+        closing = true
         _initialized = false
         grpcServer.shutdownNow().awaitTermination(15, TimeUnit.SECONDS)
     }
@@ -114,7 +120,8 @@ class IpcAdapterService(
     /**
      * Inner class that implements the GRPC service
      */
-    private inner class ProtocolService : ProtocolAdapterServiceGrpcKt.ProtocolAdapterServiceCoroutineImplBase() {
+    private inner class ProtocolService(private var adapter : ProtocolAdapter?, private val fnContinue: () -> Boolean) :
+        ProtocolAdapterServiceGrpcKt.ProtocolAdapterServiceCoroutineImplBase() {
 
 
         // Implements GRPC ReadValues streaming service
@@ -132,13 +139,17 @@ class IpcAdapterService(
 
             return flow {
                 // Create a reader to feed the channel flow
-                SourcesValuesAsFlow(protocolAdapter, sources, interval, logger).use { reader ->
+                SourcesValuesAsFlow(adapter!!, sources, interval, logger).use { reader ->
                     // Loop reading from reader read results channel
                     reader.sourceReadResults(
                         currentCoroutineContext(),
                         maxConcurrentSourceReads = tuningConfiguration.maxConcurrentSourceReaders,
-                        timeout = tuningConfiguration.allSourcesReadTimeout
-                    ).buffer(100).cancellable().collect {
+                        timeout = tuningConfiguration.allSourcesReadTimeout,
+                    ) {
+                        fnContinue()
+                    }.buffer(100).cancellable().collect {
+
+                        if (!fnContinue()) currentCoroutineContext().cancel()
 
                         if (logger.level == LogLevel.TRACE) {
                             it.forEach { source, result ->
@@ -148,7 +159,8 @@ class IpcAdapterService(
                                 }
                             }
                         } else if (logger.level == LogLevel.INFO) {
-                            val valueCount =( it.values.filterIsInstance<SourceReadSuccess>()).map{ v->v.values.values.count()}.sum()
+                            val valueCount =
+                                (it.values.filterIsInstance<SourceReadSuccess>()).sumOf { v -> v.values.values.count() }
                             if (valueCount != 0) {
                                 val sourceCount = it.values.size
                                 log.info("Read $valueCount values from $sourceCount sources")
@@ -170,23 +182,28 @@ class IpcAdapterService(
             // Interval between reading metrics
             val interval = request.interval.toDuration(DurationUnit.MILLISECONDS)
 
-            while (initialized) {
-                MetricsAsFlow(_protocolAdapter?.metricsCollector, interval, logger).metricsFlow.buffer(100).cancellable().collect {
-                    try {
-                        if (!initialized) {
-                            return@collect
-                        }
-                        val reply = it.grpcMetricsDataMessage
-                        send(reply)
-
-                    } catch (e: Exception) {
-                        if (!e.isJobCancellationException)
-                            log.errorEx("Error building or emitting readMetrics reply", e)
-                    }
+            while (initialized && !closing) {
+                MetricsAsFlow(adapter?.metricsCollector, interval, logger) {
+                    closing
                 }
+                    .metricsFlow
+                    .buffer(100)
+                    .cancellable()
+                    .collect {
+                        try {
+                            if (!initialized) {
+                                return@collect
+                            }
+                            val reply = it.grpcMetricsDataMessage
+                            send(reply)
+
+                        } catch (e: Exception) {
+                            if (!e.isJobCancellationException)
+                                log.errorEx("Error building or emitting readMetrics reply", e)
+                        }
+                    }
             }
         }
-
 
 
         override suspend fun initializeAdapter(request: InitializeAdapterRequest): InitializeAdapterResponse {
@@ -216,7 +233,9 @@ class IpcAdapterService(
 
                         val secretsManager = SecretsManager.createSecretsManager(serviceConfiguration, logger)
                         runBlocking {
-                            secretsManager?.syncSecretsFromService(serviceConfiguration.secretsManagerConfiguration?.cloudSecrets ?: emptyList())
+                            secretsManager?.syncSecretsFromService(
+                                serviceConfiguration.secretsManagerConfiguration?.cloudSecrets ?: emptyList()
+                            )
                         }
 
                         val configReader = ConfigReader.createConfigReader(
@@ -225,10 +244,10 @@ class IpcAdapterService(
                         )
 
                         val adapter = adapterID ?: serviceConfiguration.protocolAdapters.keys.first()
-                        //   _protocolAdapter?.stop(1.toDuration(DurationUnit.SECONDS))
-                        _protocolAdapter = createAdapter(adapter, configReader, logger)
+                        this.adapter?.stop(10.toDuration(DurationUnit.SECONDS))
+                        this.adapter = createAdapter(adapter, configReader, logger)
                         runBlocking {
-                            _protocolAdapter?.init()
+                            this@ProtocolService.adapter?.init()
 
                             _initialized = true
 
@@ -273,7 +292,10 @@ class IpcAdapterService(
 
     private fun stopUnhealthyService() {
         runBlocking {
-            logger.getCtxWarningLog(className, "stopUnhealthyService")("Service will be stopped by health probe service")
+            logger.getCtxWarningLog(
+                className,
+                "stopUnhealthyService"
+            )("Service will be stopped by health probe service")
             stop()
             exitProcess(1)
         }
@@ -288,7 +310,12 @@ class IpcAdapterService(
         healthProbeService = if (healthProbeConfiguration == null) null else
             try {
                 val service =
-                    HealthProbeService(healthProbeConfiguration, serviceStopFunction = ::stopUnhealthyService, checkFunction = ::isHealthy, logger = logger)
+                    HealthProbeService(
+                        healthProbeConfiguration,
+                        serviceStopFunction = ::stopUnhealthyService,
+                        checkFunction = ::isHealthy,
+                        logger = logger
+                    )
                 serverScope.launch {
                     delay(1.toDuration(DurationUnit.MINUTES))
                     service.restartIfInactive()
@@ -303,7 +330,7 @@ class IpcAdapterService(
     companion object {
 
         private var lastRequest: String? = ""
-            private val initializationLock = Mutex()
+        private val initializationLock = Mutex()
 
 
         fun createProtocolAdapterService(
@@ -324,7 +351,8 @@ class IpcAdapterService(
                 // get protocol id which could be specified on the command line or be read from the configuration if it only has a single protocol
                 val protocolAdapterID = getAdapterProtocolID(cmd, serviceConfiguration)
                 val protocolConfiguration = getProtocolConfig(serviceConfiguration, protocolAdapterID)
-                val protocolServerConfiguration = getProtocolServerConfiguration(serviceConfiguration, protocolConfiguration)
+                val protocolServerConfiguration =
+                    getProtocolServerConfiguration(serviceConfiguration, protocolConfiguration)
 
 
                 val logLevel: LogLevel = cmd.logLevel ?: serviceConfiguration.logLevel
@@ -345,7 +373,10 @@ class IpcAdapterService(
             }
         }
 
-        private fun getAdapterProtocolID(cmd: ProtocolServerCommandLine, serviceConfiguration: ServiceConfiguration): String? =
+        private fun getAdapterProtocolID(
+            cmd: ProtocolServerCommandLine,
+            serviceConfiguration: ServiceConfiguration
+        ): String? =
             cmd.protocolAdapterID
                 ?: when (serviceConfiguration.protocolAdapters.size) {
                     0 -> null
@@ -370,7 +401,10 @@ class IpcAdapterService(
 
         }
 
-        private fun getProtocolConfig(serviceConfiguration: ServiceConfiguration, protocolAdapterID: String?): ProtocolAdapterConfiguration? {
+        private fun getProtocolConfig(
+            serviceConfiguration: ServiceConfiguration,
+            protocolAdapterID: String?
+        ): ProtocolAdapterConfiguration? {
             return if (serviceConfiguration.protocolAdapters.isNotEmpty()) serviceConfiguration.protocolAdapters[protocolAdapterID]
                 ?: throw ProtocolAdapterException("Protocol Adapter \"$protocolAdapterID\" does not exist in configuration, existing protocols adapters are ${serviceConfiguration.protocolAdapters.keys}")
             else null

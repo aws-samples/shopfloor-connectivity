@@ -1,0 +1,55 @@
+{
+  "Word": {
+    "AccessPoint": "D0",
+    "DataType" : "WORD"
+  },
+  "Word2": {
+    "AccessPoint": "D1",
+    "DataType": "WORD[2]"
+  },
+  "DoubleWord": {
+    "AccessPoint": "D4"
+  },
+  "DoubleWord2": {
+    "AccessPoint": "D6",
+    "Size" : 2
+  },
+  "String32": {
+    "AccessPoint": "D16",
+    "DataType": "STRING(32)"
+  },
+  "String32-2": {
+    "AccessPoint": "D32",
+    "DataType": "STRING(32)[2]"
+  },
+  "Output": {
+    "AccessPoint": "Y0"
+  },
+  "Output8": {
+    "AccessPoint": "Y0",
+    "Size": 8
+  },
+  "OutputAsWord": {
+    "AccessPoint": "Y0",
+    "DataType": "WORD"
+  },
+  "Input": {
+    "AccessPoint": "X0"
+  },
+  "Input8": {
+    "AccessPoint": "X0",
+    "DataType": "BIT[8]"
+  },
+  "InputAsWord": {
+    "AccessPoint": "X0",
+    "DataType": "WORD"
+  },
+  "Structure1": {
+    "AccessPoint": "D200",
+    "DataType": "STRUCT1"
+  },
+  "Structure2": {
+    "AccessPoint": "D200",
+    "DataType": "STRUCT2"
+  }
+}

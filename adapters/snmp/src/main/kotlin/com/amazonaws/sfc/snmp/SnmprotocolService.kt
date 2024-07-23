@@ -13,10 +13,6 @@ import com.amazonaws.sfc.service.ServiceMain
 import kotlinx.coroutines.runBlocking
 
 
-/**
- * OPC UA protocol IPC service
- * @constructor
- */
 class SnmpProtocolService : ServiceMain() {
 
     override fun createServiceInstance(args: Array<String>, configuration: String, logger: Logger): Service? {
