@@ -78,6 +78,7 @@ class AwsSiteWiseTargetConfiguration : AwsServiceConfig, TargetConfiguration() {
         super.validate()
         validateInterval()
         validateRegion()
+        assets.forEach { it.validate() }
         validated = true
     }
 
@@ -140,6 +141,9 @@ class AwsSiteWiseTargetConfiguration : AwsServiceConfig, TargetConfiguration() {
             }
             return instance
         }
+
+        const val ID_REGEX_STR = "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        val ID_REGEX = ID_REGEX_STR.toRegex()
 
 
     }

@@ -64,7 +64,7 @@ class IpcAdapterService(
 
     private var healthProbeService: HealthProbeService? = null
 
-   private var _protocolAdapter: ProtocolAdapter? = null
+    private var _protocolAdapter: ProtocolAdapter? = null
 
     private val protocolAdapter: ProtocolAdapter
         get() {
@@ -120,8 +120,8 @@ class IpcAdapterService(
     /**
      * Inner class that implements the GRPC service
      */
-    private inner class ProtocolService(private var adapter : ProtocolAdapter?, private val fnContinue: () -> Boolean) :
-        ProtocolAdapterServiceGrpcKt.ProtocolAdapterServiceCoroutineImplBase() {
+    private inner class ProtocolService(private var adapter: ProtocolAdapter?, private val fnContinue: () -> Boolean) :
+            ProtocolAdapterServiceGrpcKt.ProtocolAdapterServiceCoroutineImplBase() {
 
 
         // Implements GRPC ReadValues streaming service
@@ -143,6 +143,7 @@ class IpcAdapterService(
                     // Loop reading from reader read results channel
                     reader.sourceReadResults(
                         currentCoroutineContext(),
+                        request.scheduleName,
                         maxConcurrentSourceReads = tuningConfiguration.maxConcurrentSourceReaders,
                         timeout = tuningConfiguration.allSourcesReadTimeout,
                     ) {
@@ -378,11 +379,11 @@ class IpcAdapterService(
             serviceConfiguration: ServiceConfiguration
         ): String? =
             cmd.protocolAdapterID
-                ?: when (serviceConfiguration.protocolAdapters.size) {
-                    0 -> null
-                    1 -> serviceConfiguration.activeTargets.keys.first()
-                    else -> throw ProtocolAdapterException("There are multiple adapters for this adapter type in the configuration, use the \"$OPTION_PROTOCOL_ADAPTER\" parameter to specify the adapter for this service instance")
-                }
+                    ?: when (serviceConfiguration.protocolAdapters.size) {
+                        0 -> null
+                        1 -> serviceConfiguration.activeTargets.keys.first()
+                        else -> throw ProtocolAdapterException("There are multiple adapters for this adapter type in the configuration, use the \"$OPTION_PROTOCOL_ADAPTER\" parameter to specify the adapter for this service instance")
+                    }
 
 
         private fun getProtocolServerConfiguration(
@@ -397,7 +398,7 @@ class IpcAdapterService(
             val protocolServerID = protocolAdapterConfig.protocolAdapterServer
 
             return (if (protocolServerID != null) serviceConfiguration.protocolAdapterServers[protocolServerID] else null)
-                ?: throw ProtocolAdapterException("Server \"protocolServerID\" for does not exist, existing servers are  ${serviceConfiguration.protocolAdapterServers.keys}")
+                    ?: throw ProtocolAdapterException("Server \"protocolServerID\" for does not exist, existing servers are  ${serviceConfiguration.protocolAdapterServers.keys}")
 
         }
 
@@ -406,7 +407,7 @@ class IpcAdapterService(
             protocolAdapterID: String?
         ): ProtocolAdapterConfiguration? {
             return if (serviceConfiguration.protocolAdapters.isNotEmpty()) serviceConfiguration.protocolAdapters[protocolAdapterID]
-                ?: throw ProtocolAdapterException("Protocol Adapter \"$protocolAdapterID\" does not exist in configuration, existing protocols adapters are ${serviceConfiguration.protocolAdapters.keys}")
+                    ?: throw ProtocolAdapterException("Protocol Adapter \"$protocolAdapterID\" does not exist in configuration, existing protocols adapters are ${serviceConfiguration.protocolAdapters.keys}")
             else null
 
         }

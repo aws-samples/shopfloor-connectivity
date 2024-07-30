@@ -100,7 +100,6 @@ abstract class AwsServiceClientHelper(
             builder.credentialsProvider(clientCredentialsProvider)
         }
 
-
         builder.overrideConfiguration(ClientOverrideConfiguration.builder()
             .advancedOptions(mutableMapOf(SdkAdvancedClientOption.USER_AGENT_PREFIX to SFC_USER_AGENT_PREFIX))
             .build())

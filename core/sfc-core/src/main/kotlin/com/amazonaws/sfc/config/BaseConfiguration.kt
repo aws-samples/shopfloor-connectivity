@@ -181,13 +181,13 @@ open class BaseConfiguration : Validate, HasSecretsManager {
             _validated = value
         }
 
-    @SerializedName(CONFIG_SECRETS_MANGER)
+    @SerializedName(CONFIG_SECRETS_MANAGER)
     @Suppress("PropertyName")
     protected var _secretsManagerConfiguration: SecretsManagerConfiguration? = null
     override val secretsManagerConfiguration
         get() = _secretsManagerConfiguration
 
-    @SerializedName(CONFIG_TUNING)
+        @SerializedName(CONFIG_TUNING)
     protected var _tuningConfiguration = TuningConfiguration()
 
     val tuningConfiguration: TuningConfiguration
@@ -229,9 +229,9 @@ open class BaseConfiguration : Validate, HasSecretsManager {
             ConfigurationException.check(
                 (secretsManagerConfiguration?.credentialProviderClient == null
                         || _awsIoTCredentialProviderClients[secretsManagerConfiguration?.credentialProviderClient] != null),
-                "$CONFIG_SECRETS_MANGER, $CONFIG_CREDENTIAL_PROVIDER_CLIENT \"secretsManagerConfiguration?.credentialProviderClient\" is not configured, " +
+                "$CONFIG_SECRETS_MANAGER, $CONFIG_CREDENTIAL_PROVIDER_CLIENT \"secretsManagerConfiguration?.credentialProviderClient\" is not configured, " +
                         "configured clients are ${_awsIoTCredentialProviderClients.keys}",
-                "$CONFIG_SECRETS_MANGER.$CONFIG_CREDENTIAL_PROVIDER_CLIENT",
+                "$CONFIG_SECRETS_MANAGER.$CONFIG_CREDENTIAL_PROVIDER_CLIENT",
                 secretsManagerConfiguration
             )
         }
@@ -273,7 +273,7 @@ open class BaseConfiguration : Validate, HasSecretsManager {
         const val CONFIG_TUNING = "Tuning"
         const val CONFIG_REGION = "Region"
         const val CONFIG_SCHEDULES = "Schedules"
-        const val CONFIG_SECRETS_MANGER = "SecretsManager"
+        const val CONFIG_SECRETS_MANAGER = "SecretsManager"
         const val CONFIG_SOURCES = "Sources"
         const val CONFIG_TARGETS = "Targets"
         const val CONFIG_TARGET_SERVERS = "TargetServers"

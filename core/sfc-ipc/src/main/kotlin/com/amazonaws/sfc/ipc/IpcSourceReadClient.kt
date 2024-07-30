@@ -1,4 +1,3 @@
-
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: MIT-0
 
@@ -68,8 +67,8 @@ class IpcSourceReadClient(internal val channel: ManagedChannel, usedSecrets: Map
      * @param interval Duration Read interval
      * @return kotlinx.coroutines.flow.Flow<ReadValuesReply> Returns flow to which the values read from the service are streamed
      */
-    suspend fun readValues(sourceChannels: Map<String, ArrayList<String>>, interval: Duration): kotlinx.coroutines.flow.Flow<ReadValuesReply> = coroutineScope {
-        val readRequest = buildReadValuesRequest(sourceChannels, interval)
+    suspend fun readValues(schedule : String?, sourceChannels: Map<String, ArrayList<String>>, interval: Duration): kotlinx.coroutines.flow.Flow<ReadValuesReply> = coroutineScope {
+        val readRequest = buildReadValuesRequest(schedule, sourceChannels, interval)
         try {
             stub.readValues(readRequest)
         } catch (e: Exception) {
@@ -81,8 +80,7 @@ class IpcSourceReadClient(internal val channel: ManagedChannel, usedSecrets: Map
 
     // Builds the read request
     private fun buildReadValuesRequest(
-        sourceChannels: Map<String, ArrayList<String>>, interval: Duration
-    ): ReadValuesRequest {
+        scheduleName: String?, sourceChannels: Map<String, ArrayList<String>>, interval: Duration): ReadValuesRequest {
 
         val sourcesList = sourceChannels.map { source ->
             SourceReadValueRequest.newBuilder()
@@ -91,10 +89,14 @@ class IpcSourceReadClient(internal val channel: ManagedChannel, usedSecrets: Map
                 .build()
         }.toList()
 
-        return ReadValuesRequest.newBuilder()
+        val builder = ReadValuesRequest.newBuilder()
             .addAllSources(sourcesList)
             .setInterval(interval.inWholeMilliseconds)
-            .build()
+
+        if (scheduleName != null)
+            builder.setScheduleName(scheduleName)
+
+        return builder.build()
     }
 
     /**

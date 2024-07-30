@@ -21,5 +21,5 @@ open class BaseConfigurationWithMetrics : BaseConfiguration(), Validate {
     val isCollectingMetrics: Boolean
         get() = ((_metrics != null) && (_metrics.isCollectingMetrics))
 
-    override var validated: Boolean = true
+    override var validated: Boolean = false
 }

@@ -5,13 +5,19 @@
 package com.amazonaws.sfc.awssitewise
 
 
-import com.amazonaws.sfc.awssitewise.config.AwsSiteWiseAssetConfiguration
-import com.amazonaws.sfc.awssitewise.config.AwsSiteWiseTargetConfiguration
-import com.amazonaws.sfc.awssitewise.config.AwsSiteWiseWriterConfiguration
+import com.amazonaws.sfc.awssitewise.config.*
+import com.amazonaws.sfc.awssitewise.config.AwsSiteWiseAssetConfiguration.Companion.CONFIG_ASSET_ID
+import com.amazonaws.sfc.awssitewise.config.AwsSiteWiseAssetCreationConfiguration.Companion.CONFIG_ASSET_EXTERNAL_ID
+import com.amazonaws.sfc.awssitewise.config.AwsSiteWiseAssetCreationConfiguration.Companion.CONFIG_ASSET_NAME
 import com.amazonaws.sfc.awssitewise.config.AwsSiteWiseWriterConfiguration.Companion.AWS_SITEWISE
-import com.amazonaws.sfc.awssitewise.config.SiteWiseAssetPropertyConfiguration
+import com.amazonaws.sfc.awssitewise.config.SiteWiseAssetPropertyConfiguration.Companion.CONFIG_PROPERTY_ALIAS
+import com.amazonaws.sfc.awssitewise.config.SiteWiseAssetPropertyConfiguration.Companion.CONFIG_PROPERTY_EXTERNAL_ID
+import com.amazonaws.sfc.awssitewise.config.SiteWiseAssetPropertyConfiguration.Companion.CONFIG_PROPERTY_ID
+import com.amazonaws.sfc.awssitewise.config.SiteWiseAssetPropertyConfiguration.Companion.CONFIG_PROPERTY_NAME
 import com.amazonaws.sfc.config.ConfigReader
+import com.amazonaws.sfc.config.ConfigurationException
 import com.amazonaws.sfc.data.DataTypes.isNumeric
+import com.amazonaws.sfc.data.JsonHelper.Companion.gsonExtended
 import com.amazonaws.sfc.data.TargetData
 import com.amazonaws.sfc.data.TargetResultBufferedHelper
 import com.amazonaws.sfc.data.TargetResultHandler
@@ -32,6 +38,7 @@ import com.amazonaws.sfc.targets.AwsServiceTargetClientHelper
 import com.amazonaws.sfc.targets.TargetDataChannel
 import com.amazonaws.sfc.targets.TargetException
 import com.amazonaws.sfc.util.*
+import com.google.gson.Gson
 import io.burt.jmespath.Expression
 import kotlinx.coroutines.*
 import kotlinx.coroutines.selects.select
@@ -49,12 +56,7 @@ import java.util.*
  * @property logger Logger Logger for output
  * @see TargetWriter
  */
-class AwsSiteWiseTargetWriter(
-    private val targetID: String,
-    private val configReader: ConfigReader,
-    private val logger: Logger,
-    resultHandler: TargetResultHandler?
-) : TargetWriter {
+class AwsSiteWiseTargetWriter(private val targetID: String, private val configReader: ConfigReader, private val logger: Logger, resultHandler: TargetResultHandler?) : TargetWriter {
 
     private val className = this::class.java.simpleName
 
@@ -64,26 +66,33 @@ class AwsSiteWiseTargetWriter(
 
 
     private val metricDimensions = mapOf(
-        METRICS_DIMENSION_SOURCE to targetID,
-        MetricsCollector.METRICS_DIMENSION_TYPE to className
-    )
+        METRICS_DIMENSION_SOURCE to targetID, MetricsCollector.METRICS_DIMENSION_TYPE to className)
 
     private val scope = buildScope("Sitewise Target")
 
-    private val clientHelper =
-        AwsServiceTargetClientHelper(
-            configReader.getConfig<AwsSiteWiseWriterConfiguration>(),
-            targetID,
-            IoTSiteWiseClient.builder(),
-            logger
-        )
+    private val clientHelper = AwsServiceTargetClientHelper(
+        configReader.getConfig<AwsSiteWiseWriterConfiguration>(), targetID, IoTSiteWiseClient.builder(), logger)
 
     private val assetHelper by lazy {
+
         val assetCreationConfiguration = targetConfig.assetCreationConfiguration
-        if (assetCreationConfiguration != null)
-            SiteWiseAssetHelper(sitewiseClient, targetID, assetCreationConfiguration, logger)
-        else
-            null
+
+        val anyAssetsByName = targetConfig.assets.map { it.assetName }.any { it != null }
+
+        val anyPropertiesByName = targetConfig.assets.flatMap { asset -> asset.properties.map { prop -> prop.propertyName } }.any { it != null }
+
+        val anyAssetsByExternalIdentity = targetConfig.assets.map { it.assetExternalID }.any { it != null }
+
+        val anyAssetPropertiesByExternalIdentity = targetConfig.assets.flatMap { asset -> asset.properties.map { prop -> prop.propertyExternalID } }.any { it != null }
+
+        val anyAssetsOrPropertiesNeedLookup = anyAssetsByName || anyPropertiesByName || anyAssetsByExternalIdentity || anyAssetPropertiesByExternalIdentity
+
+        if (assetCreationConfiguration != null || anyAssetsOrPropertiesNeedLookup) {
+            SiteWiseAssetHelper(
+                sitewiseClient,
+                targetID, assetCreationConfiguration ?: AwsSiteWiseAssetCreationConfiguration(),
+                assetCreationConfiguration != null, logger)
+        } else null
     }
 
     private val targetResults = if (resultHandler != null) TargetResultBufferedHelper(targetID, resultHandler, logger) else null
@@ -108,7 +117,7 @@ class AwsSiteWiseTargetWriter(
     private val targetDataChannel = TargetDataChannel.create(targetConfig, "$className:targetDataChannel")
 
     // Buffer to collect batch of property values
-    private val propertyValuesBuffer = mutableMapOf<String, MutableMap<SiteWiseAssetPropertyConfiguration, MutableList<AssetPropertyValue>>>()
+    private val propertyValuesBuffer = mutableMapOf<String?, MutableMap<String, MutableList<AssetPropertyValue>>>()
     private var batchCount = 0
 
     private val metricsCollector: MetricsCollector? by lazy {
@@ -121,23 +130,25 @@ class AwsSiteWiseTargetWriter(
                 metricsSourceType = MetricsSourceType.TARGET_WRITER,
                 metricsSourceConfiguration = metricsConfiguration,
                 staticDimensions = TARGET_METRIC_DIMENSIONS,
-                logger = logger
-            )
+                logger = logger)
         } else null
     }
-    private val collectMetricsFromLogger: MetricsCollectorMethod? =
-        if (config.isCollectingMetrics) {
-            { metricsList ->
-                try {
-                    val dataPoints = metricsList.map { MetricsDataPoint(it.metricsName, metricDimensions, it.metricUnit, it.metricsValue) }
-                    runBlocking {
-                        metricsCollector?.put(targetID, dataPoints)
-                    }
-                } catch (e: java.lang.Exception) {
-                    logger.getCtxErrorLogEx(this::class.java.simpleName, "collectMetricsFromLogger")("Error collecting metrics from logger", e)
+    private val collectMetricsFromLogger: MetricsCollectorMethod? = if (config.isCollectingMetrics) {
+        { metricsList ->
+            try {
+                val dataPoints = metricsList.map {
+                    MetricsDataPoint(
+                        it.metricsName, metricDimensions, it.metricUnit, it.metricsValue)
                 }
+                runBlocking {
+                    metricsCollector?.put(targetID, dataPoints)
+                }
+            } catch (e: java.lang.Exception) {
+                logger.getCtxErrorLogEx(
+                    this::class.java.simpleName, "collectMetricsFromLogger")("Error collecting metrics from logger", e)
             }
-        } else null
+        }
+    } else null
 
     override val metricsProvider: MetricsProvider? by lazy {
         if (metricsCollector != null) InProcessMetricsProvider(metricsCollector!!, logger) else null
@@ -157,25 +168,27 @@ class AwsSiteWiseTargetWriter(
                 select {
 
                     targetDataChannel.onReceive { targetData ->
-                        timer.cancel()
-                        handleTargetData(targetData)
+                        if (handleTargetData(targetData)) {
+                            timer.cancel()
+                            timer = timerJob()
+                        }
                     }
 
                     timer.onJoin {
                         log.trace("${(targetConfig.interval.inWholeMilliseconds)} milliseconds buffer interval reached, flushing buffer")
                         flush()
+                        timer = timerJob()
                     }
                 }
 
-                timer = timerJob()
+
             } catch (e: Exception) {
-                if (!e.isJobCancellationException)
-                    log.errorEx("Error in writer", e)
+                if (!e.isJobCancellationException) log.errorEx("Error in writer", e)
             }
         }
     }
 
-    private suspend fun handleTargetData(targetData: TargetData) {
+    private suspend fun handleTargetData(targetData: TargetData): Boolean {
 
         val log = logger.getCtxLoggers(className, "handleTargetData")
 
@@ -194,64 +207,117 @@ class AwsSiteWiseTargetWriter(
         if (targetData.noBuffering || batchCount >= targetConfig.batchSize) {
             flush()
             batchCount = 0
+            return true
+        }
+        return false
+    }
+
+    private fun handleDataForConfiguredAssets(targetData: TargetData) {
+
+        // Remapping keys of the data to escape unsupported characters for jmespath queries
+        val data = targetData.toMap(config.elementNames, jmesPathCompatibleKeys = true) // For every configured asset
+        targetConfig.assets.forEach { asset ->
+            val assetID = getAssetId(asset, logger)
+            asset.properties.forEach { property ->
+
+                val propertyIdOrAlias = getPropertyIdOrAlias(property, assetID)
+
+                if (propertyIdOrAlias != null) {
+                    buildAndStorePropertyValue(asset, property, assetID, propertyIdOrAlias, data)
+                }
+            }
+
         }
     }
 
-    private fun handleDataForConfiguredAssets( targetData: TargetData) {
+    private fun buildAndStorePropertyValue(assetConfig: AwsSiteWiseAssetConfiguration,
+                                           propertyConfig: SiteWiseAssetPropertyConfiguration,
+                                           assetID: String?,
+                                           propertyIdOrAlias: String,
+                                           data: Map<String, Any>) {
 
-        val log = logger.getCtxLoggers(className, "handleDataForConfiguredAssets")
+        val log = logger.getCtxLoggers(className, "buildAnsStorePropertyValue")
 
-        // Remapping keys of the data to escape unsupported characters for jmespath queries
-        val data = targetData.toMap(config.elementNames, jmesPathCompatibleKeys = true)
-        // For every configured asset
-        targetConfig.assets.forEach { asset ->
-            // For every configures property of the asset
-            asset.properties.forEach { property ->
-                // Extract the value and timestamp from the data
-                val valueAndTimeStamp = getPropertyValueAndTimeStamp(data, asset, property, log)
-                if (valueAndTimeStamp != null) {
-                    // Create and buffer asset property value
-                    try {
-                        val assetValue = buildAssetValue(property.dataType, valueAndTimeStamp.first, valueAndTimeStamp.second)
-                        storeValueAndTimestampInBuffer(asset.assetID, property, assetValue)
-                    } catch (e: Exception) {
-                        log.errorEx(
-                            "Error building property value for property $property from value ${valueAndTimeStamp.first} (${valueAndTimeStamp.first::class.java.simpleName})",
-                            e
-                        )
-                    }
-                }
+        val valueAndTimeStamp = getPropertyValueAndTimeStamp(data, assetConfig, propertyConfig, log)
+        if (valueAndTimeStamp != null) {
+            try {
+
+                val assetValue = buildAssetValue(propertyConfig.dataType, valueAndTimeStamp.first, valueAndTimeStamp.second)
+
+                val byAlias: Boolean = propertyConfig.propertyAlias != null
+
+                storeValueAndTimestampInBuffer(
+                    // when using an alias the property id is not needed
+                    (if (byAlias) null else assetID),
+                    // when using an alias the property id is the alias name
+                    propertyIdOrAlias,
+                    assetValue)
+
+            } catch (e: Exception) {
+                val valueStr = "${valueAndTimeStamp.first} (${valueAndTimeStamp.first::class.java.simpleName}"
+                log.errorEx("Error building or storing property value for property ${propertyConfig.asString} from value $valueStr)", e)
             }
         }
     }
+
+    private fun getAssetId(asset: AwsSiteWiseAssetConfiguration, logger: Logger): String? =
+        when {
+            (!asset.assetID.isNullOrEmpty()) -> asset.assetID
+
+            (!asset.assetName.isNullOrEmpty()) -> {
+                val assetID = assetHelper?.assetDetailsByName?.get(asset.assetName)?.assetId()
+                if (assetID == null) {
+                    logger.getCtxWarningLog("Asset with $CONFIG_ASSET_NAME \"${asset.assetName}\" could not be found")
+                }
+                assetID
+            }
+
+            (!asset.assetExternalID.isNullOrEmpty()) -> {
+                val assetID = assetHelper?.assetDetailsByExternalID?.get(asset.assetExternalID)?.assetId()
+                if (assetID == null) {
+                    logger.getCtxWarningLog(className, "getAssetId")("Asset with $CONFIG_ASSET_EXTERNAL_ID \"${asset.assetExternalID}\" could not be found")
+                }
+                assetID
+            }
+
+            (!asset.assetExternalID.isNullOrEmpty()) -> {
+                val assetID = assetHelper?.assetDetailsByExternalID?.get(asset.assetExternalID)?.assetId()
+                if (assetID == null) {
+                    logger.getCtxWarningLog(className, "getAssetId")("Asset with $CONFIG_ASSET_EXTERNAL_ID \"${asset.assetExternalID}\" could not be found")
+                }
+                assetID
+            }
+
+            else -> {
+                if (asset.properties.any { it.propertyAlias.isNullOrEmpty() }) {
+                    logger.getCtxWarningLog(className, "getAssetId")("No $CONFIG_ASSET_ID, $CONFIG_ASSET_NAME or $CONFIG_ASSET_EXTERNAL_ID  specified for asset, ${Gson().toJson(asset)}")
+                }
+                null
+            }
+        }
+
 
     private suspend fun handleTargetDataForCreatedAssets(targetData: TargetData) {
 
         val log = logger.getCtxLoggers(className, "handleTargetDataForCreatedAssets")
 
-        if (assetHelper != null) {
+        if (assetHelper != null && assetHelper!!.createAssets) {
             targetData.sources.forEach { (sourceName, sourceData) ->
                 try {
-                    val (asset, channelToAssetPropertyMap) = assetHelper!!.assetAndPropertiesForSource(sourceName, targetData)
+                    val (asset, channelToAssetPropertyMap) = assetHelper!!.assetAndPropertiesForSource(
+                        sourceName, targetData)
                     sourceData.channels.filter { it.value.value != null }.forEach { (channelName, channelData) ->
-                        val channelPropertyName = targetConfig.assetCreationConfiguration!!.renderAssetPropertyName(
-                            targetID,
-                            targetData.schedule,
-                            sourceName,
-                            channelName,
-                            sourceData.metadata
-                        )
+
+                        val channelPropertyName = targetConfig.assetCreationConfiguration!!.renderAssetPropertyName(targetID, sourceName, channelName, targetData)
 
                         val assetProperty: AssetProperty? = channelToAssetPropertyMap[channelName]
                         if (assetProperty != null) {
                             val dataType = SiteWiseDataType.from(assetProperty.dataType())
-                            val assetValue = buildAssetValue(dataType, channelData.value!!, assetHelper?.getPropertyTimestamp(targetData, sourceData, channelData)?:systemDateTime())
+                            val assetValue = buildAssetValue(
+                                dataType, channelData.value!!, assetHelper?.getPropertyTimestamp(targetData, sourceData, channelData) ?: systemDateTime())
                             storeValueAndTimestampInBuffer(
-                                asset,
-                                SiteWiseAssetPropertyConfiguration.create(propertyId = assetProperty.id(), dataType = dataType),
-                                assetValue
-                            )
-                        } else{
+                                asset, assetProperty.id(), assetValue)
+                        } else {
                             log.warning("No property for channel \"$channelName\" with name \"$channelPropertyName\" in asset \"$asset\"")
                         }
                     }
@@ -268,8 +334,7 @@ class AwsSiteWiseTargetWriter(
 
             return@launch try {
                 delay(targetConfig.interval)
-            } catch (e: Exception) {
-                // no harm done, timer is just used to guard for timeouts
+            } catch (e: Exception) { // no harm done, timer is just used to guard for timeouts
             }
         }
     }
@@ -305,15 +370,8 @@ class AwsSiteWiseTargetWriter(
         val usedDataType = if (dataType != SiteWiseDataType.UNSPECIFIED) dataType else SiteWiseDataType.fromValue(value)
 
         // Build the AssetPropertyValue
-        return AssetPropertyValue.builder()
-            .timestamp(
-                TimeInNanos.builder()
-                    .timeInSeconds(timestamp.epochSecond)
-                    .offsetInNanos(timestamp.nano)
-                    .build()
-            )
-            .value(buildValue(usedDataType, value))
-            .build()
+        return AssetPropertyValue.builder().timestamp(
+            TimeInNanos.builder().timeInSeconds(timestamp.epochSecond).offsetInNanos(timestamp.nano).build()).value(buildValue(usedDataType, value)).build()
     }
 
     /**
@@ -322,9 +380,7 @@ class AwsSiteWiseTargetWriter(
      * @param property SiteWiseAssetPropertyConfiguration Asset property configuration
      * @param propValue AssetPropertyValue The AssetPropertyValue to store
      */
-    private fun storeValueAndTimestampInBuffer(
-        assetID: String, property: SiteWiseAssetPropertyConfiguration, propValue: AssetPropertyValue
-    ) {
+    private fun storeValueAndTimestampInBuffer(assetID: String?, propertyID: String, propValue: AssetPropertyValue) {
         // Get entry for asset
         var assetEntry = propertyValuesBuffer[assetID]
         if (assetEntry == null) {
@@ -333,20 +389,29 @@ class AwsSiteWiseTargetWriter(
         }
 
         // Get entry in asset for property
-        var propertyEntry = assetEntry!![property]
+        var propertyEntry = assetEntry!![propertyID]
         if (propertyEntry == null) {
-            assetEntry[property] = mutableListOf()
-            propertyEntry = assetEntry[property]
+            assetEntry[propertyID] = mutableListOf()
+            propertyEntry = assetEntry[propertyID]
         }
 
         // Add to list of stored values
-        val entryWithSameTimestamp= propertyEntry!!.find{it.timestamp() == propValue.timestamp()}
+        val entryWithSameTimestamp = propertyEntry!!.find { it.timestamp() == propValue.timestamp() }
         if (entryWithSameTimestamp != null) {
             propertyEntry.remove(entryWithSameTimestamp)
         }
         propertyEntry.add(propValue)
     }
 
+    fun searchData(query: Expression<Any>?, data: Map<String, Any>, prop: SiteWiseAssetPropertyConfiguration): Any? = try {
+        query?.search(data)
+    } catch (e: NullPointerException) {
+        null
+    } catch (e: Exception) {
+        val log = logger.getCtxErrorLogEx(className, "searchData")
+        log("Error querying data for target \"$targetID\", property $prop", e)
+        null
+    }
 
     /**
      * Extracts property value and timestamp from the received data
@@ -356,58 +421,88 @@ class AwsSiteWiseTargetWriter(
      * @param log ContextLogger Logger for output
      * @return Pair<Any, Instant>? Pair containing value and timestamp if found, else null
      */
-    private fun getPropertyValueAndTimeStamp(
-        data: Map<String, Any>,
-        asset: AwsSiteWiseAssetConfiguration,
-        prop: SiteWiseAssetPropertyConfiguration,
-        log: Logger.ContextLogger
-    ): Pair<Any, Instant>? {
-
-        // internal method for searching value and timestamp for an asset property
-        fun searchData(query: Expression<Any>?): Any? =
-            try {
-                query?.search(data)
-            } catch (e: NullPointerException) {
-                null
-            } catch (e: Exception) {
-                log.errorEx("Error querying data for target \"$targetID\", asset ${asset.assetID}, property $prop", e)
-                null
-            }
+    private fun getPropertyValueAndTimeStamp(data: Map<String, Any>, asset: AwsSiteWiseAssetConfiguration, prop: SiteWiseAssetPropertyConfiguration, log: Logger.ContextLogger): Pair<Any, Instant>? {
 
         // internal method for fetching a specified value from input value this is a map
         fun valueFromMap(v: Any?, key: String): Any? = if ((v is Map<*, *>) && (v.containsKey(key))) v[key] else null
 
         // Search property data
-        val dataSearchResult = searchData(prop.dataPath)
-        // If the value is a map the value can be in the value field
+        val dataSearchResult = searchData(prop.dataPath, data, prop) // If the value is a map the value can be in the value field
         val propertyValue: Any? = (valueFromMap(dataSearchResult, elementNames.value)) ?: dataSearchResult
 
         // No data for this property
         if (propertyValue == null) {
-            log.warning("No value found for target \"$targetID\", asset \"${asset.assetID}\", property \"$prop\" for dataPath \"${prop.dataPathStr}\"")
+            if (prop.warnIfNotPresent && logger.level != LogLevel.TRACE) {
+                log.warning("No value found for target \"$targetID\", asset \"${asset.asString}\", property \"${prop.asString}\" for dataPath \"${prop.dataPathStr}\"")
+            }
             return null
         }
 
-        log.trace("Value $propertyValue (${propertyValue::class.java.simpleName}) found for target \"$targetID\" , asset \"${asset.assetID}\", property \"$prop\" using path ${prop.dataPathStr}")
+        log.trace("Value $propertyValue (${propertyValue::class.java.simpleName}) found for target \"$targetID\" , asset \"${asset.asString}\", property \"${prop.asString}\" using path ${prop.dataPathStr}")
 
         val timestampPath = prop.timestampPath
+
         // Test if there is an explicit timestamp query, in that case use it to query for the timestamp
         val timestampValue: Instant? = if (timestampPath != null) {
-            val timestampSearchResult = searchData(timestampPath) as? Instant?
+            val timestampSearchResult = searchData(timestampPath, data, prop) as? Instant?
             (valueFromMap(timestampSearchResult, elementNames.timestamp) as? Instant?) ?: timestampSearchResult
         } else {
-            // else test if it was included as a timestamp field with the value
-            (valueFromMap(dataSearchResult, elementNames.timestamp) as? Instant?)
+            getImplicitTimeStamp(prop, data)
         }
         if (timestampValue == null) {
-            log.trace("No timestamp found for target \"$targetID\", asset ${asset.assetID}, property $prop\" for timestampPath \"${prop.timestampPathStr}\"")
+            log.trace("No timestamp found for target \"$targetID\", asset ${asset.asString}, property ${prop.asString}\" for timestampPath \"${prop.timestampPathStr}\"")
             return null
         }
 
-        log.trace("Timestamp $timestampValue found for target \"$targetID\", asset \"${asset.assetID}\", property \"$prop\"")
+        log.trace("Timestamp $timestampValue found for target \"$targetID\", asset \"${asset.asString}\", property \"${prop.asString}\"")
 
         return propertyValue to timestampValue
 
+    }
+
+    private fun getImplicitTimeStamp(prop: SiteWiseAssetPropertyConfiguration, data: Map<String, Any>): Instant? {
+
+        return getImplicitValueTimestamp(prop, data) ?: getImplicitSourceTimestamp(prop, data) ?: data[elementNames.timestamp] as? Instant?
+    }
+
+    private fun getImplicitValueTimestamp(prop: SiteWiseAssetPropertyConfiguration, data: Map<String, Any>): Instant? {
+
+        val log = logger.getCtxLoggers(className, "getImplicitValueTimestamp")
+
+        val valueTimeStampPathStr = if (prop.dataPathStr?.endsWith(elementNames.value) == true) {
+            val pathElements = prop.dataPathStr!!.split(".").toMutableList()
+            pathElements[pathElements.lastIndex] = elementNames.timestamp
+            pathElements.joinToString(separator = ".")
+        } else null
+
+        val implicitTimestampPath = if (valueTimeStampPathStr != null) SiteWiseAssetPropertyConfiguration.getExpression(valueTimeStampPathStr) else null
+
+        val valueTimeStamp = if (implicitTimestampPath != null) searchData(implicitTimestampPath, data, prop) as? Instant? else null
+        if (valueTimeStamp != null) {
+            log.trace("Found timestamp $valueTimeStamp for value using implicit path \"$valueTimeStampPathStr\"")
+        }
+        return valueTimeStamp
+    }
+
+    private fun getImplicitSourceTimestamp(prop: SiteWiseAssetPropertyConfiguration, data: Map<String, Any>): Instant? {
+
+        val log = logger.getCtxLoggers(className, "getImplicitSourceTimestamp")
+
+        var pathElements = prop.dataPathStr!!.split(".")
+        val implicitTimestampPathStr = if (pathElements.indexOf(elementNames.timestamp) == 2) {
+            pathElements = pathElements.subList(0, 3)
+            pathElements.joinToString(separator = ".")
+        } else null
+        val implicitSourceTimestampPath = if (implicitTimestampPathStr != null) SiteWiseAssetPropertyConfiguration.getExpression(
+            implicitTimestampPathStr) else null
+
+        val sourceTimeStamp = if (implicitSourceTimestampPath != null) searchData(
+            implicitSourceTimestampPath, data, prop) as? Instant? else null
+        if (sourceTimeStamp != null) {
+            log.trace("Found timestamp $sourceTimeStamp for source using implicit path \"$implicitSourceTimestampPath\"")
+        }
+
+        return sourceTimeStamp
     }
 
 
@@ -425,26 +520,25 @@ class AwsSiteWiseTargetWriter(
 
 
         // Stream of requests containing max 10 entries with max 10 values per asset property
-        buildBatchRequests().forEach { request ->
+        buildBatchPutAssetRequestsForBufferedValues().forEach { request ->
             try {
 
                 val start = systemDateTime().toEpochMilli()
                 val resp = clientHelper.executeServiceCallWithRetries {
                     try {
-                        log.info(
-                            "Writing batch of ${request.entries().sumOf { it.propertyValues().count() }} values to ${
-                                request.entries().count()
-                            } properties for ${request.entries().groupBy { it.assetId() }.count()} assets(s)"
-                        )
+                        log.info("Writing batch of ${request.entries().sumOf { it.propertyValues().count() }} values to " +
+                                "${request.entries().count()} properties for " +
+                                "${request.entries().groupBy { it.assetId() }.filter { it.key != null }.count()} configured assets(s)")
                         val r = sitewiseClient.batchPutAssetPropertyValue(request)
                         val writeDurationInMillis = (systemDateTime().toEpochMilli() - start).toDouble()
                         createMetrics(targetID, metricDimensions, request, writeDurationInMillis)
-
                         r
-
                     } catch (e: AwsServiceException) {
                         log.errorEx("SiteWise batchPutAssetPropertyValue error", e)
-                        runBlocking { metricsCollector?.put(targetID, METRICS_WRITE_ERRORS, 1.0, MetricUnits.COUNT, metricDimensions) }
+                        runBlocking {
+                            metricsCollector?.put(
+                                targetID, METRICS_WRITE_ERRORS, 1.0, MetricUnits.COUNT, metricDimensions)
+                        }
 
                         // Check the exception, it will throw an AwsServiceRetryableException if the error is recoverable
                         clientHelper.processServiceException(e)
@@ -461,7 +555,7 @@ class AwsSiteWiseTargetWriter(
                     logErrorEntry(request, errorEntry, log.error)
 
                 }
-            } catch( e : IllegalStateException){
+            } catch (e: IllegalStateException) {
                 log.info("SiteWise target \"$targetID\" adapter closing down \"$targetID\"")
             } catch (e: Exception) {
                 log.errorEx("Error sending to SiteWise \"$targetID\"", e)
@@ -475,28 +569,17 @@ class AwsSiteWiseTargetWriter(
         propertyValuesBuffer.clear()
     }
 
-    private fun createMetrics(
-        adapterID: String,
-        metricDimensions: MetricDimensions,
-        request: BatchPutAssetPropertyValueRequest,
-        writeDurationInMillis: Double
-    ) {
+    private fun createMetrics(adapterID: String, metricDimensions: MetricDimensions, request: BatchPutAssetPropertyValueRequest, writeDurationInMillis: Double) {
 
         runBlocking {
             metricsCollector?.put(
-                adapterID,
-                metricsCollector?.buildValueDataPoint(
-                    adapterID,
-                    MetricsCollector.METRICS_MEMORY,
-                    MemoryMonitor.getUsedMemoryMB().toDouble(),
-                    MetricUnits.MEGABYTES
-                ),
-                metricsCollector?.buildValueDataPoint(adapterID, METRICS_WRITES, 1.0, MetricUnits.COUNT, metricDimensions),
-                metricsCollector?.buildValueDataPoint(adapterID, METRICS_MESSAGES, request.entries().size.toDouble(), MetricUnits.COUNT, metricDimensions),
-                metricsCollector?.buildValueDataPoint(adapterID, METRICS_WRITE_DURATION, writeDurationInMillis, MetricUnits.MILLISECONDS, metricDimensions),
-                metricsCollector?.buildValueDataPoint(adapterID, METRICS_WRITE_SUCCESS, 1.0, MetricUnits.COUNT, metricDimensions),
-                metricsCollector?.buildValueDataPoint(adapterID, METRICS_WRITE_SIZE, request.toString().length.toDouble(), MetricUnits.BYTES, metricDimensions)
-            )
+                adapterID, metricsCollector?.buildValueDataPoint(
+                    adapterID, MetricsCollector.METRICS_MEMORY, MemoryMonitor.getUsedMemoryMB().toDouble(), MetricUnits.MEGABYTES), metricsCollector?.buildValueDataPoint(
+                    adapterID, METRICS_WRITES, 1.0, MetricUnits.COUNT, metricDimensions), metricsCollector?.buildValueDataPoint(
+                    adapterID, METRICS_MESSAGES, request.entries().size.toDouble(), MetricUnits.COUNT, metricDimensions), metricsCollector?.buildValueDataPoint(
+                    adapterID, METRICS_WRITE_DURATION, writeDurationInMillis, MetricUnits.MILLISECONDS, metricDimensions), metricsCollector?.buildValueDataPoint(
+                    adapterID, METRICS_WRITE_SUCCESS, 1.0, MetricUnits.COUNT, metricDimensions), metricsCollector?.buildValueDataPoint(
+                    adapterID, METRICS_WRITE_SIZE, request.toString().length.toDouble(), MetricUnits.BYTES, metricDimensions))
         }
     }
 
@@ -517,36 +600,90 @@ class AwsSiteWiseTargetWriter(
      * each entry has max 10 values
      * @return Sequence<BatchPutAssetPropertyValueRequest>
      */
-    private fun buildBatchRequests() = sequence {
-        // Sequence of PutAssetPropertyValueEntries
-        sequence {
-            propertyValuesBuffer.forEach { (assetID, properties) ->
-                properties.forEach { (prop, propertyValues) ->
-                    propertyValues.chunked(10) // Max 10 values per entry
-                        .map { values ->
+    private fun buildBatchPutAssetRequestsForBufferedValues(): List<BatchPutAssetPropertyValueRequest> {
 
-                            // Build the entry
-                            val builder = PutAssetPropertyValueEntry.builder()
-                                .assetId(assetID)
-                                .entryId(UUID.randomUUID().toString())
-                                .propertyValues(values)
 
-                            // Use either property ID or alias
-                            if (!prop.propertyID.isNullOrEmpty()) {
-                                builder.propertyId(prop.propertyID)
-                            } else if (!prop.propertyAlias.isNullOrEmpty()) {
-                                builder.propertyAlias(prop.propertyAlias)
-                            }
+        val log = logger.getCtxLoggers(className, "buildBatchRequests")
 
-                            yield(builder.build())
-                        }
+
+        return propertyValuesBuffer.map { (assetID, properties) ->
+
+            properties.map { (propertyIdOrAlias, propertyValues) ->
+
+                // get values for this asset property in sets of 10
+                propertyValues.chunked(10).map { listOf10Values ->
+                    val builder = PutAssetPropertyValueEntry.builder()
+                        .entryId(UUID.randomUUID().toString())
+                        .propertyValues(listOf10Values)
+
+                    // assetID is null when an alias was used in the property configuration, in which case only this alias must be specified
+                    if (assetID == null) {
+                        builder.propertyAlias(propertyIdOrAlias)
+                    } else {
+                        // no alias, requires assetID and the propertyID (which can be looked up from its name or externalID in the property config
+                        builder.assetId(assetID)
+                        builder.propertyId(propertyIdOrAlias)
+                    }
+
+                    builder.build()
                 }
-            }
-        }.chunked(10)
-            .forEach { entries ->   // Max 10 entries per request
-                yield(BatchPutAssetPropertyValueRequest.builder().entries(entries).build())
+            }.flatten() // flatten list for asset
+        }.flatten() // flatten list for all
+            // get 10 entries per request
+            .chunked(10).map { i ->
+                val batchPutAssetPropertyValueRequest = BatchPutAssetPropertyValueRequest.builder().entries(i).build()
+                if (logger.level == LogLevel.TRACE) {
+                    log.trace("Created BatchPutAssetPropertyValueRequest request with ${batchPutAssetPropertyValueRequest.entries().size} entries for ${
+                        batchPutAssetPropertyValueRequest.entries().sumOf { it.propertyValues().size }
+                    } values")
+                }
+                batchPutAssetPropertyValueRequest
             }
     }
+
+
+    private fun getPropertyIdOrAlias(propertyConfig: SiteWiseAssetPropertyConfiguration, assetID: String?): String? {
+
+        if (!propertyConfig.propertyAlias.isNullOrEmpty()) return propertyConfig.propertyAlias
+
+        val log = logger.getCtxLoggers(className, "getPropertyIdOrAlias")
+        if (assetID == null) {
+            log.warning(
+                "Sitewise target \"$targetID\",  property ${propertyConfig.asString}\" can not be found as asset can not be identified, which is required for a property with a " +
+                        "$CONFIG_PROPERTY_ID, $CONFIG_PROPERTY_NAME or $CONFIG_PROPERTY_EXTERNAL_ID , " +
+                        "configure a $CONFIG_ASSET_ID, $CONFIG_ASSET_NAME or $CONFIG_PROPERTY_EXTERNAL_ID for this asset or use a $CONFIG_PROPERTY_ALIAS for this property.")
+            return null
+        }
+
+        return when {
+
+            (!propertyConfig.propertyID.isNullOrEmpty()) -> propertyConfig.propertyID
+
+            (!propertyConfig.propertyName.isNullOrEmpty()) -> {
+                val propertyID = getPropertyIdByName(assetID, propertyConfig)
+                if (propertyID == null) {
+                    val availableNames = assetHelper?.assetDetailsById?.get(assetID)?.assetProperties()?.joinToString(prefix = "[", postfix = "]", separator = ", ") { it.name() }
+                    log.warning("Sitewise target \"$targetID\", asset ID \"$assetID\", property with " + "$CONFIG_PROPERTY_NAME \"${propertyConfig.propertyName}\" not found, available properties names in this asset are $availableNames")
+                }
+                propertyID
+            }
+
+            (!propertyConfig.propertyExternalID.isNullOrEmpty()) -> {
+                val propertyID = getPropertyIdByExternalID(assetID, propertyConfig)
+                if (propertyID == null) {
+                    val availableExternalIDs = assetHelper?.assetDetailsById?.get(assetID)?.assetProperties()?.joinToString(prefix = "[", postfix = "]", separator = ", ") { it.externalId() }
+                    log.warning("Sitewise target \"$targetID\", asset ID \"$assetID\", property with " + "$CONFIG_PROPERTY_EXTERNAL_ID \"${propertyConfig.propertyName}\" not found, available properties names in this asset are $availableExternalIDs")
+                }
+                propertyID
+            }
+
+            else -> {
+                log.warning("Sitewise target \"$targetID\", asset ID \"$assetID\", property ${Gson().toJson(propertyConfig)} no $CONFIG_PROPERTY_ID, $CONFIG_PROPERTY_NAME, $CONFIG_PROPERTY_EXTERNAL_ID, $CONFIG_PROPERTY_ALIAS specified")
+                null
+            }
+        }
+    }
+
 
     /**
      * Builds SiteWise Variant for value
@@ -559,11 +696,21 @@ class AwsSiteWiseTargetWriter(
         when (dataType) {
             SiteWiseDataType.DOUBLE -> variantBuilder.doubleValue(toSiteWiseDouble(data))
             SiteWiseDataType.INTEGER -> variantBuilder.integerValue(toSiteWiseInt(data))
-            SiteWiseDataType.STRING -> variantBuilder.stringValue(data.toString())
+            SiteWiseDataType.STRING -> {
+                val s = toSiteWiseString(data)
+                variantBuilder.stringValue(s)
+            }
+
             SiteWiseDataType.BOOLEAN -> variantBuilder.booleanValue(toSiteWiseBoolean(data))
             else -> variantBuilder.stringValue(data.toString())
         }
         return variantBuilder.build()
+    }
+
+    private fun toSiteWiseString(data: Any): String = when (data) {
+        is Map<*, *> -> gsonExtended().toJson(data)
+        is ArrayList<*> -> data.joinToString(prefix = "[", postfix = "]", separator = ",") { toSiteWiseString(it) }
+        else -> data.toString()
     }
 
     /**
@@ -574,18 +721,37 @@ class AwsSiteWiseTargetWriter(
             return clientHelper.writerConfig(configReader, AWS_SITEWISE)
         }
 
+    private fun getPropertyIdByName(assetID: String, propertyConfig: SiteWiseAssetPropertyConfiguration): String? {
+        val log = logger.getCtxLoggers(className, "getPropertyIdByName")
+
+        val assetProperties = assetHelper?.assetDetailsById?.get(assetID)?.assetProperties() ?: emptyList()
+        val propertyID = assetProperties.find { p -> p.name() == propertyConfig.propertyName }?.id()
+        if (propertyID == null) {
+
+            val availablePropertyNames = assetProperties.filter { p -> !p.name().isNullOrEmpty() }.map { p -> p.name() }
+            log.warning("Sitewise target \"$targetID\", asset ID \"$assetID\", property with $CONFIG_PROPERTY_NAME \"${propertyConfig.propertyName}\" not found, available  names for this asset are $availablePropertyNames")
+        }
+        return propertyID
+    }
+
+    private fun getPropertyIdByExternalID(assetID: String, propertyConfig: SiteWiseAssetPropertyConfiguration): String? {
+        val log = logger.getCtxLoggers(className, "getPropertyIdByExternalID")
+
+        val assetProperties = assetHelper?.assetDetailsById?.get(assetID)?.assetProperties() ?: emptyList()
+        val propertyID = assetProperties.find { p -> p.externalId() == propertyConfig.propertyExternalID }?.id()
+        if (propertyID == null) {
+            val availablePropertyNames = assetProperties.filter { p -> !p.externalId().isNullOrEmpty() }.map { p -> p.externalId() }
+            log.warning("Sitewise target \"$targetID\", asset ID \"$assetID\", property with  $CONFIG_PROPERTY_EXTERNAL_ID \"${propertyConfig.propertyExternalID}\" not found, available external identifiers for this asset are $availablePropertyNames")
+        }
+        return propertyID
+    }
 
     companion object {
 
         @JvmStatic
         @Suppress("unused")
-        fun newInstance(vararg createParameters: Any?) =
-            newInstance(
-                createParameters[0] as ConfigReader,
-                createParameters[1] as String,
-                createParameters[2] as Logger,
-                createParameters[3] as TargetResultHandler?
-            )
+        fun newInstance(vararg createParameters: Any?) = newInstance(
+            createParameters[0] as ConfigReader, createParameters[1] as String, createParameters[2] as Logger, createParameters[3] as TargetResultHandler?)
 
         /**
          * Creates new instance of AWS SiteWise target from configuration.
@@ -600,6 +766,8 @@ class AwsSiteWiseTargetWriter(
         fun newInstance(configReader: ConfigReader, targetID: String, logger: Logger, resultHandler: TargetResultHandler?): TargetWriter {
             return try {
                 AwsSiteWiseTargetWriter(targetID, configReader, logger, resultHandler)
+            } catch (e: ConfigurationException) {
+                throw e
             } catch (e: Throwable) {
                 throw TargetException("Error creating AWS SiteWise target writer, ${e.message}")
             }
@@ -679,11 +847,12 @@ class AwsSiteWiseTargetWriter(
         }
 
         val TARGET_METRIC_DIMENSIONS = mapOf(
-            MetricsCollector.METRICS_DIMENSION_SOURCE_CATEGORY to METRICS_DIMENSION_SOURCE_CATEGORY_TARGET
-        )
+            MetricsCollector.METRICS_DIMENSION_SOURCE_CATEGORY to METRICS_DIMENSION_SOURCE_CATEGORY_TARGET)
 
     }
 }
+
+
 
 
 

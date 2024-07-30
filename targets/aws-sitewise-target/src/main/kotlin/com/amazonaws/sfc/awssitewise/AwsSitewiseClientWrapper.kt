@@ -41,5 +41,9 @@ class AwsSiteWiseClientWrapper(private val client: IoTSiteWiseClient) : AwsSiteW
     override fun createAssetModel(createAssetModelRequest: CreateAssetModelRequest): CreateAssetModelResponse =
         client.createAssetModel(createAssetModelRequest)
 
+    override fun updateAssetProperty(updateAssetPropertyRequest: UpdateAssetPropertyRequest): UpdateAssetPropertyResponse =
+        client.updateAssetProperty(updateAssetPropertyRequest)
+
+
     override fun close() = client.close()
 }

@@ -24,7 +24,7 @@ fun addExternalSecretsConfig(config: ServiceConfiguration,
 
     // add configured secrets for placeholders
     secretsConfiguration.cloudSecrets = externalResolvedSecrets
-    outputConfigMap[BaseConfiguration.CONFIG_SECRETS_MANGER] = secretsConfiguration.asConfigurationMap()
+    outputConfigMap[BaseConfiguration.CONFIG_SECRETS_MANAGER] = secretsConfiguration.asConfigurationMap()
 
     // test if a client is configured for access to secrets manager, if so add it
     val credentialsClientId = secretsConfiguration.credentialProviderClient ?: return

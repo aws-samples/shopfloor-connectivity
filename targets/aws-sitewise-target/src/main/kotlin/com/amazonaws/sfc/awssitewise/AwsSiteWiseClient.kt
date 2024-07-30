@@ -24,6 +24,7 @@ import software.amazon.awssdk.services.iotsitewise.paginators.ListAssetsIterable
         "ListAssetModelProperties",
         "ListAssets",
         "UpdateAssetModel",
+        "UpdateAssetProperty",
         "TagResource"
     ]
 )
@@ -36,6 +37,6 @@ interface AwsSiteWiseClient {
     fun createAsset(createAssetRequest: CreateAssetRequest): CreateAssetResponse
     fun updateAssetModel(updateAssetModelRequest: UpdateAssetModelRequest): UpdateAssetModelResponse
     fun createAssetModel(createAssetModelRequest: CreateAssetModelRequest): CreateAssetModelResponse
-
+    fun updateAssetProperty(updateAssetPropertyRequest: UpdateAssetPropertyRequest): UpdateAssetPropertyResponse
     fun close()
 }

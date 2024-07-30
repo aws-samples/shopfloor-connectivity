@@ -7,10 +7,7 @@ package com.amazonaws.sfc.ipc
 
 import com.amazonaws.sfc.channels.channelSubmitEventHandler
 import com.amazonaws.sfc.channels.submit
-import com.amazonaws.sfc.config.ConfigReader
-import com.amazonaws.sfc.config.SecretsManagerConfiguration
-import com.amazonaws.sfc.config.ServerConfiguration
-import com.amazonaws.sfc.config.ServiceConfiguration
+import com.amazonaws.sfc.config.*
 import com.amazonaws.sfc.data.*
 import com.amazonaws.sfc.ipc.IpcMetricsServerCommandLine.Companion.OPTION_TARGET
 import com.amazonaws.sfc.ipc.extensions.GrpcTargetValueAsNativeExt.asTargetData
@@ -69,7 +66,7 @@ class IpcTargetServer(
 
     private val writer: TargetWriter?
         get() {
-            return _writer!!
+            return _writer
         }
 
     private var useCompressionForReplies = false
@@ -137,7 +134,7 @@ class IpcTargetServer(
 
         private var _initialized = false
 
-        private var elementNames: com.amazonaws.sfc.config.ElementNamesConfiguration = com.amazonaws.sfc.config.ElementNamesConfiguration.DEFAULT_TAG_NAMES
+        private var elementNames: ElementNamesConfiguration = ElementNamesConfiguration.DEFAULT_TAG_NAMES
 
         /**
          * Handles the writeValues method of the target service
@@ -257,7 +254,7 @@ class IpcTargetServer(
 
                 // Get the configuration data for the target and check if it is the expected type for this target
                 val targetConfiguration = config.targets[targetID]
-                    ?: throw IpcException("Target type \"$targetID\" does not exist in configuration, available targets are ${config.targets.keys}")
+                        ?: throw IpcException("Target type \"$targetID\" does not exist in configuration, available targets are ${config.targets.keys}")
 
                 if (targetConfiguration.targetType != targetType) {
                     throw IpcException("Configuration target type \"${targetConfiguration.targetType}\" does not match expected target type \"$targetType\"")
@@ -288,7 +285,11 @@ class IpcTargetServer(
                 log.info("Target writer for target \"$targetID\" of type \"${targetConfiguration.targetType}\" created")
 
             } catch (e: java.lang.Exception) {
-                log.errorEx("Error initializing target from configuration \"${request.targetConfiguration}\"", e)
+                if (e is ConfigurationException) {
+                    log.error("Configuration error initializing target from configuration \"${request.targetConfiguration}\", $e")
+                } else {
+                    log.errorEx("Error initializing target from configuration \"${request.targetConfiguration}\"", e)
+                }
                 InitializeTargetResponse.newBuilder().setInitialized(false).setError(e.message).build()
             }
 
@@ -440,7 +441,7 @@ class IpcTargetServer(
         }
 
         private fun getAddress(cmd: IpcTargetServerCommandLine) = (getIp4NetworkAddress(cmd.networkInterface)
-            ?: throw ProtocolAdapterException("No IP4 network address for interface ${cmd.networkInterface}"))
+                ?: throw ProtocolAdapterException("No IP4 network address for interface ${cmd.networkInterface}"))
 
         private fun getTargetID(cmd: IpcTargetServerCommandLine, serviceConfiguration: ServiceConfiguration): String? {
             return cmd.targetID ?: if (serviceConfiguration.activeTargets.size == 1) serviceConfiguration.activeTargets.keys.first() else null
@@ -461,20 +462,20 @@ class IpcTargetServer(
 
             val targetConfig = if (serviceConfiguration.activeTargets.isNotEmpty())
                 serviceConfiguration.activeTargets[targetID]
-                    ?: throw IpcException(
-                        "Target ID \"$targetID\" does not exist or is not active in configuration, " +
-                                "existing active targets are ${serviceConfiguration.activeTargets.keys}"
-                    )
+                        ?: throw IpcException(
+                            "Target ID \"$targetID\" does not exist or is not active in configuration, " +
+                                    "existing active targets are ${serviceConfiguration.activeTargets.keys}"
+                        )
             else null
 
             if (targetConfig != null) {
                 val targetServerID = targetConfig.server
 
                 return (if (targetServerID != null) serviceConfiguration.targetServers[targetServerID] else null)
-                    ?: throw IpcException(
-                        "Server for target ID \"$targetServerID\" does not exist, " +
-                                "existing servers are  ${serviceConfiguration.targetServers.keys}"
-                    )
+                        ?: throw IpcException(
+                            "Server for target ID \"$targetServerID\" does not exist, " +
+                                    "existing servers are  ${serviceConfiguration.targetServers.keys}"
+                        )
             }
             return null
         }

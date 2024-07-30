@@ -1,4 +1,3 @@
-
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: MIT-0
 
@@ -17,7 +16,7 @@ import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_NAME
 import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_PROTOCOL_ADAPTERS
 import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_PROTOCOL_ADAPTER_TYPES
 import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_PROTOCOL_SERVERS
-import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_SECRETS_MANGER
+import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_SECRETS_MANAGER
 import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_SOURCES
 import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_TARGETS
 import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_TARGET_SERVERS
@@ -46,7 +45,6 @@ import com.amazonaws.sfc.service.addExternalSecretsConfig
 import com.amazonaws.sfc.util.launch
 import io.grpc.StatusException
 import kotlinx.coroutines.*
-import kotlin.time.Duration
 
 /**
  * Reads input from IPC service that implements the input protocol used by the instance of the SFC controller
@@ -57,7 +55,7 @@ class IpcSourceReader(
     serverConfig: ServerConfiguration,
     private val sources: Map<String, ArrayList<String>>,
     private val adapterType: String,
-    private val interval: Duration,
+    private val schedule: ScheduleConfiguration,
     logger: Logger
 ) : IpcClientBase<IpcSourceReadClient>(
     configReader = configReader,
@@ -77,15 +75,15 @@ class IpcSourceReader(
      */
     override suspend fun read(consumer: ReadResultConsumer) = coroutineScope {
 
-        var reader: Job?
+        val reader: Job?
 
         reader = launch(context = Dispatchers.IO, name = "IPC Source Reader") {
-             readerTask(serverConfig, consumer, this)
+            readerTask(serverConfig, schedule.name, consumer, this)
         }
         reader.join()
     }
 
-    private suspend fun readerTask(serverConfig: ServerConfiguration, consumer: ReadResultConsumer, scope: CoroutineScope){
+    private suspend fun readerTask(serverConfig: ServerConfiguration, scheduleName : String?, consumer: ReadResultConsumer, scope: CoroutineScope) {
         val log = logger.getCtxLoggers(IpcSourceReader::class.java.simpleName, "reader")
 
         // read loop, remote IPC service is streaming data
@@ -98,7 +96,7 @@ class IpcSourceReader(
                 try {
                     val adapterConfiguration = getAdapterConfiguration(configReader)
                     _initialized = client?.initializeAsync(adapterConfiguration, serverConfig, logger)?.await() == true
-                } catch (e : StatusException){
+                } catch (e: StatusException) {
                     val errorMessage = "${e.cause?.message ?: e.message}"
                     if (serverConfig.serverConnectionType == ServerConnectionType.PlainText && errorMessage.contains("unknown reason"))
                         log.error("${ServerConnectionType.PlainText} connection type is configured for client, check if server requires ServerSide or Mutual TLS")
@@ -114,7 +112,7 @@ class IpcSourceReader(
                 }
 
                 // read the values from the client
-                client?.readValues(sources, interval)?.collect { r: ReadValuesReply ->
+                client?.readValues(schedule.name, sources, schedule.interval)?.collect { r: ReadValuesReply ->
                     // call handler to process the data
                     if (!consumer(r.asReadResult)) {
                         // if handler returns false stop reading from client
@@ -148,7 +146,8 @@ class IpcSourceReader(
 
         val config = configReader.getConfig<ServiceConfiguration>()
         if (config.metrics != null)
-            IpcMetricsProvider(configReader = configReader,
+            IpcMetricsProvider(
+                configReader = configReader,
                 serverConfig,
                 isIpcServiceInitialized = { this.isInitialized },
                 logger = logger) { m -> IpcSourceReadClient(m, configReader.usedSecrets) }
@@ -186,7 +185,7 @@ class IpcSourceReader(
                 adapterConfig?.protocolAdapterType == adapterType
             }
 
-            return IpcSourceReader(adapterID, configReader, serverConfig, sources, adapterType, schedule.interval, logger)
+            return IpcSourceReader(adapterID, configReader, serverConfig, sources, adapterType, schedule, logger)
         }
 
         const val WAIT_AFTER_ERROR = 10000L
@@ -215,9 +214,6 @@ class IpcSourceReader(
             .forEach { section ->
                 adapterConfig[section as String] = configRaw[section] as Any
             }
-
-
-        adapterConfig["SecretValues"] = configReader.usedSecrets
 
         addExternalSecretsConfig(configuration, configReader, adapterConfig)
         return ConfigReader.convertExternalPlaceholders(gson.toJson(adapterConfig))
@@ -325,7 +321,7 @@ class IpcSourceReader(
             CONFIG_PROTOCOL_ADAPTER_TYPES,
             CONFIG_PROTOCOL_SERVERS,
             CONFIG_METRICS,
-            CONFIG_SECRETS_MANGER,
+            CONFIG_SECRETS_MANAGER,
             CONFIG_AWS_IOT_CREDENTIAL_PROVIDER_CLIENTS
         )
 

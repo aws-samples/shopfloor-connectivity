@@ -243,8 +243,8 @@ class MqttAdapter(private val adapterID: String, private val configuration: Mqtt
                     }
                 }
             } catch (e: Exception) {
-                val log = logger.getCtxErrorLogEx(className, "stop")
-                log("Error unsubscribing or disconnecting MQTT client", e)
+                val log = logger.getCtxErrorLog(className, "stop")
+                log("Error unsubscribing or disconnecting MQTT client, $e")
             }
 
             // clear data stores
@@ -413,8 +413,8 @@ class MqttAdapter(private val adapterID: String, private val configuration: Mqtt
                     }
                     ChannelReadValue(value, timestamp)
                 } catch (e: JsonSyntaxException) {
-                    val log = logger.getCtxErrorLogEx("dataValue")
-                    log("Source \"$sourceID\", Channel \"$channelID\", Value \"$message\" is not valid JSON", e)
+                    val log = logger.getCtxErrorLog("dataValue")
+                    log("Source \"$sourceID\", Channel \"$channelID\", Value \"$message\" is not valid JSON, $e")
                     null
                 }
             } else {

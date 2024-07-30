@@ -37,6 +37,8 @@ message ReadValuesRequest{
   repeated SourceReadValueRequest sources = 1;
   // Read interval
   int64 interval = 2;
+  // Schedule name
+  optional string scheduleName = 3;
 }
 
 // Source and its channels to read

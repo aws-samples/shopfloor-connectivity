@@ -53,6 +53,7 @@ class SourcesValuesAsFlow(
 
     fun sourceReadResults(
         context: CoroutineContext,
+        schedule: String?,
         maxConcurrentSourceReads: Int,
         timeout: Duration,
         fnContinue: () -> Boolean
@@ -93,13 +94,20 @@ class SourcesValuesAsFlow(
 
                         // lock the source to prevent simultaneous reads
                         runBlocking {
+                            val start = systemDateTime().toEpochMilli()
                             val result = adapter.read(sourceID, channels)
-                            taskLogger.trace("Finished reading from source, read $sourceID ${if (result is SourceReadSuccess) "succeeded" else "failed"}")
+                            val sourceReadDuration = (systemDateTime().toEpochMilli() - start)
+                            taskLogger.trace("Finished reading from source \"$sourceID\", read ${if (result is SourceReadSuccess) "succeeded" else "failed and  took $sourceReadDuration"}")
+                            if (sourceReadDuration > interval.inWholeMilliseconds) {
+                                log.warning("Reading from  source \"$sourceID\" took ${sourceReadDuration.toDuration(DurationUnit.MILLISECONDS)}, " +
+                                        "which is more than the read interval of $interval${if (schedule != null)" for schedule \"$schedule\"" else ""}")
+                            }
                             sourceID to result
+
                         }
                     } catch (e: Exception) {
                         if (!e.isJobCancellationException) {
-                            log.errorEx("Error reading from source $sourceID", e)
+                            log.errorEx("Error reading from source \"$sourceID\"", e)
                             sourceID to SourceReadError(e.message ?: e.stackTrace.toString(), systemDateTime())
                         } else sourceID to SourceReadSuccess(emptyMap(), systemDateTime())
                     }
@@ -122,7 +130,8 @@ class SourcesValuesAsFlow(
 
                 // wait for next iteration
                 if (duration > interval) {
-                    log.warning("Read cycle took $duration, which is more than read interval of $interval")
+                    log.warning("Read cycle took ${duration.inWholeMilliseconds.toDuration(DurationUnit.MILLISECONDS)}, " +
+                            "which is more than read interval of $interval ${if (schedule != null)" for schedule \"$schedule\"" else ""}")
                 } else {
                     log.trace("Read cycle took $duration")
                     runBlocking {
