@@ -7734,16 +7734,37 @@ The following properties are set by the adapter
 <thead>
 <tr class="header">
 <th colspan="4"><p>AwsSitewiseTargetConfiguration extends the type TargetConfiguration with specific configuration data for sending data to Timestream tables. The Targets configuration element can contain entries of this type, the TargetType of these entries must be set to <strong>"AWS-SITEWISE"</strong></p>
-<p>Requires IAM permission iotsitewise:BatchPutAssetPropertyValue to write to the configured assets.</p></th>
+<p></p>
+<p style='text-align: justify;'>Required IAM permissions</p>
+
+- <p style='text-align: justify;'>iotsitewise:BatchPutAssetPropertyValue</p>
+- <p style='text-align: justify;'>iotsitewise:CreateAsset (*)</p>
+- <p style='text-align: justify;'>iotsitewise:CreateAssetModel (*)</p>
+- <p style='text-align: justify;'>iotsitewise:DescribeAsset (*) (**)</p>
+- <p style='text-align: justify;'>iotsitewise:DescribeAssetModel (*) (**)</p>
+- <p style='text-align: justify;'>iotsitewise:DescribeEndpoint</p>
+- <p style='text-align: justify;'>iotsitewise:ListAssetModels (*) (**)</p>
+- <p style='text-align: justify;'>iotsitewise:ListAssetModelProperties (*) (**)</p>
+- <p style='text-align: justify;'>iotsitewise:ListAssets (*) (**)</p>
+- <p style='text-align: justify;'>iotsitewise:UpdateAssetModel (*)</p>
+- <p style='text-align: justify;'>iotsitewise:UpdateAssetModelProperty (*)</p>
+- <p style='text-align: justify;'>iotsitewise:TagResource (*)</p>
+  
+
+<p style='text-align: justify;'>(*) required when using Asset creation</p>
+<p style='text-align: justify;'>(**) required when  using AssetName, AssetExternalId, AssetPropertyName,AssetPropertyExternalId in asset and asset property configuration.</p>
+</th>
 </tr>
 </thead>
 <tbody>
+
 <tr class="odd">
 <td><strong>Name</strong></td>
 <td><strong>Description</strong></td>
 <td><strong>Type</strong></td>
 <td>Comments</td>
 </tr>
+
 <tr class="even">
 <td>Assets</td>
 <td>Assets to write to</td>
@@ -7753,6 +7774,7 @@ The following properties are set by the adapter
 AssetCreation</a> setting. 
 </td>
 </tr>
+
 <tr class="odd">
 <td>AssetCreation</td>
 <td>Settings for AssetModels and Assets automatically created by the adapter.</td>
@@ -7794,10 +7816,7 @@ AwsSiteWiseAssetCreationConfiguration</a></td>
 <tr>
 <td colspan="4"><p>The SiteWise target adapter can automatically create and update AssetModels and Assets using the target data received by the adapter.
 Each source in the target  data will be mapped to a SiteWise AssetModel and Asset using configurable naming templates.</p>
-<p>Additionally, to the IAM permission iotsitewise:BatchPutAssetPropertyValue to write to the configured assets, the following permissions are required when 
-automatic creation of the SiteWise AssetModels and Assets is enabled: iotsitewise:CreateAsset, iotsitewise:CreateAssetModel,iotsitewise:DescribeAsset",
-iotsitewise:DescribeAssetModel, iotsitewise:DescribeEndpoint, iotsitewise:ListAssetModelProperties, iotsitewise:ListAssets, iotsitewise:UpdateAssetModel, iotsitewise:UpdateAssetPropery,iotsitewise:TagResource
-</p>
+
 </td>
 
 <tr class="odd">
@@ -7845,6 +7864,7 @@ If this setting is not used then no external ID will be created for the asset.
 </td>
 </tr>
 
+
 <tr class="even">
 <td>AssetDescription </td>
 <td>Template for description of created assets.</td>
@@ -7867,11 +7887,13 @@ The default value is "Asset for target %target%, schedule %schedule%, source %so
 
 
 <tr class="odd">
-<td>AssetModelName</td>
-<td>Template for name of created or updated asset models.</td>
-<td>String</td>
+<td>AssetTags</td>
+<td>Map containing the names and value templates to add to an Asset when it is created by the adapter.</td>
+<td>Map[String,String]</td>
 <td>
-The value is as template used tro create the name for the created or updated asset model.
+Optional
+
+The value is as template used tro create the tag values for the created measurement assets,
 In template, besides placeholders for environment variables (${name}) the following placeholders are
 available:
 
@@ -7881,48 +7903,9 @@ available:
 
 To use the values of metadata at the top or source level of the target data, the name af the metadata value can be used with a '%' prefix and postfix.
 
-The default value is "%target%-%schedule%-%source%-model"
-</td>
-</tr>
-<tr class="odd">
-<td>AssetDescription </td>
-<td>Template for description of created asset models.</td>
-<td>String</td>
-<td>
-The value is as template used tro create the name for a created asset model.
-In template, besides placeholders for environment variables (${name}) the following placeholders are
-available:
-
-- %schedule%
-- %target%
-- %source%
-- %datetime%
-
-To use the values of metadata at the top or source level of the target data, the name af the metadata value can be used with a '%' prefix and postfix.
-
-
-The default value is "Asset model for target %target%, schedule %schedule%, source %source%"
 </td>
 </tr>
 
-<tr class="odd">
-<td>AssetModelExternalId</td>
-<td>Template for external ID  of created or updated asset models.</td>
-<td>String</td>
-<td>
-The value is as template used to create the external ID for the created or updated asset model.
-In template, besides placeholders for environment variables (${name}) the following placeholders are
-available:
-
-- %schedule%
-- %target%
-- %source%
-
-To use the values of metadata at the top or source level of the target data, the name af the metadata value can be used with a '%' prefix and postfix.
-
-If this setting is not used then no external ID will be created for the asset model.
-</td>
-</tr>
 
 <tr class="even">
 <td>AssetPropertyName</td>
@@ -7945,11 +7928,11 @@ The default value is "%target%-%schedule%-%source%-%channel%"
 </tr>
 
 <tr class="odd">
-<td>AssetAlias</td>
+<td>AssetPropertyAlias</td>
 <td>Template for alias  of created or updated asset properties.</td>
 <td>String</td>
 <td>
-The value is as template used to create the external ID for the created assset property.
+The value is as template used to create the external ID for the created asset property.
 In template, besides placeholders for environment variables (${name}) the following placeholders are
 available:
 
@@ -7990,14 +7973,12 @@ Default value is "Channel"
 </tr>
 
 
-<tr class="even">
-<td>AssetModelTags</td>
-<td>Map containing the names and value templates to add to an AssetModel when it is created by the adapter.</td>
-<td>Map[String,String]</td>
+<tr class="odd">
+<td>AssetModelName</td>
+<td>Template for name of created or updated asset models.</td>
+<td>String</td>
 <td>
-Optional
-
-The value is as template used tro create the tag values for the created measurement asset models,
+The value is as template used tro create the name for the created or updated asset model.
 In template, besides placeholders for environment variables (${name}) the following placeholders are
 available:
 
@@ -8007,17 +7988,57 @@ available:
 
 To use the values of metadata at the top or source level of the target data, the name af the metadata value can be used with a '%' prefix and postfix.
 
+The default value is "%target%-%schedule%-%source%-model"
+</td>
+</tr>
+<tr class="odd">
+<td>AssetModelDescription </td>
+<td>Template for description of created asset models.</td>
+<td>String</td>
+<td>
+The value is as template used tro create the name for a created asset model.
+In template, besides placeholders for environment variables (${name}) the following placeholders are
+available:
+
+- %schedule%
+- %target%
+- %source%
+- %datetime%
+
+To use the values of metadata at the top or source level of the target data, the name af the metadata value can be used with a '%' prefix and postfix.
+
+
+The default value is "Asset model for target %target%, schedule %schedule%, source %source%"
 </td>
 </tr>
 
 <tr class="odd">
-<td>AssetTags</td>
-<td>Map containing the names and value templates to add to an Asset when it is created by the adapter.</td>
+<td>AssetModelExternalId</td>
+<td>Template for external ID  of created or updated asset models.</td>
+<td>String</td>
+<td>
+The value is as template used to create the external ID for the created or updated asset model.
+In template, besides placeholders for environment variables (${name}) the following placeholders are
+available:
+
+- %schedule%
+- %target%
+- %source%
+
+To use the values of metadata at the top or source level of the target data, the name af the metadata value can be used with a '%' prefix and postfix.
+
+If this setting is not used then no external ID will be created for the asset model.
+</td>
+</tr>
+
+<tr class="even">
+<td>AssetModelTags</td>
+<td>Map containing the names and value templates to add to an AssetModel when it is created by the adapter.</td>
 <td>Map[String,String]</td>
 <td>
 Optional
 
-The value is as template used tro create the tag values for the created measurement assets,
+The value is as template used tro create the tag values for the created measurement asset models,
 In template, besides placeholders for environment variables (${name}) the following placeholders are
 available:
 
@@ -8069,14 +8090,14 @@ To use the values of metadata at the top or source level of the target data, the
 <td>AssetName</td>
 <td>Name of the asset</td>
 <td>String</td>
-<td>Either the asset's id, name or external id must be specified. If all properties for the asset use the property alias then AssetId must NOT be specified.</td>
+<td>The asset's id, name OR external id must be specified, not both. If all properties for the asset use the property alias then AssetName must NOT be specified.</td>
 </tr>
 
 <tr class="even">
 <td>AssetExternalId</td>
 <td>External id of the asset</td>
 <td>String</td>
-<td>Either the asset's id, name or external id must be specified. If all properties for the asset use the property alias then AssetId must NOT be specified.</td>
+<td>The asset's id, name or external id must be specified, noth both. If all properties for the asset use the property alias then ExternalId must NOT be specified.</td>
 </tr>
 
 <tr class="odd">
@@ -8113,30 +8134,31 @@ To use the values of metadata at the top or source level of the target data, the
 
 <tr class="even">
 <td>PropertyId</td>
-<td>ID of the asset property</td>
+<td>Id of the asset property</td>
 <td>String</td>
-<td>Only the property id, name, external id or alias must be specified</td>
+<td>Only one of the property id, name, external id or alias must be specified</td>
 </tr>
 
 <tr class="odd">
-<td>PropertyId</td>
+<td>PropertyName</td>
 <td>Name of the asset property</td>
 <td>String</td>
-<td>Only the property id, name, external id or alias must be specified</td>
+<td>Only one of the property id, name, external id or alias must be specified</td>
 </tr>
 
 <tr class="even">
-<td>ExternalId</td>
+<td>PropertyExternalId</td>
 <td>External id of the asset property</td>
 <td>String</td>
-<td>Only the property id, name, external id or alias must be specified</td>
+<td>Only one of the property id, name, external id or alias must be specified</td>
 </tr>
 
 <tr class="odd">
-<td>ExternalId</td>
-<td>External id of the asset property</td>
+<td>PropertyAlias</td>
+<td>Alias of the asset property</td>
 <td>String</td>
-<td>Only the property id, name, external id or alias must be specified</td>
+<td>Only one of the property id, name, external id or alias must be specified
+If ProperyAlias is used for all properties of an asset then the AssetId, AssetName and AssetExternalId must not be configured for that asset.</td>
 </tr>
 
 <tr class="even">

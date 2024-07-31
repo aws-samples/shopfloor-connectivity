@@ -367,7 +367,7 @@ class SiteWiseAssetHelper(private val client: AwsSiteWiseClient,
         val sourceOutputData: SourceOutputData = targetData.sources[source] ?: return null
 
         return sequence {
-            sourceOutputData.channels?.filter { it.value.value != null }?.forEach { (channelName, channelData) ->
+            sourceOutputData.channels.filter { it.value.value != null }.forEach { (channelName, channelData) ->
 
                 val propertyNameForChannel = assetCreationConfiguration.renderAssetPropertyName(target, source, channelName, targetData)
 
