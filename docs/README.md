@@ -82,6 +82,7 @@ SFC documentation
 - [Metrics Collection](#metrics-collection)
   - [Running Metrics writers as an IPC service](#running-metrics-writers-as-an-ipc-service)
   - [Running metric writers in-process](#running-metric-writers-in-process)
+  - [Running metric writers in-process](#running-metric-writers-in-process)
 - [Extending the SFC Framework](#extending-the-sfc-framework)
   - [Implementing a protocol adapter](#implementing-a-protocol-adapter)
   - [Read function](#read-function)
@@ -776,22 +777,23 @@ filtering. Both steps are optional and can be applied individually.
 
 ## Data Change Filters
 
-A data change filter can be configured at source and channel values level. If a filter is configured at source level it
+A [data change filter](./core/change-filter-configuration.md) can be configured at source and channel values level. If a filter is configured at source level it
 is applied on all values for that source. Filters configured at value level take precedence over a filter at source
 level. Values only pass a filter if a value has changed at least, or beyond, a configured value since the last value
 that was passed. This value can be a percentage or absolute value. The initial value will always pass the filter. It is
 also possible to specify a time interval in which at least a value will pass the filter. These filters can only be
 applied on single numeric values.
 
+
 ## Value Change Filters
 
-A value change filter will pass a value if it matches a filter expression. A filter expression can consist of one or
+A [value change filter](./core/value-filter-configuration.md) will pass a value if it matches a filter expression. A filter expression can consist of one or
 more operators like `==`,`!=`,`>`,`>=`,`<`,`<=`, combined in `&&` and `||` groups. For non-numeric values, only the ==
 and != operators can be used.
 
 ## Condition Filters
 
-After the Data Change and Value Change filters, if any, have been applied Condition filter can be used to select values
+After the Data Change and Value Change filters, if any, have been applied [Condition filters](./core/condition-filter-configuration.md) can be used to select values
 based on other values of the same source. This makes it posible to include or exclude values if other values, or
 combinations of values do exist, or do not exist in the same source. Operators that can be used are :
 
@@ -948,7 +950,8 @@ keep consistency between (repeated) values in the configuration and values used 
 ## Configuration secrets
 
 SFC integrates with AWS Secrets Manager following the same logic as used in GreenGrass Secret manager. Secrets are
-defined in the configuration file using the SecutityManager Element. This element includes a list of configured secrets.
+defined in the configuration file using the [SecretsManager](./core/secrets-manager-configuration.md) Element. 
+This element includes a list of configured secrets.
 Each secret has an id, which can either be the arn or name of the secret, and an optional alias. Secrets can be used by
 using placeholders of the format \${name} in the configuration file. Name can be the name, arn or alias of the secret.
 If just an arn is used for a configured secret either this arn or the name of the secret in the AWS Secrets manager
@@ -1244,16 +1247,16 @@ When processing a configuration file SFC will first load all included content an
 
 ## Configuration providers
 
-In the architecture of the SFC core the configuration method is abstracted by using configuration providers. These
+In the architecture of the SFC core the [configuration method](./core/sfc-top-level-config.md) is abstracted by using configuration providers. These
 plug-able providers read the configuration data from their specific source and method and provide the initial
-configuration and updates to an SFC service process, which can be the Service, a source service or a target service, g
+configuration and updates to an SFC service process, which can be the Service, a source service or a target service, 
 as a channel of configuration versions. An SFC service process will receive the new configuration version and apply
 these to the internal service stance that will use these new settings without the need to restart the service.
 
 Service providers can read configuration data from files, by making service calls or listening to service requests.
 
 By default, the configuration is read from a configuration file which is specified by the -config command line parameter
-for all services. The ConfigFileServiceProvider, which is used for configuration files, will detect updated to the
+for all services. The ConfigFileServiceProvider, which is used for configuration files, will detect updates to the
 configuration file, or changes made to environment variables used in placeholders in the configuration file, and provide
 the updated configuration data to the service.
 
@@ -1289,7 +1292,7 @@ starting the SCF core or a protocol adapter or target writer service.
 Logging output will contain the system date and time, the logging level, source of the event and a message. The logging
 infrastructure will intercept and blank the values of secrets configured in the SFC configuration.
 
-Instead of writing to the console custom log writer can be implemented and configured. Details on how to implement a
+Instead of writing to the console custom log writer can be implemented and [configured](./core/sfc-top-level-config.md). Details on how to implement a
 custom log writer can be found in section [Custom Logging](#custom-logging).
 
 [^top](#toc)
@@ -1388,7 +1391,7 @@ The network traffic between SFC components is not encrypted.
 The network traffic is encrypted using the private key of the service, the service is providing its X509 server
 certificate to the client to decrypt the traffic. The service process needs to be started using the -key and -cert
 parameters specifying the files containing servers private key and server certificate. The -connection type parameter
-must be set to ServerSideTLS. In the SFC configuration the ConnectionType in the ServiceConfiguration for the server
+must be set to ServerSideTLS. In the SFC configuration the ConnectionType in the [ServiceConfiguration](./core/server-configuration.md) for the server
 must be set to ServerSideTLS.
 
 The value used for the connection type parameter used for the service and the configured ConnectionType must match.
@@ -1499,7 +1502,7 @@ the [AWS IoT Credentials Provider Service](https://aws.amazon.com/blogs/security
 Targets can refer to a client configuration that contains entries for the files with for the required device
 certificate, private key and root CA certificate. SFC provides helpers, that can be used by the targets, to obtain
 session credentials using these certificates and key files. These client configurations are in the
-AwsIotCredentialProviderClients section of the configuration file and are referred by the targets by setting the
+[AwsIotCredentialProviderClients](./core/aws-iot-credential-provider-configuration.md) section of the configuration file and are referred by the targets by setting the
 CredentialProviderClient to an entry in that section. If the CredentialProviderClient is not set then SFC will fall back
 on the default credentials provider chain as
 described [here](https://docs.aws.amazon.com/sdk-for-java/v1/developer-guide/credentials.html).
@@ -1748,7 +1751,7 @@ metadata:
 # Service Health Probes
 
 In order to check the state of an SFC process (sfc-main service and protocol adapters, target adapters and metric
-writer, running as a service on the local or a remote server) each of these can be configured to have a health probe
+writer, running as a service on the local or a remote server) each of these can be [configured](./core/health-probe-configuration.md) to have a health probe
 endpoint. This endpoint can be polled by the platform used to control the service instances (e.g., Docker Compose,
 Kubernetes). Servers will respond with a configurable response (default is "OK") if the service is in non-faulty state,
 which is determined by the logic of that service implementation.
@@ -1863,19 +1866,19 @@ Example of mixed OPCUA source nodes for an alarm event and two data nodes.
 
 ```json
 "Channels": {
-"LevelAlarm": {
-"Name": "LevelAlarm",
-"NodeId": "ns=6;s=MyLevel.Alarm",
-"EventType": "ExclusiveLevelAlarmType"
-},
-"SimulationRandom": {
-"Name": "Random",
-"NodeId": "ns=3;i=1002"
-},
-"SimulationCounter": {
-"Name": "Counter",
-"NodeId": "ns=3;i=1001"
-}
+  "LevelAlarm": {
+     "Name": "LevelAlarm",
+     "NodeId": "ns=6;s=MyLevel.Alarm",
+     "EventType": "ExclusiveLevelAlarmType"
+  },
+  "SimulationRandom": {
+     "Name": "Random",
+     "NodeId": "ns=3;i=1002"
+   }, 
+     "SimulationCounter": {
+     "Name": "Counter",
+     "NodeId": "ns=3;i=1001"
+  }
 }
 ```
 
@@ -1902,24 +1905,7 @@ The collected data from the event and data nodes is shown below.
             "LowLowLimit": 10.0,
             "InputNode": "ns=0;i=0",
             "Retain": true,
-            "EventId": [
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              6,
-              72,
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              6,
-              71
-            ],
+            "EventId": [0, 0, 0, 0, 0, 0, 6, 72, 0, 0, 0, 0, 0, 0, 6, 71],
             "EventType": "ns=0;i=9482",
             "SourceNode": "ns=6;s=MyLevel",
             "SourceName": "MyLevel",
@@ -1989,14 +1975,15 @@ their nodes to collect the data in the properties for these events.
 }
 ```
 
-Further details on OPCUA alarms and event can be found in the OPCUA configuration tables in this document.
+Further details on OPCUA configuring alarms and events and [creating custom event types](./adapters/opcua.md#opcuaeventtypeconfiguration) can be found in the [OPCUA configuration](./adapters/opcua.md#opcuaadapterconfiguration).
 
 # OPCUA security profiles and certificates
 
 In order to secure the traffic between the OPCUA protocol adapter and the OPCUA Server it can be signed and encrypted
 using certificates.
 
-In the configuration for the OPCUA server in the adapter the security policies can be used by setting the SecurityPolicy
+In the configuration for the OPCUA server in the adapter the security policies can be used by setting the 
+[SecurityPolicy](./adapters/opcua.md#opcuaserverconfiguration)
 of the server to any of the following policy names:
 
 | Name                | Sign / Encrypt   | Security Policy                                                  |
@@ -2097,34 +2084,34 @@ specified base directory for that server.
 
 ```json
 "OPCUA-SERVER-1": {
-"Address": "opc.tcp://myserver.com",
-"Path": "OPCUA/SimulationServer",
-"Port": 53530,
-"SecurityPolicy": "Basic256Sha256",
-"CertificateValidation": {
-"Directory": "/etc/certificates/opcua1 ",
-"ValidationOptions": {
-"HostOrIP": true,
-"Validity": true,
-"KeyUsageEndEntity": true,
-"ExtKeyUsageEndEntity" : true,
-"KeyUsageIssuer": true,
-"Revocation": true,
-"ApplicationUri": true
-}
+    "Address": "opc.tcp://myserver.com",
+    "Path": "OPCUA/SimulationServer",
+    "Port": 53530,
+    "SecurityPolicy": "Basic256Sha256",
+    "CertificateValidation": {
+    "Directory": "/etc/certificates/opcua1 ",
+    "ValidationOptions": {
+    "HostOrIP": true,
+    "Validity": true,
+    "KeyUsageEndEntity": true,
+    "ExtKeyUsageEndEntity" : true,
+    "KeyUsageIssuer": true,
+    "Revocation": true,
+    "ApplicationUri": true
+  }
 },
-"Certificate": {
-"CertificateFile": "/etc/certificates/certificate.pem",
-"PrivateKeyFile": "/etc/certificates/ /private-key.pem",
-"ExpirationWarningPeriod": 30,
-"SelfSignedCertificate": {
-"CommonName": "OPCUA-CONNECTOR",
-"Organization": "AWS",
-"OrganizationalUnit": "AIP",
-"LocalityName": "AMS",
-"StateName": "NH",
-"CountryCode": "NL",
-"ValidPeriodDays": 365
+    "Certificate": {
+    "CertificateFile": "/etc/certificates/certificate.pem",
+    "PrivateKeyFile": "/etc/certificates/ /private-key.pem",
+    "ExpirationWarningPeriod": 30,
+    "SelfSignedCertificate": {
+    "CommonName": "OPCUA-CONNECTOR",
+    "Organization": "AWS",
+    "OrganizationalUnit": "AIP",
+    "LocalityName": "AMS",
+    "StateName": "NH",
+    "CountryCode": "NL",
+    "ValidPeriodDays": 365
 }
 }
 }
@@ -2134,7 +2121,7 @@ specified base directory for that server.
 
 # SFC tuning
 
-This section describes the tuning of SFC using the elements of the “Tuning” configuration at the top level of the SFC
+This section describes the tuning of SFC using the elements of the [Tuning](./core/tuning-configuration.md) configuration at the top level of the SFC
 configuration file.
 
 ## SFC channel tuning
