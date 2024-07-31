@@ -478,3 +478,6 @@ workshop, remember to clean up your resources afterwards to avoid unwanted charg
 1. Go to **CloudFormation**, and select **Stacks**
 2. Select the root stack named **sfc-workshop-inprocess-opcua-sitewise**
 3. Click **Delete**
+
+
+[Examples](../../docs/examples/examples.md)

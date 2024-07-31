@@ -125,3 +125,5 @@ When the content of the file which is used as value for the -config parameter is
 process.
 
 The file opcua-auto-discovery-config.json is included as an example and starting point for creating a configuration file leveraging the auto discover configuration provider.
+
+[Examples](../../docs/examples/examples.md)

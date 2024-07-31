@@ -1,5 +1,7 @@
 # SFC Example in process configuration for Mitsubishi/Melsec SLMP to Amazon S3
 
+[Examples](../../docs/examples/examples.md
+)
 The file `in-process-slmp-s3.json` contains an example template for
 reading data from a Mitsubishi controller using SLMP and
 sending the data to an S3 bucket.
@@ -184,3 +186,7 @@ AwsIotCredentialProviderClients and any references in the targets can be
 deleted. Using the temporary credentials provided through a configured
 AwsIotCredentialProviderClient for production environment is strongly
 recommended.
+
+[^top](#sfc-example-in-process-configuration-for-mitsubishimelsec-slmp-to-amazon-s3)
+
+[Examples](../../docs/examples/examples.md)

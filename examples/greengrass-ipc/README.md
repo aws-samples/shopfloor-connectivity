@@ -869,3 +869,5 @@ To delete the components from IOT Core do the following steps:
 - com.amazon.sfc.aws-s3-target
 - com.amazon.sfc.aws-iot-mqtt-target
 - com-amazon.svf.debug-tagret
+
+[Examples](../../docs/examples/examples.md)
