@@ -10,6 +10,8 @@ only be configures as an external IPC Protocol Server.
   - [OpcdaServerConfiguration](#opcdaserverconfiguration)
   - [OpcdaServerConfiguration](#opcdaserverconfiguration)
 
+[Protocol Adapters](protocol-adapters.md)
+
 ## OpcdaSourceConfiguration
 
 <table>
@@ -140,6 +142,5 @@ only be configures as an external IPC Protocol Server.
 | SamplingRate                                                               | Time in milliseconds for sampling items in subscription mode.      | Integer  | If not specified then the shorted interval will be used from all active schedules that have a source using this server. |
 | ReadBatchSize                                                              | Max number of items to read in a single batch read from the server | Integer  | If not specified all configured items are read in a single read,                                                        |
 
-[OpcdaProtocolConfiguration](#opcda-protocol-configuration)
+[^Top](#opcda-protocol-configuration)
 
-[^top](../README.md#toc)

@@ -16,7 +16,9 @@ configuration types
   - [CertificateValidationConfiguration](#certificatevalidationconfiguration)
   - [CertificateValidationOptions](#certificatevalidationoptions)
 
-[^Top](../README.md#toc)
+
+[Protocol Adapters](protocol-adapters.md)
+
 
 ## OpcuaSourceConfiguration
 
@@ -554,7 +556,4 @@ configuration types
 | ApplicationUri                            | Check Application description against the ApplicationUri from Subject Alternative Names        | Boolean  | Default is true |
 
 
-
-[Opcua Protocol Configuration](#opcua-protocol-configuration)
-
-[^top](../README.md#toc)
+[^top](#opcua-protocol-configuration)
