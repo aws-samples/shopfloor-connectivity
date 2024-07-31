@@ -78,12 +78,12 @@ class IpcSourceReader(
         val reader: Job?
 
         reader = launch(context = Dispatchers.IO, name = "IPC Source Reader") {
-            readerTask(serverConfig, schedule.name, consumer, this)
+            readerTask(serverConfig, consumer, this)
         }
         reader.join()
     }
 
-    private suspend fun readerTask(serverConfig: ServerConfiguration, scheduleName : String?, consumer: ReadResultConsumer, scope: CoroutineScope) {
+    private suspend fun readerTask(serverConfig: ServerConfiguration, consumer: ReadResultConsumer, scope: CoroutineScope) {
         val log = logger.getCtxLoggers(IpcSourceReader::class.java.simpleName, "reader")
 
         // read loop, remote IPC service is streaming data

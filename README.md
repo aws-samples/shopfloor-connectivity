@@ -15,9 +15,6 @@ SFC extends and unifies data collection capabilities additionally to our existin
 
 **Supported AWS targets:** `IoT Core HTTP`, `IoT Core`, `Sitewise`, `IoT Analytics`, `Kinesis`, `Firehose`, `Lambda`, `MSK`, `S3`, `SNS`, `SQS`, `Timestream`
 
-### [<code style="background-color:cyan; color:black">SFC Docs</code>](./docs/README.md) ++ [<code style="background-color:cyan; color:black">Greengrass Deployment</code>](./deployment/greengrass-sfc-components/release-version-as-components-cdk/README.md) ++ [<code style="background-color:cyan; color:black">Greengrass Lab</code>](./examples/greengrass-in-process/README.md) ++ [<code style="background-color:cyan; color:black">Siemens S7 sample</code>](./examples/in-process-s7-sitewise/README.md) ++ [<code style="background-color:cyan; color:black">Rockwell PCCC sample</code>](./examples/in-process-pccc-s3/README.md) ++ [<code style="background-color:cyan; color:black">Quickstart</code>](#quickstart-example)
-
----
 &nbsp;
 
 ### SFC Components
@@ -40,7 +37,8 @@ The SFC core will provide the services, protocol and target adapters, with the r
   <img src="docs/img/fig02.png" width="75%"/>
 </p>
 
->Read more in the [`SFC docs`](./docs/README.md)
+## Documentation
+Read more in the [`SFC documentation`](./docs/README.md)
 
 
 ## Quickstart Example
@@ -49,7 +47,7 @@ The SFC core will provide the services, protocol and target adapters, with the r
 
 ### Installation
 
-In this Quick start you will set up following architecture: A local SFC installation will receive data from an OPC-UA server and send it according to its configuration to an S3 Bucket. *As a side note here: SFC can deal with more industrial protocols - [have a look at the docs here!](./docs/README.md#running-the-jvm-protocol-adapters-as-an-ipc-service)*
+In this Quick start you will set up following architecture: A local SFC installation will receive data from an OPC-UA server and send it according to its configuration to an S3 Bucket. *As a side note here: SFC can deal with more industrial protocols - [have a look at the docs here!](docs/adapters/protocol-adapters.md)*
 
 At first, we have to download and extract the SFC bundles. These are precompiled executables to get started quickly:
 
