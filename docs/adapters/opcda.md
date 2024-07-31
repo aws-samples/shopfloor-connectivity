@@ -62,6 +62,8 @@ only be configures as an external IPC Protocol Server.
 </tbody>
 </table>
 
+[OpcdaProtocolConfiguration](#opcda-protocol-configuration)
+
 ## OpcdaChannelConfiguration
 
 <table>
@@ -93,7 +95,7 @@ only be configures as an external IPC Protocol Server.
 </tbody>
 </table>
 
-[^top](#toc)
+[OpcdaProtocolConfiguration](#opcda-protocol-configuration)
 
 ## OpcdaAdapterConfiguration
 

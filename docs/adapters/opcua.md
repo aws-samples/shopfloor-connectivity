@@ -16,6 +16,8 @@ configuration types
   - [CertificateValidationConfiguration](#certificatevalidationconfiguration)
   - [CertificateValidationOptions](#certificatevalidationoptions)
 
+[^Top](../README.md#toc)
+
 ## OpcuaSourceConfiguration
 
 <table>
@@ -83,6 +85,8 @@ configuration types
 </tr>
 </tbody>
 </table>
+
+[Opcua Protocol Configuration](#opcua-protocol-configuration)
 
 ## OpcuaNodeChannelConfiguration
 
@@ -164,7 +168,7 @@ configuration types
 </tbody>
 </table>
 
-[^top](#toc)
+[Opcua Protocol Configuration](#opcua-protocol-configuration)
 
 ## OpcuaNodeChangeFilter
 
@@ -204,6 +208,8 @@ configuration types
 </tr>
 </tbody>
 </table>
+
+[Opcua Protocol Configuration](#opcua-protocol-configuration)
 
 ## OpcuaAdapterConfiguration
 
@@ -249,6 +255,8 @@ configuration types
 |--------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------|--------------------------------------------------------------------------|--------------|
 | **Name**                                                                                                                 | **Description**                                       | **Type**                                                                 | **Comments** |
 | EventTypes                                                                                                               | Additional event types that can be used for a server, | Map\[String,[OpcUaEvenTypeConfiguration](#opcuaeventtypeconfiguration)\] |              |
+
+[Opcua Protocol Configuration](#opcua-protocol-configuration)
 
 ## OpcuaEventTypeConfiguration
 
@@ -299,7 +307,7 @@ configuration types
 </tbody>
 </table>
 
-[^top](#toc)
+[Opcua Protocol Configuration](#opcua-protocol-configuration)
 
 ## OpcuaServerConfiguration
 
@@ -434,6 +442,8 @@ configuration types
 </tbody>
 </table>
 
+[Opcua Protocol Configuration](#opcua-protocol-configuration)
+
 ## CertificateConfiguration
 
 | Client certificate configuration for OPCUA client |                                                                                                                            |                                                                           |                                                                                                                                                                           |
@@ -446,6 +456,8 @@ configuration types
 | SelfSignedCertificate                             | Self-signed certificate configuration used to generate a self-signed certificate                                           | [SelfSignedCertificateConfiguration](#selfsignedcertificateconfiguration) | If the certificate specified by CertificateFile does not exist a certificate is generated using this configuration. If this section does not exist an error is generated. |
 | Format                                            | Format of the certificate file, can either be Pem or Pkcs12.                                                               | String                                                                    | If not specified the adapter will attempt to determine the type from the filename of the key file.                                                                        |
 | ExpirationWarningPeriod                           | Period in days in which the adapter will generate a daily warning and metrics value before the client certificate expires. | Integer                                                                   | Default is 30, set to 0 to disable.                                                                                                                                       |
+
+[Opcua Protocol Configuration](#opcua-protocol-configuration)
 
 ## SelfSignedCertificateConfiguration
 
@@ -515,7 +527,7 @@ configuration types
 </table>
 
 
-[^top](#toc)
+[Opcua Protocol Configuration](#opcua-protocol-configuration)
 
 ## CertificateValidationConfiguration
 
@@ -526,7 +538,7 @@ configuration types
 | Directory                                 | Pathname to base directory under which certificates and certificate revocation lists are stored | String                                                        | This directory must exist, subdirectories will be created by the adapter if they do not exist. |
 | ValidationOptions                         | Configuration of op optional checks                                                             | [CertificateValidationOptions](#certificatevalidationoptions) | When not set then all options are enabled                                                      |
 
-[^top](#toc)
+[Opcua Protocol Configuration](#opcua-protocol-configuration)
 
 ## CertificateValidationOptions
 
@@ -540,8 +552,6 @@ configuration types
 | KeyUsageIssuer                            | Key usage must be present and will be checked for CA certificates                              | Boolean  | Default is true |
 | Revocation                                | Revocation checking                                                                            | Boolean  | Default is true |
 | ApplicationUri                            | Check Application description against the ApplicationUri from Subject Alternative Names        | Boolean  | Default is true |
-
-[^top](#toc)
 
 
 
