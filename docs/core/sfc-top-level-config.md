@@ -1,5 +1,8 @@
 ## SFC top level configuration
 
+Top level of SFC configuration
+
+
 <table>
 	<colgroup>
 		<col style="width: 22%" />
@@ -119,7 +122,7 @@
 				<p>Note Only types that run in the same process as the SFC core need to be configured. If the core uses IPC to send the data to a target that runs in its process, the type does not have to be defined in the ProtocolAdapterTypes section.</p>
 				<p>Only JVM implementations of protocol adapters can be used to run in the same process as the SFC core.</p>
 			</td>
-			<td>Map[String,<a href="./in-procecess-configuration.md">InProcessConfiguration</a>]</td>
+			<td>Map[String,<a href="./in-process-configuration.md">InProcessConfiguration</a>]</td>
 			<td></td>
 		</tr>
 		<tr class="even">
@@ -151,7 +154,7 @@
 				<p>Note Only types that run in the same process as the SFC core need to be included in the configuration. If the core uses IPC to send the data to a target that runs in its process, the type does not have to be defined in the TargetTypes section.</p>
 				<p>Only JVM implementations of targets can be used to run in the same process as the SFC core.</p>
 			</td>
-			<td>Map[String,<a href="./in-procecess-configuration.md">InProcessConfiguration</a>]</td>
+			<td>Map[String,<a href="./in-process-configuration.md">InProcessConfiguration</a>]</td>
 			<td></td>
 		</tr>
 		<tr class="odd">
@@ -179,23 +182,27 @@
 			</td>
 			<td>Map[String,<a href="./transformation-operator-configuration.md">TransformationOperator</a>[]]</td>
 			<td>
-				<p>Example:</p>
-				<p>{</p>
-				<p>"DivBy2Add1Round": [</p>
-				<p>{</p>
-				<p>"Operator" : "Divide",</p>
-				<p>"Operand" : 2</p>
-				<p>},</p>
-				<p>{</p>
-				<p>"Operator" : "Add",</p>
-				<p>"Operand" : 1</p>
-				<p>},</p>
-				<p>{</p>
-				<p>"Operator" : "Round"</p>
-				<p>}</p>
-				<p>]</p>
-				<p>}</p>
-				<p>The transformation with identifier DivBy2Add1Round above Divides the input value by 2, then adds 1 and rounds the result.</p>
+			Example:
+
+```json
+{
+   "DivBy2Add1Round": [
+       {
+           "Operator" : "Divide",
+           "Operand" : 2
+       },
+       {
+          "Operator" : "Add",
+          "Operand" : 1
+       },
+       {
+         "Operator" : "Round"
+       }
+    ]
+ }
+```
+
+<p>The transformation with identifier DivBy2Add1Round above Divides the input value by 2, then adds 1 and rounds the result.</p>
 			</td>
 		</tr>
 		<tr class="even">
@@ -203,62 +210,61 @@
 			<td>Filters that can be applied at source or channel value level to let pass values only if they have changed at all or an absolute or percentage from the previously passed value, or since a time interval.</td>
 			<td>Map[String,<a href="./change-filter-configuration.md">ChangeFilterConfiguration</a>]</td>
 			<td>
-				<p>Example:</p>
-				<p>"ChangeFilters" : {
-					<br />
-"Change1PercentOrPer10Sec" : {
-					<br />
-"Type": "Percent",
-					<br />
-"Value": 1,
-					<br />
-"AtLeast": 10000
-					<br />
-},
-					<br />
-"AllChangesOrOncePer10Sec" : {
-					<br />
-"Type": "Always",
-					<br />
-"AtLeast": 10000
-					<br />
+				<p>Example:
+
+```json
+
+"ChangeFilters" : {
+   "Change1PercentOrPer10Sec" : {
+	   "Type": "Percent",
+      "Value": 1,			
+      "AtLeast": 10000
+	},
+   "AllChangesOrOncePer10Sec" : {
+      "Type": "Always",
+	   "AtLeast": 10000
+   }				
 }
-					<br />
-}
-				</p>
-			</td>
+```
+
+
+</td>
 		</tr>
 		<tr class="odd">
 			<td>ValueFilters</td>
 			<td>Filters that can be applied at channel values level. Values are passed if the value matches the filter expression</td>
 			<td>Map[String,<a href="./value-filter-configuration.md">ValueFilterConfiguration</a>]</td>
 			<td>
-				<p>Example</p>
-				<p>"ValueFilters": {</p>
-				<p>"ValueEqual5": {</p>
-				<p>"Operator": "eq",</p>
-				<p>"Value": 5</p>
-				<p>},</p>
-				<p>"ValueEqualYes": {</p>
-				<p>"Operator": "eq",</p>
-				<p>"Value": "Yes"</p>
-				<p>},</p>
-				<p>"ValueInRange0-10": {</p>
-				<p>"Operator": "and",</p>
-				<p>"Value": [</p>
-				<p>{</p>
-				<p>"Operator": "ge",</p>
-				<p>"Value": 0</p>
-				<p>},</p>
-				<p>{</p>
-				<p>"Operator": "le",</p>
-				<p>"Value": 10</p>
-				<p>}</p>
-				<p>]</p>
-				<p>}</p>
-				<p>}</p>
-			</td>
-		</tr>
+				Example:
+
+```json
+"ValueFilters": {
+   "ValueEqual5": {
+      "Operator": "eq",
+      "Value": 5
+   },
+   "ValueEqualYes": {
+      "Operator": "eq",
+      "Value": "Yes"
+   },
+   "ValueInRange0-10": {
+      "Operator": "and",
+      "Value": [
+         {
+           "Operator": "ge",
+           "Value": 0
+         },
+         {
+           "Operator": "le",
+           "Value": 10
+         }
+      ]
+   }
+}
+```
+
+</td>
+</tr>
 
 
 <tr class="odd">
@@ -284,19 +290,19 @@
 		<tr class="even">
 			<td>ConfigProvider</td>
 			<td>Configuration for custom configuration handler</td>
-			<td><a href="./in-procecess-configuration.md">InProcessConfiguration</a></td>
+			<td><a href="./in-process-configuration.md">InProcessConfiguration</a></td>
 			<td></td>
 		</tr>
 		<tr class="odd">
 			<td>LogWriter</td>
 			<td>Configuration for custom log writer</td>
-			<td><a href="./in-procecess-configuration.md">InProcessConfiguration</a></td>
+			<td><a href="./in-process-configuration.md">InProcessConfiguration</a></td>
 			<td>Default writer logs to console</td>
 		</tr>
 		<tr class="even">
 			<td>HealthProbe</td>
 			<td>Configuration for main process health probe endpoint</td>
-			<td><a href="./in-procecess-configuration.md">HealthProbeConfiguration</a></td>
+			<td><a href="./in-process-configuration.md">HealthProbeConfiguration</a></td>
 			<td></td>
 		</tr>
         <tr class="odd">

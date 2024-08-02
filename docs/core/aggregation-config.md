@@ -1,5 +1,7 @@
 ## Aggregation
 
+An optional aggregation can be used for a schedule to collect the results of multiple read values and combine these in a single output message, optimally applying functions to aggregate the output data.
+
 <table>
 <colgroup>
 <col style="width: 18%" />
@@ -7,17 +9,20 @@
 <col style="width: 28%" />
 <col style="width: 25%" />
 </colgroup>
-<thead>
-<tr class="header">
-<th colspan="4">An optional aggregation can be used for a schedule to collect the results of multiple read values and combine these in a single output message, optimally applying functions to aggregate the output data.</th>
-</tr>
-</thead>
 <tbody>
+<tr class="odd">
+<td><strong>Name</strong></td>
+<td><strong>Description</strong></td>
+<td colspan="2"><strong>Type</strong></td>
+<td><strong>Comments</strong></td>
+
+</tr>
 <tr class="odd">
 <td>Size</td>
 <td>The number of values to aggregate before applying the aggregation and sending output to the targets.</td>
 <td>Integer</td>
 <td>Default is 1, must be 1 or higher</td>
+
 </tr>
 <tr class="even">
 <td>Output</td>
@@ -70,27 +75,31 @@
 <p>Besides aggregation of the collected data, reducing the volume of data sent to the targets, aggregation can also be used to reduce the number of calls to the targets by setting the size and just using the "values" aggregation.</p></td>
 <td>Map[String,Map[String,String[]]]</td>
 <td><p>There must be at least a single output.</p>
-<p>Examples</p>
-<p>"Output": {</p>
-<p>"source1": {</p>
-<p>"channel1": [</p>
-<p>"count",</p>
-<p>"avg",</p>
-<p>"min",</p>
-<p>"max"</p>
-<p>],</p>
-<p>"channel2": [</p>
-<p>"sum",</p>
-<p>"count"</p>
-<p>],</p>
-<p>"channel3": [</p>
-<p>"*"</p>
-<p>],</p>
-<p>"*": [</p>
-<p>"values"</p>
-<p>]</p>
-<p>}</p>
-<p>}</p>
+
+Examples:
+```json
+"Output": {
+
+	"source1": {
+       "channel1": [
+          "count",
+          "avg",
+          "min",
+          "max"
+       ],
+       "channel2": [
+          "sum",
+          "count"
+       ],
+       "channel3": [
+          "*"
+       ],
+       "*": [
+          "values"
+       ]
+    }
+  ``` 
+
 <p>The aggregated values for source1, channel1 will contain the aggregated output count, avg, min, and max.</p>
 <p>The aggregated values for source1, channel2 will contain the aggregated output sum and count.</p>
 <p>The aggregated values for source1, channel3 will contain the aggregated output applicable to the datatype of the values.</p>
@@ -98,6 +107,7 @@
 <p>Output aggregations first and last can have an optional timestamp, depending on the Timestamp level configured for the schedule.</p>
 <p>The output values for the mod and values aggregation outputs are arrays of values.</p>
 <p>The values aggregation output value is a list of the input values used for the aggregation, which can include a timestamp for each value depending on the Timestamp level configured for the schedule.</p></td>
+
 </tr>
 <tr class="odd">
 <td>Transformations</td>
@@ -117,25 +127,30 @@
 <p>If there is no matching entry no transformations will be applied.</p></td>
 <td>Map[String,Map[String,Map[String,String]]</td>
 <td><p>Example:</p>
-<p>"Transformations": {</p>
-<p>"source1": {</p>
-<p>"channel1": {</p>
-<p>"avg": "tr1",</p>
-<p>"min": "tr2",</p>
-<p>"max": "tr2"</p>
-<p>},</p>
-<p>"channel2": {</p>
-<p>"sum": "tr3"</p>
-<p>},</p>
-<p>"channel3": {</p>
-<p>"*": "tr4"</p>
-<p>}</p>
-<p>}</p>
-<p>}</p>
-<p>Transformation "tr1" will be applied to the aggregated "avg" output for the values of "source1", "channel1".</p>
+
+```json
+"Transformations": {
+   "source1": {
+      "channel1": {
+      "avg": "tr1",
+      "min": "tr2",
+      "max": "tr2"
+    },
+    "channel2": {
+        "sum": "tr3"
+    },
+    "channel3": {
+        "*": "tr4"
+    }
+  }
+}
+```
+
+Transformation "tr1" will be applied to the aggregated "avg" output for the values of "source1", "channel1".</p>
 <p>Transformation "tr2" will be applied to the aggregated "min" and "max" output for the values of "source1", "channel1".</p>
 <p>Transformation "tr3" will be applied to the aggregated "sum" output for the values of "source1", "channel2".</p>
 <p>Transformation "tr4" will be applied to all aggregated values of "source1", "channel3".</p></td>
+
 </tr>
 </tbody>
 </table>

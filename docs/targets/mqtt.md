@@ -1,5 +1,7 @@
 # MQTT Target
-
+<br>
+<p>MqttTargetConfiguration extends the type TargetConfiguration with specific configuration data for connecting to and sending to MQTT topic. The Targets configuration element can contain entries of this type, the TargetType of these entries must be set to <strong>"MQTT-TARGET"</strong></p>
+<br>
 [Targets](./targets.md)
 
 ## MqttTargetConfiguration
@@ -11,11 +13,7 @@
 <col style="width: 13%" />
 <col style="width: 55%" />
 </colgroup>
-<thead>
-<tr class="header">
-<th colspan="4"><p>MqttTargetConfiguration extends the type TargetConfiguration with specific configuration data for connecting to and sending to MQTT topic. The Targets configuration element can contain entries of this type, the TargetType of these entries must be set to <strong>"MQTT-TARGET"</strong></p></th>
-</tr>
-</thead>
+
 <tbody>
 <tr class="odd">
 <td><strong>Name</strong></td>

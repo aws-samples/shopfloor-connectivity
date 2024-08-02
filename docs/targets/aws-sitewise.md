@@ -1,25 +1,7 @@
-
 # AWS SiteWise Target
 
-- [AwsSitewiseTargetConfiguration](#awssitewisetargetconfiguration)
-- [AwsSiteWiseAssetCreationConfiguration](#awssitewiseassetcreationconfiguration)
-- [AwsSiteWiseAssetConfiguration](#awssitewiseassetconfiguration)
-- [AwsSiteWiseAssetPropertyConfiguration](#awssitewiseassetpropertyconfiguration)
-
-[Targets](./targets.md)
-
-## AwsSitewiseTargetConfiguration
-
-<table>
-<colgroup>
-<col style="width: 18%" />
-<col style="width: 27%" />
-<col style="width: 29%" />
-<col style="width: 23%" />
-</colgroup>
-<thead>
-<tr class="header">
-<th colspan="4"><p>AwsSitewiseTargetConfiguration extends the type TargetConfiguration with specific configuration data for sending data to Timestream tables. The Targets configuration element can contain entries of this type, the TargetType of these entries must be set to <strong>"AWS-SITEWISE"</strong></p>
+AwsSitewiseTargetConfiguration extends the type TargetConfiguration with specific configuration data for sending data to SIteWise assets. The Targets configuration element can contain entries of this type, the TargetType of 
+these entries must be set to <strong>"AWS-SITEWISE"</strong></p>
 <p></p>
 <p style='text-align: justify;'>Required IAM permissions</p>
 
@@ -39,9 +21,24 @@
 
 <p style='text-align: justify;'>(*) required when using Asset creation</p>
 <p style='text-align: justify;'>(**) required when  using AssetName, AssetExternalId, AssetPropertyName,AssetPropertyExternalId in asset and asset property configuration.</p>
-</th>
-</tr>
-</thead>
+
+- [AwsSitewiseTargetConfiguration](#awssitewisetargetconfiguration)
+- [AwsSiteWiseAssetCreationConfiguration](#awssitewiseassetcreationconfiguration)
+- [AwsSiteWiseAssetConfiguration](#awssitewiseassetconfiguration)
+- [AwsSiteWiseAssetPropertyConfiguration](#awssitewiseassetpropertyconfiguration)
+
+[Targets](./targets.md)
+
+## AwsSitewiseTargetConfiguration
+
+<table>
+<colgroup>
+<col style="width: 18%" />
+<col style="width: 27%" />
+<col style="width: 29%" />
+<col style="width: 23%" />
+</colgroup>
+
 <tbody>
 
 <tr class="odd">

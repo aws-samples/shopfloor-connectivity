@@ -24,6 +24,8 @@ In order to reduce the number of interactions between the adapter and the contro
 
 ## SlmpSourceConfiguration
 
+The SLMPSourceConfiguration extends the common Source configuration with SLMP specific source configuration data.
+
 <table>
 <colgroup>
 <col style="width: 19%" />
@@ -31,12 +33,7 @@ In order to reduce the number of interactions between the adapter and the contro
 <col style="width: 32%" />
 <col style="width: 22%" />
 </colgroup>
-<thead>
-<tr class="header">
-<th colspan="4"><p><strong>SlmpSourceConfiguration</strong> Extends SourceConfiguration</p>
-<p>The SLMPSourceConfiguration extends the common Source configuration with SLMP specific source configuration data.</p></th>
-</tr>
-</thead>
+
 <tbody>
 <tr class="odd">
 <td><strong>Name</strong></td>
@@ -44,6 +41,7 @@ In order to reduce the number of interactions between the adapter and the contro
 <td><strong>Type</strong></td>
 <td><strong>Comments</strong></td>
 </tr>
+
 <tr class="even">
 <td>Channels</td>
 <td><p>The channels configuration for an SLMP source holds configuration data to read values from fields on the source controller.</p>
@@ -52,12 +50,14 @@ In order to reduce the number of interactions between the adapter and the contro
 <td>Map[String,<a href="#slmpchannelconfiguration">SLMPChannelConfiguration</a>]</td>
 <td>At least 1 channel must be configured.</td>
 </tr>
+
 <tr class="odd">
 <td>AdapterController</td>
 <td>Controller Identifier for the controller to read from. This referenced server must be present in the Devices section of the adapter referred to by the ProtocolAdapter attribute of the source.</td>
 <td>String</td>
 <td>Must be an identifier of a server in the Controllers section of the SLMP adapter used by the source.</td>
 </tr>
+
 
 
 </tbody>
@@ -67,6 +67,8 @@ In order to reduce the number of interactions between the adapter and the contro
 
 ## SlmpChannelConfiguration
 
+The SlmpChannelConfiguration extends the common Channel configuration with SLMP specific channel configuration data
+
 <table>
 <colgroup>
 <col style="width: 15%" />
@@ -74,13 +76,7 @@ In order to reduce the number of interactions between the adapter and the contro
 <col style="width: 22%" />
 <col style="width: 43%" />
 </colgroup>
-<thead>
-<tr class="header">
-<th colspan="4"><p><strong>SlmpChannelConfiguration</strong></p>
-<p><strong>Extends ChannelConfiguration</strong></p>
-<p>The SlmpChannelConfiguration extends the common Channel configuration with SLMP specific channel configuration data</p></th>
-</tr>
-</thead>
+
 <tbody>
 <tr class="odd">
 <td><strong>Name</strong></td>
@@ -88,6 +84,7 @@ In order to reduce the number of interactions between the adapter and the contro
 <td><strong>Type</strong></td>
 <td><strong>Comments</strong></td>
 </tr>
+
 <tr class="even">
 <td>AccessPoint</td>
 <td>A string containing the access point for the value to read from the device.</td>
@@ -138,6 +135,7 @@ An access points consists of a device code and a decimal device number, e.g. "D2
 
 
 
+
 <tr class="odd">
 <td>DataType</td>
 <td>The type of data to read from the device. If no type is specified then a single value of the default type of the device is read.</td>
@@ -164,6 +162,7 @@ E.g. <p>
  </td>
 </tr>
 
+
 <tr class="even">
 <td>Size</td>
 <td>The number of values to read starting from the access point.</td>
@@ -173,12 +172,15 @@ The number of items to read can be specified as well in the DataType of the chan
  </td>
 </tr>
 
+
 </tbody>
 </table>
 
 [^top](#slmp-protocol-configuration)
 
 ## SlmpAdapterConfiguration
+The SlmpAdapterConfiguration extends the common adapter configuration with SLMP specific adapter configuration settings. The AdapterType to use for this adapter is <strong>"SLMP"</strong>.
+
 
 <table>
 <colgroup>
@@ -187,13 +189,7 @@ The number of items to read can be specified as well in the DataType of the chan
 <col style="width: 27%" />
 <col style="width: 39%" />
 </colgroup>
-<thead>
-<tr class="header">
-<th colspan="4"><p><strong>SlmpAdapterConfiguration</strong></p>
-<p><strong>Extends ProtocolAdapterConfiguration</strong></p>
-<p>The SlmpAdapterConfiguration extends the common adapter configuration with SLMP specific adapter configuration settings. The AdapterType to use for this adapter is "SLMP".</p></th>
-</tr>
-</thead>
+
 <tbody>
 <tr class="odd">
 <td><strong>Name</strong></td>
@@ -201,12 +197,14 @@ The number of items to read can be specified as well in the DataType of the chan
 <td><strong>Type</strong></td>
 <td><strong>Comments</strong></td>
 </tr>
+
 <tr class="even">
 <td>Controllers</td>
 <td>Controllers configured for this adapter. The SLMP source using the adapter must have a reference to one of these in its AdapterController attribute.</td>
 <td>Map[String,<a href="#slmpdeviceconfiguration">SlmpControllerConfiguration</a>]</td>
 <td></td>
 </tr>
+
 <tr class="odd">
 <td>Structures</td>
 <td>Custom data structures configured for this adapter. Structured defined in this section can be uses as custom structured data types for channel values. If a structure has a field which is of a custome structure type,t hen this type must be defined first.</td>
@@ -235,12 +233,15 @@ A SLMP channel can now use both type "STRUCT1" as "STRUCT2" as a DataType. The d
 </td>
 </tr>
 
+
 </tbody>
 </table>
 
 [^top](#slmp-protocol-configuration)
 
 ## SlmpControllerConfiguration
+
+Configuration data for connecting to and reading from sources from devices using SLMP protocol
 
 <table>
 <colgroup>
@@ -249,12 +250,7 @@ A SLMP channel can now use both type "STRUCT1" as "STRUCT2" as a DataType. The d
 <col style="width: 28%" />
 <col style="width: 25%" />
 </colgroup>
-<thead>
-<tr class="header">
-<th colspan="4"><p><strong>SlmpControllerConfiguration</strong></p>
-<p>Configuration data for connecting to and reading from sources from devices using SLMP protocol</p></th>
-</tr>
-</thead>
+
 <tbody>
 <tr class="odd">
 <td><strong>Name</strong></td>
@@ -262,78 +258,91 @@ A SLMP channel can now use both type "STRUCT1" as "STRUCT2" as a DataType. The d
 <td><strong>Type</strong></td>
 <td>Comments</td>
 </tr>
+
 <tr class="even">
 <td>Address</td>
 <td>IP Address of the device</td>
 <td>String</td>
 <td>IP address in format aaa.bbb.ccc.ddd or a hostname</td>
 </tr>
+
 <tr class="odd">
 <td>Port</td>
 <td>Port number</td>
 <td>Integer</td>
 <td>Default is 48898</td>
 </tr>
+
 <tr class="even">
 <td>CommandTimeout</td>
 <td>Timeout for executing commands in milliseconds</td>
 <td>Integer</td>
 <td>Default is 10000 milliseconds</td>
 </tr>
+
 <tr class="odd">
 <td>ConnectTimeout</td>
 <td>Timeout for connecting to the device in milliseconds</td>
 <td>Integer</td>
 <td>Default is 10000</td>
 </tr>
+
 <tr class="even">
 <td>ReadTimeout</td>
 <td>Timeout for reading response packets from the controller in milliseconds</td>
 <td>Integer</td>
 <td>Default is 50000</td>
 </tr>
+
 <tr class="odd">
 <td>WaitAfterConnectError</td>
 <td>Time to wait before (re)connecting after a connection error in milliseconds</td>
 <td>Integer</td>
 <td>Default is 10000</td>
 </tr>
+
 <tr class="even">
 <td>WaitAfterReadError</td>
 <td>Time to wait before reading values from the controller after a read error in milliseconds</td>
 <td>Integer</td>
 <td>Default is 10000</td>
 </tr>
+
 <tr class="odd">
 <td>WaitAfterWriteError</td>
 <td>Time to wait after an error writing request packets to the controller in milliseconds</td>
 <td>Integer</td>
 <td>Default is 10000</td>
 </tr>
+
 <tr class="even">
 <td>NetworkNumber</td>
 <td>Request destination network number</td>
 <td>Integer</td>
 <td>Default is 0 (0x00)</td>
 </tr>
+
 <tr class="odd">
 <td>StationNumber</td>
 <td>Request station number</td>
 <td>Integer</td>
 <td>Default is 255 (0xFF) </td>
 </tr>
+
 <tr class="even">
 <td>ModuleNumber</td>
 <td>Request module number</td>
 <td>Integer</td>
 <td>Default is 1023 (0x03FF) </td>
 </tr>
+
 <tr class="odd">
 <td>MultiDropStationNumber</td>
 <td>Request multidrop station number</td>
 <td>Integer</td>
 <td>Default is 0 (0x00)</td>
 </tr>
+
 <tr class="even">
 <td>MonitoringTimer</td>
 <td>Timer to set the waiting time until the access destination send back a response after the SLMP compatible device
@@ -341,6 +350,7 @@ which received a request message from the external device requests a processing 
 <td>Integer</td>
 <td>Default is 0 (unlimited wait)</td>
 </tr>
+
 
 </tbody>
 </table>

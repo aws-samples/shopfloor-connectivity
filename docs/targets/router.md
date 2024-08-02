@@ -1,5 +1,7 @@
-
 # Router Target
+<br>
+RouterTargetConfiguration extends the type TargetConfiguration with specific configuration data for routing target data to next (primary) targets and alternative and success targets for this these targets. The Targets configuration element can contain entries of this type, the TargetType of these entries must be set to <strong>"ROUTER".</strong>
+<br>
 
 - [RouterTargetConfiguration](#routertargetconfiguration)
 - [RoutesConfiguration](#routesconfiguration)
@@ -16,17 +18,14 @@
 <col style="width: 28%" />
 <col style="width: 26%" />
 </colgroup>
-<thead>
-<tr class="header">
-<th colspan="4">RouterTargetConfiguration extends the type TargetConfiguration with specific configuration data for routing target data to next (primary) targets and alternative and success targets for this these targets. The Targets configuration element can contain entries of this type, the TargetType of these entries must be set to <strong>"ROUTER".</strong></th>
-</tr>
-</thead>
+
 <tbody>
 <tr class="odd">
 <td><strong>Name</strong></td>
 <td><strong>Description</strong></td>
 <td><strong>Type</strong></td>
 <td>Comments</td>
+
 </tr>
 <tr class="even">
 <td>Routes</td>
@@ -36,6 +35,7 @@
 <p>A success target can be specified to which data is routed if the data was written successfully to the primary or alternative target.</p></td>
 <td>Map[String, <a href="#routesconfiguration">RoutesConfiguration</a>]</td>
 <td>The targets must be targets that are configured either as in-process or IPC service targets in the same configuration.</td>
+
 </tr>
 <tr class="odd">
 <td>ResultHandlerPolicy</td>
@@ -44,6 +44,7 @@
 <p>AnyTarget: Routing is successful if data is written to at least one configured primary target or an alternative route for any of the primary targets</p></td>
 <td>String</td>
 <td>Default is "AllTargets"</td>
+
 </tr>
 </tbody>
 </table>

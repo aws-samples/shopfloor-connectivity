@@ -1,4 +1,9 @@
 # AWS IoT Core Target
+<br>
+AwsIotCoreTargetConfiguration extends the type TargetConfiguration with specific configuration data for connecting to and sending to AWS IoT core topic using HTTP dataplane API. The Targets configuration element can contain entries of this type, the TargetType of these entries must be set to <strong>"AWS-IOT-CORE"</strong><br>
+<br>
+Requires IAM permission iot:Publish for the topic the data is published to.
+
 
 [Targets](./targets.md)
 
@@ -11,12 +16,7 @@
 <col style="width: 29%" />
 <col style="width: 23%" />
 </colgroup>
-<thead>
-<tr class="header">
-<th colspan="4"><p>AwsIotCoreTargetConfiguration extends the type TargetConfiguration with specific configuration data for connecting to and sending to AWS IoT core topic using HTTP dataplane API. The Targets configuration element can contain entries of this type, the TargetType of these entries must be set to <strong>"AWS-IOT-CORE"</strong></p>
-<p>Requires IAM permission iot:Publish for the topic the data is published to.</p></th>
-</tr>
-</thead>
+
 <tbody>
 <tr class="odd">
 <td><strong>Name</strong></td>

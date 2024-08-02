@@ -1,4 +1,9 @@
 ## TargetConfiguration
+<br>
+
+The Targets element contains elements for targets for different target types, where the TargetType specifies its distinct target type.
+<br>
+<br>
 
 <table>
 <colgroup>
@@ -7,12 +12,7 @@
 <col style="width: 24%" />
 <col style="width: 30%" />
 </colgroup>
-<thead>
-<tr class="header">
-<th colspan="4"><p>The TargetConfiguration type contains a set of generic target configuration attributes used to send the output data to the targets. Each target implementation must extend this type with its specific target configuration type that contains the additional attributes required for that target type.</p>
-<p>The Targets element can contain elements for targets for different target types, where the TargetType specifies its distinct target type.</p></th>
-</tr>
-</thead>
+
 <tbody>
 <tr class="odd">
 <td><strong>Name</strong></td>
@@ -60,8 +60,8 @@ Context variables for template</p>
 <td>TargetChannelSize</td>
 <td>Size of channel used by target to process and write items</td>
 <td>Int</td>
-<td>Default is 1000</td>
-see <a href="#sfc-tuning">SFC TuningC</a> for more details
+<td>Default is 1000
+see <a href="#sfc-tuning">SFC Tuning</a> for more details</td>
 </tr>
 <tr class="odd">
 <td>TargetChannelTimeout</td>

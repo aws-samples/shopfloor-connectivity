@@ -1,5 +1,8 @@
 ## ChannelConfiguration
-
+<br>
+The ChannelConfiguration element contains a set of generic source configuration attributes used to process the read data. Each input protocol implementation should implement its specific channel configuration type, and include that in its source type, which contains the required configuration data for that protocol.
+<br>
+<br>
 <table>
 <colgroup>
 <col style="width: 19%" />
@@ -7,11 +10,7 @@
 <col style="width: 28%" />
 <col style="width: 24%" />
 </colgroup>
-<thead>
-<tr class="header">
-<th colspan="4">TThe ChannelConfiguration element contains a set of generic source configuration attributes used to process the read data. Each input protocol implementation should implement its specific channel configuration type, and include that in its source type, which contains the required configuration data for that protocol.</th>
-</tr>
-</thead>
+
 <tbody>
 <tr class="odd">
 <td><strong>Name</strong></td>

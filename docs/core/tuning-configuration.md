@@ -1,7 +1,8 @@
-
-
 ## TuningConfiguration
-
+<br>
+Tuning parameters for SFC components
+<br>
+<br>
 <table>
 <colgroup>
 <col style="width: 19%" />
@@ -9,11 +10,7 @@
 <col style="width: 24%" />
 <col style="width: 30%" />
 </colgroup>
-<thead>
-<tr class="header">
-<th colspan="4">Tuning parameters for SFC components</th>
-</tr>
-</thead>
+
 <tbody>
 <tr class="odd">
 <td><strong>Name</strong></td>

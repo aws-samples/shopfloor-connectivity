@@ -21,6 +21,7 @@ import software.amazon.awssdk.awscore.internal.AwsErrorCode
 import software.amazon.awssdk.core.SdkClient
 import software.amazon.awssdk.core.client.config.ClientOverrideConfiguration
 import software.amazon.awssdk.core.client.config.SdkAdvancedClientOption
+import java.util.UUID
 
 
 // Internal exception class used to indicate that failed execution of a code block making the AWS
@@ -51,7 +52,7 @@ abstract class AwsServiceClientHelper(
     // Credentials provider using IoT Credentials Service
     private var _credentialsProvider: AwsIoTCredentialSessionProvider? = null
 
-    private fun getCredentialsProvider(): AwsCredentialsProvider? {
+    fun getCredentialsProvider(): AwsCredentialsProvider? {
         // Only if client is configured for the target
         if ((credentialClientConfig != null) && (_credentialsProvider == null)) {
             _credentialsProvider = AwsIoTCredentialSessionProvider(credentialClientConfig, logger)
@@ -95,18 +96,15 @@ abstract class AwsServiceClientHelper(
             builder.region(region)
         }
 
-        val clientCredentialsProvider = getCredentialsProvider()
-        if (clientCredentialsProvider != null) {
-            builder.credentialsProvider(clientCredentialsProvider)
-        }
-
-        builder.overrideConfiguration(ClientOverrideConfiguration.builder()
-            .advancedOptions(mutableMapOf(SdkAdvancedClientOption.USER_AGENT_PREFIX to SFC_USER_AGENT_PREFIX))
-            .build())
+//        val clientCredentialsProvider = getCredentialsProvider()
+//        if (clientCredentialsProvider != null) {
+//            builder.credentialsProvider(clientCredentialsProvider)
+//        }
 
         builder.build() as SdkClient
 
     }
+
 
 
     /**

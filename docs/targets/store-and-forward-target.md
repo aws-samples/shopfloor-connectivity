@@ -1,5 +1,8 @@
 # Store and Forward Target
-
+<br>
+StoreForwardTargetConfiguration extends the type TargetConfiguration with specific configuration data for forwarding and buffering target data to next targets configured for this target. The Targets configuration element can contain entries of this type, the TargetType of these entries must be set to <strong>"STORE-FORWARD".</strong>
+<br>
+<br>
 
 [Targets](./targets.md)
 
@@ -13,11 +16,7 @@
 <col style="width: 28%" />
 <col style="width: 26%" />
 </colgroup>
-<thead>
-<tr class="header">
-<th colspan="4">StoreForwardTargetConfiguration extends the type TargetConfiguration with specific configuration data for forwarding and buffering target data to next targets configured for this target. The Targets configuration element can contain entries of this type, the TargetType of these entries must be set to <strong>"STORE-FORWARD".</strong></th>
-</tr>
-</thead>
+
 <tbody>
 <tr class="odd">
 <td><strong>Name</strong></td>

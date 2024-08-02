@@ -322,6 +322,7 @@ class AwsSiteWiseTargetWriter(private val targetID: String, private val configRe
                         }
                     }
                 } catch (e: Exception) {
+                    println(e)
                     log.error("Error getting asset for source $sourceName, $e")
                 }
             }

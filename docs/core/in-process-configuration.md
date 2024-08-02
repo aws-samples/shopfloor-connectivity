@@ -1,5 +1,8 @@
 ## InProcessConfiguration
-
+<br>
+Configuration data for loading and creating in-process target instances
+<br>
+<br>
 <table>
 <colgroup>
 <col style="width: 18%" />
@@ -7,17 +10,14 @@
 <col style="width: 22%" />
 <col style="width: 30%" />
 </colgroup>
-<thead>
-<tr class="header">
-<th colspan="4">Configuration data for loading and creating in-process target instances</th>
-</tr>
-</thead>
+
 <tbody>
 <tr class="odd">
 <td><strong>Name</strong></td>
 <td><strong>Description</strong></td>
 <td><strong>Type</strong></td>
 <td><strong>Comments</strong></td>
+
 </tr>
 <tr class="even">
 <td>JarFiles</td>
@@ -25,6 +25,7 @@
 <p>These entries can either be pathnames to the jar files of to the directory in which these reside. If the entry is a directory it will expand to a list of all jar files in that directory,</p></td>
 <td>String[]</td>
 <td></td>
+
 </tr>
 <tr class="odd">
 <td>FactoryClassName</td>
@@ -45,6 +46,7 @@
 </ul></td>
 <td>String</td>
 <td></td>
+
 </tr>
 </tbody>
 </table>

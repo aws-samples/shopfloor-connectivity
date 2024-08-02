@@ -1,5 +1,10 @@
 # AWS Kinesis Target
 
+
+AwsKinesisTargetConfiguration extends the type TargetConfiguration with specific configuration data for sending to a stream for the AWS Kinesis service. The Targets configuration element can contain entries of this type, the TargetType of these entries must be set to <strong>"AWS-KINESIS"</strong></p>
+<p>Requires IAM permission kinesis:PutRecords for the stream the data is sent to.
+
+
 [Targets](./targets.md)
 
 ## AwsKinesisTargetConfiguration
@@ -11,48 +16,49 @@
 <col style="width: 29%" />
 <col style="width: 23%" />
 </colgroup>
-<thead>
-<tr class="header">
-<th colspan="4"><p>AwsKinesisTargetConfiguration extends the type TargetConfiguration with specific configuration data for sending to a stream for the AWS Kinesis service. The Targets configuration element can contain entries of this type, the TargetType of these entries must be set to <strong>"AWS-KINESIS"</strong></p>
-<p>Requires IAM permission kinesis:PutRecords for the stream the data is sent to.</p></th>
-</tr>
-</thead>
+
 <tbody>
 <tr class="odd">
 <td><strong>Name</strong></td>
 <td><strong>Description</strong></td>
 <td><strong>Type</strong></td>
 <td>Comments</td>
+
 </tr>
 <tr class="even">
 <td>StreamName</td>
 <td>Name of the Kinesis stream</td>
 <td>String</td>
 <td></td>
+
 </tr>
 <tr class="odd">
 <td>Region</td>
 <td>AWS Region for Kinesis service</td>
 <td>String</td>
 <td></td>
+
 </tr>
 <tr class="even">
 <td>BatchSize</td>
 <td>Number of output messages to combine in a single putRecordBatch API call.</td>
 <td>Integer</td>
 <td>Default is 10, Maximum is 500</td>
+
 </tr>
 <tr class="odd">
 <td>Compression</td>
 <td>Compression used to compress the data in the submitted items</td>
 <td>"None" | "GZip" | "Zip"</td>
 <td>Default is "None"</td>
+
 </tr>
 <tr class="even">
 <td>Interval</td>
 <td>Interval in milliseconds after which data is sent to stream even if the buffer is not full</td>
 <td>Integer</td>
 <td>Optional, if not set only BatchSize is used</td>
+
 </tr>
 </tbody>
 </table>

@@ -63,6 +63,7 @@
           "Description": "Fifteenth input bit"
         },
         "BINARY-FIRST-16-BITS": {
+          "Address": "B3:0",
           "Description": "First 16 binary bits in logical order"
         },
         "BINARY-SINGLE-BIT-0": {

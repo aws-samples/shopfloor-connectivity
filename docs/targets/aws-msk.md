@@ -1,4 +1,8 @@
 # AWS MSK Target
+<br>
+<p>AwsMskTargetConfiguration extends the type TargetConfiguration with specific configuration data for connecting to and sending to an AWS MSK topic. The Targets configuration element can contain entries of this type, the TargetType of these entries must be set to <strong>"AWS-MSK"</strong>
+<br>
+<br>
 
 [Targets](./targets.md)
 
@@ -11,23 +15,21 @@
 <col style="width: 13%" />
 <col style="width: 55%" />
 </colgroup>
-<thead>
-<tr class="header">
-<th colspan="4"><p>AwsMskTargetConfiguration extends the type TargetConfiguration with specific configuration data for connecting to and sending to an AWS MSK topic. The Targets configuration element can contain entries of this type, the TargetType of these entries must be set to <strong>"AWS-MSK"</strong></p>
-</tr>
-</thead>
+
 <tbody>
 <tr class="odd">
 <td><strong>Name</strong></td>
 <td><strong>Description</strong></td>
 <td><strong>Type</strong></td>
 <td>Comments</td>
+
 </tr>
 <tr class="even">
 <td>TopicName</td>
 <td>Name of the MSK topic</td>
 <td>String</td>
 <td></td>
+
 </tr>
 <tr class="odd">
 <td>BootstrapBrokers</td>
@@ -36,18 +38,21 @@
 <td><p>To get the broker addresses for a cluster use the CLI command <br />
 aws kafka get-bootstrap-brokers --cluster-arn `ClusterArn` and use the addresses returned in `"BootstrapBrokerStringPublicSaslIam"'.</p>
 <p><a href="https://docs.aws.amazon.com/msk/latest/developerguide/msk-get-bootstrap-brokers.html">Getting the bootstrap brokers for an Amazon MSK cluster"</a></p></td>
+
 </tr>
 <tr class="even">
 <td>Key</td>
 <td>Key used for the written records</td>
 <td>String</td>
 <td>Optional</td>
+
 </tr>
 <tr class="odd">
 <td>Partition</td>
 <td>Optional partition key</td>
 <td>Integer</td>
 <td></td>
+
 </tr>
 <tr class="even">
 <td>Serialization</td>
@@ -56,10 +61,11 @@ aws kafka get-bootstrap-brokers --cluster-arn `ClusterArn` and use the addresses
 <td>
 
 - "json" (default)
-- "protobuf", see [protobuf schema](../core/sfc-ipc/src/main/proto/TargetAdapterService.proto)
+- "protobuf", <a href="../../../core/sfc-ipc/src/main/proto/TargetAdapterService.proto">see protobuf TargetAdapterService schema</a>
 
-If a [Template](#targetconfiguration) is specified to transform the data for this target then this setting is not used
+If a <a href="../core/target-configuration.md">Template</a> is specified to transform the data for this target then this setting is not used
 and the transformation output is written as a string to the topic.</td>
+
 </tr>
 <tr class="odd">
 <td>Acknowledgements</td>
@@ -72,6 +78,7 @@ and the transformation output is written as a string to the topic.</td>
 - "all" = -1
 
 </td>
+
 </tr>
 <tr class="even">
 <td>ProviderProperties</td>
@@ -97,12 +104,14 @@ The following properties are set by the adapter
 - batch.size from `BatchSize`
 
 </td>
+
 </tr>
 <tr class="odd">
 <td>Headers</td>
 <td>Map of headers set for written records</td>
 <td>Map[String,String]</td>
 <td>Default = empty map</td>
+
 </tr>
 <tr class="even">
 <td>Compression</td>
@@ -117,18 +126,21 @@ The following properties are set by the adapter
 - zstd
 
 </td>
+
 </tr>
 <tr class="odd">
 <td>BatchSize</td>
 <td>Batch size <a href="https://kafka.apache.org/documentation/#producerconfigs_batch.size">(batch.size)</a></td>
 <td>Integer</td>
 <td></td>
+
 </tr>
 <tr class="even">
 <td>Interval</td>
 <td>Interval in milliseconds in which adapter will flush the producer even when the batch size is not reached.</td>
 <td>Integer</td>
 <td></td>
+
 </tr>
 </tbody>
 </table>

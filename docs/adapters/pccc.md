@@ -239,6 +239,8 @@ Syntax: A\<file number\>:\<element index\>\[/character offset\]
 
 ## PcccSourceConfiguration
 
+The PCCCSourceConfiguration extends the common Source configuration with PCCC specific source configuration data
+
 <table>
 <colgroup>
 <col style="width: 19%" />
@@ -246,12 +248,7 @@ Syntax: A\<file number\>:\<element index\>\[/character offset\]
 <col style="width: 32%" />
 <col style="width: 22%" />
 </colgroup>
-<thead>
-<tr class="header">
-<th colspan="4"><p><strong>PCCCSourceConfiguration</strong> Extends SourceConfiguration</p>
-<p>The PCCCSourceConfiguration extends the common Source configuration with PCCC specific source configuration data</p></th>
-</tr>
-</thead>
+
 <tbody>
 <tr class="odd">
 <td><strong>Name</strong></td>
@@ -259,6 +256,7 @@ Syntax: A\<file number\>:\<element index\>\[/character offset\]
 <td><strong>Type</strong></td>
 <td><strong>Comments</strong></td>
 </tr>
+
 <tr class="even">
 <td>Channels</td>
 <td><p>The channels configuration for a PCCC source holds configuration data to read values from fields on the source controller.</p>
@@ -267,18 +265,24 @@ Syntax: A\<file number\>:\<element index\>\[/character offset\]
 <td>Map[String,<a href="#pcccchannelconfiguration">PcccChannelConfiguration</a>]</td>
 <td>At least 1 channel must be configured.</td>
 </tr>
+
 <tr class="odd">
 <td>AdapterController</td>
 <td>Server Identifier for the controller to read from. This referenced server must be present in the Controllers section of the adapter referred to by the ProtocolAdapter attribute of the source.</td>
 <td>String</td>
 <td>Must be an identifier of a server in the Controllers section of the PCCC adapter used by the source.</td>
 </tr>
+
 </tbody>
 </table>
 
 [^top](#pccc-protocol-configuration)
 
 ## PcccChannelConfiguration
+
+
+The PcccChannelConfiguration extends the common Channel configuration with PCCC specific channel configuration data
+
 
 <table>
 <colgroup>
@@ -287,13 +291,7 @@ Syntax: A\<file number\>:\<element index\>\[/character offset\]
 <col style="width: 22%" />
 <col style="width: 43%" />
 </colgroup>
-<thead>
-<tr class="header">
-<th colspan="4"><p><strong>PcccChannelConfiguration</strong></p>
-<p><strong>Extends ChannelConfiguration</strong></p>
-<p>The PcccChannelConfiguration extends the common Channel configuration with PCCC specific channel configuration data</p></th>
-</tr>
-</thead>
+
 <tbody>
 <tr class="odd">
 <td><strong>Name</strong></td>
@@ -301,12 +299,14 @@ Syntax: A\<file number\>:\<element index\>\[/character offset\]
 <td><strong>Type</strong></td>
 <td><strong>Comments</strong></td>
 </tr>
+
 <tr class="even">
 <td>Address</td>
 <td>A string containing the address of the field to read from the controller.</td>
 <td>String</td>
 <td>For supported datatype and address syntax see <a href="#pccc-addressing">PCCC Addressing</a>.</td>
 </tr>
+
 </tbody>
 </table>
 
@@ -315,6 +315,8 @@ Syntax: A\<file number\>:\<element index\>\[/character offset\]
 
 ## PcccAdapterConfiguration
 
+The PcccAdapterConfiguration extends the common adapter configuration with PCCC specific adapter configuration settings. The AdapterType to use for this adapter is <strong>"PCCC"</strong>
+
 <table>
 <colgroup>
 <col style="width: 14%" />
@@ -322,13 +324,7 @@ Syntax: A\<file number\>:\<element index\>\[/character offset\]
 <col style="width: 27%" />
 <col style="width: 39%" />
 </colgroup>
-<thead>
-<tr class="header">
-<th colspan="4"><p><strong>PcccAdapterConfiguration</strong></p>
-<p><strong>Extends ProtocolAdapterConfiguration</strong></p>
-<p>The PcccAdapterConfiguration extends the common adapter configuration with PCCC specific adapter configuration settings. The AdapterType to use for this adapter is "PCCC".</p></th>
-</tr>
-</thead>
+
 <tbody>
 <tr class="odd">
 <td><strong>Name</strong></td>
@@ -336,12 +332,14 @@ Syntax: A\<file number\>:\<element index\>\[/character offset\]
 <td><strong>Type</strong></td>
 <td><strong>Comments</strong></td>
 </tr>
+
 <tr class="even">
 <td>Controllers</td>
 <td>PLCs servers configured for this adapter. The PCCC source using the adapter must have a reference to one of these in its AdapterController attribute.</td>
 <td>Map[String,<a href="#pccccontrollerconfiguration">PcccControllerConfiguration</a>]</td>
 <td></td>
 </tr>
+
 </tbody>
 </table>
 
@@ -349,19 +347,17 @@ Syntax: A\<file number\>:\<element index\>\[/character offset\]
 
 ## PcccControllerConfiguration
 
+Configuration data for connecting to and reading from sources for controllers using PCCC
+
 <table>
 <colgroup>
-<col style="width: 18%" />
+<col style="width: 19%" />
 <col style="width: 27%" />
 <col style="width: 28%" />
-<col style="width: 25%" />
+<col style="width: 24%" />
 </colgroup>
-<thead>
-<tr class="header">
-<th colspan="4"><p><strong>PcccControllerConfiguration</strong></p>
-<p>Configuration data for connecting to and reading from sources for controllers using PCCC</p></th>
-</tr>
-</thead>
+
+
 <tbody>
 <tr class="odd">
 <td><strong>Name</strong></td>
@@ -369,54 +365,63 @@ Syntax: A\<file number\>:\<element index\>\[/character offset\]
 <td><strong>Type</strong></td>
 <td>Comments</td>
 </tr>
+
 <tr class="even">
 <td>Address</td>
 <td>IP Address of the controller</td>
 <td>String</td>
 <td>IP address in format aaa.bbb.ccc.ddd</td>
 </tr>
+
 <tr class="odd">
 <td>Port</td>
 <td>Port number</td>
 <td>Integer</td>
 <td>Default is 44818</td>
 </tr>
+
 <tr class="even">
 <td>ConnectPath</td>
 <td>Connect path for controller</td>
 <td><a href="#pcccconnectpathconfiguration">PcccConnectPathConfiguration</a></td>
 <td>Optional</td>
 </tr>
+
 <tr class="odd">
 <td>ConnectTimeout</td>
 <td>Timeout for connecting to the controller in milliseconds</td>
 <td>Integer</td>
 <td>Default is 10000</td>
 </tr>
+
 <tr class="even">
 <td>ReadTimeout</td>
 <td>Timeout for reading response packets from the controller in milliseconds</td>
 <td>Integer</td>
 <td>Default is 10000</td>
 </tr>
+
 <tr class="odd">
 <td>WaitAfterConnectError</td>
 <td>Time to wait before (re)connecting after a connection error in milliseconds</td>
 <td>Integer</td>
 <td>Default is 10000</td>
 </tr>
+
 <tr class="even">
 <td>WaitAfterReadError</td>
 <td>Time to wait before reading values from the controller after a read error in milliseconds</td>
 <td>Integer</td>
 <td>Default is 10000</td>
 </tr>
+
 <tr class="odd">
 <td>WaitAfterWriteError</td>
 <td>Time to wait after an error writing request packets to the controller in milliseconds</td>
 <td>Integer</td>
 <td>Default is 10000</td>
 </tr>
+
 <tr class="even">
 <td>OptimizeReads</td>
 <td>Optimized the reading of data from the controller by combining the reads for (near) adjacent fields in a single read request.</td>
@@ -424,12 +429,14 @@ Syntax: A\<file number\>:\<element index\>\[/character offset\]
 <td><p>Default is true</p>
 <p>Optimization reduces the calls made to the controller to read data. When troubleshooting optimization it can be disabled to find specific fields that make the (combined) reads to fail.</p></td>
 </tr>
+
 <tr class="odd">
 <td>MaxReadGap</td>
 <td>When optimization is used this specified the max number of bytes between near adjacent fields that may be combined in a single read.</td>
 <td>Integer</td>
 <td>Default is 32</td>
 </tr>
+
 </tbody>
 </table>
 
@@ -437,19 +444,17 @@ Syntax: A\<file number\>:\<element index\>\[/character offset\]
 
 ## PcccConnectPathConfiguration
 
+Configuration connect path of a controller used for routing
+
 <table>
 <colgroup>
-<col style="width: 18%" />
+<col style="width: 19%" />
 <col style="width: 27%" />
 <col style="width: 28%" />
-<col style="width: 25%" />
+<col style="width: 24%" />
+
 </colgroup>
-<thead>
-<tr class="header">
-<th colspan="4"><p><strong>PcccConnectPathConfiguration</strong></p>
-<p>Configuration connect path of a controller used for routing.</p></th>
-</tr>
-</thead>
+
 <tbody>
 <tr class="odd">
 <td><strong>Name</strong></td>
@@ -457,18 +462,21 @@ Syntax: A\<file number\>:\<element index\>\[/character offset\]
 <td><strong>Type</strong></td>
 <td>Comments</td>
 </tr>
+
 <tr class="even">
 <td>Backplane</td>
 <td>Backplane number</td>
 <td>Integer</td>
 <td>Default is 1</td>
 </tr>
+
 <tr class="odd">
 <td>Slot</td>
 <td>Slot number</td>
 <td>Integer</td>
 <td>Default is 0</td>
 </tr>
+
 </tbody>
 </table>
 

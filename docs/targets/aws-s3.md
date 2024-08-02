@@ -1,5 +1,9 @@
-
 # AWS S3 Target
+
+AwsS3TargetConfiguration extends the type TargetConfiguration with specific configuration data for sending data to an S3 bucket. The Targets configuration element can contain entries of this type, the TargetType of these entries must be set to <strong>"AWS-S3"</strong>
+<p>Requires IAM permission s3:putObject to write to the configured bucket</p>
+
+
 
 [Targets](./targets.md)
 
@@ -12,12 +16,7 @@
 <col style="width: 29%" />
 <col style="width: 23%" />
 </colgroup>
-<thead>
-<tr class="header">
-<th colspan="4"><p>AwsS3TargetConfiguration extends the type TargetConfiguration with specific configuration data for sending data to an S3 bucket. The Targets configuration element can contain entries of this type, the TargetType of these entries must be set to <strong>"AWS-S3"</strong></p>
-<p>Requires IAM permission s3:putObject to write to the configured bucket</p></th>
-</tr>
-</thead>
+
 <tbody>
 <tr class="odd">
 <td><strong>Name</strong></td>

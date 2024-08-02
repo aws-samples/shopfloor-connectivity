@@ -23,6 +23,4 @@
 - [Store and Forward Target](./store-and-forward-target.md)
 
 
-
-
 [^Top](../README.md#toc)

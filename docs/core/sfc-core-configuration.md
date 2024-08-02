@@ -15,7 +15,7 @@
   - [TuningConfiguration](tuning-configuration.md)
   - [AwsIotCredentialProviderClientConfiguration](aws-iot-credential-provider-configuration.md)
   - [ClientProxyConfiguration](client-proxy-configuration.md)
-  - [InProcessConfiguration](in-procecess-configuration.md)
+  - [InProcessConfiguration](in-process-configuration.md)
   - [ServerConfiguration](server-configuration.md)
   - [ChangeFilterConfiguration](change-filter-configuration.md)
   - [ValueFilterConfiguration](value-filter-configuration.md)

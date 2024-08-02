@@ -83,11 +83,6 @@ class SiteWiseAssetHelper(private val client: AwsSiteWiseClient,
         assetDetailsById.map { it.value.assetExternalId() to it.value }.toMap().toMutableMap()
     }
 
-    fun getAlias(assetID: String, propertyID: String): String? = assetDetailsById[assetID]?.assetProperties()?.find { it.id() == propertyID }?.alias()
-
-    fun getPropertyIdByAlias(assetID: String, alias: String): String? = assetDetailsById[assetID]?.assetProperties()?.find { it.alias() == alias }?.id()
-
-
     private fun createAssetModelMeasurementPropertyDefinition(propertyName: String, externalID: String?, channelName: String, channelData: ChannelOutputData): AssetModelPropertyDefinition {
 
         val log = logger.getCtxLoggers(className, "createAssetModelMeasurementPropertyDefinition")
@@ -156,8 +151,6 @@ class SiteWiseAssetHelper(private val client: AwsSiteWiseClient,
 
         val log = logger.getCtxLoggers(className, "setAssetPropertiesAlias")
 
-        val asset = describeAssetWhenReady(assetID)
-
         targetData.sources[source]?.channels?.keys?.forEach { channelName ->
 
             val alias = assetCreationConfiguration.renderAssetPropertyAlias(
@@ -167,6 +160,9 @@ class SiteWiseAssetHelper(private val client: AwsSiteWiseClient,
                 val propertyName = assetCreationConfiguration.renderAssetPropertyName(
                     target = target, source = source, channel = channelName, targetData = targetData)
 
+                // reload latest copy of stable asset as otherwise setting the alias may fail
+                val asset =describeAssetWhenReady(assetID)
+                assetDetailsById[assetID] = asset
                 val property = asset.assetProperties().find { it.name() == propertyName }
                 if (property != null) {
                     log.info("Setting alias \"$alias\" for property $propertyName) \"$alias\" of asset ${asset.assetName()}(${asset.assetId()} for channel \"$channelName\"")
@@ -175,6 +171,8 @@ class SiteWiseAssetHelper(private val client: AwsSiteWiseClient,
                     } catch (e: Exception) {
                         log.error("Error setting alias \"$alias\" for property \"${propertyName}\"  of asset ${asset.assetName()} (${asset.assetId()}) for channel \"$channelName\", ${e.message}")
                     }
+                } else{
+                    log.error("Property \"$propertyName\" not found for asset ${asset.assetName()} (${asset.assetId()}) for channel \"$channelName\"")
                 }
             }
         }
@@ -272,7 +270,15 @@ class SiteWiseAssetHelper(private val client: AwsSiteWiseClient,
         }
         val assetDescription = assetCreationConfiguration.renderAssetDescription(target, source, targetData)
 
-        val assetExternalID = assetCreationConfiguration.renderAssetExternalID(target, source, targetData)
+        var assetExternalID = assetCreationConfiguration.renderAssetExternalID(target, source, targetData)
+
+        if (assetExternalID != null) {
+            val assetForExtId = assetSummaries.find { it.externalId().toString().lowercase() == assetExternalID.toString().lowercase() }
+            if (assetForExtId != null) {
+                log.error("Asset external ID \"$assetExternalID\" for source \"$source\" in target \"$target\" is already in use by asset  \"${assetForExtId.name()}\"")
+                assetExternalID = null
+            }
+        }
 
         val assetTags = assetCreationConfiguration.renderAssetTags(target, source, targetData)
         return createAsset(
@@ -284,8 +290,6 @@ class SiteWiseAssetHelper(private val client: AwsSiteWiseClient,
             targetData = targetData,
             tags = assetTags)
     }
-
-    private fun describeAsset(assetID: String) = client.describeAsset(DescribeAssetRequest.builder().assetId(assetID).build())
 
 
     fun measurementsMapByNameForAsset(asset: DescribeAssetResponse): Map<String, AssetProperty>? {
@@ -416,7 +420,14 @@ class SiteWiseAssetHelper(private val client: AwsSiteWiseClient,
 
         val assetModelName = assetCreationConfiguration.renderAssetModelName(target, source, targetData)
 
-        val assetModelExternalID = assetCreationConfiguration.renderAssetModelExternalID(target, source, targetData)
+        var assetModelExternalID = assetCreationConfiguration.renderAssetModelExternalID(target, source, targetData)
+        if (assetModelExternalID != null) {
+            val assetModelExtId = assetModelSummaries.find { it.externalId().toString().lowercase() == assetModelExternalID.toString().lowercase() }
+            if (assetModelExtId != null) {
+                log.error("Asset model external ID \"$assetModelExternalID\" for source \"$source\" in target \"$target\" is already in use by asset  \"${assetModelExtId.name()}\"")
+                assetModelExternalID = null
+            }
+        }
 
         val assetModelDescription = assetCreationConfiguration.renderAssetModelDescription(target, source, targetData)
 
@@ -563,7 +574,7 @@ fun AwsSiteWiseAssetCreationConfiguration.renderAssetModelPropertyExternalID(tar
         1000,
         targetData.metaDataAtChannelLevel(source, channel))
 
-fun AwsSiteWiseAssetCreationConfiguration.renderAssetPropertyAlias(target: String, source: String, channel: String, assetID : String, targetData: TargetData): String? =
+fun AwsSiteWiseAssetCreationConfiguration.renderAssetPropertyAlias(target: String, source: String, channel: String, assetID: String, targetData: TargetData): String? =
     if (assetPropertyAlias.isNullOrEmpty()) null
     else (renderTemplate(assetPropertyAlias!!, targetData.schedule, source, channel, target, 128, targetData.metaDataAtChannelLevel(source, channel))
         .replace(TEMPLATE_UUID, UUID.randomUUID().toString().replace(TEMPLATE_PRE_POSTFIX, ""))

@@ -58,8 +58,8 @@ open class InstanceFactory<T>(private val config: InProcessConfiguration, privat
             if (e.cause is ProtocolAdapterException){
                 logs.error("Error creating instance of \"${config.factoryClassName}\" because a required class was not fond at ${config.jarFiles?.joinToString()}, ${(e.cause as ProtocolAdapterException).message}")
             } else {
-                logs.errorEx(
-                    "Error creating instance of \"${config.factoryClassName}\" from  ${config.jarFiles?.joinToString()}, cause is ${e.targetException}", e)
+                logs.error(
+                    "Error creating instance of \"${config.factoryClassName}\" from  ${config.jarFiles?.joinToString()}, cause is ${e.targetException}, $e")
             }
 
         }
