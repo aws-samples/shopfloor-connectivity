@@ -60,8 +60,8 @@ class ConfigFileProvider(private val configFile: File, private val configVerific
 
         } catch (e: JsonSyntaxException) {
             val msg = "Error creating custom configuration provider, invalid JSON syntax in configuration"
-            log.errorEx(msg, e.extendedJsonException(configStr))
-            throw ConfigurationException(msg, CONFIG_CUSTOM_CONFIG_PROVIDER)
+            log.error("msg, $e")
+            throw JsonSyntaxException(msg)
         } catch (e: Exception) {
             val msg = "Error creating custom configuration provider"
             log.errorEx(msg, e)
@@ -140,7 +140,9 @@ class ConfigFileProvider(private val configFile: File, private val configVerific
                         }
                     }
                 } catch (e: Exception) {
-                    loggers.errorEx("Error in configuration provider", e)
+                    if ((e !is JsonSyntaxException) && (e !is ConfigurationException) ) {
+                        loggers.errorEx("Error in configuration provider", e)
+                    }
                 }
             }
         }

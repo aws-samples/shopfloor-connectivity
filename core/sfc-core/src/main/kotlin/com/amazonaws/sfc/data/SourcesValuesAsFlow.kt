@@ -66,6 +66,8 @@ class SourcesValuesAsFlow(
 
         if (!fnContinue()) return emptyFlow()
 
+        var initialRead = true
+
         return flow {
             // wait for initialization has been finished
             if (!fnContinue()) initJob?.join()
@@ -98,7 +100,7 @@ class SourcesValuesAsFlow(
                             val result = adapter.read(sourceID, channels)
                             val sourceReadDuration = (systemDateTime().toEpochMilli() - start)
                             taskLogger.trace("Finished reading from source \"$sourceID\", read ${if (result is SourceReadSuccess) "succeeded" else "failed and  took $sourceReadDuration"}")
-                            if (sourceReadDuration > interval.inWholeMilliseconds) {
+                            if (!initialRead && sourceReadDuration > interval.inWholeMilliseconds) {
                                 log.warning("Reading from source \"$sourceID\" took ${sourceReadDuration.toDuration(DurationUnit.MILLISECONDS)}, " +
                                         "which is more than the read interval of $interval${if (schedule != null)" for schedule \"$schedule\"" else ""}")
                             }
@@ -129,7 +131,7 @@ class SourcesValuesAsFlow(
                 }
 
                 // wait for next iteration
-                if (duration > interval) {
+                if (!initialRead && duration > interval) {
                     log.warning("Read cycle took ${duration.inWholeMilliseconds.toDuration(DurationUnit.MILLISECONDS)}, " +
                             "which is more than read interval of $interval ${if (schedule != null)" for schedule \"$schedule\"" else ""}")
                 } else {
@@ -140,6 +142,7 @@ class SourcesValuesAsFlow(
                         }
                     }
                 }
+                initialRead = false
             }
         }.catch { e ->
             if (!e.isJobCancellationException) {
