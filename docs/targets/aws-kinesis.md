@@ -5,7 +5,7 @@ AwsKinesisTargetConfiguration extends the type TargetConfiguration with specific
 <p>Requires IAM permission kinesis:PutRecords for the stream the data is sent to.
 
 
-[Targets](./targets.md)
+[Targets](./README.md)
 
 ## AwsKinesisTargetConfiguration
 

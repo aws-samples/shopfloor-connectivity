@@ -4,7 +4,7 @@
 <br>
 <br>
 
-[Targets](./targets.md)
+[Targets](./README.md)
 
 ## AwsMskTargetConfiguration
 

@@ -10,17 +10,11 @@ Greengrass
 
 Adapters
 - [Rockwell PCCC to S3 sample](../../examples/in-process-pccc-s3/README.md)
-- 
-
 - [Beckhoff ADS to S3 sample](../../examples/in-process-ads-s3/README.md)
-- 
 
 - [Mitsubishi/Melsec SLMP in process sample](../../examples/in-process-slmp-s3/README.md)
 - [Mitsubishi/Melsec SLMP IPC sample](../../examples/ipc-slmp-s3/README.md)
-
-
 - [Siemens S7 to Sitewise sample](../../examples/in-process-s7-sitewise/README.md)
-- 
 
 - [OPCUA to MSK In-Process sample](../../examples/in-process-opcua-msk/README.md)
 - [OPCUA to MSK IPC sample](../../examples/ipc-opcua-msk/README.md)
@@ -42,6 +36,3 @@ Other
 
 Logging
 - [Custom Log Writer Template](../../examples/custom-log-writer/README.md)
-
-
-[^Top](../README.md#toc)

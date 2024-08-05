@@ -86,5 +86,3 @@ A schedule defines a unit of work for the SFC core. It defines the values to rea
 </table>
 
 [SfcTopLevelConfiguration](sfc-top-level-config.md)
-
-[^top](../../README.md#toc)

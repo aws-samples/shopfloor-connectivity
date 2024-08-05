@@ -65,5 +65,3 @@ Configuration for metrics configuration. In order to collect and write metrics t
 
 [SfcTopLevelConfiguration](sfc-top-level-config.md)
 
-[^top](../../README.md#toc)
-

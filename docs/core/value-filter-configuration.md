@@ -80,5 +80,3 @@ Configuration for value filter that let only pass values if they match the filte
 </table>
 
 [SfcTopLevelConfiguration](sfc-top-level-config.md)
-
-[^top](../../README.md#toc)

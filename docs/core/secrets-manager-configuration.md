@@ -87,6 +87,4 @@ Configuration data for reading secrets stored in AWS Secrets manger and storing 
 
 [SfcTopLevelConfiguration](sfc-top-level-config.md)
 
-[^top](../../README.md#toc)
-
 

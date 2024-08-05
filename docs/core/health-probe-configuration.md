@@ -83,5 +83,3 @@ Nothing is returned if the service is not healthy.</td>
 </table>
 
 [SfcTopLevelConfiguration](sfc-top-level-config.md)
-
-[^top](../../README.md#toc)

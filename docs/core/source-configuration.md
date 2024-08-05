@@ -83,5 +83,3 @@ The SourceConfiguration element contains a set of generic source configuration a
 </table>
 
 [SfcTopLevelConfiguration](sfc-top-level-config.md)
-
-[^top](../../README.md#toc)

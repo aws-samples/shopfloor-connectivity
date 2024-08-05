@@ -17,7 +17,7 @@ configuration types
   - [CertificateValidationOptions](#certificatevalidationoptions)
 
 
-[Protocol Adapters](protocol-adapters.md)
+[Protocol Adapters](./README.md)
 
 
 ## OpcuaSourceConfiguration

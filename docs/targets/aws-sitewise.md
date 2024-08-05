@@ -27,7 +27,7 @@ these entries must be set to <strong>"AWS-SITEWISE"</strong></p>
 - [AwsSiteWiseAssetConfiguration](#awssitewiseassetconfiguration)
 - [AwsSiteWiseAssetPropertyConfiguration](#awssitewiseassetpropertyconfiguration)
 
-[Targets](./targets.md)
+[Targets](./README.md)
 
 ## AwsSitewiseTargetConfiguration
 

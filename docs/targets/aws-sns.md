@@ -6,7 +6,7 @@ AwsSnsTargetConfiguration extends the type TargetConfiguration with specific con
 
 
 
-[Targets](./targets.md)
+[Targets](./README.md)
 
 ## AwsSnsTargetConfiguration
 

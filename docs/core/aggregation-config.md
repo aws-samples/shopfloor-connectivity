@@ -156,5 +156,3 @@ Transformation "tr1" will be applied to the aggregated "avg" output for the valu
 </table>
 
 [SfcTopLevelConfiguration](sfc-top-level-config.md)
-
-[^top](../../README.md#toc)

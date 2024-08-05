@@ -14,7 +14,7 @@ broken TCP pipe errors will occur.**
 - [SlmpAdapterConfiguration](#slmpadapterconfiguration)
 - [SlmpControllerConfiguration](#slmpcontrollerconfiguration)
 
-[Protocol Adapters](protocol-adapters.md)
+[Protocol Adapters](./README.md)
 
 ### SLMP channel reading optimization
 In order to reduce the number of interactions between the adapter and the controller  read action for  single BIT, WORD and DOUBLEWORD elements are combined in batches of maximum 192 values using the SLMP Read Random request.   For reading arrays of multiple values, STRING values and values of custom structured types a per channel SLMP Read request is used.

@@ -10,7 +10,7 @@ configuration types.
 - [AdsAdapterConfiguration](#adsadapterconfiguration)
 - [AdsDeviceConfiguration](#adsdeviceconfiguration)
 
-[Protocol Adapters](protocol-adapters.md)
+[Protocol Adapters](./README.md)
 
 ## AdsSourceConfiguration
 

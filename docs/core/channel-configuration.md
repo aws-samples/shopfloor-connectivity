@@ -58,5 +58,3 @@ The ChannelConfiguration element contains a set of generic source configuration 
 </table>
 
 [SfcTopLevelConfiguration](sfc-top-level-config.md)
-
-[^top](../../README.md#toc)

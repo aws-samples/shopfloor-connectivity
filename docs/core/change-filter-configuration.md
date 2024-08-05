@@ -52,5 +52,3 @@ Absolute value if type is "Absolute"</p>
 </table>
 
 [SfcTopLevelConfiguration](sfc-top-level-config.md)
-
-[^top](../../README.md#toc)

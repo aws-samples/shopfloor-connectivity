@@ -10,7 +10,7 @@ AwsSTimestreamTargetConfiguration extends the type TargetConfiguration with spec
 - [AwsTimestreamDimensionConfiguration](#awstimestreamdimensionconfiguration)
 
 
-[Targets](./targets.md)
+[Targets](./README.md)
 
 ## AwsTimestreamTargetConfiguration
 

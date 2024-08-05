@@ -41,5 +41,3 @@ Writer used to write collected metrics data. This writer can be configured as an
 
 [SfcTopLevelConfiguration](sfc-top-level-config.md)
 
-[^top](../../README.md#toc)
-

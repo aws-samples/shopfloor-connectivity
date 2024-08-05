@@ -52,5 +52,3 @@ Configuration data for loading and creating in-process target instances
 </table>
 
 [SfcTopLevelConfiguration](sfc-top-level-config.md)
-
-[^top](../../README.md#toc)

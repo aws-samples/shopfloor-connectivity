@@ -639,5 +639,3 @@ The string must represent a valid instant in UTC</td>
 </table>
 
 [SfcTopLevelConfiguration](sfc-top-level-config.md)
-
-[^top](../../README.md#toc)

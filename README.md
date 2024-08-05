@@ -11,9 +11,11 @@ SFC extends and unifies data collection capabilities additionally to our existin
   <img src="./docs/img/s7-iot-core-mqtt.gif" width="75%"/>
 </p>
 
-**Supported protocols:** `Siemens S7`, `Rockwell PCCC`, `Mitsubishi/Melsec SLMP`, `Beckhoff ADS`, `SNMP`, `OPC-UA`, `MQTT`, `SQL`,` Modbus-TCP`
+**Supported protocols:** [`Siemens S7`](./docs/adapters/s7.md), [`Rockwell PCCC`](./docs/adapters/pccc.md), [`Mitsubishi/Melsec SLMP`](./docs/adapters/slmp.md), [`Beckhoff ADS`](./docs/adapters/ads.md), [`SNMP`](./docs/adapters/snmp.md), [`OPC-UA`](./docs/adapters/opcua.md), [`MQTT`](./docs/adapters/mqtt.md), [`SQL`](./docs/adapters/sql.md), [`Modbus-TCP`](./docs/adapters/modbus.md)
 
-**Supported AWS targets:** `IoT Core HTTP`, `IoT Core`, `Sitewise`, `IoT Analytics`, `Kinesis`, `Firehose`, `Lambda`, `MSK`, `S3`, `SNS`, `SQS`, `Timestream`
+**Supported AWS targets:** [`IoT Core`](./docs/targets/aws-iot-core.md), [`IoT Sitewise`](./docs/targets/aws-sitewise.md), [`IoT Analytics`](./docs/targets/aws-iot-analytics.md), [`Kinesis`](./docs/targets/aws-kinesis.md), [`Firehose`](./docs/targets/aws-kinesis-firehose.md), [`Lambda`](./docs/targets/aws-lambda.md), [`MSK`](./docs/targets/aws-msk.md), [`S3`](./docs/targets/aws-s3.md), [`SNS`](./docs/targets/aws-sns.md), [`SQS`](./docs/targets/aws-sqs.md), [`Timestream`](./docs/targets/aws-timestream.md)
+
+**SFC Docs:** [`/docs/README.md`](./docs/README.md)
 
 &nbsp;
 

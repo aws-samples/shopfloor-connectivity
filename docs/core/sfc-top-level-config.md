@@ -334,6 +334,4 @@ Top level of SFC configuration
 
 </table>
 
-[SFC Core Configuration](sfc-core-configuration.md)
-
-[^top](../../README.md#toc)
+[SFC Core Configuration](./README.md)

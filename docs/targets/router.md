@@ -7,7 +7,7 @@ RouterTargetConfiguration extends the type TargetConfiguration with specific con
 - [RoutesConfiguration](#routesconfiguration)
 
 
-[Targets](./targets.md)
+[Targets](./README.md)
 
 ## RouterTargetConfiguration
 

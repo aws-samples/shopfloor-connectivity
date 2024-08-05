@@ -52,7 +52,5 @@ Proxy configurstion settings
 
 [SfcTopLevelConfiguration](sfc-top-level-config.md)
 
-[^top](../../README.md#toc)
-
 
 

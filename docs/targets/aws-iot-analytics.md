@@ -1,7 +1,7 @@
 
 # AWS IoT Analytics Target
 
-[Targets](./targets.md)
+[Targets](./README.md)
 
 ## AwsIotAnalyticsTargetConfiguration
 

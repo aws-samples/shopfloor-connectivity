@@ -45,5 +45,3 @@ Configured secret in AWS Secrets Manager service to be used to replace placehold
 
 [SfcTopLevelConfiguration](sfc-top-level-config.md)
 
-[^top](../../README.md#toc)
-

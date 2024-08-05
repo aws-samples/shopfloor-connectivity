@@ -9,6 +9,8 @@ configuration types
 - [PcccControllerConfiguration](#pccccontrollerconfiguration)
 - [PcccConnectPathConfiguration](#pcccconnectpathconfiguration)
 
+[Protocol Adapters](./README.md)
+
 ## PCCC Addressing
 
 The following datatype with their addresses can be used as the value of “Address” in a PcccChannel.

@@ -73,5 +73,3 @@ see <a href="#sfc-tuning">SFC Tuning</a> for more details</td>
 </table>
 
 [SfcTopLevelConfiguration](sfc-top-level-config.md)
-
-[^top](../../README.md#toc)

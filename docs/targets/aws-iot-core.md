@@ -5,7 +5,7 @@ AwsIotCoreTargetConfiguration extends the type TargetConfiguration with specific
 Requires IAM permission iot:Publish for the topic the data is published to.
 
 
-[Targets](./targets.md)
+[Targets](./README.md)
 
 ## AwsIotCoreTargetConfiguration
 

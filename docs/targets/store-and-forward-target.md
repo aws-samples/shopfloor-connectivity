@@ -4,7 +4,7 @@ StoreForwardTargetConfiguration extends the type TargetConfiguration with specif
 <br>
 <br>
 
-[Targets](./targets.md)
+[Targets](./README.md)
 
 
 ## StoreForwardTargetConfiguration

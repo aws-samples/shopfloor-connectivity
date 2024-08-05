@@ -106,5 +106,3 @@ aws iot describe-endpoint --endpoint-type iot:CredentialProvider.</p>
 </table>
 
 [SfcTopLevelConfiguration](sfc-top-level-config.md)
-
-[^top](../../README.md#toc)

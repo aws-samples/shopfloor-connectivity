@@ -4,7 +4,7 @@ FileConfiguration extends the type TargetConfiguration with specific configurati
 <br>
 <br>
 
-[Targets](./targets.md)
+[Targets](./README.md)
 
 ## FileConfiguration
 

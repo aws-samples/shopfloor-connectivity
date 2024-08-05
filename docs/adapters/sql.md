@@ -11,7 +11,7 @@ configuration types
 - [SqlAdapterConfiguration](#sqladapterconfiguration)
 - [DbServerConfiguration](#dbserverconfiguration)
 
-[Protocol Adapters](protocol-adapters.md)
+[Protocol Adapters](./README.md)
 
 ## SqlSourceConfiguration
 

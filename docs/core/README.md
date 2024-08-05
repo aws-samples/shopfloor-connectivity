@@ -21,5 +21,3 @@
   - [TransformationOperator](transformation-operator-configuration.md)
   - [TuningConfiguration](tuning-configuration.md)
   - [ValueFilterConfiguration](value-filter-configuration.md)
-
-  [^top](../README.md)

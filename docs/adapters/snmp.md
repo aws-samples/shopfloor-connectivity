@@ -11,7 +11,7 @@ service.
 - [SnmpDeviceConfiguration](#snmpdeviceconfiguration)
 
 
-[Protocol Adapters](protocol-adapters.md)
+[Protocol Adapters](./README.md)
 
 ## SnmpSourceConfiguration
 

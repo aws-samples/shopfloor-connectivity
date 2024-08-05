@@ -157,5 +157,3 @@ Increment when getting timeouts on resubmit channels and available memory is lim
 </table>
 
 [SfcTopLevelConfiguration](sfc-top-level-config.md)
-
-[^top](../../README.md#toc)

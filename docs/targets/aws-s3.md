@@ -5,7 +5,7 @@ AwsS3TargetConfiguration extends the type TargetConfiguration with specific conf
 
 
 
-[Targets](./targets.md)
+[Targets](./README.md)
 
 ## Aws3TargetConfiguration
 

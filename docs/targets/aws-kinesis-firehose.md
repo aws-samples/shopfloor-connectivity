@@ -6,7 +6,7 @@ AwsKinesisFirehoseTargetConfiguration extends the type TargetConfiguration with 
 <p>Requires IAM permission firehose:PutRecordBatch for the delivery stream the data is sent to.</p></th>
 
 
-[Targets](./targets.md)
+[Targets](./README.md)
 
 ## AwsKinesisFirehoseTargetConfiguration
 

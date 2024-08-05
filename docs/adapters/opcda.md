@@ -10,7 +10,7 @@ only be configures as an external IPC Protocol Server.
   - [OpcdaServerConfiguration](#opcdaserverconfiguration)
   - [OpcdaServerConfiguration](#opcdaserverconfiguration)
 
-[Protocol Adapters](protocol-adapters.md)
+[Protocol Adapters](./README.md)
 
 ## OpcdaSourceConfiguration
 

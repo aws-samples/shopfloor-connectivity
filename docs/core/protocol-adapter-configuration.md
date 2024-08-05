@@ -39,4 +39,3 @@ The ProtocolAdapterConfiguration element contains a set of generic adapter confi
 
 [SfcTopLevelConfiguration](sfc-top-level-config.md)
 
-[^top](../../README.md#toc)

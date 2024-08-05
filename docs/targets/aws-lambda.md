@@ -4,7 +4,7 @@ AwsLambdaFunctionConfiguration extends the type TargetConfiguration with specifi
 <p>Requires IAM permission lambda:InvokeFunction for the lambda function that is called.</p>
 
 
-[Targets](./targets.md)
+[Targets](./README.md)
 
 ## AwsLambdaTargetConfiguration
 

@@ -10,7 +10,7 @@ specific configuration types.
 - [ModbusTcpAdapterConfiguration](#modbustcpadapterconfiguration)
 - [ModbusTcpDeviceConfiguration](#modbustcpdeviceconfiguration)
 
-[Protocol Adapters](protocol-adapters.md)
+[Protocol Adapters](./README.md)
 
 ## ModbusSourceConfiguration
 

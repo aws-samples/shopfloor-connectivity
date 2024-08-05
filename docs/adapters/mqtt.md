@@ -10,7 +10,7 @@ configuration types
 - [MqttBrokerConfiguration](#mqttbrokerconfiguration)
 
 
-  [Protocol Adapters](protocol-adapters.md)
+[Protocol Adapters](./README.md)
 
 ## MqttSourceConfiguration
 
