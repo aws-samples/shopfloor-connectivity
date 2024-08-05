@@ -1,4 +1,4 @@
-##Protocol Adapters
+## Protocol Adapters
 
 - [ADS Protocol Configuration (Beckhoff)](./ads.md)
 - [MQTT Protocol Configuration](./mqtt.md)
