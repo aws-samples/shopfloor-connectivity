@@ -1,4 +1,7 @@
 ## Schedule
+
+[SfcTopLevelConfiguration](sfc-top-level-config.md)
+
 <br>
 A schedule defines a unit of work for the SFC core. It defines the values to read from sources, the read interval, data processing, and output targets to send the data to.
 <br>
@@ -76,7 +79,7 @@ A schedule defines a unit of work for the SFC core. It defines the values to rea
 <tr class="odd">
 <td>Aggregation</td>
 <td>Optionally aggregation can be applied to the schedule output data by adding an Aggregation element. The collected values will be buffered and optionally one or more aggregation functions can be applied to these values before sending it to the targets.</td>
-<td><a href="#aggregation">Aggregation</a></td>
+<td><a href="./aggregation-config.md">Aggregation</a></td>
 <td>Default is no aggregation of data</td>
 
 </tr>

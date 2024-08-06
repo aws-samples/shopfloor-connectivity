@@ -2,6 +2,7 @@
 
 Top level of SFC configuration
 
+[SFC Core Configuration](./README.md)
 
 <table>
 	<colgroup>

@@ -9,7 +9,7 @@
 - [AWS S3 Target](./aws-s3.md)
 - [AWS SiteWise Target](./aws-sitewise.md)
 - [AWS SNS Target](./aws-sns.md)
-  [AWS SQS Service Target](./aws-sqs.md)
+- [AWS SQS Service Target](./aws-sqs.md)
 - [AWS Timestream Target](./aws-timestream.md)
 
 ## Local targets
