@@ -109,8 +109,8 @@ class AwsS3TargetConfiguration : AwsServiceConfig, TargetConfiguration() {
         )
 
         ConfigurationException.check(
-            (_bucketName!!.all { it in "abcdefghijklmnopqrstuvwxyxz.-" } &&
-             (_bucketName!![0] !in "-.") &&
+            (_bucketName!!.all { it in "abcdefghijklmnopqrstuvwxyxz.0123456789-" } &&
+             (_bucketName!![0] !in "-.0123456789") &&
              (_bucketName!![_bucketName!!.length - 1] !in "-.")),
             "Name of S3 bucket is invalid",
             CONFIG_BUCKET_NAME,
