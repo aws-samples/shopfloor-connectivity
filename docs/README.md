@@ -1,4 +1,4 @@
-### **`TL;DR`**
+### **`Quicklinks`**
 
 #### SFC Examples
 - [**SFC examples collection**](./examples/README.md)
@@ -13,7 +13,6 @@
 - [**Target Adapters**](./targets/README.md)
 - [**Metrics**](./metrics/README.md)
 
-...\
 ...
 
 SFC Documentation
@@ -29,7 +28,7 @@ process data. It allows customers to collect data from their industrial equipmen
 work best for their requirements. Customers get the cost and functional benefits of specific AWS services and save costs
 on licenses for additional connectivity products.
 
-[^top](#toc)
+[^top](#quicklinks)
 
 ## SFC Components
 
@@ -72,7 +71,7 @@ In order to adapt to customer environments, logging, (dynamic) configuration and
 configurable. Default implementations are provided, but can be replaced by custom ones by implementing a minimal
 interface, and adding the implementation (JAR file) to the configuration.
 
-[^top](#toc)
+[^top](#quicklinks)
 
 ## Target Adapters
 
@@ -146,7 +145,7 @@ access, targets adapters, in a DMZ.
 The SFC core will provide the services, protocol and target adapters, with the required configuration after these are
 bootstrapped, providing a single, monitored and consistent source and location of configuration.
 
-[^top](#toc)
+[^top](#quicklinks)
 
 # High level design overview and tenets
 
@@ -191,7 +190,7 @@ It is also possible to build and configure the following extensions to the SFC C
 - *Metrics*: SFC comes with a metrics collector for to the AWS CloudWatch Metrics service, which can be optionally added
   to the SFC configuration. Custom metrics collectors can be implemented and configured.
 
-[^top](#toc)
+[^top](#quicklinks)
 
 ## Networking
 
@@ -231,7 +230,7 @@ system as the SFC Core, or on external systems to distribute the load and footpr
 the load and footprint of these components, the overall throughput and scalability of the system can be improved. This
 approach also enables better resource utilization and fault tolerance.
 
-[^top](#toc)
+[^top](#quicklinks)
 
 ## Configuration
 
@@ -291,7 +290,7 @@ the target adapters, to read, validate and replace placeholders in a consistent 
 To protect the configuration from unauthorized modification SFC has tooling and an API to sign the configuration data.
 The SFC Core will use the digital signature from the configuration data and reject it verification fails.
 
-[^top](#toc)
+[^top](#quicklinks)
 
 ## Logging
 
@@ -335,7 +334,7 @@ handling health probes. Mechanisms used to manage the service instances, (e.g., 
 these endpoints in their configuration to check the status of a service and recycle instances failing to respond to the
 health probe requests. This approach can help ensure the reliability and availability of microservices-based systems.
 
-[^top](#toc)
+[^top](#quicklinks)
 
 ## Data types and formats
 
@@ -401,7 +400,7 @@ The components don’t have any runtime environment-specific dependencies, they 
 - *AWS IoT Greengrass v2 components* or containers
 - *Docker* or *Kubernetes* containers
 
-[^top](#toc)
+[^top](#quicklinks)
 
 ## In-process and IPC deployment models
 
@@ -475,7 +474,7 @@ intermediate target. The same interface can be used to query the data that the r
 This can be just the serial number, the complete message or no data, for acknowledged, dis-acknowledged or error
 messages.
 
-[^top](#toc)
+[^top](#quicklinks)
 
 ## Target chaining and buffering
 
@@ -507,7 +506,7 @@ store-forward-target. It will use the returned results from the targets to buffe
 to the destinations of the targets behind the store and forward target. When the targets can resume delivering data to
 their destinations the store and forward target will resubmit the data to these targets.
 
-[^top](#toc)
+[^top](#quicklinks)
 
 ## Store and forward target
 
@@ -536,7 +535,7 @@ The store and forward target using to following logic:
 - Messages for which an ERROR is received are not stored and in case they are buffered removed from the store as this
   means they cannot be processed by the target.
 
-[^top](#toc)
+[^top](#quicklinks)
 
 ## Retention strategies
 
@@ -600,7 +599,7 @@ Used cases for the router target are:
     <em>Fig. 14. SFC Router target - routing to a final `success` target</em>
 </p>
 
-[^top](#toc)
+[^top](#quicklinks)
 
 # Output data format
 
@@ -689,7 +688,7 @@ Source data -> Transformation(value)(*) -> Change Filter (*) -> Value Filter(*) 
 
 (`*`) optional, only applied if configured
 
-[^top](#toc)
+[^top](#quicklinks)
 
 # Data Filtering
 
@@ -860,7 +859,7 @@ class that implements the type-specific model of the data. These classes can opt
 validate the loaded data, which can raise a configuration exception, including a detailed description if the data is not
 valid according to the validation logic.
 
-[^top](#toc)
+[^top](#quicklinks)
 
 ## Configuration placeholders
 
@@ -895,7 +894,7 @@ existing file, or as a reference to a GreenGrass deployment in which case the Gr
 used. If a path to a file with a private key is used then there is also an option to automatically generate this file
 containing the secret key at first use, if it does not exist.
 
-[^top](#toc)
+[^top](#quicklinks)
 
 ## Deferred placeholder replacement
 
@@ -1216,7 +1215,7 @@ infrastructure will intercept and blank the values of secrets configured in the 
 Instead of writing to the console custom log writer can be implemented and [configured](./core/sfc-top-level-config.md). Details on how to implement a
 custom log writer can be found in section [Custom Logging](#custom-logging).
 
-[^top](#toc)
+[^top](#quicklinks)
 
 # Metrics collection
 
@@ -1297,7 +1296,7 @@ The following metric values are collected:
 | WriteErrors             | Number of failed writes                                       | All Targets                         |
 | Writes                  | Writes by targets                                             | All targets                         |
 
-[^top](#toc)
+[^top](#quicklinks)
 
 # Securing Network Traffic between SFC components
 
@@ -1412,7 +1411,7 @@ openssl x509 -in client-cert.pem -noout -text
 
 ```
 
-[^top](#toc)
+[^top](#quicklinks)
 
 # Providing session credentials for targets accessing AWS Services
 
@@ -1454,7 +1453,7 @@ As targets may need to access the internet over a proxy server, to obtain the se
 and to make the required AWS service calls, the client configuration referred by the target can also include proxy
 configuration information.
 
-[^top](#toc)
+[^top](#quicklinks)
 
 # Securing the configuration
 
@@ -1532,7 +1531,7 @@ fun verify(configJson: String, publicKeyFile: File): Boolean
 fun verify(configJson: String, publicKey: PublicKey): Boolean
 ```
 
-[^top](#toc)
+[^top](#quicklinks)
 
 # Output Structure Transformation
 
@@ -1667,7 +1666,7 @@ metadata:
 #end
 ```
 
-[^top](#toc)
+[^top](#quicklinks)
 
 # Service Health Probes
 
@@ -1743,7 +1742,7 @@ locations:
 
 For details on the HealthProbe configuration see HealthProbeConfiguration table section in this document
 
-[^top](#toc)
+[^top](#quicklinks)
 
 # OPCUA Alarm and Events types
 
@@ -1844,7 +1843,7 @@ The collected data from the event and data nodes is shown below.
 }
 ```
 
-[^top](#toc)
+[^top](#quicklinks)
 
 The snippet below shows the configuration of an OPCUA adapter with a profile named "CustomEventsProfile" that defines
 two additional event types, "CustomEventType1" and "CustomEventType2", each with two properties. CustomEventType1
@@ -2038,7 +2037,7 @@ specified base directory for that server.
 }
 ```
 
-[^top](#toc)
+[^top](#quicklinks)
 
 # SFC tuning
 
@@ -2172,7 +2171,7 @@ The `sfc-main` application has the following command-line arguments:
 | -trace                  | Set log output level to most detailed trace level (Info, warning, error, and detailed trace messages)                                        |
 | -warning                | Set log output level to warning level. (Error and warning messages)                                                                          |
 
-[^top](#toc)
+[^top](#quicklinks)
 
 # Running the JVM protocol adapters as an IPC Service
 
@@ -2283,7 +2282,7 @@ To protect the ICP traffic between the core and the adapter SSL can be used. For
 parameter must be used to specify the pathname to the certificate and the key file. If the -conf parameter is used then
 the values of the Cert and Key elements of the server referred to in the ProtocolSource/Server element will be used.
 
-[^top](#toc)
+[^top](#quicklinks)
 
 # Running targets as an IPC Service
 
@@ -2413,7 +2412,7 @@ the values of the Cert and Key elements of the server referred to in the Protoco
 - Note that the SFC configuration file config.json in the config-docker directory uses ${name} placeholders, which are
   replaced by the environment variables set from the docker file for the container running the sfc-main core process.
 
-[^top](#toc)
+[^top](#quicklinks)
 
 # Running protocol adapters in-process
 
@@ -2516,7 +2515,7 @@ SFC_DEPLOYMENT_DIR: Directory in which deployment packed is deployed, with the s
 
 ```
 
-[^top](#toc)
+[^top](#quicklinks)
 
 # Running targets in-process
 
@@ -2658,7 +2657,7 @@ configuration file.</u>*
 
 ```
 
-[^top](#toc)
+[^top](#quicklinks)
 
 # Metrics Collection
 
@@ -2775,7 +2774,7 @@ The jar files are part of the target deployment and can be found in the lib dire
 specify the path to the jar files it is recommended to use a placeholder, instead of hard-coding, the directory where
 the adapter, and targets, are deployed and set an environment variable for this directory.
 
-[^top](#toc)
+[^top](#quicklinks)
 
 # Extending the SFC Framework
 
@@ -2844,7 +2843,7 @@ timestamp. The SFC core will automatically log these errors.
 When the SFC core is stopped it will create the adapter stop method to let the adapter cleanup resources or close any
 sessions.
 
-[^top](#toc)
+[^top](#quicklinks)
 
 # Creating in-process adapter instances
 
@@ -2997,7 +2996,7 @@ fun createMqttAdapter(configReader: ConfigReader, logger: Logger): ProtocolAdapt
 The main method of the server application can simply create an instance of the class, passing the command line
 parameters which are parsed consistently for all servers and call the run method to run the service.
 
-[^top](#toc)
+[^top](#quicklinks)
 
 # Custom Configuration Handlers
 
@@ -3032,7 +3031,7 @@ These values are:
 - configVerificationKey: PublicKey? Used to verify the content of the configuration
 - logger: Logger, Logger log results of handler
 
-[^top](#toc)
+[^top](#quicklinks)
 
 # Custom Logging
 
@@ -3058,7 +3057,7 @@ fun newInstance(vararg createParameters: Any?): ConfigWriter?
 A single value is through createParameters by the core when creating an in-process instance of the writer which is the
 configuration that may contain specific section for the type of the writer.
 
-[^top](#toc)
+[^top](#quicklinks)
 
 # Custom Metric Writers
 
@@ -3119,7 +3118,7 @@ class AwsCloudWatchMetricsWriterService : ServiceMain() {
 The method creating the instance of the writer is provided as function parameter of the createIpcMetricsServer method.
 This method is receiving a config reader and a logger instance.
 
-[^top](#toc)
+[^top](#quicklinks)
 
 # .NET Core based protocol adapters
 
@@ -3273,7 +3272,7 @@ public sealed class OpcdaProtocolService : ProtocolServiceMain
     }
 ```
 
-[^top](#toc)
+[^top](#quicklinks)
 
 ## Service
 
