@@ -1,4 +1,4 @@
-# Examples
+# SFC Example Collection
 
 
 - [Quickstart Lab](../../README.md#quickstart-example)

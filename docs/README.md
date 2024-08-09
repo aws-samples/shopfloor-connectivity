@@ -15,9 +15,6 @@
 
 ...
 
-SFC Documentation
-=================
-
 # Introduction
 
 Shop Floor Connectivity (SFC) is a data ingestion technology that can deliver data to multiple AWS Services.

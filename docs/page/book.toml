@@ -1,0 +1,18 @@
+[book]
+authors = ["Hubert Asamer"]
+language = "en"
+multilingual = false
+src = "src"
+title = "Shop Floor Connectivity - SFC"
+
+[build]
+build-dir = "book"                # the directory where the output is placed
+use-default-preprocessors = false  # use the default preprocessors
+extra-watch-dirs = []             # directories to watch for triggering builds
+
+[output.html]
+additional-css = ["theme/pagetoc.css"]
+additional-js = ["theme/pagetoc.js"]
+
+[output.html.search]
+limit-results = 10
