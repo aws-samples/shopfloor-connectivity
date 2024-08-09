@@ -121,5 +121,5 @@ We will create step by step a working SFC environment with our UX Config Provide
 | pushed      | GET    |         | Int     | get the current pushed config   |
 | hostname    | GET    |         | json    | get hostname and IP             |
 
-[Examples](../../docs/examples/examples.md)
+[Examples](../../docs/examples/README.md)
 

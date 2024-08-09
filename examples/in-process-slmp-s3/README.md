@@ -189,4 +189,4 @@ recommended.
 
 [^top](#sfc-example-in-process-configuration-for-mitsubishimelsec-slmp-to-amazon-s3)
 
-[Examples](../../docs/examples/examples.md)
+[Examples](../../docs/examples/README.md)

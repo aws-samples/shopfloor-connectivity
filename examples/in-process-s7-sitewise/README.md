@@ -246,4 +246,4 @@ deleted. Using the temporary credentials provided through a configured
 AwsIotCredentialProviderClient for production environment is strongly
 recommended.
 
-[Examples](../../docs/examples/examples.md)
+[Examples](../../docs/examples/README.md)

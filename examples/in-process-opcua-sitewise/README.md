@@ -480,4 +480,4 @@ workshop, remember to clean up your resources afterwards to avoid unwanted charg
 3. Click **Delete**
 
 
-[Examples](../../docs/examples/examples.md)
+[Examples](../../docs/examples/README.md)
