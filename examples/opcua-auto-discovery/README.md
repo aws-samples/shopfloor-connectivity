@@ -126,4 +126,4 @@ process.
 
 The file opcua-auto-discovery-config.json is included as an example and starting point for creating a configuration file leveraging the auto discover configuration provider.
 
-[Examples](../../docs/examples/examples.md)
+[Examples](../../docs/examples/README.md)

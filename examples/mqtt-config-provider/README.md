@@ -178,4 +178,4 @@ is received on the configured topic.
 </tbody>  
 </table>
 
-[Examples](../../docs/examples/examples.md)
+[Examples](../../docs/examples/README.md)

@@ -289,4 +289,4 @@ Adapter config [look here](src/main/resources/conf-test-csvfile.json).
   <img src="img/CsvFileConfiguration.png" width="50%"/>
 </p>
 
-[Examples](../../docs/examples/examples.md
+[Examples](../../docs/examples/README.md)

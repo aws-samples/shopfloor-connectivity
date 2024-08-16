@@ -2,4 +2,4 @@
 
 Custom Config provide template
 
-[Examples](../../docs/examples/examples.md)
+[Examples](../../docs/examples/README.md)

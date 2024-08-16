@@ -381,7 +381,6 @@ Metadata at channel-level will be added to the values under a metadata-level nod
     <em>Fig. 6. SFC metadata concept</em>
 </p>
 
-## `TODO`: map SFC metadata approach to Unified Namespace (UNS) & IDF
 
 # Deployment
 
