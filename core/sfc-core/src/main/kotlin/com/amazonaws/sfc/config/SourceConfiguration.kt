@@ -54,6 +54,11 @@ class SourceConfiguration : BaseSourceConfiguration() {
     val channelTimestampAdjustment: Long
         get() = _channelTimestampAdjustment ?: 0
 
+    @SerializedName(CONFIG_COMPOSE)
+    protected var _compose: Map<String, List<String>>? = null
+    val compose
+        get() = _compose?: emptyMap()
+
 
     /**
      * Validates configuration
@@ -101,8 +106,9 @@ class SourceConfiguration : BaseSourceConfiguration() {
     companion object {
         private val default = SourceConfiguration()
 
-        private const val CONFIG_SOURCE_TIMESTAMP_ADJUSTMENT = "SourceTimestampAdjustment"
-        private const val CONFIG_CHANNEL_TIMESTAMP_ADJUSTMENT = "ChannelTimestampAdjustment"
+        const val CONFIG_SOURCE_TIMESTAMP_ADJUSTMENT = "SourceTimestampAdjustment"
+        const val CONFIG_CHANNEL_TIMESTAMP_ADJUSTMENT = "ChannelTimestampAdjustment"
+        const val CONFIG_COMPOSE = "Compose"
 
         fun create(name: String = default._name,
                    description: String = default._description,

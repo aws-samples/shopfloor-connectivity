@@ -38,6 +38,7 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ClosedSendChannelException
 import kotlinx.coroutines.channels.SendChannel
 import java.io.Closeable
+import java.time.Instant
 import kotlin.time.Duration
 
 
@@ -173,7 +174,7 @@ class ScheduleReader(
             Dispatchers.IO,
             logger = logger
         ) { (protocolID, reader) ->
-            readProtocolTask(protocolID, reader, readResultsChannel){
+            readProtocolTask(protocolID, reader, readResultsChannel) {
                 !closing
             }
         }
@@ -244,13 +245,13 @@ class ScheduleReader(
 
                 val sourceTimestampAdjustment = config.sources[sourceID]?.sourceTimestampAdjustment ?: 0L
 
-                if ( sourceTimestampAdjustment != 0L) {
+                if (sourceTimestampAdjustment != 0L) {
                     sourceReadResult.timestamp = sourceReadResult.timestamp.plusMillis(sourceTimestampAdjustment)
                 }
 
                 val channelTimestampAdjustment = config.sources[sourceID]?.channelTimestampAdjustment ?: 0L
-                if ( channelTimestampAdjustment != 0L) {
-                    sourceReadResult.values.values.forEach { readValue->
+                if (channelTimestampAdjustment != 0L) {
+                    sourceReadResult.values.values.forEach { readValue ->
                         if (readValue.timestamp != null) {
                             readValue.timestamp = readValue.timestamp?.plusMillis(channelTimestampAdjustment)
                         }
@@ -318,16 +319,19 @@ class ScheduleReader(
             val readValues = selectSuccessfulSourceReadValues(result)
 
             // apply configured transformations on the input data
-            val transformedData = applyTransformation(readValues)
+            val transformedData: Map<String, SourceReadSuccess> = applyTransformation(readValues)
 
             // map values from all sources
-            val filteredData = applyFilters(transformedData)
+            val filteredData: Map<String, SourceReadSuccess> = applyFilters(transformedData)
 
-            if (filteredData.isNotEmpty()) {
+            // compose and decompose channels
+            val restructuredData: Map<String, SourceReadSuccess> = restructureChannels(filteredData)
+
+            if (restructuredData.isNotEmpty()) {
 
                 // send to aggregator for aggregation
                 if (schedule.isAggregated) {
-                    (aggregationChannel as Channel?)?.submit(filteredData, config.tuningConfiguration.aggregatorChannelTimeout) { event ->
+                    (aggregationChannel as Channel?)?.submit(restructuredData, config.tuningConfiguration.aggregatorChannelTimeout) { event ->
                         channelSubmitEventHandler(
                             event = event,
                             channelName = "$className:aggregationChannel",
@@ -336,11 +340,10 @@ class ScheduleReader(
                             tuningChannelTimeoutName = TuningConfiguration.CONFIG_AGGREGATOR_CHANNEL_TIMEOUT,
                             log = log
                         )
-
                     }
                 } else {
                     // no aggregation, combine with timestamps and send to output writer
-                    val outputValues = buildOutputValues(schedule, filteredData)
+                    val outputValues = buildOutputValues(schedule, restructuredData)
                     try {
                         (readerOutputChannel as Channel).submit(outputValues, config.tuningConfiguration.writerInputChannelTimeout) { event ->
                             channelSubmitEventHandler(
@@ -372,6 +375,114 @@ class ScheduleReader(
         }
     }
 
+
+    private fun restructureChannels(data: Map<String, SourceReadSuccess>): Map<String, SourceReadSuccess> {
+        if (data.isEmpty()) return data
+        val decomposed = decomposeChannelValues(data)
+        return composeChannels(decomposed)
+    }
+
+    private fun decomposeChannelValues(data: Map<String, SourceReadSuccess>): Map<String, SourceReadSuccess> {
+
+        fun decomposeStructuredValue(name: String, value: Any?, timestamp: Instant?, y: MutableMap<String, ChannelReadValue>) {
+            if ((value != null) && (value is Map<*, *>)) {
+                (value).forEach { (k, v) ->
+                    // nested structures
+                    if (v is Map<*, *>) decomposeStructuredValue("$name.$k", v, timestamp, y)
+                    else y["$name.${k.toString()}"] = ChannelReadValue(v, timestamp)
+                }
+            }
+        }
+
+        // map indexed by source, entry contains list of channels that need to be decomposed into separate values
+        val decomposedSourceChannels: Map<String, Set<String>> = data.keys.map { source ->
+            val sourceConfig: SourceConfiguration? = sources[source]
+            val decomposedSourceChannels: Set<String> = sourceConfig?.channels?.filter { it.value.decompose }?.keys ?: emptySet()
+            source to decomposedSourceChannels
+        }.toMap()
+
+        // no compositions, just return the data
+        if (decomposedSourceChannels.values.flatten().isEmpty()) return data
+
+        return data.map { (source, sourceData: SourceReadSuccess) ->
+
+            val sourceDecomposedChannels = decomposedSourceChannels[source]
+
+            source to if (!sourceDecomposedChannels.isNullOrEmpty()) {
+
+                val channelValues: MutableMap<String, ChannelReadValue> = sourceData.values.toMutableMap()
+                sourceDecomposedChannels.forEach { ch ->
+                    val value = channelValues[ch]
+                    if (value != null) {
+                        decomposeStructuredValue(ch, value.value, value.timestamp, channelValues)
+                    }
+                }
+
+                // remove decomposed channels
+                sourceDecomposedChannels.forEach {
+                    if (channelValues[it]?.value is Map<*, *>) channelValues.remove(it)
+                }
+                SourceReadSuccess(channelValues.toMap(), sourceData.timestamp)
+
+            } else {
+                // no decompositions fot this source
+                sourceData
+            }
+        }.toMap()
+
+
+    }
+
+
+    private fun composeChannels(dec: Map<String, SourceReadSuccess>): Map<String, SourceReadSuccess> {
+        val compositionChannels: List<String> = dec.keys.flatMap { source -> config.sources[source]?.compose?.values ?: emptyList() }.flatten()
+
+        if (compositionChannels.isEmpty()) return dec
+
+
+        return dec.map { (source: String, sourceData: SourceReadSuccess) ->
+
+            val sourceCompositions = config.sources[source]?.compose ?: emptyMap()
+
+            if (sourceCompositions.isNotEmpty()) {
+
+                val sourceValues = sourceData.values.toMutableMap()
+
+                sourceCompositions.forEach { (structureName, channelIDs) ->
+                    val struct = buildStructure(channelIDs, sourceValues, source)
+                    if (struct.isNotEmpty()) {
+                        sourceValues[structureName] = ChannelReadValue(struct, sourceData.timestamp)
+                    }
+                }
+
+                // remove channels used by composition
+                compositionChannels.forEach {
+                    sourceValues.remove(it)
+                }
+
+                source to SourceReadSuccess(sourceValues, sourceData.timestamp)
+
+            } else {
+                source to dec[source]!!
+            }
+
+        }.toMap()
+    }
+
+
+    private fun buildStructure(channelIDs: List<String>,
+                               sourceValues: MutableMap<String, ChannelReadValue>,
+                               source: String) = sequence {
+        channelIDs.forEach { channelID ->
+            val channelValue = sourceValues[channelID]
+            if (channelValue != null) {
+                val channelConfiguration = sources[source]?.channels?.get(channelID)
+                val name = channelConfiguration?.name ?: channelID
+                yield(name to channelValue.value)
+            }
+        }
+    }.toMap()
+
     private fun selectSuccessfulSourceReadValues(readResult: ReadResult) =
         readResult.filter { it.value is SourceReadSuccess && (it.value as SourceReadSuccess).values.isNotEmpty() }.map {
             it.key to it.value as SourceReadSuccess
@@ -379,6 +490,8 @@ class ScheduleReader(
 
 
     private fun applyFilters(data: Map<String, SourceReadSuccess>): Map<String, SourceReadSuccess> {
+
+        if (data.isEmpty()) return data
 
         val noChangeFiltersConfigured = config.changeFilters.isEmpty()
         val noValueFiltersConfigured = config.valueFilters.isEmpty()
@@ -457,17 +570,19 @@ class ScheduleReader(
     }
 
     // Applies configured transformation on the input data
-    private suspend fun applyTransformation(readValues: Map<String, SourceReadSuccess>): Map<String, SourceReadSuccess> {
+    private suspend fun applyTransformation(data: Map<String, SourceReadSuccess>): Map<String, SourceReadSuccess> {
+
+        if (data.isEmpty()) return data
 
         val context = buildScope("ApplyTransformations")
 
         // No transformations, return input data
         if (!scheduleHasTransformations) {
-            return readValues
+            return data
         }
 
         // Apply transformations
-        return readValues.map { result ->
+        return data.map { result ->
 
             val sourceID = result.key
             val channels = sources[sourceID]?.channels ?: emptyMap()

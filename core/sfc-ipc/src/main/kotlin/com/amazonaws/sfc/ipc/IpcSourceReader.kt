@@ -8,6 +8,7 @@ import com.amazonaws.sfc.config.*
 import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_AWS_IOT_CREDENTIAL_PROVIDER_CLIENTS
 import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_CHANGE_FILTER
 import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_CHANGE_FILTERS
+import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_DECOMPOSE_CHANNEL_VALUE
 import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_DESCRIPTION
 import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_ELEMENT_NAMES
 import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_LOG_LEVEL
@@ -29,6 +30,9 @@ import com.amazonaws.sfc.config.BaseSourceConfiguration.Companion.CONFIG_SOURCE_
 import com.amazonaws.sfc.config.ChannelConfiguration.Companion.CONFIG_TRANSFORMATION
 import com.amazonaws.sfc.config.ProtocolAdapterConfiguration.Companion.CONFIG_PROTOCOL_ADAPTER_SERVER
 import com.amazonaws.sfc.config.ProtocolAdapterConfiguration.Companion.CONFIG_PROTOCOL_ADAPTER_TYPE
+import com.amazonaws.sfc.config.SourceConfiguration.Companion.CONFIG_CHANNEL_TIMESTAMP_ADJUSTMENT
+import com.amazonaws.sfc.config.SourceConfiguration.Companion.CONFIG_COMPOSE
+import com.amazonaws.sfc.config.SourceConfiguration.Companion.CONFIG_SOURCE_TIMESTAMP_ADJUSTMENT
 import com.amazonaws.sfc.data.JsonHelper
 import com.amazonaws.sfc.data.ReadResultConsumer
 import com.amazonaws.sfc.data.SourceValuesReader
@@ -251,7 +255,12 @@ class IpcSourceReader(
         val sources = (configRaw[CONFIG_SOURCES] as Map<*, *>).filter { source ->
             val serverForSource = sourceToServerMap[source.key]
             usedServers.contains(serverForSource)
-        }
+        }.map{ (sourceID, source) ->
+            val s = source as MutableMap<*,*>
+            listOf(CONFIG_COMPOSE, CONFIG_SOURCE_TIMESTAMP_ADJUSTMENT, CONFIG_CHANNEL_TIMESTAMP_ADJUSTMENT).forEach { s.remove(it) }
+            sourceID to s
+        }.toMap()
+
 
         return removeChannelDataNotUsedByAdapter(sources)
 
@@ -268,6 +277,7 @@ class IpcSourceReader(
                 channel.remove(CONFIG_META_DATA)
                 channel.remove(CONFIG_CHANGE_FILTER)
                 channel.remove(CONFIG_VALUE_FILTER)
+                channel.remove(CONFIG_DECOMPOSE_CHANNEL_VALUE)
             }
         }
         return sources

@@ -6,6 +6,7 @@ package com.amazonaws.sfc.config
 
 import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_CHANGE_FILTER
 import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_CONDITION_FILTER
+import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_DECOMPOSE_CHANNEL_VALUE
 import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_DESCRIPTION
 import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_NAME
 import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_VALUE_FILTER
@@ -84,6 +85,11 @@ open class ChannelConfiguration : Validate {
     protected var _conditionFilterID: String? = null
     val conditionFilterID: String?
         get() = _conditionFilterID
+
+    @SerializedName(CONFIG_DECOMPOSE_CHANNEL_VALUE)
+    protected var _decompose : Boolean = false
+    val decompose
+        get() = _decompose
 
 
     /**

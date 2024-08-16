@@ -11,9 +11,33 @@ SFC extends and unifies data collection capabilities additionally to our existin
   <img src="./docs/img/s7-iot-core-mqtt.gif" width="75%"/>
 </p>
 
-**Supported protocols:** [`Siemens S7`](./docs/adapters/s7.md), [`Rockwell PCCC`](./docs/adapters/pccc.md), [`Mitsubishi/Melsec SLMP`](./docs/adapters/slmp.md), [`Beckhoff ADS`](./docs/adapters/ads.md), [`SNMP`](./docs/adapters/snmp.md), [`OPC-UA`](./docs/adapters/opcua.md), [`MQTT`](./docs/adapters/mqtt.md), [`SQL`](./docs/adapters/sql.md), [`Modbus-TCP`](./docs/adapters/modbus.md)
+[**Supported protocols:**](./docs/adapters/README.md)
+- [Beckhoff ADS](./docs/adapters/ads.md)
+- [MQTT](./docs/adapters/mqtt.md), 
+- [Mitsubishi/Melsec SLMP](./docs/adapters/slmp.md)-
+- [Modbus-TCP](./docs/adapters/modbus.md)
+- [OPC-UA](./docs/adapters/opcua.md), 
+- [Rockwell PCCC](./docs/adapters/pccc.md)
+- [SNMP](./docs/adapters/snmp.md),
+- [SQL](./docs/adapters/sql.md),
+- [Siemens S7](./docs/adapters/s7.md)
 
-**Supported AWS targets:** [`IoT Core`](./docs/targets/aws-iot-core.md), [`IoT Sitewise`](./docs/targets/aws-sitewise.md), [`IoT Analytics`](./docs/targets/aws-iot-analytics.md), [`Kinesis`](./docs/targets/aws-kinesis.md), [`Firehose`](./docs/targets/aws-kinesis-firehose.md), [`Lambda`](./docs/targets/aws-lambda.md), [`MSK`](./docs/targets/aws-msk.md), [`S3`](./docs/targets/aws-s3.md), [`SNS`](./docs/targets/aws-sns.md), [`SQS`](./docs/targets/aws-sqs.md), [`Timestream`](./docs/targets/aws-timestream.md)
+[**Supported  targets:** ](./docs/targets/README.md)
+
+- [AWS IoT Analytics](./docs/targets/aws-iot-analytics.md)
+- [AWS IoT Core](./docs/targets/aws-iot-core.md)
+- [AWS IoT Sitewise](./docs/targets/aws-sitewise.md)
+- [AWS Kinesis Firehose](./docs/targets/aws-kinesis-firehose.md)
+- [AWS Kinesis](./docs/targets/aws-kinesis.md)
+- [AWS Lambda](./docs/targets/aws-lambda.md)
+- [AWS MSK](./docs/targets/aws-msk.md)
+- [AWS S3](./docs/targets/aws-s3.md)
+- [AWS SNS](./docs/targets/aws-sns.md)
+- [AWS SQS](./docs/targets/aws-sqs.md)
+- [AWS Timestream](./docs/targets/aws-timestream.md)
+- [Debug Terminal](./docs/targets/debug.md)
+- [File system](./docs/targets/file.md)
+- [MQTT](./docs/targets/mqtt.md)
 
 **SFC Docs:** [`/docs/README.md`](./docs/README.md)
 
@@ -40,7 +64,7 @@ The SFC core will provide the services, protocol and target adapters, with the r
 </p>
 
 ## Documentation
-Read more in the [`SFC documentation`](./docs/README.md)
+Read more in the [SFC documentation](./docs/README.md)
 
 
 ## Quickstart Example
@@ -49,7 +73,7 @@ Read more in the [`SFC documentation`](./docs/README.md)
 
 ### Installation
 
-In this Quick start you will set up following architecture: A local SFC installation will receive data from an OPC-UA server and send it according to its configuration to an S3 Bucket. *As a side note here: SFC can deal with more industrial protocols - [have a look at the docs here!](docs/adapters/protocol-adapters.md)*
+In this Quick start you will set up following architecture: A local SFC installation will receive data from an OPC-UA server and send it according to its configuration to an S3 Bucket. *As a side note here: SFC can deal with more industrial protocols - [have a look at the docs here!](docs/adapters/README.md)*
 
 At first, we have to download and extract the SFC bundles. These are precompiled executables to get started quickly:
 

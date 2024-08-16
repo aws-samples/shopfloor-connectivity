@@ -347,6 +347,9 @@ the SFC can transform every individual value that is read from a protocol adapte
 standardize data values and types read from different devices to be delivered in a consistent way to the consuming
 target adapters. The SFC framework comes with a set of 80 transformation operators.
 
+A source configuration can be configured to compose structured values from selected individual from that source. Channels, containing structures values,
+can be configured to be decomposed into individual values in the output.
+
 The SFC core can also aggregate the data into batches and apply aggregation function to that data, which then can be
 sent instead of, or with the individual values. This can be used to reduce the data volume by sending only the output of
 selected aggregation functions or the number of data messages to the consuming targets. Additionally, transformations,
@@ -676,6 +679,7 @@ steps:
   values and/or the collected values.
 - Data transformations are applied on the aggregated data output values if a transformation is configured for that
   specific output.
+- Composition of values into structures or decomposing from structures into structures is applied based on source and channel configurations.
 - Data values are named according to their configured names. Metadata and timestamp information is added at configured
   levels (top, source and value) as configured.
 - The data is transmitted to the configured targets where additional buffering or target specific processing is done.

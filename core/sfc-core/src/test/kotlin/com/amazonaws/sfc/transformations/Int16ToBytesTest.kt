@@ -16,7 +16,7 @@ class Int16ToBytesTest {
     @Test
     fun `create and validate`() {
         Assertions.assertDoesNotThrow {
-            Fahrenheit.create().validate()
+            Int16ToBytes.create().validate()
         }
     }
 

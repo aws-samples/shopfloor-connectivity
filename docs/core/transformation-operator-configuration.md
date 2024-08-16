@@ -77,11 +77,40 @@ A transformation operator consists of an operator name and an optional operand. 
 </tr>
 
 <tr class="odd">
+<td>BytesToDoubleBE</td>
+<td>Converts array of 8 bytes to a float value (Big-Endian)</td>
+<td>Datatype: byte[8]</td>
+<td></td>
+</tr>
+
+<tr class="even">
+<td>BytesToDoubleLE</td>
+<td>Converts array of 8 bytes to a float value (Little-Endian)</td>
+<td>Datatype: byte[8]</td>
+<td></td>
+</tr>
+
+<tr class="odd">
+<td>BytesToFloatBE</td>
+<td>Converts array of 4 bytes to a float value (Big-Endian)</td>
+<td>Datatype: byte[4]</td>
+<td></td>
+</tr>
+
+<tr class="even">
+<td>BytesToFloatLE</td>
+<td>Converts array of 4 bytes to a float value (Little-Endian)</td>
+<td>Datatype: byte[4]</td>
+<td></td>
+</tr>
+
+<tr class="odd">
 <td>BytesToInt16</td>
 <td>Converts array of two bytes to a 16-bit integer (Big-Endian)</td>
 <td>Datatype: byte[2]</td>
 <td></td>
 </tr>
+
 
 <tr class="even">
 <td>Ceil</td>
@@ -133,6 +162,21 @@ A transformation operator consists of an operator name and an optional operand. 
 <td></td>
 </tr>
 
+
+<tr class="odd">
+<td>EpocMilliSecondsToTimestamp</td>
+<td>Obtains a DateTime using milliseconds from the epoch of 1970-01-01T00:00:00Z.</td>
+<td>Datatypes: Long</td>
+<td></td>
+</tr>
+
+<tr class="even">
+<td>EpocSecondsToTimestamp</td>
+<td>Obtains a DateTime using seconds from the epoch of 1970-01-01T00:00:00Z.</td>
+<td>Datatypes: Long</td>
+<td></td>
+</tr>
+
 <tr class="odd">
 <td>Fahrenheit</td>
 <td>Converts Celsius temperature to Fahrenheit.</td>
@@ -141,48 +185,41 @@ A transformation operator consists of an operator name and an optional operand. 
 </tr>
 
 <tr class="even">
-<td>EpocMilliSecondsToTimestamp</td>
-<td>Obtains a DateTime using milliseconds from the epoch of 1970-01-01T00:00:00Z.</td>
-<td>Datatypes: Long</td>
+<td>Flatten</td>
+<td>Flattens multi-dimensional array values into a single dimensional array value </td>
+<td>Datatypes: Any</td>
 <td></td>
 </tr>
 
 <tr class="odd">
-<td>EpocSecondsToTimestamp</td>
-<td>Obtains a DateTime using seconds from the epoch of 1970-01-01T00:00:00Z.</td>
-<td>Datatypes: Long</td>
-<td></td>
-</tr>
-
-<tr class="even">
 <td>Floor</td>
 <td>Calculates the largest integer less than or equal to the value.</td>
 <td>Datatypes: Numeric</td>
 <td></td>
 </tr>
 
-<tr class="odd">
+<tr class="even">
 <td>Int16sToInt32</td>
 <td>Converts an array of two 16-bit values to a single 32-bit value.</td>
 <td>Datatypes: int16[2]</td>
 <td></td>
 </tr>
 
-<tr class="even">
+<tr class="odd">
 <td>Int16ToBytes</td>
 <td>Converts a 16-bit value in an array of 2 8-bit values.</td>
 <td>Datatype: 16-bit value</td>
 <td></td>
 </tr>
 
-<tr class="odd">
+<tr class="even">
 <td>Int32ToInt16s</td>
 <td>Converts a 32-bit value in an array of 2 16-bit values.</td>
 <td>Datatype: 32-bit Value</td>
 <td></td>
 </tr>
 
-<tr class="even">
+<tr class="odd">
 <td>IsoTimeStrToMilliSeconds</td>
 <td>Converts a string in ISO-8601 duration format into milliseconds.
 Converts a string in a format such as 2007-12-03T10:15:30.00Z into the number of milliseconds from the epoch of 1970-01-01T00:00:00Z.
@@ -191,56 +228,57 @@ The string must represent a valid instant in UTC</td>
 <td></td>
 </tr>
 
-<tr class="odd">
+<tr class="even">
 <td>IsoTimeStrSeconds</td>
 <td>Converts a string in ISO-8601 duration format into milliseconds.
 Converts a string in a format such as 2007-12-03T10:15:30.00Z into the number of seconds from the epoch of 1970-01-01T00:00:00Z.
 The string must represent a valid instant in UTC</td>
 <td>Datatype : String</td>
 <td></td>
-<tr class="even">
+
+<tr class="odd">
 <td>IsoTimeStrToMilliSeconds</td>
 <td>Converts a string in ISO-8601 duration format into milliseconds</td>
 <td>Datatype : String</td>
 <td></td>
 </tr>
 
-<tr class="odd">
+<tr class="even">
 <td>IsoTimeStrToNanoSeconds</td>
 <td>Converts a string in ISO-8601 duration format into nanoseconds</td>
 <td>Datatype : String</td>
 <td></td>
 </tr>
 
-<tr class="even">
+<tr class="odd">
 <td>IsoTimeStrToSeconds</td>
 <td>Converts a string in ISO-8601 duration format into seconds</td>
 <td>Datatype : String</td>
 <td></td>
 </tr>
 
-<tr class="odd">
+<tr class="even">
 <td>Ln</td>
 <td>Computes the natural logarithm (base E)</td>
 <td>Datatypes: Numeric</td>
 <td></td>
 </tr>
 
-<tr class="even">
+<tr class="odd">
 <td>Log10</td>
 <td>Computes the common logarithm (base 10)</td>
 <td>Datatype: Numeric</td>
 <td></td>
 </tr>
 
-<tr class="odd">
+<tr class="even">
 <td>LowerCase</td>
 <td>Converts string to lowercase.</td>
 <td>Datatype: String</td>
 <td></td>
 </tr>
 
-<tr class="even">
+<tr class="odd">
 <td>MapRange</td>
 <td>Maps numeric ranges.</td>
 <td>Datatype: Numeric</td>

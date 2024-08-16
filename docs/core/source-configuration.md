@@ -79,6 +79,51 @@ The SourceConfiguration element contains a set of generic source configuration a
 
 </tr>
 
+
+<tr class="even">
+<td>Compose</td>
+<td>This setting is a map, indexed by a structure name, with a list of Channel IDs in this source. The channels listed for a structured are
+composed into a new value with the name of the structure. Each channel listed in a structure becomes a field of the structured value. The field name id the ID of
+the channel or value of the "Name" setting when it is specified in the configuration of the channel. The channels that become fields in the composed structured values
+are removed from the dataset.
+
+The timestamp of the source will be used as the timestamp of the new structured value.
+
+</td>
+<td>Map[String, List[String]]</td>
+<td>
+
+```json
+
+   "Compose" : {
+        "IO" : ["Input0", "Output0"]
+  }
+```
+
+will result in the Input0 and Output0 channel values being replaced by a new value named "IO" with both of these fields as fields of that structure.
+```json
+{
+   "Input0" : true,
+   "Output0" : false
+}
+
+```
+
+
+```json
+{
+   "IO" : {
+      "Input0" : true,
+       "Output0" : false
+   }
+}
+```
+
+
+</td>
+
+</tr>
+
 </tbody>
 </table>
 

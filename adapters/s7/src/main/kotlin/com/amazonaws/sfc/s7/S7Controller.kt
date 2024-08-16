@@ -348,11 +348,11 @@ class S7Controller(
                 metrics?.put(adapterID, METRICS_CONNECTIONS, 1.0, MetricUnits.COUNT, metricDimensions)
             }
             if (!connection.metadata?.canRead()!!) {
-                throw ProtocolAdapterException("Can connect but not read from PLC for source \"${sourceID}\" with connect string \"$connectString\"")
+                throw ProtocolAdapterException("Can connect but not read from PLC for source \"$sourceID\" with connect string \"$connectString\"")
             }
         } catch (e: Exception) {
             metrics?.put(adapterID, METRICS_CONNECTION_ERRORS, 1.0, MetricUnits.COUNT, metricDimensions)
-            throw (ProtocolAdapterException("Can not connect to PLC for source \"${sourceID}\" with connect string \"$connectString\", ${e.message}"))
+            throw (ProtocolAdapterException("Can not connect to PLC for source \"$sourceID\" with connect string \"$connectString\", ${e.message}"))
         }
     }
 
