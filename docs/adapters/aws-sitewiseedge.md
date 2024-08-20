@@ -189,4 +189,4 @@ Whenever the number of messages, total message size or an interval is reached th
 
 </tbody></table>
 
-[^top](#aws-sitewiseedge-target)
+[^top](#aws-sitewise-edge-target)

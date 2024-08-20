@@ -39,11 +39,9 @@ import com.amazonaws.sfc.targets.TargetException
 import com.amazonaws.sfc.util.MemoryMonitor
 import com.amazonaws.sfc.util.buildScope
 import com.amazonaws.sfc.util.byteCountString
-import com.amazonaws.sfc.util.getHostName
 import com.amazonaws.sfc.util.isJobCancellationException
 import com.amazonaws.sfc.util.launch
 import com.google.gson.JsonSyntaxException
-import java.util.*
 import kotlin.coroutines.CoroutineContext
 import kotlin.time.Duration
 import kotlin.time.measureTime
@@ -252,8 +250,6 @@ class SiteWiseEdgeTargetWriter(
         if (metricsCollector != null) InProcessMetricsProvider(metricsCollector!!, logger) else null
     }
 
-    private val transformation by lazy { if (targetConfig.template != null) OutputTransformation(targetConfig.template!!, logger) else null }
-
     private fun createMetrics(
         adapterID: String,
         metricDimensions: MetricDimensions,
@@ -295,7 +291,6 @@ class SiteWiseEdgeTargetWriter(
 
     companion object {
 
-        private val className = this::class.java.simpleName
 
         @JvmStatic
         @Suppress("unused")
