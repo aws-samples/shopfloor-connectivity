@@ -86,6 +86,11 @@ open class MqttConnectionOptions : Validate {
     protected var _connectTimeout = DEFAULT_CONNECT_TIMEOUT
     val connectTimeout: Duration = _connectTimeout.toDuration(DurationUnit.SECONDS)
 
+    @SerializedName(CONFIG_MQTT_VERIFY_HOSTNAME)
+    protected var _verifyHostname: Boolean = true
+    val verifyHostname
+        get() = _verifyHostname
+
     val address
         get() = endPoint.substringAfter("://")
 
@@ -192,6 +197,7 @@ open class MqttConnectionOptions : Validate {
         const val CONFIG_MQTT_USERNAME = "Username"
         const val CONFIG_MQTT_PASSWORD = "Password"
         const val CONFIG_MQTT_PORT = "Port"
+        const val CONFIG_MQTT_VERIFY_HOSTNAME = "VerifyHostname"
 
         // included as this was setting has been renamed to CONFIG_END_POINT
         const val CONFIG_BROKER_ADDRESS = "Address"
@@ -209,7 +215,8 @@ open class MqttConnectionOptions : Validate {
             privateKey: String? = default._privateKey,
             rootCA: String? = default._rootCA,
             sslServerCert: String? = default._sslServerCert,
-            connectTimeout: Int = default._connectTimeout
+            connectTimeout: Int = default._connectTimeout,
+            verifyHostname: Boolean = default._verifyHostname
         ): MqttConnectionOptions {
 
 
@@ -224,6 +231,7 @@ open class MqttConnectionOptions : Validate {
                 _rootCA = rootCA
                 _sslServerCert = sslServerCert
                 _connectTimeout = connectTimeout
+                _verifyHostname = verifyHostname
             }
             return instance
         }

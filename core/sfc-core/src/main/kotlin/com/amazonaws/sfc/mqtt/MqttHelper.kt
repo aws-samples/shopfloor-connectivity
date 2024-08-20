@@ -88,6 +88,7 @@ class MqttHelper(private val mqttConnectionConfig: MqttConnectionOptions, privat
         options.isAutomaticReconnect = true
         options.isCleanSession = true
         options.connectionTimeout = mqttConnectionConfig.connectTimeout.inWholeSeconds.toInt()
+        options.isHttpsHostnameVerificationEnabled = mqttConnectionConfig.verifyHostname
 
         if (mqttConnectionConfig.password != null) {
             options.password = mqttConnectionConfig.password!!.toCharArray()

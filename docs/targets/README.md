@@ -13,6 +13,7 @@
 - [AWS Timestream Target](./aws-timestream.md)
 
 ## Local targets
+- [AWS SiteWise Edge Target](./aws-sitewiseedge.md)
 - [Debug Target](./debug.md)
 - [File Target](./file.md)
 - [MQTT Target](./mqtt.md)

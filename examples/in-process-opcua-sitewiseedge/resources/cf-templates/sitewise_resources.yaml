@@ -1,0 +1,87 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: SiteWise Edge Wind Farm Demo
+Transform: AWS::Serverless-2016-10-31
+Resources:
+
+  ##############################
+  # Models
+  ##############################
+  DemoModel:
+    Type: AWS::IoTSiteWise::AssetModel
+    Properties:
+      AssetModelName: DemoModel
+      AssetModelDescription: SFC Demo Asset Model
+      AssetModelProperties:
+        - LogicalId: Property_ServerStatus
+          Name: ServerStatus
+          DataType: STRING
+          Type:
+            TypeName: Measurement
+        - LogicalId: Property_ServerTime
+          Name: ServerTime
+          DataType: STRING
+          Type:
+            TypeName: Measurement
+        - LogicalId: Property_State
+          Name: State
+          DataType: INTEGER
+          Type:
+            TypeName: Measurement
+        - LogicalId: Property_AbsoluteErrorTime
+          Name: AbsoluteErrorTime
+          DataType: INTEGER
+          Type:
+            TypeName: Measurement
+        - LogicalId: Property_AbsoluteLength
+          Name: AbsoluteLength
+          DataType: INTEGER
+          Type:
+            TypeName: Measurement
+        - LogicalId: Property_AbsoluteMachineOffTime
+          Name: AbsoluteMachineOffTime
+          DataType: INTEGER
+          Type:
+            TypeName: Measurement
+        - LogicalId: Property_AbsoluteMachineOnTime
+          Name: AbsoluteMachineOnTime
+          DataType: INTEGER
+          Type:
+            TypeName: Measurement
+        - LogicalId: Property_AbsolutePiecesIn
+          Name: AbsolutePiecesIn
+          DataType: INTEGER
+          Type:
+            TypeName: Measurement
+        - LogicalId: Property_FeedSpeed
+          Name: FeedSpeed
+          DataType: DOUBLE
+          Type:
+            TypeName: Measurement
+
+  ##############################
+  # Assets
+  ##############################
+  DemoAsset:
+    Type: AWS::IoTSiteWise::Asset
+    Properties:
+      AssetModelId: !Ref DemoModel
+      AssetName: Demo Asset
+      AssetProperties:
+        - LogicalId: Property_ServerStatus
+          Alias: "ServerStatus"
+        - LogicalId: Property_ServerTime
+          Alias: "ServerTime"
+        - LogicalId: Property_State
+          Alias: "State"
+        - LogicalId: Property_AbsoluteErrorTime
+          Alias: "AbsoluteErrorTime"
+        - LogicalId: Property_AbsoluteLength
+          Alias: "AbsoluteLength"
+        - LogicalId: Property_AbsoluteMachineOffTime
+          Alias: "AbsoluteMachineOffTime"
+        - LogicalId: Property_AbsoluteMachineOnTime
+          Alias: "AbsoluteMachineOnTime"
+        - LogicalId: Property_AbsolutePiecesIn
+          Alias: "AbsolutePiecesIn"
+        - LogicalId: Property_FeedSpeed
+          Alias: "FeedSpeed"

@@ -19,6 +19,7 @@ Adapters
 - [OPCUA to MSK In-Process sample](../../examples/in-process-opcua-msk/README.md)
 - [OPCUA to MSK IPC sample](../../examples/ipc-opcua-msk/README.md)
 - [OPCUA to SiteWise In-Process Example](../../examples/in-process-opcua-sitewise/README.md)
+- [OPCUA to SiteWise Edge In-Process Example](../../examples/in-process-opcua-sitewiseedge/README.md)
 
 - [CSV File Adapter Example](../../examples/custom-adapter-csvfile/README.md)
 
