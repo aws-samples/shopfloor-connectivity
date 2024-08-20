@@ -45,7 +45,7 @@ class MBAPHeader {
      * @param transactionIDHigh UByte High bytes already read for transaction ID
      */
     private suspend fun readTransactionId(transport: ModbusTransport, readTimeout: Duration, transactionIDHigh: UByte) {
-        val transactionIdLow = ResponseBase.readResponseBytes(transport, timeout = readTimeout, n = 1)
+        val transactionIdLow = ResponseBase.readResponseBytes(transport, n = 1, timeout = readTimeout)
                                ?: throw Modbus.ModbusException("timeout reading MBAP transaction ID LOW")
         _transactionID = (transactionIDHigh.toInt() shl 8).toTransactionID() or transactionIdLow[0].toTransactionID()
     }
@@ -56,7 +56,7 @@ class MBAPHeader {
      * @param readTimeout Duration Timeout for reading the protocol ID
      */
     private suspend fun readProtocolId(transport: ModbusTransport, readTimeout: Duration) {
-        val id = ResponseBase.readResponseBytes(transport, timeout = readTimeout, n = 2)
+        val id = ResponseBase.readResponseBytes(transport, n = 2, timeout = readTimeout)
                  ?: throw Modbus.ModbusException("timeout MBAP reading protocol ID")
 
         if (!(id contentEquals ModbusTcpProtocolID)) {
@@ -74,7 +74,7 @@ class MBAPHeader {
      * @param readTimeout Duration Timeout for reading the protocol ID
      */
     private suspend fun readResponseLength(transport: ModbusTransport, readTimeout: Duration) {
-        val l = ResponseBase.readResponseBytes(transport, timeout = readTimeout, n = 2)
+        val l = ResponseBase.readResponseBytes(transport, n = 2, timeout = readTimeout)
                 ?: throw Modbus.ModbusException("timeout reading MBAP length")
         _length = (l[0].toInt() shl 8).toUShort() or l[1].toUShort()
     }
@@ -86,7 +86,7 @@ class MBAPHeader {
      */
     private suspend fun readUnitID(transport: ModbusTransport, readTimeout: Duration) {
 
-        val unitID = ResponseBase.readResponseBytes(transport, timeout = readTimeout, n = 1)
+        val unitID = ResponseBase.readResponseBytes(transport, n = 1, timeout = readTimeout)
                      ?: throw Modbus.ModbusException("timeout reading MBAP unit ID")
         _unitID = unitID[0]
     }

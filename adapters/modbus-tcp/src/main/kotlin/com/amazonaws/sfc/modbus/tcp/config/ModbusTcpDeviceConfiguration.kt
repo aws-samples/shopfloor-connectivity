@@ -7,6 +7,7 @@ package com.amazonaws.sfc.modbus.tcp.config
 
 import com.amazonaws.sfc.config.ConfigurationClass
 import com.amazonaws.sfc.config.ConfigurationException
+import com.amazonaws.sfc.config.TcpConfiguration
 import com.amazonaws.sfc.config.Validate
 import com.google.gson.annotations.SerializedName
 import kotlin.time.Duration
@@ -18,7 +19,7 @@ import kotlin.time.toDuration
  */
 
 @ConfigurationClass
-class ModbusTcpDeviceConfiguration : Validate {
+class ModbusTcpDeviceConfiguration : TcpConfiguration, Validate {
 
     @SerializedName(CONFIG_ADDRESS)
     private var _address = ""
@@ -26,7 +27,7 @@ class ModbusTcpDeviceConfiguration : Validate {
     /**
      * IP address of the Modbus TCP source server
      */
-    val address: String
+    override val address: String
         get() = _address
 
     @SerializedName(CONFIG_PORT)
@@ -35,7 +36,7 @@ class ModbusTcpDeviceConfiguration : Validate {
     /**
      * Port used by the Modbus TCP source server
      */
-    val port: Int
+    override val port: Int
         get() = _port
 
     @SerializedName(CONFIG_DEVICE_ID)
@@ -62,7 +63,7 @@ class ModbusTcpDeviceConfiguration : Validate {
     /**
      * Timeout for connecting to the Modbus TCP source server
      */
-    val connectTimeout: Duration
+    override val connectTimeout: Duration
         get() = _connectTimeout.toDuration(DurationUnit.MILLISECONDS)
 
     @SerializedName(CONFIG_WAIT_AFTER_CONNECT_ERROR)
@@ -71,7 +72,7 @@ class ModbusTcpDeviceConfiguration : Validate {
     /**
      * Time to wait after failed to connect to the Modbus TCP source server
      */
-    val waitAfterConnectError: Duration
+    override val waitAfterConnectError: Duration
         get() = _waitAfterConnectError.toDuration(DurationUnit.MILLISECONDS)
 
     @SerializedName(CONFIG_WAIT_AFTER_READ_ERROR)
@@ -80,7 +81,7 @@ class ModbusTcpDeviceConfiguration : Validate {
     /**
      * Time to wait after error reading from the Modbus TCP source server
      */
-    val waitAfterReadError: Duration
+    override val waitAfterReadError: Duration
         get() = _waitAfterReadError.toDuration(DurationUnit.MILLISECONDS)
 
     @SerializedName(CONFIG_WAIT_AFTER_WRITE_ERROR)
@@ -89,7 +90,7 @@ class ModbusTcpDeviceConfiguration : Validate {
     /**
      * Time to wait after error writing to the Modbus TCP source server
      */
-    val waitAfterWriteError: Duration
+    override val waitAfterWriteError: Duration
         get() = _waitAfterWriteError.toDuration(DurationUnit.MILLISECONDS)
 
 

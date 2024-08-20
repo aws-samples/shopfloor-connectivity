@@ -64,11 +64,16 @@ class ModbusSourceConfiguration : BaseSourceConfiguration() {
     override fun validate() {
         if (validated) return
         super.validate()
+        validateChannels()
         validateReadTimeout()
         validateSourceDevice()
         validateIsAtLeastOneChannel()
         optimization.validate()
         validated = true
+    }
+
+    private fun validateChannels() {
+        channels.values.forEach { it.validate() }
     }
 
     // Device must be set

@@ -18,6 +18,7 @@ import com.amazonaws.sfc.modbus.config.ModbusChannelType
 import com.amazonaws.sfc.modbus.config.ModbusSourceConfiguration
 import com.amazonaws.sfc.modbus.protocol.*
 import com.amazonaws.sfc.system.DateTime
+import com.amazonaws.sfc.util.isJobCancellationException
 import com.amazonaws.sfc.util.launch
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.channels.Channel
@@ -84,9 +85,11 @@ class ModbusDevice(
                     try {
                         receiveResponses(requests, requestSlots, resultChannel, channels)
                     } catch (e: Exception) {
-                        val ctxErrorLog = logger.get()?.getCtxErrorLog(className, "receiver")
-                        if (ctxErrorLog != null) {
-                            ctxErrorLog("Exception while receiving responses from device ${configuration.sourceAdapterDevice} on adapter ${configuration.protocolAdapterID}: ${e.message}")
+                        if (!e.isJobCancellationException) {
+                            val ctxErrorLog = logger.get()?.getCtxErrorLog(className, "receiver")
+                            if (ctxErrorLog != null) {
+                                ctxErrorLog("Exception while receiving responses from device ${configuration.sourceAdapterDevice} on adapter ${configuration.protocolAdapterID}: ${e.message}")
+                            }
                         }
                     }
 
@@ -97,9 +100,11 @@ class ModbusDevice(
                     try {
                         sendRequests(requests, requestSlots)
                     } catch (e: Exception) {
-                        val ctxErrorLog = logger.get()?.getCtxErrorLog(className, "transmitter")
-                        if (ctxErrorLog != null) {
-                            ctxErrorLog("Exception while sending requests to device ${configuration.sourceAdapterDevice} on adapter ${configuration.protocolAdapterID}: ${e.message}")
+                        if (!e.isJobCancellationException) {
+                            val ctxErrorLog = logger.get()?.getCtxErrorLog(className, "transmitter")
+                            if (ctxErrorLog != null) {
+                                ctxErrorLog("Exception while sending requests to device ${configuration.sourceAdapterDevice} on adapter ${configuration.protocolAdapterID}: ${e.message}")
+                            }
                         }
                     }
                 }
@@ -330,7 +335,7 @@ class ModbusDevice(
     }
 
     // build all requests to send to the device
-    private suspend fun buildRequests(channels: List<String>?) =
+    private fun buildRequests(channels: List<String>?) =
         ModbusChannelType.entries.flatMap { channelType ->
             configuration.addressRangesForType(channelType, channels).map { addressRange ->
                 buildRequest(channelType, addressRange.first, addressRange.second, deviceID)
@@ -457,7 +462,7 @@ class ModbusDevice(
 
 
     // build request for reading one of more values from a device
-    private suspend fun buildRequest(channelType: ModbusChannelType, address: UShort, size: UShort, deviceID: Int?): RequestBase {
+    private fun buildRequest(channelType: ModbusChannelType, address: UShort, size: UShort, deviceID: Int?): RequestBase {
 
         return when (channelType) {
             ModbusChannelType.COIL -> ReadCoilsRequest(

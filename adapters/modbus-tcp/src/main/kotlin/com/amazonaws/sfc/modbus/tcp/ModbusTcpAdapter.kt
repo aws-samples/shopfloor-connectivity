@@ -138,6 +138,7 @@ class ModbusTcpAdapter(private val adapterID: String, private val configuration:
         val devices = configuration.activeDevices.map { (adapterID, adapter) ->
             adapterID to
                     adapter.map { device ->
+                        trace("Setting up transport for device ${device.key}")
                         device.key to TcpTransport(device.value,
                             logger = logger,
                             metrics = metricsCollector,
@@ -146,12 +147,6 @@ class ModbusTcpAdapter(private val adapterID: String, private val configuration:
                     }.toMap()
         }.toMap()
 
-        devices.forEach { adapter ->
-            adapter.value.forEach { device ->
-                trace("Starting device ${device.key} for adapter ${adapter.key}")
-                device.value.start()
-            }
-        }
         return devices
     }
 

@@ -21,7 +21,6 @@ import software.amazon.awssdk.awscore.internal.AwsErrorCode
 import software.amazon.awssdk.core.SdkClient
 import software.amazon.awssdk.core.client.config.ClientOverrideConfiguration
 import software.amazon.awssdk.core.client.config.SdkAdvancedClientOption
-import java.util.UUID
 
 
 // Internal exception class used to indicate that failed execution of a code block making the AWS

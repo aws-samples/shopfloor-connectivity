@@ -123,7 +123,7 @@ class ModbusTCP(
     // reads the unit ID
     private suspend fun readUnitID(readTimeout: Duration): DeviceID {
 
-        val unitID = ResponseBase.readResponseBytes(modbusDevice, timeout = readTimeout, n = 1)
+        val unitID = ResponseBase.readResponseBytes(modbusDevice, n = 1, timeout = readTimeout)
                      ?: throw Modbus.ModbusException("timeout reading MBAP unit ID")
         return unitID[0]
     }

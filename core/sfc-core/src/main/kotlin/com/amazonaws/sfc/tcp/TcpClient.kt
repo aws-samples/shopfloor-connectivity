@@ -108,7 +108,7 @@ open class TcpClient(private val config: TcpConfiguration, readBufferSize : Int 
     }
 
     // test if socket is connected
-    private inline val isConnected
+    val isConnected
         get() = (clientSocket?.isConnected ?: false)
 
     // create socket connection
@@ -243,7 +243,8 @@ open class TcpClient(private val config: TcpConfiguration, readBufferSize : Int 
 
                     } catch (e: SocketException) {
                         if (!e.isJobCancellationException){
-                            if (e.message?.contains("Broken pipe") == true){
+                            val disconnected = e.message?.contains("Broken pipe") == true || e.message?.contains("Socket closed") == true
+                            if (disconnected){
                                 log.warning("Error writing data to ${config.address}:${config.port}, $e")
                             } else{
                                 log.errorEx("Error writing data to ${config.address}:${config.port}", e)
@@ -287,10 +288,18 @@ open class TcpClient(private val config: TcpConfiguration, readBufferSize : Int 
 
                     } catch (t: SocketTimeoutException) {
                         // Timeout reading data, nu further action required. Timeout is used to keep read loop responsive and checking isActive flag frequently.
-                    } catch (e: Exception) {
-                        log.errorEx("Error reading data from ${config.address}:${config.port}", e)
-                        flagForReconnect()
-                        delay(config.waitAfterReadError.inWholeMilliseconds)
+                    }
+
+                    catch (e: Exception) {
+                        if (!e.isJobCancellationException) {
+                            if (e.message?.contains("Connection reset") == true){
+                                log.warning("Error reading data to ${config.address}:${config.port}, $e")
+                            } else{
+                                log.errorEx("Error reading data from ${config.address}:${config.port}", e)
+                            }
+                            flagForReconnect()
+                            delay(config.waitAfterReadError.inWholeMilliseconds)
+                        }
                     }
                 }
             }

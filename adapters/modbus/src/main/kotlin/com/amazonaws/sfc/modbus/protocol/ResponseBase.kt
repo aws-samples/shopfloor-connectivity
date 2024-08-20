@@ -174,6 +174,7 @@ abstract class ResponseBase(
                 i++
                 yield()
             }
+
             return buffer
         }
     }

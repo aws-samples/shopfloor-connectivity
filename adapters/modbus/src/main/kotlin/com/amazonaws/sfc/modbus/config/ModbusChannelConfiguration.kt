@@ -27,19 +27,13 @@ class ModbusChannelConfiguration : ChannelConfiguration() {
         get() = _type
 
     @SerializedName(CONFIG_ADDRESS)
-    private var _address: String = "0"
+    private var _address: Short = 0
 
     /**
      * Start address to read from
      */
     val address: Short
-        get() {
-            return try {
-                _address.toShort()
-            } catch (_: NumberFormatException) {
-                0
-            }
-        }
+        get() = _address
 
     @SerializedName(CONFIG_SIZE)
     private var _size: Short = 1
@@ -64,13 +58,14 @@ class ModbusChannelConfiguration : ChannelConfiguration() {
     }
 
     // Validates size
-    private fun validateSize() =
+    private fun validateSize() {
         ConfigurationException.check(
             (size > 0),
             "Modbus channel $CONFIG_SIZE must be 1 or higher",
             CONFIG_SIZE,
             this
         )
+    }
 
 
     // Validates address
@@ -85,8 +80,8 @@ class ModbusChannelConfiguration : ChannelConfiguration() {
     // Validates modbus channel type
     private fun validateType() =
         ConfigurationException.check(
-            ((type != null) && (type in ModbusChannelType.values())),
-            "Channel $CONFIG_TYPE must be one of ${ModbusChannelType.values().joinToString()}",
+            ((type != null) && (type in ModbusChannelType.entries)),
+            "Channel $CONFIG_TYPE must be one of ${ModbusChannelType.entries.joinToString()}",
             CONFIG_TYPE,
             this
         )
@@ -99,7 +94,7 @@ class ModbusChannelConfiguration : ChannelConfiguration() {
         private val default = ModbusChannelConfiguration()
 
         fun create(type: ModbusChannelType? = default._type,
-                   address: String = default._address,
+                   address: Short = default._address,
                    size: Short = default._size,
                    name: String? = default._name,
                    description: String = default._description,
