@@ -112,7 +112,7 @@ class FileTargetWriter(
                 select {
                     targetDataChannel.onReceive { targetData ->
 
-                        val content = targetData.toJson(config.elementNames)
+                        val content = targetData.toJson(config.elementNames,targetConfig.unquoteNumericJsonValues)
 
                         buffer.add(targetData, content)
 

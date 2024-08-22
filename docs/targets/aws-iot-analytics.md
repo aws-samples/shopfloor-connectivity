@@ -6,7 +6,7 @@
 ## AwsIotAnalyticsTargetConfiguration
 
 
-AwsIotAnalyticsTargetConfiguration extends the type TargetConfiguration with specific configuration data for sending data to an IoT Analytics channel. The Targets configuration element can contain entries of this type, the TargetType of these entries must be set to <strong>"AWS-IOT-ANALYTICS"</strong>
+AwsIotAnalyticsTargetConfiguration extends the type <a href="../core/target-configuration.md" >TargetConfiguration</a> with specific configuration data for sending data to an IoT Analytics channel. The Targets configuration element can contain entries of this type, the TargetType of these entries must be set to <strong>"AWS-IOT-ANALYTICS"</strong>
 <p>Requires IAM permission iotanalytics:BatchPutMessage to write to the configured channel</p>
 <br>
 

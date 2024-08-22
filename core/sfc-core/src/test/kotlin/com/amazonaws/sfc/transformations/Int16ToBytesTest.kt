@@ -34,5 +34,8 @@ class Int16ToBytesTest {
         val o = Int16ToBytes()
         val result = o.invoke(0x0ff0)
         assertEquals(listOf(0x0f.toByte(), 0xf0.toByte()), result, "Split 16 bit int into bytes")
+
+        val resultU = o.invoke(0x0ff0u)
+        assertEquals(listOf(0x0f.toByte(), 0xf0.toByte()), resultU, "Split 16 bit Unsigned int into bytes")
     }
 }

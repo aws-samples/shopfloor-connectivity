@@ -379,7 +379,8 @@ class ScheduleReader(
     private fun restructureChannels(data: Map<String, SourceReadSuccess>): Map<String, SourceReadSuccess> {
         if (data.isEmpty()) return data
         val decomposed = decomposeChannelValues(data)
-        return composeChannels(decomposed)
+        val spread = spreadChannelValues(decomposed)
+        return composeChannels(spread)
     }
 
     private fun decomposeChannelValues(data: Map<String, SourceReadSuccess>): Map<String, SourceReadSuccess> {
@@ -429,8 +430,50 @@ class ScheduleReader(
                 sourceData
             }
         }.toMap()
+    }
 
+    private fun spreadChannelValues(data: Map<String, SourceReadSuccess>): Map<String, SourceReadSuccess> {
 
+        // map indexed by source, entry contains list of channels that need to be decomposed into separate values
+        val spreadSourceChannels: Map<String, Set<String>> = data.keys.map { source ->
+            val sourceConfig: SourceConfiguration? = sources[source]
+            val spreadSourceChannels: Set<String> = sourceConfig?.channels?.filter { it.value.spread }?.keys ?: emptySet()
+            source to spreadSourceChannels
+        }.toMap()
+
+        // no spreads, just return the data
+        if (spreadSourceChannels.values.flatten().isEmpty()) return data
+
+        return data.map { (source, sourceData: SourceReadSuccess) ->
+
+            val sourceSpreadChannels = spreadSourceChannels[source]
+
+            source to if (!sourceSpreadChannels.isNullOrEmpty()) {
+
+                val channelValues: MutableMap<String, ChannelReadValue> = sourceData.values.toMutableMap()
+                sourceSpreadChannels.forEach { ch ->
+                    val value = channelValues[ch]
+                    if (value != null) {
+                        val v = value.value
+                        if ((v != null) && (v is List<*>)) {
+                            v.forEachIndexed { i, sv ->
+                                channelValues["$ch.$i"] = ChannelReadValue(sv, value.timestamp)
+                            }
+                        }
+                    }
+                }
+
+                // remove decomposed channels
+                sourceSpreadChannels.forEach {
+                    if (channelValues[it]?.value is Map<*, *>) channelValues.remove(it)
+                }
+                SourceReadSuccess(channelValues.toMap(), sourceData.timestamp)
+
+            } else {
+                // no decompositions fot this source
+                sourceData
+            }
+        }.toMap()
     }
 
 
@@ -607,12 +650,41 @@ class ScheduleReader(
         // map channel values for this source
         val transformedValues = result.value.values.map { (channelID, channelReadValue) ->
 
-            // get first part of channel as additional information might be appended when channel supports wildcards
-            val id = channelID.split(CHANNEL_SEPARATOR)[0]
+
+            val ids = mutableListOf(channelID)
+            if (channelID.contains(CHANNEL_SEPARATOR)) {
+                ids.add(channelID.split(CHANNEL_SEPARATOR)[0])
+            }
 
             // get the ID of the transformation for the channel
-            val transformationIdForChannel = channels[id]?.transformationID
-            val transformationForChannel = if (transformationIdForChannel != null) transformations[transformationIdForChannel] else null
+            val channelIDForTransformation: String? = ids.find {
+                val channelTransformation = channels[it]?.transformationID
+                transformations.containsKey(channelTransformation)
+            }
+
+            val (transformationID, transformationForChannel) = if (channelIDForTransformation != null) {
+                val id = channels[channelIDForTransformation]?.transformationID
+                id to transformations[id]
+            } else null to null
+
+
+
+//            { id ->
+//                // get the ID of the transformation for the channel
+//                val transformationIdForChannel = channels[id]?.transformationID
+//                val transformationForChannel = if (transformationIdForChannel != null) transformations[transformationIdForChannel] else null
+//
+//            }
+//
+//
+//            // get first part of channel as additional information might be appended when channel supports wildcards
+//            val id = channelID.split(CHANNEL_SEPARATOR)[0]
+//
+//            // get the ID of the transformation for the channel
+//            val transformationIdForChannel = channels[id]?.transformationID
+//            val transformationForChannel = if (transformationIdForChannel != null) transformations[transformationIdForChannel] else null
+//
+//
 
             channelID to if (transformationForChannel == null)
             // this channel does not require transformation, return inout value as result of mapping
@@ -630,7 +702,7 @@ class ScheduleReader(
                     }
                 } catch (e: TransformationException) {
                     val errLog = logger.getCtxErrorLog(className, "transformValues")
-                    errLog("Error applying transformation \"$transformationIdForChannel\" value $channelReadValue for source \"$sourceID\", channel \"${channelID}\", ${e.message} ${e.operator}")
+                    errLog("Error applying transformation \"$transformationID\" value $channelReadValue for source \"$sourceID\", channel \"${channelID}\", ${e.message} ${e.operator}")
                     channelReadValue
                 }
         }.associate {

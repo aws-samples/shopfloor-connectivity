@@ -34,43 +34,62 @@ The ChannelConfiguration element contains a set of generic source configuration 
 </tr>
 
 <tr class="even">
+<td>Transformation</td>
+<td>Transformation to apply to this channel value, the name must be an existing entry in the "Transformation" element at the <a href="sfc-top-level-config.md">top level</a> of the SFC configuration.</td>
+<td>String</td>
+<td>Optional, if used it must refer to a configured filter in the Transformations element.</td>
+</tr>
+
+<tr class="odd">
 <td>ChangeFilter</td>
 <td>ChangeFilter to apply to this channel value. (Overwrites change filter at source level if any)</td>
 <td>String</td>
 <td>Optional, if used it must refer to a configured filter in the ChangeFilters element.</td>
 </tr>
 
-<tr class="odd">
+<tr class="even">
 <td>ValueFilter</td>
 <td>ValueFilter to apply to this channel value, see <a href="./value-filter-configuration.md">value filters</a></td>
 <td>String</td>
 <td></td>
 </tr>
 
-<tr class="even">
+<tr class="odd">
 <td>ChangeFilter</td>
 <td>Change filter to apply to the value of the channel, see <a href="./change-filter-configuration.md">change filters</a></td>
 <td>String</td>
 <td>Optional, if used it must refer to a configured filter in the ChangeFilters element</td>
 </tr>
 
-<tr class="odd">
+<tr class="even">
 <td>ConditionFilter</td>
 <td>ConditionFilter to apply to this channel, see <a href="./condition-filter-configuration.md">condition filters</a></td>
 <td>String</td>
 <td>Optional, if used it must refer to a configured filter in the ConditionFilters element </td>
 </tr>
 
-<tr class="even">
+<tr class="odd">
 <td>Decompose</td>
 <td>If set to true and the value of the channel the value is a structured value then the value is decomposed into a set of individual values for each (sub) element in  the structure.</td>
 <td>Boolean</td>
 <td>Default is false
 
-The names of the values for the fields in the structure start with the name of the value appended by the names of the sub elements, separated by a ".". After decomposing the structured valueinto individual values, iyt is removed from the dataset.
+The names of the values for the fields in the structure start with the name of the value appended by the names of the sub elements, separated by a ".". After decomposing the structured value into individual values, it is removed from the dataset.
 
 </td>
 </tr>
+
+<tr class="even">
+<td>Spread</td>
+<td>If set to true and the value of the channel the value is a list then for each element in the list a new individual value is created .</td>
+<td>Boolean</td>
+<td>Default is false
+
+The names of the values for the fields in the structure start with the name of the value element with a sequence number, separated by a ".". After splitting the list value into individual values, it is removed from the dataset.
+
+</td>
+</tr>
+
 
 </tbody>
 </table>

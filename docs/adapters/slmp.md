@@ -24,7 +24,7 @@ In order to reduce the number of interactions between the adapter and the contro
 
 ## SlmpSourceConfiguration
 
-The SLMPSourceConfiguration extends the common Source configuration with SLMP specific source configuration data.
+The SLMPSourceConfiguration extends the common <a href="../core/source-configuration.md">Source configuration</a> with SLMP specific source configuration data.
 
 <table>
 <colgroup>

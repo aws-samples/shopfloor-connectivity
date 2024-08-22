@@ -65,7 +65,7 @@ class OutputTransformation(private var templateFile: File, private val logger: L
             return null
         }
 
-        val data = fromJsonExtended(targetData.toJson(elementNames), Map::class.java)
+        val data = fromJsonExtended(targetData.toJson(elementNames, false), Map::class.java)
 
         // writer for template output
         val sw = StringWriter()

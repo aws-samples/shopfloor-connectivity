@@ -14,7 +14,7 @@ configuration types
 
 ## MqttSourceConfiguration
 
-The MqttSourceConfiguration extends the common Source configuration with MQTT specific source configuration data
+The MqttSourceConfiguration extends the common <a href="../core/source-configuration.md">Source configuration</a> with MQTT specific source configuration data
 
 <table>
 <colgroup>

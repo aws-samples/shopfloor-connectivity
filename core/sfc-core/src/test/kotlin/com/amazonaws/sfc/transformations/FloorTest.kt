@@ -31,7 +31,7 @@ class FloorTest {
 
     @Test
     fun `operator logic`() {
-        val testValues = listOf<Pair<Number, Number>>(
+        val testValues = listOf<Pair<Any, Number>>(
             // target, result
 
             // Integer variants positive
@@ -39,6 +39,12 @@ class FloorTest {
             Pair(1.toByte(), 1.toByte()),
             Pair(1.toShort(), 1.toShort()),
             Pair(1.toLong(), 1.toLong()),
+
+            // Integer variants unsigned
+            Pair(1.toUInt(), 1),
+            Pair(1.toUByte(), 1.toByte()),
+            Pair(1.toUShort(), 1.toShort()),
+            Pair(1.toULong(), 1.toLong()),
 
             // Integer variants negative
             Pair(-1, -1),
@@ -62,10 +68,10 @@ class FloorTest {
 
         val o = Floor.create()
         for (v in testValues) {
-            val target: Number = v.first
+            val target = v.first
             val result = o.invoke(target)
             assertEquals(v.second, result, v.first::class.java.name)
-            if (result != null) assertEquals(target::class, result::class)
+            if (result != null) assertEquals(v.second::class, result::class)
         }
     }
 }

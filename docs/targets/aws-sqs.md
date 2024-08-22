@@ -1,5 +1,5 @@
 # AWS SQS Target
-AwsSqsTargetConfiguration extends the type TargetConfiguration with specific configuration data for sending data to an SQS queue. The Targets configuration element can contain entries of this type, the TargetType of these entries must be set to <strong>"AWS-SQS"</strong>
+AwsSqsTargetConfiguration extends the type <a href="../core/target-configuration.md" >TargetConfiguration</a> with specific configuration data for sending data to an SQS queue. The Targets configuration element can contain entries of this type, the TargetType of these entries must be set to <strong>"AWS-SQS"</strong>
 <p>Requires IAM permission sqs:SendMessageBatch for the receiving queue.</p>
 
 [Targets](./README.md)

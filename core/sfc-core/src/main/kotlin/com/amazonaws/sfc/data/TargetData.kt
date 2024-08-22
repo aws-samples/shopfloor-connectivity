@@ -64,8 +64,13 @@ data class TargetData(val schedule: String,
      * @param elementNames ElementNamesConfiguration Configurable element names
      * @return String Data as JSON
      */
-    fun toJson(elementNames: ElementNamesConfiguration): String {
-        return gson(elementNames).toJson(this)
+    fun toJson(elementNames: ElementNamesConfiguration, trimQuotesForNumericValues : Boolean): String {
+
+        val s =  gson(elementNames).toJson(this)
+        return if (trimQuotesForNumericValues) s.replace(numericValueRegex){m ->
+            m.groups[1]?.value.toString().trim('"')
+        } else s
+
     }
 
     /**
@@ -83,6 +88,9 @@ data class TargetData(val schedule: String,
             .create()
 
 
+    companion object{
+       private val numericValueRegex = "\"(\\d+(\\.\\d*)?)\"".toRegex()
+    }
 }
 
 /**

@@ -1,6 +1,6 @@
 # File Target
 <br>
-FileConfiguration extends the type TargetConfiguration with specific configuration data for writing data to the local file system. The Targets configuration element can contain entries of this type, the TargetType of these entries must be set to <strong>"FILE-TARGET".</strong>
+FileConfiguration extends the type <a href="../core/target-configuration.md" >TargetConfiguration</a> with specific configuration data for writing data to the local file system. The Targets configuration element can contain entries of this type, the TargetType of these entries must be set to <strong>"FILE-TARGET".</strong>
 <br>
 <br>
 

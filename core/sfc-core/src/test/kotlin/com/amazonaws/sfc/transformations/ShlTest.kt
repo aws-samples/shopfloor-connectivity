@@ -41,12 +41,18 @@ class ShlTest {
 
     @Test
     fun `operator logic`() {
-        val testValues = listOf<Triple<Number, Int, Number?>>(
+        val testValues = listOf<Triple<Any, Int, Number?>>(
             // target, shl, result
             Triple(1, 1, 2),
             Triple(1.toByte(), 1, 2.toByte()),
             Triple(1.toShort(), 1, 2.toShort()),
             Triple(1.toLong(), 1, 2.toLong()),
+
+            Triple(1.toUInt(), 1, 2),
+            Triple(1.toUByte(), 1, 2.toByte()),
+            Triple(1.toUShort(), 1, 2.toShort()),
+            Triple(1.toULong(), 1, 2.toLong()),
+
             Triple(1.0, 1, null)
         )
         for (v in testValues) {
@@ -54,7 +60,7 @@ class ShlTest {
             val result = o.invoke(v.first)
             assertEquals(v.third, result, v.first::class.java.name)
             if (result != null) {
-                assertEquals(v.first::class, result::class)
+                if (v.third!= null ) assertEquals(v.third!!::class, result::class)
             }
         }
     }

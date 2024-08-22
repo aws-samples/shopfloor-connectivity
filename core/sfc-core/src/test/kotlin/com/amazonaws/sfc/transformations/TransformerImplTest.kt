@@ -102,7 +102,7 @@ class TransformerImplTest {
         val operand = NoOperandTest()
         for (v in testValues) {
 
-            val result = operand(v)
+            val result = operand.apply(v)
             assertEquals(v::class, result!!::class, v::class.simpleName)
         }
     }

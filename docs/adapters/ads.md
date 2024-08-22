@@ -3,7 +3,7 @@
 This section describes the configuration types for the ADS protocol adapter and contains the extensions and specific
 configuration types.
 
-<p>The AdsSourceConfiguration extends the common Source configuration with ADS specific source configuration data.</p>
+<p>The AdsSourceConfiguration extends the common <a href="../core/source-configuration.md">Source configuration</a> with ADS specific source configuration data.</p>
 
 - [AdsSourceConfiguration](#adssourceconfiguration)
 - [AdsChannelConfiguratio](#adschannelconfiguration)

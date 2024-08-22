@@ -241,7 +241,7 @@ Syntax: A\<file number\>:\<element index\>\[/character offset\]
 
 ## PcccSourceConfiguration
 
-The PCCCSourceConfiguration extends the common Source configuration with PCCC specific source configuration data
+The PCCCSourceConfiguration extends the common <a href="../core/source-configuration.md">Source configuration</a> with PCCC specific source configuration data
 
 <table>
 <colgroup>

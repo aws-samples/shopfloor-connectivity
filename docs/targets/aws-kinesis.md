@@ -1,7 +1,7 @@
 # AWS Kinesis Target
 
 
-AwsKinesisTargetConfiguration extends the type TargetConfiguration with specific configuration data for sending to a stream for the AWS Kinesis service. The Targets configuration element can contain entries of this type, the TargetType of these entries must be set to <strong>"AWS-KINESIS"</strong></p>
+AwsKinesisTargetConfiguration extends the type <a href="../core/target-configuration.md" >TargetConfiguration</a> with specific configuration data for sending to a stream for the AWS Kinesis service. The Targets configuration element can contain entries of this type, the TargetType of these entries must be set to <strong>"AWS-KINESIS"</strong></p>
 <p>Requires IAM permission kinesis:PutRecords for the stream the data is sent to.
 
 

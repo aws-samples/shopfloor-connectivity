@@ -381,7 +381,7 @@ class AwsMskTargetWriter(
         transformation != null ->
             transformation!!.transform(targetData, mskWriterConfig.elementNames)?.toByteArray(Charsets.UTF_8)
 
-        mskTargetConfig.serialization == Serialization.JSON -> targetData.toJson(mskWriterConfig.elementNames).toByteArray(Charsets.UTF_8)
+        mskTargetConfig.serialization == Serialization.JSON -> targetData.toJson(mskWriterConfig.elementNames, mskTargetConfig.unquoteNumericJsonValues).toByteArray(Charsets.UTF_8)
         mskTargetConfig.serialization == Serialization.PROTOBUF -> GrpcTargetValueFromNativeExt.newWriteValuesRequest(targetData, false).toByteArray()
 
         else -> throw NotImplementedError("Data serialization ${mskTargetConfig.serialization} implemented")

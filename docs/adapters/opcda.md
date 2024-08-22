@@ -24,7 +24,7 @@ only be configures as an external IPC Protocol Server.
 <thead>
 <tr class="header">
 <th colspan="7"><p>Extends SourceConfiguration</p>
-<p>The OpcuaSourceConfiguration extends the common Source configuration with OPCUA specific source configuration data</p></th>
+<p>The OpcuaSourceConfiguration extends the common <a href="../core/source-configuration.md">Source configuration</a> with OPCUA specific source configuration data</p></th>
 </tr>
 </thead>
 <tbody>

@@ -46,7 +46,7 @@ class DivideTest {
 
     @Test
     fun `operator logic`() {
-        val testValues = listOf<Triple<Number, Number, Number?>>(
+        val testValues = listOf<Triple<Any, Number, Number?>>(
             // target, and multiplier, result
             Triple(6, 2, 3.0),
             Triple(5, 2, 2.5),
@@ -58,6 +58,17 @@ class DivideTest {
             Triple(5.toLong(), 2.toLong(), 2.5),
             Triple(6.0, 2.0, 3.0),
             Triple(5.0, 2.0, 2.5),
+
+            Triple(6.toUInt(), 2, 3.0),
+            Triple(5.toUInt(), 2, 2.5),
+            Triple(6.toUByte(), 2.toByte(), 3.0),
+            Triple(5.toUByte(), 2.toByte(), 2.5),
+            Triple(6.toUShort(), 2.toShort(), 3.0),
+            Triple(5.toUShort(), 2.toShort(), 2.5),
+            Triple(6.toULong(), 2.toLong(), 3.0),
+            Triple(5.toULong(), 2.toLong(), 2.5),
+
+
             Triple(6.0.toFloat(), 2.0.toFloat(), 3.0.toFloat()),
             Triple(5.0.toFloat(), 2.0.toFloat(), 2.5.toFloat()),
             Triple(2, 0, null),

@@ -15,7 +15,7 @@ service.
 
 ## SnmpSourceConfiguration
 
-The SnmpSourceConfiguration extends the common Source configuration with SNMP specific source device configuration data
+The SnmpSourceConfiguration extends the common <a href="../core/source-configuration.md">Source configuration</a> with SNMP specific source device configuration data
 
 <table>
 <colgroup>

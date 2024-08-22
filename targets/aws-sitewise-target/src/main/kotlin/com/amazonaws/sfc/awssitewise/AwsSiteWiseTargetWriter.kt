@@ -193,7 +193,7 @@ class AwsSiteWiseTargetWriter(private val targetID: String, private val configRe
         val log = logger.getCtxLoggers(className, "handleTargetData")
 
         if (logger.level == LogLevel.TRACE) {
-            val json = targetData.toJson(elementNames)
+            val json = targetData.toJson(elementNames, targetConfig.unquoteNumericJsonValues)
             log.trace("Writer received data \"$json\"")
         }
 
@@ -378,7 +378,7 @@ class AwsSiteWiseTargetWriter(private val targetID: String, private val configRe
     /**
      * Stores a AssetPropertyValue in the buffer
      * @param assetID String Asset ID
-     * @param property SiteWiseAssetPropertyConfiguration Asset property configuration
+     * @param propertyID SiteWiseAssetPropertyConfiguration Asset property configuration
      * @param propValue AssetPropertyValue The AssetPropertyValue to store
      */
     private fun storeValueAndTimestampInBuffer(assetID: String?, propertyID: String, propValue: AssetPropertyValue) {

@@ -16,6 +16,15 @@ object DataTypes {
     // test if a number is an unsigned number
     fun isUnsignedNumber(c: KClass<*>) = c in unSignedNumbers
 
+    fun isUnsignedNumber(o: Any) = DataTypes.isUnsignedNumber(o::class)
+
+    // test if a list of values contains only unsigned numbers (or null
+    fun isUnsignedNumberList(l: Any) = (l is List<*>) && l.all { isUnsignedNumber(it?:false) }
+
+    fun isUnsignedNumberOrListOfUnsigned(o:Any) = isUnsignedNumber(o) || (o is List<*> && isUnsignedNumberList(o ))
+
+    // test if a number is a signed number
+
     // tests if a value is numeric (signed or unsigned)
     fun isNumeric(k: KClass<*>?) = ((k != null) && ((k.isSubclassOf(Number::class)) || isUnsignedNumber(k)))
 

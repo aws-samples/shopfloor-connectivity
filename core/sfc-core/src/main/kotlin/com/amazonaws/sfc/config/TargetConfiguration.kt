@@ -9,6 +9,7 @@ import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_ACTIVE
 import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_CREDENTIAL_PROVIDER_CLIENT
 import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_DESCRIPTION
 import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_TARGETS
+import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_UNQUOTE_NUMERIC_JSON_VALUES
 import com.amazonaws.sfc.metrics.MetricsConfiguration
 import com.amazonaws.sfc.metrics.MetricsSourceConfiguration
 import com.google.gson.annotations.SerializedName
@@ -62,6 +63,18 @@ open class TargetConfiguration : Validate {
     @SerializedName(CONFIG_TARGET_SERVER)
     @Suppress("PropertyName")
     protected var _server: String? = null
+
+    @SerializedName(CONFIG_UNQUOTE_NUMERIC_JSON_VALUES)
+    protected var _unquoteNumericJsonValues = false
+
+    /**
+     * If true, unquote numeric values in JSON output
+     */
+    val unquoteNumericJsonValues : Boolean
+        get() {
+            return _unquoteNumericJsonValues
+        }
+
 
     /**
      * Target server for IPC target server

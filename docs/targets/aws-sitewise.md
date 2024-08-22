@@ -1,6 +1,6 @@
 # AWS SiteWise Target
 
-AwsSitewiseTargetConfiguration extends the type TargetConfiguration with specific configuration data for sending data to SIteWise assets. The Targets configuration element can contain entries of this type, the TargetType of 
+AwsSitewiseTargetConfiguration extends the type <a href="../core/target-configuration.md" >TargetConfiguration</a> with specific configuration data for sending data to SiteWise assets. The Targets configuration element can contain entries of this type, the TargetType of 
 these entries must be set to <strong>"AWS-SITEWISE"</strong></p>
 <p></p>
 <p style='text-align: justify;'>Required IAM permissions</p>

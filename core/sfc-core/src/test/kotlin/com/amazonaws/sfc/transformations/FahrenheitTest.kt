@@ -32,7 +32,7 @@ class FahrenheitTest {
 
     @Test
     fun `operator logic`() {
-        val testValues = listOf<Pair<Number, Number>>(
+        val testValues = listOf<Pair<Any, Number>>(
             // target in Celsius, result in Fahrenheit
 
 
@@ -40,6 +40,11 @@ class FahrenheitTest {
             Pair((-40).toByte(), -40.0),
             Pair((-40).toShort(), -40.0),
             Pair((-40).toLong(), -40.0),
+
+            Pair(0.toUInt(), 32.0),
+            Pair((0).toUByte(), 32.0),
+            Pair((0).toUShort(), 32.0),
+            Pair((0).toULong(), 32.0),
 
             // Double
             Pair(-40.0, -40.0),
@@ -50,7 +55,7 @@ class FahrenheitTest {
 
         val o = Fahrenheit.create()
         for (v in testValues) {
-            val target: Number = v.first
+            val target= v.first
             val result = o.invoke(target)
             assertEquals(v.second, result, v.first::class.java.name + " : " + v.first)
         }

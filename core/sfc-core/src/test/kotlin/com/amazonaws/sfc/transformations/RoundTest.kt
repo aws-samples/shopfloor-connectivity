@@ -31,12 +31,16 @@ class RoundTest {
 
     @Test
     fun `operator logic`() {
-        val testValues = listOf<Pair<Number, Number>>(
+        val testValues = listOf<Pair<Any, Any>>(
             // target, result
             Pair(2, 2),
             Pair(2.toByte(), 2.toByte()),
             Pair(2.toShort(), 2.toShort()),
             Pair(2.toLong(), 2.toLong()),
+            Pair(2.toUInt(), 2),
+            Pair(2.toUByte(), 2.toByte()),
+            Pair(2.toUShort(), 2.toShort()),
+            Pair(2.toULong(), 2.toLong()),
             Pair(2.6, 3.0),
             Pair(2.4, 2.0),
             Pair(2.6.toFloat(), 3.0.toFloat()),
@@ -46,7 +50,7 @@ class RoundTest {
         for (v in testValues) {
             val result = Round.create().invoke(v.first)
             assertEquals(v.second, result, "Test round ${v.first::class}")
-            if (result != null) assertEquals(v.first::class.java, result::class.java, "Check type")
+            if (result != null) assertEquals(v.second::class.java, result::class.java, "Check type")
 
         }
     }

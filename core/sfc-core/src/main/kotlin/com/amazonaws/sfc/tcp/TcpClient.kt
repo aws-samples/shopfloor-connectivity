@@ -293,7 +293,7 @@ open class TcpClient(private val config: TcpConfiguration, readBufferSize : Int 
                     catch (e: Exception) {
                         if (!e.isJobCancellationException) {
                             if (e.message?.contains("Connection reset") == true){
-                                log.warning("Error reading data to ${config.address}:${config.port}, $e")
+                                log.warning("Error reading data from ${config.address}:${config.port}, $e")
                             } else{
                                 log.errorEx("Error reading data from ${config.address}:${config.port}", e)
                             }

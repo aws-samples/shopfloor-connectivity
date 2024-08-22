@@ -9,6 +9,7 @@ import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_CONDITION_FIL
 import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_DECOMPOSE_CHANNEL_VALUE
 import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_DESCRIPTION
 import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_NAME
+import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_SPREAD_CHANNEL_VALUE
 import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_VALUE_FILTER
 import com.google.gson.annotations.SerializedName
 
@@ -90,6 +91,12 @@ open class ChannelConfiguration : Validate {
     protected var _decompose : Boolean = false
     val decompose
         get() = _decompose
+
+
+    @SerializedName(CONFIG_SPREAD_CHANNEL_VALUE)
+    protected var _spread : Boolean = false
+    val spread
+        get() = _spread
 
 
     /**

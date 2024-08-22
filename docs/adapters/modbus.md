@@ -14,7 +14,7 @@ specific configuration types.
 
 ## ModbusSourceConfiguration
 
-The ModbusSourceConfiguration extends the common Source configuration with Modbus specific source device configuration data</p></th>
+The ModbusSourceConfiguration extends the common <a href="../core/source-configuration.md">Source configuration</a> with Modbus specific source device configuration data</p></th>
 
 
 <table>
@@ -49,7 +49,7 @@ The ModbusSourceConfiguration extends the common Source configuration with Modbu
 
 <tr class="odd">
 <td>AdapterDevice</td>
-<td Identifier for the device to read from. This referenced device must be present in the Devices section of the adapter referred to by the ProtocolAdapter attribute of the source.</td>
+<td>Identifier for the device to read from. This referenced device must be present in the Devices section of the adapter referred to by the ProtocolAdapter attribute of the source.</td>
 <td>String</td>
 <td><p>Must be an identifier of a device in the Devices section of the MODBUS-TCP adapter used by the source.</p>
 <p>Note this is not the modbus device is, this id is set in the DeviceId attribute of the referenced device.</p></td>

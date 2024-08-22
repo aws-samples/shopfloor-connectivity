@@ -1,6 +1,6 @@
 # AWS MSK Target
 <br>
-<p>AwsMskTargetConfiguration extends the type TargetConfiguration with specific configuration data for connecting to and sending to an AWS MSK topic. The Targets configuration element can contain entries of this type, the TargetType of these entries must be set to <strong>"AWS-MSK"</strong>
+<p>AwsMskTargetConfiguration extends the type <a href="../core/target-configuration.md" >TargetConfiguration</a> with specific configuration data for connecting to and sending to an AWS MSK topic. The Targets configuration element can contain entries of this type, the TargetType of these entries must be set to <strong>"AWS-MSK"</strong>
 <br>
 <br>
 

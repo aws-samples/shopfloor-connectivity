@@ -679,6 +679,7 @@ steps:
 - Data transformations are applied on the aggregated data output values if a transformation is configured for that
   specific output.
 - Composition of values into structures or decomposing from structures into structures is applied based on source and channel configurations.
+- Spreading elements from list values into separate values based on channel configuration.
 - Data values are named according to their configured names. Metadata and timestamp information is added at configured
   levels (top, source and value) as configured.
 - The data is transmitted to the configured targets where additional buffering or target specific processing is done.
@@ -692,6 +693,57 @@ Source data -> Transformation(value)(*) -> Change Filter (*) -> Value Filter(*) 
 (`*`) optional, only applied if configured
 
 [^top](#quicklinks)
+
+# Transformations
+
+Individual values can be transformed by configuring a transformation for the channel.
+
+The configuration snippet below shows how a transformation named "ToInteger" is applied to the channels by setting the "Transformation" setting to the name of this transformation.
+
+```json
+"Channels" : {
+
+    "SimulationSawtoothInt": {
+       "NodeId": "ns=3;i=1003",
+       "Transformation": "ToInteger"
+     }
+   },
+   "SimulationSquareInt": {
+      "NodeId": "ns=3;i=1005",
+      "Transformation": "ToInteger"
+   }
+}
+```
+
+Transformations, which are lists of transformation operands, are defined at the top-level of the sfc-configuration. The operators in a transformation are applied on the values in the listed order.
+
+Below is an example of a "Transformations" section defining 3 transformations, including the "ToInteger" one mentioned above. This transformation first gets the absolute value from the input value, it then rounds it and explicitly converts it into an Integer value. SFC will validate if the input value, or the resulting value of an operator, is valid for the inut of the first or next operator of a transformation.
+
+A configured operator consists of the name of the operator specified by the "Operator" setting and in case the operator takes arguments, the value of the argument specified by the "Operand" setting.
+Transformations can also be applied to aggregated data if a schedule has an aggregation setup. See the setting "Transformations" in  [Aggregation](./core/aggregation-config.md) for more details.
+
+
+See [TransformationOperator configuration](./core/transformation-operator-configuration.md) for a list of all available operators.
+
+
+```json
+  "Transformations": {
+    "ToInteger": [
+      {"Operator": "Abs"},
+      {"Operator": "Round"},
+      {
+        "Operator": "ToInt"
+      },
+    ],
+    "ToDegreesCelsius": [
+      {"Operator": "Celsius"},
+      {"Operator": "TruncAt", "Operand": "2"}
+    ],
+    "TwoDigits": [
+      {"Operator": "TruncAt", "Operand": 2}
+    ]
+  }
+```
 
 # Data Filtering
 

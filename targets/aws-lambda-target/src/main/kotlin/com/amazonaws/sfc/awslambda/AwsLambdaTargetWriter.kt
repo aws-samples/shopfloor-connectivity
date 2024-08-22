@@ -114,7 +114,7 @@ class AwsLambdaTargetWriter(
     }
 
     private fun buildPayload(targetData: TargetData): String =
-        if (transformation == null) targetData.toJson(config.elementNames) else transformation!!.transform(targetData, config.elementNames) ?: ""
+        if (transformation == null) targetData.toJson(config.elementNames, targetConfig.unquoteNumericJsonValues) else transformation!!.transform(targetData, config.elementNames) ?: ""
 
 
     private val writer = scope.launch("Writer") {

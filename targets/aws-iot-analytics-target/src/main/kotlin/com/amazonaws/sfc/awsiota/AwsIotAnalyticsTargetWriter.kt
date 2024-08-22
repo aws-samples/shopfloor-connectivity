@@ -155,7 +155,7 @@ class AwsIotAnalyticsTargetWriter(
     private val transformation by lazy { if (targetConfig.template != null) OutputTransformation(targetConfig.template!!, logger) else null }
 
     private fun buildPayload(targetData: TargetData): String =
-        if (transformation == null) targetData.toJson(config.elementNames) else transformation!!.transform(targetData, config.elementNames) ?: ""
+        if (transformation == null) targetData.toJson(config.elementNames, targetConfig.unquoteNumericJsonValues) else transformation!!.transform(targetData, config.elementNames) ?: ""
 
 
     // buffer messages and sends message to channel if buffer is reached

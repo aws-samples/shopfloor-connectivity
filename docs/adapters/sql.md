@@ -15,7 +15,7 @@ configuration types
 
 ## SqlSourceConfiguration
 
-The SqlSourceConfiguration extends the common Source configuration with SQL specific source configuration data
+The SqlSourceConfiguration extends the common <a href="../core/source-configuration.md">Source configuration</a> with SQL specific source configuration data
 
 <table>
 <colgroup>

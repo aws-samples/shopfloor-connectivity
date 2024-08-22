@@ -1,7 +1,7 @@
 
 # AWS Timestream Target
 
-AwsSTimestreamTargetConfiguration extends the type TargetConfiguration with specific configuration data for sending data to a Timestream table. The Targets configuration element can contain entries of this type, the TargetType of these entries must be set to <strong>"AWS-TIMESTREAM"</strong>
+AwsSTimestreamTargetConfiguration extends the type <a href="../core/target-configuration.md" >TargetConfiguration</a> with specific configuration data for sending data to a Timestream table. The Targets configuration element can contain entries of this type, the TargetType of these entries must be set to <strong>"AWS-TIMESTREAM"</strong>
 <p>Requires IAM timestream:WriteRecords permission for the configures table as well timestream:DescribeEndpoints</p>
 
 

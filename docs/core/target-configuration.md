@@ -20,12 +20,14 @@ The Targets element contains elements for targets for different target types, wh
 <td><strong>Type</strong></td>
 <td><strong>Comments</strong></td>
 </tr>
+
 <tr class="even">
 <td>Active</td>
 <td>Output to a target can be suspended by setting the Active element to false.</td>
 <td>Boolean</td>
 <td>Default is true</td>
 </tr>
+
 <tr class="odd">
 <td>TargetType</td>
 <td><p>TargetType is a code that identifies the type of the target (e.g., "AWS-SQS", "AWS-KINESIS").</p>
@@ -34,6 +36,7 @@ The Targets element contains elements for targets for different target types, wh
 <td>String</td>
 <td>Mandatory</td>
 </tr>
+
 <tr class="even">
 <td>Server</td>
 <td><p>Target server identifier of the server that is running the target as an IPC service in its process. The identifier must exist in the TargetServers section of the configuration.</p>
@@ -42,6 +45,7 @@ The Targets element contains elements for targets for different target types, wh
 <td>String</td>
 <td>Set to a configured target server to use IPC to send data to a target running as an external IPC service.</td>
 </tr>
+
 <tr class="odd">
 <td>Template</td>
 <td>Pathname to file containing an Apache velocity template that can be applied to transform the output data of the target</td>
@@ -50,12 +54,14 @@ The Targets element contains elements for targets for different target types, wh
 Context variables for template</p>
 <p>$schedule, $sources, $metadata, or names specified in ElementNames configuration.</p></td>
 </tr>
+
 <tr class="even">
 <td>CredentialProviderClient</td>
 <td>The client is used by the target to obtain session credentials from the AWS IoT Credential provider service.</td>
 <td>String</td>
 <td>Must refer to an existing client configuration in AwsIotCredentialProviderClients section.</td>
 </tr>
+
 <tr class="odd">
 <td>TargetChannelSize</td>
 <td>Size of channel used by target to process and write items</td>
@@ -63,12 +69,29 @@ Context variables for template</p>
 <td>Default is 1000
 see <a href="#sfc-tuning">SFC Tuning</a> for more details</td>
 </tr>
+
 <tr class="odd">
 <td>TargetChannelTimeout</td>
 <td>Timeout in milliseconds for writing to internal target channel if it has reached it capacity </td>
 <td>Int</td>
 <td>Default is 1000</td>
 </tr>
+
+
+<tr class="even">
+<td>UnquoteNumericJsonValues</td>
+<td>Set to true to strip double quotes from numeric values in JSON output.</td>
+<td>Boolean</td>
+<td>Default is false
+
+This setting can reduce the size of the output by stripping redundant double quotes.
+
+Do not set this flag to true if there are any key names in the output that consist of numbers only.
+
+
+</td>
+</tr>
+
 </tbody>
 </table>
 

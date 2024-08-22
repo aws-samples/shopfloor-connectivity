@@ -1,9 +1,9 @@
 
 # AWS Kinesis Firehose Target
 
-AwsKinesisFirehoseTargetConfiguration extends the type TargetConfiguration with specific configuration data for sending to a delivery stream for the AWS Kinesis Firehose service. The Targets configuration element can contain entries of this type, the TargetType of these entries must be set to <strong>"AWS-FIREHOSE"</strong>
+AwsKinesisFirehoseTargetConfiguration extends the type <a href="../core/target-configuration.md" >TargetConfiguration</a> with specific configuration data for sending to a delivery stream for the AWS Kinesis Firehose service. The Targets configuration element can contain entries of this type, the TargetType of these entries must be set to <strong>"AWS-FIREHOSE"</strong>
 
-<p>Requires IAM permission firehose:PutRecordBatch for the delivery stream the data is sent to.</p></th>
+<p>Requires IAM permission firehose:PutRecordBatch for the delivery stream the data is sent to.</p>
 
 
 [Targets](./README.md)

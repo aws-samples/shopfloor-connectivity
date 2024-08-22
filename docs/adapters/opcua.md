@@ -22,7 +22,7 @@ configuration types
 
 ## OpcuaSourceConfiguration
 
-The OpcuaSourceConfiguration extends the common Source configuration with OPCUA specific source configuration data
+The OpcuaSourceConfiguration extends the common <a href="../core/source-configuration.md">Source configuration</a> with OPCUA specific source configuration data
 
 <table>
 <colgroup>
