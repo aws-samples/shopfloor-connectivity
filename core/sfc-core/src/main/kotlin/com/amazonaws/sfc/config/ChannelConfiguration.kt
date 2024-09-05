@@ -88,13 +88,13 @@ open class ChannelConfiguration : Validate {
         get() = _conditionFilterID
 
     @SerializedName(CONFIG_DECOMPOSE_CHANNEL_VALUE)
-    protected var _decompose : Boolean = false
+    protected var _decompose : Boolean? = null
     val decompose
         get() = _decompose
 
 
     @SerializedName(CONFIG_SPREAD_CHANNEL_VALUE)
-    protected var _spread : Boolean = false
+    protected var _spread : Boolean? = null
     val spread
         get() = _spread
 

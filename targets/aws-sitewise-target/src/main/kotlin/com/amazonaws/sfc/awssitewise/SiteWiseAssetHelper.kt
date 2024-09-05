@@ -421,11 +421,17 @@ class SiteWiseAssetHelper(private val client: AwsSiteWiseClient,
         val assetModelName = assetCreationConfiguration.renderAssetModelName(target, source, targetData)
 
         var assetModelExternalID = assetCreationConfiguration.renderAssetModelExternalID(target, source, targetData)
+
         if (assetModelExternalID != null) {
             val assetModelExtId = assetModelSummaries.find { it.externalId().toString().lowercase() == assetModelExternalID.toString().lowercase() }
             if (assetModelExtId != null) {
                 log.error("Asset model external ID \"$assetModelExternalID\" for source \"$source\" in target \"$target\" is already in use by asset  \"${assetModelExtId.name()}\"")
                 assetModelExternalID = null
+            } else{
+                if (!"[a-zA-Z0-9_][a-zA-Z_\\-0-9.:]*[a-zA-Z0-9_]+".toRegex().matches(assetModelExternalID.toString())){
+                    log.error("External ID \"$assetModelExternalID\" for asset model \"$assetModelName\" is not valid")
+                    assetModelExternalID = null
+                }
             }
         }
 
@@ -437,7 +443,11 @@ class SiteWiseAssetHelper(private val client: AwsSiteWiseClient,
 
             val propertyNameForChannel = assetCreationConfiguration.renderAssetPropertyName(target, source, channelName, targetData)
 
-            val externalIdForChannel = assetCreationConfiguration.renderAssetModelPropertyExternalID(target, source, channelName, targetData)
+            var externalIdForChannel = assetCreationConfiguration.renderAssetModelPropertyExternalID(target, source, channelName, targetData)
+            if  ((externalIdForChannel != null ) && (!"[a-zA-Z0-9_][a-zA-Z_\\-0-9.:]*[a-zA-Z0-9_]+".toRegex().matches(externalIdForChannel.toString()))){
+                log.error("External ID \"$externalIdForChannel\" for value $channelName is not valid")
+                externalIdForChannel = null
+            }
 
             createAssetModelMeasurementPropertyDefinition(
                 propertyNameForChannel, externalIdForChannel, channelName, channelData)
@@ -553,10 +563,10 @@ fun AwsSiteWiseAssetCreationConfiguration.renderAssetModelName(target: String, s
     renderTemplate(assetModelName, targetData.schedule, source, target, 256, targetData.metaDataAtSourceLevel(source))
 
 fun AwsSiteWiseAssetCreationConfiguration.renderAssetModelExternalID(target: String, source: String, targetData: TargetData): String? =
-    if (assetModelExternalID.isNullOrEmpty()) null else renderTemplate(assetModelExternalID!!, targetData.schedule, source, target, 128, targetData.metaDataAtSourceLevel(source))
+    if (assetModelExternalID.isNullOrEmpty()) null else renderTemplate(assetModelExternalID!!, targetData.schedule, source, target, 128, targetData.metaDataAtSourceLevel(source)).replace("/", "_")
 
 fun AwsSiteWiseAssetCreationConfiguration.renderAssetExternalID(target: String, source: String, targetData: TargetData): String? =
-    if (assetExternalID.isNullOrEmpty()) null else renderTemplate(assetExternalID!!, targetData.schedule, source, target, 128, targetData.metaDataAtSourceLevel(source))
+    if (assetExternalID.isNullOrEmpty()) null else renderTemplate(assetExternalID!!, targetData.schedule, source, target, 128, targetData.metaDataAtSourceLevel(source)).replace("/", "_")
 
 fun AwsSiteWiseAssetCreationConfiguration.renderAssetModelDescription(target: String, source: String, targetData: TargetData): String =
     renderTemplate(assetModelDescription, targetData.schedule, source, target, 2048, targetData.metaDataAtSourceLevel(source), true)
@@ -572,7 +582,7 @@ fun AwsSiteWiseAssetCreationConfiguration.renderAssetModelPropertyExternalID(tar
         channel,
         target,
         1000,
-        targetData.metaDataAtChannelLevel(source, channel))
+        targetData.metaDataAtChannelLevel(source, channel)).replace("/", "_")
 
 fun AwsSiteWiseAssetCreationConfiguration.renderAssetPropertyAlias(target: String, source: String, channel: String, assetID: String, targetData: TargetData): String? =
     if (assetPropertyAlias.isNullOrEmpty()) null

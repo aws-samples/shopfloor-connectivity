@@ -246,7 +246,11 @@ class AwsS3TargetWriter(
     }
 
     private fun buildContent(key: String): RequestBody {
-        val content: String = buffer.payloads.joinToString(prefix = "[", postfix = "]", separator = ",")
+        val content = if (targetConfig.arrayWhenBuffered)
+            buffer.payloads.joinToString(prefix = "[", postfix = "]", separator = ",")
+        else
+            buffer.payloads.joinToString(separator = "")
+
 
         return if (targetConfig.compressionType == CompressionType.NONE) RequestBody.fromString(content) else {
             val compressedData = compressContent(content, key)

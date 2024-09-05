@@ -344,14 +344,14 @@ The string must represent a valid instant in UTC</td>
 <tr>
 <td>Max</td>
 <td>Returns greater of value or parameter value.</td>
-<td>Datatype: Numeric, convert unsigned values to signed using ToSigned first/td>
+<td>Datatype: Numeric</td>
 <td>Numeric test value</td>
 </tr>
 
 <tr>
 <td>Min</td>
 <td>Return smaller of value or parameter value.</td>
-<td>Datatype: Numeric, convert unsigned values to signed using ToSigned first/td>
+<td>Datatype: Numeric</td>
 <td>Numeric test value</td>
 </tr>
 
@@ -359,7 +359,7 @@ The string must represent a valid instant in UTC</td>
 <td><p>Minus</p>
 <p>alias is "-"</p></td> 
 <td>Subtracts parameter value from value.</td>
-<td>Datatype: Numeric, convert unsigned values to signed using ToSigned first/td>
+<td>Datatype: Numeric</td>
 <td>Numeric value to subtract</td>
 </tr>
 
@@ -367,7 +367,7 @@ The string must represent a valid instant in UTC</td>
 <td><p>Mod</p>
 <p>alias is "%"</p></td>
 <td>Calculates the remainder of dividing value by parameter value.</td>
-<td>Datatype: Numeric, convert unsigned values to signed using ToSigned first/td>
+<td>Datatype: Numeric</td>
 <td>Parameter: Divider</td>
 </tr>
 
@@ -375,7 +375,7 @@ The string must represent a valid instant in UTC</td>
 <td><p>Multiply</p>
 <p>alias is "*"</p></td>
 <td>Multiplies value by parameter value.</td>
-<td>Datatype: Numeric, convert unsigned values to signed using ToSigned first/td>
+<td>Datatype: Numeric</td>
 <td>Parameter: Multiplier</td>
 </tr>
 
@@ -405,14 +405,14 @@ The string must represent a valid instant in UTC</td>
 <td><p>Or</p>
 <p>Alias = "|"</p></td>
 <td>Bitwise or of value and parameter.</td>
-<td>Datatype: Int, Byte, Short, Long, convert unsigned values to signed value first using ToSigned operator</td>
+<td>Datatype: Int, Byte, Short, Long.</td>
 <td>Parameter: or value</td>
 </tr>
 
 <tr>
 <td>OutsideRangeExclusive</td>
 <td>Test if a value is outside an exclusive range</td>
-<td>Datatype: Numeric, convert unsigned values to signed using ToSigned first/td>
+<td>Datatype: Numeric</td>
 <td><p>
 
 ```json
@@ -430,7 +430,7 @@ The string must represent a valid instant in UTC</td>
 
 <tr>
 <td>OutsideRangeInclusive</td>
-<td>Datatype: Numeric, convert unsigned values to signed using ToSigned first/td>
+<td>Datatype: Numeric</td>
 <td>Datatype: Numeric</td>
 <td>
 
@@ -452,7 +452,7 @@ The string must represent a valid instant in UTC</td>
 <td><p>Plus</p>
 <p>alias is "+" or "Add"</p></td>
 <td>Adds the value of the parameter to value.</td>
-<td>Datatype: Numeric, convert unsigned values to signed using ToSigned first/td>
+<td>Datatype: Numeric</td>
 <td>Numeric value to add</td>
 </tr>
 
@@ -610,42 +610,42 @@ The string must represent a valid instant in UTC</td>
 <tr>
 <td>ToByte</td>
 <td>Converts numeric value to a byte value</td>
-<td>Datatype: Numeric, convert unsigned values to signed using ToSigned first/td>
+<td>Datatype: Numeric</td>
 <td>No operand</td>
 </tr>
 
 <tr>
 <td>ToDouble</td>
 <td>Converts numeric value to a double value</td>
-<td>Datatype: Numeric, convert unsigned values to signed using ToSigned first/td>
+<td>Datatype: Numeric</td>
 <td>No operand</td>
 </tr>
 
 <tr>
 <td>ToFloat</td>
 <td>Converts numeric value to a float value</td>
-<td>Datatype: Numeric, convert unsigned values to signed using ToSigned first/td>
+<td>Datatype: Numeric</td>
 <td>No operand</td>
 </tr>
 
 <tr>
 <td>ToInt</td>
 <td>Converts numeric value to an int value</td>
-<td>Datatype: Numeric, convert unsigned values to signed using ToSigned first/td>
+<td>Datatype: Numeric</td>
 <td>No operand</td>
 </tr>
 
 <tr>
 <td>ToLong</td>
 <td>Converts numeric value to a long 64 bits value</td>
-<td>Datatype: Numeric, convert unsigned values to signed using ToSigned first/td>
+<td>Datatype: Numeric</td>
 <td>No operand</td>
 </tr>
 
 <tr>
 <td>ToShort</td>
 <td>Converts numeric value to a short 16 bits value</td>
-<td>Datatype: Numeric, convert unsigned values to signed using ToSigned first/td>
+<td>Datatype: Numeric</td>
 <td>No operand</td>
 </tr>
 
@@ -668,14 +668,14 @@ The string must represent a valid instant in UTC</td>
 <tr>
 <td>Trunc</td>
 <td>Rounds the given value to an integer towards zero.</td>
-<td>Datatype: Numeric, convert unsigned values to signed using ToSigned first/td>
+<td>Datatype: Numeric</td>
 <td></td>
 </tr>
 
 <tr>
 <td>TruncAt</td>
 <td>Rounds the given value to a value with a specified number of decimals.</td>
-<td>Datatype: Numeric, convert unsigned values to signed using ToSigned first/td>
+<td>Datatype: Numeric</td>
 <td>Number of decimals to truncate value at</td>
 </tr>
 
@@ -688,7 +688,7 @@ The string must represent a valid instant in UTC</td>
 
 <tr>
 <td>WithinRangeExclusive</td>
-<td>Datatype: Numeric, convert unsigned values to signed using ToSigned first/td>
+<td>Datatype: Numeric</td>
 <td>Datatype : Numeric</td>
 <td>
 
@@ -707,7 +707,7 @@ The string must represent a valid instant in UTC</td>
 
 <tr>
 <td>WithinRangeInclusive</td>
-<td>Datatype: Numeric, convert unsigned values to signed using ToSigned first/td>
+<td>Datatype: Numeric</td>
 <td>Datatype: Numeric</td>
 <td>
 

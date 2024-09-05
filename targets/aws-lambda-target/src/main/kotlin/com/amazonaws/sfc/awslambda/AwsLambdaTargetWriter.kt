@@ -254,7 +254,11 @@ class AwsLambdaTargetWriter(
             buffer.payloads[0]
         else {
             // if buffer contains multiple message send as an array
-            buffer.payloads.joinToString(prefix = "[", postfix = "]", separator = ",")
+            if (targetConfig.arrayWhenBuffered)
+                buffer.payloads.joinToString(prefix = "[", postfix = "]", separator = ",")
+            else{
+                buffer.payloads.joinToString(separator = "")
+            }
         }
 
         return if (targetConfig.compressionType == CompressionType.NONE) data

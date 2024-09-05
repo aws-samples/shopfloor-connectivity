@@ -16,7 +16,7 @@ Shop Floor Connectivity (SFC) is a data ingestion technology that can deliver da
 Ensure your AWS account and region have the associated [Greengrass service role](https://docs.aws.amazon.com/greengrass/v2/developerguide/greengrass-service-role.html) enabled, which is required for external connections to the Greengrass MQTT broker.
 
 1. Sign in to the [AWS Management Console](https://console.aws.amazon.com/)
-2. Navigate to the[IoT SiteWise console](https://console.aws.amazon.com/iotsitewise/home#/gateway)
+2. Navigate to the [IoT SiteWise console](https://console.aws.amazon.com/iotsitewise/home#/gateway)
 3. Create a SiteWise Edge Gateway by following the instructions in the [AWS IoT SiteWise User Guide](https://docs.aws.amazon.com/iot-sitewise/latest/userguide/create-gateway-ggv2.html).
 4. Install the SiteWise Edge Gateway software on a local device by following the instructions in the [AWS IoT SiteWise User Guide](https://docs.aws.amazon.com/iot-sitewise/latest/userguide/install-gateway-software-on-local-device.html).
 
@@ -37,9 +37,9 @@ Ensure your AWS account and region have the associated [Greengrass service role]
 7. Click **Next**
 8. Next to the search box, uncheck the **Show only selected components** option
 9. Search for and add the following components:
-    1. `aws.greengrass.clientdevices.mqtt.EMQX`
-    2. `aws.greengrass.clientdevices.Auth`
-    3. `aws.greengrass.clientdevices.IPDetector`
+   1. `aws.greengrass.clientdevices.mqtt.EMQX`
+   2. `aws.greengrass.clientdevices.Auth`
+   3. `aws.greengrass.clientdevices.IPDetector`
 10. Click **Next**
 11. Select the `aws.greengrass.clientdevices.Auth` component and click **Configure component**
 12. Paste the following configuration into the **Configuration to merge** section:
@@ -73,9 +73,9 @@ Ensure your AWS account and region have the associated [Greengrass service role]
 }
 ```
 
-1. Click **Confirm**
-2. Select the `aws.greengrass.clientdevices.mqtt.EMQX` component and click **Configure component**
-3. Paste the following configuration into the **Configuration to merge** section:
+13. Click **Confirm**
+14. Select the `aws.greengrass.clientdevices.mqtt.EMQX` component and click **Configure component**
+15. Paste the following configuration into the **Configuration to merge** section:
 
 ```json
 {
@@ -115,10 +115,10 @@ Ensure your AWS account and region have the associated [Greengrass service role]
 }
 ```
 
-1. Click **Confirm**
-2. Click **Skip to Review**
-3. Click **Deploy**
-4. Wait for the **Deployment status** to change to **completed**
+16. Click **Confirm**
+17. Click **Skip to Review**
+18. Click **Deploy**
+19. Wait for the **Deployment status** to change to **completed**
 
 
 After completing these steps, the EMQX MQTT broker component should be deployed and configured on your SiteWise Edge Gateway.
@@ -151,7 +151,7 @@ aws iot create-policy \
 }'
 ```
 
-1. Create an IoT Thing named `DemoClientThing` and save its X.509 certificates:
+3. Create an IoT Thing named `DemoClientThing` and save its X.509 certificates:
 
 ```shell
 mkdir -p ~/gateway-client-certs
@@ -163,7 +163,7 @@ aws iot attach-policy --policy-name DemoClientThingPolicy --target $CERTIFICATE_
 aws iot attach-thing-principal --thing-name $THING_NAME --principal $CERTIFICATE_ARN
 ```
 
-1. Associate the `DemoClientThing` with the Greengrass core. You can retrieve the name of the Greengrass Core by going to the [AWS IoT SiteWise Edge Gateways](https://console.aws.amazon.com/iotsitewise/home#/gateway) console and selecting the gateway.
+4. Associate the `DemoClientThing` with the Greengrass core. You can retrieve the name of the Greengrass Core by going to the [AWS IoT SiteWise Edge Gateways](https://console.aws.amazon.com/iotsitewise/home#/gateway) console and selecting the gateway.
 
 ```shell
 aws greengrassv2 batch-associate-client-device-with-core-device \
@@ -171,7 +171,7 @@ aws greengrassv2 batch-associate-client-device-with-core-device \
    --entries thingName=$THING_NAME
 ```
 
-1. Retrieve the Greengrass Core CA certificate:
+5. Retrieve the Greengrass Core CA certificate:
 
 ```shell
 curl -s --cert ${THING_NAME}.crt \

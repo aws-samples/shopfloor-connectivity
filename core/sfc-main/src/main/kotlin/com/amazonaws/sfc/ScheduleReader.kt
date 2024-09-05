@@ -383,290 +383,314 @@ class ScheduleReader(
         return composeChannels(spread)
     }
 
-    private fun decomposeChannelValues(data: Map<String, SourceReadSuccess>): Map<String, SourceReadSuccess> {
-
-        fun decomposeStructuredValue(name: String, value: Any?, timestamp: Instant?, y: MutableMap<String, ChannelReadValue>) {
-            if ((value != null) && (value is Map<*, *>)) {
-                (value).forEach { (k, v) ->
-                    // nested structures
-                    if (v is Map<*, *>) decomposeStructuredValue("$name.$k", v, timestamp, y)
-                    else y["$name.${k.toString()}"] = ChannelReadValue(v, timestamp)
-                }
-            }
-        }
-
-        // map indexed by source, entry contains list of channels that need to be decomposed into separate values
-        val decomposedSourceChannels: Map<String, Set<String>> = data.keys.map { source ->
-            val sourceConfig: SourceConfiguration? = sources[source]
-            val decomposedSourceChannels: Set<String> = sourceConfig?.channels?.filter { it.value.decompose }?.keys ?: emptySet()
-            source to decomposedSourceChannels
-        }.toMap()
-
-        // no compositions, just return the data
-        if (decomposedSourceChannels.values.flatten().isEmpty()) return data
-
-        return data.map { (source, sourceData: SourceReadSuccess) ->
-
-            val sourceDecomposedChannels = decomposedSourceChannels[source]
-
-            source to if (!sourceDecomposedChannels.isNullOrEmpty()) {
-
-                val channelValues: MutableMap<String, ChannelReadValue> = sourceData.values.toMutableMap()
-                sourceDecomposedChannels.forEach { ch ->
-                    val value = channelValues[ch]
-                    if (value != null) {
-                        decomposeStructuredValue(ch, value.value, value.timestamp, channelValues)
-                    }
-                }
-
-                // remove decomposed channels
-                sourceDecomposedChannels.forEach {
-                    if (channelValues[it]?.value is Map<*, *>) channelValues.remove(it)
-                }
-                SourceReadSuccess(channelValues.toMap(), sourceData.timestamp)
-
-            } else {
-                // no decompositions fot this source
-                sourceData
-            }
-        }.toMap()
+    private fun isDecomposed(sourceConfig : SourceConfiguration, channelConfig: ChannelConfiguration) : Boolean{
+        return (sourceConfig.decompose == true && channelConfig.decompose!= false) ||
+                (channelConfig.decompose == true)
     }
 
-    private fun spreadChannelValues(data: Map<String, SourceReadSuccess>): Map<String, SourceReadSuccess> {
+    private fun isSpread(sourceConfig : SourceConfiguration, channelConfig: ChannelConfiguration) : Boolean{
+        return (sourceConfig.spread == true && channelConfig.spread!= false)||
+                (channelConfig.spread == true)
+    }
 
-        // map indexed by source, entry contains list of channels that need to be decomposed into separate values
-        val spreadSourceChannels: Map<String, Set<String>> = data.keys.map { source ->
-            val sourceConfig: SourceConfiguration? = sources[source]
-            val spreadSourceChannels: Set<String> = sourceConfig?.channels?.filter { it.value.spread }?.keys ?: emptySet()
-            source to spreadSourceChannels
-        }.toMap()
+    private fun decomposeChannelValues(data: Map<String, SourceReadSuccess>): Map<String, SourceReadSuccess> {
 
-        // no spreads, just return the data
-        if (spreadSourceChannels.values.flatten().isEmpty()) return data
-
-        return data.map { (source, sourceData: SourceReadSuccess) ->
-
-            val sourceSpreadChannels = spreadSourceChannels[source]
-
-            source to if (!sourceSpreadChannels.isNullOrEmpty()) {
-
-                val channelValues: MutableMap<String, ChannelReadValue> = sourceData.values.toMutableMap()
-                sourceSpreadChannels.forEach { ch ->
-                    val value = channelValues[ch]
-                    if (value != null) {
-                        val v = value.value
-                        if ((v != null) && (v is List<*>)) {
-                            v.forEachIndexed { i, sv ->
-                                channelValues["$ch.$i"] = ChannelReadValue(sv, value.timestamp)
-                            }
+        fun decomposeStructuredValue(name: String, sourceConfig : SourceConfiguration, channelConfig: ChannelConfiguration, value: Any?, timestamp: Instant?, decomposed: MutableMap<String, ChannelReadValue>) {
+            if (value != null)
+                if (value is Map<*, *>) {
+                    (value).forEach { (k, v) ->
+                        // nested structures
+                        if (v is Map<*, *>) decomposeStructuredValue("$name.$k",sourceConfig, channelConfig, v, timestamp, decomposed)
+                        else decomposed["$name.${k.toString()}"] = ChannelReadValue(v, timestamp)
+                    }
+                    decomposed.remove(name)
+                } else {
+                    if (value is List<*> && isSpread(sourceConfig, channelConfig)) {
+                        value.forEachIndexed { i, v ->
+                            decomposeStructuredValue("$name.$i", sourceConfig, channelConfig, v, timestamp, decomposed)
+                            decomposed.remove(name)
                         }
                     }
                 }
 
-                // remove decomposed channels
-                sourceSpreadChannels.forEach {
-                    if (channelValues[it]?.value is Map<*, *>) channelValues.remove(it)
-                }
-                SourceReadSuccess(channelValues.toMap(), sourceData.timestamp)
-
-            } else {
-                // no decompositions fot this source
-                sourceData
-            }
-        }.toMap()
-    }
-
-
-    private fun composeChannels(dec: Map<String, SourceReadSuccess>): Map<String, SourceReadSuccess> {
-        val compositionChannels: List<String> = dec.keys.flatMap { source -> config.sources[source]?.compose?.values ?: emptyList() }.flatten()
-
-        if (compositionChannels.isEmpty()) return dec
-
-
-        return dec.map { (source: String, sourceData: SourceReadSuccess) ->
-
-            val sourceCompositions = config.sources[source]?.compose ?: emptyMap()
-
-            if (sourceCompositions.isNotEmpty()) {
-
-                val sourceValues = sourceData.values.toMutableMap()
-
-                sourceCompositions.forEach { (structureName, channelIDs) ->
-                    val struct = buildStructure(channelIDs, sourceValues, source)
-                    if (struct.isNotEmpty()) {
-                        sourceValues[structureName] = ChannelReadValue(struct, sourceData.timestamp)
-                    }
-                }
-
-                // remove channels used by composition
-                compositionChannels.forEach {
-                    sourceValues.remove(it)
-                }
-
-                source to SourceReadSuccess(sourceValues, sourceData.timestamp)
-
-            } else {
-                source to dec[source]!!
-            }
-
-        }.toMap()
-    }
-
-
-    private fun buildStructure(channelIDs: List<String>,
-                               sourceValues: MutableMap<String, ChannelReadValue>,
-                               source: String) = sequence {
-        channelIDs.forEach { channelID ->
-            val channelValue = sourceValues[channelID]
-            if (channelValue != null) {
-                val channelConfiguration = sources[source]?.channels?.get(channelID)
-                val name = channelConfiguration?.name ?: channelID
-                yield(name to channelValue.value)
-            }
         }
+
+
+
+    // map indexed by source, entry contains list of channels that need to be decomposed into separate values
+    val decomposedSourceChannels: Map<String, Map<String, ChannelConfiguration>> = data.keys.map { source ->
+        val sourceConfig: SourceConfiguration? = sources[source]
+
+        val decomposedSourceChannels = sourceConfig?.channels?.filter { isDecomposed(sourceConfig, it.value) } ?: emptyMap()
+        source to decomposedSourceChannels
     }.toMap()
 
-    private fun selectSuccessfulSourceReadValues(readResult: ReadResult) =
-        readResult.filter { it.value is SourceReadSuccess && (it.value as SourceReadSuccess).values.isNotEmpty() }.map {
-            it.key to it.value as SourceReadSuccess
-        }.toMap()
+    // no compositions, just return the data
+    if (decomposedSourceChannels.values.map { it.keys }.isEmpty()) return data
 
+    return data .map{
+        (source, sourceData: SourceReadSuccess) ->
 
-    private fun applyFilters(data: Map<String, SourceReadSuccess>): Map<String, SourceReadSuccess> {
+        val sourceDecomposedChannels: Map<String, ChannelConfiguration>? = decomposedSourceChannels[source]
 
-        if (data.isEmpty()) return data
+        source to if (!sourceDecomposedChannels.isNullOrEmpty()) {
 
-        val noChangeFiltersConfigured = config.changeFilters.isEmpty()
-        val noValueFiltersConfigured = config.valueFilters.isEmpty()
-        val noConditionFiltersConfigured = config.conditionFilters.isEmpty()
-        val noFiltersConfigured = noChangeFiltersConfigured && noValueFiltersConfigured && noConditionFiltersConfigured
-
-
-        if (noFiltersConfigured) return data
-
-        val trace = if (logger.level == LogLevel.TRACE) logger.getCtxTraceLog(className, "applyFilters") else null
-
-        val sourceOutputData: Map<String, SourceReadSuccess> = data.map { (sourceID, sourceValues) ->
-
-            // apply filter on the values of a source, the filter will return the true if it passes the filter, else false
-            val filteredSourceValues = sourceValues.values.filter { (channelID, channelReadValue) ->
-
-                val value = channelReadValue.value ?: return@filter false
-
-                // first is applied filter, second is result of filter, passed is true, filtered out is false
-                var filterOutput: Pair<Filter?, Boolean>
-
-                // Change filter
-                filterOutput = if (noChangeFiltersConfigured) null to true else changeFilters.applyFilter(sourceID, channelID, value, logger)
-
-                // If passed change filter apply value filter
-                if (filterOutput.second) {
-                    filterOutput = if (noValueFiltersConfigured) null to true else applyValueFilter(sourceID, channelID, value)
+            val channelValues: MutableMap<String, ChannelReadValue> = sourceData.values.toMutableMap()
+            sourceDecomposedChannels.forEach { ch ->
+                val value = channelValues[ch.key]
+                if (value != null) {
+                    config.sources[source]?.let { sourceConfig -> decomposeStructuredValue(ch.key, sourceConfig, ch.value, value.value, value.timestamp, channelValues) }
                 }
-
-                if (trace != null && !filterOutput.second && filterOutput.first != null) {
-                    trace("Source \"$sourceID\", Channel \"$channelID\", Value $value (${value::class.java.simpleName}) filtered out by filter ${filterOutput.first}")
-                }
-
-                return@filter filterOutput.second
             }
 
-            // new ReadSuccess for the source containing the filtered channel values
-            sourceID to SourceReadSuccess(values = filteredSourceValues, timestamp = sourceValues.timestamp)
-        }.toMap().filter { it.value.values.isNotEmpty() }
-
-        return if (noConditionFiltersConfigured)
-            sourceOutputData
-        else
-            applyConditionFilters(sourceOutputData)
-    }
-
-    private fun applyConditionFilters(sourceOutputData: Map<String, SourceReadSuccess>) =
-        sourceOutputData.map { (sourceID: String, sourceData: SourceReadSuccess) ->
-            val trace = logger.getCtxTraceLog(className, "applyConditionFilters")
-            val filtered = sourceData.values.filter { (channelID: String, _: ChannelReadValue) ->
-
-                val conditionFilterID = config.sources[sourceID]?.channels?.get(channelID)?.conditionFilterID
-                var filter: Filter? = null
-
-                val conditionFilterResult = if (conditionFilterID == null) true else {
-                    filter = conditionFilters[conditionFilterID]
-                    filter == null || filter.apply(sourceData.valuesMap)
-                }
-
-                if (!conditionFilterResult) {
-                    val value = sourceData.values[channelID]?.value
-                    trace("Source \"$sourceID\", Channel \"$channelID\", Value $value (${value!!::class.java.simpleName}) filtered out by condition filter \"$conditionFilterID\" ($filter)")
-                }
-
-                conditionFilterResult
+            // remove decomposed channels
+            sourceDecomposedChannels.forEach {
+                if (channelValues[it.key]?.value is Map<*, *>) channelValues.remove(it.key)
             }
-            sourceID to SourceReadSuccess(timestamp = sourceData.timestamp, values = filtered)
-        }.toMap().filter { it.value.values.isNotEmpty() }
+            SourceReadSuccess(channelValues.toMap(), sourceData.timestamp)
+
+        } else {
+            // no decompositions fot this source
+            sourceData
+        }
+    }.toMap()
+}
+
+private fun spreadChannelValues(data: Map<String, SourceReadSuccess>): Map<String, SourceReadSuccess> {
+
+    // map indexed by source, entry contains list of channels that need to be decomposed into separate values
+    val spreadSourceChannels: Map<String, Map<String, ChannelConfiguration>> = data.keys.map { source ->
+        val sourceConfig: SourceConfiguration? = sources[source]
+        val spreadSourceChannels: Map<String, ChannelConfiguration> = sourceConfig?.channels?.filter { isSpread(sourceConfig, it.value) }?: emptyMap()
+        source to spreadSourceChannels
+    }.toMap()
+
+    // no spreads, just return the data
+    if (spreadSourceChannels.values.map { it.keys }.flatten().isEmpty()) return data
+
+    return data.map { (source, sourceData: SourceReadSuccess) ->
+
+        val sourceSpreadChannels = spreadSourceChannels[source]
+
+        source to if (!sourceSpreadChannels.isNullOrEmpty()) {
+
+            val channelValues: MutableMap<String, ChannelReadValue> = sourceData.values.toMutableMap()
+            sourceSpreadChannels.forEach { ch ->
+                val value = channelValues[ch.key]
+                if (value != null) {
+                    val v = value.value
+                    if ((v != null) && (v is List<*>)) {
+                        v.forEachIndexed { i, sv ->
+                            if (sv is Map<*,*> )
+                            channelValues["${ch.key}.$i"] = ChannelReadValue(sv, value.timestamp)
+                        }
+                    }
+                }
+            }
+
+            // remove decomposed channels
+            sourceSpreadChannels.forEach {
+                if (channelValues[it.key]?.value is List<*>) channelValues.remove(it.key)
+            }
+            SourceReadSuccess(channelValues.toMap(), sourceData.timestamp)
+
+        } else {
+            // no decompositions fot this source
+            sourceData
+        }
+    }.toMap()
+}
 
 
-    private fun applyValueFilter(sourceID: String, channelID: String, value: Any): Pair<Filter?, Boolean> {
-        val filterName = config.sources[sourceID]?.channels?.get(channelID)?.valueFilterID
-        val filter = if (filterName != null) valueFilters[filterName] else null
-        val result = filter?.apply(value) ?: true
-        return filter to result
-    }
+private fun composeChannels(dec: Map<String, SourceReadSuccess>): Map<String, SourceReadSuccess> {
+    val compositionChannels: List<String> = dec.keys.flatMap { source -> config.sources[source]?.compose?.values ?: emptyList() }.flatten()
 
-    // Applies configured transformation on the input data
-    private suspend fun applyTransformation(data: Map<String, SourceReadSuccess>): Map<String, SourceReadSuccess> {
+    if (compositionChannels.isEmpty()) return dec
 
-        if (data.isEmpty()) return data
 
-        val context = buildScope("ApplyTransformations")
+    return dec.map { (source: String, sourceData: SourceReadSuccess) ->
 
-        // No transformations, return input data
-        if (!scheduleHasTransformations) {
-            return data
+        val sourceCompositions = config.sources[source]?.compose ?: emptyMap()
+
+        if (sourceCompositions.isNotEmpty()) {
+
+            val sourceValues = sourceData.values.toMutableMap()
+
+            sourceCompositions.forEach { (structureName, channelIDs) ->
+                val struct = buildStructure(channelIDs, sourceValues, source)
+                if (struct.isNotEmpty()) {
+                    sourceValues[structureName] = ChannelReadValue(struct, sourceData.timestamp)
+                }
+            }
+
+            // remove channels used by composition
+            compositionChannels.forEach {
+                sourceValues.remove(it)
+            }
+
+            source to SourceReadSuccess(sourceValues, sourceData.timestamp)
+
+        } else {
+            source to dec[source]!!
         }
 
-        // Apply transformations
-        return data.map { result ->
+    }.toMap()
+}
 
-            val sourceID = result.key
-            val channels = sources[sourceID]?.channels ?: emptyMap()
 
-            // test if there are any transformations for this source, if not then return all its values as result of the mapping
-            sourceID to if (!sourceHasTransformations(sourceID))
-                result.value
-            else {
-                transformValues(context, sourceID, channels, result)
+private fun buildStructure(channelIDs: List<String>,
+                           sourceValues: MutableMap<String, ChannelReadValue>,
+                           source: String) = sequence {
+    channelIDs.forEach { channelID ->
+        val channelValue = sourceValues[channelID]
+        if (channelValue != null) {
+            val channelConfiguration = sources[source]?.channels?.get(channelID)
+            val name = channelConfiguration?.name ?: channelID
+            yield(name to channelValue.value)
+        }
+    }
+}.toMap()
+
+private fun selectSuccessfulSourceReadValues(readResult: ReadResult) =
+    readResult.filter { it.value is SourceReadSuccess && (it.value as SourceReadSuccess).values.isNotEmpty() }.map {
+        it.key to it.value as SourceReadSuccess
+    }.toMap()
+
+
+private fun applyFilters(data: Map<String, SourceReadSuccess>): Map<String, SourceReadSuccess> {
+
+    if (data.isEmpty()) return data
+
+    val noChangeFiltersConfigured = config.changeFilters.isEmpty()
+    val noValueFiltersConfigured = config.valueFilters.isEmpty()
+    val noConditionFiltersConfigured = config.conditionFilters.isEmpty()
+    val noFiltersConfigured = noChangeFiltersConfigured && noValueFiltersConfigured && noConditionFiltersConfigured
+
+
+    if (noFiltersConfigured) return data
+
+    val trace = if (logger.level == LogLevel.TRACE) logger.getCtxTraceLog(className, "applyFilters") else null
+
+    val sourceOutputData: Map<String, SourceReadSuccess> = data.map { (sourceID, sourceValues) ->
+
+        // apply filter on the values of a source, the filter will return the true if it passes the filter, else false
+        val filteredSourceValues = sourceValues.values.filter { (channelID, channelReadValue) ->
+
+            val value = channelReadValue.value ?: return@filter false
+
+            // first is applied filter, second is result of filter, passed is true, filtered out is false
+            var filterOutput: Pair<Filter?, Boolean>
+
+            // Change filter
+            filterOutput = if (noChangeFiltersConfigured) null to true else changeFilters.applyFilter(sourceID, channelID, value, logger)
+
+            // If passed change filter apply value filter
+            if (filterOutput.second) {
+                filterOutput = if (noValueFiltersConfigured) null to true else applyValueFilter(sourceID, channelID, value)
             }
-        }.toMap()
+
+            if (trace != null && !filterOutput.second && filterOutput.first != null) {
+                trace("Source \"$sourceID\", Channel \"$channelID\", Value $value (${value::class.java.simpleName}) filtered out by filter ${filterOutput.first}")
+            }
+
+            return@filter filterOutput.second
+        }
+
+        // new ReadSuccess for the source containing the filtered channel values
+        sourceID to SourceReadSuccess(values = filteredSourceValues, timestamp = sourceValues.timestamp)
+    }.toMap().filter { it.value.values.isNotEmpty() }
+
+    return if (noConditionFiltersConfigured)
+        sourceOutputData
+    else
+        applyConditionFilters(sourceOutputData)
+}
+
+private fun applyConditionFilters(sourceOutputData: Map<String, SourceReadSuccess>) =
+    sourceOutputData.map { (sourceID: String, sourceData: SourceReadSuccess) ->
+        val trace = logger.getCtxTraceLog(className, "applyConditionFilters")
+        val filtered = sourceData.values.filter { (channelID: String, _: ChannelReadValue) ->
+
+            val conditionFilterID = config.sources[sourceID]?.channels?.get(channelID)?.conditionFilterID
+            var filter: Filter? = null
+
+            val conditionFilterResult = if (conditionFilterID == null) true else {
+                filter = conditionFilters[conditionFilterID]
+                filter == null || filter.apply(sourceData.valuesMap)
+            }
+
+            if (!conditionFilterResult) {
+                val value = sourceData.values[channelID]?.value
+                trace("Source \"$sourceID\", Channel \"$channelID\", Value $value (${value!!::class.java.simpleName}) filtered out by condition filter \"$conditionFilterID\" ($filter)")
+            }
+
+            conditionFilterResult
+        }
+        sourceID to SourceReadSuccess(timestamp = sourceData.timestamp, values = filtered)
+    }.toMap().filter { it.value.values.isNotEmpty() }
+
+
+private fun applyValueFilter(sourceID: String, channelID: String, value: Any): Pair<Filter?, Boolean> {
+    val filterName = config.sources[sourceID]?.channels?.get(channelID)?.valueFilterID
+    val filter = if (filterName != null) valueFilters[filterName] else null
+    val result = filter?.apply(value) ?: true
+    return filter to result
+}
+
+// Applies configured transformation on the input data
+private suspend fun applyTransformation(data: Map<String, SourceReadSuccess>): Map<String, SourceReadSuccess> {
+
+    if (data.isEmpty()) return data
+
+    val context = buildScope("ApplyTransformations")
+
+    // No transformations, return input data
+    if (!scheduleHasTransformations) {
+        return data
     }
 
+    // Apply transformations
+    return data.map { result ->
 
-    private suspend fun transformValues(
-        context: CoroutineScope,
-        sourceID: String,
-        channels: Map<String, ChannelConfiguration>,
-        result: Map.Entry<String, SourceReadSuccess>
-    ): SourceReadSuccess {
+        val sourceID = result.key
+        val channels = sources[sourceID]?.channels ?: emptyMap()
 
-        // map channel values for this source
-        val transformedValues = result.value.values.map { (channelID, channelReadValue) ->
+        // test if there are any transformations for this source, if not then return all its values as result of the mapping
+        sourceID to if (!sourceHasTransformations(sourceID))
+            result.value
+        else {
+            transformValues(context, sourceID, channels, result)
+        }
+    }.toMap()
+}
 
 
-            val ids = mutableListOf(channelID)
-            if (channelID.contains(CHANNEL_SEPARATOR)) {
-                ids.add(channelID.split(CHANNEL_SEPARATOR)[0])
-            }
+private suspend fun transformValues(
+    context: CoroutineScope,
+    sourceID: String,
+    channels: Map<String, ChannelConfiguration>,
+    result: Map.Entry<String, SourceReadSuccess>
+): SourceReadSuccess {
 
-            // get the ID of the transformation for the channel
-            val channelIDForTransformation: String? = ids.find {
-                val channelTransformation = channels[it]?.transformationID
-                transformations.containsKey(channelTransformation)
-            }
+    // map channel values for this source
+    val transformedValues = result.value.values.map { (channelID, channelReadValue) ->
 
-            val (transformationID, transformationForChannel) = if (channelIDForTransformation != null) {
-                val id = channels[channelIDForTransformation]?.transformationID
-                id to transformations[id]
-            } else null to null
 
+        val ids = mutableListOf(channelID)
+        if (channelID.contains(CHANNEL_SEPARATOR)) {
+            ids.add(channelID.split(CHANNEL_SEPARATOR)[0])
+        }
+
+        // get the ID of the transformation for the channel
+        val channelIDForTransformation: String? = ids.find {
+            val channelTransformation = channels[it]?.transformationID
+            transformations.containsKey(channelTransformation)
+        }
+
+        val (transformationID, transformationForChannel) = if (channelIDForTransformation != null) {
+            val id = channels[channelIDForTransformation]?.transformationID
+            id to transformations[id]
+        } else null to null
 
 
 //            { id ->
@@ -686,74 +710,74 @@ class ScheduleReader(
 //
 //
 
-            channelID to if (transformationForChannel == null)
-            // this channel does not require transformation, return inout value as result of mapping
-                channelReadValue
-            else
-            // apply the transformation to the value
-                try {
-                    if (logger.level != LogLevel.TRACE) {
-                        // when not in trace mode run transformations async
-                        context.async {
-                            applyTransformation(channelReadValue, channelID, transformationForChannel)
-                        }
-                    } else {
+        channelID to if (transformationForChannel == null)
+        // this channel does not require transformation, return inout value as result of mapping
+            channelReadValue
+        else
+        // apply the transformation to the value
+            try {
+                if (logger.level != LogLevel.TRACE) {
+                    // when not in trace mode run transformations async
+                    context.async {
                         applyTransformation(channelReadValue, channelID, transformationForChannel)
                     }
-                } catch (e: TransformationException) {
-                    val errLog = logger.getCtxErrorLog(className, "transformValues")
-                    errLog("Error applying transformation \"$transformationID\" value $channelReadValue for source \"$sourceID\", channel \"${channelID}\", ${e.message} ${e.operator}")
-                    channelReadValue
+                } else {
+                    applyTransformation(channelReadValue, channelID, transformationForChannel)
                 }
-        }.associate {
-            it.first to
-                    // result could be a deferred if transformations were run async
-                    if (it.second is ChannelReadValue) it.second as ChannelReadValue
-                    else (it.second as Deferred<*>).await() as ChannelReadValue
-        }
-        return SourceReadSuccess(values = transformedValues, timestamp = result.value.timestamp)
+            } catch (e: TransformationException) {
+                val errLog = logger.getCtxErrorLog(className, "transformValues")
+                errLog("Error applying transformation \"$transformationID\" value $channelReadValue for source \"$sourceID\", channel \"${channelID}\", ${e.message} ${e.operator}")
+                channelReadValue
+            }
+    }.associate {
+        it.first to
+                // result could be a deferred if transformations were run async
+                if (it.second is ChannelReadValue) it.second as ChannelReadValue
+                else (it.second as Deferred<*>).await() as ChannelReadValue
     }
+    return SourceReadSuccess(values = transformedValues, timestamp = result.value.timestamp)
+}
 
-    // Applies transformation to a channel value
-    private fun applyTransformation(channelValue: ChannelReadValue, valueName: String, transformation: Transformation): ChannelReadValue {
-        return if (channelValue.value != null)
-            ChannelReadValue(
-                transformation.invoke(channelValue.value!!, valueName, throwsException = true, logger = logger),
-                channelValue.timestamp
-            )
-        else
-        // There was no transformation needed, just return value
-            channelValue
+// Applies transformation to a channel value
+private fun applyTransformation(channelValue: ChannelReadValue, valueName: String, transformation: Transformation): ChannelReadValue {
+    return if (channelValue.value != null)
+        ChannelReadValue(
+            transformation.invoke(channelValue.value!!, valueName, throwsException = true, logger = logger),
+            channelValue.timestamp
+        )
+    else
+    // There was no transformation needed, just return value
+        channelValue
 
-    }
+}
 
-    // Tests if there are any transformations configured for channel values in a source
-    private fun sourceHasTransformations(sourceID: String): Boolean {
-        val source = sources[sourceID] ?: return false
-        return source.channels.any { it.value.transformationID != null }
-    }
+// Tests if there are any transformations configured for channel values in a source
+private fun sourceHasTransformations(sourceID: String): Boolean {
+    val source = sources[sourceID] ?: return false
+    return source.channels.any { it.value.transformationID != null }
+}
 
-    // Combines the channel values with timestamps on source/channel level
-    private fun buildOutputValues(schedule: ScheduleConfiguration, values: Map<String, SourceReadSuccess>): Map<String, SourceOutputData> {
+// Combines the channel values with timestamps on source/channel level
+private fun buildOutputValues(schedule: ScheduleConfiguration, values: Map<String, SourceReadSuccess>): Map<String, SourceOutputData> {
 
-        return values.map { (sourceID, readValues: SourceReadSuccess) ->
+    return values.map { (sourceID, readValues: SourceReadSuccess) ->
 
-            val needSourceTimestamp = (schedule.timestampLevel == TimestampLevel.BOTH || schedule.timestampLevel == TimestampLevel.SOURCE)
-            val sourceTimestamp = if (needSourceTimestamp) readValues.timestamp else null
+        val needSourceTimestamp = (schedule.timestampLevel == TimestampLevel.BOTH || schedule.timestampLevel == TimestampLevel.SOURCE)
+        val sourceTimestamp = if (needSourceTimestamp) readValues.timestamp else null
 
-            val needChannelTimestamp = (schedule.timestampLevel == TimestampLevel.BOTH || schedule.timestampLevel == TimestampLevel.CHANNEL)
+        val needChannelTimestamp = (schedule.timestampLevel == TimestampLevel.BOTH || schedule.timestampLevel == TimestampLevel.CHANNEL)
 
-            sourceID to SourceOutputData(
-                channels = readValues.values.filter { it.value.value != null }.map { (channelID, channelValue) ->
-                    val channelTimestamp = if (needChannelTimestamp) channelValue.timestamp ?: readValues.timestamp else null
-                    val channelMetadata = config.sources[sourceID]?.channels?.get(channelID)?.metadata
-                    channelID to ChannelOutputData(channelValue.value!!, channelTimestamp, channelMetadata)
-                }.toMap(),
+        sourceID to SourceOutputData(
+            channels = readValues.values.filter { it.value.value != null }.map { (channelID, channelValue) ->
+                val channelTimestamp = if (needChannelTimestamp) channelValue.timestamp ?: readValues.timestamp else null
+                val channelMetadata = config.sources[sourceID]?.channels?.get(channelID)?.metadata
+                channelID to ChannelOutputData(channelValue.value!!, channelTimestamp, channelMetadata)
+            }.toMap(),
 
-                timestamp = sourceTimestamp,
-                isAggregated = false
-            )
-        }.toMap().filter { it.value.channels.isNotEmpty() }
-    }
+            timestamp = sourceTimestamp,
+            isAggregated = false
+        )
+    }.toMap().filter { it.value.channels.isNotEmpty() }
+}
 
 }

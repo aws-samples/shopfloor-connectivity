@@ -1,5 +1,17 @@
 # Release Notes:
 
+## Version 1.4.2, 5 September 2024
+
+- [OPCUA autodiscovery example](https://github.com/aws-samples/shopfloor-connectivity/tree/mainline/examples/opcua-auto-discovery) validation of external ID's
+- Decompose setting to control decomposition of structured values at [source](https://github.com/aws-samples/shopfloor-connectivity/blob/mainline/docs/core/source-configuration.md) level
+- Support for decomposition of lists of structured values
+- Control over output of numeric values for targets with JSON output [UnquoteNumericJsonValues](https://github.com/aws-samples/shopfloor-connectivity/blob/mainline/docs/core/target-configuration.md)
+- Spread setting to control decomposition of list values at [source](https://github.com/aws-samples/shopfloor-connectivity/blob/mainline/docs/core/source-configuration.md) level
+- Documentation fixes and updates
+
+---
+
+
 ## Version 1.4.1, 22 August 2024
 
 - [Transformation operators](docs/core/transformation-operator-configuration.md) : Chunked,NumbersToFloatBE, NumbertToFloatLE, ReverseList, ToShort, ToSigned, ToUnsigned.

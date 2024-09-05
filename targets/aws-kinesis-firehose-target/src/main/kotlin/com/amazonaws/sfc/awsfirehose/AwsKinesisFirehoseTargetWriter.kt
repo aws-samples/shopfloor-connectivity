@@ -45,7 +45,7 @@ import java.util.*
  * @property logger Logger Logger for output
  * @see TargetWriter
  */
-class AwsFirehoseTargetWriter(
+class AwsKinesisFirehoseTargetWriter(
     private val targetID: String,
     private val configReader: ConfigReader,
     private val logger: Logger,
@@ -314,7 +314,7 @@ class AwsFirehoseTargetWriter(
         fun newInstance(configReader: ConfigReader, targetID: String, logger: Logger, resultHandler: TargetResultHandler?): TargetWriter {
 
             try {
-                return AwsFirehoseTargetWriter(targetID, configReader, logger, resultHandler)
+                return AwsKinesisFirehoseTargetWriter(targetID, configReader, logger, resultHandler)
             } catch (e: Throwable) {
                 throw TargetException("Error creating AWS Firehose target, ${e.message}")
             }

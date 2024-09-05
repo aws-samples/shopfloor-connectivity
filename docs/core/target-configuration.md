@@ -52,7 +52,8 @@ The Targets element contains elements for targets for different target types, wh
 <td>String</td>
 <td><p>Optional<br />
 Context variables for template</p>
-<p>$schedule, $sources, $metadata, or names specified in ElementNames configuration.</p></td>
+<p>$schedule, $sources, $metadata, or names specified in ElementNames configuration. "$tab" can be used as a context variable to insert a '\t' character in the 
+transformation output, as putting this character directly in a Velocity template is not supported.</p></td>
 </tr>
 
 <tr class="even">
@@ -66,11 +67,12 @@ Context variables for template</p>
 <td>TargetChannelSize</td>
 <td>Size of channel used by target to process and write items</td>
 <td>Int</td>
-<td>Default is 1000
-see <a href="#sfc-tuning">SFC Tuning</a> for more details</td>
+<td>Default is 1000,
+see <a href="https://github.com/aws-samples/shopfloor-connectivity/tree/mainline/docs#sfc-tuning>SFC Tuning">tuning</a> for more details
+</td>
 </tr>
 
-<tr class="odd">
+<tr class="even">
 <td>TargetChannelTimeout</td>
 <td>Timeout in milliseconds for writing to internal target channel if it has reached it capacity </td>
 <td>Int</td>
@@ -78,7 +80,7 @@ see <a href="#sfc-tuning">SFC Tuning</a> for more details</td>
 </tr>
 
 
-<tr class="even">
+<tr class="odd">
 <td>UnquoteNumericJsonValues</td>
 <td>Set to true to strip double quotes from numeric values in JSON output.</td>
 <td>Boolean</td>
@@ -88,9 +90,25 @@ This setting can reduce the size of the output by stripping redundant double quo
 
 Do not set this flag to true if there are any key names in the output that consist of numbers only.
 
+</td>
+</tr>
+
+
+<tr class="odd">
+<td>AsArrayWhenBuffered</td>
+<td>Set to value false to strip '[' prefix and ']' postfix and  ',' separator from buffered data for targets that output data as JSON or a transformed list of values.</td>
+<td>Boolean</td>
+<td>Default is true
+
+This setting can reduce the size of the output by stripping redundant double quotes.
+
+Do not set this flag to true if there are any key names in the output that consist of numbers only.
 
 </td>
 </tr>
+
+
+
 
 </tbody>
 </table>

@@ -113,6 +113,11 @@ open class TargetConfiguration : Validate {
     val targetChannelChannelTimeout
         get() = _targetChannelChannelTimeout.toDuration(DurationUnit.MILLISECONDS)
 
+    @SerializedName(CONFIG_TARGET_ARRAY_WHEN_BUFFERED)
+    protected var _arrayWhenBuffered = DEFAULT_TARGET_ARRAY_WHEN_BUFFERED
+    val arrayWhenBuffered
+        get() = _arrayWhenBuffered
+
 
     private var _validated = false
     override var validated
@@ -153,6 +158,9 @@ open class TargetConfiguration : Validate {
 
         const val CONFIG_TARGET_CHANNEL_BUFFER_TIMEOUT_DEFAULT = 10000
         const val CONFIG_TARGET_CHANNEL_BUFFER_SIZE_DEFAULT = 1000
+
+        const val CONFIG_TARGET_ARRAY_WHEN_BUFFERED = "AsArrayWhenBuffered"
+        const val DEFAULT_TARGET_ARRAY_WHEN_BUFFERED = true
 
         const val CONFIG_TARGET_SERVER = "TargetServer"
         fun create(description: String = "",

@@ -124,6 +124,35 @@ will result in the Input0 and Output0 channel values being replaced by a new val
 
 </tr>
 
+
+<tr class="odd">
+<td>Decompose</td>
+<td>If set to true and the value of the channel the value is a structured value then the value is decomposed into a set of individual values for each (sub) element in  the structure.
+If the value is  list of structures and the value of the "Spread" setting is true then each structure in the list is decomposed. </td>
+The value of this setting can be overruled for specific channels by setting the Decompose setting for that channel.
+<td>Boolean</td>
+<td>Default is false
+
+The names of the values for the fields in the structure start with the name of the value appended by the names of the sub elements, separated by a ".".
+After decomposing the structured value into individual values, it is removed from the dataset. If the structure was an element in a list of structures the name
+is the name of the element, followed by a zero indexed order number of the element in the list and the name of the sub element, all separated by a ".".
+
+</td>
+</tr>
+
+<tr class="even">
+<td>Spread</td>
+<td>If set to true and the value of the channel the value is a list then for each element in the list a new individual value is created.
+The value of this setting overrules the setting of the Spread setting at source level.
+The value of this setting can be overruled for specific channels by setting the Spread setting for that channel.</td>
+<td>Boolean</td>
+<td>Default is false
+
+The names of the values for the fields in the structure start with the name of the value element with a sequence number, separated by a ".". After splitting the list value into individual values, it is removed from the dataset.
+
+</td>
+</tr>
+
 </tbody>
 </table>
 

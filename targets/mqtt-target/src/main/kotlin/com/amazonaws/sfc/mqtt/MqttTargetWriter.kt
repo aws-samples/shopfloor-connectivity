@@ -176,8 +176,8 @@ class MqttTargetWriter(
     }
 
     private fun bufferReachedMaxSizeOrMessages(log: Logger.ContextLogger): Boolean {
-        val reachedBufferCount =  if (targetConfig.batchCount> 1) (buffer.size >= targetConfig.batchCount) else false
-       if (reachedBufferCount) log.trace("${targetConfig.batchCount} batch count reached")
+        val reachedBufferCount = if (targetConfig.batchCount > 1) (buffer.size >= targetConfig.batchCount) else false
+        if (reachedBufferCount) log.trace("${targetConfig.batchCount} batch count reached")
 
         val reachedBufferSize = (buffer.payloadSize + (2 + (buffer.size - 1)) >= targetConfig.batchSize)
 
@@ -209,7 +209,13 @@ class MqttTargetWriter(
 
     private fun buildMqttMessage(): MqttMessage {
         val message = MqttMessage()
-        val payload = if (doesBatching) buffer.payloads.joinToString(prefix = "[", postfix = "]", separator = ",") { it } else buffer.payloads.first()
+        val payload = if (doesBatching)
+            if (targetConfig.arrayWhenBuffered)
+                buffer.payloads.joinToString(prefix = "[", postfix = "]", separator = ",") { it }
+            else
+                buffer.payloads.joinToString(separator = "") { it }
+        else
+            buffer.payloads.first()
         if (targetConfig.compressionType == CompressionType.NONE) {
             message.payload = payload.toByteArray()
         } else {
@@ -266,7 +272,7 @@ class MqttTargetWriter(
                 val itemStr = if (doesBatching) " containing ${buffer.size} items " else " "
                 log.trace("Published MQTT${compressedStr}message to topic ${targetConfig.topicName} with size of ${mqttMessage.payload.size.byteCountString} ${itemStr}in $duration")
 
-                createMetrics(targetID, metricDimensions, mqttMessage.payload.size, duration )
+                createMetrics(targetID, metricDimensions, mqttMessage.payload.size, duration)
             }
 
         } catch (e: Exception) {
@@ -363,8 +369,6 @@ class MqttTargetWriter(
 
     companion object {
 
-        private val className = this::class.java.simpleName
-
         @JvmStatic
         @Suppress("unused")
         fun newInstance(vararg createParameters: Any?) =
@@ -383,7 +387,7 @@ class MqttTargetWriter(
 
             // Obtain configuration for used target
             val mqttConfig = config.targets[targetID]
-                ?: throw TargetException("Configuration for $MQTT_TARGET type target with ID \"$targetID\" does not exist, existing targets are ${config.targets.keys}")
+                    ?: throw TargetException("Configuration for $MQTT_TARGET type target with ID \"$targetID\" does not exist, existing targets are ${config.targets.keys}")
             return try {
                 MqttTargetWriter(
                     configReader = configReader,

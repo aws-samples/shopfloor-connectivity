@@ -74,7 +74,7 @@ class AwsIotCoreTargetWriter(
         clientHelper.targetConfig(config, targetID, AWS_IOT_CORE_TARGET)
     }
     private val buffer = TargetDataBuffer(storeFullMessage = false)
-    private val doesBatching by lazy { targetConfig.batchSize> 0 || targetConfig.batchCount > 0 || targetConfig.batchInterval != Duration.INFINITE }
+    private val doesBatching by lazy { targetConfig.batchSize > 0 || targetConfig.batchCount > 0 || targetConfig.batchInterval != Duration.INFINITE }
     private val usesCompression = targetConfig.compressionType != CompressionType.NONE
 
     private val dataClientBuilder: IotDataPlaneClientBuilder = IotDataPlaneClient.builder().endpointOverride(URI.create("https://$endpoint"))
@@ -221,7 +221,7 @@ class AwsIotCoreTargetWriter(
 
     private fun checkMessagePayloadSize(targetData: TargetData, payloadSize: Int, log: Logger.ContextLogger): Boolean {
         if (usesCompression) return true
-        return if (payloadSize > AWS_IOT_CORE_MAX_PAYLOAD_SIZE) {
+        return if (payloadSize >  AWS_IOT_CORE_MAX_PAYLOAD_SIZE) {
             log.error("Size $payloadSize bytes of message is larger max payload size ${AWS_IOT_CORE_MAX_PAYLOAD_SIZE.byteCountString} for AWS IoT Core")
             TargetResultHelper(targetID, resultHandler, logger).error(targetData)
             false
@@ -239,10 +239,10 @@ class AwsIotCoreTargetWriter(
 
     private fun bufferReachedMaxSizeOrMessages(log: Logger.ContextLogger): Boolean {
 
-        val reachedBufferCount = if (targetConfig.batchCount > 1)  buffer.size >= targetConfig.batchCount else false
+        val reachedBufferCount = if (targetConfig.batchCount > 1) buffer.size >= targetConfig.batchCount else false
         if (reachedBufferCount) log.trace("${targetConfig.batchCount} batch count reached")
 
-        val reachedBufferSize = if (targetConfig.batchSize != 0)  (buffer.payloadSize + (2 + (buffer.size - 1)) >= targetConfig.batchSize) else false
+        val reachedBufferSize = if (targetConfig.batchSize != 0) (buffer.payloadSize + (2 + (buffer.size - 1)) >= targetConfig.batchSize) else false
         if (reachedBufferSize) log.trace("${targetConfig.batchSize.byteCountString} batch size reached")
 
         return reachedBufferSize || reachedBufferCount
@@ -321,7 +321,13 @@ class AwsIotCoreTargetWriter(
         val builder = PublishRequest.builder()
         builder.topic(targetConfig.topicName)
 
-        val payload = if (doesBatching) buffer.payloads.joinToString(prefix = "[", postfix = "]", separator = ",") { it } else buffer.payloads.first()
+        val payload = if (doesBatching)
+            if (targetConfig.arrayWhenBuffered )
+                buffer.payloads.joinToString(prefix = "[", postfix = "]", separator = ",") { it }
+            else
+                buffer.payloads.joinToString(separator = "") { it }
+        else
+            buffer.payloads.first()
 
         return if (targetConfig.compressionType == CompressionType.NONE) {
             builder.payload(SdkBytes.fromUtf8String(payload))

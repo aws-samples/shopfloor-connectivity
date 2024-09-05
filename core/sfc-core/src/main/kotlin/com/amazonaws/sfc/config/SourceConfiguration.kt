@@ -7,8 +7,10 @@ package com.amazonaws.sfc.config
 
 import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_CHANGE_FILTER
 import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_CHANNELS
+import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_DECOMPOSE_CHANNEL_VALUE
 import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_META_DATA
 import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_NAME
+import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_SPREAD_CHANNEL_VALUE
 import com.google.gson.annotations.SerializedName
 
 /**
@@ -58,6 +60,18 @@ class SourceConfiguration : BaseSourceConfiguration() {
     protected var _compose: Map<String, List<String>>? = null
     val compose
         get() = _compose?: emptyMap()
+
+    @SerializedName(CONFIG_DECOMPOSE_CHANNEL_VALUE)
+    protected var _decompose : Boolean? = null
+    val decompose
+        get() = _decompose
+
+
+    @SerializedName(CONFIG_SPREAD_CHANNEL_VALUE)
+    protected var _spread : Boolean? = null
+    val spread
+        get() = _spread
+
 
 
     /**
