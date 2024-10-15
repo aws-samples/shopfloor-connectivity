@@ -306,6 +306,7 @@ class MetricsCollector(
         const val METRICS_MESSAGE_BUFFERED_DELETED = "MessagesBufferedDeleted"
         const val METRICS_MESSAGE_BUFFERED_SIZE = "MessagesBufferedSize"
         const val METRICS_MESSAGES = "Messages"
+        const val METRICS_VALUES = "Values"
         const val METRICS_READ_DURATION = "ReadDuration"
         const val METRICS_READ_ERRORS = "ReadError"
         const val METRICS_READ_SUCCESS = "ReadSuccess"

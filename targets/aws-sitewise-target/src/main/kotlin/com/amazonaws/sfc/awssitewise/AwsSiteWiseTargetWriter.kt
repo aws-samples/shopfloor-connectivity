@@ -382,6 +382,7 @@ class AwsSiteWiseTargetWriter(private val targetID: String, private val configRe
      * @param propValue AssetPropertyValue The AssetPropertyValue to store
      */
     private fun storeValueAndTimestampInBuffer(assetID: String?, propertyID: String, propValue: AssetPropertyValue) {
+
         // Get entry for asset
         var assetEntry = propertyValuesBuffer[assetID]
         if (assetEntry == null) {

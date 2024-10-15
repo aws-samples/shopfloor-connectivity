@@ -7,6 +7,6 @@
 - [OPCDA Protocol Configuration](./opcda.md)
 - [PCCC Protocol Configuration (Allen Bradley/Rockwell)](./pccc.md)
 - [S7 Protocol Configuration](./s7.md)
-- [SLMP Protocol Configuration (Mitsubishi/Melsec)](./slmp)
+- [SLMP Protocol Configuration (Mitsubishi/Melsec)](slmp.md)
 - [SNMP Protocol Configuration](./snmp.md)
 - [SQL Adapter Configuration](./sql.md)

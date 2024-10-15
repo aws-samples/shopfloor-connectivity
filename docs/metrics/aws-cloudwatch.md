@@ -68,6 +68,7 @@ AwsCloudWatchConfiguration configures the settings used by the AWS CloudWatch Me
 
 </tbody>
 </table>
+
 [^top](#aws-cloudwatch-metrics)
 
 <table>

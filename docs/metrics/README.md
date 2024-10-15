@@ -1,3 +1,3 @@
 # Metric writers
 
-- [AWS CloudWatch Metrics Wiriter](aws-cloudwatch.md)
+- [AWS CloudWatch Metrics Writer](./aws-cloudwatch.md)
