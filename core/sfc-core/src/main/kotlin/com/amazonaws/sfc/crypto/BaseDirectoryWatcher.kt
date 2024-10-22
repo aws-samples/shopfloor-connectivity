@@ -1,12 +1,13 @@
 
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: MIT-0
+//
 
 
-package com.amazonaws.sfc.opcua
+package com.amazonaws.sfc.crypto
 
-import DirectoryEntryChange
-import DirectoryWatcher
+import com.amazonaws.sfc.util.DirectoryEntryChange
+import com.amazonaws.sfc.util.DirectoryWatcher
 import com.amazonaws.sfc.log.Logger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.FlowPreview
@@ -15,7 +16,7 @@ import kotlinx.coroutines.launch
 import java.io.Closeable
 import java.nio.file.Path
 
-internal abstract class TypedDirectoryWatcher<T>(
+abstract class TypedDirectoryWatcher<T>(
     private val watchedDirectory: Path,
     scope: CoroutineScope,
     logger: Logger,
@@ -31,7 +32,7 @@ internal abstract class TypedDirectoryWatcher<T>(
     private val watchJob = scope.launch {
         watcher = DirectoryWatcher(watchedDirectory.toAbsolutePath().toString())
         watcher?.changes?.debounce(watcher!!.pollInterval)?.collect { _: DirectoryEntryChange ->
-            val info = logger.getCtxInfoLog(className, "DirectoryEntryChange")
+            val info = logger.getCtxInfoLog(className, "com.amazonaws.sfc.util.DirectoryEntryChange")
             info("File changes detected in directory $watchedDirectory")
             entries = onUpdate()
         }

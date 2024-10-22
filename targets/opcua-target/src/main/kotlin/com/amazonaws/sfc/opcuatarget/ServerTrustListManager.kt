@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT-0
 
 
-package com.amazonaws.sfc.opcua
+package com.amazonaws.sfc.opcuatarget
 
 import com.amazonaws.sfc.crypto.CertificateDirectoryWatcher
 import com.amazonaws.sfc.crypto.CrlDirectoryWatcher
@@ -27,7 +27,7 @@ import java.security.cert.X509Certificate
 import kotlin.io.path.Path
 
 
-class ClientTrustListManager(baseDirectoryName: String, private val logger: Logger, onUpdate: (Path) -> Unit) : TrustListManager, Closeable {
+class ServerTrustListManager(baseDirectoryName: String, private val logger: Logger, onUpdate: (Path) -> Unit) : TrustListManager, Closeable {
 
     private val className = this::class.simpleName.toString()
 
@@ -36,7 +36,7 @@ class ClientTrustListManager(baseDirectoryName: String, private val logger: Logg
     private val scope = buildScope("ClientTrustListManager", Dispatchers.IO)
 
     private val issuersPath: Path = basePath.resolve(ISSUERS_DIR_NAME)
-    private val issuerCertificatePath: Path = issuersPath.resolve(CERTIFICATES_DIR_NAME).ensureExists()
+    val issuerCertificatePath: Path = issuersPath.resolve(CERTIFICATES_DIR_NAME).ensureExists()
     private val issuersClrPath: Path = issuersPath.resolve(CRL_DIR_NAME).ensureExists()
 
     private val issuerCertificateWatcher = CertificateDirectoryWatcher(issuerCertificatePath, scope, logger) { onUpdate(issuerCertificatePath) }

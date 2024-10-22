@@ -1,4 +1,4 @@
-
+package com.amazonaws.sfc.util
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: MIT-0
 
@@ -55,7 +55,6 @@ class DirectoryWatcher(
 
         try {
             withTimeout(1000.toDuration(DurationUnit.SECONDS)) {
-                @Suppress("BlockingMethodInNonBlockingContext")
                 watchedDirectory.register(watcher, events)
             }
         } catch (ex: IOException) {
@@ -104,7 +103,6 @@ class DirectoryWatcher(
             if (!closing) throw e
         } finally {
             withTimeout(10.toDuration(DurationUnit.SECONDS)) {
-                @Suppress("BlockingMethodInNonBlockingContext")
                 watcher.close()
             }
         }

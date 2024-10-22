@@ -35,6 +35,11 @@ fun getIp4NetworkAddress(interfaceName: String?): String? {
     }?.let { n -> return n.inetAddresses.toList().firstOrNull { it is Inet4Address }?.hostAddress }
 }
 
+fun getNetworkInterfaces(): List<String> {
+    val en: Enumeration<NetworkInterface> = NetworkInterface.getNetworkInterfaces()
+    return en.toList().map { it.name }
+}
+
 fun getIp4Address(address: String): String? {
     return if (IP_ADDRESS.matches(address))
         address

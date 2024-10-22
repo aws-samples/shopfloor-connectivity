@@ -21,7 +21,7 @@ import com.google.gson.JsonSyntaxException
  * Abstraction for reading configuration data of a specified type from a JSON source
  * @property config String JSON source data
  */
-class ConfigReader private constructor(val config: String, private val allowUnresolved: Boolean = false, val secretsManager: SecretsManager? = null) {
+open class ConfigReader(val config: String, val allowUnresolved: Boolean = false, val secretsManager: SecretsManager? = null) {
 
     val jsonConfig by lazy { processConfig() }
 
@@ -108,6 +108,14 @@ class ConfigReader private constructor(val config: String, private val allowUnre
         return configOut
     }
 
+    protected open fun createJsonConfigReader(): Gson = GsonBuilder()
+        .registerTypeAdapter(ValueFilterConfiguration::class.java, FilterConfigurationDeserializer())
+        .registerTypeAdapter(ValueFilterConfiguration::class.java, ValueFilterConfigurationDeserializer())
+        .registerTypeAdapter(ConditionFilterConfiguration::class.java, ConditionFilterConfigurationDeserializer())
+        .registerTypeAdapter(TransformationOperator::class.java, TransformationsDeserializer())
+        .create()
+
+
     companion object {
 
 
@@ -128,12 +136,6 @@ class ConfigReader private constructor(val config: String, private val allowUnre
 
         fun getPlaceHolders(config: String) = CONFIG_PLACEHOLDER_REGEX.findAll(config)
 
-        private fun createJsonConfigReader() = GsonBuilder()
-            .registerTypeAdapter(ValueFilterConfiguration::class.java, FilterConfigurationDeserializer())
-            .registerTypeAdapter(ValueFilterConfiguration::class.java, ValueFilterConfigurationDeserializer())
-            .registerTypeAdapter(ConditionFilterConfiguration::class.java, ConditionFilterConfigurationDeserializer())
-            .registerTypeAdapter(TransformationOperator::class.java, TransformationsDeserializer())
-            .create()
 
         // // Creates reader for a configuration string
         fun createConfigReader(configStr: String, allowUnresolved: Boolean = false, secretsManager: SecretsManager? = null): ConfigReader {

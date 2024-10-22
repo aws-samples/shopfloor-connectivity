@@ -5,7 +5,6 @@
 
 package com.amazonaws.sfc.util
 
-import DirectoryWatcher
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flow
 import java.io.Closeable

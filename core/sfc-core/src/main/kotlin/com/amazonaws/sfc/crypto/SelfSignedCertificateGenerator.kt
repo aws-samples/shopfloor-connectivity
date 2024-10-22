@@ -48,13 +48,13 @@ class SelfSignedCertificateGenerator {
 
     private fun X509v3CertificateBuilder.addSubjectAlternativeNames(
         dnsNames: List<String>?,
-        ipAddresses: List<String>?
+        ipAddresses: List<String>?,
+        applicationUri: String?
     ): X509v3CertificateBuilder {
 
         val generalNames = mutableListOf<GeneralName>()
 
-        val applicationUri = "urn:aws-sfc-opcua@${getHostName()}"
-        generalNames.add(GeneralName(GeneralName.uniformResourceIdentifier, applicationUri))
+        generalNames.add(GeneralName(GeneralName.uniformResourceIdentifier, if (applicationUri.isNullOrEmpty()) "urn:aws-sfc-opcua@${getHostName()}" else applicationUri))
 
         val (hostIpAddresses, hostDnsNames) = if (dnsNames == null || ipAddresses == null) getAddressesAndHostNames() else null to null
 
@@ -116,7 +116,8 @@ class SelfSignedCertificateGenerator {
             .addExtendedKeyUsage()
             .addSubjectAlternativeNames(
                 certificateConfig.dnsNames,
-                certificateConfig.ipAddresses
+                certificateConfig.ipAddresses,
+                certificateConfig.applicationUri
             )
             .addSubjectKeyIdentifier(keyPair)
 

@@ -1,17 +1,16 @@
-/*
- * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.SPDX-License-Identifier: MIT-0
- */
+// Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: MIT-0
+//
 
-package com.amazonaws.sfc.opcua
+package com.amazonaws.sfc.crypto
 
-import com.amazonaws.sfc.crypto.CertificateHelper
 import com.amazonaws.sfc.log.Logger
 import kotlinx.coroutines.CoroutineScope
 import java.io.File
 import java.nio.file.Path
 import java.security.cert.X509Certificate
 
-internal class CertificateDirectoryWatcher(path: Path, scope: CoroutineScope, private val logger: Logger, onUpdate: (Path) -> Unit) :
+class CertificateDirectoryWatcher(path: Path, scope: CoroutineScope, private val logger: Logger, onUpdate: (Path) -> Unit) :
 
         TypedDirectoryWatcher<X509Certificate>(path, scope, logger, {
             val ctxLog = logger.getCtxLoggers("CertificateDirectoryWatcher", "onUpdate")

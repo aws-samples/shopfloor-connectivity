@@ -1,18 +1,18 @@
 
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: MIT-0
+//
 
 
-package com.amazonaws.sfc.opcua
+package com.amazonaws.sfc.crypto
 
-import com.amazonaws.sfc.crypto.CertificateHelper
 import com.amazonaws.sfc.log.Logger
 import kotlinx.coroutines.CoroutineScope
 import java.io.File
 import java.nio.file.Path
 import java.security.cert.X509CRL
 
-internal class CrlDirectoryWatcher(path: Path, scope: CoroutineScope, logger: Logger, onUpdate: () -> Unit) :
+class CrlDirectoryWatcher(path: Path, scope: CoroutineScope, logger: Logger, onUpdate: () -> Unit) :
 
         TypedDirectoryWatcher<X509CRL>(path, scope, logger, {
             val ctxLog = logger.getCtxLoggers("CrlDirectoryWatcher", "onUpdate")

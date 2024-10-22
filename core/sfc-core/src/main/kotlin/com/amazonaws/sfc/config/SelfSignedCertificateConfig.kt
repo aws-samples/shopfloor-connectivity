@@ -6,7 +6,6 @@
 package com.amazonaws.sfc.config
 
 import com.google.gson.annotations.SerializedName
-import java.time.Period
 
 @ConfigurationClass
 class SelfSignedCertificateConfig : Validate {
@@ -51,6 +50,14 @@ class SelfSignedCertificateConfig : Validate {
     val ipAddresses: List<String>?
         get() = _ipAddresses
 
+    @SerializedName(CONFIG_CERT_APPLICATION_URI)
+    private var _applicationUri : String? = null
+    var applicationUri : String?
+        get() = _applicationUri
+        set(value) {
+            _applicationUri = value
+        }
+
     @SerializedName(CONFIG_CERT_VALIDITY_PERIOD_DAYS)
     private var _validityPeriodDays = CONFIG_CERT_DEFAULT_VALIDITY_PERIOD_DAYS
     val validityPeriodDays: Int
@@ -94,7 +101,6 @@ class SelfSignedCertificateConfig : Validate {
 
         private val default = SelfSignedCertificateConfig()
 
-        @Suppress("unused")
         fun create(commonName: String = default._commonName,
                    organization: String? = default._organization,
                    organizationalUnit: String? = default._organizationalUnit,
@@ -103,7 +109,8 @@ class SelfSignedCertificateConfig : Validate {
                    countryCode: String? = default._countryCode,
                    dnsNames: List<String>? = default._dnsNames,
                    ipAddress: List<String>? = default._ipAddresses,
-                   validityPeriodDays: Int = default._validityPeriodDays) {
+                   applicationUri : String? = default._applicationUri,
+                   validityPeriodDays: Int = default._validityPeriodDays) :SelfSignedCertificateConfig {
 
             val instance = SelfSignedCertificateConfig()
             with(instance) {
@@ -115,8 +122,11 @@ class SelfSignedCertificateConfig : Validate {
                 _countryCode = countryCode
                 _dnsNames = dnsNames
                 _ipAddresses = ipAddress
+                _applicationUri = applicationUri
                 _validityPeriodDays = validityPeriodDays
             }
+
+            return instance
         }
 
 
@@ -129,8 +139,9 @@ class SelfSignedCertificateConfig : Validate {
         private const val CONFIG_CERT_DNS_NAMES = "DnsNames"
         private const val CONFIG_CERT_IP_ADDRESSES = "IpAddresses"
         private const val CONFIG_CERT_VALIDITY_PERIOD_DAYS = "ValidPeriodDays"
+        private const val CONFIG_CERT_APPLICATION_URI = "ApplicationUri"
 
-        private val CONFIG_CERT_DEFAULT_VALIDITY_PERIOD_DAYS = Period.ofYears(3).days
+        const val CONFIG_CERT_DEFAULT_VALIDITY_PERIOD_DAYS = 1000
 
     }
 }

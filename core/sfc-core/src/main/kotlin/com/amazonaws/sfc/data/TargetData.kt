@@ -48,13 +48,13 @@ data class TargetData(val schedule: String,
      * @param elementNames ElementNamesConfiguration? Configurable element names.
      * @return Gson instance
      */
-    internal fun gson(elementNames: ElementNamesConfiguration? = null): Gson {
+    internal fun gson(elementNames: ElementNamesConfiguration? = null, pretty : Boolean = true): Gson {
         var names = elementNames
         if (_gson == null) {
             if (names == null) {
                 names = ElementNamesConfiguration.DEFAULT_TAG_NAMES
             }
-            _gson = gsonInstance(names)
+            _gson = gsonInstance(names, pretty)
         }
         return _gson as Gson
     }
@@ -64,9 +64,9 @@ data class TargetData(val schedule: String,
      * @param elementNames ElementNamesConfiguration Configurable element names
      * @return String Data as JSON
      */
-    fun toJson(elementNames: ElementNamesConfiguration, trimQuotesForNumericValues : Boolean): String {
+    fun toJson(elementNames: ElementNamesConfiguration, trimQuotesForNumericValues : Boolean, pretty: Boolean = true): String {
 
-        val s =  gson(elementNames).toJson(this)
+        val s =  gson(elementNames, pretty).toJson(this)
         return if (trimQuotesForNumericValues) s.replace(numericValueRegex){m ->
             m.groups[1]?.value.toString().trim('"')
         } else s
@@ -78,14 +78,18 @@ data class TargetData(val schedule: String,
      * @param elementNames ElementNamesConfiguration
      * @return Gson
      */
-    private fun gsonInstance(elementNames: ElementNamesConfiguration): Gson =
-        JsonHelper.gsonBuilder()
+    private fun gsonInstance(elementNames: ElementNamesConfiguration, pretty : Boolean = true): Gson {
+        val builder = JsonHelper.gsonBuilder()
             .disableHtmlEscaping()
-            .setPrettyPrinting()
+
             .registerTypeAdapter(TargetData::class.java, TargetDataSerializer(elementNames))
             .registerTypeAdapter(SourceOutputData::class.java, SourceOutputDataSerializer(this, elementNames))
             .registerTypeAdapter(ChannelOutputData::class.java, ChannelDataOutputSerializer(this, elementNames))
-            .create()
+
+        if (pretty) builder.setPrettyPrinting()
+
+        return builder.create()
+    }
 
 
     companion object{

@@ -82,9 +82,9 @@ class MetricsCollector(
                 val duration = measureTime {
                     cleanUp()
                 }
-                runBlocking {
-                    delay(METRICS_CLEANUP_INTERVAL - duration)
-                }
+
+                delay(METRICS_CLEANUP_INTERVAL - duration)
+
             } catch (e: Exception) {
                 logger.getCtxErrorLog(className, "cleaner")("Error cleaning up metrics: ${e.message}")
             }
@@ -96,7 +96,7 @@ class MetricsCollector(
     }
 
     // build and stores a single data point if metrics are enabled for the specified metrics source for a single value
-    suspend fun put(
+    fun put(
         metricSource: String,
         name: String,
         value: Double,
@@ -140,7 +140,7 @@ class MetricsCollector(
         else null
 
     // build and stores a single data point if metrics are enabled for the specified metrics source for a list of values and counts
-    suspend fun put(
+    fun put(
         metricSource: String,
         name: String,
         values: List<Double>,
@@ -163,7 +163,7 @@ class MetricsCollector(
     }
 
     // build and stores a single data point if metrics are enabled for the specified metrics source for a statistics value
-    suspend fun put(
+    fun put(
         metricSource: String,
         name: String,
         statistics: MetricsStatistics,
@@ -192,7 +192,7 @@ class MetricsCollector(
     }
 
     // stores a collection of data points
-    suspend fun put(metricSource: String, vararg dataPoints: MetricsDataPoint?) {
+    fun put(metricSource: String, vararg dataPoints: MetricsDataPoint?) {
 
         val data = dataPoints.filterNotNull()
         put(metricSource, data)
@@ -206,7 +206,7 @@ class MetricsCollector(
         }
     }
 
-    suspend fun put(metricSource: String, metricsData: MetricsData) {
+    fun put(metricSource: String, metricsData: MetricsData) {
 
         val dataPoints = metricsData.dataPoints.map {
             it.dimensions = (metricsData.commonDimensions ?: emptyMap()) + (it.dimensions ?: emptyMap())
@@ -319,6 +319,7 @@ class MetricsCollector(
         const val METRICS_WRITE_SUCCESS = "WriteSuccess"
         const val METRICS_WRITES = "Writes"
         const val METRICS_MEMORY = "Memory"
+        const val METRICS_VALUES_WRITTEN = "ValuesWritten"
 
         const val METRICS_DIMENSION_ADAPTER = "Adapter"
         const val METRICS_DIMENSION_SOURCE = "Source"

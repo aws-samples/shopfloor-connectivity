@@ -40,8 +40,9 @@ class CertificateConfiguration : Validate {
 
     @SerializedName(CONFIG_CERT_SELF_SIGNED_CERTIFICATE)
     private var _selfSignedCertificateConfig: SelfSignedCertificateConfig? = null
-    val selfSignedCertificateConfig
+    var selfSignedCertificateConfig
         get() = _selfSignedCertificateConfig
+        set(value) { _selfSignedCertificateConfig = value }
 
     @SerializedName(CONFIG_CERT_FILE_FORMAT)
     private var _format: CertificateFormat? = null
@@ -52,6 +53,7 @@ class CertificateConfiguration : Validate {
     private var _expirationWarningPeriod = CONFIG_CERT_DEFAULT_EXPIRATION_WARNING_PERIOD
     val expirationWarningPeriod: Int
         get() = _expirationWarningPeriod
+
 
     fun certificateFileFormatFromName(): CertificateFormat {
         val certificatePath = _certificatePath ?: return CertificateFormat.Unknown
