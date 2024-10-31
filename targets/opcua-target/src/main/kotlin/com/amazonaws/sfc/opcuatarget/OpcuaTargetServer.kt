@@ -47,7 +47,6 @@ import org.eclipse.milo.opcua.stack.core.types.builtin.*
 import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UShort
 import org.eclipse.milo.opcua.stack.core.types.enumerated.MessageSecurityMode
 import org.eclipse.milo.opcua.stack.core.types.structured.BuildInfo
-import org.eclipse.milo.opcua.stack.core.util.validation.ValidationCheck
 import org.eclipse.milo.opcua.stack.server.EndpointConfiguration
 import java.net.Inet4Address
 import java.net.NetworkInterface
@@ -125,16 +124,15 @@ class OpcuaTargetServer(private val targetConfiguration: OpcuaTargetConfiguratio
             log.info("Certificate or CLR update in directory \"$dir\"")
         }
 
-        val certificateValidator = if (serverTrustListManager.trustedCertificates.isEmpty() && serverTrustListManager.issuerCertificates.isEmpty()) {
+        if (serverTrustListManager.trustedCertificates.isEmpty() && serverTrustListManager.issuerCertificates.isEmpty() ) {
             log.info("There are no trusted or issuer certificates in directories ${serverTrustListManager.trustedCertificatesDirectory} or ${serverTrustListManager.issuerCertificatePath}")
-            null
-        } else {
-            val validations = if (!targetConfiguration.certificateValidationConfiguration.active)
-                emptySet<ValidationCheck>()
-            else
-                targetConfiguration.certificateValidationConfiguration.validationOptions.options
-            ServerCertificateValidator(serverTrustListManager, validations, logger)
         }
+
+        val validations = if (!targetConfiguration.certificateValidationConfiguration.active)
+            emptySet()
+        else
+            targetConfiguration.certificateValidationConfiguration.validationOptions.options
+        val certificateValidator = ServerCertificateValidator(serverTrustListManager, validations, logger)
 
         val usernameIdentifyValidator = UserNameValidator(targetConfiguration.serverSecurityPolicies.contains(OpcuaServerSecurityPolicy.None) || targetConfiguration.anonymousDiscoveryEndPoint)
 
@@ -159,6 +157,7 @@ class OpcuaTargetServer(private val targetConfiguration: OpcuaTargetConfiguratio
         val endpointConfigurations: Set<EndpointConfiguration> = createEndpointConfigurations(certificate)
 
 
+
         val serverConfigBuilder = OpcUaServerConfig.builder()
             .setApplicationUri(PRODUCT_URI)
             .setApplicationName(LocalizedText.english(PRODUCT_NAME))
@@ -178,10 +177,9 @@ class OpcuaTargetServer(private val targetConfiguration: OpcuaTargetConfiguratio
                 .setTrustListManager(serverTrustListManager)
                 .setHttpsKeyPair(httpKeypair)
                 .setHttpsCertificateChain(arrayOf(certificate))
-
-            if (certificateValidator != null) {
+            
                 serverConfigBuilder.setCertificateValidator(certificateValidator)
-            }
+
         }
 
         val identityValidator =
