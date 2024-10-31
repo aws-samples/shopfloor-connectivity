@@ -30,5 +30,4 @@ class ServerCertificateValidator(trustListManager: TrustListManager,
             throw e
         }
     }
-
 }
