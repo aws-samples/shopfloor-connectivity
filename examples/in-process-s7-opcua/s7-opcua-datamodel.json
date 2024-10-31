@@ -15,7 +15,7 @@
         ]
       },
       "Targets": [
-        "DebugTarget",
+        "#DebugTarget",
         "OpcuaTarget"
       ]
     }
