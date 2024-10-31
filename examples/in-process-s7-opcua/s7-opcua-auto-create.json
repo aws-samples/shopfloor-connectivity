@@ -1,0 +1,107 @@
+{
+  "AWSVersion": "2022-04-02",
+  "Name": "S7 to OPC UA, data model created by target adapter",
+  "Version": 1,
+  "LogLevel": "Trace",
+  "Schedules": [
+    {
+      "Name": "ConveyorData",
+      "Interval": 1000,
+      "Active": true,
+      "TimestampLevel": "Both",
+      "Sources": {
+        "S7-SOURCE": [
+          "*"
+        ]
+      },
+      "Targets": [
+        "#DebugTarget",
+        "OpcuaTarget"
+      ]
+    }
+  ],
+  "Sources": {
+    "S7-SOURCE": {
+      "Name": "FluidConveyor",
+      "ProtocolAdapter": "S7",
+      "AdapterController": "S7-PLC-1",
+      "Description": "S7 PLC local server",
+      "Channels": {
+        "Power": {
+          "Address": "%DB120:230:DINT"
+        },
+        "Speed": {
+          "Address": "%DB120:234:DINT"
+        },
+        "Temperature": {
+          "Address": "%DB120:242:REAL",
+          "Metadata": {
+            "Unit": "Celsius"
+          }
+        },
+        "Pressure": {
+          "Address": "%DB120:246:REAL"
+        },
+        "Flow": {
+          "Address": "%DB120:250:REAL"
+        },
+        "Torque": {
+          "Address": "%DB120:254:REAL"
+        }
+      }
+    }
+  },
+  "Targets": {
+    "DebugTarget": {
+      "TargetType": "DEBUG-TARGET"
+    },
+    "OpcuaTarget": {
+      "LogLevel": "Info",
+      "TargetType": "OPCUA-TARGET",
+      "AutoCreate" : true
+    }
+  },
+  "TargetTypes": {
+    "DEBUG-TARGET": {
+      "JarFiles": [
+        "${SFC_DEPLOYMENT_DIR}/debug-target/lib"
+      ],
+      "FactoryClassName": "com.amazonaws.sfc.debugtarget.DebugTargetWriter"
+    },
+    "OPCUA-TARGET": {
+      "JarFiles": [
+        "${SFC_DEPLOYMENT_DIR}/opcua-target/lib"
+      ],
+      "FactoryClassName": "com.amazonaws.sfc.opcuatarget.OpcuaTargetWriter"
+    }
+  },
+  "AdapterTypes": {
+    "S7": {
+      "JarFiles": [
+        "${SFC_DEPLOYMENT_DIR}/s7/lib"
+      ],
+      "FactoryClassName": "com.amazonaws.sfc.s7.S7Adapter"
+    }
+  },
+  "ProtocolAdapters": {
+    "S7": {
+      "AdapterType": "S7",
+      "Controllers": {
+        "S7-PLC-1": {
+          "Address": "192.168.1.130",
+          "ReadPerSingleField": false,
+          "LocalRack": 0,
+          "LocalSlot": 1,
+          "RemoteRack": 0,
+          "RemoteSlot": 1,
+          "PduSize": 1024,
+          "MaxAmqCaller": 8,
+          "MaxAmqCallee": 8,
+          "ControllerType": "S7-1200",
+          "ReadTimeout": 10000,
+          "ConnectTimeout": 10000
+        }
+      }
+    }
+  }
+}

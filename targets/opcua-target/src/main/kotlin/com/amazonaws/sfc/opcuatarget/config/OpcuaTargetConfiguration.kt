@@ -5,13 +5,11 @@
 package com.amazonaws.sfc.opcuatarget.config
 
 import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_CERTIFICATE_VALIDATION
-import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_TRANSFORMATIONS
 import com.amazonaws.sfc.config.ConfigurationClass
 import com.amazonaws.sfc.config.ConfigurationException
 import com.amazonaws.sfc.config.TargetConfiguration
 import com.amazonaws.sfc.crypto.CertificateConfiguration
 import com.amazonaws.sfc.opcuatarget.config.DataModelConfigurationMap.Companion.DEFAULT_DATA_MODELS
-import com.amazonaws.sfc.transformations.Transformation
 import com.google.gson.annotations.SerializedName
 import java.net.Inet4Address
 import java.net.NetworkInterface
@@ -82,12 +80,6 @@ class OpcuaTargetConfiguration : TargetConfiguration() {
     private var _valuesInitWithNull: Boolean = true
     val valuesInitWithNull: Boolean
             get() = _valuesInitWithNull
-
-    @SerializedName(CONFIG_TRANSFORMATIONS)
-    private var _transformations = mapOf<String, Transformation>()
-    val transformations: Map<String, Transformation>
-        get() = _transformations
-
 
     override fun validate() {
         super.validate()

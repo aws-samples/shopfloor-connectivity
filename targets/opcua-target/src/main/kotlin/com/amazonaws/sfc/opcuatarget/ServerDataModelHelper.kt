@@ -13,6 +13,7 @@ import com.amazonaws.sfc.opcuatarget.config.DataModelConfiguration
 import com.amazonaws.sfc.opcuatarget.config.FolderNodeConfiguration
 import com.amazonaws.sfc.opcuatarget.config.OpcuaTargetConfiguration
 import com.amazonaws.sfc.opcuatarget.config.VariableNodeConfiguration
+import com.amazonaws.sfc.transformations.Transformation
 import io.burt.jmespath.Expression
 import org.eclipse.milo.opcua.sdk.server.OpcUaServer
 import org.eclipse.milo.opcua.sdk.server.nodes.UaFolderNode
@@ -28,14 +29,15 @@ import java.util.*
 class ServerDataModelHelper(private val server: OpcUaServer,
                             private val targetConfiguration: OpcuaTargetConfiguration,
                             private val elementNames: ElementNamesConfiguration,
+                            private val transformations: Map<String, Transformation>,
                             private val attributeFilter: AttributeFilter?,
                             private val logger: Logger) {
 
-    class CachedQuery(val id : String,
-                      val uaVariableNode : UaVariableNode,
-                      val queryStr : String,
-                      val query : Expression<Any>?,
-                      val transformationID : String?)
+    class CachedQuery(val id: String,
+                      val uaVariableNode: UaVariableNode,
+                      val queryStr: String,
+                      val query: Expression<Any>?,
+                      val transformationID: String?)
 
     inner class Folder(val folderConfig: FolderNodeConfiguration, val folderNode: UaFolderNode)
 
@@ -53,7 +55,7 @@ class ServerDataModelHelper(private val server: OpcUaServer,
     private val folders = mutableListOf<Folder>()
     private val namespaceFolders = mutableListOf<UaFolderNode>()
 
-    val valueQueries: Map<NodeId,CachedQuery>
+    val valueQueries: Map<NodeId, CachedQuery>
         get() = cacheValueQueries.filter { it.value.query != null }
 
     val timestampQueries: Map<NodeId, Pair<String?, Expression<Any>?>>
@@ -312,19 +314,33 @@ class ServerDataModelHelper(private val server: OpcUaServer,
 
                 if (selectorStr != null && !cacheValueQueries.containsKey(uaVariableNode.nodeId)) {
                     try {
-                        cacheValueQueries[uaVariableNode.nodeId] = CachedQuery(
-                            id = variableNodeConfig.id,
-                            uaVariableNode =uaVariableNode,
-                            queryStr =selectorStr,
-                            query = JmesPathExtended.create().compile(JmesPathExtended.escapeJMesString(selectorStr)),
-                            transformationID = variableNodeConfig.transformationID)
+
+                        if (!variableNodeConfig.transformationID.isNullOrEmpty() && !transformations.containsKey(variableNodeConfig.transformationID)) {
+
+                            log.error("Unable to find transformation \"${variableNodeConfig.transformationID}\" for variable ${variableNodeConfig.id}, configured transformations are ${transformations.keys}")
+                            cacheValueQueries[uaVariableNode.nodeId] = CachedQuery(
+                                id = variableNodeConfig.id,
+                                uaVariableNode = uaVariableNode,
+                                queryStr = selectorStr,
+                                query = null,
+                                transformationID = variableNodeConfig.transformationID)
+                        }
+
+                        if (!cacheValueQueries.containsKey(uaVariableNode.nodeId)){
+                            cacheValueQueries[uaVariableNode.nodeId] = CachedQuery(
+                                id = variableNodeConfig.nodeID?.toParseableString() ?: variableNodeConfig.browseName,
+                                uaVariableNode = uaVariableNode,
+                                queryStr = selectorStr,
+                                query = JmesPathExtended.create().compile(JmesPathExtended.escapeJMesString(selectorStr)),
+                                transformationID = variableNodeConfig.transformationID)
+                        }
 
                         val timestampSelector = getValueTimestampSelector(variableNodeConfig.timestampSelector, variableNodeConfig.valueSelector!!, elementNames)
                         cachedTimestampQueries[uaVariableNode.nodeId] = timestampSelector
 
                     } catch (e: Exception) {
                         log.error("Unable to compile selector $selectorStr for variable ${variableNodeConfig.id}, $e")
-                        cacheValueQueries[uaVariableNode.nodeId] =  CachedQuery(
+                        cacheValueQueries[uaVariableNode.nodeId] = CachedQuery(
                             id = variableNodeConfig.id,
                             uaVariableNode = uaVariableNode,
                             queryStr = selectorStr,
@@ -428,7 +444,6 @@ class ServerDataModelHelper(private val server: OpcUaServer,
     }
 
 
-
     fun getChannelAggregatedValueVariable(folder: UaFolderNode?,
                                           scheduleName: String,
                                           sourceName: String,
@@ -484,7 +499,7 @@ class ServerDataModelHelper(private val server: OpcUaServer,
                 is String -> OpcuaServerDataTypes.STRING
                 is Instant -> OpcuaServerDataTypes.DATETIME
                 is Map<*, *> -> OpcuaServerDataTypes.STRUCT
-                is ChannelOutputData -> if (v.value!=null)dataTypeForValue(v.value!!) else OpcuaServerDataTypes.VARIANT
+                is ChannelOutputData -> if (v.value != null) dataTypeForValue(v.value!!) else OpcuaServerDataTypes.VARIANT
                 else -> OpcuaServerDataTypes.VARIANT
             }
         }

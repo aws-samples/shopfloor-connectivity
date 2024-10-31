@@ -213,7 +213,7 @@ class IpcTargetWriter(private val targetID: String,
              @Suppress("UNCHECKED_CAST")
              val target = targetsMap[targetId] as MutableMap<String,Any>
              val targetTransformations = targetTransformations(configurationMap[CONFIG_TARGETS] as Map<*,*>).filter { allTransformations.keys.contains(it) }
-             if (targetTransformations.isNotEmpty()) target[CONFIG_TRANSFORMATIONS] = allTransformations.filter { it.key in targetTransformations }
+             if (targetTransformations.isNotEmpty()) outputConfig[CONFIG_TRANSFORMATIONS] = allTransformations.filter { it.key in targetTransformations }
              targetId  to target
         }.toMap()
 

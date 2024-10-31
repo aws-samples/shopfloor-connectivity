@@ -21,6 +21,7 @@ import com.amazonaws.sfc.opcuatarget.config.OpcuaServerSecurityPolicy
 import com.amazonaws.sfc.opcuatarget.config.OpcuaTargetConfiguration
 import com.amazonaws.sfc.system.DateTime.add
 import com.amazonaws.sfc.system.DateTime.systemDateUTC
+import com.amazonaws.sfc.transformations.Transformation
 import com.amazonaws.sfc.transformations.invoke
 import com.amazonaws.sfc.util.*
 import io.burt.jmespath.Expression
@@ -58,6 +59,7 @@ import java.util.*
 
 
 class OpcuaTargetServer(private val targetConfiguration: OpcuaTargetConfiguration,
+                        private val transformations: Map<String,Transformation>,
                         private val attributeFilter: AttributeFilter?,
                         private val elementNames: ElementNamesConfiguration, private val logger: Logger) {
 
@@ -193,7 +195,7 @@ class OpcuaTargetServer(private val targetConfiguration: OpcuaTargetConfiguratio
 
         server = OpcUaServer(serverConfig)
 
-        dataModelHelper = ServerDataModelHelper(server!!, targetConfiguration, elementNames, attributeFilter, logger)
+        dataModelHelper = ServerDataModelHelper(server!!, targetConfiguration, elementNames, transformations, attributeFilter, logger)
         dataModelHelper!!.createServerDataModels()
 
         return this
@@ -504,7 +506,7 @@ class OpcuaTargetServer(private val targetConfiguration: OpcuaTargetConfiguratio
                         val timestamp = getTimestamp(queryData.uaVariableNode, targetDataMap, targetData)
 
                         if (!queryData.transformationID.isNullOrEmpty()) {
-                            selectedValue = applyTransformation(selectedValue, queryData.id, queryData.transformationID)
+                            selectedValue = applyTransformation(selectedValue, queryData.id, queryData.transformationID,)
                         }
                         if (selectedValue != null) {
                             queryData.uaVariableNode.value = buildValue(selectedValue, queryData.uaVariableNode, timestamp)
@@ -551,10 +553,10 @@ class OpcuaTargetServer(private val targetConfiguration: OpcuaTargetConfiguratio
     private fun applyTransformation(value: Any, name: String, transformationID: String): Any? {
         val log = logger.getCtxLoggers(className, "applyTransformation")
 
-        val transformation = targetConfiguration.transformations[transformationID]
+        val transformation = transformations[transformationID] ?: return null
         return try {
-            log.trace("Applying transformation \"$transformationID\" on value ${value}:${value::class.java.simpleName} to \"name\" ")
-            val transformedValue = transformation?.invoke(value, name, true, logger)
+            log.trace("Applying transformation \"$transformationID\" on value ${value}:${value::class.java.simpleName} to \"$name\"")
+            val transformedValue = transformation.invoke(value, name, true, logger)
             log.trace("Result of transformation \"$transformationID\" is ${transformedValue}${if (transformedValue != null) ":${transformedValue::class.java.simpleName}" else ""}")
             transformedValue
         } catch (e: Exception) {

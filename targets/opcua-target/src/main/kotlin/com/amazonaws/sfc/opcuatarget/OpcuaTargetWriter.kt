@@ -69,7 +69,7 @@ class OpcuaTargetWriter(
     )
 
     private val opcuaTargetServer: OpcuaTargetServer by lazy {
-        OpcuaTargetServer(targetConfig, this, config.elementNames, logger).initialize()
+        OpcuaTargetServer(targetConfig, config.transformations, this, config.elementNames, logger).initialize()
     }
 
     override suspend fun writeTargetData(targetData: TargetData) {

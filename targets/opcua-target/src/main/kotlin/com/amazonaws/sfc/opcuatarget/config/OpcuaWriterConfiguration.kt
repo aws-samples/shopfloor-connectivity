@@ -8,6 +8,7 @@ package com.amazonaws.sfc.opcuatarget.config
 
 import com.amazonaws.sfc.config.*
 import com.amazonaws.sfc.log.LogLevel
+import com.amazonaws.sfc.transformations.Transformation
 import com.google.gson.annotations.SerializedName
 import kotlin.time.Duration
 import kotlin.time.DurationUnit
@@ -24,6 +25,13 @@ class OpcuaWriterConfiguration : BaseConfigurationWithMetrics(), Validate{
     private var _targets: Map<String, OpcuaTargetConfiguration> = emptyMap()
     val targets: Map<String, OpcuaTargetConfiguration>
         get() = _targets.filter { (it.value.targetType == OPCUA_TARGET) }
+
+
+    @SerializedName(CONFIG_TRANSFORMATIONS)
+    private var _transformations = mapOf<String, Transformation>()
+    val transformations: Map<String, Transformation>
+        get() = _transformations
+
 
 
     /**

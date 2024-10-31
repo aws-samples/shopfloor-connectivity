@@ -57,7 +57,7 @@ open class BaseNodeConfiguration(namespaceIndex : Int, val id: String, browseNam
         try {
             val nodeStr = when (_baseId) {
                 is String -> {
-                    val i = (_baseId as String).toIntOrNull()
+                    val i = (_baseId as String).split(".").first().toIntOrNull()
                     when {
                         // i=
                         i != null -> "ns=$nameSpaceIndex;i=$i"

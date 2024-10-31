@@ -12,6 +12,7 @@ There are two different mapping methods available for associating target data wi
 
 ## Automatic model mapping
 
+
 The most straightforward method to expose the data received by the target adapter as an OPC UA model is to allow the 
 adapter to  automatically generate the model based on the structure and values of the incoming data.
 
@@ -142,6 +143,8 @@ named "Value" for the actual channel value, along with additional variable nodes
 
 The rule is that when metadata or aggregated values are present for a value, a folder is created for 
 that value. If these are not present, a variable node is created.
+
+[Full example at examples/in-process-s7-opcua, config file s7-opcua-auto-create.json](../examples/in-process-s7-opcua/README.md)
 
 ## Query mapping
 
