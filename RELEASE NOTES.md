@@ -1,5 +1,11 @@
 # Release Notes:
 
+## Version 1.5.0, 31 October 2024
+
+- NEW OPC UA Target Adapter: Allows exposing the data collected by the SFC protocol adapter as an OPC UA model.
+---
+
+
 ## Version 1.4.2, 5 September 2024
 
 - [OPCUA autodiscovery example](https://github.com/aws-samples/shopfloor-connectivity/tree/mainline/examples/opcua-auto-discovery) validation of external ID's
