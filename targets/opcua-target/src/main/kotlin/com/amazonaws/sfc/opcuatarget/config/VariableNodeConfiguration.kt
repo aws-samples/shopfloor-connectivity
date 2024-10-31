@@ -4,6 +4,9 @@
 
 package com.amazonaws.sfc.opcuatarget.config
 
+import com.amazonaws.sfc.config.ChannelConfiguration.Companion.CONFIG_TRANSFORMATION
+import com.amazonaws.sfc.config.ConfigurationException
+import com.amazonaws.sfc.data.JmesPathExtended
 import com.amazonaws.sfc.opcuatarget.OpcuaServerDataTypes
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
@@ -15,11 +18,31 @@ import org.eclipse.milo.opcua.stack.core.types.builtin.ExpandedNodeId
 import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId
 import java.time.Instant
 
-class VariableNodeConfiguration(configNode: BaseNodeConfiguration, dataType: OpcuaServerDataTypes, val initValue: Any?, val arrayDimensions: List<Int>?) :
-        BaseNodeConfiguration(configNode.nameSpaceIndex, configNode.id, configNode.browseName, configNode.displayName, configNode.description) {
+class VariableNodeConfiguration(configNode: BaseNodeConfiguration,
+                                dataType: OpcuaServerDataTypes,
+                                val initValue: Any?,
+                                val arrayDimensions: List<Int>?,
+                                valueSelector: String? = null,
+                                timestampSelector: String? = null,
+                                val transformationID: String? = null) :
+        BaseNodeConfiguration(
+            configNode.nameSpaceIndex,
+            configNode.id,
+            configNode.browseName,
+            configNode.displayName,
+            configNode.description) {
 
-            constructor(namespaceIndex : Int, id : String, browseName : String? = null, displayName : String? = null, description : String? = null, dataType: OpcuaServerDataTypes, initValue: Any? = null, arrayDimensions: List<Int>? = null) :
-                    this(BaseNodeConfiguration( namespaceIndex, id, browseName, displayName, description), dataType, initValue, arrayDimensions)
+    constructor(namespaceIndex: Int,
+                id: String, browseName: String? = null,
+                displayName: String? = null,
+                description: String? = null,
+                dataType: OpcuaServerDataTypes,
+                initValue: Any? = null,
+                arrayDimensions: List<Int>? = null,
+                valueSelector: String? = null,
+                timestampSelector: String? = null,
+                transformation: String? = null) :
+            this(BaseNodeConfiguration(namespaceIndex, id, browseName, displayName, description), dataType, initValue, arrayDimensions, valueSelector, timestampSelector, transformation)
 
     private val _dataType = dataType
     val dataType
@@ -28,11 +51,53 @@ class VariableNodeConfiguration(configNode: BaseNodeConfiguration, dataType: Opc
         _dataType.identifier
     }
 
+    override fun validate() {
+        if (validated) return
+
+        super.validate()
+
+        validateValueSelector()
+        validateTimestampSelector()
+
+        validated = true
+    }
+
+    private fun validateTimestampSelector() {
+        if (_timestampSelector != null) {
+            try {
+                JmesPathExtended.create().compile(JmesPathExtended.escapeJMesString(_timestampSelector))
+            } catch (e: Exception) {
+                throw ConfigurationException("Invalid selector \"$_timestampSelector\" for variable ${this.id}, ${e.message}", CONFIG_TIMESTAMP_SELECTOR, this)
+            }
+        }
+    }
+
+    private fun validateValueSelector() {
+        if (_valueSelector != null) {
+            try {
+                JmesPathExtended.create().compile(JmesPathExtended.escapeJMesString(_valueSelector))
+            } catch (e: Exception) {
+                throw ConfigurationException("Invalid selector \"$_valueSelector\" for variable ${this.id}, ${e.message}", CONFIG_VALUE_SELECTOR, this)
+            }
+        }
+    }
+
+    private val _valueSelector: String? = valueSelector
+    val valueSelector
+        get() = _valueSelector
+
+
+    private val _timestampSelector: String? = timestampSelector
+    val timestampSelector
+        get() = _timestampSelector
+
     companion object {
 
         private const val CONFIG_NODE_INITIAL_VALUE = "InitValue"
         private const val CONFIG_NODE_DATA_TYPE = "DataType"
         private const val CONFIG_NODE_ARRAY_DIMENSIONS = "ArrayDimensions"
+        private const val CONFIG_VALUE_SELECTOR = "ValueQuery"
+        private const val CONFIG_TIMESTAMP_SELECTOR = "TimestampQuery"
 
         fun getValue(jsonElement: JsonElement?, dataType: OpcuaServerDataTypes): Any? {
 
@@ -47,7 +112,7 @@ class VariableNodeConfiguration(configNode: BaseNodeConfiguration, dataType: Opc
                 return getValue(json, dataType)
             }
 
-            val dataTypeIdentifier =dataType.identifier
+            val dataTypeIdentifier = dataType.identifier
             val value = try {
                 when (dataTypeIdentifier) {
                     Identifiers.Boolean -> json.asBoolean
@@ -83,7 +148,7 @@ class VariableNodeConfiguration(configNode: BaseNodeConfiguration, dataType: Opc
         }
 
         fun fromJson(key: String, json: JsonObject): VariableNodeConfiguration {
-            val configNode = fromJson(key, json)
+            val configNode = BaseNodeConfiguration.fromJson(key, json.asJsonObject.getAsJsonObject(key))
 
             val dataTypeStr = json.asJsonObject[key]?.asJsonObject?.get(CONFIG_NODE_DATA_TYPE)?.asString ?: ""
             val dataType = OpcuaServerDataTypes.fromString(dataTypeStr)
@@ -96,7 +161,12 @@ class VariableNodeConfiguration(configNode: BaseNodeConfiguration, dataType: Opc
                 if (!validateDimension(initValue, arrayDimensions)) initValue = null
             }
 
-            val variableNode = VariableNodeConfiguration(configNode, dataType, initValue, arrayDimensions)
+            val valueSelector = json.asJsonObject[key]?.asJsonObject?.get(CONFIG_VALUE_SELECTOR)?.asString
+            val timestampSelector = json.asJsonObject[key]?.asJsonObject?.get(CONFIG_TIMESTAMP_SELECTOR)?.asString
+            val transformationID = json.asJsonObject[key]?.asJsonObject?.get(CONFIG_TRANSFORMATION)?.asString ?: ""
+
+
+            val variableNode = VariableNodeConfiguration(configNode, dataType, initValue, arrayDimensions, valueSelector, timestampSelector, transformationID)
             return variableNode
         }
 

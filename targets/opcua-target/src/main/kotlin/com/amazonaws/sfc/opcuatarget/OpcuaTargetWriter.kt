@@ -69,9 +69,7 @@ class OpcuaTargetWriter(
     )
 
     private val opcuaTargetServer: OpcuaTargetServer by lazy {
-        OpcuaTargetServer(targetConfig, this, logger).initialize()
-        OpcuaTargetServer(targetConfig, this, logger).initialize()
-
+        OpcuaTargetServer(targetConfig, this, config.elementNames, logger).initialize()
     }
 
     override suspend fun writeTargetData(targetData: TargetData) {
@@ -147,7 +145,11 @@ class OpcuaTargetWriter(
 
                         } catch (e: Exception) {
                             runBlocking { metricsCollector?.put(targetID, METRICS_WRITE_ERRORS, 1.0, MetricUnits.COUNT, metricDimensions) }
-                            log.error("Error writing target data, $e")
+                            if (logger.level == LogLevel.TRACE){
+                                log.traceEx("Error writing target data", e)
+                            } else {
+                                log.error("Error writing target data, $e")
+                            }
                             targetResults?.nack(targetData)
                         }
 
@@ -293,7 +295,7 @@ class OpcuaTargetWriter(
             if (logger.level == LogLevel.TRACE && ctx.session.isPresent) {
                 val session = ctx.session.get()
                 logger.getCtxTraceLog(className, "getAttribute")(
-                    "Reading value ${value.value.value} from node ${ctx.node.nodeId.toParseableString()}, " +
+                    "Reading value ${value.valueStr}${value.valueTypeStr} from node ${ctx.node.nodeId.toParseableString()}, " +
                             "client session:${session.sessionName}, " +
                             "address:${session.clientAddress}, " +
                             "endpoint:${session.endpoint.endpointUrl}, " +
@@ -310,8 +312,9 @@ class OpcuaTargetWriter(
             writeCount.addAndGet(1)
 
             if (logger.level == LogLevel.TRACE && value.value != null) {
-                val v = value.value.value
-                logger.getCtxTraceLog(className, "getAttribute")("Writing value $v ${(if (v != null) "(${v::class.java.simpleName})" else "")} to node ${ctx.node.nodeId.toParseableString()}")
+                logger.getCtxTraceLog(
+                    className,
+                    "getAttribute")("Writing value ${value.valueStr}${value.valueTypeStr} to node ${ctx.node.nodeId.toParseableString()}")
             }
             ctx.setAttribute(attributeId, value)
         }
@@ -372,5 +375,22 @@ class OpcuaTargetWriter(
 
     }
 
+    private val DataValue.valueStr
+    get() =  when {
+        this.value.value == null -> "null"
+        (this.value.value is Array<*>) -> (this.value.value as Array<*>).joinToString(prefix = "[", postfix = "]", separator = ",") { it.toString() }
+        else -> this.value.value.toString()
+    }
 
+    private val DataValue.valueTypeStr
+        get() = when {
+            this.value.value == null -> ""
+            this.value.value is Array<*> &&
+                    (this.value.value as Array<*>).isNotEmpty()  &&
+                    ((this.value.value as Array<*>).first() != null) -> ":[${(this.value.value as Array<*>).first()!!::class.java.simpleName?:""}]"
+            this.value.value is List<*> &&
+                    (this.value.value as List<*>).isNotEmpty()  &&
+                    ((this.value.value as List<*>).first() != null) -> ":[${(this.value.value as List<*>).first()!!::class.java.simpleName}]"
+            else -> ":${this.value.value::class.java.simpleName}"
+        }
 }

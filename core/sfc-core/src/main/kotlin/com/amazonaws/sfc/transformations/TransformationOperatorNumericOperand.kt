@@ -14,8 +14,13 @@ class TransformationOperatorNumericOperand : TransformationOperatorWithOperand()
             // use string to allow parsing of hex etc.
             val s = op.asString.toString()
             if (s.isBlank()) throw TransformationException("Numeric operator can not be empty", "TransformationOperatorNumericOperand")
-            try {
-                Integer.decode(s)
+
+            try{
+                if (s.contains("."))
+                    s.toFloat()
+                else{
+                    Integer.decode(s.split(".").first())
+                }
             } catch (e: NumberFormatException) {
                 throw TransformationException("\"$s\" is not a valid number", "TransformationOperatorNumericOperand")
             }

@@ -23,7 +23,7 @@ data class TargetData(val schedule: String,
      * @param elementNames ElementNamesConfiguration
      * @return Mapping<String, Any>
      */
-    fun toMap(elementNames: ElementNamesConfiguration, jmesPathCompatibleKeys: Boolean): Map<String, Any> {
+    fun  toMap(elementNames: ElementNamesConfiguration, jmesPathCompatibleKeys: Boolean): Map<String, Any> {
 
         return mapOf(
             elementNames.schedule to schedule,

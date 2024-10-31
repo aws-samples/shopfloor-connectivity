@@ -116,10 +116,10 @@ open class BaseNodeConfiguration(namespaceIndex : Int, val id: String, browseNam
 
             return BaseNodeConfiguration(
                 namespaceIndex = 0,
-                id = json[key]?.asJsonObject?.get(CONFIG_NODE_ID)?.asString?:key,
-                displayName = json[key]?.asJsonObject?.get(CONFIG_NODE_DISPLAY_NAME)?.asString,
-                browseName =  json[key]?.asJsonObject?.get(CONFIG_NODE_BROWSE_NAME)?.asString,
-                description =  json[key]?.asJsonObject?.get(CONFIG_NODE_DESCRIPTION)?.asString
+                id = json.asJsonObject?.get(CONFIG_NODE_ID)?.asString?:key,
+                displayName = json.asJsonObject?.get(CONFIG_NODE_DISPLAY_NAME)?.asString,
+                browseName =  json.asJsonObject?.get(CONFIG_NODE_BROWSE_NAME)?.asString,
+                description =  json.asJsonObject?.get(CONFIG_NODE_DESCRIPTION)?.asString
             )
         }
 

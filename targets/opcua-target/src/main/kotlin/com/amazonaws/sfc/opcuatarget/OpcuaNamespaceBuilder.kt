@@ -36,6 +36,7 @@ class OpcuaNamespaceBuilder(server: OpcUaServer,
                             private val modelConfiguration: DataModelConfiguration,
                             private val root: ExpandedNodeId = Identifiers.ObjectsFolder.expanded(),
                             private val attributeFilter: AttributeFilter?,
+                            private val initializeValuesWithNull : Boolean,
                             private val logger: Logger) : ManagedNamespaceWithLifecycle(server, modelConfiguration.nameSpace) {
 
     private val className = this::class.java.simpleName
@@ -101,6 +102,8 @@ class OpcuaNamespaceBuilder(server: OpcUaServer,
         folderNode.addReference((Reference(folderNode.nodeId, Identifiers.Organizes, parent, false)))
         onFolderNodeCreated?.invoke(nodeConfig, folderNode)
 
+        log.trace("Created folder node ${nodeConfig.nodeID?.toParseableString()}, Display name: \"${nodeConfig.displayName}\", Browse name: \"${nodeConfig.browseName}\", within folder ${parent.toParseableString()}")
+
         nodeConfig.variables?.values?.forEach { variableConfig ->
             addVariableNode(variableConfig, folderNode)
         }
@@ -109,7 +112,6 @@ class OpcuaNamespaceBuilder(server: OpcUaServer,
             addFolderNode(folder, folderNode.nodeId.expanded())
         }
 
-        log.trace("Created folder node ${nodeConfig.nodeID?.toParseableString()}, Display name: \"${nodeConfig.displayName}\", Browse name: \"${nodeConfig.browseName}\", within folder ${parent.toParseableString()}")
 
         return folderNode
 
@@ -149,7 +151,15 @@ class OpcuaNamespaceBuilder(server: OpcUaServer,
         nodeManager.addNode(variableNode)
         onVariableNodeCreated?.invoke(nodeConfig, variableNode)
 
-        variableNode.value = DataValue(nodeConfig.initValue.toVariant(nodeConfig.dataTypeIdentifier, nodeConfig.arrayDimensions))
+        if (nodeConfig.initValue != null ) {
+            log.trace("Setting configured initial value for ${nodeConfig.nodeID} to ${nodeConfig.initValue}")
+            variableNode.value = DataValue(nodeConfig.initValue.toVariant(nodeConfig.dataTypeIdentifier, nodeConfig.arrayDimensions))
+        } else {
+            if (initializeValuesWithNull) {
+                log.trace("Setting initial value for ${nodeConfig.nodeID} to null")
+                variableNode.value = DataValue(null.toVariant(nodeConfig.dataTypeIdentifier, nodeConfig.arrayDimensions))
+            }
+        }
 
         folder.addOrganizes(variableNode)
 
@@ -159,6 +169,7 @@ class OpcuaNamespaceBuilder(server: OpcUaServer,
                             if (nodeConfig.initValue != null) ", Init value: ${nodeConfig.initValue}" else "" +
                                     ", within folder node ${folder.nodeId.toParseableString()}"
         )
+
 
         return variableNode
     }
@@ -170,16 +181,6 @@ class OpcuaNamespaceBuilder(server: OpcUaServer,
         val modelFolderNode = addFolderNode(modelConfiguration, root)
 
         onNamespaceFolderNodeCreated?.invoke(modelConfiguration, modelFolderNode)
-
-        modelConfiguration.variables?.values?.forEach { variableConfig ->
-            variableConfig.nameSpaceIndex = namespaceIndex.toInt()
-            addVariableNode(variableConfig, modelFolderNode)
-        }
-
-        modelConfiguration.folders?.values?.forEach { folderConfig ->
-            folderConfig.nameSpaceIndex = namespaceIndex.toInt()
-            addFolderNode(folderConfig, modelFolderNode.nodeId.expanded())
-        }
     }
 
     override fun onDataItemsCreated(dataItems: List<DataItem>) {

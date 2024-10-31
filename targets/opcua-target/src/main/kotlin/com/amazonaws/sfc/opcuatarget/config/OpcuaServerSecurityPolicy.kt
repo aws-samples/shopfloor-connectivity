@@ -26,7 +26,7 @@ enum class OpcuaServerSecurityPolicy(val policy: SecurityPolicy) {
 
 
     companion object{
-        val ALL_POLICIES = setOf(None, Basic128Rsa15, Basic256, Basic256Sha256, Aes128Sha256RsaOaep)
+        private val ALL_POLICIES = setOf(None, Basic128Rsa15, Basic256, Basic256Sha256, Aes128Sha256RsaOaep)
         val VALID_POLICIES = ALL_POLICIES.map { it.policy }
 
         private const val POLICY_NONE = "None"

@@ -19,6 +19,7 @@ import com.amazonaws.sfc.secrets.SecretsManager
 import com.amazonaws.sfc.service.HealthProbeService
 import com.amazonaws.sfc.service.Service
 import com.amazonaws.sfc.system.DateTime
+import com.amazonaws.sfc.targets.TargetException
 import com.amazonaws.sfc.util.buildScope
 import com.amazonaws.sfc.util.getIp4NetworkAddress
 import com.amazonaws.sfc.util.isJobCancellationException
@@ -283,13 +284,11 @@ class IpcTargetServer(
                 initializeHealthProbeService(configReader)
 
                 log.info("Target writer for target \"$targetID\" of type \"${targetConfiguration.targetType}\" created")
-
+            } catch (e: TargetException) {
+                log.error(("Error initializing target from configuration \"${request.targetConfiguration}\", $e"))
+                InitializeTargetResponse.newBuilder().setInitialized(false).setError(e.message).build()
             } catch (e: java.lang.Exception) {
-                if (e is ConfigurationException) {
-                    log.error("Configuration error initializing target from configuration \"${request.targetConfiguration}\", $e")
-                } else {
-                    log.errorEx("Error initializing target from configuration \"${request.targetConfiguration}\"", e)
-                }
+                log.errorEx("Error initializing target from configuration \"${request.targetConfiguration}\"", e)
                 InitializeTargetResponse.newBuilder().setInitialized(false).setError(e.message).build()
             }
 

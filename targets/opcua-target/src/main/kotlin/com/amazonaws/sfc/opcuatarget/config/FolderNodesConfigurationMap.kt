@@ -7,6 +7,7 @@ package com.amazonaws.sfc.opcuatarget.config
 import com.google.gson.JsonDeserializationContext
 import com.google.gson.JsonDeserializer
 import com.google.gson.JsonElement
+import com.google.gson.JsonObject
 import java.lang.reflect.Type
 
 class FolderNodesConfigurationMap : NodeConfigurationMap<FolderNodeConfiguration>() {
@@ -17,7 +18,7 @@ class FolderNodesConfigurationMap : NodeConfigurationMap<FolderNodeConfiguration
             val jsonObject = json?.asJsonObject
 
             val nodes = jsonObject?.keySet()?.associate { key ->
-                key to FolderNodeConfiguration.fromJson(key, jsonObject, context)
+                key to FolderNodeConfiguration.fromJson(key, jsonObject.getAsJsonObject()[key] as JsonObject, context)
             }
 
             val folderNode = FolderNodesConfigurationMap()

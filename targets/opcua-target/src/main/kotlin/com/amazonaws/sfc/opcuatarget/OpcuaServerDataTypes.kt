@@ -77,6 +77,10 @@ enum class OpcuaServerDataTypes {
         override val identifier: NodeId
             get() = Identifiers.QualifiedName
     },
+    REAL{
+        override val identifier: NodeId
+            get() = Identifiers.Float
+    },
     SHORT {
         override val identifier: NodeId
             get() = Identifiers.Int16

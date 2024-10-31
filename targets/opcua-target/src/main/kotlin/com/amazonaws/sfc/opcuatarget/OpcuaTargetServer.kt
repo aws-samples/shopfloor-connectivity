@@ -5,8 +5,10 @@
 package com.amazonaws.sfc.opcuatarget
 
 
+import com.amazonaws.sfc.config.ElementNamesConfiguration
 import com.amazonaws.sfc.config.SelfSignedCertificateConfig
 import com.amazonaws.sfc.config.SelfSignedCertificateConfig.Companion.CONFIG_CERT_DEFAULT_VALIDITY_PERIOD_DAYS
+import com.amazonaws.sfc.crypto.CertificateConfiguration
 import com.amazonaws.sfc.crypto.CertificateHelper
 import com.amazonaws.sfc.data.ChannelOutputData
 import com.amazonaws.sfc.data.JsonHelper
@@ -19,7 +21,9 @@ import com.amazonaws.sfc.opcuatarget.config.OpcuaServerSecurityPolicy
 import com.amazonaws.sfc.opcuatarget.config.OpcuaTargetConfiguration
 import com.amazonaws.sfc.system.DateTime.add
 import com.amazonaws.sfc.system.DateTime.systemDateUTC
+import com.amazonaws.sfc.transformations.invoke
 import com.amazonaws.sfc.util.*
+import io.burt.jmespath.Expression
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import org.eclipse.milo.opcua.sdk.server.OpcUaServer
@@ -51,9 +55,11 @@ import java.time.Instant
 import java.time.Period
 import java.time.temporal.ChronoUnit
 import java.util.*
-import java.util.concurrent.CompletableFuture
 
-class OpcuaTargetServer(val config: OpcuaTargetConfiguration, private val attributeFilter: AttributeFilter?, private val logger: Logger) {
+
+class OpcuaTargetServer(private val targetConfiguration: OpcuaTargetConfiguration,
+                        private val attributeFilter: AttributeFilter?,
+                        private val elementNames: ElementNamesConfiguration, private val logger: Logger) {
 
     private val className = this::class.java.simpleName
 
@@ -74,6 +80,7 @@ class OpcuaTargetServer(val config: OpcuaTargetConfiguration, private val attrib
         logger.getCtxTraceLog("Node ${node.nodeId.toParseableString()} updated")
         modelUpdateChannel.trySend(Unit)
     }
+
     private var certificateExpiryChecker: Job? = null
 
     private val defaultSelfSignedCertificateConfiguration by lazy {
@@ -89,49 +96,58 @@ class OpcuaTargetServer(val config: OpcuaTargetConfiguration, private val attrib
         defaultSelfSignedCertificateConfig
     }
 
+    private val defaultCertificateConfiguration: CertificateConfiguration by lazy {
+        val defaultCertificateConfig = CertificateConfiguration.create(
+            certificate = "$COMMON_NAME-${getHostName()}.cert",
+            key = "$COMMON_NAME-${getHostName()}.key",
+            selfSignedCertificateConfig = defaultSelfSignedCertificateConfiguration
+        )
+        defaultCertificateConfig
+    }
+
     fun initialize(): OpcuaTargetServer {
 
         val log = logger.getCtxLoggers(className, "initialize")
 
-        val certificateConfiguration = config.certificateConfiguration
+        val certificateConfiguration = targetConfiguration.certificateConfiguration ?: defaultCertificateConfiguration
 
-        if (certificateConfiguration != null && certificateConfiguration.selfSignedCertificateConfig == null){
+        if (certificateConfiguration.selfSignedCertificateConfig == null) {
             certificateConfiguration.selfSignedCertificateConfig = defaultSelfSignedCertificateConfiguration
         }
 
-        if (certificateConfiguration?.selfSignedCertificateConfig?.applicationUri.isNullOrEmpty()) certificateConfiguration?.selfSignedCertificateConfig?.applicationUri = PRODUCT_URI
+        if (certificateConfiguration.selfSignedCertificateConfig?.applicationUri.isNullOrEmpty()) certificateConfiguration.selfSignedCertificateConfig?.applicationUri = PRODUCT_URI
 
-        val certificateHelper = CertificateHelper(certificateConfiguration!!, logger)
+        val certificateHelper = CertificateHelper(certificateConfiguration, logger)
 
-        val serverTrustListManager = ServerTrustListManager(config.certificateValidationConfiguration.directory, logger) { dir ->
+        val serverTrustListManager = ServerTrustListManager(targetConfiguration.certificateValidationConfiguration.directory, logger) { dir ->
             log.info("Certificate or CLR update in directory \"$dir\"")
         }
 
         val certificateValidator = if (serverTrustListManager.trustedCertificates.isEmpty() && serverTrustListManager.issuerCertificates.isEmpty()) {
-            log.warning("There are no trusted or issuer certificates in directories ${serverTrustListManager.trustedCertificatesDirectory} or ${serverTrustListManager.issuerCertificatePath}")
+            log.info("There are no trusted or issuer certificates in directories ${serverTrustListManager.trustedCertificatesDirectory} or ${serverTrustListManager.issuerCertificatePath}")
             null
         } else {
-            val validations = if (!config.certificateValidationConfiguration.active)
+            val validations = if (!targetConfiguration.certificateValidationConfiguration.active)
                 emptySet<ValidationCheck>()
             else
-                config.certificateValidationConfiguration.validationOptions.options
+                targetConfiguration.certificateValidationConfiguration.validationOptions.options
             ServerCertificateValidator(serverTrustListManager, validations, logger)
         }
 
-        val usernameIdentifyValidator = UserNameValidator(config.serverSecurityPolicies.contains(OpcuaServerSecurityPolicy.None) || config.anonymousDiscoveryEndPoint)
+        val usernameIdentifyValidator = UserNameValidator(targetConfiguration.serverSecurityPolicies.contains(OpcuaServerSecurityPolicy.None) || targetConfiguration.anonymousDiscoveryEndPoint)
 
 
-        val secureMode = config.serverSecurityPolicies.any { it != OpcuaServerSecurityPolicy.None }
+        val secureMode = targetConfiguration.serverSecurityPolicies.any { it != OpcuaServerSecurityPolicy.None }
         val x509IdentityValidator = if (secureMode) X509IdentityValidator { _ -> true } else null
 
 
         val (certificate, httpKeypair) = if (secureMode) certificateHelper.getCertificateAndKeyPair() else null to null
         if (secureMode) {
             if (certificate == null) {
-                throw UaRuntimeException(StatusCodes.Bad_ConfigurationError, "No certificate required for security policies ${config.serverSecurityPolicies.joinToString { it.name }}")
+                throw UaRuntimeException(StatusCodes.Bad_ConfigurationError, "No certificate required for security policies ${targetConfiguration.serverSecurityPolicies.joinToString { it.name }}")
             }
             if (httpKeypair == null) {
-                throw UaRuntimeException(StatusCodes.Bad_ConfigurationError, "No keypair required for security policies ${config.serverSecurityPolicies.joinToString { it.name }}")
+                throw UaRuntimeException(StatusCodes.Bad_ConfigurationError, "No keypair required for security policies ${targetConfiguration.serverSecurityPolicies.joinToString { it.name }}")
             }
         }
 
@@ -177,7 +193,7 @@ class OpcuaTargetServer(val config: OpcuaTargetConfiguration, private val attrib
 
         server = OpcUaServer(serverConfig)
 
-        dataModelHelper = ServerDataModelHelper(server!!, config, attributeFilter, logger)
+        dataModelHelper = ServerDataModelHelper(server!!, targetConfiguration, elementNames, attributeFilter, logger)
         dataModelHelper!!.createServerDataModels()
 
         return this
@@ -195,42 +211,82 @@ class OpcuaTargetServer(val config: OpcuaTargetConfiguration, private val attrib
                                  sourceName: String,
                                  channelName: String,
                                  channelData: ChannelOutputData,
-                                 sourceFolder: UaFolderNode?,
+                                 sourceFolder: UaFolderNode,
                                  isAggregated: Boolean,
                                  timeStamp: Instant) {
 
 
-        val channelFolder = if (isAggregated || !channelData.metadata.isNullOrEmpty()) dataModelHelper?.getChannelFolder(scheduleName, sourceName, channelName, ::fnModelChanged) else null
-
-        channelData.metadata?.forEach { (metadataName, metadataValue) ->
-            val metadataVariable = dataModelHelper?.getChannelVariable(channelFolder, scheduleName, sourceName, channelName, metadataName, metadataValue, ::fnModelChanged)
-            metadataVariable?.value = DataValue(Variant(metadataValue), StatusCode.GOOD, DateTime(timeStamp), DateTime(Instant.now()))
-
-        }
+        if (dataModelHelper == null) return
 
         if (isAggregated) {
-            (channelData.value as Map<*, *>?)?.forEach { (aggregationName, aggregation) ->
-                if (aggregation != null) {
-                    val aggregationValue = (aggregation as ChannelOutputData).value
-                    if (aggregationValue != null) {
-                        val aggregatedValueVariable =
-                            dataModelHelper?.getChannelVariable(channelFolder!!, scheduleName, sourceName, channelName, aggregationName as String, aggregationValue, ::fnModelChanged)
-                        val value = buildValue(aggregationValue, aggregatedValueVariable, timeStamp)
-                        aggregatedValueVariable?.value = value
-                    }
+            writeAggregatedChannelData(scheduleName, sourceName, channelName, channelData, timeStamp)
+        } else {
+            writeChannelValue(channelData, scheduleName, sourceName, channelName, sourceFolder, timeStamp)
+        }
+
+        if (!channelData.metadata.isNullOrEmpty()) {
+            val folderForMetadata = if (!channelData.metadata.isNullOrEmpty()) dataModelHelper!!.getChannelFolder(scheduleName, sourceName, channelName, ::fnModelChanged) else sourceFolder
+            if (folderForMetadata != null) {
+
+                channelData.metadata?.forEach { (metadataName, metadataValue) ->
+
+                    val metadataVariable = dataModelHelper?.getChannelMetadataVariable(folderForMetadata, scheduleName, sourceName, channelName, metadataName, metadataValue, ::fnModelChanged)
+                    metadataVariable?.value = DataValue(Variant(metadataValue), StatusCode.GOOD, DateTime(timeStamp), DateTime(Instant.now()))
+
                 }
             }
-        } else {
-            if (channelData.value != null) {
-                val valueVariable = if (channelFolder != null)
-                    dataModelHelper?.getChannelVariable(channelFolder, scheduleName, sourceName, channelName, "Value", channelData.value!!, ::fnModelChanged)
-                else
-                    dataModelHelper?.getChannelVariable(sourceFolder, scheduleName, sourceName, channelName, "", channelData.value!!, ::fnModelChanged)
-                val value = buildValue(channelData.value!!, valueVariable, timeStamp)
-                valueVariable?.value = value
+        }
+
+    }
+
+    private fun writeChannelValue(channelData: ChannelOutputData,
+                                  scheduleName: String,
+                                  sourceName: String,
+                                  channelName: String,
+                                  sourceFolder: UaFolderNode,
+                                  timeStamp: Instant) {
+        if (channelData.value != null) {
+
+            val canStoreAsVariable = channelData.metadata.isNullOrEmpty()
+
+
+            val valueVariable = if (canStoreAsVariable) {
+                // all metadata already mapped, so store directly in source folder
+                dataModelHelper?.getChannelVariable(sourceFolder, scheduleName, sourceName, channelName, "", channelData.value!!, ::fnModelChanged)
+            } else {
+                // we have metadata so store data in folder containing the value and metadata
+                val channelFolder = dataModelHelper!!.getChannelFolder(scheduleName, sourceName, channelName, ::fnModelChanged)
+                dataModelHelper?.getChannelVariable(channelFolder, scheduleName, sourceName, channelName, "Value", channelData.value!!, ::fnModelChanged)
             }
 
+            val value = buildValue(channelData.value!!, valueVariable, timeStamp)
+            valueVariable?.value = value
 
+
+        }
+    }
+
+    private fun writeAggregatedChannelData(scheduleName: String,
+                                           sourceName: String,
+                                           channelName: String,
+                                           channelData: ChannelOutputData,
+                                           timeStamp: Instant) {
+
+
+        (channelData.value as Map<*, *>?)?.forEach { (aggregationName, aggregation) ->
+            if (aggregation != null) {
+                val aggregationValue = (aggregation as ChannelOutputData).value
+                if (aggregationValue != null) {
+
+                    val channelFolder = dataModelHelper!!.getChannelFolder(scheduleName, sourceName, channelName, ::fnModelChanged)
+                    val aggregatedValueVariable =
+                        dataModelHelper!!.getChannelAggregatedValueVariable(channelFolder, scheduleName, sourceName, channelName, aggregationName as String, aggregationValue, ::fnModelChanged)
+
+                    val value = buildValue(aggregationValue, aggregatedValueVariable, timeStamp)
+                    aggregatedValueVariable?.value = value
+
+                }
+            }
         }
     }
 
@@ -238,7 +294,8 @@ class OpcuaTargetServer(val config: OpcuaTargetConfiguration, private val attrib
         val hostnames: MutableSet<String> = mutableSetOf()
 
         val hostname = HostnameUtil.getHostname()
-        val networkInterfaces = NetworkInterface.getNetworkInterfaces().toList().filter { config.serverNetworkInterfaces.isEmpty() || config.serverNetworkInterfaces.contains(it.name.lowercase()) }
+        val networkInterfaces = NetworkInterface.getNetworkInterfaces().toList()
+            .filter { targetConfiguration.serverNetworkInterfaces.isEmpty() || targetConfiguration.serverNetworkInterfaces.contains(it.name.lowercase()) }
         val addresses: List<Inet4Address> = networkInterfaces.flatMap { it.inetAddresses.toList() }.filterIsInstance<Inet4Address>().map { it }
         if (HostnameUtil.getHostnames(hostname).any { i -> i in addresses.map { it.hostAddress } }) {
             hostnames.add(hostname)
@@ -281,7 +338,7 @@ class OpcuaTargetServer(val config: OpcuaTargetConfiguration, private val attrib
         val builder = EndpointConfiguration.newBuilder()
             .setBindAddress(bindAddress)
             .setHostname(hostName)
-            .setPath("/${config.serverPath}")
+            .setPath("/${targetConfiguration.serverPath}")
             .addTokenPolicies(
                 OpcUaServerConfig.USER_TOKEN_POLICY_ANONYMOUS,
                 OpcUaServerConfig.USER_TOKEN_POLICY_X509)
@@ -299,8 +356,8 @@ class OpcuaTargetServer(val config: OpcuaTargetConfiguration, private val attrib
     private fun buildEndpoints(builder: EndpointConfiguration.Builder): Set<EndpointConfiguration> {
         val endpoints = mutableSetOf<EndpointConfiguration>()
 
-        config.serverSecurityPolicies.filter { it != OpcuaServerSecurityPolicy.None }.forEach { policy ->
-            config.serverMessageSecurityModes.filter { it != OpcuaServerMessageSecurityMode.NONE }.forEach { mode ->
+        targetConfiguration.serverSecurityPolicies.filter { it != OpcuaServerSecurityPolicy.None }.forEach { policy ->
+            targetConfiguration.serverMessageSecurityModes.filter { it != OpcuaServerMessageSecurityMode.NONE }.forEach { mode ->
                 endpoints.add(
                     buildTcpEndpoint(
                         builder.copy()
@@ -311,7 +368,7 @@ class OpcuaTargetServer(val config: OpcuaTargetConfiguration, private val attrib
             }
         }
 
-        if (config.serverSecurityPolicies.contains(OpcuaServerSecurityPolicy.None)) {
+        if (targetConfiguration.serverSecurityPolicies.contains(OpcuaServerSecurityPolicy.None)) {
             val noSecurityBuilder = builder.copy()
                 .setSecurityPolicy(SecurityPolicy.None)
                 .setSecurityMode(MessageSecurityMode.None)
@@ -319,9 +376,9 @@ class OpcuaTargetServer(val config: OpcuaTargetConfiguration, private val attrib
             endpoints.add(buildTcpEndpoint(noSecurityBuilder))
         }
 
-        if (config.anonymousDiscoveryEndPoint) {
+        if (targetConfiguration.anonymousDiscoveryEndPoint) {
             val discoveryBuilder = builder.copy()
-                .setPath("/${config.serverPath}/discovery")
+                .setPath("/${targetConfiguration.serverPath}/discovery")
                 .setSecurityPolicy(SecurityPolicy.None)
                 .setSecurityMode(MessageSecurityMode.None)
 
@@ -342,22 +399,21 @@ class OpcuaTargetServer(val config: OpcuaTargetConfiguration, private val attrib
 
     fun shutdown() {
 
-        try{
-        modelChangedEventTask.cancel()
-        namespaces.forEach { it.shutdown() }
+        try {
+            modelChangedEventTask.cancel()
+            namespaces.forEach { it.shutdown() }
 
-        serverScope.cancel()
+            serverScope.cancel()
 
-        if (server == null) {
-            CompletableFuture.completedFuture(server)
-        } else {
             server?.shutdown()
-        }}catch ( _ : Exception){}
+
+        } catch (_: Exception) {
+        }
     }
 
     private fun startCertificateExpiryChecker(certificate: X509Certificate?): Job? {
 
-        val certificateConfiguration = config.certificateConfiguration
+        val certificateConfiguration = targetConfiguration.certificateConfiguration
         val expirationWarningPeriod = certificateConfiguration?.expirationWarningPeriod ?: 0
 
         if (certificate == null || certificateConfiguration == null || expirationWarningPeriod <= 0) {
@@ -415,35 +471,115 @@ class OpcuaTargetServer(val config: OpcuaTargetConfiguration, private val attrib
 
     fun writeTargetData(targetData: TargetData) {
 
-        val scheduleFolderNew = dataModelHelper?.getScheduleFolder(targetData.schedule, ::fnModelChanged)
+        if (targetConfiguration.autoCreate) {
+            val scheduleFolderNew = dataModelHelper?.getScheduleFolder(targetData.schedule, ::fnModelChanged)
 
-        val scheduleFolder = scheduleFolderNew ?: return//server.modelHelper?.getScheduleFolderOld(targetData.schedule)
-
-        targetData.metadata.forEach { (metadataName, metadataValue) ->
-
-            val metaDataVariable = dataModelHelper?.getScheduleMetadataVariable(scheduleFolder, targetData.schedule, metadataName, metadataValue, ::fnModelChanged)
-
-            metaDataVariable?.value = DataValue(Variant(metadataValue), StatusCode.GOOD, DateTime(targetData.timestamp), DateTime(Instant.now()))
+            val scheduleFolder = scheduleFolderNew ?: return//server.modelHelper?.getScheduleFolderOld(targetData.schedule)
+            targetData.metadata.forEach { (metadataName, metadataValue) ->
+                val metaDataVariable = dataModelHelper?.getScheduleMetadataVariable(scheduleFolder, targetData.schedule, metadataName, metadataValue, ::fnModelChanged)
+                metaDataVariable?.value = DataValue(Variant(metadataValue), StatusCode.GOOD, DateTime(targetData.timestamp), DateTime(Instant.now()))
+            }
+            targetData.sources.forEach { (sourceName, sourceData) ->
+                writeSourceData(targetData.schedule, sourceName, sourceData, targetData)
+            }
         }
-        targetData.sources.forEach { (sourceName, sourceData) ->
-            writeSourceData(targetData.schedule, sourceName, sourceData, targetData)
+
+        handleVariableNodeSelectors(targetData)
+    }
+
+    private fun handleVariableNodeSelectors(targetData: TargetData) {
+
+        if (dataModelHelper?.valueQueries?.isNotEmpty() == true) {
+
+            val log = logger.getCtxLoggers(className, "handleVariableNodeSelectors")
+
+            val targetDataMap = targetData.toMap(elementNames, true)
+
+            dataModelHelper?.valueQueries?.forEach { (nodeId, queryData) ->
+                if (queryData.query != null) {
+                    var selectedValue = searchData(queryData.queryStr, queryData.query, targetDataMap)
+
+                    if (selectedValue != null) {
+                        log.trace("Using value $selectedValue (${selectedValue::class.java.simpleName}) from selector \"${queryData.queryStr}\" to variable \"${queryData.uaVariableNode.displayName.text}\" ( ${nodeId.toParseableString()})")
+                        val timestamp = getTimestamp(queryData.uaVariableNode, targetDataMap, targetData)
+
+                        if (!queryData.transformationID.isNullOrEmpty()) {
+                            selectedValue = applyTransformation(selectedValue, queryData.id, queryData.transformationID)
+                        }
+                        if (selectedValue != null) {
+                            queryData.uaVariableNode.value = buildValue(selectedValue, queryData.uaVariableNode, timestamp)
+                        }
+                    }
+                }
+            }
         }
     }
+
+    private fun getTimestamp(uaVariableNode: UaVariableNode, targetDataMap: Map<String, Any>, targetData: TargetData): Instant {
+
+        val log = logger.getCtxLoggers(className, "getTimestamp")
+
+        val timestampSelector = dataModelHelper?.timestampQueries?.get(uaVariableNode.nodeId)
+
+        val timestampByQuery = (if (timestampSelector?.first != null && timestampSelector.second != null)
+            searchData(timestampSelector.first!!, timestampSelector.second, targetDataMap) else null) as Instant?
+        if (timestampByQuery == null) {
+            log.trace("Query \"${timestampSelector?.first}\" dis not return a timestamp")
+        }
+
+        return if (timestampByQuery != null) {
+            log.trace("Used query \"${timestampSelector?.first}\" to select timestamp $timestampByQuery for variable \"${uaVariableNode.displayName.text}\" (${uaVariableNode.nodeId.toParseableString()})")
+            timestampByQuery
+        } else {
+            log.trace("Used target data timestamp ${targetData.timestamp} for variable \"${uaVariableNode.displayName.text}\" (${uaVariableNode.nodeId.toParseableString()})")
+            targetData.timestamp
+        }
+    }
+
+
+    private fun searchData(queryString: String, query: Expression<Any>?, data: Map<String, Any>): Any? = try {
+        query?.search(data)
+    } catch (e: NullPointerException) {
+        null
+    } catch (e: Exception) {
+        val log = logger.getCtxErrorLogEx(className, "searchData")
+        log("Error querying data with expression \"$queryString\"", e)
+        null
+    }
+
+
+    private fun applyTransformation(value: Any, name: String, transformationID: String): Any? {
+        val log = logger.getCtxLoggers(className, "applyTransformation")
+
+        val transformation = targetConfiguration.transformations[transformationID]
+        return try {
+            log.trace("Applying transformation \"$transformationID\" on value ${value}:${value::class.java.simpleName} to \"name\" ")
+            val transformedValue = transformation?.invoke(value, name, true, logger)
+            log.trace("Result of transformation \"$transformationID\" is ${transformedValue}${if (transformedValue != null) ":${transformedValue::class.java.simpleName}" else ""}")
+            transformedValue
+        } catch (e: Exception) {
+            logger.getCtxErrorLog(className, "applyTransformation")("Error applying transformation $transformationID to name \"$name\", e")
+            null
+        }
+    }
+
 
     private fun writeSourceData(scheduleName: String,
                                 sourceName: String,
                                 sourceData: SourceOutputData,
                                 targetData: TargetData) {
+
         val sourceFolder = dataModelHelper?.getSourceFolder(scheduleName, sourceName, ::fnModelChanged) ?: return
 
-        sourceData.metadata?.forEach { (metadataName, metaDatavalue) ->
-            val metadataVariable = dataModelHelper?.getSourceMetadataVariable(sourceFolder, scheduleName, sourceName, metadataName, metaDatavalue, ::fnModelChanged)
+        val sourceTimeStamp = sourceData.timestamp ?: targetData.timestamp
+        sourceData.metadata?.forEach { (metadataName, metadataValue) ->
+
+            val metadataVariable = dataModelHelper?.getSourceMetadataVariable(sourceFolder, scheduleName, sourceName, metadataName, metadataValue, ::fnModelChanged)
             if (metadataVariable != null) {
-                metadataVariable.value = DataValue(Variant(metaDatavalue), StatusCode.GOOD, DateTime(sourceData.timestamp), DateTime(Instant.now()))
+                metadataVariable.value = DataValue(Variant(metadataValue), StatusCode.GOOD, DateTime(sourceTimeStamp), DateTime(Instant.now()))
             }
         }
 
-        val sourceTimeStamp = sourceData.timestamp ?: targetData.timestamp
 
         sourceData.channels.forEach { (channelName, channelData) ->
             val timestamp = channelData.timestamp ?: sourceTimeStamp
@@ -452,13 +588,17 @@ class OpcuaTargetServer(val config: OpcuaTargetConfiguration, private val attrib
 
     }
 
+    @Suppress("UNCHECKED_CAST")
     private fun buildValue(value: Any, valueVariable: UaVariableNode?, sourceTimeStamp: Instant): DataValue {
-        val variant =
-            if (value is Map<*, *>) {
-                Variant(JsonHelper.gsonExtended().toJson(value))
-            } else {
-                value.toVariant(dimensions = valueVariable?.arrayDimensions?.map { it.toInt() }, dataTypeIdentifier = valueVariable?.dataType)
+        val variant = when {
+            value is Map<*, *> -> Variant(JsonHelper.gsonExtended().toJson(value))
+            value is List<*> && value.isNotEmpty() && value.first() is ChannelOutputData -> {
+                val l = (value as List<ChannelOutputData>).map { it.value }
+                l.toVariant(dimensions = valueVariable?.arrayDimensions?.map { it.toInt() }, dataTypeIdentifier = valueVariable?.dataType)
             }
+
+            else -> value.toVariant(dimensions = valueVariable?.arrayDimensions?.map { it.toInt() }, dataTypeIdentifier = valueVariable?.dataType)
+        }
         return DataValue(variant, StatusCode.GOOD, DateTime(sourceTimeStamp), DateTime.now())
     }
 
@@ -466,7 +606,7 @@ class OpcuaTargetServer(val config: OpcuaTargetConfiguration, private val attrib
     private fun buildTcpEndpoint(base: EndpointConfiguration.Builder): EndpointConfiguration {
         return base.copy()
             .setTransportProfile(TransportProfile.TCP_UASC_UABINARY)
-            .setBindPort(config.serverTcpPort)
+            .setBindPort(targetConfiguration.serverTcpPort)
             .build()
     }
 

@@ -6,7 +6,6 @@
 
 package com.amazonaws.sfc.opcuatarget.config
 
-import com.amazonaws.sfc.awsiot.AwsIotCredentialProviderClientConfiguration
 import com.amazonaws.sfc.config.*
 import com.amazonaws.sfc.log.LogLevel
 import com.google.gson.annotations.SerializedName
@@ -61,7 +60,6 @@ class OpcuaWriterConfiguration : BaseConfigurationWithMetrics(), Validate{
                    targetTypes: Map<String, InProcessConfiguration> = default._targetTypes,
                    adapterServers: Map<String, ServerConfiguration> = default._protocolAdapterServers,
                    adapterTypes: Map<String, InProcessConfiguration> = default._protocolTypes,
-                   awsIotCredentialProviderClients: Map<String, AwsIotCredentialProviderClientConfiguration> = default._awsIoTCredentialProviderClients,
                    secretsManagerConfiguration: SecretsManagerConfiguration? = default._secretsManagerConfiguration,
                    monitorIncludedConfigFiles: Boolean = default._monitorIncludedConfigFiles,
                    monitorIncludedConfigFilesInterval : Duration = default._monitorIncludedConfigFilesInterval.toDuration(DurationUnit.SECONDS),
@@ -80,7 +78,7 @@ class OpcuaWriterConfiguration : BaseConfigurationWithMetrics(), Validate{
                 targetTypes = targetTypes,
                 adapterServers = adapterServers,
                 adapterTypes = adapterTypes,
-                awsIotCredentialProviderClients = awsIotCredentialProviderClients,
+                awsIotCredentialProviderClients = emptyMap(),
                 secretsManagerConfiguration = secretsManagerConfiguration,
                 templates = templatesConfiguration,
                 monitorIncludedConfigFilesInterval = monitorIncludedConfigFilesInterval,

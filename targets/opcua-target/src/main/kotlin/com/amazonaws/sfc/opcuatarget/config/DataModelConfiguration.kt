@@ -4,12 +4,13 @@
 
 package com.amazonaws.sfc.opcuatarget.config
 
+import com.amazonaws.sfc.config.Validate
 import com.google.gson.JsonDeserializationContext
 import com.google.gson.JsonObject
 
 
 class DataModelConfiguration(folderConfig: FolderNodeConfiguration, namespace: String)
-    : FolderNodeConfiguration(folderConfig, folderConfig.folders, folderConfig.variables), ParentNode {
+    : FolderNodeConfiguration(folderConfig, folderConfig.folders, folderConfig.variables), ParentNode, Validate {
 
     constructor(namespaceIndex : Int, id: String,
                 nameSpace: String,

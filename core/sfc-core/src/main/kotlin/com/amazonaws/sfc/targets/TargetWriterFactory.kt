@@ -47,7 +47,8 @@ class TargetWriterFactory(private val configReader: ConfigReader, config: Servic
         }
 
         val factory = InstanceFactory<TargetWriter>(targetTypes[targetConfig.targetType]!!, logger)
-        return factory.createInstance(configReader, targetID, writerLogger, targetResultHandler) as TargetWriter
+        val instance = factory.createInstance(configReader, targetID, writerLogger, targetResultHandler)
+        return if (instance!=null) instance as TargetWriter? else null
 
     }
 

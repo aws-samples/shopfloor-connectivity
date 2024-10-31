@@ -693,23 +693,6 @@ private suspend fun transformValues(
         } else null to null
 
 
-//            { id ->
-//                // get the ID of the transformation for the channel
-//                val transformationIdForChannel = channels[id]?.transformationID
-//                val transformationForChannel = if (transformationIdForChannel != null) transformations[transformationIdForChannel] else null
-//
-//            }
-//
-//
-//            // get first part of channel as additional information might be appended when channel supports wildcards
-//            val id = channelID.split(CHANNEL_SEPARATOR)[0]
-//
-//            // get the ID of the transformation for the channel
-//            val transformationIdForChannel = channels[id]?.transformationID
-//            val transformationForChannel = if (transformationIdForChannel != null) transformations[transformationIdForChannel] else null
-//
-//
-
         channelID to if (transformationForChannel == null)
         // this channel does not require transformation, return inout value as result of mapping
             channelReadValue

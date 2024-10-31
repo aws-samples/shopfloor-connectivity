@@ -9,6 +9,7 @@ import com.amazonaws.sfc.opcuatarget.config.DataModelConfiguration.Companion.DEF
 import com.google.gson.JsonDeserializationContext
 import com.google.gson.JsonDeserializer
 import com.google.gson.JsonElement
+import com.google.gson.JsonObject
 import java.lang.reflect.Type
 
 class DataModelConfigurationMap : NodeConfigurationMap<DataModelConfiguration>() {
@@ -19,7 +20,7 @@ class DataModelConfigurationMap : NodeConfigurationMap<DataModelConfiguration>()
             val jsonObject = json?.asJsonObject
 
             val dataModels = jsonObject?.keySet()?.associate { key ->
-                key to DataModelConfiguration.fromJson(key, jsonObject, context)
+                key to DataModelConfiguration.fromJson(key, jsonObject[key] as JsonObject, context)
             }
 
             val dataModelNode = DataModelConfigurationMap()

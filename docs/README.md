@@ -2355,15 +2355,17 @@ well as all required library files. The application tar file contains script fil
 | Firehose      | aws-kinesis-target          | com.amazonaws.sfc.awsfirehose.AwsKinesisFirehoseTargetService |
 | Kinesis       | aws-kinesis-firehose-target | com.amazonaws.sfc.awskinesis.AwsKinesisTargetService          |
 | Lambda        | aws-lambda-target           | com.amazonaws.sfc.awslambda.AwsLambdaTargetService            |
-| S3            | aws-kinesis-target          | com.amazonaws.sfc.awss3.AwsKinesisTargetService               |
+| S3            | aws-kinesis-target          | com.amazonaws.sfc.awss3.AwsS3TargetService                    |
+| OPCUA         | opcua-target                | com.amazonaws.sfc.opcuatarget.OpcuaTargetService              |
 | SiteWise      | aws-sitewise-target         | com.amazonaws.sfc.awssitewise.AwsSiteWiseTargetService        |
+| SiteWiseEdge  | aws-sitewiseedge-target     | com.amazonaws.sfc.awssitewiseedge.SiteWiseEdgeTargetService   |
 | SNS           | Aws-sns-target              | com.amazonaws.sfc.awssns.AwsSnsTargetService                  |
 | SQS           | aws-sqs-target              | com.amazonaws.sfc.awssqs.AwsSqsTargetService                  |
 | Timestream    | aws-timestream-target       | com.amazonaws.sfc.awstimestream.AwsTimestreamTargetService    |
 | MQTT          | mqtt-target                 | com.amazonaws.sfc.mqtt.MqttTargetService                      | 
 | File system   | file-target                 | com.amazonaws.sfc.filetarget.TargetService                    |
 | Console       | debug-target                | com.amazonaws.sfc.debugtarget.DebugTargetService              |
-| Store&Forward | Storeforward-target         | com.amazonaws.sfc.storeforward. AwsStoreForwardTargetService  |
+| Store&Forward | storeforward-target         | com.amazonaws.sfc.storeforward. AwsStoreForwardTargetService  |
 
 The applications do have all the following command line parameters in common.
 
@@ -2659,6 +2661,12 @@ configuration file.</u>*
       ],
       "FactoryClassName": "com.amazonaws.sfc.awssqs.AwsSqsTargetWriter"
     },
+    "OPCUA-TARGET": {
+      "JarFiles": [
+      "${SFC_DEPLOYMENT_DIR}/opcua-target/lib"
+   ],
+  "FactoryClassName": "com.amazonaws.sfc.opcuatarget,OpcuaTargetWriter"
+  },
     "AWS-IOT-ANALYTICS": {
       "JarFiles": [
         "${SFC_DEPLOYMENT_DIR}/debug-target/lib"
@@ -2677,6 +2685,12 @@ configuration file.</u>*
       ],
       "FactoryClassName": "com.amazonaws.sfc.awssitewise.AwsSiteWiseTargetWriter"
     },
+    "AWS-SITEWISEEDGE-TARGET": {
+       "JarFiles": [
+       "${SFC_DEPLOYMENT_DIR}/aws-sitewiseedge-target/lib"
+   ],
+  "FactoryClassName": "com.amazonaws.sfc.awssitewiseedge.SiteWiseEdgeTargetWriter"
+  },
     "AWS-SNS": {
       "JarFiles": [
         "${SFC_DEPLOYMENT_DIR}/aws-sns-target/lib/"

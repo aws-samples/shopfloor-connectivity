@@ -160,9 +160,9 @@ open class CertificateHelper(protected val config: CertificateConfiguration, pro
                     pemWriter.writeObject(newKeyPair.private)
                 }
                 constrainFilePermissions(file)
-                log.info("Saved new key in PEM format to file \"$keyFile\"")
+                log.info("Saved new key in PEM format to file \"${File(keyFile).absolutePath}\"")
             } catch (e: Exception) {
-                throw CertificateException("Error saving key to $keyFile, $e")
+                throw CertificateException("Error saving key to \"${File(keyFile?:"").absolutePath}\", $e")
             }
         }
         return newKeyPair

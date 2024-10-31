@@ -23,7 +23,7 @@ class VariableNodeMap: NodeConfigurationMap<VariableNodeConfiguration>(){
             f.nodes = variables
             return f
         }
-
-
     }
+
+
 }

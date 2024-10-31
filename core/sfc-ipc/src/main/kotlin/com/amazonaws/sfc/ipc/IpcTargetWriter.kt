@@ -1,4 +1,3 @@
-
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: MIT-0
 
@@ -11,6 +10,8 @@ import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_AWS_VERSION
 import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_TARGETS
 import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_TARGET_SERVERS
 import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_TARGET_TYPES
+import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_TRANSFORMATIONS
+import com.amazonaws.sfc.config.ChannelConfiguration.Companion.CONFIG_TRANSFORMATION
 import com.amazonaws.sfc.config.ConfigReader.Companion.convertExternalPlaceholders
 import com.amazonaws.sfc.config.SecretsManagerConfiguration.Companion.CONFIG_CLOUD_SECRETS
 import com.amazonaws.sfc.data.*
@@ -61,11 +62,11 @@ class IpcTargetWriter(private val targetID: String,
     private val requestChannel = Channel<WriteValuesRequest>(100)
 
     // Coroutine that writes the data to the service
-    private val writerWorker = scope.launch( buildContext("writer", scope)) {
-        val log =  logger.getCtxLoggers(className, "writer")
+    private val writerWorker = scope.launch(buildContext("writer", scope)) {
+        val log = logger.getCtxLoggers(className, "writer")
         try {
             writer()
-        }catch (e : Exception){
+        } catch (e: Exception) {
             if (!e.isJobCancellationException)
                 log.error("Error in writerWorker, ${e.message}")
         }
@@ -154,13 +155,30 @@ class IpcTargetWriter(private val targetID: String,
                 true
             } else false
 
-        } catch ( e : StatusException){
+        } catch (e: StatusException) {
             log.error("Error IPC initializing server for target \"$targetID\" on ${serverConfig.addressStr}, ${e.cause?.message ?: e.message}")
             false
         } catch (e: Exception) {
             log.errorEx("Error IPC initializing  server for target \"$targetID\" on ${serverConfig.addressStr}", e)
             false
         }
+    }
+
+
+    private fun targetTransformations(map: Map<*, *>): Set<String> {
+
+        val transformations = mutableSetOf<String>()
+        map.forEach { (k, v) ->
+            when {
+                ((k as String) == CONFIG_TRANSFORMATION && v != null && v is String) ->
+                    transformations.add(v)
+
+                else -> if (v is Map<*, *>) {
+                    transformations.addAll(targetTransformations( v))
+                }
+            }
+        }
+        return transformations
     }
 
 
@@ -189,7 +207,17 @@ class IpcTargetWriter(private val targetID: String,
         val usedTargetIDs = usedTargets(targetID, emptySet(), configuration)
 
         // Include targets
-        outputConfig[CONFIG_TARGETS] = usedTargetIDs.associateWith { targetsMap[it] }
+        val allTransformations = configurationMap[CONFIG_TRANSFORMATIONS] as Map<*,*>
+        outputConfig[CONFIG_TARGETS] = usedTargetIDs.map { targetId ->
+            // include transformations used in target
+             @Suppress("UNCHECKED_CAST")
+             val target = targetsMap[targetId] as MutableMap<String,Any>
+             val targetTransformations = targetTransformations(configurationMap[CONFIG_TARGETS] as Map<*,*>).filter { allTransformations.keys.contains(it) }
+             if (targetTransformations.isNotEmpty()) target[CONFIG_TRANSFORMATIONS] = allTransformations.filter { it.key in targetTransformations }
+             targetId  to target
+        }.toMap()
+
+
 
         // Build map for all targets types configured as in process targets
         val targetTypes = buildTargetTypesMap(usedTargetIDs)
@@ -257,8 +285,9 @@ class IpcTargetWriter(private val targetID: String,
                 val clientID = target?.credentialProviderClient
                 if (clientID != null) {
                     val clientConfiguration = configuration.awsCredentialServiceClients[clientID]
-                                              ?: throw IpcException("Client \"$clientID\" does not exist, " +
-                                                                    "configured targets are ${configuration.awsCredentialServiceClients.keys}")
+                            ?: throw IpcException(
+                                "Client \"$clientID\" does not exist, " +
+                                        "configured targets are ${configuration.awsCredentialServiceClients.keys}")
                     yield(clientID to clientConfiguration.asConfigurationMap())
                 }
             }
@@ -366,7 +395,8 @@ class IpcTargetWriter(private val targetID: String,
 
             val targetMetricsConfig = configuration.targets[targetID]?.metrics ?: MetricsSourceConfiguration()
             return if ((configuration.metrics != null) && (targetMetricsConfig.enabled))
-                IpcMetricsProvider(configReader = configReader,
+                IpcMetricsProvider(
+                    configReader = configReader,
                     serverConfig = serverConfig,
                     isIpcServiceInitialized = { this.isInitialized },
                     logger = logger) { m -> IpcTargetWriterClient(m) }

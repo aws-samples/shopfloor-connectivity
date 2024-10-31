@@ -22,7 +22,7 @@ SFC extends and unifies data collection capabilities additionally to our existin
 - [SQL](./docs/adapters/sql.md),
 - [Siemens S7](./docs/adapters/s7.md)
 
-[**Supported  targets:** ](./docs/targets/README.md)
+[**Supported  service targets:** ](./docs/targets/README.md)
 
 - [AWS IoT Analytics](./docs/targets/aws-iot-analytics.md)
 - [AWS IoT Core](./docs/targets/aws-iot-core.md)
@@ -35,6 +35,10 @@ SFC extends and unifies data collection capabilities additionally to our existin
 - [AWS SNS](./docs/targets/aws-sns.md)
 - [AWS SQS](./docs/targets/aws-sqs.md)
 - [AWS Timestream](./docs/targets/aws-timestream.md)
+
+[**Supported  edge  targets:** ](./docs/targets/README.md)
+
+- [OPCUA](./docs/targets/opcua.md)
 - [Debug Terminal](./docs/targets/debug.md)
 - [File system](./docs/targets/file.md)
 - [MQTT](./docs/targets/mqtt.md)

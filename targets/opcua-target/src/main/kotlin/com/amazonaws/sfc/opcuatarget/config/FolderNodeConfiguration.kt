@@ -15,7 +15,7 @@ open class FolderNodeConfiguration(configNode: BaseNodeConfiguration, folders: F
             displayName = configNode.displayName,
             description = configNode.description), ParentNode {
 
-    constructor(namespaceIndex : Int,
+    constructor(namespaceIndex: Int,
                 id: String,
                 browseName: String? = null,
                 displayName: String? = null,
@@ -34,6 +34,7 @@ open class FolderNodeConfiguration(configNode: BaseNodeConfiguration, folders: F
     override val variables: VariableNodeMap?
         get() = _variables
 
+
     init {
         variables?.values?.forEach { it.parent = this }
         folders?.values?.forEach { it.parent = this }
@@ -49,7 +50,7 @@ open class FolderNodeConfiguration(configNode: BaseNodeConfiguration, folders: F
             }
         }
 
-    open fun findFolder(id : String) : FolderNodeConfiguration?{
+    open fun findFolder(id: String): FolderNodeConfiguration? {
         if (this.id == id) return this
 
         folders?.values?.forEach {
@@ -60,9 +61,9 @@ open class FolderNodeConfiguration(configNode: BaseNodeConfiguration, folders: F
 
     }
 
-    open fun findVariable(id : String) : VariableNodeConfiguration?{
+    open fun findVariable(id: String): VariableNodeConfiguration? {
 
-        this.variables?.values?.forEach { v->
+        this.variables?.values?.forEach { v ->
             if (v.id == id) return v
         }
 
@@ -95,11 +96,11 @@ open class FolderNodeConfiguration(configNode: BaseNodeConfiguration, folders: F
         fun fromJson(key: String, json: JsonObject, context: JsonDeserializationContext?): FolderNodeConfiguration {
             val configNode = fromJson(key, json)
 
-            val subFoldersJson = json.getAsJsonObject(key)?.get(CONFIG_NODE_FOLDERS)
+            val subFoldersJson = json.getAsJsonObject().get(CONFIG_NODE_FOLDERS)
             val subFolders = if (subFoldersJson != null) foldersFromJson(subFoldersJson.asJsonObject, context) else null
 
-            val variablesJson = json.getAsJsonObject(key)?.get(CONFIG_NODE_VARIABLES)
-            val variables = if (variablesJson != null) variablesFromJson(variablesJson.asJsonObject, context) else null
+            val variablesJson = json.getAsJsonObject().get(CONFIG_NODE_VARIABLES) as JsonObject?
+            val variables = if (variablesJson != null) variablesFromJson(variablesJson, context) else null
 
             val folderNode = FolderNodeConfiguration(configNode, folders = subFolders, variables = variables)
             return folderNode

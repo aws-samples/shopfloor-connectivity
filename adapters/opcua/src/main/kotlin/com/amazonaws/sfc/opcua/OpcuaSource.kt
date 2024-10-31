@@ -96,7 +96,7 @@ open class OpcuaSource(
                 log.warning("fnOnPublishFailure event received with status ${exception?.statusCode.toString()}")
                 fnOnPublishFailure(exception)
             } catch (e: Exception) {
-                log.errorEx("Error executing onSubscriptionTransferFailedAction", e)
+                log.error("Error executing onSubscriptionTransferFailedAction, $e")
             }
         }
 
@@ -106,7 +106,7 @@ open class OpcuaSource(
                 log.warning("onSubscriptionTransferFailed event received with status code ${statusCode.toString()} ")
                 fnOnSubscriptionTransferFailed(subscription, statusCode)
             } catch (e: Exception) {
-                log.errorEx("Error executing onSubscriptionTransferFailedAction", e)
+                log.error("Error executing onSubscriptionTransferFailedAction, $e")
             }
         }
     }
@@ -220,7 +220,7 @@ open class OpcuaSource(
         return _opcuaClient
     }
 
-    private suspend fun startConnectionWatchdog(): Job? {
+    private  fun startConnectionWatchdog(): Job? {
 
 
         // only needed in subscription mode as in read node the read will fail anyway if connection is lost
@@ -338,7 +338,7 @@ open class OpcuaSource(
 
 
     // creates the client to communicate with the server the source is reading from
-    private suspend fun createOpcuaClient(): OpcUaClient? {
+    private  fun createOpcuaClient(): OpcUaClient? {
 
         val log = logger.getCtxLoggers(className, "createServerClient")
 
@@ -922,7 +922,7 @@ open class OpcuaSource(
     }
 
 
-    private suspend fun createMetrics(
+    private  fun createMetrics(
         protocolAdapterID: String,
         readDurationInMillis: Double,
         values: MutableMap<String, ChannelReadValue>
@@ -958,7 +958,7 @@ open class OpcuaSource(
 
     }
 
-    private suspend fun serverReadsInPollingMode(channels: List<String>?): List<Pair<String, ChannelReadValue>> {
+    private  fun serverReadsInPollingMode(channels: List<String>?): List<Pair<String, ChannelReadValue>> {
 
         if (client == null) return emptyList()
 

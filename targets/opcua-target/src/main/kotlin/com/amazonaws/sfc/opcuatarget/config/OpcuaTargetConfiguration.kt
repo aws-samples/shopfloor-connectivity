@@ -5,11 +5,13 @@
 package com.amazonaws.sfc.opcuatarget.config
 
 import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_CERTIFICATE_VALIDATION
+import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_TRANSFORMATIONS
 import com.amazonaws.sfc.config.ConfigurationClass
 import com.amazonaws.sfc.config.ConfigurationException
 import com.amazonaws.sfc.config.TargetConfiguration
 import com.amazonaws.sfc.crypto.CertificateConfiguration
 import com.amazonaws.sfc.opcuatarget.config.DataModelConfigurationMap.Companion.DEFAULT_DATA_MODELS
+import com.amazonaws.sfc.transformations.Transformation
 import com.google.gson.annotations.SerializedName
 import java.net.Inet4Address
 import java.net.NetworkInterface
@@ -22,11 +24,6 @@ class OpcuaTargetConfiguration : TargetConfiguration() {
     private var _dataModels: DataModelConfigurationMap = DataModelConfigurationMap()
     val dataModels: DataModelConfigurationMap
         get() = _dataModels.ifEmpty { DEFAULT_DATA_MODELS }
-
-    @SerializedName(CONFIG_DATA_MODEL_MAPPING)
-    private var _datamodelMapping: Map<String, ScheduleMapping> = emptyMap()
-    val datamodelMapping: Map<String, ScheduleMapping>
-        get() = _datamodelMapping
 
     @SerializedName(CONFIG_AUTO_CREATE)
     private var _autoCreate: Boolean = true
@@ -70,7 +67,7 @@ class OpcuaTargetConfiguration : TargetConfiguration() {
     val serverMessageSecurityModes: Set<OpcuaServerMessageSecurityMode>
         get() =
             if (_serverMessageSecurityModes.isEmpty()) DEFAULT_SERVER_SECURITY_MODES else
-                _serverMessageSecurityModes.map { OpcuaServerMessageSecurityMode.fromString(it) }.filterNotNull().toSet()
+                _serverMessageSecurityModes.mapNotNull { OpcuaServerMessageSecurityMode.fromString(it) }.toSet()
 
     @SerializedName(CONFIG_SERVER_SECURITY_POLICIES)
     private var _serverSecurityPolicies: List<String> = emptyList()
@@ -79,46 +76,69 @@ class OpcuaTargetConfiguration : TargetConfiguration() {
             if (_serverSecurityPolicies.isEmpty()) {
                 DEFAULT_SERVER_SECURITY_POLICIES
             } else
-                _serverSecurityPolicies.map { OpcuaServerSecurityPolicy.fromString(it) }.filterNotNull().toSet()
+                _serverSecurityPolicies.mapNotNull { OpcuaServerSecurityPolicy.fromString(it) }.toSet()
+
+    @SerializedName(CONFIG_VALUES_INIT_WITH_NULL)
+    private var _valuesInitWithNull: Boolean = true
+    val valuesInitWithNull: Boolean
+            get() = _valuesInitWithNull
+
+    @SerializedName(CONFIG_TRANSFORMATIONS)
+    private var _transformations = mapOf<String, Transformation>()
+    val transformations: Map<String, Transformation>
+        get() = _transformations
+
 
     override fun validate() {
         super.validate()
 
-        val invalidPolicies =_serverSecurityPolicies.filter { OpcuaServerSecurityPolicy.fromString(it) == null }
-        if (invalidPolicies.isNotEmpty()){
-            throw ConfigurationException("Invalid security policy(s) $invalidPolicies, valid modes are ${OpcuaServerSecurityPolicy.VALID_POLICIES}", CONFIG_SERVER_SECURITY_POLICIES)
-        }
-
-        val invalidModes =_serverMessageSecurityModes.filter { OpcuaServerMessageSecurityMode.fromString(it) == null }
-        if (invalidModes.isNotEmpty()){
-            throw ConfigurationException("Invalid security modes(s) $invalidModes, valid modes are ${OpcuaServerMessageSecurityMode.VALID_SECURTITY_MODES}", CONFIG_SERVER_MESSAGE_SECURITY_MODES)
-        }
-
-        val ip4networkInterfaces =  NetworkInterface.getNetworkInterfaces().toList().filter { it.inetAddresses.toList().any { a -> a is Inet4Address } }
-        val invalidInterfaces = _serverNetworkInterfaces.filter { ni -> ip4networkInterfaces.none { it.name.equals(ni, ignoreCase = true) } }
-        if (invalidInterfaces.isNotEmpty()){
-            throw ConfigurationException("Invalid network interface(s) $invalidInterfaces, valid interfaces with IP4 addresses are ${ip4networkInterfaces.map { it.name }}", CONFIG_SERVER_NETWORK_INTERFACES)
-        }
-
-        if (serverSecurityPolicies.any { it != OpcuaServerSecurityPolicy.None }){
-            ConfigurationException.check(
-                _certificateConfiguration != null,
-               "$CONFIG_SERVER_CERTIFICATE must be set for used $CONFIG_SERVER_SECURITY_POLICIES $_serverSecurityPolicies",
-                CONFIG_SERVER_CERTIFICATE,
-                this
-            )
-            certificateConfiguration?.validate()
-        }
-
+        validateSecurityPolicies()
+        validateSecurityModes()
+        validateNetworkInterfaces()
+        validateCertificate()
 
         validated = true
+    }
+
+    private fun validateCertificate() {
+        if (serverSecurityPolicies.any { it != OpcuaServerSecurityPolicy.None }) {
+
+            certificateConfiguration?.validate()
+            dataModels.values.forEach {  model ->
+                model.validate()
+            }
+
+        }
+    }
+
+    private fun validateNetworkInterfaces() {
+        val ip4networkInterfaces = NetworkInterface.getNetworkInterfaces().toList().filter { it.inetAddresses.toList().any { a -> a is Inet4Address } }
+        val invalidInterfaces = _serverNetworkInterfaces.filter { ni -> ip4networkInterfaces.none { it.name.equals(ni, ignoreCase = true) } }
+        if (invalidInterfaces.isNotEmpty()) {
+            throw ConfigurationException(
+                "Invalid network interface(s) $invalidInterfaces, valid interfaces with IP4 addresses are ${ip4networkInterfaces.map { it.name }}",
+                CONFIG_SERVER_NETWORK_INTERFACES)
+        }
+    }
+
+    private fun validateSecurityModes() {
+        val invalidModes = _serverMessageSecurityModes.filter { OpcuaServerMessageSecurityMode.fromString(it) == null }
+        if (invalidModes.isNotEmpty()) {
+            throw ConfigurationException("Invalid security modes(s) $invalidModes, valid modes are ${OpcuaServerMessageSecurityMode.VALID_SECURITY_MODES}", CONFIG_SERVER_MESSAGE_SECURITY_MODES)
+        }
+    }
+
+    private fun validateSecurityPolicies() {
+        val invalidPolicies = _serverSecurityPolicies.filter { OpcuaServerSecurityPolicy.fromString(it) == null }
+        if (invalidPolicies.isNotEmpty()) {
+            throw ConfigurationException("Invalid security policy(s) $invalidPolicies, valid modes are ${OpcuaServerSecurityPolicy.VALID_POLICIES}", CONFIG_SERVER_SECURITY_POLICIES)
+        }
     }
 
 
 
     companion object {
         private const val CONFIG_DATA_MODELS = "DataModels"
-        private const val CONFIG_DATA_MODEL_MAPPING = "DataModelMapping"
         private const val CONFIG_AUTO_CREATE = "AutoCreate"
 
         private const val CONFIG_SERVER_TCP_PORT = "ServerTcpPort"
@@ -132,6 +152,8 @@ class OpcuaTargetConfiguration : TargetConfiguration() {
         private const val CONFIG_SERVER_NETWORK_INTERFACES = "ServerNetworkInterfaces"
 
         private const val CONFIG_SERVER_CERTIFICATE = "ServerCertificate"
+
+        private const val CONFIG_VALUES_INIT_WITH_NULL = "Basic128Rsa15"
 
         private const val CONFIG_SERVER_MESSAGE_SECURITY_MODES = "ServerMessageSecurityModes"
         private val DEFAULT_SERVER_SECURITY_MODES = setOf(OpcuaServerMessageSecurityMode.NONE, OpcuaServerMessageSecurityMode.SIGN, OpcuaServerMessageSecurityMode.SIGN_AND_ENCRYPT)

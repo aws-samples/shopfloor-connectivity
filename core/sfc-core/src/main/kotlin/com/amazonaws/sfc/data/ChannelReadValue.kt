@@ -82,7 +82,7 @@ class ChannelReadValue(value: Any?, var timestamp: Instant? = null) {
     private fun typeStrSingle(a: Any?): String = "${if (a != null) a::class.simpleName else "null"}"
 
     // type name as a string for array values
-    private fun typeStr(a: Any?): String =
+    fun typeStr(a: Any?): String =
         if (isArrayValue)
             "[${if ((a as Iterable<*>).toList().isNotEmpty()) typeStrSingle(a.first()) else ""}]"
         else

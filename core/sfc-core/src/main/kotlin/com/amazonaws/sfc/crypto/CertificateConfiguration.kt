@@ -116,7 +116,7 @@ class CertificateConfiguration : Validate {
                    password: String? = default._password,
                    validationExpirationWarningPeriod: Int = default._expirationWarningPeriod,
                    selfSignedCertificateConfig: SelfSignedCertificateConfig? = default._selfSignedCertificateConfig,
-                   usePkcs: CertificateFormat? = default._format) {
+                   usePkcs: CertificateFormat? = default._format): CertificateConfiguration {
 
             val instance = CertificateConfiguration()
             with(instance) {
@@ -129,6 +129,8 @@ class CertificateConfiguration : Validate {
                 _format = usePkcs
 
             }
+
+            return instance
         }
 
         private const val CONFIG_CERT_PASSWORD = "Password"

@@ -17,8 +17,8 @@ enum class OpcuaServerMessageSecurityMode(val mode : MessageSecurityMode) {
 
 
     companion object{
-        val ALL_SECURITY_MODES = setOf(NONE, SIGN, SIGN_AND_ENCRYPT)
-        val VALID_SECURTITY_MODES = ALL_SECURITY_MODES.map { it.mode }
+        private val ALL_SECURITY_MODES = setOf(NONE, SIGN, SIGN_AND_ENCRYPT)
+        val VALID_SECURITY_MODES = ALL_SECURITY_MODES.map { it.mode }
 
         private const val MODE_NONE = "None"
         private const val MODE_SIGN = "Sign"
