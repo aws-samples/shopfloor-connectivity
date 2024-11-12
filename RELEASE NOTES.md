@@ -1,5 +1,11 @@
 # Release Notes:
 
+## Version 1.5.01 12 November 2024
+
+- MQTT Protocol adapter "ReadMode" setting: "KeepLast" to collect only the last received message from topic, "KeepAll", collects all messages received in a read interval.
+"KeepLast" is the default as this was the behaviour in previous versions.
+---
+
 ## Version 1.5.0, 31 October 2024
 
 - NEW OPC UA Target Adapter: Allows exposing the data collected by the SFC protocol adapter as an OPC UA model.
@@ -20,7 +26,7 @@
 
 ## Version 1.4.1, 22 August 2024
 
-- [Transformation operators](docs/core/transformation-operator-configuration.md) : Chunked,NumbersToFloatBE, NumbertToFloatLE, ReverseList, ToShort, ToSigned, ToUnsigned.
+- [Transformation operators](docs/core/transformation-operator-configuration.md) : Chunked,NumbersToFloatBE, NumberToFloatLE, ReverseList, ToShort, ToSigned, ToUnsigned.
 
 - [Channel configuration](docs/core/channel-configuration.md) option "Spread" to elements of source list values in into separate values.
 

@@ -28,7 +28,6 @@ class MqttConfiguration : SourceAdapterBaseConfiguration() {
     val mqttProtocolAdapters: Map<String, MqttAdapterConfiguration>
         get() = _protocolAdapters.filter { it.value.protocolAdapterType == MQTT_ADAPTER }
 
-
     @Throws(ConfigurationException::class)
     override fun validate() {
         if (validated) return
@@ -92,6 +91,7 @@ class MqttConfiguration : SourceAdapterBaseConfiguration() {
 
     companion object {
         const val MQTT_ADAPTER = "MQTT"
+
 
         private val default = MqttConfiguration()
 

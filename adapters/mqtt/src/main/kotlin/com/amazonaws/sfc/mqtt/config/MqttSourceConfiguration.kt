@@ -18,13 +18,14 @@ class MqttSourceConfiguration : BaseSourceConfiguration() {
     /**
      * ID of the opcua server in the adapter device
      */
-    val sourceAdapterbrokerID: String
+    val sourceAdapterBrokerID: String
         get() = _sourceAdapterbrokerID
 
     @SerializedName(CONFIG_CHANNELS)
     private var _channels = mapOf<String, MqttChannelConfiguration>()
     val channels: Map<String, MqttChannelConfiguration>
         get() = _channels.filter { !it.key.startsWith(BaseConfiguration.CONFIG_DISABLED_COMMENT) }
+
 
     @Throws(ConfigurationException::class)
     override fun validate() {
@@ -45,7 +46,7 @@ class MqttSourceConfiguration : BaseSourceConfiguration() {
     // Device must be set
     private fun validateMustHaveAdapterBroker() =
         ConfigurationException.check(
-            (sourceAdapterbrokerID.isNotEmpty()),
+            (sourceAdapterBrokerID.isNotEmpty()),
             "$CONFIG_SOURCE_ADAPTER_BROKER for MQTT source must be set",
             CONFIG_SOURCE_ADAPTER_BROKER,
             this

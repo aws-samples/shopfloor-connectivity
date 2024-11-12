@@ -120,15 +120,15 @@ open class OpcuaSource(
 
     // configuration for this source instance
     private val sourceConfiguration = configuration.sources[sourceID]
-        ?: throw OpcuaSourceException(sourceID, "Unknown source identifier, available sources are ${configuration.sources.keys}")
+            ?: throw OpcuaSourceException(sourceID, "Unknown source identifier, available sources are ${configuration.sources.keys}")
 
     // adapter configuration for source
     private val protocolAdapterID = sourceConfiguration.protocolAdapterID
     private val opcuaAdapterConfiguration = configuration.protocolAdapters[protocolAdapterID]
-        ?: throw OpcuaSourceException(
-            sourceID,
-            "Unknown protocol adapter identifier \"$protocolAdapterID\", available OPCUA protocol adapters are ${configuration.protocolAdapters}"
-        )
+            ?: throw OpcuaSourceException(
+                sourceID,
+                "Unknown protocol adapter identifier \"$protocolAdapterID\", available OPCUA protocol adapters are ${configuration.protocolAdapters}"
+            )
 
 
     private val dimensions = mapOf(MetricsCollector.METRICS_DIMENSION_SOURCE to "$protocolAdapterID:$sourceID") + adapterMetricDimensions as Map<String, String>
@@ -136,20 +136,20 @@ open class OpcuaSource(
     // server from the adapter used by the source instance
     private val sourceAdapterOpcuaServerID = sourceConfiguration.sourceAdapterOpcuaServerID
     private val opcuaServerConfiguration = opcuaAdapterConfiguration.opcuaServers[sourceAdapterOpcuaServerID]
-        ?: throw OpcuaSourceException(
-            sourceID,
-            "Unknown protocol adapter OPCUA server identifier \"$sourceAdapterOpcuaServerID\", available servers for adapter \"$protocolAdapterID\" are ${opcuaAdapterConfiguration.opcuaServers.keys}"
-        )
+            ?: throw OpcuaSourceException(
+                sourceID,
+                "Unknown protocol adapter OPCUA server identifier \"$sourceAdapterOpcuaServerID\", available servers for adapter \"$protocolAdapterID\" are ${opcuaAdapterConfiguration.opcuaServers.keys}"
+            )
 
 
     // optional profile for a server which does contain additional event/alarm types
     private val serverProfile =
         if (opcuaServerConfiguration.serverProfile != null)
             opcuaAdapterConfiguration.serverProfiles[opcuaServerConfiguration.serverProfile]
-                ?: throw OpcuaSourceException(
-                    sourceID,
-                    "Unknown server profile \"${opcuaServerConfiguration.serverProfile}\", available profiles for adapter \"$protocolAdapterID\" are ${opcuaAdapterConfiguration.serverProfiles.keys}"
-                )
+                    ?: throw OpcuaSourceException(
+                        sourceID,
+                        "Unknown server profile \"${opcuaServerConfiguration.serverProfile}\", available profiles for adapter \"$protocolAdapterID\" are ${opcuaAdapterConfiguration.serverProfiles.keys}"
+                    )
         else OpcuaServerProfileConfiguration()
 
     // batch size for interacting with the server
@@ -220,7 +220,7 @@ open class OpcuaSource(
         return _opcuaClient
     }
 
-    private  fun startConnectionWatchdog(): Job? {
+    private fun startConnectionWatchdog(): Job? {
 
 
         // only needed in subscription mode as in read node the read will fail anyway if connection is lost
@@ -247,9 +247,7 @@ open class OpcuaSource(
                         }
                         log.trace("Connection to server ${opcuaServerConfiguration.endPoint} for source \"${sourceID}\" checked")
                     }
-                    runBlocking {
-                        delay(opcuaServerConfiguration.connectionWatchdogInterval)
-                    }
+                    delay(opcuaServerConfiguration.connectionWatchdogInterval)
                 } catch (e: Exception) {
                     if (!e.isJobCancellationException) {
                         log.error("Unable to read from server ${opcuaServerConfiguration.endPoint} for source \"${sourceID}\"")
@@ -338,7 +336,7 @@ open class OpcuaSource(
 
 
     // creates the client to communicate with the server the source is reading from
-    private  fun createOpcuaClient(): OpcUaClient? {
+    private fun createOpcuaClient(): OpcUaClient? {
 
         val log = logger.getCtxLoggers(className, "createServerClient")
 
@@ -766,7 +764,7 @@ open class OpcuaSource(
                             }
 
                         } else {
-                            val nodeChannelID = node?.channelID ?: "unknown channel"
+                            val nodeChannelID =  "unknown channel"
                             val errorLog = logger.getCtxErrorLog(className, "onMonitoredEventReceived")
                             errorLog("Error status on monitored event item for source \"$sourceID\", node \"$nodeChannelID\" (${item.readValueId}), ${item.statusCode}")
                         }
@@ -823,7 +821,7 @@ open class OpcuaSource(
     }
 
     // get the flow to read the source values, the flow depends on the mode the adapter is using
-    private suspend fun readSourceValues(channels: List<String>?): List<Pair<String, ChannelReadValue>> {
+    private fun readSourceValues(channels: List<String>?): List<Pair<String, ChannelReadValue>> {
 
         val events = (eventStore?.read(channels) ?: emptyList()).map { it.first to ChannelReadValue(it.second) }
 
@@ -922,7 +920,7 @@ open class OpcuaSource(
     }
 
 
-    private  fun createMetrics(
+    private fun createMetrics(
         protocolAdapterID: String,
         readDurationInMillis: Double,
         values: MutableMap<String, ChannelReadValue>
@@ -951,14 +949,14 @@ open class OpcuaSource(
     private fun serverReadsInSubscriptionMode(channels: List<String>?): List<Pair<String, ChannelReadValue>> {
         var values: List<Pair<String, ChannelReadValue>>
         val duration = measureTime {
-            values = dataValueChangesStore?.read(channels) ?: emptyList()
+            values = dataValueChangesStore?.read(channels)?.map { it.first to it.second as ChannelReadValue } ?: emptyList()
         }
         if (values.isNotEmpty()) logger.getCtxTraceLog(className, "read")("Reading ${values.size} from store took $duration")
         return values
 
     }
 
-    private  fun serverReadsInPollingMode(channels: List<String>?): List<Pair<String, ChannelReadValue>> {
+    private fun serverReadsInPollingMode(channels: List<String>?): List<Pair<String, ChannelReadValue>> {
 
         if (client == null) return emptyList()
 

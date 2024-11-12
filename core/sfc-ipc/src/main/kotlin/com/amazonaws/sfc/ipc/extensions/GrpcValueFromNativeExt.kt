@@ -5,6 +5,7 @@
 
 package com.amazonaws.sfc.ipc.extensions
 
+import com.amazonaws.sfc.data.ChannelReadValue
 import com.amazonaws.sfc.data.JsonHelper.Companion.gsonExtended
 import com.amazonaws.sfc.ipc.*
 import com.amazonaws.sfc.ipc.extensions.GrpcSourceValueFromNativeExt.setValueTimestamp
@@ -355,6 +356,19 @@ object GrpcValueFromNativeExt {
             .build()
     }
 
+    fun channelValue(value : ChannelReadValue): ChannelValue? =
+        if (value.value == null) null else channelValue(value.value!!, value.timestamp)
+
+
+    fun channelValue(value : Iterable<ChannelReadValue>, ts: Instant?): ChannelValue? {
+        val l = value.filter { it.value != null }.map { channelValue(it) }
+        return if (l.isEmpty()) null else ChannelValue.newBuilder()
+            .setChannelValueArray(ChannelValueArray.newBuilder().addAllItems(l).build())
+            .setValueTimestamp(ts)
+            .build()
+    }
+
+
     /**
      * Builds a new channel value from an array of timestamp values
      * @param value ArrayList<Instant>
@@ -385,10 +399,10 @@ object GrpcValueFromNativeExt {
             is UInt -> channelValue(value.toInt(), ts)
             is ULong -> channelValue(value.toLong(), ts)
             is UShort -> channelValue(value.toInt(), ts)
+            is ChannelReadValue -> channelValue(value.value!!, ts)
             is ArrayList<*> -> {
                 channelArrayValue(value, ts)
             }
-
             else -> {
                 channelValue(value.toString(), ts)
             }
@@ -412,6 +426,7 @@ object GrpcValueFromNativeExt {
             is UInt -> channelValue(arrayListOf(*value.map { it as UInt }.toTypedArray<UInt>()), ts)
             is ULong -> channelValue(arrayListOf(*value.map { it as ULong }.toTypedArray<ULong>()), ts)
             is UShort -> channelValue(arrayListOf(*value.map { it as UShort }.toTypedArray<UShort>()), ts)
+            is ChannelReadValue -> channelValue(arrayListOf(*value.map { it as ChannelReadValue }.toTypedArray<ChannelReadValue>()), ts)
             is ArrayList<*> -> channelValue(arrayListOf(*value.map { it as ArrayList<*> }.toTypedArray<ArrayList<*>>()), ts)
             else -> channelValue(ArrayList<String>(value.size).addAll(value.map { it.toString() }), ts)
         }
@@ -473,6 +488,7 @@ object GrpcValueFromNativeExt {
             .setValueTimestamp(ts)
             .build()
     }
+
 
 }
 

@@ -16,14 +16,12 @@ import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_CONNECTIONS
 import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_CONNECTION_ERRORS
 import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_DIMENSION_SOURCE
 import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_DIMENSION_SOURCE_CATEGORY_ADAPTER
-import com.amazonaws.sfc.mqtt.config.MqttAdapterConfiguration
+import com.amazonaws.sfc.mqtt.config.*
 import com.amazonaws.sfc.mqtt.config.MqttAdapterConfiguration.Companion.DEFAULT_RECEIVED_DATA_CHANNEL_SIZE
 import com.amazonaws.sfc.mqtt.config.MqttAdapterConfiguration.Companion.DEFAULT_RECEIVED_DATA_CHANNEL_TIMEOUT
-import com.amazonaws.sfc.mqtt.config.MqttChannelConfiguration
-import com.amazonaws.sfc.mqtt.config.MqttConfiguration
-import com.amazonaws.sfc.mqtt.config.MqttSourceConfiguration
 import com.amazonaws.sfc.system.DateTime
 import com.amazonaws.sfc.targets.TargetException
+import com.amazonaws.sfc.util.LookupCacheHandler
 import com.amazonaws.sfc.util.MemoryMonitor.Companion.getUsedMemoryMB
 import com.amazonaws.sfc.util.buildScope
 import com.amazonaws.sfc.util.launch
@@ -68,12 +66,14 @@ class MqttAdapter(private val adapterID: String, private val configuration: Mqtt
         logger.getCtxInfoLog(className, "")(BuildConfig.toString())
     }
 
+    private val clientCache = LookupCacheHandler<String, MqttClient?, String>(
+        supplier = { sourceName ->
+           createMqttClient(sourceName)
+        }
+    )
     private val adapterMetricDimensions = mapOf(MetricsCollector.METRICS_DIMENSION_TYPE to className)
 
     private val adapterConfiguration = configuration.mqttProtocolAdapters[adapterID]
-
-    // clients for each broker used by the sources
-    private val sourceClients = mutableMapOf<String, MqttClient?>()
 
     private val sources
         get() = configuration.sources.filter { it.value.protocolAdapterID in configuration.mqttProtocolAdapters.keys }
@@ -111,8 +111,11 @@ class MqttAdapter(private val adapterID: String, private val configuration: Mqtt
     private val scope = buildScope("MQTT Protocol Handler")
 
     // Store received data
-    private val sourceDataStores = sources.keys.map { sourceID ->
-        sourceID to SourceDataValuesStore<ChannelReadValue>()
+    private val sourceDataStores : Map<String, SourceDataStore<ChannelReadValue>> = sources.keys.map{ sourceID ->
+        sourceID to if (adapterConfiguration?.readMode == ReadMode.KEEP_LAST)
+            SourceDataValuesStore()
+        else
+            SourceDataMultiValuesStore<ChannelReadValue>()
     }.toMap()
 
 
@@ -154,8 +157,8 @@ class MqttAdapter(private val adapterID: String, private val configuration: Mqtt
         if (client == null) {
             val adapterConfiguration = configuration.mqttProtocolAdapters[protocolAdapterID]
                 ?: return SourceReadError("Adapter \"$protocolAdapterID\" for  Source \"$sourceID\" does not exist, available adapters are ${configuration.mqttProtocolAdapters.keys}")
-            val brokerConfiguration = adapterConfiguration.brokers[sourceConfiguration.sourceAdapterbrokerID]
-                ?: return SourceReadError("Broker \"${sourceConfiguration.sourceAdapterbrokerID}\" Adapter \"$protocolAdapterID\" for  Source \"$sourceID\" does not exist, available brokers are ${adapterConfiguration.brokers}")
+            val brokerConfiguration = adapterConfiguration.brokers[sourceConfiguration.sourceAdapterBrokerID]
+                ?: return SourceReadError("Broker \"${sourceConfiguration.sourceAdapterBrokerID}\" Adapter \"$protocolAdapterID\" for  Source \"$sourceID\" does not exist, available brokers are ${adapterConfiguration.brokers}")
 
             // Wait for next read and return read error
             val error = SourceReadError("Can not connect to broker at ${brokerConfiguration.endPoint}", DateTime.systemDateTime())
@@ -169,21 +172,29 @@ class MqttAdapter(private val adapterID: String, private val configuration: Mqtt
         val start = DateTime.systemDateTime().toEpochMilli()
 
         // Get the values and return result
-        val f: List<Pair<String, ChannelReadValue>> = store?.read(channels) ?: emptyList()
-        val data = f.toMap()
+        val data = (store?.read(channels) ?: emptyList()).associate {
+            val s = it.first.split(CHANNEL_SEPARATOR)
+            val channel = if (s.size == 1) it.first else s.subList(1, s.lastIndex + 1).joinToString(separator = CHANNEL_SEPARATOR.toString()) { c->c }
+            channel to it.second
+        }
 
         val readDurationInMillis = (DateTime.systemDateTime().toEpochMilli() - start).toDouble()
 
+        createMetrics(protocolAdapterID, dimensions, readDurationInMillis, data.size)
 
-        createMetrics(protocolAdapterID, dimensions, readDurationInMillis, data)
-        return SourceReadSuccess(data, DateTime.systemDateTime())
+        val d = data.map {
+            it.key to ChannelReadValue(it.value)
+        }.toMap()
+
+        return SourceReadSuccess(d, DateTime.systemDateTime())
     }
 
-    private suspend fun createMetrics(
+
+    private fun createMetrics(
         protocolAdapterID: String,
         metricDimensions: MetricDimensions?,
         readDurationInMillis: Double,
-        values: Map<String, ChannelReadValue>
+        values: Int
     ) {
         metricsCollector?.put(
             protocolAdapterID,
@@ -211,7 +222,7 @@ class MqttAdapter(private val adapterID: String, private val configuration: Mqtt
             metricsCollector?.buildValueDataPoint(
                 protocolAdapterID,
                 MetricsCollector.METRICS_VALUES_READ,
-                values.size.toDouble(),
+                values.toDouble(),
                 MetricUnits.COUNT,
                 metricDimensions
             ),
@@ -231,7 +242,7 @@ class MqttAdapter(private val adapterID: String, private val configuration: Mqtt
                 // for each source
                 sources.forEach { (sourceID, source) ->
                     // get the client
-                    val client = sourceClients[sourceID]
+                    val client = clientCache.getItemAsync(sourceID, sourceID).await()
                     // unsubscribe from all topics
                     if (client != null) {
                         source.channels.values.forEach { channel ->
@@ -259,22 +270,14 @@ class MqttAdapter(private val adapterID: String, private val configuration: Mqtt
      * @param sourceID String
      * @return MqttClient?
      */
-    private suspend fun getClientForSource(
+    private  suspend fun getClientForSource(
         sourceID: String,
         adapterID: String,
         metrics: MetricsCollector?,
         metricDimensions: Map<String, String>
     ): MqttClient? {
 
-        var client = sourceClients[sourceID]
-        if ((client != null)) {
-            return client
-        }
-
-        client = createMqttClient(sourceID)
-        if (client != null) {
-            sourceClients[sourceID] = client
-        }
+        val client = clientCache.getItemAsync(sourceID, sourceID).await()
 
         metrics?.put(adapterID, if (client != null) METRICS_CONNECTIONS else METRICS_CONNECTION_ERRORS, 1.0, MetricUnits.COUNT, metricDimensions)
         return client
@@ -299,9 +302,9 @@ class MqttAdapter(private val adapterID: String, private val configuration: Mqtt
             log.error("Adapter \"${sourceConfiguration.protocolAdapterID}\" for  Source \"$sourceID\" does not exist, available adapters are ${configuration.mqttProtocolAdapters.keys}")
             return null
         }
-        val brokerConfiguration = adapterConfiguration.brokers[sourceConfiguration.sourceAdapterbrokerID]
+        val brokerConfiguration = adapterConfiguration.brokers[sourceConfiguration.sourceAdapterBrokerID]
         if (brokerConfiguration == null) {
-            log.error("Broker \"${sourceConfiguration.sourceAdapterbrokerID}\" Adapter \"${sourceConfiguration.protocolAdapterID}\" for  Source \"$sourceID\" does not exist, available brokers are ${adapterConfiguration.brokers}")
+            log.error("Broker \"${sourceConfiguration.sourceAdapterBrokerID}\" Adapter \"${sourceConfiguration.protocolAdapterID}\" for  Source \"$sourceID\" does not exist, available brokers are ${adapterConfiguration.brokers}")
             return null
         }
 
@@ -376,7 +379,7 @@ class MqttAdapter(private val adapterID: String, private val configuration: Mqtt
      * sent by the subscription handler
      * @param receivedData ReceivedData
      */
-    private suspend fun handleDataReceived(receivedData: ReceivedData) {
+    private fun handleDataReceived(receivedData: ReceivedData) {
 
         with(receivedData) {
             // Build the channel name for the received data (configured name or a mapped topic name)

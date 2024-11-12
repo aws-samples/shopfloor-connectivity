@@ -14,7 +14,7 @@ configuration types
 
 ## MqttSourceConfiguration
 
-The MqttSourceConfiguration extends the common <a href="../core/source-configuration.md">Source configuration</a> with MQTT specific source configuration data
+The MqttSourceConfiguration extends the common <a href = "../core/source-configuration.md" >Source configuration</a> with MQTT specific source configuration data
 
 <table>
 <colgroup>
@@ -197,8 +197,19 @@ The MqttAdapterConfiguration extends the common adapter configuration with MQTT 
 <td><strong>Comments</strong></td>
 </tr>
 
-
 <tr class="even">
+<td>ReadMode</td>
+<td>Read mode of the adapter. Set to "KeepAll" to collect all messages on subscribed topics during a read interval.
+Set to "KeepLast", which is the default, to keep only the last received message.</td>
+<td>String</td>
+<td>
+- "KeepLast" to collect last message received in read interval (Default)
+- "KeepAll" to collect all messages received in read interval
+</td>
+</tr>
+
+
+<tr class="odd">
 <td>Brokers</td>
 <td>Brokers configured for this adapter. The mqtt source using the adapter must refer to one of these servers with the AdapterBroker attribute.</td>
 <td>Map[String,<a href="#mqttbrokerconfiguration">MqttBrokerConfiguration</a>]</td>
@@ -206,7 +217,7 @@ The MqttAdapterConfiguration extends the common adapter configuration with MQTT 
 </tr>
 
 
-<tr class="odd">
+<tr class="even">
 <td>ReceivedDataChannelSize</td>
 <td>Size of internal buffer to receive data for topic subscriptions</td>
 <td>Int</td>

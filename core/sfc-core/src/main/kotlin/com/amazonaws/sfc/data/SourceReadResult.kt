@@ -37,6 +37,7 @@ class SourceReadSuccess(val values: Map<String, ChannelReadValue>, timestamp: In
     val valuesMap
         get() = values.map { it.key to it.value.value }.toMap()
 
+
 }
 
 

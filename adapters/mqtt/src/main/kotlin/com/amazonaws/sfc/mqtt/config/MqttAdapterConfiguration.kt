@@ -22,14 +22,19 @@ class MqttAdapterConfiguration : ProtocolAdapterConfiguration(), Validate {
         get() = _brokers
 
     @SerializedName(CONFIG_RECEIVED_DATA_CHANNEL_SIZE)
-    protected val _receivedDataChannelSize = DEFAULT_RECEIVED_DATA_CHANNEL_SIZE
+    private val _receivedDataChannelSize = DEFAULT_RECEIVED_DATA_CHANNEL_SIZE
     val receivedDataChannelSize
         get() = _receivedDataChannelSize
 
     @SerializedName(CONFIG_RECEIVED_DATA_CHANNEL_TIMEOUT)
-    protected val _receivedDataChannelTimeout = DEFAULT_RECEIVED_DATA_CHANNEL_TIMEOUT
+    private val _receivedDataChannelTimeout = DEFAULT_RECEIVED_DATA_CHANNEL_TIMEOUT
     val receivedDataChannelTimeout
         get() = _receivedDataChannelTimeout.toDuration(DurationUnit.MILLISECONDS)
+
+    @SerializedName(CONFIG_READ_MODE)
+    private var _readMode = ReadMode.KEEP_LAST
+    val readMode: ReadMode
+        get() = _readMode
 
     @Throws(ConfigurationException::class)
     override fun validate() {
@@ -47,6 +52,8 @@ class MqttAdapterConfiguration : ProtocolAdapterConfiguration(), Validate {
         const val CONFIG_RECEIVED_DATA_CHANNEL_SIZE = "ReceivedDataChannelSize"
         const val CONFIG_RECEIVED_DATA_CHANNEL_TIMEOUT = "ReceivedDataChannelTimeout"
 
+        const val CONFIG_READ_MODE = "ReadMode"
+
         const val DEFAULT_RECEIVED_DATA_CHANNEL_SIZE = 1000
         const val DEFAULT_RECEIVED_DATA_CHANNEL_TIMEOUT = 1000
 
@@ -55,6 +62,7 @@ class MqttAdapterConfiguration : ProtocolAdapterConfiguration(), Validate {
         fun create(brokers: Map<String, MqttBrokerConfiguration> = default._brokers,
                    description: String = default._description,
                    metrics: MetricsSourceConfiguration? = default._metrics,
+                   readMode: ReadMode = default._readMode,
                    adapterServer: String? = default._protocolAdapterServer): MqttAdapterConfiguration {
 
             val instance = createAdapterConfiguration<MqttAdapterConfiguration>(
@@ -65,6 +73,7 @@ class MqttAdapterConfiguration : ProtocolAdapterConfiguration(), Validate {
 
             with(instance) {
                 _brokers = brokers
+                _readMode = readMode
             }
             return instance
         }

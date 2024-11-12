@@ -116,6 +116,10 @@ message TimestampArray{
   repeated  google.protobuf.Timestamp timestamp = 1;
 }
 
+message ChannelValueArray{
+     repeated ChannelValue items = 1;
+}
+
 message CustomArray{
   repeated string items = 1;
 }
@@ -186,6 +190,8 @@ message ChannelValue{
     TypedMap typed_hash_map = 71;
     TypedMapArray typed_has_map_array = 171;
 
+    ChannelValue channel_value = 81;
+    ChannelValueArray channel_value_array = 181;
   }
 
   // timestamp for the value

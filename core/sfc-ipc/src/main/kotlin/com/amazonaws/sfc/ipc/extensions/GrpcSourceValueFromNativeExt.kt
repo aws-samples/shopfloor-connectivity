@@ -640,6 +640,19 @@ object GrpcSourceValueFromNativeExt {
         return this
     }
 
+
+    @JvmName("addChannelValue")
+    fun SourceReadValuesReply.Builder.addValue(name : String, value : ChannelReadValue, ts : Instant? = null) : SourceReadValuesReply.Builder{
+        this.putValues(name, channelValue(value, ts))
+        return this
+    }
+
+    @JvmName("addChannelValueList")
+    fun SourceReadValuesReply.Builder.addChannelValueList(name : String, value : Iterable<ChannelReadValue>, ts : Instant? = null) : SourceReadValuesReply.Builder{
+        this.putValues(name, channelValue(value, ts))
+        return this
+    }
+
     /**
      * Add a value to a response builder. Based on th actual type it will store it in the correct field of the GSON response
      * @receiver SourceReadValuesReply.Builder
@@ -673,6 +686,7 @@ object GrpcSourceValueFromNativeExt {
             is UShort -> this.addValue(name, value.toUShort(), ts)
             is ULong -> this.addValue(name, value, ts)
             is LinkedHashMap<*, *> -> this.addValue(name, value, ts)
+            is ChannelReadValue -> this.addValue(name, value, ts)
             else -> if (value != null) this.addCustomValue(name, value, ts) else this
         }
 
@@ -708,6 +722,7 @@ object GrpcSourceValueFromNativeExt {
             is ULong -> this.addValue(name, (valueAsList as ArrayList<ULong>), ts)
             is UShort -> this.addValue(name, (valueAsList as ArrayList<UShort>), ts)
             is LinkedHashMap<*, *> -> this.addValue(name, valueAsList as ArrayList<LinkedHashMap<*, *>>, ts)
+            is ChannelReadValue -> this.addChannelValueList(name, valueAsList as ArrayList<ChannelReadValue>, ts)
             else -> addCustomValueList(name, valueAsList.filterNotNull(), ts)
         }
 

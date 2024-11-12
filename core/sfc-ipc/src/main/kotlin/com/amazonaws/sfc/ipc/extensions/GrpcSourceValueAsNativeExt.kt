@@ -1,4 +1,3 @@
-
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: MIT-0
 
@@ -89,6 +88,20 @@ object GrpcSourceValueAsNativeExt {
 
             ChannelValue.CUSTOM_ARRAY_FIELD_NUMBER -> try {
                 gson.fromJson(this.customArray, ArrayList<Any>()::class.java)
+            } catch (_: Throwable) {
+                null
+            }
+
+            ChannelValue.CHANNEL_VALUE_ARRAY_FIELD_NUMBER -> try {
+                this.channelValueArray.itemsList.map {
+                    (it as ChannelValue).asReadValue
+                }
+            } catch (_: Throwable) {
+                null
+            }
+
+            ChannelValue.CHANNEL_VALUE_FIELD_NUMBER -> try {
+                this.channelValue as ChannelValue
             } catch (_: Throwable) {
                 null
             }
