@@ -1,6 +1,13 @@
 # Release Notes:
 
-## Version 1.5.01 12 November 2024
+## Version 1.5.3 14 November 2024
+
+- MQTT Protocol adapter channel metadata not included for unmapped channels fixed
+
+---
+
+
+## Version 1.5.2 12 November 2024
 
 - MQTT Protocol adapter "ReadMode" setting: "KeepLast" to collect only the last received message from topic, "KeepAll", collects all messages received in a read interval.
 "KeepLast" is the default as this was the behaviour in previous versions.

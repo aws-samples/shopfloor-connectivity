@@ -208,13 +208,16 @@ class ScheduleWriter(
 
                 // het value and its name
                 val channel = source?.channels?.get(channelID)
-                val channelName = channel?.name ?: channelID
+                val s = channelID.split(CHANNEL_SEPARATOR)
+                val id = s.first()
+                val name = if (s.size == 1) channelID else s.subList(1, s.lastIndex + 1).joinToString(separator = CHANNEL_SEPARATOR.toString()) { c->c }
+                val channelName = channel?.name ?: name
 
                 // mapped channel data
                 channelName to ChannelOutputData(
                     value = channelData.value,
                     timestamp = channelData.timestamp,
-                    metadata = channelMetadata[sourceID]?.get(channelID.split(CHANNEL_SEPARATOR)[0])
+                    metadata = channelMetadata[sourceID]?.get(id)
                 )
             }.toMap()
 

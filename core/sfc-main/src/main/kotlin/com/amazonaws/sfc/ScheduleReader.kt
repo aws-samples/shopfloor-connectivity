@@ -765,7 +765,8 @@ class ScheduleReader(
             sourceID to SourceOutputData(
                 channels = readValues.values.filter { it.value.value != null }.map { (channelID, channelValue) ->
                     val channelTimestamp = if (needChannelTimestamp) channelValue.timestamp ?: readValues.timestamp else null
-                    val channelMetadata = config.sources[sourceID]?.channels?.get(channelID)?.metadata
+                    val id = channelID.split(CHANNEL_SEPARATOR)[0]
+                    val channelMetadata = config.sources[sourceID]?.channels?.get(id)?.metadata
                     channelID to ChannelOutputData(channelValue.value!!, channelTimestamp, channelMetadata)
                 }.toMap(),
 

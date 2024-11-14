@@ -173,9 +173,7 @@ class MqttAdapter(private val adapterID: String, private val configuration: Mqtt
 
         // Get the values and return result
         val data = (store?.read(channels) ?: emptyList()).associate {
-            val s = it.first.split(CHANNEL_SEPARATOR)
-            val channel = if (s.size == 1) it.first else s.subList(1, s.lastIndex + 1).joinToString(separator = CHANNEL_SEPARATOR.toString()) { c->c }
-            channel to it.second
+            it.first to it.second
         }
 
         val readDurationInMillis = (DateTime.systemDateTime().toEpochMilli() - start).toDouble()
