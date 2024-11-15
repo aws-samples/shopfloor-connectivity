@@ -32,6 +32,7 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.selects.select
 import software.amazon.awssdk.awscore.exception.AwsServiceException
 import software.amazon.awssdk.core.SdkBytes
+import software.amazon.awssdk.core.exception.SdkClientException
 import software.amazon.awssdk.services.iot.IotClient
 import software.amazon.awssdk.services.iot.model.DescribeEndpointRequest
 import software.amazon.awssdk.services.iotdataplane.IotDataPlaneClient
@@ -303,7 +304,9 @@ class AwsIotCoreTargetWriter(
                 createMetrics(targetID, metricDimensions, buffer.size, payloadSize, duration)
             }
         } catch (e: Exception) {
-            log.errorEx("Error writing to topic \"${targetConfig.topicName}\"", e)
+            val  throttled =  (e is SdkClientException  && e.suppressedExceptions.any { (it.message?:"").lowercase().contains("throttled")})
+            val message = "Error writing to topic \"${targetConfig.topicName}\", ${ if (throttled) "throttled" else  "${e.message}"}"
+            log.error(message)
             runBlocking { metricsCollector?.put(targetID, METRICS_WRITE_ERRORS, 1.0, MetricUnits.COUNT, metricDimensions) }
             if (e.isServiceNotReachable) {
                 targetResults?.nackBuffered()
@@ -331,10 +334,12 @@ class AwsIotCoreTargetWriter(
 
         return if (targetConfig.compressionType == CompressionType.NONE) {
             builder.payload(SdkBytes.fromUtf8String(payload))
+            builder.retain(targetConfig.retain)
             builder.build() to payload.length
         } else {
             val compressedBytes = compressPayload(payload)
             builder.payload(SdkBytes.fromByteArray(compressedBytes))
+            builder.retain(targetConfig.retain)
             builder.build() to compressedBytes.size
 
         }

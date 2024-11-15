@@ -132,6 +132,11 @@ class MqttTargetConfiguration : TargetConfiguration(), Validate {
     val maxPayloadSize
         get() = if (_maxPayloadSize != null) _maxPayloadSize!! * 1024 else null
 
+    @SerializedName(CONFIG_RETAIN)
+    private var _retain: Boolean = false
+    val retain: Boolean
+        get() = _retain
+
     @SerializedName(CONFIG_COMPRESS)
     private var _compressionType: CompressionType? = null
 
@@ -206,6 +211,7 @@ class MqttTargetConfiguration : TargetConfiguration(), Validate {
         const val CONFIG_BATCH_COUNT = "BatchCount"
         const val CONFIG_BATCH_INTERVAL = "BatchInterval"
         private const val CONFIG_MAX_PAYLOAD_SIZE = "MaxPayloadSize"
+        private const val CONFIG_RETAIN= "Retain"
 
         private val default = MqttTargetConfiguration()
 
@@ -225,6 +231,7 @@ class MqttTargetConfiguration : TargetConfiguration(), Validate {
             batchSize : Int? = default._batchSize,
             batchInterval : Int? = default._batchInterval,
             maxPayloadSize : Int? = default._maxPayloadSize,
+            retain : Boolean = default._retain,
             compression  : CompressionType? = default._compressionType
         ): MqttTargetConfiguration {
 
@@ -247,6 +254,7 @@ class MqttTargetConfiguration : TargetConfiguration(), Validate {
                 _batchInterval= batchInterval
                 _maxPayloadSize= maxPayloadSize
                 _compressionType= compression
+                _retain = retain
             }
             return instance
         }

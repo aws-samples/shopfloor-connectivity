@@ -189,6 +189,14 @@ of messages will be sent to the topic when this size is reached.</td>
 <td>Default is "None"</td>
 </tr> 
 
+<tr class="odd">  
+<td>Retain</td>  
+<td>Set to true to store a single message per a given MQTT topic for delivery to any current and future topic subscribers.</td>  
+<td>Boolean
+</td>  
+<td>Default is false
+</td>
+</tr> 
 
 </tbody></table>
 

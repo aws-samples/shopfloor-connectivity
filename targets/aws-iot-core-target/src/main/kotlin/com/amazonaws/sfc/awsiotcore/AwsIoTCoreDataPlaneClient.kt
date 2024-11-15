@@ -10,7 +10,7 @@ import software.amazon.awssdk.services.iotdataplane.model.PublishRequest
 import software.amazon.awssdk.services.iotdataplane.model.PublishResponse
 
 
-@AwsServicePermissions("iot", ["Connect", "Publish", "DescribeEndpoint"])
+@AwsServicePermissions("iot", ["Connect", "Publish", "DescribeEndpoint", "RetainPublish"])
 interface AwsIoTCoreDataPlaneClient {
     fun publish(publishRequest: PublishRequest): PublishResponse
     fun close()

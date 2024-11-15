@@ -207,7 +207,7 @@ class IpcTargetWriter(private val targetID: String,
         val usedTargetIDs = usedTargets(targetID, emptySet(), configuration)
 
         // Include targets
-        val allTransformations = configurationMap[CONFIG_TRANSFORMATIONS] as Map<*,*>
+        val allTransformations = (configurationMap[CONFIG_TRANSFORMATIONS]?: emptyMap<Any,Any>()) as Map<*,*>
         outputConfig[CONFIG_TARGETS] = usedTargetIDs.map { targetId ->
             // include transformations used in target
              @Suppress("UNCHECKED_CAST")

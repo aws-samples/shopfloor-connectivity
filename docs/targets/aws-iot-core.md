@@ -2,7 +2,7 @@
 <br>
 AwsIotCoreTargetConfiguration extends the type <a href="../core/target-configuration.md" >TargetConfiguration</a> with specific configuration data for connecting to and sending to AWS IoT core topic using HTTP dataplane API. The Targets configuration element can contain entries of this type, the TargetType of these entries must be set to <strong>"AWS-IOT-CORE"</strong><br>
 <br>
-Requires IAM permission iot:Publish for the topic the data is published to.
+Requires IAM permissions iot:Connect, iot:DescribeEndpoint, iot:Publish for the topic the data is published to and iot:RetainPublish if the Retain option is used.
 
 
 [Targets](./README.md)
@@ -76,6 +76,19 @@ Whenever the number of messages, total message size or an interval is reached th
 
 </td>  
 <td>Default is "None"</td>
+</tr> 
+
+<tr class="even">  
+<td>Retain</td>  
+<td>Set to true to store a single message per a given MQTT topic for delivery to any current and future topic subscribers.</td>  
+<td>Boolean
+</td>  
+<td>Default is false
+
+As service limits for publishing retained messages are lower than publishing non-retained messages consider to enable buffering
+using, BatchSize, BatchCount or BatchInterval.
+Publishing messages with retain option requires the iot:RetainPublish permission
+</td>
 </tr> 
 
 </tbody>

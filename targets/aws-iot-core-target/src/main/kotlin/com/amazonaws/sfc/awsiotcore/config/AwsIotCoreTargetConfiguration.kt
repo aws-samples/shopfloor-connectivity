@@ -46,6 +46,11 @@ class AwsIotCoreTargetConfiguration : AwsServiceConfig, TargetConfiguration() {
     override val region: Region?
         get() = if (_region.isNullOrEmpty()) null else Region.of(_region!!.lowercase())
 
+    @SerializedName(CONFIG_RETAIN)
+    private var _retain: Boolean = false
+    val retain: Boolean
+            get() = _retain
+
     /**
      * Validates topic configuration, throws ConfigurationException if it is invalid.
      * @throws ConfigurationException
@@ -120,11 +125,13 @@ class AwsIotCoreTargetConfiguration : AwsServiceConfig, TargetConfiguration() {
         const val CONFIG_BATCH_SIZE = "BatchSize"
         const val CONFIG_BATCH_COUNT = "BatchCount"
         const val CONFIG_BATCH_INTERVAL = "BatchInterval"
+        const val CONFIG_RETAIN= "Retain"
 
         private val default = AwsIotCoreTargetConfiguration()
 
         fun create(topicName: String? = default._topicName,
                    region: String? = default._region,
+                   retain: Boolean = default._retain,
                    description: String = default._description,
                    active: Boolean = default._active,
                    template: String? = default._template,
@@ -146,6 +153,7 @@ class AwsIotCoreTargetConfiguration : AwsServiceConfig, TargetConfiguration() {
             with(instance) {
                 _topicName = topicName
                 _region = region
+                _retain = retain
                 _batchCount = batchCount
                 _batchSize= batchSize
                 _batchInterval = batchInterval

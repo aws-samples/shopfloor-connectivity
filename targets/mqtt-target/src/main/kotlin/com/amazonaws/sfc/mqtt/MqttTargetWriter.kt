@@ -222,6 +222,7 @@ class MqttTargetWriter(
             message.payload = compressPayload(payload)
 
         }
+        message.isRetained = targetConfig.retain
         message.qos = targetConfig.qos
         return message
     }

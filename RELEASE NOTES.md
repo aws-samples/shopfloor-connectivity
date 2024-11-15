@@ -1,5 +1,11 @@
 # Release Notes:
 
+## Version 1.5.4 15 November 2024
+
+- Added message retain option to IoT Core and MQTT target adapters
+
+---
+
 ## Version 1.5.3 14 November 2024
 
 - MQTT Protocol adapter channel metadata not included for unmapped channels fixed
