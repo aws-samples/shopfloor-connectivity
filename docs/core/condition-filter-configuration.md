@@ -1,6 +1,11 @@
 ## ConditionFilterConfiguration
 <br>
-Configuration for value filter that let only pass values if they match the condition filter expression. When log level is trace then there will be log entries that show the filter expression how it is interpreted by SFC.
+Configuration for  filter that let only include the channel if they match the condition filter expression. Condition filter are used to filter channels based on the existence or non-existence of one or more other channels. 
+The values used for the operands of these conditions are not the actual calues of a channel read from their source, but the names of these channels.
+
+Typical use cases for condi
+
+.When log level is trace, then there will be log entries that show the filter expression how it is interpreted by SFC.
 <br>
 <br>
 <table>
@@ -42,7 +47,10 @@ Configuration for value filter that let only pass values if they match the condi
 <td><p>Filter value.</p>
 <p>If the operator is "and" ("&amp;&amp;") or "or" ("||")it is a nested list of Condition that all (and) or any (or) must match for the value to pass. Each filter that is part of an "and" or "or" list can have additional nested "and" ("&amp;&amp;") or "or" ("||") operators.</p></td>
 <td>String, String[], Boolean or list of Conditions</td>
-<td>Value used by the filter operator, or a list of nested ConditionConfigurations if the operator is "and" ("&amp;&amp;") or "or" ("||"). If the value for an operator is a value name or a list of value names, the name is the key of the value in the channels table for a source. Valid JMESPath expressions van be used as well to specify values names to match against.</td>
+<td>
+Note: The operands are the names of a channel, not the actual values for that channel that have been read from their source.
+
+Operand used by the filter operator, or a list of nested ConditionConfigurations if the operator is "and" ("&amp;&amp;") or "or" ("||"). If the operand for an operand is a channel name or a list of channel names, the name is the key of the channel in the channels table for a source. Valid JMESPath expressions van be used as well to specify channel names to match against.</td>
 
 </tr>
 </tbody>
