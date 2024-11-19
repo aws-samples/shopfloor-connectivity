@@ -638,7 +638,7 @@ private fun renderTemplate(template: String, schedule: String, source: String, t
     if (metadata != null) {
         for (entry in metadata) {
             s = s.replace(
-                "${TEMPLATE_PRE_POSTFIX}entry.key$TEMPLATE_PRE_POSTFIX", entry.value.replace(TEMPLATE_PRE_POSTFIX, ""))
+                "${TEMPLATE_PRE_POSTFIX}${entry.key}$TEMPLATE_PRE_POSTFIX", entry.value.replace(TEMPLATE_PRE_POSTFIX, ""))
         }
     }
     return s.trim().substring(0, minOf(s.length, maxLength))

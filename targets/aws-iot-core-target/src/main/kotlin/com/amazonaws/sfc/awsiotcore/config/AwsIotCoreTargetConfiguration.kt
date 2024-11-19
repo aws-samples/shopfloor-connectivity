@@ -33,7 +33,7 @@ class AwsIotCoreTargetConfiguration : AwsServiceConfig, TargetConfiguration() {
     /**
      * Name of the topic
      */
-    val topicName: String
+    val topicNameTemplate: String
         get() = _topicName ?:""
 
 

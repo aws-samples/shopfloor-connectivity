@@ -29,6 +29,7 @@ import com.amazonaws.sfc.targets.TargetDataChannel
 import com.amazonaws.sfc.targets.TargetException
 import com.amazonaws.sfc.util.*
 import kotlinx.coroutines.*
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.selects.select
 import software.amazon.awssdk.awscore.exception.AwsServiceException
 import software.amazon.awssdk.core.SdkBytes
@@ -41,6 +42,7 @@ import software.amazon.awssdk.services.iotdataplane.model.PublishRequest
 import java.io.ByteArrayOutputStream
 import java.net.URI
 import java.util.*
+import java.util.concurrent.ConcurrentHashMap
 import kotlin.time.Duration
 import kotlin.time.measureTime
 
@@ -74,7 +76,10 @@ class AwsIotCoreTargetWriter(
     private val targetConfig: AwsIotCoreTargetConfiguration by lazy {
         clientHelper.targetConfig(config, targetID, AWS_IOT_CORE_TARGET)
     }
-    private val buffer = TargetDataBuffer(storeFullMessage = false)
+    private val buffers = ConcurrentHashMap<String, TargetDataBuffer>()// TargetDataBuffer(storeFullMessage = false)
+    private val timers = ConcurrentHashMap<String, Job>()
+    private val timerChannel = Channel<String>(capacity = 100)
+
     private val doesBatching by lazy { targetConfig.batchSize > 0 || targetConfig.batchCount > 0 || targetConfig.batchInterval != Duration.INFINITE }
     private val usesCompression = targetConfig.compressionType != CompressionType.NONE
 
@@ -173,42 +178,63 @@ class AwsIotCoreTargetWriter(
         try {
             val log = logger.getCtxLoggers(className, "writer")
 
-            var timer = createTimer()
+        //    var timer = createTimer()
 
-            log.info("AWS IoT Core writer for target \"$targetID\" publishing to topic \"${targetConfig.topicName}\" in region ${targetConfig.region}")
+            //   log.info("AWS IoT Core writer for target \"$targetID\" publishing to topic \"${targetConfig.topicName}\" in region ${targetConfig.region}")
             while (isActive) {
                 try {
                     select {
                         targetDataChannel.channel.onReceive { targetData ->
 
-                            val messagePayload = buildPayload(targetData)
+                            targetResults?.add(targetData)
 
-                            if (checkMessagePayloadSize(targetData, messagePayload.length, log)) {
-                                if (exceedBufferOrMaxPayloadWhenBufferingMessage(messagePayload)) {
-                                    log.trace("Batch size of ${targetConfig.batchSize.byteCountString} or AWS IoT Core max payload ise of ${AWS_IOT_CORE_MAX_PAYLOAD_SIZE.byteCountString} reached")
-                                    timer = writeBufferedMessages(timer)
+                            val topicMessages = mapTargetDataToTopics(targetData)
+
+                            topicMessages.forEach { (topic, topicTargetData) ->
+                                val topicBuffer = buffers.computeIfAbsent(topic) { TargetDataBuffer(storeFullMessage = false) }
+                                val timer = timers.computeIfAbsent(topic) { createTimer(topic) }
+
+                                val messagePayload = buildPayload(topicTargetData)
+
+                                if (checkMessagePayloadSize(targetData, messagePayload.length, log)) {
+                                    if (exceedBufferOrMaxPayloadWhenBufferingMessage(topicBuffer, messagePayload)) {
+                                        log.trace("Batch size of ${targetConfig.batchSize.byteCountString} or AWS IoT Core max payload ise of ${AWS_IOT_CORE_MAX_PAYLOAD_SIZE.byteCountString} reached")
+                                        timers[topic] = writeBufferedMessages(topicBuffer, topic, timer)
+                                    }
                                 }
 
-                                targetResults?.add(targetData)
-                                buffer.add(targetData, messagePayload)
+                                topicBuffer.add(targetData, messagePayload)
 
-                                log.trace("Received message, buffered items is ${buffer.size} with a total size of ${buffer.payloadSize.byteCountString}")
-                                if (targetData.noBuffering || !doesBatching || bufferReachedMaxSizeOrMessages(log)) {
-                                    timer = writeBufferedMessages(timer)
+                                log.trace("Received message, buffered items for topic $topic is ${topicBuffer.size} with a total size of ${topicBuffer.payloadSize.byteCountString}")
+                                if (targetData.noBuffering || !doesBatching || bufferReachedMaxSizeOrMessages(topicBuffer, topic, log)) {
+                                    timers[topic] = writeBufferedMessages(topicBuffer, topic, timer)
                                 }
-
                             }
-                        }
-                        timer.onJoin {
-                            log.trace("${targetConfig.batchInterval} batch interval reached")
-                            timer = writeBufferedMessages(timer)
 
                         }
+
+                        timerChannel.onReceive { topic ->
+                            val topicBuffer = buffers[topic]
+                            log.trace("${targetConfig.batchInterval} batch interval reached for topic $topic")
+                            val timer = timers[topic]
+                            if (topicBuffer != null && timer != null)
+                                timers[topic] = writeBufferedMessages(topicBuffer, topic, timer)
+
+                        }
+
                     }
 
                 } catch (e: Exception) {
                     if (!e.isJobCancellationException)
                         log.errorEx("Error in writer", e)
+                    if (e.isServiceNotReachable) {
+                        targetResults?.nackBuffered()
+                    } else {
+                        targetResults?.errorBuffered()
+                    }
+                    timers.keys.forEach { timers[it]?.cancel()
+                        timers[it] = createTimer(it)
+                    }
                 }
 
             }
@@ -222,14 +248,14 @@ class AwsIotCoreTargetWriter(
 
     private fun checkMessagePayloadSize(targetData: TargetData, payloadSize: Int, log: Logger.ContextLogger): Boolean {
         if (usesCompression) return true
-        return if (payloadSize >  AWS_IOT_CORE_MAX_PAYLOAD_SIZE) {
+        return if (payloadSize > AWS_IOT_CORE_MAX_PAYLOAD_SIZE) {
             log.error("Size $payloadSize bytes of message is larger max payload size ${AWS_IOT_CORE_MAX_PAYLOAD_SIZE.byteCountString} for AWS IoT Core")
             TargetResultHelper(targetID, resultHandler, logger).error(targetData)
             false
         } else true
     }
 
-    private fun exceedBufferOrMaxPayloadWhenBufferingMessage(payload: String): Boolean {
+    private fun exceedBufferOrMaxPayloadWhenBufferingMessage(buffer: TargetDataBuffer, payload: String): Boolean {
         if (usesCompression) return false
         val bufferedPayloadSizeWhenAddingMessage = payload.length + (2 + (buffer.size - 1)) + buffer.payloadSize
         val bufferSizeExceededWhenAddingMessage = (targetConfig.batchSize > 0) && (bufferedPayloadSizeWhenAddingMessage > targetConfig.batchSize)
@@ -238,21 +264,22 @@ class AwsIotCoreTargetWriter(
         return reachedMaxSizeWhenAddingToBuffer
     }
 
-    private fun bufferReachedMaxSizeOrMessages(log: Logger.ContextLogger): Boolean {
+    private fun bufferReachedMaxSizeOrMessages(buffer : TargetDataBuffer, topic : String,log: Logger.ContextLogger): Boolean {
 
         val reachedBufferCount = if (targetConfig.batchCount > 1) buffer.size >= targetConfig.batchCount else false
-        if (reachedBufferCount) log.trace("${targetConfig.batchCount} batch count reached")
+        if (reachedBufferCount) log.trace("${targetConfig.batchCount} batch count for topic $topic reached")
 
         val reachedBufferSize = if (targetConfig.batchSize != 0) (buffer.payloadSize + (2 + (buffer.size - 1)) >= targetConfig.batchSize) else false
-        if (reachedBufferSize) log.trace("${targetConfig.batchSize.byteCountString} batch size reached")
+        if (reachedBufferSize) log.trace("${targetConfig.batchSize.byteCountString} batch size for topic $topic reached")
 
         return reachedBufferSize || reachedBufferCount
     }
 
-    private fun createTimer(): Job {
+    private fun createTimer(channel: String): Job {
         return scope.launch {
             try {
                 delay(targetConfig.batchInterval)
+                timerChannel.send(channel)
             } catch (e: Exception) {
                 // no harm done, timer is just used to guard for timeouts
             }
@@ -264,29 +291,31 @@ class AwsIotCoreTargetWriter(
     private fun buildPayload(targetData: TargetData): String =
         if (transformation == null) targetData.toJson(config.elementNames, targetConfig.unquoteNumericJsonValues) else transformation!!.transform(targetData, config.elementNames) ?: ""
 
-    private fun writeBufferedMessages(timer: Job): Job {
+    private fun writeBufferedMessages(buffer: TargetDataBuffer, topic : String, timer: Job) : Job {
         if (timer.isActive) timer.cancel()
 
         val log = logger.getCtxLoggers(className, "writeBufferedMessages")
         if (buffer.size == 0) {
-            return createTimer()
+            return createTimer(topic)
         }
 
-        val (request, payloadSize) = buildRequest()
+        val (request, payloadSize) = buildRequest(buffer, topic)
 
-        try {
+        return try {
             if (payloadSize > AWS_IOT_CORE_MAX_PAYLOAD_SIZE) {
                 targetResults?.errorBuffered()
-                log.error("Size of MQTT payload is $payloadSize bytes, max payload size of AWS IoT core is $AWS_IOT_CORE_MAX_PAYLOAD_SIZE bytes, reduce or set $CONFIG_BATCH_SIZE, $CONFIG_BATCH_COUNT, $CONFIG_BATCH_INTERVAL for this target")
+                log.error("Size of MQTT payload for topic $topic is $payloadSize bytes, max payload size of AWS IoT core is $AWS_IOT_CORE_MAX_PAYLOAD_SIZE bytes, reduce or set $CONFIG_BATCH_SIZE, $CONFIG_BATCH_COUNT, $CONFIG_BATCH_INTERVAL for this target")
                 runBlocking { metricsCollector?.put(targetID, METRICS_WRITE_ERRORS, 1.0, MetricUnits.COUNT, metricDimensions) }
+                targetResults?.ackBuffered()
+                createTimer(topic)
             } else {
                 val duration = measureTime {
 
                     clientHelper.executeServiceCallWithRetries {
                         try {
+                            log.trace("Publishing to topic $topic")
                             val resp = iotDataPlaneClient.publish(request)
                             log.trace("AWS IoT Core publish response ${resp.sdkHttpResponse().statusCode()}")
-                            targetResults?.ackBuffered()
                         } catch (e: AwsServiceException) {
                             log.trace("AWS IoT Core publish error ${e.message}")
                             // Check the exception, it will throw an AwsServiceRetryableException if the error is recoverable
@@ -299,33 +328,29 @@ class AwsIotCoreTargetWriter(
 
                 val compressedStr = if (targetConfig.compressionType != CompressionType.NONE) " compressed " else " "
                 val itemStr = if (doesBatching) " containing ${buffer.size} items " else " "
-                log.trace("Published MQTT${compressedStr}message to topic ${targetConfig.topicName} with size of ${payloadSize.byteCountString} ${itemStr}in $duration")
+                log.trace("Published MQTT${compressedStr}message to topic ${topic} with size of ${payloadSize.byteCountString} ${itemStr}in $duration")
 
                 createMetrics(targetID, metricDimensions, buffer.size, payloadSize, duration)
+                createTimer(topic)
             }
         } catch (e: Exception) {
-            val  throttled =  (e is SdkClientException  && e.suppressedExceptions.any { (it.message?:"").lowercase().contains("throttled")})
-            val message = "Error writing to topic \"${targetConfig.topicName}\", ${ if (throttled) "throttled" else  "${e.message}"}"
+            val throttled = (e is SdkClientException && e.suppressedExceptions.any { (it.message ?: "").lowercase().contains("throttled") })
+            val message = "Error writing to topic \"${targetConfig.topicNameTemplate}\", ${if (throttled) "throttled" else "${e.message}"}"
             log.error(message)
             runBlocking { metricsCollector?.put(targetID, METRICS_WRITE_ERRORS, 1.0, MetricUnits.COUNT, metricDimensions) }
-            if (e.isServiceNotReachable) {
-                targetResults?.nackBuffered()
-            } else {
-                targetResults?.errorBuffered()
-            }
+            throw (e)
         } finally {
             buffer.clear()
         }
-        return createTimer()
     }
 
-    private fun buildRequest(): Pair<PublishRequest, Int> {
+    private fun buildRequest(buffer : TargetDataBuffer, topic : String): Pair<PublishRequest, Int> {
 
         val builder = PublishRequest.builder()
-        builder.topic(targetConfig.topicName)
+        builder.topic(topic)
 
         val payload = if (doesBatching)
-            if (targetConfig.arrayWhenBuffered )
+            if (targetConfig.arrayWhenBuffered)
                 buffer.payloads.joinToString(prefix = "[", postfix = "]", separator = ",") { it }
             else
                 buffer.payloads.joinToString(separator = "") { it }
@@ -385,6 +410,45 @@ class AwsIotCoreTargetWriter(
 
     }
 
+    private fun mapTargetDataToTopics(targetData: TargetData): Map<String, TargetData> {
+
+        if (!targetConfig.topicNameTemplate.contains(TEMPLATE_PRE_POSTFIX)) return mapOf(targetConfig.topicNameTemplate to targetData)
+
+        val log = logger.getCtxLoggers(className, "mapTargetTargetDataToTopics")
+
+        val topicMap = targetData.sources.map { (sourceName, sourceData) ->
+            val sourceMetadata = metaDataAtSourceLevel(targetData, sourceName)
+            sourceData.channels.map { (channelName, channelData) ->
+                val channelMetadata = metaDataAtChannelLevel(targetData, sourceName, channelName) + sourceMetadata
+                val topicName = if (targetConfig.topicNameTemplate.contains(TEMPLATE_PRE_POSTFIX)) {
+                    val name = renderTopicName(targetConfig.topicNameTemplate, targetData.schedule, sourceName, channelName, targetID, channelMetadata)
+                    val parts = name.split('/')
+                    if (parts.size > 8) {
+                        val truncateName = parts.subList(0, 8).joinToString(separator = "/") { it }
+                        log.warning("Rendered topic name \"$name\" is longer than 8 levels, which is the maximum allowed by AWS IoT Core, name truncated to \"$truncateName\"")
+                        truncateName
+                    } else name
+                } else targetConfig.topicNameTemplate
+                topicName to (sourceName to channelName)
+            }
+        }.flatten().toMap()
+
+        val mappedTargetData = topicMap.map { (topic, s) ->
+            topic to TargetData(targetData.schedule, sources =
+            targetData.sources.filter { it.key == s.first }.map { (source, sourceData) ->
+                val channels = sourceData.channels.filter { it.key == s.second }
+                source to SourceOutputData(channels, sourceData.timestamp, metadata = sourceData.metadata, isAggregated = sourceData.isAggregated)
+            }.toMap(),
+                metadata = targetData.metadata,
+                serial = targetData.serial, noBuffering = targetData.noBuffering,
+                timestamp = targetData.timestamp)
+
+        }.toMap()
+
+        log.trace("Message ${targetData.serial} mapped to topics ${mappedTargetData.keys}")
+        return mappedTargetData
+    }
+
 
     companion object {
         @JvmStatic
@@ -424,5 +488,33 @@ class AwsIotCoreTargetWriter(
 
         private const val AWS_IOT_CORE_MAX_PAYLOAD_SIZE = 128 * 1024
 
+        private const val TEMPLATE_PRE_POSTFIX = "%"
+        private const val TEMPLATE_SCHEDULE = "${TEMPLATE_PRE_POSTFIX}schedule${TEMPLATE_PRE_POSTFIX}"
+        private const val TEMPLATE_SOURCE = "${TEMPLATE_PRE_POSTFIX}source${TEMPLATE_PRE_POSTFIX}"
+        private const val TEMPLATE_TARGET = "${TEMPLATE_PRE_POSTFIX}target${TEMPLATE_PRE_POSTFIX}"
+        private const val TEMPLATE_CHANNEL = "${TEMPLATE_PRE_POSTFIX}channel${TEMPLATE_PRE_POSTFIX}"
+
+
+        private fun renderTopicName(template: String, schedule: String, source: String, channel: String, target: String, metadata: Map<String, String>?): String {
+
+            var s = template
+                .replace(TEMPLATE_SCHEDULE, schedule.replace(TEMPLATE_PRE_POSTFIX, ""))
+                .replace(TEMPLATE_SOURCE, source.replace(TEMPLATE_PRE_POSTFIX, ""))
+                .replace(TEMPLATE_CHANNEL, channel.replace(TEMPLATE_PRE_POSTFIX, ""))
+                .replace(TEMPLATE_TARGET, target.replace(TEMPLATE_PRE_POSTFIX, ""))
+
+            if (metadata != null) {
+                for (entry in metadata) {
+                    s = s.replace(
+                        "${TEMPLATE_PRE_POSTFIX}${entry.key}$TEMPLATE_PRE_POSTFIX", entry.value.replace(TEMPLATE_PRE_POSTFIX, ""))
+                }
+            }
+            return s
+        }
+
+        private fun metaDataAtSourceLevel(targetData: TargetData, source: String) = targetData.metadata + (targetData.sources[source]?.metadata ?: emptyMap())
+        private fun metaDataAtChannelLevel(targetData: TargetData, source: String, channel: String) = (targetData.sources[source]?.channels?.get(channel)?.metadata ?: emptyMap())
     }
+
+
 }
