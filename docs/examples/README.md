@@ -25,6 +25,7 @@ Adapters
 - [CSV File Adapter Example](../../examples/custom-adapter-csvfile/README.md)
 
 Configuration
+- [Contextualization & Filter Demo](../../examples/opcua-to-iot-using-filters/README.md)
 - [Configuration Signing](../../examples/sign-sfc-config)
 - [Custom Config Provider Template](../../examples/custom-config-provider/README.md)
 - [Custom User Interface and API Config Provider](../../examples/custom-api-ui-config-provider/README.md)
