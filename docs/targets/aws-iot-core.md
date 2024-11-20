@@ -28,7 +28,22 @@ Requires IAM permissions iot:Connect, iot:DescribeEndpoint, iot:Publish for the 
 <td>TopicName</td>
 <td>Name of the topic</td>
 <td>String</td>
-<td>Topic names must not start with "$" as these are reserved for topics used only by AWS IoT Core</td>
+<td>Topic names must not start with "$" as these are reserved for topics used only by AWS IoT Core
+
+A template can be used for the topicName to render the actual topic name using placeholders. In this template, 
+besides placeholders for environment variables (${name}) the following placeholders are available:
+
+- %target%
+- %source%
+- %channel%
+
+To use the values of metadata at the top, source or channel level of the target data, the name af the metadata value can be used with a '%' prefix and postfix.
+
+Note that the use of placeholders to send data to specific topics will result in additional publish calls and may result in throttling. Enabling buffering
+can be used to reduce the chance of throttling.
+
+
+</td>
 </tr>
 <tr class="odd">
 <td>Region</td>
@@ -41,7 +56,7 @@ Requires IAM permissions iot:Connect, iot:DescribeEndpoint, iot:Publish for the 
 
 <tr class="even">  
 <td>BatchCount</td>  
-<td>Number of messages to buffer before sending data as a batch  to topic.</td>  
+<td>Number of messages to buffer before sending data as a batch to a topic.</td>  
 <td>Int</td>  
 <td>Batching is enabled by setting a value for one or more of BatchSize, BatchCount and BatchInterval.
 Whenever the number of messages, total message size or an interval is reached the buffered data is sent as an array of messages to the topic.</td>
@@ -49,7 +64,7 @@ Whenever the number of messages, total message size or an interval is reached th
 
 <tr class="odd">  
 <td>BatchSize</td>  
-<td>Payload size in KB of messages to batch before sending data as a batch to topic.</td>  
+<td>Payload size in KB of messages to batch before sending data as a batch to a topic.</td>  
 <td>Int</td>  
 <td>Batching is enabled by setting a value for one or more of BatchSize, BatchCount and BatchInterval.
 Whenever the number of messages, total message size or an interval is reached the buffered data is sent as an array of messages to the topic.
@@ -58,7 +73,7 @@ The size is calculated on the uncompressed payload of the messages.</td>
 
 <tr class="even">  
 <td>BatchInterval</td>  
-<td>Interval in milliseconds after which a batch of messages is sent to the topic, even when the BatchSize or BatchCount limit is not reached.</td>  
+<td>Interval in milliseconds after which a batch of messages is sent to a topic, even when the BatchSize or BatchCount limit is not reached.</td>  
 <td>Int</td>  
 <td>Batching is enabled by setting a value for one or more of BatchSize, BatchCount and BatchInterval.
 Whenever the number of messages, total message size or an interval is reached the buffered data is sent as an array of messages to the topic.

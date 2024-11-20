@@ -24,9 +24,22 @@
 </tr>
 <tr class="even">
 <td>TopicName</td>
-<td>Name of the topic</td>
+<td>Name or name template of the topic</td>
 <td>String</td>
-<td></td>
+<td>
+A template can be used for the topicName to render the actual topic name using placeholders. In this template, 
+besides placeholders for environment variables (${name}) the following placeholders are available:
+
+- %schedule%
+- %target%
+- %source%
+- %channel%
+
+To use the values of metadata at the top, source or channel level of the target data, the name af the metadata value can be used with a '%' prefix and postfix.
+
+Note that the use of placeholders to send data to specific topics will result in additional publish calls to the broker.
+
+</td>
 </tr>
 
 <tr class="odd">
@@ -38,7 +51,7 @@
 If no scheme is specified in the address, then it will be added based on the Connection type.
 ("tcp://" for PlainText or "ssl://" for ServerSideTLS or MutualTLS)
 <p>To get the ATS endpoint for an account use the AWS CLI command<br />
-aws iot describe-endpoint --endpoint-type iot:Data-ATS</p>
+aws iot describe-endpoint --endpoint-type iot:Data-AtemplTS</p>
 <p><a href="https://awscli.amazonaws.com/v2/documentation/api/latest/reference/iot/describe-endpoint.html">https://awscli.amazonaws.com/v2/documentation/api/latest/reference/iot/describe-endpoint.html</a></p>
 </td>
 </tr>  
@@ -144,7 +157,7 @@ In no port number is specified then the EndPoint address is searched for a train
 
 <tr class="even">  
 <td>BatchCount</td>  
-<td>Number of messages to buffer before sending data as a batch  to topic.</td>  
+<td>Number of messages to buffer before sending data as a batch to a topic.</td>  
 <td>Int</td>  
 <td>Batching is enabled by setting a value for one or more of BatchSize, BatchCount and BatchInterval.
 Whenever the number of messages, total message size or an interval is reached the buffered data is sent as an array of messages to the topic.</td>
@@ -152,7 +165,7 @@ Whenever the number of messages, total message size or an interval is reached th
 
 <tr class="odd">  
 <td>BatchSize</td>  
-<td>Payload size in KB of messages to batch before sending data as a batch to topic.</td>  
+<td>Payload size in KB of messages to batch before sending data as a batch to a topic.</td>  
 <td>Int</td>  
 <td>Batching is enabled by setting a value for one or more of BatchSize, BatchCount and BatchInterval.
 Whenever the number of messages, total message size or an interval is reached the buffered data is sent as an array of messages to the topic.
@@ -161,7 +174,7 @@ The size is calculated on the uncompressed payload of the messages.</td>
 
 <tr class="even">  
 <td>BatchInterval</td>  
-<td>Interval in milliseconds after which a batch of messages is sent to the topic, even when the BatchSize or BatchCount limit is not reached.</td>  
+<td>Interval in milliseconds after which a batch of messages is sent to the a topic, even when the BatchSize or BatchCount limit is not reached.</td>  
 <td>Int</td>  
 <td>Batching is enabled by setting a value for one or more of BatchSize, BatchCount and BatchInterval.
 Whenever the number of messages, total message size or an interval is reached the buffered data is sent as an array of messages to the topic.

@@ -178,9 +178,8 @@ class AwsIotCoreTargetWriter(
         try {
             val log = logger.getCtxLoggers(className, "writer")
 
-        //    var timer = createTimer()
 
-            //   log.info("AWS IoT Core writer for target \"$targetID\" publishing to topic \"${targetConfig.topicName}\" in region ${targetConfig.region}")
+            log.info("AWS IoT Core writer for target \"$targetID\" publishing to topics in region ${targetConfig.region}")
             while (isActive) {
                 try {
                     select {
@@ -237,6 +236,10 @@ class AwsIotCoreTargetWriter(
                     }
                 }
 
+            }
+
+            buffers.forEach { (topic, buffer) ->
+                writeBufferedMessages(buffer, topic, timers[topic]!!).cancel()
             }
 
 
@@ -418,9 +421,10 @@ class AwsIotCoreTargetWriter(
 
         val topicMap = targetData.sources.map { (sourceName, sourceData) ->
             val sourceMetadata = metaDataAtSourceLevel(targetData, sourceName)
-            sourceData.channels.map { (channelName, channelData) ->
+            sourceData.channels.keys.map { channelName->
                 val channelMetadata = metaDataAtChannelLevel(targetData, sourceName, channelName) + sourceMetadata
                 val topicName = if (targetConfig.topicNameTemplate.contains(TEMPLATE_PRE_POSTFIX)) {
+                    // this is also checked in the configuration but checked here again in case any placeholders contain '/' and expand the level
                     val name = renderTopicName(targetConfig.topicNameTemplate, targetData.schedule, sourceName, channelName, targetID, channelMetadata)
                     val parts = name.split('/')
                     if (parts.size > 8) {

@@ -81,6 +81,13 @@ class AwsIotCoreTargetConfiguration : AwsServiceConfig, TargetConfiguration() {
             this
         )
 
+        ConfigurationException.check(
+            (topicNameTemplate.split('/').size) <= 8,
+            "$CONFIG_TOPIC_NAME cannot have more than 8 levels for AWS IoT Core",
+            CONFIG_TOPIC_NAME,
+            this
+        )
+
     }
 
     // tests is region is valid, throws ConfigurationException if it is not valid

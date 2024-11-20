@@ -28,9 +28,9 @@ class MqttTargetConfiguration : TargetConfiguration(), Validate {
         get() = _qos
 
     @SerializedName(CONFIG_TOPIC_NAME)
-    private var _topicName: String? = null
-    val topicName: String?
-        get() = _topicName
+    private var _topicNameTemplate: String? = null
+    val topicNameTemplate: String
+        get() = _topicNameTemplate?:""
 
     @SerializedName(CONFIG_PUBLISH_TIMEOUT)
     private var _publishTimeout = DEFAULT_PUBLISH_TIMEOUT
@@ -189,7 +189,7 @@ class MqttTargetConfiguration : TargetConfiguration(), Validate {
     // Checks if al required attributes are set
     private fun checkRequiredSettings() {
         ConfigurationException.check(
-            !_topicName.isNullOrEmpty(),
+            !_topicNameTemplate.isNullOrEmpty(),
             "$CONFIG_TOPIC_NAME for MQTT target must be set",
             CONFIG_TOPIC_NAME,
             this
@@ -225,7 +225,7 @@ class MqttTargetConfiguration : TargetConfiguration(), Validate {
             rootCA: String? = default._rootCA,
             sslServerCert: String? = default._sslServerCert,
             connectTimeout: Int = default._connectTimeout,
-            topicName: String? = default._topicName,
+            topicName: String? = default._topicNameTemplate,
             qos : Int = default._qos,
             batchCount : Int? = default.batchCount,
             batchSize : Int? = default._batchSize,
@@ -247,7 +247,7 @@ class MqttTargetConfiguration : TargetConfiguration(), Validate {
                 _rootCA = rootCA
                 _sslServerCert = sslServerCert
                 _connectTimeout = connectTimeout
-                _topicName = topicName
+                _topicNameTemplate = topicName
                 _qos = qos
                 _batchCount = batchCount
                 _batchSize= batchSize
