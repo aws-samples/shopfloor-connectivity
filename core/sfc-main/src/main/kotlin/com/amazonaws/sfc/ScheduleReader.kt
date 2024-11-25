@@ -813,7 +813,7 @@ class ScheduleReader(
                         if (channelValue.value is List<*>) {
                             val valueList = (channelValue.value as List<*>)
                             if (valueList.first() is ChannelReadValue) {
-                                yield(channel to ChannelReadValue(valueList.first() as ChannelReadValue))
+                                yield(channel to valueList.first() as ChannelReadValue)
                             } else {
                                 yield(channel to channelValue)
                             }
