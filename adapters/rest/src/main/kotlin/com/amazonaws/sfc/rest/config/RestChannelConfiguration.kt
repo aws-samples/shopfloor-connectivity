@@ -1,4 +1,3 @@
-
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: MIT-0
 //
@@ -48,6 +47,10 @@ class RestChannelConfiguration : ChannelConfiguration() {
     val selectorStr
         get() = _selector
 
+    @SerializedName(CONFIG_JSON)
+    private var _isJson: Boolean = true
+    val isJson: Boolean
+        get() = _isJson
 
     override fun validate() {
         validateSelector()
@@ -64,11 +67,19 @@ class RestChannelConfiguration : ChannelConfiguration() {
                 this
             )
         }
+
+        if (selector != null && !isJson) throw ConfigurationException(
+            "$CONFIG_SELECTOR for channel can only be used for json data",
+            CONFIG_SELECTOR,
+            this
+        )
     }
+
 
     companion object {
 
         const val CONFIG_SELECTOR = "Selector"
+        const val CONFIG_JSON = "Json"
 
         val jmesPath by lazy {
             JmesPathExtended.create()
@@ -80,11 +91,12 @@ class RestChannelConfiguration : ChannelConfiguration() {
         fun create(name: String? = default._name,
                    description: String = default._description,
                    selector: String? = default._selector,
+                   json: Boolean = default._isJson,
                    transformation: String? = default._transformationID,
                    metadata: Map<String, String> = default._metadata,
                    changeFilter: String? = default._changeFilterID,
                    valueFilter: String? = default._valueFilterID,
-                   conditionFilter : String? = default._conditionFilterID): RestChannelConfiguration {
+                   conditionFilter: String? = default._conditionFilterID): RestChannelConfiguration {
 
             val instance = createChannelConfiguration<RestChannelConfiguration>(
                 name = name,
@@ -97,6 +109,7 @@ class RestChannelConfiguration : ChannelConfiguration() {
 
             with(instance) {
                 _selector = selector
+                _isJson = json
             }
             return instance
         }

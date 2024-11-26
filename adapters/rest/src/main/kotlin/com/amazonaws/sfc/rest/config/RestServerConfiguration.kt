@@ -1,4 +1,3 @@
-
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: MIT-0
 //
@@ -25,7 +24,7 @@ class RestServerConfiguration : Validate {
         get() = _server
 
     @SerializedName(CONFIG_SERVER_PORT)
-    private var _port : Int? = null
+    private var _port: Int? = null
     val port: Int?
         get() = _port
 
@@ -61,10 +60,10 @@ class RestServerConfiguration : Validate {
     val proxy: ClientProxyConfiguration?
         get() = _proxy
 
-    val serverString : String by lazy{
+    val serverString: String by lazy {
 
         var serverStr = server.trimEnd('/')
-        serverStr  = if (serverStr.lowercase().startsWith("http://")  || serverStr.lowercase().startsWith("https://"))
+        serverStr = if (serverStr.lowercase().startsWith("http://") || serverStr.lowercase().startsWith("https://"))
             server
         else
             "http://$server"
@@ -122,8 +121,8 @@ class RestServerConfiguration : Validate {
 
         fun create(server: String = default._server,
                    port: Int? = default._port,
-                   waitAfterReadError : Long = default._waitAfterReadError,
-                   proxy : ClientProxyConfiguration? = default._proxy): RestServerConfiguration {
+                   waitAfterReadError: Long = default._waitAfterReadError,
+                   proxy: ClientProxyConfiguration? = default._proxy): RestServerConfiguration {
 
             val instance = RestServerConfiguration()
             with(instance) {

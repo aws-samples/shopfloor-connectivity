@@ -1,4 +1,3 @@
-
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: MIT-0
 //
@@ -27,7 +26,6 @@ class RestSourceConfiguration : BaseSourceConfiguration() {
     private val _restRequest: String = ""
     val restRequest: String
         get() = _restRequest
-
 
 
     @Throws(ConfigurationException::class)
@@ -73,8 +71,8 @@ class RestSourceConfiguration : BaseSourceConfiguration() {
 
 
     companion object {
-        const val CONFIG_ADAPTER_SERVER = "AdapterServer"
-        private const val CONFIG_REST_REQUEST = "RestRequest"
+        const val CONFIG_ADAPTER_SERVER = "RestServer"
+        private const val CONFIG_REST_REQUEST = "Request"
 
         private val default = RestSourceConfiguration()
 

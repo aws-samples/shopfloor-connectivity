@@ -1,4 +1,3 @@
-
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: MIT-0
 //
@@ -120,7 +119,7 @@ class RestConfiguration : SourceAdapterBaseConfiguration() {
                    awsIotCredentialProviderClients: Map<String, AwsIotCredentialProviderClientConfiguration> = default._awsIoTCredentialProviderClients,
                    secretsManagerConfiguration: SecretsManagerConfiguration? = default._secretsManagerConfiguration,
                    monitorIncludedConfigFiles: Boolean = default._monitorIncludedConfigFiles,
-                   monitorIncludedConfigFilesInterval : Duration = default._monitorIncludedConfigFilesInterval.toDuration(DurationUnit.SECONDS),
+                   monitorIncludedConfigFilesInterval: Duration = default._monitorIncludedConfigFilesInterval.toDuration(DurationUnit.SECONDS),
                    templatesConfiguration: TemplatesConfiguration? = default._templates): RestConfiguration {
 
             val instance = createBaseConfiguration<RestConfiguration>(

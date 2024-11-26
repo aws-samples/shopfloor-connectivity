@@ -17,6 +17,7 @@ SFC extends and unifies data collection capabilities additionally to our existin
 - [Mitsubishi/Melsec SLMP](./docs/adapters/slmp.md)-
 - [Modbus-TCP](./docs/adapters/modbus.md)
 - [OPC-UA](./docs/adapters/opcua.md), 
+- [REST](./docs/adapters/rest.md),
 - [Rockwell PCCC](./docs/adapters/pccc.md)
 - [SNMP](./docs/adapters/snmp.md),
 - [SQL](./docs/adapters/sql.md),

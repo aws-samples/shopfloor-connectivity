@@ -22,7 +22,7 @@ configuration types
 
 ## OpcuaSourceConfiguration
 
-The OpcuaSourceConfiguration extends the common <a href="../core/source-configuration.md">Source configuration</a> with OPCUA specific source configuration data
+The OpcuaSourceConfiguration extends the common <a href="../core/source-configuration.md" >Source configuration</a> with OPCUA specific source configuration data
 
 <table>
 <colgroup>
@@ -154,7 +154,7 @@ The OpcuaNodeChannelConfiguration extends the common Channel configuration with 
 <td>Selector</td>
 <td><p>Evaluate a <a href="https://jmespath.org/">JMESpath</a> query against the value of a structured data type and returns the result.</p>
 <p>The selector can be used to restructure or select values from structured data types.</p></td>
-<td>Datatype: Structure or array</td>
+<td>String</td>
 <td>Parameter: <a href="https://jmespath.org/">JMESPath</a> expression, see https://jmespath.org/</td>
 </tr>
 
@@ -224,7 +224,7 @@ Data change filter for OPCUA node channels when running adapter in subscription 
 
 ## OpcuaAdapterConfiguration
 
-The OpcuaAdapterConfiguration extends the common adapter configuration with OPCDA specific adapter configuration settings. The AdapterType to use for this adapter is "OPCUA".
+The OpcuaAdapterConfiguration extends the common adapter configuration with OPCUA specific adapter configuration settings. The AdapterType to use for this adapter is "OPCUA".
 
 <table>
 <colgroup>

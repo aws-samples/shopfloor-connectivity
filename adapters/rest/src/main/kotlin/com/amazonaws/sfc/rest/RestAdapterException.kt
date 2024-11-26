@@ -4,4 +4,4 @@
 
 package com.amazonaws.sfc.rest
 
-class RestAdapterException(message : String) : Exception(message)
+class RestAdapterException(message: String) : Exception(message)

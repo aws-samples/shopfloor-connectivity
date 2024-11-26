@@ -1,4 +1,3 @@
-
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: MIT-0
 
@@ -29,7 +28,7 @@ class RestAdapterConfiguration : ProtocolAdapterConfiguration(), Validate {
     }
 
     companion object {
-        const val CONFIG_SERVERS = "Servers"
+        const val CONFIG_SERVERS = "RestServers"
         private val default = RestAdapterConfiguration()
 
         fun create(servers: Map<String, RestServerConfiguration> = default._servers,

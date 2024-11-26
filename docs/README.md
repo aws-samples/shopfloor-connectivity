@@ -9,7 +9,7 @@
 
 #### SFC Configuration Spec.
 - [**SFC Core**](./core/README.md)
-- [**Protocol Adpaters**](./adapters/README.md)
+- [**Protocol Adapters**](./adapters/README.md)
 - [**Target Adapters**](./targets/README.md)
 - [**Metrics**](./metrics/README.md)
 
@@ -717,7 +717,7 @@ The configuration snippet below shows how a transformation named "ToInteger" is 
 
 Transformations, which are lists of transformation operands, are defined at the top-level of the sfc-configuration. The operators in a transformation are applied on the values in the listed order.
 
-Below is an example of a "Transformations" section defining 3 transformations, including the "ToInteger" one mentioned above. This transformation first gets the absolute value from the input value, it then rounds it and explicitly converts it into an Integer value. SFC will validate if the input value, or the resulting value of an operator, is valid for the inut of the first or next operator of a transformation.
+Below is an example of a "Transformations" section defining 3 transformations, including the "ToInteger" one mentioned above. This transformation first gets the absolute value from the input value, it then rounds it and explicitly converts it into an Integer value. SFC will validate if the input value, or the resulting value of an operator, is valid for the input of the first or next operator of a transformation.
 
 A configured operator consists of the name of the operator specified by the "Operator" setting and in case the operator takes arguments, the value of the argument specified by the "Operand" setting.
 Transformations can also be applied to aggregated data if a schedule has an aggregation setup. See the setting "Transformations" in  [Aggregation](./core/aggregation-config.md) for more details.
@@ -769,7 +769,7 @@ and != operators can be used.
 ## Condition Filters
 
 After the Data Change and Value Change filters, if any, have been applied [Condition filters](./core/condition-filter-configuration.md) can be used to select values
-based on other values of the same source. This makes it posible to include or exclude values if other values, or
+based on other values of the same source. This makes it possible to include or exclude values if other values, or
 combinations of values do exist, or do not exist in the same source. Operators that can be used are :
 
 - ***any*** : Any of a list of values must exist
@@ -856,7 +856,7 @@ source.
 If value is true then the value on which the filter is applied is only included if it not the only value for that
 source.
 
-If value is false then the value on thich the filter is applied is only included if it is the only value for that
+If value is false then the value on which the filter is applied is only included if it is the only value for that
 source.
 
 All the operators above can be combined using the ***and*** and ***or*** operator, which take filter or a list of
@@ -1979,7 +1979,7 @@ use placeholders for secrets obtained from AWS Secrets manager instead). If an a
 value of that alias must be set in the Alias attribute of the configuration.
 
 The type of the certificate can be determined by the prefix of the filename (either ".pem "or ".pfx") optionally
-followed by ".cer", ".cert" or ".crt"). If another extension is used then the type can be explicitly set by setting the
+followed by ".cer", ".cert" or ".crt". If another extension is used then the type can be explicitly set by setting the
 server configuration's Format attribute to either "Pem" or "Pkcs12".
 
 If either the PEM or PFX certificate file does not exist, it is possible to let the OPCUA adapter generate a self-signed
@@ -2244,6 +2244,7 @@ well as all required library files. The application tar file contains script fil
 | SNMP         | snmp                 | com.amazonaws.sfc.snmp.SnmpProtocolService             |
 | SQL          | sql                  | Com.amazonaws.sfc.sql.SqlProtocolService               |
 | PCCC         | pccc                 | com.amazonaws.sfc.pccc.PcccProtocolService             |
+| REST         |rest                  | com.amazonaws.sfv.rest.RestProtocolService            |
 
 The applications do have all the following command line parameters in common.
 
@@ -2556,6 +2557,12 @@ SFC_DEPLOYMENT_DIR: Directory in which deployment packed is deployed, with the s
       ],
       "FactoryClassName": "com.amazonaws.sfc.pccc.PcccAdapter"
     },
+   "PCCC": {
+      "JarFiles": [
+         "${SFC_DEPLOYMENT_DIR}/rest/lib"
+      ],
+      "FactoryClassName": "com.amazonaws.sfc.rest.RestAdapter"
+     },
     "ADS": {
       "JarFiles": [
         "${SFC_DEPLOYMENT_DIR}/ads/lib"
@@ -2735,7 +2742,7 @@ implementation of the MetricsProvider interface as defined in the ProtocolAdapte
 component using the adapter or the target will use the interface to read the collected metrics.
 
 If the adapter or target is hosted in an IPC service process, then the base classes for these services will provide the
-metrics provider as part of the exposed service that will provide metrics as a server-side streaming methos. The IPC
+metrics provider as part of the exposed service that will provide metrics as a server-side streaming methods. The IPC
 client classes for adapters and targets,do implement a MetricsProvider implementation that will invoke and read the data
 from the method that will stream the data to the client.
 

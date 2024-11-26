@@ -20,7 +20,6 @@ import com.amazonaws.sfc.rest.config.RestSourceConfiguration
 import com.amazonaws.sfc.system.DateTime.systemDateTime
 import com.amazonaws.sfc.targets.TargetException
 import com.amazonaws.sfc.util.MemoryMonitor.Companion.getUsedMemoryMB
-import com.amazonaws.sfc.util.buildScope
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
@@ -60,7 +59,6 @@ class RestAdapter(private val adapterID: String, private val configuration: Rest
             val restSourceConfiguration = getSourceConfiguration(sourceID)
             RestSource(
                 sourceID = sourceID,
-                serverID = serverID,
                 restServerConfiguration = restServerConfiguration,
                 restSourceConfiguration = restSourceConfiguration,
                 metricsCollector = metricsCollector,
@@ -76,26 +74,26 @@ class RestAdapter(private val adapterID: String, private val configuration: Rest
 
     private fun getSourceConfiguration(sourceID: String): RestSourceConfiguration {
         return sourceConfigurations[sourceID]
-            ?: throw RestAdapterException(
-                "\"$sourceID\" is not a valid REST source, " +
-                        "available REST sources are ${sourceConfigurations.keys}"
-            )
+                ?: throw RestAdapterException(
+                    "\"$sourceID\" is not a valid REST source, " +
+                            "available REST sources are ${sourceConfigurations.keys}"
+                )
     }
 
     private fun protocolAdapterForSource(sourceID: String): RestAdapterConfiguration {
         val sourceConfig = getSourceConfiguration(sourceID)
         return configuration.restProtocolAdapters[sourceConfig.protocolAdapterID]
-            ?: throw RestAdapterException(
-                "\"${sourceConfig.protocolAdapterID}\" for source \"$sourceID\" is not a valid REST protocol adapter, " +
-                        "available REST protocol adapters are ${configuration.restProtocolAdapters.keys}"
-            )
+                ?: throw RestAdapterException(
+                    "\"${sourceConfig.protocolAdapterID}\" for source \"$sourceID\" is not a valid REST protocol adapter, " +
+                            "available REST protocol adapters are ${configuration.restProtocolAdapters.keys}"
+                )
     }
 
     private fun serverConfigurationForSource(sourceID: String): Pair<String, RestServerConfiguration> {
         val sourceConfig = getSourceConfiguration(sourceID)
         val restAdapter = protocolAdapterForSource(sourceID)
         return sourceConfig.adapterServerID to (restAdapter.servers[sourceConfig.adapterServerID]
-            ?: throw RestAdapterException("\"${sourceConfig.adapterServerID}\" is not a valid $CONFIG_SERVER for adapter \"${sourceConfig.protocolAdapterID}\" used by source \"$sourceID\", valid servers are ${restAdapter.servers.keys}"))
+                ?: throw RestAdapterException("\"${sourceConfig.adapterServerID}\" is not a valid $CONFIG_SERVER for adapter \"${sourceConfig.protocolAdapterID}\" used by source \"$sourceID\", valid servers are ${restAdapter.servers.keys}"))
     }
 
     override val metricsCollector: MetricsCollector? by lazy {
@@ -232,7 +230,6 @@ class RestAdapter(private val adapterID: String, private val configuration: Rest
 
 
         private val createInstanceMutex = Mutex()
-
 
 
         @JvmStatic

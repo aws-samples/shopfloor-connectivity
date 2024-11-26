@@ -72,7 +72,7 @@ open class BaseSourceConfiguration : Validate {
     private fun validateMustHaveAdapter() =
         ConfigurationException.check(
             (protocolAdapterID.isNotBlank()),
-            "Source does not have protocol",
+            "Source does not have protocol adapter",
             CONFIG_SOURCE_PROTOCOL_ADAPTER,
             this
         )
