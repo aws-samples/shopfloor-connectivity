@@ -67,7 +67,7 @@ class RestSource(private val sourceID: String,
 
         try {
 
-            var resp = client.get(url)
+            var resp : HttpResponse
 
             var retries = 0
 
@@ -75,7 +75,7 @@ class RestSource(private val sourceID: String,
 
             while (retries < restServerConfiguration.maxRetries) {
                 val serverResponseTime = measureTime {
-                    resp = client.get(url)
+                     resp = client.get(url)
                 }
 
                 if (resp.status == HttpStatusCode.OK) {
@@ -118,7 +118,7 @@ class RestSource(private val sourceID: String,
 
         val payload = resp.bodyAsText()
 
-        val (payLoadData, payloadIsJson) = try {
+        val payLoadData = try {
             fromJsonExtended(payload, Any::class.java) to true
         } catch (e: JsonSyntaxException) {
             payload to false
@@ -134,7 +134,7 @@ class RestSource(private val sourceID: String,
                         yield(channelName to ChannelReadValue(payLoadData, timestamp))
                     } else {
                         try {
-                            val channelData = selectData(channelConfig.selector, payLoadData, channelName)
+                            val channelData = selectData(channelConfig.selector, payLoadData)
                             if (channelData != null) {
                                 log.trace("Selected data for channel \"$channelName\" using selector \"${channelConfig.selectorStr}\" from request result \"$channelData\"")
                                 yield(channelName to ChannelReadValue(channelData, timestamp))
@@ -154,7 +154,7 @@ class RestSource(private val sourceID: String,
     }
 
 
-    private fun selectData(query: Expression<Any>?, data: Any, channel: String): Any? = try {
+    private fun selectData(query: Expression<Any>?, data: Any): Any? = try {
         query?.search(data)
     } catch (e: NullPointerException) {
         null
@@ -227,9 +227,6 @@ class RestSource(private val sourceID: String,
     override fun close() {
     }
 
-    private fun channelFilter(channelID: String, channels: List<String>?): Boolean {
-        return channels.isNullOrEmpty() || channels.contains(channelID)
-    }
 
 
 }
