@@ -19,7 +19,7 @@ Source configuration (partial)
       "Name": "RestSource",
       "ProtocolAdapter": "REST",
       "RestServer": "PumpDataServer",
-      "Request": "pumps/1",
+      "Request": "pumps/1"
 
 ```
 
@@ -39,7 +39,7 @@ Adapter configuration
         }
       }
     }
-  },
+  }
 ```
 
 For a source one or more channels must be defined. There are the following options:
@@ -209,7 +209,7 @@ used with a single channel named "Objects".
         }
       }
     }
-  },
+  }
 ```
 
 The output is:
