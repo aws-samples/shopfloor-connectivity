@@ -118,18 +118,20 @@ class RestSource(private val sourceID: String,
 
         val payload = resp.bodyAsText()
 
-        val payLoadData = try {
-            fromJsonExtended(payload, Any::class.java) to true
+        val payLoadData = if (restSourceConfiguration.channels.values.any{it.isJson})  try {
+            fromJsonExtended(payload, Any::class.java)
         } catch (e: JsonSyntaxException) {
-            payload to false
-        }
+            log.error("Error parsing JSON data \"$payload\" for source \"$sourceID\", ${e.message}")
+            payload
+        }else{""}
+
         val timestamp = Instant.ofEpochMilli(resp.responseTime.timestamp)
 
         val channelsToRead = restSourceConfiguration.channels.filter { channels.isNullOrEmpty() || channels.contains(it.key) }
 
         return sequence {
             channelsToRead.forEach { (channelName, channelConfig) ->
-                if (channelConfig.isJson) {
+                if (channelConfig.isJson && payLoadData != "") {
                     if (channelConfig.selector == null) {
                         yield(channelName to ChannelReadValue(payLoadData, timestamp))
                     } else {

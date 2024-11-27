@@ -1,5 +1,11 @@
 # Release Notes:
 
+## Version 1.6.0 27 November 2024
+
+- REST protocol adapter
+
+---
+
 ## Version 1.5.5 25 November 2024
 
 - Added message retain option to IoT Core and MQTT target adapters

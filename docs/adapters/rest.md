@@ -1,5 +1,374 @@
 
 
+# REST Adapter data mapping
+
+The REST adapter fetches data from a service using GET requests.
+
+A source within the adapter, configured to interact with the "PumpDataServer," utilizes the "pumps/1" request. 
+This adapter uses a GET request to the URL "https://api.pumpserver.com/pumps/1" to retrieve the desired object which returns 
+the following payload:
+
+```
+{"id":"1","name":"FluidConveyor-1","data":{"flow"64,"pressure":33}}
+```
+
+Source configuration (partial)
+
+```json
+    "REST-SOURCE": {
+      "Name": "RestSource",
+      "ProtocolAdapter": "REST",
+      "RestServer": "PumpDataServer",
+      "Request": "pumps/1",
+
+```
+
+Adapter configuration
+
+```json
+  "ProtocolAdapters": {
+    "REST": {
+      "AdapterType": "REST",
+      "AdapterServer": "Pumps",
+      "RestServers": {
+        "PumpDataServer": {
+          "Server": "https://api.pumpserver.com",
+          "MaxRetries": 3,
+          "WaitBeforeRetry": 1000,
+          "WaitAfterReadError": 10000
+        }
+      }
+    }
+  },
+```
+
+For a source one or more channels must be defined. There are the following options:
+
+## All object properties  a single channel value
+
+The source configuration below has a single channel named "Object", without further channel configuration data. It's assumed that
+the returned data is in JSON format. When the data is not JSON then the channel Configuration must include a setting `"Json" : false` 
+in which case the raw data is used for the value of the channel.
+
+```json
+  "REST-SOURCE": {
+    "Name": "RestSource",
+    "ProtocolAdapter": "REST",
+    "RestServer": "PumpDataServer",
+    "Request": "objects",
+    "Channels": {
+      "Object": {}
+    }
+  }
+```
+
+This configuration results in the following output data
+
+```json
+    "timestamp": "2024-11-27T10:34:00.856635Z",
+    "sources": {
+      "RestSource": {
+        "values": {
+          "Object": {
+            "value": {
+              "id": "1",
+              "name": "FluidConveyor-1",
+              "data": {
+                "flow" 64,
+                "pressure": 33
+              }
+            }
+          }
+        },
+        "timestamp": "2024-11-27T10:34:00.853744Z"
+      }
+    }
+  }
+```
+
+## Object properties as separate channel values
+
+The "Decompose" channel option can be used to create individual values for every element of a returned object.
+
+```json
+    "REST-SOURCE": {
+      "Name": "RestSource",
+      "ProtocolAdapter": "REST",
+      "RestServer": "PumpDataServer",
+      "Request": "pumps/1",
+      "Channels": {
+        "Object": {
+          "Decompose" : true
+        }
+      }
+    }
+```
+This results in the following output structure:
+
+```json
+{
+  "schedule": "DEMO-DATA",
+  "serial": "93702088-789c-4f38-91ff-e0aaea2c204d",
+  "timestamp": "2024-11-27T11:11:15.825499Z",
+  "sources": {
+    "RestSource": {
+      "values": {
+        "Object.id": {
+          "value": "1"
+        },
+        "Object.name": {
+          "value": "FluidConveyor-1"
+        },
+        "Object.data.flow": {
+          "value": 64
+        },
+        "Object.data.pressure": {
+          "value": 33
+        }
+      },
+      "timestamp": "2024-11-27T11:11:15.819938Z"
+    }
+  }
+}
+
+```
+
+## Selecting object properties
+
+By defining channels with a "Selector" object properties can be selected as the value for these channels. A selector
+is a <a href="https://jmespath.org/"> JMESPath</a> query to select the data from the returned object. Having individual
+channels also enable the option to apply transformation and filters on the selected values and ad channel level metadata.
+
+The source configuration below has 4 channels with a selector to query the data
+
+```json
+    "REST-SOURCE": {
+      "Name": "RestSource",
+      "ProtocolAdapter": "REST",
+      "RestServer": "PumpDataServer",
+      "Request": "pumps/1",
+      "Channels": {
+        "Id": {
+          "Selector": "id"
+        },
+        "Name": {
+          "Selector": "name"
+        },
+        "flow" {
+          "Selector": "data.flow"
+        },
+        "pressure" {
+           "Selector": "data.pressure"
+        }
+      }
+    }
+```
+
+The structure of the output data is for this configuration is:
+
+```json
+{
+    "schedule": "DEMO-DATA",
+    "serial": "39cf5c74-9bfa-46bf-a260-5d465d67c95e",
+    "timestamp": "2024-11-27T10:27:05.285881Z",
+    "sources": {
+      "RestSource": {
+        "values": {
+          "Id": {
+            "value": "1"
+          },
+          "Name": {
+            "value": "FluidConveyor-1"
+          },
+          "flow" {
+            "value": 64
+          },
+          "pressure" {
+            "value": 33
+          }
+        },
+        "timestamp": "2024-11-27T10:27:03.438145Z"
+      }
+    }
+  }
+```
+
+## Objects lists
+
+When a request returns a list of objects, then these values can be returned as a single channel value. Here a request "objects" is
+used with a single channel named "Objects".
+
+```json
+"REST-SOURCE": {
+      "Name": "RestSource",
+      "ProtocolAdapter": "REST",
+      "RestServer": "PumpDataServer",
+      "Request": "pumps,
+      "Channels": {
+        "Pumps": {
+        }
+      }
+    }
+  },
+```
+
+The output is:
+
+```json
+{
+  "schedule": "DEMO-DATA",
+  "serial": "9e5de241-bcd7-4292-9c4e-0df5680561d0",
+  "timestamp": "2024-11-27T10:43:23.830073Z",
+  "sources": {
+    "RestSource": {
+      "values": {
+        "Pumps": {
+          "value": [
+            {"id":"1","name":"FluidConveyor-1","data":{"flow"64,"pressure":33}},
+            {"id":"2","name":"FluidConveyor-2","data":{"flow"68,"pressure":42}},
+            {"id":"3","name":"FluidConveyor-3","data":{"flow"67,"pressure":17}},
+          ]
+        }
+      },
+      "timestamp": "2024-11-27T10:43:23.826884Z"
+    }
+  }
+}
+```
+
+If the number of returned object is known, channels can be defined each selecting a value from the list.
+
+```json
+  "Sources": {
+    "REST-SOURCE": {
+      "Name": "RestSource",
+      "ProtocolAdapter": "REST",
+      "RestServer": "PumpDataServer",
+      "Request": "objects",
+      "Channels": {
+        "Pump1": {
+          "Selector" : "[0]"
+        },
+        "Pump2": {
+          "Selector" : "[1]"
+        },
+        "Pump3": {
+          "Selector" : "[2]"
+        }
+      }
+    }
+  },
+```
+
+
+```json
+{
+  "schedule": "DEMO-DATA",
+  "serial": "3eb61f25-23e8-40d7-99ee-14db6dad9b31",
+  "timestamp": "2024-11-27T11:35:31.949222Z",
+  "sources": {
+    "RestSource": {
+      "values": {
+        "Pump1": {
+          "value": {
+            "id": "1",
+            "name": "FluidConveyor-1",
+            "data": {
+              "flow" 64,
+              "pressure": 33
+            }
+          }
+        },
+        "Pump2": {
+          "value": {
+            "id": "2",
+            "name": "FluidConveyor-2",
+            "data": {
+              "flow" 46,
+              "pressure": 23
+            }
+          }
+        },
+        "Pump3": {
+          "value": {
+            "id": "4",
+            "name": "FluidConveyor-3",
+            "data": {
+              "flow" 47,
+              "pressure": 26
+            }
+          }
+        }
+      },
+      "timestamp": "2024-11-27T11:35:31.869553Z"
+    }
+  }
+}
+```
+
+Or if the number of returned objects is unknown a single channel definition can be used with the "Spread" option set to true.
+
+```json
+  "REST-SOURCE": {
+    "Name": "RestSource",
+    "ProtocolAdapter": "REST",
+    "RestServer": "PumpDataServer",
+    "Request": "objects",
+    "Channels": {
+      "Pump": {
+        "Spread": true
+      }
+    }
+  }
+```
+
+This results in a numbered channel being created for every object in the returned list.
+
+```json
+{
+  "schedule": "DEMO-DATA",
+  "serial": "59085f28-3a5c-46ad-a9b3-4732fddb2ffb",
+  "timestamp": "2024-11-27T10:41:18.228132Z",
+  "sources": {
+    "RestSource": {
+      "values": {
+        "Pump.0": {
+          "value": {
+            "id": "1",
+            "name": "FluidConveyor-1",
+            "data": {
+              "flow" 64,
+              "pressure": 33
+            }
+          },
+          "timestamp": "2024-11-27T10:41:18.224438Z"
+        },
+        "Pump.1": {
+          "value": {
+            "id": "2",
+            "name": "FluidConveyor-2",
+            "data": {
+              "flow" 68,
+              "pressure": 26
+            }
+          },
+          "timestamp": "2024-11-27T10:41:18.224438Z"
+        },
+        "Pump.2": {
+          "value": {
+            "id": "3",
+            "name": "FluidConveyor-3",
+            "data": {
+              "flow" 46,
+              "pressure": 54
+            }
+          },
+          "timestamp": "2024-11-27T10:41:18.224438Z"
+        }
+  }
+}
+```
+
 
 # REST Adapter Configuration
 
