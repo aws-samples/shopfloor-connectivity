@@ -10,7 +10,7 @@ broken TCP pipe errors will occur.**
 
 - [SLMP channel reading optimization](#slmp-channel-reading-optimization)
 - [SlmpSourceConfiguration](#slmpsourceconfiguration)
-- [SlmpChannelConfiguratio](#slmpchannelconfiguration)
+- [SlmpChannelConfiguration](#slmpchannelconfiguration)
 - [SlmpAdapterConfiguration](#slmpadapterconfiguration)
 - [SlmpControllerConfiguration](#slmpcontrollerconfiguration)
 
@@ -168,7 +168,7 @@ E.g. <p>
 <td>The number of values to read starting from the access point.</td>
 <td>Integer</td>
 <td>
-The number of items to read can be specified as well in the DataType of the channel, e.g. WORD[size]. The Size setting can be used if the DataType field is ommitted to read the default data type for the device. If the length is both specified in the DataType in both the Size setting a configuration error is raised.
+The number of items to read can be specified as well in the DataType of the channel, e.g. WORD[size]. The Size setting can be used if the DataType field is omitted to read the default data type for the device. If the length is both specified in the DataType in both the Size setting a configuration error is raised.
  </td>
 </tr>
 
@@ -207,7 +207,7 @@ The SlmpAdapterConfiguration extends the common adapter configuration with SLMP 
 
 <tr class="odd">
 <td>Structures</td>
-<td>Custom data structures configured for this adapter. Structured defined in this section can be uses as custom structured data types for channel values. If a structure has a field which is of a custome structure type,t hen this type must be defined first.</td>
+<td>Custom data structures configured for this adapter. Structured defined in this section can be uses as custom structured data types for channel values. If a structure has a field which is of a custom structure type,t hen this type must be defined first.</td>
 <td>Map[String,Map{String,String]]</td>
 <td>
 Below is an example defining a custom structure "STRUCT1" containing two fields "A1" and "B1" of type word. This type used in a second type "STRUCT2" having a field "A2" containing an array of size 2 containing values of "STRUCT1", as well as a field "B2", containing 16 words and a field "C2" containing a 32 character string.

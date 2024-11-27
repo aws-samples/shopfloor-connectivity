@@ -380,7 +380,7 @@ To use the values of metadata at the top or source level of the target data, the
 <td>AssetExternalId</td>
 <td>External id of the asset</td>
 <td>String</td>
-<td>The asset's id, name or external id must be specified, noth both. If all properties for the asset use the property alias then ExternalId must NOT be specified.</td>
+<td>The asset's id, name or external id must be specified, not both. If all properties for the asset use the property alias then ExternalId must NOT be specified.</td>
 </tr>
 
 <tr class="odd">
@@ -443,7 +443,7 @@ To use the values of metadata at the top or source level of the target data, the
 <td>Alias of the asset property</td>
 <td>String</td>
 <td>Only one of the property id, name, external id or alias must be specified
-If ProperyAlias is used for all properties of an asset then the AssetId, AssetName and AssetExternalId must not be configured for that asset.</td>
+If ProperyyAlias is used for all properties of an asset then the AssetId, AssetName and AssetExternalId must not be configured for that asset.</td>
 </tr>
 
 <tr class="even">
@@ -459,7 +459,7 @@ If ProperyAlias is used for all properties of an asset then the AssetId, AssetNa
 <td>String</td>
 <td><p><a href="https://jmespath.org/">https://jmespath.org/</a></p>
 <p>A path typically has the format "sources.< source name >.values< value name >.value or sourcename.valuename.value"
-<p>Note that JMESPath syntax treats chacteres like '-' as special characters and therefore the element in the path must be in quotes,</p></td>
+<p>Note that JMESPath syntax treats chacterers like '-' as special characters and therefore the element in the path must be in quotes,</p></td>
 </tr>
 
 <tr class="even">
@@ -473,7 +473,7 @@ A path typically has the format "sources.< source name >.values< value name >.ti
 
 <tr>
 <td>WarnIfNotPresent</td>
-<td>A warning is generated if the data path does not return a value for the data being handled by the adapter. This warning can be dissabled for 
+<td>A warning is generated if the data path does not return a value for the data being handled by the adapter. This warning can be disabled for 
 fields that are not always present by setting this setting to false.
 <td>Boolean</td>
 <td>

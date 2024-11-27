@@ -3,7 +3,7 @@
 
 AwsCloudWatchConfiguration configures the settings used by the AWS CloudWatch Metrics writer. It is used as a section names "CloudWatch" in the Metrics section of the SFC configuration
 
-[Meteric Writers](./README.md)
+[Metric Writers](./README.md)
 
 
 ## AwsCloudWatchConfiguration

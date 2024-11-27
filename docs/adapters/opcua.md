@@ -4,8 +4,8 @@ This section describes the configuration types for the OPCUA protocol adapter an
 configuration types
 
 
-  - [OpcuaSourceConfiguration](#opcdasourceconfiguration)
-  - [OpcuaNodeChannelConfiguration](#opcdachannelconfiguration)
+  - [OpcuaSourceConfiguration](#opcuasourceconfiguration)
+  - [OpcuaNodeChannelConfiguration](#opcuachannelconfiguration)
   - [OpcuaNodeChangeFilter](#opcuanodechangefilter)
   - [OpcuaAdapterConfiguration](#opcuaadapterconfiguration)
   - [OpcuaServerProfileConfiguration](#opcuaserverprofileconfiguration)

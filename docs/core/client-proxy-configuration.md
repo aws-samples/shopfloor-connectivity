@@ -1,6 +1,6 @@
 ## ClientProxyConfiguration
 
-Proxy configurstion settings
+Client proxy configuration settings
 
 <table>
 <colgroup>

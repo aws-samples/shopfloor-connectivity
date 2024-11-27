@@ -107,4 +107,3 @@ Configuration for an external server running an IPC service
 
 [SfcTopLevelConfiguration](sfc-top-level-config.md)
 
-[^top](../../README.md#toc)

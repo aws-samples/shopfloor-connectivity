@@ -1,9 +1,7 @@
 ## ConditionFilterConfiguration
 <br>
 Configuration for  filter that let only include the channel if they match the condition filter expression. Condition filter are used to filter channels based on the existence or non-existence of one or more other channels. 
-The values used for the operands of these conditions are not the actual calues of a channel read from their source, but the names of these channels.
-
-Typical use cases for condi
+The values used for the operands of these conditions are not the actual values of a channel read from their source, but the names of these channels.
 
 .When log level is trace, then there will be log entries that show the filter expression how it is interpreted by SFC.
 <br>

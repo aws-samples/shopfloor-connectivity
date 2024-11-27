@@ -23,14 +23,14 @@ Writer used to write collected metrics data. This writer can be configured as an
 <tr class="even">
 <td>MetricsWriter</td>
 <td>Jar files implementing the writer</td>
-<td><a href="in-process-configuration.md">InProcessConfigurarion</a></td>
+<td><a href="in-process-configuration.md">InProcessConfiguration</a></td>
 <td></td>
 </tr>
 
 <tr class="odd">
 <td>MetricsServer</td>
 <td>Server providing the metrics writer service</td>
-<td><a href="server-configuration.md">ServerConfigurartion</a></td>
+<td><a href="server-configuration.md">ServerConfiguration</a></td>
 <td></td>
 </tr>
 

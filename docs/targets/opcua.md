@@ -144,7 +144,7 @@ named "Value" for the actual channel value, along with additional variable nodes
 The rule is that when metadata or aggregated values are present for a value, a folder is created for 
 that value. If these are not present, a variable node is created.
 
-[Full example at examples/in-process-s7-opcua, config file s7-opcua-auto-create.json](../examples/in-process-s7-opcua/README.md)
+Full example at [examples/in-process-s7-opcua, config file s7-opcua-auto-create.json](../../examples/in-process-s7-opcua/README.md)
 
 ## Query mapping
 

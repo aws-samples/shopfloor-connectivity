@@ -8,7 +8,7 @@
 
 ## Version 1.5.5 25 November 2024
 
-- Added message retain option to IoT Core and MQTT target adapters
+- Fixed issue with multi-value chanel value serialization
 
 ---
 

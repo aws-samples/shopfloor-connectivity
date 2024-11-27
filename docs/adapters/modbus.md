@@ -40,7 +40,7 @@ The ModbusSourceConfiguration extends the common <a href="../core/source-configu
 
 <tr class="even">
 <td>Channels</td>
-<td>The channels hold configuration data to read values from the Modbus source device.</p>
+<td>The channels hold configuration data to read values from the Modbus source device.<p/>
 <p>The element is a map indexed by the channel identifier.</p>
 <p>Channels can be "commented" out by adding a "#" at the beginning of the identifier of that channel.</p></td>
 <td>Map[String,<a href="#modbuschannelconfiguration">ModbusChannelConfiguration</a>]</td>

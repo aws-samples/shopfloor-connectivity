@@ -6,7 +6,7 @@ configuration types.
 <p>The AdsSourceConfiguration extends the common <a href="../core/source-configuration.md">Source configuration</a> with ADS specific source configuration data.</p>
 
 - [AdsSourceConfiguration](#adssourceconfiguration)
-- [AdsChannelConfiguratio](#adschannelconfiguration)
+- [AdsChannelConfiguration](#adschannelconfiguration)
 - [AdsAdapterConfiguration](#adsadapterconfiguration)
 - [AdsDeviceConfiguration](#adsdeviceconfiguration)
 
@@ -58,7 +58,7 @@ configuration types.
 <td>SourceAmsPort</td>
 <td>The ADS port number. ADS devices in the TwinCAT network are identified by an AMS network address and a port number.</td>
 <td>Integer</td>
-<td>The following decimal port numbers are invariantly defined on each TwinCAT single system.
+<td>The following decimal port numbers are invariant defined on each TwinCAT single system.
 
 - Runtime system 1: 851 (in TwinCAT 2: 801)
 - Runtime system 2: 852 (in TwinCAT 2: 811)

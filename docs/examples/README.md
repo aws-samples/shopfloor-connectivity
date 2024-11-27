@@ -15,7 +15,7 @@ Adapters
 - [Mitsubishi/Melsec SLMP in process sample](../../examples/in-process-slmp-s3/README.md)
 - [Mitsubishi/Melsec SLMP IPC sample](../../examples/ipc-slmp-s3/README.md)
 - [Siemens S7 to Sitewise sample](../../examples/in-process-s7-sitewise/README.md)
-- [SIemens S7 to OPCUA sample](../../examples/in-process-s7-opcua/README.md)
+- [Siemens S7 to OPCUA sample](../../examples/in-process-s7-opcua/README.md)
 
 - [OPCUA to MSK In-Process sample](../../examples/in-process-opcua-msk/README.md)
 - [OPCUA to MSK IPC sample](../../examples/ipc-opcua-msk/README.md)
@@ -34,7 +34,7 @@ Configuration
 - [YAML Custom Configuration Provider](../../examples/yaml-custom-config-provider/README.md)
 
 Other
-- [Generate Self-Signes test certificates](../../examples/test-certificates/README.md)
+- [Generate Self-Signed test certificates](../../examples/test-certificates/README.md)
 - [Transformation Templates](../../examples/transformation-templates/README.md)
 
 Logging
