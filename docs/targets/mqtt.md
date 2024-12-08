@@ -16,12 +16,15 @@
 </colgroup>
 
 <tbody>
+
+
 <tr class="odd">
 <td><strong>Name</strong></td>
 <td><strong>Description</strong></td>
 <td><strong>Type</strong></td>
 <td>Comments</td>
 </tr>
+
 <tr class="even">
 <td>TopicName</td>
 <td>Name or name template of the topic</td>
@@ -35,12 +38,41 @@ besides placeholders for environment variables (${name}) the following placehold
 - %source%
 - %channel%
 
-To use the values of metadata at the top, source or channel level of the target data, the name af the metadata value can be used with a '%' prefix and postfix.
+To use the values of **metadata** at the top, source or channel level of the target data, the name af the metadata value can 
+be used with a '%' prefix and postfix.
+
+Value placeholders can be used to add additional topic levels or grouping values to a specific topic.
+
+Template examples:
+
+- plant1-**%source%** : Values from each source will be published to a topic for that source
+- plant1-**%line%**   : Values from all sources will be grouped by the value of the %line% metadata and published to a topic for that value
+
+In case a placeholder is not resolved, when a value for a used placeholder is part of the data,
+then an alternative topic name can be configured by setting the name of that topic to the **"AlternateTopiName"** setting.
 
 Note that the use of placeholders to send data to specific topics will result in additional publish calls to the broker.
 
 </td>
 </tr>
+
+<tr class="odd">
+<td>AlternateTopicName</td>
+<td>Name or name template of the topic values are published in case there are unmapped template placeholders in the TopicName</td>
+<td>String</td>
+<td>
+</td>
+</tr>
+
+<tr class="even">
+<td>WarnAlternateTopicName</td>
+<td>Generate warning if data is published to AlternateTopicName</td>
+<td>Boolean</td>
+<td>
+Default is tue
+</td>
+</tr>
+
 
 <tr class="odd">
 <td>EndPoint</td>  
@@ -51,7 +83,7 @@ Note that the use of placeholders to send data to specific topics will result in
 If no scheme is specified in the address, then it will be added based on the Connection type.
 ("tcp://" for PlainText or "ssl://" for ServerSideTLS or MutualTLS)
 <p>To get the ATS endpoint for an account use the AWS CLI command<br />
-aws iot describe-endpoint --endpoint-type iot:Data-AtemplTS</p>
+aws iot describe-endpoint --endpoint-type iot:Data-ATS</p>
 <p><a href="https://awscli.amazonaws.com/v2/documentation/api/latest/reference/iot/describe-endpoint.html">https://awscli.amazonaws.com/v2/documentation/api/latest/reference/iot/describe-endpoint.html</a></p>
 </td>
 </tr>  
@@ -72,7 +104,7 @@ In no port number is specified then the EndPoint address is searched for a train
 
 </td> 
 </tr>  
-<tr class="odd">  
+<tr class="even">  
 <td>Connection</td>  
 <td>Connection type</td>  
 <td>String</td>  
@@ -84,26 +116,29 @@ In no port number is specified then the EndPoint address is searched for a train
 
 </td>  
 </tr>  
-<tr class="even">  
+<tr class="odd">  
 <td>SslServerCertificate</td>  
 <td>Path to server certificate file to verify the identity of the broker.</td>  
 <td>String</td>  
 <td>If no certificate file is specified it is obtained from the server.
 <p>Used for connections of type ServerSideTLS and MutualTLS</p></td>  
 </tr>  
-<tr class="odd">  
+
+<tr class="even">  
 <td>PrivateKey</td>  
 <td>Path to client private key file</td>  
 <td>String</td>  
 <td></td>  
 </tr>  
-<tr class="even">  
+
+<tr class="odd">  
 <td>RootCA</td>  
 <td>Path to root certificate file. The Root CA file in an MQTT client is used for server certificate verification when establishing a secure connection with the broker (using TLS/SSL)</td>  
 <td>String</td>  
 <td></td>  
 </tr>  
-<tr class="odd">  
+
+<tr class="even">  
 <td>Certificate</td>  
 <td>Path to client certificate file. Used if broker used certificate authentication</td>  
 <td>String</td>  
@@ -119,7 +154,8 @@ In no port number is specified then the EndPoint address is searched for a train
 <p>1 = At least once</p>
 <p>2 = Exactly once</p></td>
 </tr>
-<tr class="odd">  
+
+<tr class="even">  
 <td>Username</td>  
 <td>Username if broker is using username and password authentication</td>  
 <td>String</td>  
@@ -129,25 +165,29 @@ In no port number is specified then the EndPoint address is searched for a train
 <td>Password if broker is using username and password authentication</td>  
 <td>String</td>  
 <td>Username and password should not be included as clear text in the configuration. It is strongly recommended to use placeholders and use the SFC integration with the AWS secrets manager.</td>  
-</tr>  
-<tr class="odd">  
+</tr> 
+
+<tr class="even">  
 <td>ConnectionTimeout</td>  
 <td>Timeout for connecting to the broker in seconds</td>  
 <td>Int</td>  
 <td>Default is 10 seconds</td>
-<tr class="even">  
+
+<tr class="odd">  
 <td>WaitAfterConnectError</td>  
 <td>Period in seconds to wait before trying to connect after a connection failure</td>  
 <td>Int</td>  
 <td>Default is 60 seconds</td>
 </tr>  
-<tr class="odd">  
+
+<tr class="even">  
 <td>ConnectRetries</td>  
 <td>Number of retries to connect to MQTT broker</td>  
 <td>Int</td>  
 <td>Default is 10</td>
 </tr>  
-<tr class="odd">
+
+<tr class="even">
 <td>PublishTimeout</td>
 <td>Timeout in seconds for publishing</td>
 <td>Long</td>
@@ -155,7 +195,7 @@ In no port number is specified then the EndPoint address is searched for a train
 </tr>
 
 
-<tr class="even">  
+<tr class="odd">  
 <td>BatchCount</td>  
 <td>Number of messages to buffer before sending data as a batch to a topic.</td>  
 <td>Int</td>  
@@ -163,7 +203,7 @@ In no port number is specified then the EndPoint address is searched for a train
 Whenever the number of messages, total message size or an interval is reached the buffered data is sent as an array of messages to the topic.</td>
 </tr>
 
-<tr class="odd">  
+<tr class="even">  
 <td>BatchSize</td>  
 <td>Payload size in KB of messages to batch before sending data as a batch to a topic.</td>  
 <td>Int</td>  
@@ -172,7 +212,7 @@ Whenever the number of messages, total message size or an interval is reached th
 The size is calculated on the uncompressed payload of the messages.</td>
 </tr>
 
-<tr class="even">  
+<tr class="odd">  
 <td>BatchInterval</td>  
 <td>Interval in milliseconds after which a batch of messages is sent to the a topic, even when the BatchSize or BatchCount limit is not reached.</td>  
 <td>Int</td>  
@@ -181,7 +221,7 @@ Whenever the number of messages, total message size or an interval is reached th
 </td>
 </tr>
 
-<tr class="odd">
+<tr class="even">
 <td>MaxPayloadSize</td>
 <td>Max payload size in KB for MQTT messages.</td>
 <td>Int</td>
@@ -189,7 +229,7 @@ Whenever the number of messages, total message size or an interval is reached th
 of messages will be sent to the topic when this size is reached.</td>
 </tr>
 
-<tr class="even">  
+<tr class="odd">  
 <td>Compression</td>  
 <td>Compression method for MQTT message payloads.</td>  
 <td>String
@@ -202,7 +242,7 @@ of messages will be sent to the topic when this size is reached.</td>
 <td>Default is "None"</td>
 </tr> 
 
-<tr class="odd">  
+<tr class="even">  
 <td>Retain</td>  
 <td>Set to true to store a single message per a given MQTT topic for delivery to any current and future topic subscribers.</td>  
 <td>Boolean

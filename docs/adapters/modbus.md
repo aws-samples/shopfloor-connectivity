@@ -14,7 +14,9 @@ specific configuration types.
 
 ## ModbusSourceConfiguration
 
-The ModbusSourceConfiguration extends the common <a href="../core/source-configuration.md">Source configuration</a> with Modbus specific source device configuration data</p></th>
+The ModbusSourceConfiguration extends the common <a href="../core/source-configuration.md">Source configuration</a> with
+Modbus specific source device configuration data</p>.
+The AdapterType for the source must be set to **MODBUS-TCP**.
 
 
 <table>

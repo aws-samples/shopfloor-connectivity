@@ -1328,28 +1328,28 @@ named "CloudWatch" can be added with the following properties:
 
 The following metric values are collected:
 
-| **Metric name**         | **Description**                                               | **Collected by**                    |
-|-------------------------|---------------------------------------------------------------|-------------------------------------|
-| BytesReceived           | Bytes read by the adapter                                     | ModbusTCP, PCCC, ADS, SLMP connector                 |
-| BytesSend               | Bytes send by the adapter                                     | ModbusTCP, PCCC, ADS, SLMP connector                 |
-| BytesWritten            | Bytes written by target                                       | Selected adapters                   |
-| Connection              | Number of connections                                         | All connectors                      |
-| ConnectionErrors        | Number of failed connections                                  | All connectors                      |
-| Errors                  | Number of logged errors                                       | Core and all connectors and targets |
-| Memory                  | Used memory by process in MB                                  | Core and all connectors and targets |
-| MessageBufferedSize     | Size of buffered messages in bytes                            | StoreForwardTarget                  |
-| Messages                | Number of messages processed                                  | All targets                         |
-| MessagesBufferedCount   | Number of buffered messages                                   | StoreForwardTarget                  |
-| MessagesBufferedDeleted | Number of messaged deleted                                    | StoreForwardTarget                  |
-| ReadDuration            | Time in milliseconds used by adapter to read data from source | All adapters                        |
-| ReadErrors              | Number of read errors                                         | All adapters                        |
-| Reads                   | Number of reads                                               | All adapters                        |
-| ReadSuccess             | Number of succeeded reads                                     | All adapters                        |
-| Values read             | Number of values read                                         | All adapters                        |
-| Warnings                | Number of logged warnings                                     | Core and all connectors and targets |
-| WriteDuration           | Time in milliseconds used by target to write data             | All targets                         |
-| WriteErrors             | Number of failed writes                                       | All Targets                         |
-| Writes                  | Writes by targets                                             | All targets                         |
+| **Metric name**         | **Description**                                               | **Collected by**                     |
+|-------------------------|---------------------------------------------------------------|--------------------------------------|
+| BytesReceived           | Bytes read by the adapter                                     | ModbusTCP, PCCC, ADS, SLMP connector |
+| BytesSend               | Bytes send by the adapter                                     | ModbusTCP, PCCC, ADS, SLMP connector |
+| BytesWritten            | Bytes written by target                                       | Selected adapters                    |
+| Connection              | Number of connections                                         | All connectors                       |
+| ConnectionErrors        | Number of failed connections                                  | All connectors                       |
+| Errors                  | Number of logged errors                                       | Core and all connectors and targets  |
+| Memory                  | Used memory by process in MB                                  | Core and all connectors and targets  |
+| MessageBufferedSize     | Size of buffered messages in bytes                            | StoreForwardTarget                   |
+| Messages                | Number of messages processed                                  | All targets                          |
+| MessagesBufferedCount   | Number of buffered messages                                   | StoreForwardTarget                   |
+| MessagesBufferedDeleted | Number of messaged deleted                                    | StoreForwardTarget                   |
+| ReadDuration            | Time in milliseconds used by adapter to read data from source | All adapters                         |
+| ReadErrors              | Number of read errors                                         | All adapters                         |
+| Reads                   | Number of reads                                               | All adapters                         |
+| ReadSuccess             | Number of succeeded reads                                     | All adapters                         |
+| Values read             | Number of values read                                         | All adapters                         |
+| Warnings                | Number of logged warnings                                     | Core and all connectors and targets  |
+| WriteDuration           | Time in milliseconds used by target to write data             | All targets                          |
+| WriteErrors             | Number of failed writes                                       | All Targets                          |
+| Writes                  | Writes by targets                                             | All targets                          |
 
 [^top](#quicklinks)
 
@@ -2216,15 +2216,60 @@ The main class for running the SFC core is `com.amazonaws.sfc.MainController`
 
 The `sfc-main` application has the following command-line arguments:
 
-| **Parameter**           | **Description**                                                                                                                              |
-|-------------------------|----------------------------------------------------------------------------------------------------------------------------------------------|
-| -config \<config file\> | Name of SFC configuration file.                                                                                                              |
-| -verify                 | Pathname of file containing the public key to verify the digital signature of the configuration passed to the sfc core by the config handler |
-| -error                  | Set log output level to error level. (Error message only)                                                                                    |
-| -h, -help               | Shows command line parameter help.                                                                                                           |
-| -info                   | Set log output level to info level. (Info, warning and error messages)                                                                       |
-| -trace                  | Set log output level to most detailed trace level (Info, warning, error, and detailed trace messages)                                        |
-| -warning                | Set log output level to warning level. (Error and warning messages)                                                                          |
+<table>
+
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 80%" />
+</colgroup>
+
+<thead>
+<tr class="header">
+<th><strong>Parameter</strong></th>
+<th><strong>Description</strong></th>
+</tr>
+</thead>
+
+<tbody>
+<tr class="odd">
+<td>-config &lt;config file&gt;</td>
+<td>Name of SFC configuration file.  </td>
+</tr>
+
+<tr class="even">
+<td>-verify</td>
+<td>Pathname of file containing the public key to verify the digital signature of the 
+configuration passed to the sfc core by the config handler.
+</tr>
+
+<tr class="odd">
+<td>-h, -help</td>
+<td>Shows command line parameter help.</td>
+</tr>
+
+<tr class="even">
+<td>-error</td>
+<td>Set log output level to error level. (Error message only)</td>
+</tr>
+
+<tr class="even">
+<td>-info</td>
+<td>Set log output level to info level. (Info, warning and error messages)</td>
+</tr>
+
+<tr class="even">
+<td>-trace</td>
+<td>Set log output level to most detailed trace level (Info, warning, error, and detailed trace messages)</td>
+</tr>
+
+<tr class="odd">
+<td>-warning</td>
+<td>Set log output level to warning level. (Error and warning messages)</td>
+</tr>
+
+</tbody>
+</table>
+
 
 [^top](#quicklinks)
 
@@ -2233,24 +2278,98 @@ The `sfc-main` application has the following command-line arguments:
 The adapters have a service wrapper that enables these adapters can be executed as an IPC Service process. For each
 adapter, a tar file is generated by the build process that includes the application script file to start the service, as
 well as all required library files. The application tar file contains script files (`bin/<adapter type>`
-*and* `bin/<adaptertype>.bat`) to launch the applications, and all required libraries (`/lib/*.jar`).
-
-| **Protocol** | **Application name** | **Main class**                                         |
-|--------------|----------------------|--------------------------------------------------------|
-| OPCUA        | opcua                | com.amazonaws.sfc.opcua.OpcuaProtocolService           |
-| Modbus TCP   | modbus-tcp           | com.amazonaws.sfc.modbus.tcp. ModbusTcpProtocolService |
-| MQTT         | mqtt                 | com.amazonaws.sfc.mqtt.MqttProtocolService             |
-| S7           | s7                   | com.amazonaws.sfc.s7.S7ProtocolService                 |
-| SNMP         | snmp                 | com.amazonaws.sfc.snmp.SnmpProtocolService             |
-| SQL          | sql                  | Com.amazonaws.sfc.sql.SqlProtocolService               |
-| PCCC         | pccc                 | com.amazonaws.sfc.pccc.PcccProtocolService             |
-| REST         |rest                  | com.amazonaws.sfv.rest.RestProtocolService            |
-
-The applications do have all the following command line parameters in common.
+and `bin/<adaptertype>.bat`) to launch the applications, and all required libraries (`/lib/*.jar`).
 
 <table>
 <colgroup>
-<col style="width: 24%" />
+<col/><col/><col/>
+</colgroup>
+
+<thead>
+<tr class="header">
+<th><strong>Protocol</strong></th>
+<th><strong>Application name</strong></th>
+<th><strong>Main Class</strong></th>
+</tr>
+</thead>
+
+<tbody>
+
+<tr class="odd">
+<td>ADS</td>
+<td>ads</td>
+<td>com.amazonaws.sfc.ads.AdsProtocolService</td>
+</tr>
+
+<tr class="even">
+<td>MQTT</td>
+<td>mqtt</td>
+<td>com.amazonaws.sfc.mqtt.MqttProtocolService</td>
+</tr>
+
+<tr class="odd">
+<td>Modbus TCP</td>
+<td>modbus-tcp</td>
+<td>com.amazonaws.sfc.tcp.ModbusTcpProtocolService</td>
+</tr>
+
+<tr class="even">
+<td>NATS</td>
+<td>nats</td>
+<td>com.amazonaws.sfc.nats.NatsProtocolService</td>
+</tr>
+
+<tr class="odd">
+<td>OPCUA</td>
+<td>opcua</td>
+<td>com.amazonaws.sfc.opcua.OpcuaProtocolService</td>
+</tr>
+
+<tr class="even">
+<td>PCCC</td>
+<td>pccc</td>
+<td>com.amazonaws.sfc.pccc.PcccProtocolService</td>
+</tr>
+
+<tr class="odd">
+<td>REST</td>
+<td>rest</td>
+<td>com.amazonaws.sfc.rest.RestProtocolService</td>
+</tr>
+
+<tr class="even">
+<td>S7</td>
+<td>s7</td>
+<td>com.amazonaws.sfc.s7.S7ProtocolService</td>
+</tr>
+
+<tr class="odd">
+<td>SLMP</td>
+<td>slmp</td>
+<td>com.amazonaws.sfc.slmp.SlmpProtocolService</td>
+</tr>
+
+<tr class="even">
+<td>SNMP</td>
+<td>snmp</td>
+<td>com.amazonaws.sfc.snmp.SnmpProtocolService</td>
+</tr>
+
+<tr class="odd">
+<td>SQL</td>
+<td>sql</td>
+<td>com.amazonaws.sfc.sql.SqlProtocolService</td>
+</tr>
+
+</tbody>
+</table>
+
+
+The applications have the following command line parameters in common.
+
+<table>
+<colgroup>
+<col style="width: 25%" />
 <col style="width: 75%" />
 </colgroup>
 <thead>
@@ -2347,26 +2466,138 @@ target, a tar file is generated by the build process that includes the applicati
 well as all required library files. The application tar file contains script files (`bin/<targettype>`
 *and* `bin/<targettype>.bat`) to launch the applications, and all required libraries (/lib/*.jar)
 
-| **Target**    | **Application name**        | **Main class**                                                |
-|---------------|-----------------------------|---------------------------------------------------------------|
-| Analytics     | aws-iot-analytics           | com.amazonaws.sfc.awsiota.AwsIotAnalyticsTargetService        |
-| IoT Core      | aws-iotcore-target          | com.amazonaws.sfc.awsiotcore.AwsIoCoreTargetService           |
-| MSK           | aws-msk-target              | com.amazonaws.sfc.awsiot.msk.AwsMskTargetService              |
-| File          | File-target                 | com.amazonaws.sfc.awsiot.mqtt.FileTargetService               |
-| Firehose      | aws-kinesis-target          | com.amazonaws.sfc.awsfirehose.AwsKinesisFirehoseTargetService |
-| Kinesis       | aws-kinesis-firehose-target | com.amazonaws.sfc.awskinesis.AwsKinesisTargetService          |
-| Lambda        | aws-lambda-target           | com.amazonaws.sfc.awslambda.AwsLambdaTargetService            |
-| S3            | aws-kinesis-target          | com.amazonaws.sfc.awss3.AwsS3TargetService                    |
-| OPCUA         | opcua-target                | com.amazonaws.sfc.opcuatarget.OpcuaTargetService              |
-| SiteWise      | aws-sitewise-target         | com.amazonaws.sfc.awssitewise.AwsSiteWiseTargetService        |
-| SiteWiseEdge  | aws-sitewiseedge-target     | com.amazonaws.sfc.awssitewiseedge.SiteWiseEdgeTargetService   |
-| SNS           | Aws-sns-target              | com.amazonaws.sfc.awssns.AwsSnsTargetService                  |
-| SQS           | aws-sqs-target              | com.amazonaws.sfc.awssqs.AwsSqsTargetService                  |
-| Timestream    | aws-timestream-target       | com.amazonaws.sfc.awstimestream.AwsTimestreamTargetService    |
-| MQTT          | mqtt-target                 | com.amazonaws.sfc.mqtt.MqttTargetService                      | 
-| File system   | file-target                 | com.amazonaws.sfc.filetarget.TargetService                    |
-| Console       | debug-target                | com.amazonaws.sfc.debugtarget.DebugTargetService              |
-| Store&Forward | storeforward-target         | com.amazonaws.sfc.storeforward. AwsStoreForwardTargetService  |
+
+<table>
+<colgroup>
+<col/><col/><col/>
+</colgroup>
+
+<thead>
+<tr class="header">
+<th><strong>Target</strong></th>
+<th><strong>Application name</strong></th>
+<th><strong>Main Class</strong></th>
+</tr>
+</thead>
+
+<tbody>
+
+<tr class="odd">
+<td>Analytics</td>
+<td>aws-iot-analytics</td>
+<td>com.amazonaws.sfc.awsiota.AwsIotAnalyticsTargetService</td>
+</tr>
+
+<tr class="even">
+<td>Console</td>
+<td>debug-target</td>
+<td>com.amazonaws.sfc.debugtarget.DebugTargetService</td>
+</tr>
+
+<tr class="odd">
+<td>File System</td>
+<td>file-target</td>
+<td>com.amazonaws.sfc.awsiot.mqtt.FileTargetService</td>
+</tr>
+
+<tr class="even">
+<td>Firehose</td>
+<td>aws-kinesis-firehose-target</td>
+<td>com.amazonaws.sfc.awsfirehose</td>
+</tr>
+
+<tr class="odd">
+<td>IoT Core</td>
+<td>aws-iotcore-target</td>
+<td>com.amazonaws.sfc.awsiotcore.AwsIoCoreTargetService</td>
+</tr>
+
+<tr class="even">
+<td>Kinesis</td>
+<td>aws-kinesis-target</td>
+<td>com.amazonaws.sfc.awskinesis.AwsKinesisTargetService</td>
+</tr>
+
+<tr class="odd">
+<td>Lambda</td>
+<td>aws-lambda-target</td>
+<td>com.amazonaws.sfc.awslambda.AwsLambdaTargetService</td>
+</tr>
+
+<tr class="even">
+<td>MQTT</td>
+<td>mqtt-target</td>
+<td>com.amazonaws.sfc.mqtt.MqttTargetService</td>
+</tr>
+
+<tr class="odd">
+<td>Kafka MSK</td>
+<td>aws-msk-target</td>
+<td>com.amazonaws.sfc.awsiot.msk.AwsMskTargetService</td>
+</tr>
+
+<tr class="even">
+<td>NATS</td>
+<td>nats-target</td>
+<td>com.amazonaws.sfc.natstarget.NatsTargetService</td>
+</tr>
+
+<tr class="odd">
+<td>OPCUA</td>
+<td>opcus-target</td>
+<td>com.amazonaws.sfc.opcuatarget.OpcuaTargetService</td>
+</tr>
+
+<tr class="even">
+<td>S3</td>
+<td>aws-s3-target</td>
+<td>com.amazonaws.sfc.awss3.AwsS3TargetService</td>
+</tr>
+
+<tr class="odd">
+<td>SNS</td>
+<td>aws-sns-target</td>
+<td>com.amazonaws.sfc.awssns.AwsSnsTargetService</td>
+</tr>
+
+<tr class="even">
+<td>SQS</td>
+<td>aws-sqs-target</td>
+<td>com.amazonaws.sfc.awssqs.AwsSqsTargetService</td>
+</tr>
+
+<tr class="odd">
+<td>SiteWise</td>
+<td>aws-sitewise-target</td>
+<td>com.amazonaws.sfc.awssitewise.AwsSiteWiseTargetService</td>
+</tr>
+
+<tr class="even">
+<td>SiteWise Edge</td>
+<td>aws-sitewiseedge-target</td>
+<td>com.amazonaws.sfc.awssitewiseedge.SiteWiseEdgeTargetService</td>
+</tr>
+
+<tr class="odd">
+<td>Store & Forward</td>
+<td>storeforward-target</td>
+<td>com.amazonaws.sfc.storeforward.AwsStoreForwardTargetService</td>
+</tr>
+
+<tr class="odd">
+<td>Router</td>
+<td>storeforward-target</td>
+<td>com.amazonaws.sfc.router.RouterTargetService</td>
+</tr>
+
+<tr class="even">
+<td>Timestream</td>
+<td>aws-timestream-service</td>
+<td>com.amazonaws.sfc.awstimestream.AwsTimestreamTargetService</td>
+</tr>
+
+</tbody>
+</table>
 
 The applications do have all the following command line parameters in common.
 
@@ -2563,6 +2794,12 @@ SFC_DEPLOYMENT_DIR: Directory in which deployment packed is deployed, with the s
       ],
       "FactoryClassName": "com.amazonaws.sfc.rest.RestAdapter"
      },
+    "NATS": {
+       "JarFiles": [
+            "${SFC_DEPLOYMENT_DIR}/nats/lib"
+       ],
+       "FactoryClassName": "com.amazonaws.sfc.nats.NatsAdapter"
+     },
     "ADS": {
       "JarFiles": [
         "${SFC_DEPLOYMENT_DIR}/ads/lib"
@@ -2668,12 +2905,18 @@ configuration file.</u>*
       ],
       "FactoryClassName": "com.amazonaws.sfc.awssqs.AwsSqsTargetWriter"
     },
+    "NATS-TARGET": {
+       "JarFiles": [
+          "${SFC_DEPLOYMENT_DIR}/nats-target/lib"
+       ],
+       "FactoryClassName": "com.amazonaws.sfc.natstarget,NatsTargetWriter"
+  },
     "OPCUA-TARGET": {
       "JarFiles": [
-      "${SFC_DEPLOYMENT_DIR}/opcua-target/lib"
-   ],
-  "FactoryClassName": "com.amazonaws.sfc.opcuatarget,OpcuaTargetWriter"
-  },
+         "${SFC_DEPLOYMENT_DIR}/opcua-target/lib"
+    ],
+    "FactoryClassName": "com.amazonaws.sfc.opcuatarget,OpcuaTargetWriter"
+    },
     "AWS-IOT-ANALYTICS": {
       "JarFiles": [
         "${SFC_DEPLOYMENT_DIR}/debug-target/lib"

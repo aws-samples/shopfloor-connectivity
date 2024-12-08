@@ -113,7 +113,6 @@ class AwsIotAnalyticsTargetWriter(
      * Closes the writer
      */
     override suspend fun close() {
-        targetDataChannel.close()
         flush()
         writer.cancel()
         iotaClient.close()

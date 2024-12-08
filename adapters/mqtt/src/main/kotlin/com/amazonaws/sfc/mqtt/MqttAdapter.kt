@@ -24,6 +24,7 @@ import com.amazonaws.sfc.targets.TargetException
 import com.amazonaws.sfc.util.LookupCacheHandler
 import com.amazonaws.sfc.util.MemoryMonitor.Companion.getUsedMemoryMB
 import com.amazonaws.sfc.util.buildScope
+import com.amazonaws.sfc.util.isJobCancellationException
 import com.amazonaws.sfc.util.launch
 import com.google.gson.JsonSyntaxException
 import kotlinx.coroutines.*
@@ -68,7 +69,7 @@ class MqttAdapter(private val adapterID: String, private val configuration: Mqtt
 
     private val clientCache = LookupCacheHandler<String, MqttClient?, String>(
         supplier = { sourceName ->
-           createMqttClient(sourceName)
+            createMqttClient(sourceName)
         }
     )
     private val adapterMetricDimensions = mapOf(MetricsCollector.METRICS_DIMENSION_TYPE to className)
@@ -111,7 +112,7 @@ class MqttAdapter(private val adapterID: String, private val configuration: Mqtt
     private val scope = buildScope("MQTT Protocol Handler")
 
     // Store received data
-    private val sourceDataStores : Map<String, SourceDataStore<ChannelReadValue>> = sources.keys.map{ sourceID ->
+    private val sourceDataStores: Map<String, SourceDataStore<ChannelReadValue>> = sources.keys.map { sourceID ->
         sourceID to if (adapterConfiguration?.readMode == ReadMode.KEEP_LAST)
             SourceDataValuesStore()
         else
@@ -134,7 +135,8 @@ class MqttAdapter(private val adapterID: String, private val configuration: Mqtt
                 val data = channel.receive()
                 handleDataReceived(data)
             } catch (e: Exception) {
-                logger.getCtxErrorLogEx(scope::class.java.simpleName, "changedDataWorker")("Error processing received data", e)
+                if (!e.isJobCancellationException)
+                    logger.getCtxErrorLogEx(scope::class.java.simpleName, "changedDataWorker")("Error processing received data", e)
             }
     }
 
@@ -156,9 +158,9 @@ class MqttAdapter(private val adapterID: String, private val configuration: Mqtt
         // No client or could not connect
         if (client == null) {
             val adapterConfiguration = configuration.mqttProtocolAdapters[protocolAdapterID]
-                ?: return SourceReadError("Adapter \"$protocolAdapterID\" for  Source \"$sourceID\" does not exist, available adapters are ${configuration.mqttProtocolAdapters.keys}")
+                    ?: return SourceReadError("Adapter \"$protocolAdapterID\" for  Source \"$sourceID\" does not exist, available adapters are ${configuration.mqttProtocolAdapters.keys}")
             val brokerConfiguration = adapterConfiguration.brokers[sourceConfiguration.sourceAdapterBrokerID]
-                ?: return SourceReadError("Broker \"${sourceConfiguration.sourceAdapterBrokerID}\" Adapter \"$protocolAdapterID\" for  Source \"$sourceID\" does not exist, available brokers are ${adapterConfiguration.brokers}")
+                    ?: return SourceReadError("Broker \"${sourceConfiguration.sourceAdapterBrokerID}\" Adapter \"$protocolAdapterID\" for  Source \"$sourceID\" does not exist, available brokers are ${adapterConfiguration.brokers}")
 
             // Wait for next read and return read error
             val error = SourceReadError("Can not connect to broker at ${brokerConfiguration.endPoint}", DateTime.systemDateTime())
@@ -268,7 +270,7 @@ class MqttAdapter(private val adapterID: String, private val configuration: Mqtt
      * @param sourceID String
      * @return MqttClient?
      */
-    private  suspend fun getClientForSource(
+    private suspend fun getClientForSource(
         sourceID: String,
         adapterID: String,
         metrics: MetricsCollector?,

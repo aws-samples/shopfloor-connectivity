@@ -17,6 +17,7 @@
 - [Debug Target](./debug.md)
 - [File Target](./file.md)
 - [MQTT Target](./mqtt.md)
+- [NATS Target](./nats.md)
 - [OPCUA Target](./opcua.md)
 
 

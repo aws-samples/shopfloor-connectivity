@@ -114,7 +114,6 @@ class SiteWiseEdgeTargetWriter(
      */
     override suspend fun close() {
         try {
-            targetDataChannel.close()
             writer.cancel()
             _mqttClient?.disconnect()
             _mqttClient?.close()

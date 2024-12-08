@@ -473,7 +473,7 @@ The string must represent a valid instant in UTC</td>
 <tr>
 <td>Query</td>
 <td>Evaluate a <a href="https://jmespath.org/">JMESpath</a> query against structured data type and returns the result.</td>
-<td>Datatype: Structure or array</td>
+<td>String</td>
 <td>Parameter: <a href="https://jmespath.org/">JMESPath</a> expression, see https://jmespath.org/</td>
 </tr>
 

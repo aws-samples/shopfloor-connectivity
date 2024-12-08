@@ -32,6 +32,16 @@ class MqttTargetConfiguration : TargetConfiguration(), Validate {
     val topicNameTemplate: String
         get() = _topicNameTemplate?:""
 
+    @SerializedName(CONFIG_ALTERNATE_TOPIC_NAME)
+    private var _alternateTopicName: String? = null
+    val alternateTopicName: String?
+        get() = _alternateTopicName
+
+    @SerializedName(CONFIG_WARN_ALTERNATE_TOPIC_NAME)
+    private var _warnAlternateTopicName: Boolean = true
+    val warnAlternateTopicName: Boolean
+        get() = _warnAlternateTopicName
+
     @SerializedName(CONFIG_PUBLISH_TIMEOUT)
     private var _publishTimeout = DEFAULT_PUBLISH_TIMEOUT
 
@@ -49,7 +59,7 @@ class MqttTargetConfiguration : TargetConfiguration(), Validate {
         get() = _connectRetries
 
     @SerializedName(MqttConnectionOptions.CONFIG_MQTT_END_POINT)
-    protected var _endPoint: String = ""
+    private var _endPoint: String = ""
     val endPoint: String by lazy {
 
         val hasPort = Regex("""(.+):(\d+)${'$'}$""")
@@ -108,8 +118,8 @@ class MqttTargetConfiguration : TargetConfiguration(), Validate {
     val password: String?
         get() = _password
 
-    @SerializedName(MqttConnectionOptions.CONFIG_MQTT_CONNECT_TIMEOUT)
-    private var _connectTimeout = MqttConnectionOptions.DEFAULT_CONNECT_TIMEOUT
+    @SerializedName(CONFIG_CONNECT_TIMEOUT)
+    private var _connectTimeout = DEFAULT_CONNECT_TIMEOUT
     val connectTimeout: Duration = _connectTimeout.toDuration(DurationUnit.SECONDS)
 
     @SerializedName(CONFIG_BATCH_COUNT)
@@ -198,13 +208,17 @@ class MqttTargetConfiguration : TargetConfiguration(), Validate {
 
     companion object {
 
-        private const val CONFIG_TOPIC_NAME = "TopicName"
+        const val CONFIG_TOPIC_NAME = "TopicName"
+        const val CONFIG_ALTERNATE_TOPIC_NAME = "AlternateTopicName"
+        const val CONFIG_WARN_ALTERNATE_TOPIC_NAME = "WarnAlternateTopicName"
         private const val CONFIG_PUBLISH_TIMEOUT = "PublishTimeout"
         private const val DEFAULT_PUBLISH_TIMEOUT = 10
         const val DEFAULT_WAIT_AFTER_CONNECT_ERROR = 10
         private const val CONFIG_WAIT_AFTER_CONNECT_ERROR = "WaitAfterConnectError"
         private const val CONFIG_QOS = "Qos"
         private const val QOS_DEFAULT = 0
+        private const val CONFIG_CONNECT_TIMEOUT = "ConnectTimeout"
+        private const val DEFAULT_CONNECT_TIMEOUT = 10
         private const val CONFIG_CONNECT_RETRIES = "ConnectRetries"
         private const val CONNECT_RETRIES_DEFAULT = 10
         const val CONFIG_BATCH_SIZE = "BatchSize"
@@ -226,6 +240,8 @@ class MqttTargetConfiguration : TargetConfiguration(), Validate {
             sslServerCert: String? = default._sslServerCert,
             connectTimeout: Int = default._connectTimeout,
             topicName: String? = default._topicNameTemplate,
+            alternateTopicName: String? = default._alternateTopicName,
+            warnAlternateTopicName : Boolean = default._warnAlternateTopicName,
             qos : Int = default._qos,
             batchCount : Int? = default.batchCount,
             batchSize : Int? = default._batchSize,
@@ -248,6 +264,8 @@ class MqttTargetConfiguration : TargetConfiguration(), Validate {
                 _sslServerCert = sslServerCert
                 _connectTimeout = connectTimeout
                 _topicNameTemplate = topicName
+                _alternateTopicName = alternateTopicName
+                _warnAlternateTopicName = warnAlternateTopicName
                 _qos = qos
                 _batchCount = batchCount
                 _batchSize= batchSize

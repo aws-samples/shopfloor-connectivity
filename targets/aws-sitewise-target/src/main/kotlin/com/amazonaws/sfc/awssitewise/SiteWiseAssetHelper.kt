@@ -597,9 +597,6 @@ private fun AwsSiteWiseAssetCreationConfiguration.renderAssetTags(target: String
     this.assetTags, targetData.schedule, source, target, targetData.metaDataAtSourceLevel(source))
 
 
-private fun TargetData.metaDataAtSourceLevel(source: String) = this.metadata + (this.sources[source]?.metadata ?: emptyMap())
-private fun TargetData.metaDataAtChannelLevel(source: String, channel: String) = this.metaDataAtSourceLevel(source) + (this.sources[source]?.channels?.get(channel)?.metadata ?: emptyMap())
-
 private fun renderTemplate(template: String, schedule: String, source: String, channel: String, target: String, maxLength: Int, metadata: Map<String, String>?, useDateTime: Boolean = true): String {
     return renderTemplate(template, schedule, source, target, maxLength, metadata, useDateTime)
         .replace(TEMPLATE_CHANNEL, channel.replace(TEMPLATE_PRE_POSTFIX, ""))

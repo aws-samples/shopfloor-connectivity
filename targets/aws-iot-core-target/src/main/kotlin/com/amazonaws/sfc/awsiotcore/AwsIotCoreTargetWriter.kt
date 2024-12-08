@@ -8,6 +8,8 @@ package com.amazonaws.sfc.awsiotcore
 import com.amazonaws.sfc.awsiotcore.config.AwsIotCoreTargetConfiguration
 import com.amazonaws.sfc.awsiotcore.config.AwsIotCoreTargetConfiguration.Companion.CONFIG_BATCH_COUNT
 import com.amazonaws.sfc.awsiotcore.config.AwsIotCoreTargetConfiguration.Companion.CONFIG_BATCH_INTERVAL
+import com.amazonaws.sfc.awsiotcore.config.AwsIotCoreTargetConfiguration.Companion.CONFIG_TOPIC_NAME
+import com.amazonaws.sfc.awsiotcore.config.AwsIotCoreTargetConfiguration.Companion.CONFIG_ALTERNATE_TOPIC_NAME
 import com.amazonaws.sfc.awsiotcore.config.AwsIotCoreWriterConfiguration
 import com.amazonaws.sfc.awsiotcore.config.AwsIotCoreWriterConfiguration.Companion.AWS_IOT_CORE_TARGET
 import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_BATCH_SIZE
@@ -28,6 +30,10 @@ import com.amazonaws.sfc.targets.AwsServiceTargetClientHelper
 import com.amazonaws.sfc.targets.TargetDataChannel
 import com.amazonaws.sfc.targets.TargetException
 import com.amazonaws.sfc.util.*
+import com.amazonaws.sfc.util.TemplateRenderer.containsPlaceHolders
+import com.amazonaws.sfc.util.TemplateRenderer.getPlaceHolders
+
+import com.amazonaws.sfc.util.TemplateRenderer.render
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.selects.select
@@ -188,6 +194,10 @@ class AwsIotCoreTargetWriter(
                             targetResults?.add(targetData)
 
                             val topicMessages = mapTargetDataToTopics(targetData)
+                            if (topicMessages.size> 1){
+                                log.trace("Message ${targetData.serial} mapped to topics ${topicMessages.keys}")
+                            }
+
 
                             topicMessages.forEach { (topic, topicTargetData) ->
                                 val topicBuffer = buffers.computeIfAbsent(topic) { TargetDataBuffer(storeFullMessage = false) }
@@ -269,7 +279,7 @@ class AwsIotCoreTargetWriter(
 
     private fun bufferReachedMaxSizeOrMessages(buffer : TargetDataBuffer, topic : String,log: Logger.ContextLogger): Boolean {
 
-        val reachedBufferCount = if (targetConfig.batchCount > 1) buffer.size >= targetConfig.batchCount else false
+        val reachedBufferCount = if (targetConfig.batchCount > 0) buffer.size >= targetConfig.batchCount else false
         if (reachedBufferCount) log.trace("${targetConfig.batchCount} batch count for topic $topic reached")
 
         val reachedBufferSize = if (targetConfig.batchSize != 0) (buffer.payloadSize + (2 + (buffer.size - 1)) >= targetConfig.batchSize) else false
@@ -331,7 +341,7 @@ class AwsIotCoreTargetWriter(
 
                 val compressedStr = if (targetConfig.compressionType != CompressionType.NONE) " compressed " else " "
                 val itemStr = if (doesBatching) " containing ${buffer.size} items " else " "
-                log.trace("Published MQTT${compressedStr}message to topic ${topic} with size of ${payloadSize.byteCountString} ${itemStr}in $duration")
+                log.trace("Published MQTT${compressedStr}message to topic $topic with size of ${payloadSize.byteCountString} ${itemStr}in $duration")
 
                 createMetrics(targetID, metricDimensions, buffer.size, payloadSize, duration)
                 createTimer(topic)
@@ -413,46 +423,36 @@ class AwsIotCoreTargetWriter(
 
     }
 
-    private fun mapTargetDataToTopics(targetData: TargetData): Map<String, TargetData> {
+    private fun mapTargetDataToTopics(targetData: TargetData): Map<String, TargetData> =
+        targetData.splitDataByName(targetConfig.topicNameTemplate, ::buildTopicName)
 
-        if (!targetConfig.topicNameTemplate.contains(TEMPLATE_PRE_POSTFIX)) return mapOf(targetConfig.topicNameTemplate to targetData)
+    private fun buildTopicName(targetData: TargetData,
+                               sourceName: String,
+                               channel: String,
+                               channelMetadata: Map<String, String>): String {
 
-        val log = logger.getCtxLoggers(className, "mapTargetTargetDataToTopics")
+        val log = logger.getCtxLoggers(className, "buildTopicName")
 
-        val topicMap = targetData.sources.map { (sourceName, sourceData) ->
-            val sourceMetadata = metaDataAtSourceLevel(targetData, sourceName)
-            sourceData.channels.keys.map { channelName->
-                val channelMetadata = metaDataAtChannelLevel(targetData, sourceName, channelName) + sourceMetadata
-                val topicName = if (targetConfig.topicNameTemplate.contains(TEMPLATE_PRE_POSTFIX)) {
-                    // this is also checked in the configuration but checked here again in case any placeholders contain '/' and expand the level
-                    val name = renderTopicName(targetConfig.topicNameTemplate, targetData.schedule, sourceName, channelName, targetID, channelMetadata)
-                    val parts = name.split('/')
-                    if (parts.size > 8) {
-                        val truncateName = parts.subList(0, 8).joinToString(separator = "/") { it }
-                        log.warning("Rendered topic name \"$name\" is longer than 8 levels, which is the maximum allowed by AWS IoT Core, name truncated to \"$truncateName\"")
-                        truncateName
-                    } else name
-                } else targetConfig.topicNameTemplate
-                topicName to (sourceName to channelName)
+        var topicName = if (containsPlaceHolders(targetConfig.topicNameTemplate)) {
+            render(targetConfig.topicNameTemplate, targetData.schedule, sourceName, channel, targetID, channelMetadata)
+        } else targetConfig.topicNameTemplate
+
+        if (containsPlaceHolders(topicName)) {
+            val messageStr = "Source \"$sourceName\", channel \"${channel}\""
+            if (targetConfig.alternateTopicName != null) {
+                log.trace("$messageStr has unmapped placeholder(s) ${getPlaceHolders(topicName)} in topic name \"$topicName\", using $CONFIG_TOPIC_NAME \"${targetConfig.topicNameTemplate}\", trying alternative $CONFIG_ALTERNATE_TOPIC_NAME \"${targetConfig.alternateTopicName}\"")
+                topicName = render(targetConfig.alternateTopicName!!, targetData.schedule, sourceName, channel, targetID, channelMetadata)
+                if (containsPlaceHolders(topicName)) {
+                    if (targetConfig.warnAlternateTopicName) log.warning("$messageStr has unmapped placeholder(s) ${getPlaceHolders(topicName)} in topic name \"$topicName\", using $CONFIG_ALTERNATE_TOPIC_NAME \"${targetConfig.alternateTopicName}\"")
+                    topicName = ""
+                }
+            } else {
+                if (targetConfig.warnAlternateTopicName) log.warning("$messageStr has unmapped placeholder(s) ${getPlaceHolders(topicName)} in topic name \"$topicName\", using $CONFIG_TOPIC_NAME \"${targetConfig.topicNameTemplate}\"")
+                topicName = ""
             }
-        }.flatten().toMap()
-
-        val mappedTargetData = topicMap.map { (topic, s) ->
-            topic to TargetData(targetData.schedule, sources =
-            targetData.sources.filter { it.key == s.first }.map { (source, sourceData) ->
-                val channels = sourceData.channels.filter { it.key == s.second }
-                source to SourceOutputData(channels, sourceData.timestamp, metadata = sourceData.metadata, isAggregated = sourceData.isAggregated)
-            }.toMap(),
-                metadata = targetData.metadata,
-                serial = targetData.serial, noBuffering = targetData.noBuffering,
-                timestamp = targetData.timestamp)
-
-        }.toMap()
-
-        log.trace("Message ${targetData.serial} mapped to topics ${mappedTargetData.keys}")
-        return mappedTargetData
+        }
+        return topicName
     }
-
 
     companion object {
         @JvmStatic
@@ -469,7 +469,7 @@ class AwsIotCoreTargetWriter(
          * Creates a new instance of an AWS IoT target writer.
          * @param configReader ConfigReader Reader for reading the target configuration
          * @param targetID String ID of the target
-         * @param logger Logger Logger to use for output
+
          * @return TargetWriter Created AWS IoT target writer
          * @see TargetWriter,
          * @see AwsIotCoreTargetConfiguration
@@ -491,34 +491,6 @@ class AwsIotCoreTargetWriter(
         )
 
         private const val AWS_IOT_CORE_MAX_PAYLOAD_SIZE = 128 * 1024
-
-        private const val TEMPLATE_PRE_POSTFIX = "%"
-        private const val TEMPLATE_SCHEDULE = "${TEMPLATE_PRE_POSTFIX}schedule${TEMPLATE_PRE_POSTFIX}"
-        private const val TEMPLATE_SOURCE = "${TEMPLATE_PRE_POSTFIX}source${TEMPLATE_PRE_POSTFIX}"
-        private const val TEMPLATE_TARGET = "${TEMPLATE_PRE_POSTFIX}target${TEMPLATE_PRE_POSTFIX}"
-        private const val TEMPLATE_CHANNEL = "${TEMPLATE_PRE_POSTFIX}channel${TEMPLATE_PRE_POSTFIX}"
-
-
-        private fun renderTopicName(template: String, schedule: String, source: String, channel: String, target: String, metadata: Map<String, String>?): String {
-
-            var s = template
-                .replace(TEMPLATE_SCHEDULE, schedule.replace(TEMPLATE_PRE_POSTFIX, ""))
-                .replace(TEMPLATE_SOURCE, source.replace(TEMPLATE_PRE_POSTFIX, ""))
-                .replace(TEMPLATE_CHANNEL, channel.replace(TEMPLATE_PRE_POSTFIX, ""))
-                .replace(TEMPLATE_TARGET, target.replace(TEMPLATE_PRE_POSTFIX, ""))
-
-            if (metadata != null) {
-                for (entry in metadata) {
-                    s = s.replace(
-                        "${TEMPLATE_PRE_POSTFIX}${entry.key}$TEMPLATE_PRE_POSTFIX", entry.value.replace(TEMPLATE_PRE_POSTFIX, ""))
-                }
-            }
-            return s
-        }
-
-        private fun metaDataAtSourceLevel(targetData: TargetData, source: String) = targetData.metadata + (targetData.sources[source]?.metadata ?: emptyMap())
-        private fun metaDataAtChannelLevel(targetData: TargetData, source: String, channel: String) = (targetData.sources[source]?.channels?.get(channel)?.metadata ?: emptyMap())
     }
-
 
 }

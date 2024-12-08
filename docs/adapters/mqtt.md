@@ -14,7 +14,8 @@ configuration types
 
 ## MqttSourceConfiguration
 
-The MqttSourceConfiguration extends the common <a href = "../core/source-configuration.md" >Source configuration</a> with MQTT specific source configuration data
+The MqttSourceConfiguration extends the common <a href = "../core/source-configuration.md" >Source configuration</a> with 
+MQTT specific source configuration data. The AdapterType for the source must be set to **MQTT**.
 
 <table>
 <colgroup>
@@ -74,7 +75,7 @@ The MqttChannelConfiguration extends the common Channel configuration with MQTT 
 
 <tr class="even">
 <td>Topics</td>
-<td>A string containing the topics to subscribe to. The topic names may contain single-level (+) and multi-level (#) wildcards</td>
+<td>A string array  containing the topics to subscribe to. The topic names may contain single-level (+) and multi-level (#) wildcards</td>
 <td>String[]</td>
 <td>The must be at least one topic in the list of topics.</td>
 </tr>
@@ -97,7 +98,7 @@ The MqttChannelConfiguration extends the common Channel configuration with MQTT 
 <td>Selector</td>
 <td><p>Evaluate a <a href="https://jmespath.org/">JMESpath</a> query against the value of a structured data type and returns the result.</p>
 <p>The selector can be used to restructure or select values from structured data types.</p></td>
-<td>Datatype: Structure or array</td>
+<td>Datatype: String</td>
 <td>Parameter: <a href="https://jmespath.org/">JMESPath</a> expression, see https://jmespath.org/</td>
 </tr>
 
@@ -168,7 +169,7 @@ The mapping of topic names of received data updates to data value names
 <td>Selector</td>
 <td><p>Evaluate a <a href="https://jmespath.org/">JMESpath</a> query against the value of a structured data type and returns the result.</p>
 <p>The selector can be used to restructure or select values from structured data types.</p></td>
-<td>Datatype: Structure or array</td>
+<td>String</td>
 <td>Parameter: <a href="https://jmespath.org/">JMESPath</a> expression, see https://jmespath.org/</td>
 </tr>
 

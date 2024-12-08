@@ -22,11 +22,16 @@ import com.amazonaws.sfc.mqtt.config.MqttTargetConfiguration
 import com.amazonaws.sfc.mqtt.config.MqttTargetConfiguration.Companion.CONFIG_BATCH_COUNT
 import com.amazonaws.sfc.mqtt.config.MqttTargetConfiguration.Companion.CONFIG_BATCH_INTERVAL
 import com.amazonaws.sfc.mqtt.config.MqttTargetConfiguration.Companion.CONFIG_BATCH_SIZE
+import com.amazonaws.sfc.mqtt.config.MqttTargetConfiguration.Companion.CONFIG_TOPIC_NAME
+import com.amazonaws.sfc.mqtt.config.MqttTargetConfiguration.Companion.CONFIG_ALTERNATE_TOPIC_NAME
 import com.amazonaws.sfc.mqtt.config.MqttWriterConfiguration
 import com.amazonaws.sfc.mqtt.config.MqttWriterConfiguration.Companion.MQTT_TARGET
 import com.amazonaws.sfc.targets.TargetDataChannel
 import com.amazonaws.sfc.targets.TargetException
 import com.amazonaws.sfc.util.*
+import com.amazonaws.sfc.util.TemplateRenderer.containsPlaceHolders
+import com.amazonaws.sfc.util.TemplateRenderer.getPlaceHolders
+import com.amazonaws.sfc.util.TemplateRenderer.render
 import com.google.gson.JsonSyntaxException
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
@@ -102,7 +107,6 @@ class MqttTargetWriter(
      */
     override suspend fun close() {
         try {
-            targetDataChannel.close()
             writer.cancel()
             _mqttClient?.disconnect()
             _mqttClient?.close()
@@ -138,6 +142,9 @@ class MqttTargetWriter(
                             targetResults?.add(targetData)
 
                             val topicMessages = mapTargetDataToTopics(targetData)
+                            if (topicMessages.size > 1) {
+                                log.trace("Message ${targetData.serial} mapped to topics ${topicMessages.keys}")
+                            }
 
                             topicMessages.forEach { (topic, topicTargetData) ->
 
@@ -209,10 +216,10 @@ class MqttTargetWriter(
     }
 
     private fun bufferReachedMaxSizeOrMessages(buffer: TargetDataBuffer, topic: String, log: Logger.ContextLogger): Boolean {
-        val reachedBufferCount = if (targetConfig.batchCount > 1) (buffer.size >= targetConfig.batchCount) else false
+        val reachedBufferCount = if (targetConfig.batchCount > 0) (buffer.size >= targetConfig.batchCount) else false
         if (reachedBufferCount) log.trace("${targetConfig.batchCount} batch count reached")
 
-        val reachedBufferSize = (buffer.payloadSize + (2 + (buffer.size - 1)) >= targetConfig.batchSize)
+        val reachedBufferSize = (targetConfig.batchSize > 0) && (buffer.payloadSize + (2 + (buffer.size - 1)) >= targetConfig.batchSize)
 
         if (reachedBufferSize) log.trace("${targetConfig.batchSize.byteCountString} batch size for topic $topic reached")
 
@@ -312,12 +319,14 @@ class MqttTargetWriter(
             }
 
         } catch (e: Exception) {
-            runBlocking { metricsCollector?.put(targetID, METRICS_WRITE_ERRORS, 1.0, MetricUnits.COUNT, metricDimensions) }
-            log.errorEx("Error publishing to topic \"topic\" for target \"$targetID\", ${e.message}", e)
-            if (e is TimeoutCancellationException || _mqttClient == null) {
-                targetResults?.nackBuffered()
-            } else {
-                targetResults?.errorBuffered()
+            if (!e.isJobCancellationException) {
+                metricsCollector?.put(targetID, METRICS_WRITE_ERRORS, 1.0, MetricUnits.COUNT, metricDimensions)
+                log.errorEx("Error publishing to topic \"topic\" for target \"$targetID\", ${e.message}", e)
+                if (e is TimeoutCancellationException || _mqttClient == null) {
+                    targetResults?.nackBuffered()
+                } else {
+                    targetResults?.errorBuffered()
+                }
             }
             createTimer(topic)
         } finally {
@@ -368,74 +377,71 @@ class MqttTargetWriter(
     private fun createMetrics(
         adapterID: String,
         metricDimensions: MetricDimensions,
-        buffer : TargetDataBuffer,
+        buffer: TargetDataBuffer,
         payloadSize: Int,
         duration: Duration
     ) {
 
-        runBlocking {
-            metricsCollector?.put(
+        metricsCollector?.put(
+            adapterID,
+            metricsCollector?.buildValueDataPoint(
                 adapterID,
-                metricsCollector?.buildValueDataPoint(
-                    adapterID,
-                    MetricsCollector.METRICS_MEMORY,
-                    MemoryMonitor.getUsedMemoryMB().toDouble(),
-                    MetricUnits.MEGABYTES
-                ),
-                metricsCollector?.buildValueDataPoint(
-                    adapterID,
-                    MetricsCollector.METRICS_MEMORY,
-                    MemoryMonitor.getUsedMemoryMB().toDouble(),
-                    MetricUnits.MEGABYTES
-                ),
-                metricsCollector?.buildValueDataPoint(adapterID, METRICS_WRITES, 1.0, MetricUnits.COUNT, metricDimensions),
-                metricsCollector?.buildValueDataPoint(adapterID, METRICS_BYTES_SEND, payloadSize.toDouble(), MetricUnits.COUNT, metricDimensions),
-                metricsCollector?.buildValueDataPoint(adapterID, METRICS_MESSAGES, buffer.size.toDouble(), MetricUnits.COUNT, metricDimensions),
-                metricsCollector?.buildValueDataPoint(
-                    adapterID,
-                    METRICS_WRITE_DURATION,
-                    duration.inWholeMilliseconds.toDouble(),
-                    MetricUnits.MILLISECONDS,
-                    metricDimensions
-                ),
-                metricsCollector?.buildValueDataPoint(adapterID, METRICS_WRITE_SUCCESS, 1.0, MetricUnits.COUNT, metricDimensions),
-                metricsCollector?.buildValueDataPoint(adapterID, METRICS_WRITE_SIZE, buffer.payloadSize.toDouble(), MetricUnits.BYTES, metricDimensions)
-            )
-        }
+                MetricsCollector.METRICS_MEMORY,
+                MemoryMonitor.getUsedMemoryMB().toDouble(),
+                MetricUnits.MEGABYTES
+            ),
+            metricsCollector?.buildValueDataPoint(
+                adapterID,
+                MetricsCollector.METRICS_MEMORY,
+                MemoryMonitor.getUsedMemoryMB().toDouble(),
+                MetricUnits.MEGABYTES
+            ),
+            metricsCollector?.buildValueDataPoint(adapterID, METRICS_WRITES, 1.0, MetricUnits.COUNT, metricDimensions),
+            metricsCollector?.buildValueDataPoint(adapterID, METRICS_BYTES_SEND, payloadSize.toDouble(), MetricUnits.COUNT, metricDimensions),
+            metricsCollector?.buildValueDataPoint(adapterID, METRICS_MESSAGES, buffer.size.toDouble(), MetricUnits.COUNT, metricDimensions),
+            metricsCollector?.buildValueDataPoint(
+                adapterID,
+                METRICS_WRITE_DURATION,
+                duration.inWholeMilliseconds.toDouble(),
+                MetricUnits.MILLISECONDS,
+                metricDimensions
+            ),
+            metricsCollector?.buildValueDataPoint(adapterID, METRICS_WRITE_SUCCESS, 1.0, MetricUnits.COUNT, metricDimensions),
+            metricsCollector?.buildValueDataPoint(adapterID, METRICS_WRITE_SIZE, buffer.payloadSize.toDouble(), MetricUnits.BYTES, metricDimensions)
+        )
 
     }
 
-    private fun mapTargetDataToTopics(targetData: TargetData): Map<String, TargetData> {
 
-        if (!targetConfig.topicNameTemplate.contains(TEMPLATE_PRE_POSTFIX)) return mapOf(targetConfig.topicNameTemplate to targetData)
+    private fun mapTargetDataToTopics(targetData: TargetData): Map<String, TargetData> =
+        targetData.splitDataByName(targetConfig.topicNameTemplate, ::buildTopicName)
 
-        val log = logger.getCtxLoggers(className, "mapTargetTargetDataToTopics")
+    private fun buildTopicName(targetData: TargetData,
+                               sourceName: String,
+                               channel: String,
+                               channelMetadata: Map<String, String>): String {
 
-        val topicMap = targetData.sources.map { (sourceName, sourceData) ->
-            val sourceMetadata = metaDataAtSourceLevel(targetData, sourceName)
-            sourceData.channels.keys.map { channelName ->
-                val channelMetadata = metaDataAtChannelLevel(targetData, sourceName, channelName) + sourceMetadata
-                val topicName = if (targetConfig.topicNameTemplate.contains(TEMPLATE_PRE_POSTFIX)) {
-                    renderTopicName(targetConfig.topicNameTemplate, targetData.schedule, sourceName, channelName, targetID, channelMetadata)
-                } else targetConfig.topicNameTemplate
-                topicName to (sourceName to channelName)
+        val log = logger.getCtxLoggers(className, "buildTopicName")
+
+        var topicName = if (containsPlaceHolders(targetConfig.topicNameTemplate)) {
+            render(targetConfig.topicNameTemplate, targetData.schedule, sourceName, channel, targetID, channelMetadata)
+        } else targetConfig.topicNameTemplate
+
+        if (containsPlaceHolders(topicName)) {
+            val messageStr = "Source \"$sourceName\", channel \"${channel}\""
+            if (targetConfig.alternateTopicName != null) {
+                log.trace("$messageStr has unmapped placeholder(s) ${getPlaceHolders(topicName)} in topic name \"$topicName\", using $CONFIG_TOPIC_NAME \"${targetConfig.topicNameTemplate}\", trying alternative $CONFIG_ALTERNATE_TOPIC_NAME \"${targetConfig.alternateTopicName}\"")
+                topicName = render(targetConfig.alternateTopicName!!, targetData.schedule, sourceName, channel, targetID, channelMetadata)
+                if (containsPlaceHolders(topicName)) {
+                    if (targetConfig.warnAlternateTopicName) log.warning("$messageStr has unmapped placeholder(s) ${getPlaceHolders(topicName)} in topic name \"$topicName\", using $CONFIG_ALTERNATE_TOPIC_NAME \"${targetConfig.alternateTopicName}\"")
+                    topicName = ""
+                }
+            } else {
+                if (targetConfig.warnAlternateTopicName) log.warning("$messageStr has unmapped placeholder(s) ${getPlaceHolders(topicName)} in topic name \"$topicName\", using $CONFIG_TOPIC_NAME \"${targetConfig.topicNameTemplate}\"")
+                topicName = ""
             }
-        }.flatten().toMap()
-
-        val mappedTargetData = topicMap.map { (topic, s) ->
-            topic to TargetData(targetData.schedule, sources =
-            targetData.sources.filter { it.key == s.first }.map { (source, sourceData) ->
-                val channels = sourceData.channels.filter { it.key == s.second }
-                source to SourceOutputData(channels, sourceData.timestamp, metadata = sourceData.metadata, isAggregated = sourceData.isAggregated)
-            }.toMap(),
-                metadata = targetData.metadata,
-                serial = targetData.serial, noBuffering = targetData.noBuffering,
-                timestamp = targetData.timestamp)
-
-        }.toMap()
-
-        log.trace("Message ${targetData.serial} mapped to topics ${mappedTargetData.keys}")
-        return mappedTargetData
+        }
+        return topicName
     }
 
     companion object {
@@ -486,33 +492,6 @@ class MqttTargetWriter(
         val TARGET_METRIC_DIMENSIONS = mapOf(
             MetricsCollector.METRICS_DIMENSION_SOURCE_CATEGORY to METRICS_DIMENSION_SOURCE_CATEGORY_TARGET
         )
-
-        private const val TEMPLATE_PRE_POSTFIX = "%"
-        private const val TEMPLATE_SCHEDULE = "${TEMPLATE_PRE_POSTFIX}schedule${TEMPLATE_PRE_POSTFIX}"
-        private const val TEMPLATE_SOURCE = "${TEMPLATE_PRE_POSTFIX}source${TEMPLATE_PRE_POSTFIX}"
-        private const val TEMPLATE_TARGET = "${TEMPLATE_PRE_POSTFIX}target${TEMPLATE_PRE_POSTFIX}"
-        private const val TEMPLATE_CHANNEL = "${TEMPLATE_PRE_POSTFIX}channel${TEMPLATE_PRE_POSTFIX}"
-
-
-        private fun renderTopicName(template: String, schedule: String, source: String, channel: String, target: String, metadata: Map<String, String>?): String {
-
-            var s = template
-                .replace(TEMPLATE_SCHEDULE, schedule.replace(TEMPLATE_PRE_POSTFIX, ""))
-                .replace(TEMPLATE_SOURCE, source.replace(TEMPLATE_PRE_POSTFIX, ""))
-                .replace(TEMPLATE_CHANNEL, channel.replace(TEMPLATE_PRE_POSTFIX, ""))
-                .replace(TEMPLATE_TARGET, target.replace(TEMPLATE_PRE_POSTFIX, ""))
-
-            if (metadata != null) {
-                for (entry in metadata) {
-                    s = s.replace(
-                        "${TEMPLATE_PRE_POSTFIX}${entry.key}$TEMPLATE_PRE_POSTFIX", entry.value.replace(TEMPLATE_PRE_POSTFIX, ""))
-                }
-            }
-            return s
-        }
-
-        private fun metaDataAtSourceLevel(targetData: TargetData, source: String) = targetData.metadata + (targetData.sources[source]?.metadata ?: emptyMap())
-        private fun metaDataAtChannelLevel(targetData: TargetData, source: String, channel: String) = (targetData.sources[source]?.channels?.get(channel)?.metadata ?: emptyMap())
 
     }
 

@@ -27,6 +27,7 @@ import java.util.logging.LogManager
 import java.util.logging.LogRecord
 
 
+
 typealias LogFunction = (String, String?, Exception?) -> Unit
 
 interface LogWriter {
@@ -64,7 +65,15 @@ class Logger(
         }
 
     init {
-        _secretNames.addAll(listOf(ClientProxyConfiguration.CONFIG_PROXY_USERNAME, ClientProxyConfiguration.CONFIG_PROXY_PASSWORD))
+        _secretNames.addAll(listOf(
+            BaseConfiguration.CONFIG_USERNAME,
+            BaseConfiguration.CONFIG_PASSWORD,
+            BaseConfiguration.CONFIG_TOKEN,
+            "${CONFIG_CERTIFICATE}Bytes",
+            "${CONFIG_PRIVATE_KEY}Bytes",
+            "${CONFIG_ROOT_CA}Bytes",
+            ClientProxyConfiguration.CONFIG_PROXY_USERNAME,
+            ClientProxyConfiguration.CONFIG_PROXY_PASSWORD))
     }
 
     fun addSecretsFieldsFromConfig(configString: String) {

@@ -1,4 +1,3 @@
-
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: MIT-0
 
@@ -34,8 +33,19 @@ class AwsIotCoreTargetConfiguration : AwsServiceConfig, TargetConfiguration() {
      * Name of the topic
      */
     val topicNameTemplate: String
-        get() = _topicName ?:""
+        get() = _topicName ?: ""
 
+
+    @SerializedName(CONFIG_ALTERNATE_TOPIC_NAME)
+    private var _alternateTopicName
+    : String? = null
+    val alternateTopicName: String?
+        get() = _alternateTopicName
+
+    @SerializedName(CONFIG_WARN_UNMAPPED_TOPIC_NAME)
+    private var _warnUnmappedTopicName: Boolean = true
+    val warnAlternateTopicName: Boolean
+        get() = _warnUnmappedTopicName
 
     @SerializedName(CONFIG_REGION)
     private var _region: String? = null
@@ -49,7 +59,7 @@ class AwsIotCoreTargetConfiguration : AwsServiceConfig, TargetConfiguration() {
     @SerializedName(CONFIG_RETAIN)
     private var _retain: Boolean = false
     val retain: Boolean
-            get() = _retain
+        get() = _retain
 
     /**
      * Validates topic configuration, throws ConfigurationException if it is invalid.
@@ -67,12 +77,12 @@ class AwsIotCoreTargetConfiguration : AwsServiceConfig, TargetConfiguration() {
 
     private fun validateTopic() {
 
-            ConfigurationException.check(
-                (!_topicName.isNullOrEmpty()),
-                "$CONFIG_TOPIC_NAME is required",
-                CONFIG_TOPIC_NAME,
-                this
-            )
+        ConfigurationException.check(
+            (!_topicName.isNullOrEmpty()),
+            "$CONFIG_TOPIC_NAME is required",
+            CONFIG_TOPIC_NAME,
+            this
+        )
 
         ConfigurationException.check(
             (!_topicName!!.startsWith("$")),
@@ -108,7 +118,7 @@ class AwsIotCoreTargetConfiguration : AwsServiceConfig, TargetConfiguration() {
     @SerializedName(CONFIG_BATCH_COUNT)
     private var _batchCount: Int? = null
     val batchCount
-        get() = _batchCount ?:0
+        get() = _batchCount ?: 0
 
     @SerializedName(CONFIG_BATCH_SIZE)
     private var _batchSize: Int? = null
@@ -117,7 +127,7 @@ class AwsIotCoreTargetConfiguration : AwsServiceConfig, TargetConfiguration() {
 
     @SerializedName(CONFIG_BATCH_INTERVAL)
     private var _batchInterval: Int? = null
-    val batchInterval : Duration
+    val batchInterval: Duration
         get() = _batchInterval?.toDuration(DurationUnit.MILLISECONDS) ?: Duration.INFINITE
 
     @SerializedName(Compress.CONFIG_COMPRESS)
@@ -128,11 +138,14 @@ class AwsIotCoreTargetConfiguration : AwsServiceConfig, TargetConfiguration() {
         get() = _compressionType ?: CompressionType.NONE
 
     companion object {
-        private const val CONFIG_TOPIC_NAME = "TopicName"
+        const val CONFIG_TOPIC_NAME = "TopicName"
+        const val CONFIG_ALTERNATE_TOPIC_NAME = "AlternateTopicName"
+        const val CONFIG_WARN_UNMAPPED_TOPIC_NAME = "WarnAlternateTopicName"
         const val CONFIG_BATCH_SIZE = "BatchSize"
         const val CONFIG_BATCH_COUNT = "BatchCount"
         const val CONFIG_BATCH_INTERVAL = "BatchInterval"
-        const val CONFIG_RETAIN= "Retain"
+        const val CONFIG_RETAIN = "Retain"
+
 
         private val default = AwsIotCoreTargetConfiguration()
 
@@ -142,14 +155,17 @@ class AwsIotCoreTargetConfiguration : AwsServiceConfig, TargetConfiguration() {
                    description: String = default._description,
                    active: Boolean = default._active,
                    template: String? = default._template,
+                   unmappedTopicName: String? = default._alternateTopicName,
+                   warnUnmappedTopicNameTemplate : Boolean = default._warnUnmappedTopicName,
                    targetServer: String? = default._server,
                    metrics: MetricsSourceConfiguration = default._metrics,
                    credentialProviderClient: String? = default._credentialProvideClient,
-                   batchCount : Int? = default.batchCount,
-                   batchSize : Int? = default._batchSize,
-                   batchInterval : Int? = default._batchInterval): AwsIotCoreTargetConfiguration {
+                   batchCount: Int? = default.batchCount,
+                   batchSize: Int? = default._batchSize,
+                   batchInterval: Int? = default._batchInterval): AwsIotCoreTargetConfiguration {
 
-            val instance = createTargetConfiguration<AwsIotCoreTargetConfiguration>(description = description,
+            val instance = createTargetConfiguration<AwsIotCoreTargetConfiguration>(
+                description = description,
                 active = active,
                 targetType = AWS_IOT_CORE_TARGET,
                 template = template,
@@ -159,10 +175,12 @@ class AwsIotCoreTargetConfiguration : AwsServiceConfig, TargetConfiguration() {
 
             with(instance) {
                 _topicName = topicName
+                _alternateTopicName = unmappedTopicName
+                _warnUnmappedTopicName = warnUnmappedTopicNameTemplate
                 _region = region
                 _retain = retain
                 _batchCount = batchCount
-                _batchSize= batchSize
+                _batchSize = batchSize
                 _batchInterval = batchInterval
             }
             return instance

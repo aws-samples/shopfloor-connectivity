@@ -293,6 +293,9 @@ open class BaseConfiguration : Validate, HasSecretsManager {
         const val CONFIG_INTERVAL = "Interval"
         const val CONFIG_BYTES_SUFFIX = "Bytes"
         const val CONFIG_TEMPLATES = "Templates"
+        const val CONFIG_USERNAME = "Username"
+        const val CONFIG_PASSWORD = "Password"
+        const val CONFIG_TOKEN = "Token"
         const val CONFIG_MONITOR_INCLUDED_CONFIG_FILES = "MonitorIncludedConfigFiles"
         const val CONFIG_MONITOR_INCLUDED_CONFIG_CONTENT_INTERVAL = "MonitorIncludedConfigContentInterval"
 

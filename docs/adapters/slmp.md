@@ -24,7 +24,8 @@ In order to reduce the number of interactions between the adapter and the contro
 
 ## SlmpSourceConfiguration
 
-The SLMPSourceConfiguration extends the common <a href="../core/source-configuration.md">Source configuration</a> with SLMP specific source configuration data.
+The SLMPSourceConfiguration extends the common <a href="../core/source-configuration.md">Source configuration</a> with 
+SLMP specific source configuration data. The AdapterType for the source must be set to **SLMP**.
 
 <table>
 <colgroup>
@@ -149,7 +150,7 @@ Valid data types are:
 - "DOUBLEWORD" (read as 32-bit integer)
 - "STRING(x)" (read as words and decoded to as a string of length x or shorter if the string is zero terminated)
 
-It is possible to define custom structures and use these as a data type as well. These structures are defined in the "Structures" section of the SLMP adapter configuration. All fiels which can be any the types mentioned above, or another custom structure type, are mapped from the read word data to the fields of the structure in the order in which they are declared in the type.
+It is possible to define custom structures and use these as a data type as well. These structures are defined in the "Structures" section of the SLMP adapter configuration. All fields which can be any the types mentioned above, or another custom structure type, are mapped from the read word data to the fields of the structure in the order in which they are declared in the type.
 
 <p>
 In order to read multiple values, returned as an array, starting at the specified access point the number of items can be appended to the data type.

@@ -13,7 +13,7 @@ import com.amazonaws.sfc.service.ServiceMain
 import kotlinx.coroutines.runBlocking
 
 /**
- *  IPC service for AWS IoT core target
+ *  IPC service for MQTT target
  */
 class MqttTargetService : ServiceMain() {
 
