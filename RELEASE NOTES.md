@@ -1,5 +1,12 @@
 # Release Notes:
 
+## Version 1.7.0.0
+
+- NATS protocol adapter
+- NATS target
+- MQTT target topic name template
+- AWS IoT Core topic name template
+
 ## Version 1.5.4 15 November 2024
 
 - Added message retain option to IoT Core and MQTT target adapters
