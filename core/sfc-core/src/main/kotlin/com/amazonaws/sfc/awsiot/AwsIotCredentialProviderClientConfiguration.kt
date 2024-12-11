@@ -12,6 +12,7 @@ import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_PRIVATE_KEY
 import com.amazonaws.sfc.data.JsonHelper
 import com.amazonaws.sfc.log.Logger.Companion.HIDDEN_VALUE
 import com.google.gson.annotations.SerializedName
+import kotlin.Throws
 
 @ConfigurationClass
 class AwsIotCredentialProviderClientConfiguration : ClientConfiguration(), Validate {

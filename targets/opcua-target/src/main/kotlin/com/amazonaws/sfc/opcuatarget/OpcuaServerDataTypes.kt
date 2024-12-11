@@ -6,6 +6,7 @@ package com.amazonaws.sfc.opcuatarget
 
 
 import com.amazonaws.sfc.data.JsonHelper
+import com.amazonaws.sfc.opcuatarget.OpcuaServerDataTypes.entries
 import org.eclipse.milo.opcua.stack.core.Identifiers
 import org.eclipse.milo.opcua.stack.core.types.builtin.*
 import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UInteger

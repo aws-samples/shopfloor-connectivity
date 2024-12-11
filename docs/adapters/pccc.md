@@ -15,7 +15,7 @@ configuration types
 
 The following datatype with their addresses can be used as the value of “Address” in a PcccChannel.
 
-Datatype OUPUT, Prefix O
+Datatype OUTPUT, Prefix O
 
 Default file number 0
 
@@ -241,7 +241,8 @@ Syntax: A\<file number\>:\<element index\>\[/character offset\]
 
 ## PcccSourceConfiguration
 
-The PCCCSourceConfiguration extends the common <a href="../core/source-configuration.md">Source configuration</a> with PCCC specific source configuration data
+The PCCCSourceConfiguration extends the common <a href="../core/source-configuration.md">Source configuration</a> with
+PCCC specific source configuration data. The AdapterType for the source must be set to **PCCC**.
 
 <table>
 <colgroup>

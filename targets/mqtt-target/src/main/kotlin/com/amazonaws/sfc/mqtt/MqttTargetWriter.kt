@@ -7,6 +7,7 @@ package com.amazonaws.sfc.mqtt
 import com.amazonaws.sfc.config.ConfigReader
 import com.amazonaws.sfc.data.*
 import com.amazonaws.sfc.data.JsonHelper.Companion.extendedJsonException
+import com.amazonaws.sfc.log.LogLevel
 import com.amazonaws.sfc.log.Logger
 import com.amazonaws.sfc.metrics.*
 import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_BYTES_SEND
@@ -19,21 +20,28 @@ import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_WRITE_ERRORS
 import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_WRITE_SIZE
 import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_WRITE_SUCCESS
 import com.amazonaws.sfc.mqtt.config.MqttTargetConfiguration
+import com.amazonaws.sfc.mqtt.config.MqttTargetConfiguration.Companion.CONFIG_ALTERNATE_TOPIC_NAME
 import com.amazonaws.sfc.mqtt.config.MqttTargetConfiguration.Companion.CONFIG_BATCH_COUNT
 import com.amazonaws.sfc.mqtt.config.MqttTargetConfiguration.Companion.CONFIG_BATCH_INTERVAL
 import com.amazonaws.sfc.mqtt.config.MqttTargetConfiguration.Companion.CONFIG_BATCH_SIZE
+import com.amazonaws.sfc.mqtt.config.MqttTargetConfiguration.Companion.CONFIG_TOPIC_NAME
 import com.amazonaws.sfc.mqtt.config.MqttWriterConfiguration
 import com.amazonaws.sfc.mqtt.config.MqttWriterConfiguration.Companion.MQTT_TARGET
 import com.amazonaws.sfc.targets.TargetDataChannel
 import com.amazonaws.sfc.targets.TargetException
 import com.amazonaws.sfc.util.*
+import com.amazonaws.sfc.util.TemplateRenderer.containsPlaceHolders
+import com.amazonaws.sfc.util.TemplateRenderer.getPlaceHolders
+import com.amazonaws.sfc.util.TemplateRenderer.render
 import com.google.gson.JsonSyntaxException
 import kotlinx.coroutines.*
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.selects.select
 import org.eclipse.paho.client.mqttv3.MqttClient
 import org.eclipse.paho.client.mqttv3.MqttMessage
 import java.io.ByteArrayOutputStream
 import java.util.*
+import java.util.concurrent.ConcurrentHashMap
 import kotlin.coroutines.CoroutineContext
 import kotlin.time.Duration
 import kotlin.time.measureTime
@@ -57,7 +65,10 @@ class MqttTargetWriter(
         MetricsCollector.METRICS_DIMENSION_TYPE to className
     )
 
-    private val buffer = TargetDataBuffer(storeFullMessage = false)
+    private val buffers = ConcurrentHashMap<String, TargetDataBuffer>()// TargetDataBuffer(storeFullMessage = false)
+    private val timers = ConcurrentHashMap<String, Job>()
+    private val timerChannel = Channel<String>(capacity = 100)
+
     private val doesBatching by lazy { targetConfig.batchSize != 0 || targetConfig.batchCount != 0 || targetConfig.batchInterval != Duration.INFINITE }
     private val usesCompression = targetConfig.compressionType != CompressionType.NONE
 
@@ -97,7 +108,6 @@ class MqttTargetWriter(
      */
     override suspend fun close() {
         try {
-            targetDataChannel.close()
             writer.cancel()
             _mqttClient?.disconnect()
             _mqttClient?.close()
@@ -121,67 +131,98 @@ class MqttTargetWriter(
     private val writer = scope.launch(context = Dispatchers.IO, name = "Writer") {
         val log = logger.getCtxLoggers(className, "writer")
 
-        var timer = createTimer()
 
-        log.info("MQTT Writer for target \"$targetID\" writer publishing to topic \"${targetConfig.topicName}\" at endpoint ${targetConfig.endPoint} on target $targetID")
-        while (isActive) {
-            try {
-                select {
+        try {
+            log.info("MQTT Writer for target \"$targetID\" writer publishing to topics at endpoint ${targetConfig.endPoint} on target $targetID")
+            while (isActive) {
+                try {
+                    select {
 
-                    targetDataChannel.channel.onReceive { targetData ->
+                        targetDataChannel.channel.onReceive { targetData ->
 
-                        val messagePayload = buildPayload(targetData)
-
-                        if (checkMessagePayloadSize(targetData, messagePayload.length, log)) {
-
-                            if (exceedBufferOrMaxPayloadWhenBufferingMessage(messagePayload)) {
-                                log.trace("Batch size of ${targetConfig.batchSize.byteCountString}${if (targetConfig.maxPayloadSize != null) " or ${targetConfig.maxPayloadSize!!.byteCountString}" else ""}}reached")
-                                timer = writeBufferedMessages(timer)
-                            }
                             targetResults?.add(targetData)
-                            buffer.add(targetData, messagePayload)
 
-                            log.trace("Received message, buffered size is ${buffer.payloadSize.byteCountString}")
-
-                            if (targetData.noBuffering || !doesBatching || bufferReachedMaxSizeOrMessages(log)) {
-                                timer = writeBufferedMessages(timer)
+                            val topicMessages = mapTargetDataToTopics(targetData)
+                            if (topicMessages.size > 1) {
+                                log.trace("Message ${targetData.serial} mapped to topics ${topicMessages.keys}")
                             }
+
+                            topicMessages.forEach { (topic, topicTargetData) ->
+
+                                val topicBuffer = buffers.computeIfAbsent(topic) { TargetDataBuffer(storeFullMessage = false) }
+                                val timer = timers.computeIfAbsent(topic) { createTimer(topic) }
+
+                                val messagePayload = buildPayload(topicTargetData)
+
+                                if (checkMessagePayloadSize(targetData, messagePayload.length, log)) {
+
+                                    if (exceedBufferOrMaxPayloadWhenBufferingMessage(topicBuffer, messagePayload)) {
+                                        log.trace("Batch size of ${targetConfig.batchSize.byteCountString}${if (targetConfig.maxPayloadSize != null) " or ${targetConfig.maxPayloadSize!!.byteCountString}" else ""} for topic $topic reached")
+                                        timers[topic] = writeBufferedMessages(topicBuffer, topic, timer)
+                                    }
+
+                                    topicBuffer.add(targetData, messagePayload)
+
+                                    log.trace("Received message, buffered size for topic \"$topic\" is $topicBuffer.payloadSize.byteCountString}")
+
+                                    if (targetData.noBuffering || !doesBatching || bufferReachedMaxSizeOrMessages(topicBuffer, topic, log)) {
+                                        timers[topic] = writeBufferedMessages(topicBuffer, topic, timer)
+                                    }
+                                }
+                            }
+                        }
+
+                        timerChannel.onReceive { topic ->
+                            val topicBuffer = buffers[topic]
+                            log.trace("${targetConfig.batchInterval} batch interval reached for topic $topic")
+                            val timer = timers[topic]
+                            if (topicBuffer != null && timer != null)
+                                timers[topic] = writeBufferedMessages(topicBuffer, topic, timer)
+
                         }
                     }
 
-                    timer.onJoin {
-                        log.trace("${targetConfig.batchInterval} batch interval reached")
-                        timer = writeBufferedMessages(timer)
 
+                } catch (e: Exception) {
+                    if (!e.isJobCancellationException)
+                        log.errorEx("Error in writer", e)
+
+                    timers.keys.forEach {
+                        timers[it]?.cancel()
+                        timers[it] = createTimer(it)
                     }
                 }
-            } catch (e: Exception) {
-                if (!e.isJobCancellationException)
-                    log.errorEx("Error in writer", e)
             }
+
+            buffers.forEach { (topic, buffer) ->
+                writeBufferedMessages(buffer, topic, timers[topic]!!).cancel()
+            }
+
+        } catch (e: Exception) {
+            logger.getCtxErrorLogEx(className, "targetWriter")("Error in target writer", e)
         }
-        writeBufferedMessages(timer).cancel()
 
     }
 
 
-    private fun createTimer(): Job {
+    private fun createTimer(channel: String): Job {
         return scope.launch {
             try {
                 delay(targetConfig.batchInterval)
+                timerChannel.send(channel)
             } catch (e: Exception) {
                 // no harm done, timer is just used to guard for timeouts
             }
         }
     }
 
-    private fun bufferReachedMaxSizeOrMessages(log: Logger.ContextLogger): Boolean {
-        val reachedBufferCount = if (targetConfig.batchCount > 1) (buffer.size >= targetConfig.batchCount) else false
+    private fun bufferReachedMaxSizeOrMessages(buffer: TargetDataBuffer, topic: String, log: Logger.ContextLogger): Boolean {
+        val reachedBufferCount = if (targetConfig.batchCount > 0) (buffer.size >= targetConfig.batchCount) else false
         if (reachedBufferCount) log.trace("${targetConfig.batchCount} batch count reached")
 
-        val reachedBufferSize = (buffer.payloadSize + (2 + (buffer.size - 1)) >= targetConfig.batchSize)
+        val reachedBufferSize = (targetConfig.batchSize > 0) && (buffer.payloadSize + (2 + (buffer.size - 1)) >= targetConfig.batchSize)
 
-        if (reachedBufferSize) log.trace("${targetConfig.batchSize.byteCountString} batch size reached")
+        if (reachedBufferSize) log.trace("${targetConfig.batchSize.byteCountString} batch size for topic $topic reached")
 
         return reachedBufferSize || reachedBufferCount
     }
@@ -196,7 +237,7 @@ class MqttTargetWriter(
         } else true
     }
 
-    private fun exceedBufferOrMaxPayloadWhenBufferingMessage(payload: String): Boolean {
+    private fun exceedBufferOrMaxPayloadWhenBufferingMessage(buffer: TargetDataBuffer, payload: String): Boolean {
         if (usesCompression) return false
         val bufferedPayloadSizeWhenAddingMessage = payload.length + (2 + (buffer.size - 1)) + buffer.payloadSize
         val bufferSizeExceededWhenAddingMessage = (targetConfig.batchSize > 0) && (bufferedPayloadSizeWhenAddingMessage > targetConfig.batchSize)
@@ -207,7 +248,7 @@ class MqttTargetWriter(
     }
 
 
-    private fun buildMqttMessage(): MqttMessage {
+    private fun buildMqttMessage(buffer: TargetDataBuffer): MqttMessage {
         val message = MqttMessage()
         val payload = if (doesBatching)
             if (targetConfig.arrayWhenBuffered)
@@ -238,23 +279,24 @@ class MqttTargetWriter(
         return compressedData
     }
 
-    private suspend fun writeBufferedMessages(timer: Job): Job {
+    private suspend fun writeBufferedMessages(buffer: TargetDataBuffer, topic: String, timer: Job): Job {
 
         if (timer.isActive) timer.cancel()
 
         val log = logger.getCtxLoggers(className, "writeBufferedMessages")
         if (buffer.size == 0) {
-            return createTimer()
+            return createTimer(topic)
         }
 
-        try {
+        return try {
 
-            val mqttMessage = buildMqttMessage()
+            val mqttMessage = buildMqttMessage(buffer)
 
             if (targetConfig.maxPayloadSize != null && mqttMessage.payload.size > targetConfig.maxPayloadSize!!) {
                 log.error("Size of MQTT message ${mqttMessage.payload.size} bytes is beyond max payload size of  ${targetConfig.maxPayloadSize!!.byteCountString} for target, reduce or set $CONFIG_BATCH_SIZE, $CONFIG_BATCH_COUNT or $CONFIG_BATCH_INTERVAL for this target")
                 targetResults?.errorBuffered()
-                runBlocking { metricsCollector?.put(targetID, METRICS_WRITE_ERRORS, 1.0, MetricUnits.COUNT, metricDimensions) }
+                 metricsCollector?.put(targetID, METRICS_WRITE_ERRORS, 1.0, MetricUnits.COUNT, metricDimensions)
+                createTimer(topic)
 
             } else {
 
@@ -264,30 +306,34 @@ class MqttTargetWriter(
                     }
 
                     withTimeout(targetConfig.publishTimeout) {
-                        client.publish(targetConfig.topicName, mqttMessage)
+                        client.publish(topic, mqttMessage)
                     }
 
                     targetResults?.ackBuffered()
                 }
                 val compressedStr = if (targetConfig.compressionType != CompressionType.NONE) " compressed " else " "
                 val itemStr = if (doesBatching) " containing ${buffer.size} items " else " "
-                log.trace("Published MQTT${compressedStr}message to topic ${targetConfig.topicName} with size of ${mqttMessage.payload.size.byteCountString} ${itemStr}in $duration")
+                log.trace("Published MQTT${compressedStr}message to topic\"$topic\" with size of ${mqttMessage.payload.size.byteCountString} ${itemStr}in $duration")
 
-                createMetrics(targetID, metricDimensions, mqttMessage.payload.size, duration)
+                createMetrics(targetID, metricDimensions, buffer, mqttMessage.payload.size, duration)
+                createTimer(topic)
             }
 
         } catch (e: Exception) {
-            runBlocking { metricsCollector?.put(targetID, METRICS_WRITE_ERRORS, 1.0, MetricUnits.COUNT, metricDimensions) }
-            log.errorEx("Error publishing to topic \"${targetConfig.topicName}\" for target \"$targetID\", ${e.message}", e)
-            if (e is TimeoutCancellationException || _mqttClient == null) {
-                targetResults?.nackBuffered()
-            } else {
-                targetResults?.errorBuffered()
+            if (!e.isJobCancellationException) {
+                metricsCollector?.put(targetID, METRICS_WRITE_ERRORS, 1.0, MetricUnits.COUNT, metricDimensions)
+                log.errorEx("Error publishing to topic \"topic\" for target \"$targetID\", ${e.message}", e)
+                if (e is TimeoutCancellationException || _mqttClient == null) {
+                    targetResults?.nackBuffered()
+                } else {
+                    targetResults?.errorBuffered()
+                }
             }
+            createTimer(topic)
         } finally {
             buffer.clear()
         }
-        return createTimer()
+
     }
 
     private val metricsCollector: MetricsCollector? by lazy {
@@ -332,40 +378,71 @@ class MqttTargetWriter(
     private fun createMetrics(
         adapterID: String,
         metricDimensions: MetricDimensions,
+        buffer: TargetDataBuffer,
         payloadSize: Int,
         duration: Duration
     ) {
 
-        runBlocking {
-            metricsCollector?.put(
+        metricsCollector?.put(
+            adapterID,
+            metricsCollector?.buildValueDataPoint(
                 adapterID,
-                metricsCollector?.buildValueDataPoint(
-                    adapterID,
-                    MetricsCollector.METRICS_MEMORY,
-                    MemoryMonitor.getUsedMemoryMB().toDouble(),
-                    MetricUnits.MEGABYTES
-                ),
-                metricsCollector?.buildValueDataPoint(
-                    adapterID,
-                    MetricsCollector.METRICS_MEMORY,
-                    MemoryMonitor.getUsedMemoryMB().toDouble(),
-                    MetricUnits.MEGABYTES
-                ),
-                metricsCollector?.buildValueDataPoint(adapterID, METRICS_WRITES, 1.0, MetricUnits.COUNT, metricDimensions),
-                metricsCollector?.buildValueDataPoint(adapterID, METRICS_BYTES_SEND, payloadSize.toDouble(), MetricUnits.COUNT, metricDimensions),
-                metricsCollector?.buildValueDataPoint(adapterID, METRICS_MESSAGES, buffer.size.toDouble(), MetricUnits.COUNT, metricDimensions),
-                metricsCollector?.buildValueDataPoint(
-                    adapterID,
-                    METRICS_WRITE_DURATION,
-                    duration.inWholeMilliseconds.toDouble(),
-                    MetricUnits.MILLISECONDS,
-                    metricDimensions
-                ),
-                metricsCollector?.buildValueDataPoint(adapterID, METRICS_WRITE_SUCCESS, 1.0, MetricUnits.COUNT, metricDimensions),
-                metricsCollector?.buildValueDataPoint(adapterID, METRICS_WRITE_SIZE, buffer.payloadSize.toDouble(), MetricUnits.BYTES, metricDimensions)
-            )
-        }
+                MetricsCollector.METRICS_MEMORY,
+                MemoryMonitor.getUsedMemoryMB().toDouble(),
+                MetricUnits.MEGABYTES
+            ),
+            metricsCollector?.buildValueDataPoint(
+                adapterID,
+                MetricsCollector.METRICS_MEMORY,
+                MemoryMonitor.getUsedMemoryMB().toDouble(),
+                MetricUnits.MEGABYTES
+            ),
+            metricsCollector?.buildValueDataPoint(adapterID, METRICS_WRITES, 1.0, MetricUnits.COUNT, metricDimensions),
+            metricsCollector?.buildValueDataPoint(adapterID, METRICS_BYTES_SEND, payloadSize.toDouble(), MetricUnits.COUNT, metricDimensions),
+            metricsCollector?.buildValueDataPoint(adapterID, METRICS_MESSAGES, buffer.size.toDouble(), MetricUnits.COUNT, metricDimensions),
+            metricsCollector?.buildValueDataPoint(
+                adapterID,
+                METRICS_WRITE_DURATION,
+                duration.inWholeMilliseconds.toDouble(),
+                MetricUnits.MILLISECONDS,
+                metricDimensions
+            ),
+            metricsCollector?.buildValueDataPoint(adapterID, METRICS_WRITE_SUCCESS, 1.0, MetricUnits.COUNT, metricDimensions),
+            metricsCollector?.buildValueDataPoint(adapterID, METRICS_WRITE_SIZE, buffer.payloadSize.toDouble(), MetricUnits.BYTES, metricDimensions)
+        )
 
+    }
+
+
+    private fun mapTargetDataToTopics(targetData: TargetData): Map<String, TargetData> =
+        targetData.splitDataByName(targetConfig.topicNameTemplate, ::buildTopicName)
+
+    private fun buildTopicName(targetData: TargetData,
+                               sourceName: String,
+                               channel: String,
+                               channelMetadata: Map<String, String>): String {
+
+        val log = logger.getCtxLoggers(className, "buildTopicName")
+
+        var topicName = if (containsPlaceHolders(targetConfig.topicNameTemplate)) {
+            render(targetConfig.topicNameTemplate, targetData.schedule, sourceName, channel, targetID, channelMetadata)
+        } else targetConfig.topicNameTemplate
+
+        if (containsPlaceHolders(topicName)) {
+            val messageStr = "Source \"$sourceName\", channel \"${channel}\""
+            if (targetConfig.alternateTopicName != null) {
+                log.trace("$messageStr has unmapped placeholder(s) ${getPlaceHolders(topicName)} in topic name \"$topicName\", using $CONFIG_TOPIC_NAME \"${targetConfig.topicNameTemplate}\", now using alternative $CONFIG_ALTERNATE_TOPIC_NAME \"${targetConfig.alternateTopicName}\"")
+                topicName = render(targetConfig.alternateTopicName!!, targetData.schedule, sourceName, channel, targetID, channelMetadata)
+                if (containsPlaceHolders(topicName)) {
+                    if (targetConfig.warnAlternateTopicName || logger.level == LogLevel.TRACE) log.warning("$messageStr has unmapped placeholder(s) ${getPlaceHolders(topicName)} in topic name \"$topicName\", using $CONFIG_ALTERNATE_TOPIC_NAME \"${targetConfig.alternateTopicName}\"")
+                    topicName = ""
+                }
+            } else {
+                if (targetConfig.warnAlternateTopicName || logger.level == LogLevel.TRACE) log.warning("$messageStr has unmapped placeholder(s) ${getPlaceHolders(topicName)} in topic name \"$topicName\", using $CONFIG_TOPIC_NAME \"${targetConfig.topicNameTemplate}\"")
+                topicName = ""
+            }
+        }
+        return topicName
     }
 
     companion object {

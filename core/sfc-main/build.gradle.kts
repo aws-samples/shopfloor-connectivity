@@ -12,7 +12,6 @@ val sfcCoreVersion = version
 val sfcIpcVersion = version
 val kotlinCoroutinesVersion = "1.6.2"
 val kotlinVersion = "1.9.0"
-val kafkaClientVersion = "3.4.0"
 val awsMskIamVersion = "1.1.6"
 
 plugins {

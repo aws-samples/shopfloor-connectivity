@@ -7,6 +7,7 @@ package com.amazonaws.sfc.data
 
 import com.amazonaws.sfc.config.ElementNamesConfiguration
 import com.amazonaws.sfc.system.DateTime
+import com.amazonaws.sfc.util.TemplateRenderer.containsPlaceHolders
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import java.time.Instant
@@ -91,6 +92,9 @@ data class TargetData(val schedule: String,
         return builder.create()
     }
 
+    fun metaDataAtSourceLevel(source: String) = metadata + (sources[source]?.metadata ?: emptyMap())
+    fun metaDataAtChannelLevel( source: String, channel: String) = (sources[source]?.channels?.get(channel)?.metadata ?: emptyMap())
+
 
     companion object{
        private val numericValueRegex = "\"(\\d+(\\.\\d*)?)\"".toRegex()
@@ -116,6 +120,58 @@ internal fun addMetaDataNode(metadata: Map<String, String>?, metadataElementName
     node.add(metadataElementName, metadataNode)
 
 }
+
+typealias NameBuilderFunction = (TargetData, String, String, Map<String, String>) -> String
+
+fun TargetData.splitDataByName(template : String, fn : NameBuilderFunction): Map<String, TargetData> {
+
+    val targetData = this@splitDataByName
+    if (!containsPlaceHolders(template)) return mapOf(template to targetData)
+
+    val namesMap = sequence {
+        targetData.sources.forEach { (sourceName, sourceData) ->
+            val sourceMetadata = targetData.metaDataAtSourceLevel(sourceName)
+            sourceData.channels.map { channel ->
+                val channelMetadata = targetData.metaDataAtChannelLevel(sourceName, channel.key) + sourceMetadata
+                var subjectName = fn(targetData, sourceName, channel.key, channelMetadata)
+                if (subjectName.isNotEmpty()) {
+                    yield(subjectName to Pair(sourceName, channel))
+                }
+            }
+        }
+    }.toList().groupBy { subject -> subject.first }    // group by rendered subject name
+        .map { (subjectName, subjectChannels) ->       // create map for subject names
+            subjectName to subjectChannels.map { (_, subjectSources) ->
+                subjectSources
+            }.groupBy { source -> source.first }.map { (sourceName, channels) ->     // group by source
+                sourceName to channels.map { (_, sourceChannels) -> sourceChannels } // creat map with channel in source
+            }.toMap()
+        }.toMap()
+
+
+    val mappedTargetData = namesMap.map { (subject, subjectSources) ->
+        subject to TargetData(
+            targetData.schedule, sources =
+                subjectSources.map { sourceChannels ->
+                    val source = targetData.sources[sourceChannels.key]!!
+                    sourceChannels.key to SourceOutputData(
+                        channels = sourceChannels.value.associate { it.key to it.value },
+                        timestamp = source.timestamp,
+                        metadata = source.metadata,
+                        isAggregated = source.isAggregated
+
+                    )
+                }.toMap(),
+            metadata = targetData.metadata,
+            serial = targetData.serial,
+            noBuffering = targetData.noBuffering,
+            timestamp = targetData.timestamp)
+
+    }.toMap()
+
+    return mappedTargetData
+}
+
 
 /**
  * Helper to add timestamp data to a node if it ia available

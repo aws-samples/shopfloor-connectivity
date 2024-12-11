@@ -5,7 +5,7 @@ configuration types
 
 
   - [OpcuaSourceConfiguration](#opcuasourceconfiguration)
-  - [OpcuaNodeChannelConfiguration](#opcuachannelconfiguration)
+  - [OpcuaNodeChannelConfiguration](#opcuanodechannelconfiguration)
   - [OpcuaNodeChangeFilter](#opcuanodechangefilter)
   - [OpcuaAdapterConfiguration](#opcuaadapterconfiguration)
   - [OpcuaServerProfileConfiguration](#opcuaserverprofileconfiguration)
@@ -22,7 +22,8 @@ configuration types
 
 ## OpcuaSourceConfiguration
 
-The OpcuaSourceConfiguration extends the common <a href="../core/source-configuration.md" >Source configuration</a> with OPCUA specific source configuration data
+The OpcuaSourceConfiguration extends the common <a href="../core/source-configuration.md" >Source configuration</a> with 
+OPCUA specific source configuration data. The AdapterType for the source must be set to **OPCUA**.
 
 <table>
 <colgroup>

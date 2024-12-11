@@ -71,7 +71,7 @@ class RestSource(private val sourceID: String,
 
             var retries = 0
 
-            var result = emptyMap<String, ChannelReadValue>()
+            var result : Map<String, ChannelReadValue>
 
             while (retries < restServerConfiguration.maxRetries) {
                 val serverResponseTime = measureTime {

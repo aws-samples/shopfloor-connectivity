@@ -25,6 +25,7 @@ import org.snmp4j.smi.*
 import org.snmp4j.transport.DefaultTcpTransportMapping
 import org.snmp4j.transport.DefaultUdpTransportMapping
 import java.io.IOException
+import kotlin.Throws
 
 class SnmpDevice(
     private val sourceID: String,
@@ -94,7 +95,7 @@ class SnmpDevice(
         }
     }
 
-    private suspend fun createSnmpInstance(adapterID: String, metricsCollector: MetricsCollector?, metricsDimensions: MetricDimensions): Snmp {
+    private fun createSnmpInstance(adapterID: String, metricsCollector: MetricsCollector?, metricsDimensions: MetricDimensions): Snmp {
         try {
             transport = createTransport()
             transport!!.listen()

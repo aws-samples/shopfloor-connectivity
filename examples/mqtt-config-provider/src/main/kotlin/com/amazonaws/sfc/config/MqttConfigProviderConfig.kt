@@ -5,6 +5,7 @@ package com.amazonaws.sfc.config
 import com.amazonaws.sfc.mqtt.MqttConnectionOptions
 import com.google.gson.annotations.SerializedName
 import java.io.File
+import kotlin.Throws
 import kotlin.time.Duration
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration

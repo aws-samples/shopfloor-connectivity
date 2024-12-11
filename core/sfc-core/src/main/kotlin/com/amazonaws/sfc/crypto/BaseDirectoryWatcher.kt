@@ -6,9 +6,9 @@
 
 package com.amazonaws.sfc.crypto
 
+import com.amazonaws.sfc.log.Logger
 import com.amazonaws.sfc.util.DirectoryEntryChange
 import com.amazonaws.sfc.util.DirectoryWatcher
-import com.amazonaws.sfc.log.Logger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.debounce

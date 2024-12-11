@@ -1,5 +1,6 @@
 package com.amazonaws.sfc.awsmsk.config
 
+import com.amazonaws.sfc.awsmsk.config.Compression.entries
 import com.google.gson.annotations.SerializedName
 
 enum class Compression {

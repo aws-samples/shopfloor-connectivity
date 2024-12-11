@@ -13,6 +13,7 @@ import com.amazonaws.sfc.log.LogLevel
 import com.amazonaws.sfc.log.LogWriter
 import com.amazonaws.sfc.log.Logger
 import com.amazonaws.sfc.log.Logger.Companion.createLogger
+import com.amazonaws.sfc.service.CommandLine.Companion.OPTION_NO_COLOR
 import com.amazonaws.sfc.services.CommandLineOptionsException
 import com.amazonaws.sfc.util.MemoryMonitor
 import com.amazonaws.sfc.util.SfcException
@@ -69,6 +70,9 @@ abstract class ServiceMain {
         if (logLevelFromArguments != null) {
             serviceLogger.level = logLevelFromArguments
         }
+
+        val noColor  = args.map { it.trimStart('-') }.contains(OPTION_NO_COLOR)
+        if (noColor) serviceLogger.noColor = true
 
         Logger.redirectLoggers(serviceLogger, className)
 

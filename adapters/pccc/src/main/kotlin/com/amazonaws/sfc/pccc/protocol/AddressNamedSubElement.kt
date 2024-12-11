@@ -5,6 +5,9 @@
 
 package com.amazonaws.sfc.pccc.protocol
 
+import com.amazonaws.sfc.pccc.protocol.AddressNamedSubElement.entries
+
+
 enum class AddressNamedSubElement : AddressSubElement {
 
 

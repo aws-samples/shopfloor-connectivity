@@ -9,6 +9,7 @@ package com.amazonaws.sfc.config
 import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_DESCRIPTION
 import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_NAME
 import com.google.gson.annotations.SerializedName
+import kotlin.Throws
 
 /**
  * Base class with minimum set of attributes for an SFC input source

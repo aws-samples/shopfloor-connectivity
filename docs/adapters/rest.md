@@ -385,7 +385,8 @@ configuration types
 
 ## RestSourceConfiguration
 
-The RestSourceConfiguration extends the common <a href="../core/source-configuration.md">Source configuration</a> with REST specific source configuration data
+The RestSourceConfiguration extends the common <a href="../core/source-configuration.md">Source configuration</a> with 
+REST specific source configuration data. The AdapterType for the source must be set to **REST**.
 
 <table>
 <colgroup>

@@ -230,6 +230,7 @@ class IpcMetricsServer(
             // set log level from command line of config file
             val logLevel: LogLevel = cmd.logLevel ?: serviceConfiguration.logLevel
             logger.level = logLevel
+            logger.noColor = cmd.noColor
 
             val metricsConfiguration = serviceConfiguration.metrics
             val metricsServerConfiguration = metricsConfiguration?.writer?.metricsServer

@@ -481,6 +481,8 @@ class MainControllerService(
             val logLevel: LogLevel = cmd.logLevel ?: controllerConfiguration.logLevel
             logger.level = logLevel
 
+            logger.noColor = cmd.noColor
+
 
             val secretsManager = createSecretsManager(controllerConfiguration, logger)
             runBlocking {

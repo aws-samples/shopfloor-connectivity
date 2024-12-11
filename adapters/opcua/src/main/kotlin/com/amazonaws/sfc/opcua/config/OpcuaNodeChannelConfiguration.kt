@@ -14,6 +14,7 @@ import com.google.gson.annotations.SerializedName
 import io.burt.jmespath.Expression
 import org.eclipse.milo.opcua.sdk.core.NumericRange
 import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId
+import kotlin.Throws
 
 val OpcuaNodeChannelConfiguration.isDataNode
     get() = this.nodeEventType.isNullOrEmpty()
