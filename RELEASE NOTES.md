@@ -1,6 +1,6 @@
 # Release Notes:
 
-## Version 1.7.0.0, 8 December 2024
+## Version 1.7.0.0, 12 December 2024
 
 - NATS protocol adapter
 - NATS target
