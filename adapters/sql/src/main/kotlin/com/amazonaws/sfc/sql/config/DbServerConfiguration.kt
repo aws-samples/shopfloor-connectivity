@@ -10,6 +10,7 @@ import com.amazonaws.sfc.config.ConfigurationException
 import com.amazonaws.sfc.config.Validate
 import com.google.gson.annotations.SerializedName
 import java.io.File
+import kotlin.Throws
 import kotlin.time.Duration
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration
@@ -169,7 +170,7 @@ class DbServerConfiguration : Validate {
     private fun validateDatabaseType() =
         ConfigurationException.check(
             (dbServerType != null),
-            "Database type not set or invalid, valid types are ${DbServerType.values().joinToString()}",
+            "Database type not set or invalid, valid types are ${DbServerType.entries.joinToString()}",
             CONFIG_DB_TYPE,
             this
         )

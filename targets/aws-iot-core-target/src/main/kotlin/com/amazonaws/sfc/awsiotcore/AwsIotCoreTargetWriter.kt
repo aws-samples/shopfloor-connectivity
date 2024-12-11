@@ -6,16 +6,16 @@ package com.amazonaws.sfc.awsiotcore
 
 
 import com.amazonaws.sfc.awsiotcore.config.AwsIotCoreTargetConfiguration
+import com.amazonaws.sfc.awsiotcore.config.AwsIotCoreTargetConfiguration.Companion.CONFIG_ALTERNATE_TOPIC_NAME
 import com.amazonaws.sfc.awsiotcore.config.AwsIotCoreTargetConfiguration.Companion.CONFIG_BATCH_COUNT
 import com.amazonaws.sfc.awsiotcore.config.AwsIotCoreTargetConfiguration.Companion.CONFIG_BATCH_INTERVAL
 import com.amazonaws.sfc.awsiotcore.config.AwsIotCoreTargetConfiguration.Companion.CONFIG_TOPIC_NAME
-import com.amazonaws.sfc.awsiotcore.config.AwsIotCoreTargetConfiguration.Companion.CONFIG_ALTERNATE_TOPIC_NAME
 import com.amazonaws.sfc.awsiotcore.config.AwsIotCoreWriterConfiguration
 import com.amazonaws.sfc.awsiotcore.config.AwsIotCoreWriterConfiguration.Companion.AWS_IOT_CORE_TARGET
 import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_BATCH_SIZE
 import com.amazonaws.sfc.config.ConfigReader
 import com.amazonaws.sfc.data.*
-
+import com.amazonaws.sfc.log.LogLevel
 import com.amazonaws.sfc.log.Logger
 import com.amazonaws.sfc.metrics.*
 import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_DIMENSION_SOURCE
@@ -32,7 +32,6 @@ import com.amazonaws.sfc.targets.TargetException
 import com.amazonaws.sfc.util.*
 import com.amazonaws.sfc.util.TemplateRenderer.containsPlaceHolders
 import com.amazonaws.sfc.util.TemplateRenderer.getPlaceHolders
-
 import com.amazonaws.sfc.util.TemplateRenderer.render
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
@@ -214,7 +213,7 @@ class AwsIotCoreTargetWriter(
 
                                 topicBuffer.add(targetData, messagePayload)
 
-                                log.trace("Received message, buffered items for topic $topic is ${topicBuffer.size} with a total size of ${topicBuffer.payloadSize.byteCountString}")
+                                log.trace("Received message, buffered items for topic \"$topic\" is ${topicBuffer.size} with a total size of ${topicBuffer.payloadSize.byteCountString}")
                                 if (targetData.noBuffering || !doesBatching || bufferReachedMaxSizeOrMessages(topicBuffer, topic, log)) {
                                     timers[topic] = writeBufferedMessages(topicBuffer, topic, timer)
                                 }
@@ -341,7 +340,7 @@ class AwsIotCoreTargetWriter(
 
                 val compressedStr = if (targetConfig.compressionType != CompressionType.NONE) " compressed " else " "
                 val itemStr = if (doesBatching) " containing ${buffer.size} items " else " "
-                log.trace("Published MQTT${compressedStr}message to topic $topic with size of ${payloadSize.byteCountString} ${itemStr}in $duration")
+                log.trace("Published MQTT${compressedStr}message to topic \"$topic\" with size of ${payloadSize.byteCountString} ${itemStr}in $duration")
 
                 createMetrics(targetID, metricDimensions, buffer.size, payloadSize, duration)
                 createTimer(topic)
@@ -440,14 +439,14 @@ class AwsIotCoreTargetWriter(
         if (containsPlaceHolders(topicName)) {
             val messageStr = "Source \"$sourceName\", channel \"${channel}\""
             if (targetConfig.alternateTopicName != null) {
-                log.trace("$messageStr has unmapped placeholder(s) ${getPlaceHolders(topicName)} in topic name \"$topicName\", using $CONFIG_TOPIC_NAME \"${targetConfig.topicNameTemplate}\", trying alternative $CONFIG_ALTERNATE_TOPIC_NAME \"${targetConfig.alternateTopicName}\"")
+                log.trace("$messageStr has unmapped placeholder(s) ${getPlaceHolders(topicName)} in topic name \"$topicName\", using $CONFIG_TOPIC_NAME \"${targetConfig.topicNameTemplate}\", using alternative $CONFIG_ALTERNATE_TOPIC_NAME \"${targetConfig.alternateTopicName}\"")
                 topicName = render(targetConfig.alternateTopicName!!, targetData.schedule, sourceName, channel, targetID, channelMetadata)
                 if (containsPlaceHolders(topicName)) {
-                    if (targetConfig.warnAlternateTopicName) log.warning("$messageStr has unmapped placeholder(s) ${getPlaceHolders(topicName)} in topic name \"$topicName\", using $CONFIG_ALTERNATE_TOPIC_NAME \"${targetConfig.alternateTopicName}\"")
+                    if (targetConfig.warnAlternateTopicName || logger.level == LogLevel.TRACE) log.warning("$messageStr has unmapped placeholder(s) ${getPlaceHolders(topicName)} in topic name \"$topicName\", using $CONFIG_ALTERNATE_TOPIC_NAME \"${targetConfig.alternateTopicName}\"")
                     topicName = ""
                 }
             } else {
-                if (targetConfig.warnAlternateTopicName) log.warning("$messageStr has unmapped placeholder(s) ${getPlaceHolders(topicName)} in topic name \"$topicName\", using $CONFIG_TOPIC_NAME \"${targetConfig.topicNameTemplate}\"")
+                if (targetConfig.warnAlternateTopicName || logger.level == LogLevel.TRACE) log.warning("$messageStr has unmapped placeholder(s) ${getPlaceHolders(topicName)} in topic name \"$topicName\", using $CONFIG_TOPIC_NAME \"${targetConfig.topicNameTemplate}\"")
                 topicName = ""
             }
         }

@@ -7,6 +7,7 @@ package com.amazonaws.sfc.mqtt
 import com.amazonaws.sfc.config.ConfigReader
 import com.amazonaws.sfc.data.*
 import com.amazonaws.sfc.data.JsonHelper.Companion.extendedJsonException
+import com.amazonaws.sfc.log.LogLevel
 import com.amazonaws.sfc.log.Logger
 import com.amazonaws.sfc.metrics.*
 import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_BYTES_SEND
@@ -19,11 +20,11 @@ import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_WRITE_ERRORS
 import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_WRITE_SIZE
 import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_WRITE_SUCCESS
 import com.amazonaws.sfc.mqtt.config.MqttTargetConfiguration
+import com.amazonaws.sfc.mqtt.config.MqttTargetConfiguration.Companion.CONFIG_ALTERNATE_TOPIC_NAME
 import com.amazonaws.sfc.mqtt.config.MqttTargetConfiguration.Companion.CONFIG_BATCH_COUNT
 import com.amazonaws.sfc.mqtt.config.MqttTargetConfiguration.Companion.CONFIG_BATCH_INTERVAL
 import com.amazonaws.sfc.mqtt.config.MqttTargetConfiguration.Companion.CONFIG_BATCH_SIZE
 import com.amazonaws.sfc.mqtt.config.MqttTargetConfiguration.Companion.CONFIG_TOPIC_NAME
-import com.amazonaws.sfc.mqtt.config.MqttTargetConfiguration.Companion.CONFIG_ALTERNATE_TOPIC_NAME
 import com.amazonaws.sfc.mqtt.config.MqttWriterConfiguration
 import com.amazonaws.sfc.mqtt.config.MqttWriterConfiguration.Companion.MQTT_TARGET
 import com.amazonaws.sfc.targets.TargetDataChannel
@@ -162,7 +163,7 @@ class MqttTargetWriter(
 
                                     topicBuffer.add(targetData, messagePayload)
 
-                                    log.trace("Received message, buffered size for topic $topic is $topicBuffer.payloadSize.byteCountString}")
+                                    log.trace("Received message, buffered size for topic \"$topic\" is $topicBuffer.payloadSize.byteCountString}")
 
                                     if (targetData.noBuffering || !doesBatching || bufferReachedMaxSizeOrMessages(topicBuffer, topic, log)) {
                                         timers[topic] = writeBufferedMessages(topicBuffer, topic, timer)
@@ -294,7 +295,7 @@ class MqttTargetWriter(
             if (targetConfig.maxPayloadSize != null && mqttMessage.payload.size > targetConfig.maxPayloadSize!!) {
                 log.error("Size of MQTT message ${mqttMessage.payload.size} bytes is beyond max payload size of  ${targetConfig.maxPayloadSize!!.byteCountString} for target, reduce or set $CONFIG_BATCH_SIZE, $CONFIG_BATCH_COUNT or $CONFIG_BATCH_INTERVAL for this target")
                 targetResults?.errorBuffered()
-                runBlocking { metricsCollector?.put(targetID, METRICS_WRITE_ERRORS, 1.0, MetricUnits.COUNT, metricDimensions) }
+                 metricsCollector?.put(targetID, METRICS_WRITE_ERRORS, 1.0, MetricUnits.COUNT, metricDimensions)
                 createTimer(topic)
 
             } else {
@@ -430,14 +431,14 @@ class MqttTargetWriter(
         if (containsPlaceHolders(topicName)) {
             val messageStr = "Source \"$sourceName\", channel \"${channel}\""
             if (targetConfig.alternateTopicName != null) {
-                log.trace("$messageStr has unmapped placeholder(s) ${getPlaceHolders(topicName)} in topic name \"$topicName\", using $CONFIG_TOPIC_NAME \"${targetConfig.topicNameTemplate}\", trying alternative $CONFIG_ALTERNATE_TOPIC_NAME \"${targetConfig.alternateTopicName}\"")
+                log.trace("$messageStr has unmapped placeholder(s) ${getPlaceHolders(topicName)} in topic name \"$topicName\", using $CONFIG_TOPIC_NAME \"${targetConfig.topicNameTemplate}\", now using alternative $CONFIG_ALTERNATE_TOPIC_NAME \"${targetConfig.alternateTopicName}\"")
                 topicName = render(targetConfig.alternateTopicName!!, targetData.schedule, sourceName, channel, targetID, channelMetadata)
                 if (containsPlaceHolders(topicName)) {
-                    if (targetConfig.warnAlternateTopicName) log.warning("$messageStr has unmapped placeholder(s) ${getPlaceHolders(topicName)} in topic name \"$topicName\", using $CONFIG_ALTERNATE_TOPIC_NAME \"${targetConfig.alternateTopicName}\"")
+                    if (targetConfig.warnAlternateTopicName || logger.level == LogLevel.TRACE) log.warning("$messageStr has unmapped placeholder(s) ${getPlaceHolders(topicName)} in topic name \"$topicName\", using $CONFIG_ALTERNATE_TOPIC_NAME \"${targetConfig.alternateTopicName}\"")
                     topicName = ""
                 }
             } else {
-                if (targetConfig.warnAlternateTopicName) log.warning("$messageStr has unmapped placeholder(s) ${getPlaceHolders(topicName)} in topic name \"$topicName\", using $CONFIG_TOPIC_NAME \"${targetConfig.topicNameTemplate}\"")
+                if (targetConfig.warnAlternateTopicName || logger.level == LogLevel.TRACE) log.warning("$messageStr has unmapped placeholder(s) ${getPlaceHolders(topicName)} in topic name \"$topicName\", using $CONFIG_TOPIC_NAME \"${targetConfig.topicNameTemplate}\"")
                 topicName = ""
             }
         }

@@ -32,6 +32,7 @@ abstract class CommandLine(val args: Array<String>) {
         helpFormatter.printHelp(" ", options())
     }
 
+    val noColor = cmd.hasOption(OPTION_NO_COLOR)
 
     val logLevel: LogLevel?
         get() {
@@ -59,6 +60,7 @@ abstract class CommandLine(val args: Array<String>) {
         const val OPTION_LOGLEVEL_INFO = "info"
         const val OPTION_LOGLEVEL_TRACE = "trace"
         const val OPTION_LOGLEVEL_WARNING = "warning"
+        const val OPTION_NO_COLOR = "nocolor"
 
 
         private val helpOption: Option = Option.builder("h")
@@ -72,6 +74,14 @@ abstract class CommandLine(val args: Array<String>) {
             .argName(OPTION_CONFIG_FILE)
             .desc("Name of the configuration file")
             .hasArg()
+
+        val noColorOption: Option = Option.builder(OPTION_NO_COLOR)
+            .type((Boolean::class.java))
+            .argName(OPTION_NO_COLOR)
+            .desc("Turn off color loglevel values")
+            .hasArg(false)
+            .build()
+
 
         val configVerificationPublicKeyFile: Option = Option.builder(OPTION_CONFIG_VERIFY_PUBLIC_KEY_FILE)
             .type(String::class.java)
@@ -116,6 +126,7 @@ abstract class CommandLine(val args: Array<String>) {
             logLevels.addOption(warningLogLevel)
             logLevels.addOption(errorLogLevel)
             options.addOptionGroup(logLevels)
+            options.addOption(noColorOption)
 
             return options
         }

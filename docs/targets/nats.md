@@ -5,8 +5,10 @@ specific configuration data for connecting to and sending to a NATS subject. The
 contain entries of this type, the TargetType of these entries must be set to <strong>"NATS-TARGET"</strong></p>
 <br>
 
-[NatsTargetConfiguration](#natstargetconfiguration)
-[NatsTlsConfiguration](#natstlsconfiguration)
+- [NatsTargetConfiguration](#natstargetconfiguration)
+- [NatsServerConfiguration](#natsserverconfiguration)
+- [NatsTlsConfiguration](#natstlsconfiguration)
+
 
 
 [Targets](./README.md)
@@ -31,18 +33,13 @@ contain entries of this type, the TargetType of these entries must be set to <st
 <td>Comments</td>
 </tr>
 
-
-<tr class="odd">  
-<td>Url</td>  
-<td>Server url</td>  
-<td>String</td>  
-<td>
-
-The schema for the url can be "nats://", "tls://"  or "tls://". If the scheme is "tls:" then
-the "Tls" property for the serer must be set to specify the required key and certificates.
-
-</td>
+<tr class="odd">
+<td>NatsServer</td>
+<td>Nats target server for publishing data</td>
+<td>NatsServerConfiguration</td>
+<td>Comments</td>
 </tr>
+
 <tr class="even">
 <td>SubjectName</td>
 <td>Name or name template of the subject</td>
@@ -82,32 +79,6 @@ Note that the use of placeholders to send data to specific subjects will result 
 </td>
 </tr>
 
-<tr class="odd">
-<td>WarnAlternateSubjectName</td>
-<td>Generate warning if data is published to AlternateSubjectName</td>
-<td>Boolean</td>
-<td>
-Default is tue
-</td>
-</tr>
-
-<tr class="even">  
-<td>ConnectRetries</td>  
-<td>Maximum number of retries connecting to the server.</td>  
-<td>Integer</td>  
-<td>
-Default = 3
-</td> 
-</tr>
-
-<tr class="odd">  
-<td>WaitAfterConnectError</td>  
-<td>Number of seconds to wait after connecting to the sever failed.</td>  
-<td>Integer</td>  
-<td>
-Default = 10
-</td> 
-</tr>
 
 <tr class="even">
 <td>PublishTimeout</td>
@@ -115,8 +86,6 @@ Default = 10
 <td>Long</td>
 <td>Default is 10 seconds</td>
 </tr>
-
-
 
 <tr class="odd">  
 <td>BatchCount</td>  
@@ -166,7 +135,62 @@ of messages will be sent to the subject when this size is reached.</td>
 </tr> 
 
 
+</tbody></table>
+
+[^top](#natstargetconfiguration)
+
+
+## NatsServerConfiguration
+
+<table>  
+<colgroup>
+<col style="width: 19%" />
+<col style="width: 27%" />
+<col style="width: 28%" />
+<col style="width: 24%" />
+</colgroup>
+
+<tbody>  
+<tr class="odd">  
+<td><strong>Name</strong></td>  
+<td><strong>Description</strong></td>  
+<td><strong>Type</strong></td>  
+<td><strong>Comments</strong></td>  
+</tr>
+
 <tr class="even">  
+<td>Url</td>  
+<td>Server url</td>  
+<td>String</td>  
+<td>
+
+The schema for the url can be "nats://", "tls://"  or "tls://". If the scheme is "tls:" then
+the "Tls" property for the serer must be set to specify the required key and certificates.
+
+Multiple urls can be configured for known all known servers as a comma separated list.
+
+</td>
+</tr>
+
+<tr class="odd">  
+<td>ConnectRetries</td>  
+<td>Maximum number of retries connecting to the server.</td>  
+<td>Integer</td>  
+<td>
+Default = 3
+</td> 
+</tr>
+
+<tr class="even">  
+<td>WaitAfterConnectError</td>  
+<td>Number of seconds to wait after connecting to the sever failed.</td>  
+<td>Integer</td>  
+<td>
+Default = 10
+</td> 
+</tr>
+
+<tr class="odd">  
 <td>Token</td>  
 <td>Random token authentication works like passwords for simple setups, but 
 larger systems should use more secure authentication methods since tokens rely on solely 
@@ -182,7 +206,7 @@ placeholder for a secret stored in and retrieved from the
 </td> 
 </tr>
 
-<tr class="odd">  
+<tr class="even">  
 <td>Username</td>  
 <td>Username to authenticate with the server.
 
@@ -199,7 +223,7 @@ If a Username is configured then the Password must be configured as well.
 </td> 
 </tr>
 
-<tr class="even">  
+<tr class="odd">  
 <td>Password</td>  
 <td>Password to authenticate with the server.
 
@@ -216,7 +240,7 @@ If a Password is configured then the Username must be configured as well.
 </td> 
 </tr>
 
-<tr class="odd">  
+<tr class="even">  
 <td>NKeyFile</td>  
 <td>Pathname of a file containing the NKEY.
 
@@ -230,7 +254,7 @@ public/private key pairs.
 </td> 
 </tr>
 
-<tr class="even">  
+<tr class="odd">  
 <td>CredentialsFile</td>  
 <td>Pathname of a file containing credentials.
 
@@ -242,6 +266,7 @@ used together for secure client authentication and authorization.
 <a href="https://docs.nats.io/using-nats/developer/connecting/creds">https://docs.nats.io/using-nats/developer/connecting/creds</a>
 </td> 
 </tr>
+
 
 <tr class="odd">  
 <td>Tls</td>  
@@ -257,11 +282,10 @@ server without TLS.</td>
 <a href="https://docs.nats.io/using-nats/developer/connecting/tls">https://docs.nats.io/using-nats/developer/connecting/tls</a>
 </td>  
 </tr>
-
-</tbody></table>
+</tbody>
+</table>
 
 [^top](#natstargetconfiguration)
-
 
 ## NatsTlsConfiguration
 

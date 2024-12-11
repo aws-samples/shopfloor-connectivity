@@ -54,10 +54,12 @@ class RestAdapter(private val adapterID: String, private val configuration: Rest
 
 
     private fun createRestSource(sourceID: String): RestSource? {
+        val log = logger.getCtxLoggers(className, "createRestSource")
         return try {
             val (serverID, restServerConfiguration) = serverConfigurationForSource(sourceID)
             val restSourceConfiguration = getSourceConfiguration(sourceID)
-            RestSource(
+
+            val source = RestSource(
                 sourceID = sourceID,
                 restServerConfiguration = restServerConfiguration,
                 restSourceConfiguration = restSourceConfiguration,
@@ -65,6 +67,8 @@ class RestAdapter(private val adapterID: String, private val configuration: Rest
                 adapterMetricDimensions = adapterMetricDimensions,
                 logger = logger
             )
+            log.info("Created REST source for source \"$sourceID\" reading from server \"$serverID\" at ${restServerConfiguration.server}")
+            source
         } catch (e: RestAdapterException) {
             logger.getCtxErrorLog(className, "createRestSource")("Error creating REST source for source \"$sourceID\", ${e.message}")
             null

@@ -407,6 +407,8 @@ class IpcTargetServer(
             val logLevel: LogLevel = cmd.logLevel ?: serviceConfiguration.logLevel
             logger.level = logLevel
 
+            logger.noColor = cmd.noColor
+
             // get target id which could be specified on the command line or be read from the configuration if it only has a single target
             val targetID = getTargetID(cmd, serviceConfiguration)
             val targetServerConfiguration = getTargetServerConfiguration(serviceConfiguration, targetID)

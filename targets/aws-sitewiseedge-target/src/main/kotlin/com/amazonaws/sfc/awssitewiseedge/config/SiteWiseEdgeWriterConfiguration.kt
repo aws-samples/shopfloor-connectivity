@@ -6,15 +6,7 @@
 package com.amazonaws.sfc.awssitewiseedge.config
 
 import com.amazonaws.sfc.awsiot.AwsIotCredentialProviderClientConfiguration
-import com.amazonaws.sfc.config.BaseConfigurationWithMetrics
-import com.amazonaws.sfc.config.ConfigurationClass
-import com.amazonaws.sfc.config.ElementNamesConfiguration
-import com.amazonaws.sfc.config.InProcessConfiguration
-import com.amazonaws.sfc.config.ScheduleConfiguration
-import com.amazonaws.sfc.config.SecretsManagerConfiguration
-import com.amazonaws.sfc.config.ServerConfiguration
-import com.amazonaws.sfc.config.TemplatesConfiguration
-import com.amazonaws.sfc.config.Validate
+import com.amazonaws.sfc.config.*
 import com.amazonaws.sfc.log.LogLevel
 import com.google.gson.annotations.SerializedName
 import javax.naming.ConfigurationException

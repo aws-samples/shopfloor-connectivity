@@ -19,6 +19,7 @@ import java.security.interfaces.ECPrivateKey
 import java.security.interfaces.RSAPrivateCrtKey
 import java.security.spec.*
 import java.util.*
+import kotlin.Throws
 
 // -----BEGIN RSA PRIVATE KEY-----
 @Suppress("MemberVisibilityCanBePrivate") object KeyHelpers {

@@ -10,6 +10,7 @@ import com.amazonaws.sfc.config.ConfigReader
 import com.amazonaws.sfc.crypto.SSLHelper
 import com.amazonaws.sfc.data.*
 import com.amazonaws.sfc.data.JsonHelper.Companion.extendedJsonException
+import com.amazonaws.sfc.log.LogLevel
 import com.amazonaws.sfc.log.Logger
 import com.amazonaws.sfc.metrics.*
 import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_BYTES_SEND
@@ -21,14 +22,14 @@ import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_WRITE_DURATI
 import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_WRITE_ERRORS
 import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_WRITE_SIZE
 import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_WRITE_SUCCESS
+import com.amazonaws.sfc.natstarget.config.NatsServerConfiguration.Companion.CONFIG_CREDENTIALS_FILE
+import com.amazonaws.sfc.natstarget.config.NatsServerConfiguration.Companion.CONFIG_NKEY_FILE
 import com.amazonaws.sfc.natstarget.config.NatsTargetConfiguration
+import com.amazonaws.sfc.natstarget.config.NatsTargetConfiguration.Companion.CONFIG_ALTERNATE_SUBJECT_NAME
 import com.amazonaws.sfc.natstarget.config.NatsTargetConfiguration.Companion.CONFIG_BATCH_COUNT
 import com.amazonaws.sfc.natstarget.config.NatsTargetConfiguration.Companion.CONFIG_BATCH_INTERVAL
 import com.amazonaws.sfc.natstarget.config.NatsTargetConfiguration.Companion.CONFIG_BATCH_SIZE
-import com.amazonaws.sfc.natstarget.config.NatsTargetConfiguration.Companion.CONFIG_CREDENTIALS_FILE
-import com.amazonaws.sfc.natstarget.config.NatsTargetConfiguration.Companion.CONFIG_NKEY_FILE
 import com.amazonaws.sfc.natstarget.config.NatsTargetConfiguration.Companion.CONFIG_SUBJECT_NAME
-import com.amazonaws.sfc.natstarget.config.NatsTargetConfiguration.Companion.CONFIG_ALTERNATE_SUBJECT_NAME
 import com.amazonaws.sfc.natstarget.config.NatsWriterConfiguration
 import com.amazonaws.sfc.natstarget.config.NatsWriterConfiguration.Companion.NATS_TARGET
 import com.amazonaws.sfc.targets.TargetDataChannel
@@ -87,51 +88,52 @@ class NatsTargetWriter(
         val connectionName = "SFC-NATS-$targetID-${getHostName()}-${UUID.randomUUID()}"
 
         var retries = 0
-        while (_natsConnection == null && targetContext.isActive && retries < targetConfig.connectRetries) {
+        val natsServerConfiguration = targetConfig.natServerConfiguration
+        while (_natsConnection == null && targetContext.isActive && retries < natsServerConfiguration.connectRetries) {
             try {
                 _natsConnection = Nats.connect(
                     {
 
                         val builder = Options.Builder()
                             .connectionName(connectionName)
-                            .server(targetConfig.url)
+                            .server(natsServerConfiguration.url)
 
-                        if (targetConfig.username != null && targetConfig.password != null) {
+                        if (natsServerConfiguration.username != null && natsServerConfiguration.password != null) {
                             log.info("Using username/password authentication")
-                            builder.userInfo(targetConfig.username!!.toCharArray(), targetConfig.password!!.toCharArray())
+                            builder.userInfo(natsServerConfiguration.username!!.toCharArray(), natsServerConfiguration.password!!.toCharArray())
                         }
 
-                        if (targetConfig.token != null) {
+                        if (natsServerConfiguration.token != null) {
                             log.info("Using token authentication")
-                            builder.token(targetConfig.token!!.toCharArray())
+                            builder.token(natsServerConfiguration.token!!.toCharArray())
                         }
 
-                        if (targetConfig.nkeyFile!=null) {
-                            log.info("Using NKey authentication, using $CONFIG_NKEY_FILE \"${targetConfig.nkeyFile}")
-                            builder.authHandler(NKeyAuthHandler(targetConfig.nkeyFile!!, logger))
+                        if (natsServerConfiguration.nkeyFile!=null) {
+                            log.info("Using NKey authentication, using $CONFIG_NKEY_FILE \"${natsServerConfiguration.nkeyFile}")
+                            builder.authHandler(NKeyAuthHandler(natsServerConfiguration.nkeyFile!!, logger))
                         }
 
-                        if (targetConfig.credentialsFile!=null) {
-                            log.info("Using JWT authentication, using $CONFIG_CREDENTIALS_FILE \"${targetConfig.credentialsFile}")
-                            builder.authHandler(Nats.credentials(targetConfig.credentialsFile!!))
+                        if (natsServerConfiguration.credentialsFile!=null) {
+                            log.info("Using JWT authentication, using $CONFIG_CREDENTIALS_FILE \"${natsServerConfiguration.credentialsFile}")
+                            builder.authHandler(Nats.credentials(natsServerConfiguration.credentialsFile!!))
                         }
 
-                        if (targetConfig.tlsSslConfiguration != null) {
+                        if (natsServerConfiguration.tlsConfiguration != null) {
                             log.info("Using SSL/TLS encryption")
-                            builder.sslContext(SSLHelper(targetConfig.tlsSslConfiguration!!, logger).sslContext)
+                            builder.sslContext(SSLHelper(natsServerConfiguration.tlsConfiguration!!, logger).sslContext)
                             builder.secure()
                         }
 
                         builder.build()
                     }()
                 )
-                log.info("Connected to NATS server at ${targetConfig.url}, connection name id $connectionName")
+                log.info("Connected to NATS server at ${natsServerConfiguration.url}, connection name id $connectionName")
             } catch (e: Exception) {
                 logger.getCtxErrorLog(className, "natsConnection")("Error creating NATS connection, ${e.message}")
             }
             if (_natsConnection == null) {
-                log.info("Waiting ${targetConfig.waitAfterConnectError} before trying to create NATS connection")
-                delay(targetConfig.waitAfterConnectError)
+                log.info("Waiting ${natsServerConfiguration.waitAfterConnectError} before trying to create NATS connection")
+                delay(natsServerConfiguration.waitAfterConnectError)
                 retries++
             }
         }
@@ -177,7 +179,7 @@ class NatsTargetWriter(
 
 
         try {
-            log.info("NATS Writer for target \"$targetID\" writer publishing to subjects at endpoint ${targetConfig.url} on target $targetID")
+            log.info("NATS Writer for target \"$targetID\" writer publishing to subjects at endpoint ${targetConfig.natServerConfiguration.url} on target $targetID")
             while (isActive) {
                 try {
                     select {
@@ -187,7 +189,7 @@ class NatsTargetWriter(
                             targetResults?.add(targetData)
 
                             val subjectMessages = mapTargetDataToSubjects(targetData)
-                            if (subjectMessages.size> 1){
+                            if (containsPlaceHolders(targetConfig.subjectName)){
                                 log.trace("Message ${targetData.serial} mapped to subjects ${subjectMessages.keys}")
                             }
 
@@ -207,7 +209,7 @@ class NatsTargetWriter(
 
                                     subjectBuffer.add(targetData, messagePayload)
 
-                                    log.trace("Received message, buffered size for subject $subject is ${subjectBuffer.payloadSize.byteCountString}")
+                                    log.trace("Received message, buffered size for subject \"$subject\"  is ${subjectBuffer.payloadSize.byteCountString}")
 
                                     if (targetData.noBuffering || !doesBatching || bufferReachedMaxSizeOrMessages(subjectBuffer, subject, log)) {
                                         timers[subject] = writeBufferedMessages(subjectBuffer, subject, timer)
@@ -471,14 +473,14 @@ class NatsTargetWriter(
         if (containsPlaceHolders(subjectName)) {
             val messageStr = "Source \"$sourceName\", channel \"${channel}\""
             if (targetConfig.alternateSubjectName != null) {
-                log.trace("$messageStr has unmapped placeholder(s) ${getPlaceHolders(subjectName)} in subject \"$subjectName\", using $CONFIG_SUBJECT_NAME \"${targetConfig.subjectName}\", trying alternative $CONFIG_ALTERNATE_SUBJECT_NAME \"${targetConfig.alternateSubjectName}\"")
+                log.trace("$messageStr has unmapped placeholder(s) ${getPlaceHolders(subjectName)} in subject \"$subjectName\", using $CONFIG_SUBJECT_NAME \"${targetConfig.subjectName}\", using alternative $CONFIG_ALTERNATE_SUBJECT_NAME \"${targetConfig.alternateSubjectName}\"")
                 subjectName = TemplateRenderer.render(targetConfig.alternateSubjectName!!, targetData.schedule, sourceName, channel, targetID, channelMetadata)
                 if (containsPlaceHolders(subjectName)) {
-                    if (targetConfig.warnAlternateSubjectName) log.warning("$messageStr has unmapped placeholder(s) ${getPlaceHolders(subjectName)} in subject \"$subjectName\", using $CONFIG_ALTERNATE_SUBJECT_NAME \"${targetConfig.alternateSubjectName}\"")
+                    if (targetConfig.warnAlternateSubjectName  || logger.level == LogLevel.TRACE) log.warning("$messageStr has unmapped placeholder(s) ${getPlaceHolders(subjectName)} in subject \"$subjectName\", using $CONFIG_ALTERNATE_SUBJECT_NAME \"${targetConfig.alternateSubjectName}\"")
                     subjectName = ""
                 }
             } else {
-                if (targetConfig.warnAlternateSubjectName) log.warning("$messageStr has unmapped placeholder(s) ${getPlaceHolders(subjectName)} in subject \"$subjectName\", using $CONFIG_SUBJECT_NAME \"${targetConfig.subjectName}\"")
+                if (targetConfig.warnAlternateSubjectName || logger.level == LogLevel.TRACE) log.warning("$messageStr has unmapped placeholder(s) ${getPlaceHolders(subjectName)} in subject \"$subjectName\", using $CONFIG_SUBJECT_NAME \"${targetConfig.subjectName}\"")
                 subjectName = ""
             }
         }

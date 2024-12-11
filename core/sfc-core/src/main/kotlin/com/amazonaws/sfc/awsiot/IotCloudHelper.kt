@@ -5,7 +5,6 @@
 
 package com.amazonaws.sfc.awsiot
 
-import com.amazonaws.sfc.awsiot.AWSIotException
 import com.amazonaws.sfc.config.ConfigurationException
 import com.amazonaws.sfc.util.BaseRetryableAccessor
 import com.amazonaws.sfc.util.CrashableSupplier

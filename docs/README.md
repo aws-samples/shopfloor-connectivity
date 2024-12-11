@@ -2257,6 +2257,11 @@ configuration passed to the sfc core by the config handler.
 <td>Set log output level to info level. (Info, warning and error messages)</td>
 </tr>
 
+<tr class="odd">
+<td>-nocolor</td>
+<td>Disable color coded output to console.</td>
+</tr>
+
 <tr class="even">
 <td>-trace</td>
 <td>Set log output level to most detailed trace level (Info, warning, error, and detailed trace messages)</td>
@@ -2379,10 +2384,12 @@ The applications have the following command line parameters in common.
 </tr>
 </thead>
 <tbody>
+
 <tr class="odd">
 <td>-config &lt;config file&gt;</td>
 <td>Name of the configuration file. The only value used from the configuration file is the port number the process will listen on for IPC requests. The SFC core will send an initialization request to the service on this port with the configuration data for the service to initialize its communication with the source device.</td>
 </tr>
+
 <tr class="even">
 <td>-connection</td>
 <td><p>Security level used to secure traffic between SFC core and protocol adapter service.</p>
@@ -2391,18 +2398,22 @@ The applications have the following command line parameters in common.
 <p>MutualTLS : Data is encrypted, required -cert, ca and -key parameters</p>
 <p>The connection type must match the connection type, as set to the ConnectionType attribute for the client, to communicates with the protocol adapter service.</p></td>
 </tr>
+
 <tr class="odd">
 <td>-cert &lt;cert&gt;</td>
 <td>Server certificate file to secure IPC (gRPC) traffic for connection types ServerSideTLS and MutualTLS</td>
 </tr>
+
 <tr class="even">
 <td>-key &lt;key&gt;</td>
 <td>Server private file to secure IPC (gRPC) traffic for connection types ServerSideTLS and MutualTLS</td>
 </tr>
+
 <tr class="odd">
 <td>-ca &lt;cert&gt;</td>
 <td>CA certificate file to secure IPC (gRPC) traffic for connection type MutualTLS</td>
 </tr>
+
 <tr class="even">
 <td>-interface</td>
 <td>Name of the network interface used by SFC IPC communication (e.g., en0)</td>
@@ -2411,38 +2422,52 @@ The applications have the following command line parameters in common.
 <td>-envport &lt;envport&gt;</td>
 <td>The name of the environment variable that contains the port number for the service to listen on for requests.</td>
 </tr>
+
 <tr class="even">
 <td>-error</td>
 <td>Set log output level to error level. (Error message only)</td>
 </tr>
+
 <tr class="odd">
 <td>-h, -help</td>
 <td>Shows command line parameter help.</td>
 </tr>
+
 <tr class="even">
 <td>-info</td>
 <td>Set log output level to info level. (Info, warning and error messages)</td>
 </tr>
+
 <tr class="odd">
 <td>-key &lt;key&gt;</td>
 <td>Server key file to secure IPC (gRPC) traffic using SSL (optional).</td>
 </tr>
+
 <tr class="even">
 <td>-cert</td>
 <td>Server Certificate file to secure IPC (gRPC) traffic using SSL (optional).</td>
 </tr>
+
 <tr class="odd">
+<td>-nocolor</td>
+<td>Disable color coded output to console.</td>
+</tr>
+
+<tr class="even">
 <td>-port</td>
 <td>port number for the service to listen on for requests.</td>
 </tr>
-<tr class="even">
+
+<tr class="odd">
 <td>-trace</td>
 <td>Set log output level to most detailed trace level (Info, warning, error, and detailed trace messages)</td>
 </tr>
-<tr class="odd">
+
+<tr class="even">
 <td>-warning</td>
 <td>Set log output level to warning level. (Error and warning messages)</td>
 </tr>
+
 </tbody>
 </table>
 
@@ -2613,10 +2638,12 @@ The applications do have all the following command line parameters in common.
 </tr>
 </thead>
 <tbody>
+
 <tr class="odd">
 <td>-config &lt;config file&gt;</td>
 <td>Name of the configuration file. The only value used from the configuration file is the port number the process will listen on for IPC requests. The SFC core will send an initialization request to the service on this port with the configuration data for the service to initialize its communication with the actual output of the target.</td>
 </tr>
+
 <tr class="even">
 <td>-connection</td>
 <td><p>Security level used to secure traffic between SFC core and target service.</p>
@@ -2625,54 +2652,73 @@ The applications do have all the following command line parameters in common.
 <p>MutualTLS : Data is encrypted, required -cert, ca and -key parameters</p>
 <p>The connection type must match the connection type, as set to the ConnectionType attribute for the client, to communicates with the target service.</p></td>
 </tr>
+
 <tr class="odd">
 <td>-cert &lt;cert&gt;</td>
 <td>Server certificate file to secure IPC (gRPC) traffic for connection types ServerSideTLS and MutualTLS</td>
 </tr>
+
 <tr class="even">
 <td>-key &lt;key&gt;</td>
 <td>Server private file to secure IPC (gRPC) traffic for connection types ServerSideTLS and MutualTLS</td>
 </tr>
+
 <tr class="odd">
 <td>-ca &lt;cert&gt;</td>
 <td>CA certificate file to secure IPC (gRPC) traffic for connection type MutualTLS</td>
 </tr>
+
 <tr class="even">
 <td>-envport &lt;envport&gt;</td>
 <td>The name of the environment variable that contains the port number for the service to listen on for requests.</td>
 </tr>
+
 <tr class="odd">
 <td>-error</td>
 <td>Set log output level to error level. (Error message only)</td>
 </tr>
+
 <tr class="even">
 <td>-h, -help</td>
 <td>Shows command line parameter help.</td>
 </tr>
+
 <tr class="odd">
 <td>-info</td>
 <td>Set log output level to info level. (Info, warning and error messages)</td>
 </tr>
+
 <tr class="even">
 <td>-key &lt;key&gt;</td>
 <td>Key file to secure IPC (gRPC) traffic using SSL (optional).</td>
 </tr>
+
 <tr class="odd">
+<td>-nocolor</td>
+<td>Disable color coded output to console.</td>
+</tr>
+
+
+<tr class="even">
 <td>-port</td>
 <td>port number for the service to listen on for requests.</td>
 </tr>
-<tr class="even">
+
+<tr class="odd">
 <td>-target</td>
 <td>Target identifier</td>
 </tr>
-<tr class="odd">
+
+<tr class="even">
 <td>-trace</td>
 <td>Set log output level to most detailed trace level (Info, warning, error, and detailed trace messages)</td>
 </tr>
-<tr class="even">
+
+<tr class="odd">
 <td>-warning</td>
 <td>Set log output level to warning level. (Error and warning messages)</td>
 </tr>
+
 </tbody>
 </table>
 

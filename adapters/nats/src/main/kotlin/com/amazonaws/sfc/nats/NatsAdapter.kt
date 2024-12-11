@@ -25,12 +25,8 @@ import com.amazonaws.sfc.nats.config.NatsServerConfiguration.Companion.CONFIG_CR
 import com.amazonaws.sfc.nats.config.NatsServerConfiguration.Companion.CONFIG_NKEY_FILE
 import com.amazonaws.sfc.system.DateTime
 import com.amazonaws.sfc.targets.TargetException
-import com.amazonaws.sfc.util.LookupCacheHandler
+import com.amazonaws.sfc.util.*
 import com.amazonaws.sfc.util.MemoryMonitor.Companion.getUsedMemoryMB
-import com.amazonaws.sfc.util.buildScope
-import com.amazonaws.sfc.util.getHostName
-import com.amazonaws.sfc.util.isJobCancellationException
-import com.amazonaws.sfc.util.launch
 import com.google.gson.JsonSyntaxException
 import io.nats.client.*
 import kotlinx.coroutines.*
@@ -85,7 +81,6 @@ class NatsAdapter(private val adapterID: String, private val configuration: Nats
 
     private val connectionCache = LookupCacheHandler<String, Connection?, NatsServerConfiguration>(
         supplier = { sourceID ->
-            val log = logger.getCtxLoggers(className, "connectionCacheSupplier")
             val (serverConfiguration, error) = serverConfigurationForSource(sourceID)
             if (serverConfiguration != null)
                 runBlocking {
@@ -213,10 +208,10 @@ class NatsAdapter(private val adapterID: String, private val configuration: Nats
             log.trace("Read from source \"$sourceID\" was paused")
         }
 
-        val (serverConfiguration, configEror) = serverConfigurationForSource(sourceID)
+        val (serverConfiguration, configError) = serverConfigurationForSource(sourceID)
 
         if (serverConfiguration == null) {
-            return SourceReadError(configEror)
+            return SourceReadError(configError)
         }
 
         val dimensions = mapOf(METRICS_DIMENSION_SOURCE to "$adapterID:$sourceID") + adapterMetricDimensions

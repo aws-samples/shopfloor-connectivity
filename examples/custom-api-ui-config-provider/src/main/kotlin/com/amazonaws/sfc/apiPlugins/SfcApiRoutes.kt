@@ -9,12 +9,15 @@ import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.*
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.jsonObject
 import java.net.InetAddress
-import java.sql.*
+import java.sql.Connection
+import java.sql.DriverManager
 
 
 fun Application.sfcApiApp(ch: Channel<String>, log: Logger, writer: JsonElement, confProvider: JsonElement) {

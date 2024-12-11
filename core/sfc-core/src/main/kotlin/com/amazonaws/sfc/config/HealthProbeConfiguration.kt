@@ -7,6 +7,7 @@ package com.amazonaws.sfc.config
 
 import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_ACTIVE
 import com.google.gson.annotations.SerializedName
+import kotlin.Throws
 import kotlin.time.Duration
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration

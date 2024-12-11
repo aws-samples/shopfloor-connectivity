@@ -4,9 +4,9 @@
 
 package com.amazonaws.sfc.pccc.protocol
 
+import com.amazonaws.sfc.pccc.protocol.DataFileType.entries
 import com.amazonaws.sfc.pccc.protocol.Decoders.decodeAscii
 import com.amazonaws.sfc.pccc.protocol.Decoders.decodeAsciiList
-
 import com.amazonaws.sfc.pccc.protocol.Decoders.decodeString
 import com.amazonaws.sfc.pccc.protocol.Decoders.decodeStructuredData
 import com.amazonaws.sfc.pccc.protocol.Decoders.toBoolean

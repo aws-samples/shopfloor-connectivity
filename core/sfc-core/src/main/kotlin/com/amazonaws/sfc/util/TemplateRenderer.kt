@@ -4,8 +4,6 @@
 
 package com.amazonaws.sfc.util
 
-import kotlin.collections.iterator
-
 object TemplateRenderer {
 
     private const val TEMPLATE_PRE_POSTFIX = "%"
@@ -36,7 +34,7 @@ object TemplateRenderer {
 
     fun getPlaceHolders(s : String):List<String> = PLACE_HOLDER_REGEX.findAll(s).map{it.value}.toList()
 
-    private val PLACE_HOLDER_REGEX = "${TEMPLATE_PRE_POSTFIX}\\.+${TEMPLATE_PRE_POSTFIX}".toRegex()
+    private val PLACE_HOLDER_REGEX = ("$TEMPLATE_PRE_POSTFIX.+$TEMPLATE_PRE_POSTFIX").toRegex()
 
 }
 

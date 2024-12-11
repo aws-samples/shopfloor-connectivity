@@ -1,9 +1,12 @@
 package com.amazonaws.sfc.log
 
+import com.amazonaws.sfc.system.isWindowsSystem
 import java.text.SimpleDateFormat
 import java.util.*
 
-class ConsoleLogWriter : LogWriter {
+class ConsoleLogWriter() : LogWriter {
+
+    var noColor : Boolean = false
 
     override fun write(logLevel: LogLevel, timestamp: Long, source: String?, message: String) {
         val output = if (logLevel == LogLevel.ERROR) System.err else System.out
@@ -16,6 +19,17 @@ class ConsoleLogWriter : LogWriter {
     override fun close() {
     }
 
+    private fun coloredLevelString(level: LogLevel): String {
+        val s = "%-6s".format(level)
+        return if (noColor || isWindowsSystem()) s else
+            when (level) {
+                LogLevel.TRACE -> BLUE
+                LogLevel.ERROR -> RED
+                LogLevel.INFO -> GREEN
+                LogLevel.WARNING -> RED
+            } + s + RESET
+    }
+
     companion object {
 
         private const val RESET = "\u001b[0m"
@@ -25,15 +39,7 @@ class ConsoleLogWriter : LogWriter {
         private const val YELLOW = "\u001b[0;33m"
         private const val BLUE = "\u001b[0;34m"
 
-        private fun coloredLevelString(level: LogLevel): String {
-            val levelStr = when (level) {
-                               LogLevel.TRACE -> BLUE
-                               LogLevel.ERROR -> RED
-                               LogLevel.INFO -> GREEN
-                               LogLevel.WARNING -> RED
-                           } + "%-6s".format(level) + "\u001B[0m"
-            return levelStr
-        }
+
 
     }
 }

@@ -1,26 +1,33 @@
 # Release Notes:
 
-## Version 1.7.0.0
+## Version 1.7.0.0, 8 December 2024
 
 - NATS protocol adapter
 - NATS target
 - MQTT target topic name template
 - AWS IoT Core topic name template
+- -nocolor parameter for service components to disable color output in console output
 
-## Version 1.5.4 15 November 2024
+## Version 1.6.0, 27 November 2024
+
+- REST protocol adapter
+
+---
+
+## Version 1.5.4, 15 November 2024
 
 - Added message retain option to IoT Core and MQTT target adapters
 
 ---
 
-## Version 1.5.3 14 November 2024
+## Version 1.5.3, 14 November 2024
 
 - MQTT Protocol adapter channel metadata not included for unmapped channels fixed
 
 ---
 
 
-## Version 1.5.2 12 November 2024
+## Version 1.5.2, 12 November 2024
 
 - MQTT Protocol adapter "ReadMode" setting: "KeepLast" to collect only the last received message from topic, "KeepAll", collects all messages received in a read interval.
 "KeepLast" is the default as this was the behaviour in previous versions.
@@ -63,7 +70,7 @@
 
 - [Transformation operators](docs/core/transformation-operator-configuration.md): BytesToDoubleBE, BytesToDoubleLE, BytesToFloatBE, BytesToFloatLE
 
-- [Channel](docs/core/channel-configuration.md) option "Decompose" to decompose a structred value into new individual values for every element in the structure.
+- [Channel](docs/core/channel-configuration.md) option "Decompose" to decompose a structured value into new individual values for every element in the structure.
 
 - [Source](docs/core/source-configuration.md) option "Compose" to compose new structured values from selected channel values.
 

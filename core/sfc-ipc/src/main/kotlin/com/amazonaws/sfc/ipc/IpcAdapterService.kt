@@ -358,6 +358,7 @@ class IpcAdapterService(
 
                 val logLevel: LogLevel = cmd.logLevel ?: serviceConfiguration.logLevel
                 logger.level = logLevel
+                logger.noColor = cmd.noColor
 
                 val configuration = buildServerConfiguration(cmd, protocolServerConfiguration)
 

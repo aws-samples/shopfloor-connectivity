@@ -46,6 +46,20 @@ class Logger(
     var writer: LogWriter
 ) {
 
+    private var _noColor : Boolean = false
+    var noColor : Boolean
+        get() = _noColor
+        set(value) {
+            _noColor = value
+            try{
+            val setNoColor = writer::class.java.declaredMethods.first{it.name=="setNoColor" && it.parameterCount== 1 && it.parameters[0].type == Boolean::class.java }
+            if (setNoColor!=null){
+                setNoColor.invoke(writer, value)
+            }}catch (e:Exception){
+                //ignore
+            }
+        }
+
 
     private var _secretNames = if (!secretNames.isNullOrEmpty()) secretNames as MutableSet<String> else mutableSetOf()
     private var _secretValues = if (!secretValues.isNullOrEmpty()) secretValues as MutableSet<String> else mutableSetOf()
@@ -74,6 +88,8 @@ class Logger(
             "${CONFIG_ROOT_CA}Bytes",
             ClientProxyConfiguration.CONFIG_PROXY_USERNAME,
             ClientProxyConfiguration.CONFIG_PROXY_PASSWORD))
+
+
     }
 
     fun addSecretsFieldsFromConfig(configString: String) {
@@ -589,7 +605,10 @@ class Logger(
 
     companion object {
 
-        fun createLogger() = Logger(LogLevel.INFO, source = null, sourceFilter = null, secretNames = null, writer = ConsoleLogWriter())
+        fun createLogger(): Logger {
+            val writer = ConsoleLogWriter()
+            return Logger(LogLevel.INFO, source = null, sourceFilter = null, secretNames = null, writer = writer)
+        }
 
         fun createLogger(configString: String): Logger {
             val secrets = getNamesWithSecretValues(configString)

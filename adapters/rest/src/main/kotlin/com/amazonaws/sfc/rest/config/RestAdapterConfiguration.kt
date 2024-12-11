@@ -4,7 +4,10 @@
 
 package com.amazonaws.sfc.rest.config
 
-import com.amazonaws.sfc.config.*
+import com.amazonaws.sfc.config.ConfigurationClass
+import com.amazonaws.sfc.config.ConfigurationException
+import com.amazonaws.sfc.config.ProtocolAdapterConfiguration
+import com.amazonaws.sfc.config.Validate
 import com.amazonaws.sfc.metrics.MetricsSourceConfiguration
 import com.amazonaws.sfc.rest.config.RestConfiguration.Companion.REST_ADAPTER
 import com.google.gson.annotations.SerializedName

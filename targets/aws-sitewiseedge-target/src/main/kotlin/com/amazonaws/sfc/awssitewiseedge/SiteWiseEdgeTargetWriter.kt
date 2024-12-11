@@ -9,16 +9,12 @@ import com.amazonaws.sfc.awssitewiseedge.config.SiteWiseEdgeWriterConfiguration
 import com.amazonaws.sfc.awssitewiseedge.config.SiteWiseEdgeWriterConfiguration.Companion.AWS_SITEWISEEDGE_TARGET
 import com.amazonaws.sfc.config.ConfigReader
 import com.amazonaws.sfc.data.JsonHelper.Companion.extendedJsonException
-import com.amazonaws.sfc.data.OutputTransformation
 import com.amazonaws.sfc.data.TargetData
 import com.amazonaws.sfc.data.TargetResultBufferedHelper
 import com.amazonaws.sfc.data.TargetResultHandler
 import com.amazonaws.sfc.data.TargetWriter
 import com.amazonaws.sfc.log.Logger
-import com.amazonaws.sfc.metrics.InProcessMetricsProvider
-import com.amazonaws.sfc.metrics.MetricDimensions
-import com.amazonaws.sfc.metrics.MetricUnits
-import com.amazonaws.sfc.metrics.MetricsCollector
+import com.amazonaws.sfc.metrics.*
 import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_BYTES_SEND
 import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_DIMENSION_SOURCE
 import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_DIMENSION_SOURCE_CATEGORY_TARGET
@@ -28,33 +24,17 @@ import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_WRITE_DURATI
 import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_WRITE_ERRORS
 import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_WRITE_SIZE
 import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_WRITE_SUCCESS
-import com.amazonaws.sfc.metrics.MetricsCollectorMethod
-import com.amazonaws.sfc.metrics.MetricsDataPoint
-import com.amazonaws.sfc.metrics.MetricsProvider
-import com.amazonaws.sfc.metrics.MetricsSourceConfiguration
-import com.amazonaws.sfc.metrics.MetricsSourceType
 import com.amazonaws.sfc.mqtt.MqttHelper
 import com.amazonaws.sfc.targets.TargetDataChannel
 import com.amazonaws.sfc.targets.TargetException
-import com.amazonaws.sfc.util.MemoryMonitor
-import com.amazonaws.sfc.util.buildScope
-import com.amazonaws.sfc.util.byteCountString
-import com.amazonaws.sfc.util.isJobCancellationException
-import com.amazonaws.sfc.util.launch
+import com.amazonaws.sfc.util.*
 import com.google.gson.JsonSyntaxException
+import kotlinx.coroutines.*
+import kotlinx.coroutines.selects.select
+import org.eclipse.paho.client.mqttv3.MqttClient
 import kotlin.coroutines.CoroutineContext
 import kotlin.time.Duration
 import kotlin.time.measureTime
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.TimeoutCancellationException
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.selects.select
-import kotlinx.coroutines.withTimeout
-import org.eclipse.paho.client.mqttv3.MqttClient
 
 
 class SiteWiseEdgeTargetWriter(
@@ -200,7 +180,7 @@ class SiteWiseEdgeTargetWriter(
 
                     targetResults?.ackBuffered()
                 }
-                log.trace("Published MQTT message to topic ${targetConfig.topicName} with size of ${mqttMessage.payload.size.byteCountString} containing ${tqvMessage.tqvCount} TQVs in $duration")
+                log.trace("Published MQTT message to \"topic\" \"${targetConfig.topicName}\" with size of ${mqttMessage.payload.size.byteCountString} containing ${tqvMessage.tqvCount} TQVs in $duration")
 
                 createMetrics(targetID, metricDimensions, mqttMessage.payload.size, duration)
 

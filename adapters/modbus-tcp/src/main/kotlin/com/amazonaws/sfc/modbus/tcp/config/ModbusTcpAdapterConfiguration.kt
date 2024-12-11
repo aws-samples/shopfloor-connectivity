@@ -5,7 +5,10 @@
 
 package com.amazonaws.sfc.modbus.tcp.config
 
-import com.amazonaws.sfc.config.*
+import com.amazonaws.sfc.config.ConfigurationClass
+import com.amazonaws.sfc.config.ConfigurationException
+import com.amazonaws.sfc.config.ProtocolAdapterConfiguration
+import com.amazonaws.sfc.config.Validate
 import com.amazonaws.sfc.metrics.MetricsSourceConfiguration
 import com.amazonaws.sfc.modbus.tcp.config.ModbusTcpConfiguration.Companion.MODBUS_TCP_ADAPTER
 import com.google.gson.annotations.SerializedName

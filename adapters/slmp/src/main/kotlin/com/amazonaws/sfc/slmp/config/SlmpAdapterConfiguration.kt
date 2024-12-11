@@ -8,11 +8,15 @@
 
 package com.amazonaws.sfc.slmp.config
 
-import com.amazonaws.sfc.config.*
+import com.amazonaws.sfc.config.ConfigurationClass
+import com.amazonaws.sfc.config.ConfigurationException
+import com.amazonaws.sfc.config.ProtocolAdapterConfiguration
+import com.amazonaws.sfc.config.Validate
 import com.amazonaws.sfc.metrics.MetricsSourceConfiguration
 import com.amazonaws.sfc.slmp.config.SlmpConfiguration.Companion.SLMP_ADAPTER
 import com.amazonaws.sfc.slmp.protocol.SlmpStructureType
 import com.google.gson.annotations.SerializedName
+import kotlin.Throws
 
 @ConfigurationClass
 class SlmpAdapterConfiguration : ProtocolAdapterConfiguration(), Validate {

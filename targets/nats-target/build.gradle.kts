@@ -8,7 +8,7 @@ group = "com.amazonaws.sfc"
 version = "1.0.0"
 
 val sfcRelease = rootProject.extra.get("sfc_release")!!
-val module = "nats"
+val module = "natstarget"
 val kotlinCoroutinesVersion = "1.6.2"
 val kotlinVersion = "1.9.0"
 val reflectionVersion = "1.6.0"

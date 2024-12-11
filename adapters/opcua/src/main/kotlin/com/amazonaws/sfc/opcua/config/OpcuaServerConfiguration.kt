@@ -11,6 +11,7 @@ import com.amazonaws.sfc.config.Validate
 import com.amazonaws.sfc.crypto.CertificateConfiguration
 import com.google.gson.annotations.SerializedName
 import org.eclipse.milo.opcua.stack.core.channel.MessageLimits
+import kotlin.Throws
 import kotlin.time.Duration
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration

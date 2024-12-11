@@ -4,8 +4,11 @@
 
 package com.amazonaws.sfc.ads.config
 
-import com.amazonaws.sfc.config.*
+import com.amazonaws.sfc.config.BaseConfiguration
 import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_CHANNELS
+import com.amazonaws.sfc.config.BaseSourceConfiguration
+import com.amazonaws.sfc.config.ConfigurationClass
+import com.amazonaws.sfc.config.ConfigurationException
 import com.google.gson.annotations.SerializedName
 import java.util.regex.Pattern
 

@@ -264,6 +264,8 @@ NATS Server configuration
 The schema for the url can be "nats://", "tls://"  or "tls://". If the scheme is "tls:" then
 the "Tls" property for the serer must be set to specify the required key and certificates.
 
+Multiple urls can be configured for known all known servers as a comma separated list.
+
 </td>
 </tr>
 
