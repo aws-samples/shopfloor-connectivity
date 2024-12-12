@@ -2,11 +2,14 @@
 
 ## Version 1.7.0.0, 12 December 2024
 
-- NATS protocol adapter
-- NATS target
-- MQTT target topic name template
-- AWS IoT Core topic name template
-- -nocolor parameter for service components to disable color output in console output
+- New NATS protocol adapter
+- New NATS target adapter with dynamic subject names
+- Updated MQTT target dynamic topic names
+- Updated AWS IoT Core target dynamic topic names
+- New -nocolor parameter for service components to disable color output in console output
+
+---
+
 
 ## Version 1.6.0, 27 November 2024
 
