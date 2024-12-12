@@ -7,9 +7,6 @@ Shop Floor Connectivity (SFC) is a data ingestion technology that can deliver da
 
 SFC extends and unifies data collection capabilities additionally to our existing IIoT data collection services, allowing customers to provide data in a consistent way to a wide range of AWS Services. It allows customers to collect data from their industrial equipment and deliver it to the AWS services that work best for their requirements. Customers get the cost and functional benefits of specific AWS services and save costs on licenses for additional connectivity products.
 
-<p align="center">
-  <img src="./docs/img/s7-iot-core-mqtt.gif" width="75%"/>
-</p>
 
 [**Supported protocols:**](./docs/adapters/README.md)
 - [Beckhoff ADS](./docs/adapters/ads.md)
