@@ -12,9 +12,7 @@ import com.amazonaws.sfc.service.Service
 import com.amazonaws.sfc.service.ServiceMain
 import kotlinx.coroutines.runBlocking
 
-/**
- *  IPC service for AWS IoT core target
- */
+
 class SiteWiseEdgeTargetService : ServiceMain() {
 
     override fun createServiceInstance(args: Array<String>, configuration: String, logger: Logger): Service {

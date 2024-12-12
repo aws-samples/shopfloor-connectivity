@@ -13,9 +13,7 @@ import kotlin.time.Duration
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration
 
-/**
- * AWS IoT Core target configuration
- */
+
 @ConfigurationClass
 class MqttWriterConfiguration : BaseConfigurationWithMetrics(), Validate{
 

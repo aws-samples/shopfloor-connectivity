@@ -12,6 +12,16 @@ import com.google.gson.Gson
 import com.google.gson.JsonObject
 import java.time.Instant
 
+/**
+ * Represents target data containing schedule, sources, metadata, and timing information.
+ *
+ * @property schedule The schedule information for the target data
+ * @property sources Map of source names to their corresponding output data
+ * @property metadata Additional metadata key-value pairs
+ * @property serial Serial identifier for the target data
+ * @property noBuffering Flag indicating if buffering should be disabled
+ * @property timestamp The timestamp when this target data was created (defaults to current UTC time)
+ */
 data class TargetData(val schedule: String,
                       val sources: Map<String, SourceOutputData>,
                       val metadata: Map<String, String>,
@@ -123,6 +133,12 @@ internal fun addMetaDataNode(metadata: Map<String, String>?, metadataElementName
 
 typealias NameBuilderFunction = (TargetData, String, String, Map<String, String>) -> String
 
+/**
+ * Splits data by name, using a template to render the name
+ * @param template String Template to render the name
+ * @param fn NameBuilderFunction Function that will be used to render the name
+ * @return Map<String, TargetData>
+ */
 fun TargetData.splitDataByName(template : String, fn : NameBuilderFunction): Map<String, TargetData> {
 
     val targetData = this@splitDataByName
