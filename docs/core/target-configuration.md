@@ -52,7 +52,7 @@ The Targets element contains elements for targets for different target types, wh
 <td>String</td>
 <td><p>Optional<br />
 Context variables for template</p>
-<p>$schedule, $sources, $metadata, or names specified in ElementNames configuration. "$tab" can be used as a context variable to insert a '\t' character in the 
+<p>$schedule, $sources, $metadata, $serial, $timestamp or names specified in ElementNames configuration. "$tab" can be used as a context variable to insert a '\t' character in the 
 transformation output, as putting this character directly in a Velocity template is not supported.</p></td>
 </tr>
 
