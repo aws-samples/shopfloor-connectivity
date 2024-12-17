@@ -80,6 +80,10 @@ class OutputTransformation(private var templateFile: File, private val logger: L
             context.put(elementNames.sources, data[elementNames.sources])
             // Add metadata
             context.put(elementNames.metadata, data[elementNames.metadata])
+            // Add timestamp
+            context.put(elementNames.timestamp, data[elementNames.timestamp])
+            // Add serial
+            context.put(elementNames.serial, data[elementNames.serial])
             // Add tab (as tabs can not be used directly in templates)
             context.put("tab", "\t")
             template?.merge(context, sw)

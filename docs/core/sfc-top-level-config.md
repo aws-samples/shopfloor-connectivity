@@ -30,7 +30,7 @@ Top level of SFC configuration
 			<td>AWSVersion</td>
 			<td>Software version must be set to "2022-04-02"</td>
 			<td>String</td>
-			<td>User for compatibility with future extensions and updates</td>
+			<td>Used for compatibility with future extensions and updates</td>
 		</tr>
 		<tr class="even">
 			<td>Name</td>
