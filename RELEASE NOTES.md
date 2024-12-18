@@ -1,6 +1,13 @@
 # Release Notes:
 
-## Version 1.7..1, 17 December 2024
+
+## Version 1.7.2, 18 December 2024
+
+- S7 Protocol adapter Detecting
+
+---
+
+## Version 1.7.1, 17 December 2024
 
 - Adding target data message serial number and timestamp to template transformation context
 

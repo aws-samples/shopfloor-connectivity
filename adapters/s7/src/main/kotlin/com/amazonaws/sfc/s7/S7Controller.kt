@@ -38,6 +38,8 @@ import java.time.Duration
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneOffset
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.TimeoutException
 import kotlin.time.measureTime
 
 private typealias mapResultFunc = (String, PlcReadResponse) -> Any
@@ -250,7 +252,7 @@ class S7Controller(
             )
         )
         return@coroutineScope data}catch (e : Exception){
-            logger.getCtxErrorLog(className, "read")("Error reading from source \"$sourceID\", $e")
+            logger.getCtxErrorLog(className, "read")("Error reading from source \"$sourceID\", ${e.message}")
             throw e
         }
     }
@@ -262,18 +264,14 @@ class S7Controller(
         // Parallel async read actions
         readRequests.map { request ->
             try {
-                withTimeout(config.readTimeout) {
                     withContext(Dispatchers.IO) {
-                        // Execute returns a deferred result, use blocking get to make sure the call has been completed
-                        // before making a new one.
-                        request.execute().get()
+                        request.execute().get(config.readTimeout.inWholeMilliseconds, TimeUnit.MILLISECONDS)
                     }
-                }
-            } catch (e: TimeoutCancellationException) {
-                throw ProtocolAdapterException("Timeout reading from source \"$sourceID\"")
+
             } catch (e: Exception) {
                 val errorFields = request.fields.map { lookupConfiguredField(it as S7Field) }.toSet()
-                val msg = "Error reading from source  \"$sourceID\", fields [${errorFields.joinToString { it.toString() }}, $e"
+                val es = if (e::class.java == TimeoutException::class.java) "Timeout reading from controller" else e.message
+                val msg = "Error reading from source  \"$sourceID\", fields [${errorFields.joinToString { it.toString() }}, $es"
                 throw ProtocolAdapterException(msg)
             }
         }
