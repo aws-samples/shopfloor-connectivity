@@ -120,11 +120,11 @@ class SourcesValuesAsFlow(
                     // create map, indexed by the sourceID, with deferred read results
 
                     sourcesToRead.forEach { (sourceID, channels) ->
-                        workerQueue.submit(sourceID to channels)
+                        workerQueue?.submit(sourceID to channels)
                     }
 
                     val result = withTimeoutOrNull(timeout) {
-                        workerQueue.await().filterNotNull().toMap()
+                        workerQueue?.await()?.filterNotNull()?.toMap()
                     }
                     if (result != null) emit(ReadResult(result))
 
