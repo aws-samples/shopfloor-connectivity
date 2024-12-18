@@ -1,4 +1,5 @@
 ## SourceConfiguration
+## SourceConfiguration
 <br>
 The SourceConfiguration element contains a set of generic source configuration attributes used to process the read data. Each input protocol implementation must extend this type with its source configuration type that contains additional attributes required for that protocol.
 <br>
