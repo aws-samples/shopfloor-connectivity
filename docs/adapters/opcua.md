@@ -1,4 +1,316 @@
-# OPCUA Protocol Configuration
+# OPCUA Protocol adapter
+
+- [OPCUA Alarm and Events types](#opcua-alarm-and-events-types)
+- [OPCUA security profiles and certificates](#opcua-security-profiles-and-certificates)
+- [OPCUA Protocol Configuration](#opcua-protocol-configuration)
+  - [OpcuaSourceConfiguration](#opcuasourceconfiguration)
+  - [OpcuaNodeChannelConfiguration](#opcuanodechannelconfiguration)
+  - [OpcuaNodeChangeFilter](#opcuanodechangefilter)
+  - [OpcuaAdapterConfiguration](#opcuaadapterconfiguration)
+  - [OpcuaServerProfileConfiguration](#opcuaserverprofileconfiguration)
+  - [OpcuaEventTypeConfiguration](#opcuaeventtypeconfiguration)
+  - [OpcuaServerConfiguration](#opcuaserverconfiguration)
+  - [CertificateConfiguration](#certificateconfiguration)
+  - [SelfSignedCertificateConfiguration](#selfsignedcertificateconfiguration)
+  - [CertificateValidationConfiguration](#certificatevalidationconfiguration)
+  - [CertificateValidationOptions](#certificatevalidationoptions)
+  - 
+# OPCUA Alarm and Events types
+
+The OPCUA protocol adapter supports the collection of data from events and alarms. This can be done by adding the event
+name or identifier of the alarm or event type to a node channel configuration. The name of the event can be the name of
+the OPCUA alarms from the model at <https://reference.opcfoundation.org/Core/Part9/v105/docs/5.8>, or an OPCUA event
+from the model at <https://reference.opcfoundation.org/Core/Part3/v104/docs/9.1>
+
+The adapter will monitor nodes with a specified event type the adapter and add the received to the collected data for
+the OPCUA source, using the name for that node. The event data consist of a map of properties, which are based on the
+type of the event used for the node. As multiple events may be received during a read interval, the value of these event
+nodes is always of type array, containing one or more maps with the event data. The maximum number of items that can be
+collected is configurable. If more events are received the oldest event is omitted from the output.
+
+The OPCUA adapter can operate in Polling or Subscription mode to collect data values from the OPCUA server. For events
+the adapter will use a subscription with monitored event nodes, independent of in which mode the adapter collects the
+data nodes.
+
+As industry specific companion specification define additional event and alarm types, SFC allows configuration of
+additional types, which are grouped in server profiles. An event is configured by a given name, the node identifier of
+the event type (e.g., ns=99;i=9999), and a list of properties for that event with their qualified names consisting of a
+namespace and browse name (e.g., 9:Property1)
+
+In order to reduce the configuration for these events it is possible to inherit from other events in the profile or the
+types defined in the OPCUA specifications, by specifying that that type by its type name or node identifier. All
+properties defined in the type a type inherits from are added, as well as all other properties in types up in the type
+hierarchy.
+
+The names or node identifiers can be used as event types in the nodes for which event and alarm data needs to be
+collected. The event name is used to:
+
+- Filter the evens raised by the node, if multiple event types need to be received then a channel needs to be configured
+  for each of these event types.
+
+- Collect the values from the received events as defined for that event type.
+
+As for data nodes selectors, it is possible to use a selector to filter specific properties from the events and add
+additional metadata at node level. Index ranges and node change filters are not supported for events data.
+
+Example of mixed OPCUA source nodes for an alarm event and two data nodes.
+
+```json
+"Channels": {
+  "LevelAlarm": {
+     "Name": "LevelAlarm",
+     "NodeId": "ns=6;s=MyLevel.Alarm",
+     "EventType": "ExclusiveLevelAlarmType"
+  },
+  "SimulationRandom": {
+     "Name": "Random",
+     "NodeId": "ns=3;i=1002"
+   }, 
+     "SimulationCounter": {
+     "Name": "Counter",
+     "NodeId": "ns=3;i=1001"
+  }
+}
+```
+
+The collected data from the event and data nodes is shown below.
+
+```json
+{
+  "OPCUA-SOURCE": {
+    "values": {
+      "Random": {
+        "value": 0.675842,
+        "timestamp": "2023-03-15T11:34:42Z"
+      },
+      "Counter": {
+        "value": 0,
+        "timestamp": "2023-03-15T11:34:42Z"
+      },
+      "LevelAlarm": {
+        "value": [
+          {
+            "HighHighLimit": 90.0,
+            "HighLimit": 70.0,
+            "LowLimit": 30.0,
+            "LowLowLimit": 10.0,
+            "InputNode": "ns=0;i=0",
+            "Retain": true,
+            "EventId": [0, 0, 0, 0, 0, 0, 6, 72, 0, 0, 0, 0, 0, 0, 6, 71],
+            "EventType": "ns=0;i=9482",
+            "SourceNode": "ns=6;s=MyLevel",
+            "SourceName": "MyLevel",
+            "Time": "2023-03-15T11:34:42.328Z",
+            "ReceiveTime": "2023-03-15T11:34:42.328Z",
+            "Message": "Level exceeded",
+            "Severity": 500
+          }
+        ],
+        "timestamp": "2023-03-15T11:34:42.848Z"
+      }
+    },
+    "timestamp": "2023-03-15T11:34:42.848Z"
+  }
+}
+```
+
+[^top](#quicklinks)
+
+The snippet below shows the configuration of an OPCUA adapter with a profile named "CustomEventsProfile" that defines
+two additional event types, "CustomEventType1" and "CustomEventType2", each with two properties. CustomEventType1
+inherits from the OPCUA defined BaseEventType type and will contain all properties from that class in addition to the
+two properties defined for the event. CustomEventType2 will inherit from and therefore contain all properties from
+CustomEventTYpe1 and the two properties defined for the event.
+
+Sources are configured to read from adapter "OPCUA" and server "OPCUA-SERVER", which has a service profile set to "
+CustomEventsProfile", can use both defined event types in addition to all OPCUA defined event types, as event type for
+their nodes to collect the data in the properties for these events.
+
+```json
+{
+  "ProtocolAdapters": {
+    "OPCUA": {
+      "AdapterType": "OPCUA",
+      "OpcuaServers": {
+        "OPCUA-SERVER": {
+          "Address": "opc.tcp://localhost",
+          "Path": "OPCUA/SimulationServer",
+          "Port": 53530,
+          "ServerProfile": "CustomEventsProfile"
+        }
+      },
+      "ServerProfiles": {
+        "CustomEventsProfile": {
+          "EventTypes": {
+            "CustomEventType1": {
+              "NodeId": "ns=9;i=9000",
+              "Properties": [
+                "99:CustomProperty1",
+                "99:CustomProperty2"
+              ],
+              "Inherits": "BaseEventType"
+            },
+            "CustomEventType2": {
+              "NodeId": "ns=9;i=9001",
+              "Properties": [
+                "99:CustomProperty3",
+                "99:CustomProperty4"
+              ],
+              "Inherits": "CustomEventType1"
+            }
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+Further details on OPCUA configuring alarms and events and [creating custom event types](./adapters/opcua.md#opcuaeventtypeconfiguration) can be found in the [OPCUA configuration](./adapters/opcua.md#opcuaadapterconfiguration).
+
+# OPCUA security profiles and certificates
+
+In order to secure the traffic between the OPCUA protocol adapter and the OPCUA Server it can be signed and encrypted
+using certificates.
+
+In the configuration for the OPCUA server in the adapter the security policies can be used by setting the
+[SecurityPolicy](./adapters/opcua.md#opcuaserverconfiguration)
+of the server to any of the following policy names:
+
+| Name                | Sign / Encrypt   | Security Policy                                                  |
+|---------------------|------------------|------------------------------------------------------------------|
+| None                |                  |                                                                  |
+| Basic128Rsa15       | Sign             | http://opcfoundation.org/UA/SecurityPolicy#Basic128Rsa15         |
+| Basic256            | Sign and encrypt | http://opcfoundation.org/UA/SecurityPolicy#Basic256              |
+| Basic256Sha256      | Sign and encrypt | http://opcfoundation.org/UA/SecurityPolicy#Basic256Sha25         |
+| Aes128Sha256RsaOaep | Sign             | http://opcfoundation.org/UA/SecurityPolicy#Aes128_Sha256_RsaOaep |
+
+The Certificate section of the OPCUA Server contains the settings for the certificate used by the client of the adapter.
+
+The CertificateName contains the filename of the client certificate, which can be in pem or Pkcs12 format. If a pem
+format file is used, additionally the name of the corresponding private key file must be set in PrivateKeyFile. This is
+not required for PFX certificates as this type of file is a container which holds the certificate and private key. If
+the PFX file is password protected then the Password attribute must be set. (Avoid clear passwords in the configuration,
+use placeholders for secrets obtained from AWS Secrets manager instead). If an alias is used in the PFX container the
+value of that alias must be set in the Alias attribute of the configuration.
+
+The type of the certificate can be determined by the prefix of the filename (either ".pem "or ".pfx") optionally
+followed by ".cer", ".cert" or ".crt". If another extension is used then the type can be explicitly set by setting the
+server configuration's Format attribute to either "Pem" or "Pkcs12".
+
+If either the PEM or PFX certificate file does not exist, it is possible to let the OPCUA adapter generate a self-signed
+certificate and store that certificate in the specified file name. For PEM format certificates the name of the private
+key file must be set as well. If the private key file does exist it will be used to generate a pem or Pkcs12 formatted
+certificate. If it does not exist the keypair is generated and, if a pem formatted certificate is generated, stored in
+the specified file. For Pkcs12 formatted certificates the key will be stored with the certificate in the pfx file.
+
+To enable the generation of these self-signed certificates the SelfSignedCertificate section must be present in the
+server configuration. In this section the CommonName of the certificate must be set and optionally the X509Name fields
+for Organization, OrganizationalUnit, LocalityName, StateName and CountryCode. The default period in which the generated
+certificate is valid start from (notBefore) the current date to an end date (notAfter) of the current date plus 3 years.
+The duration in which the certificate is valid can be modified by setting the ValidPeriodDays attribute.
+
+A number of days can be set in ExpirationWarningPeriod. At startup and at midnight the OPCUA adapter will check if the
+client certificate will expire within that period and generate a warning and metric for an expiring (or expired)
+certificate.
+
+If the OPCUA server does validate the DNS name or the DNS name and IP addresses of the client must be present in the
+certificate Subject Alternative Names. A list of IP Addresses and DNS names can be set in the SelfSignedCertificate
+IpAddresses and DnsNames attributes. If these are not set then all known IP addresses and DNS name of the host on which
+the OPCUA adapter generates the certificate will be set as Subject Alternative Names. To exclude the IP addresses and
+DNS names from the generated certificate, specify an empty list for these attributes.
+
+If the certificate contains an ApplicationUri as an Alternative Subject Name, the Application Description used by the
+OPCUA client will be the name part from that URI. For self-signed certificates the alternative subject name for the
+application uri will be set to urn:aws-sfc-opcua@\[hostname\]. (Application Name used by client is
+aws-sfc-opcua@\[hostname\]). OPCUA servers van validate the application name used by the client against the
+ApplicationUri from the certificate.
+
+*NOTE: The certificate used by the client must be trusted by the OPCUA server, for which the procedure depends on the
+used sever. As an example, when a ProSys OPCUA (simulation) server is used, an unknown certificate is rejected but
+stored on the server, where it can be manually marked through the UI as trusted.*
+
+The OPCUA adapter can also validate the certificate it receives from the OPCUA server. It will validate it using a set
+of know trusted certificates and issuers and certificate revocation lists (CRL). To enable the validation a
+CertificateValidation section must be present in the configuration. The Directory attribute in this section is set to
+the location where the certificates and revocation lists are stored in a number of subdirectories, which will be created
+by the adapter if these do not exist.
+
+```sh
+[Configured directory name]
+|----- issuers
+|        |---- certs
+|        |---- crl
+|      trusted
+|        |---- certs
+|        |---- crl
+|----- rejected
+```
+
+The certs directories contain trusted certificates and certificates of issuers in order to validate signed certificates.
+The crl directories contain the certification revocation lists. When a server certificate does not pass the validation
+it will be stored in PEM format in the rejected directory, from where it can after inspection be moved into the trusted
+certificate directory.
+
+A number of optional checks (see <https://reference.opcfoundation.org/v104/Core/docs/Part4/6.1.3/>) can be configured in
+a ValidationOptions section in the CertificateValidation section. It can contain the following attributes that can be
+set to a value of false to disable the optional validation, which by default are all enabled.
+
+Validation options:
+
+- HostOrIP: End certificates must contain their host name or IP address in the Subject Alternate Names which will be
+  validated
+- Validity: Checks certificate expiry
+- KeyUsageEndEntity: Key usage extensions for end entity certificates must be present and will be checked.
+- ExtKeyUsageEndEntity: : Extended key usage extensions for end entity certificates must be present and will be checked.
+- KeyUsageIssuer: Key usage extensions must be present and will be checked for CA certificates.
+- Revocation: Revocation will be checked against CLRs.
+- ApplicationUri: Checks the Application name in the Subject Alternative Names against the Application description.
+
+Example of OPCUA server configuration using Basic256Sha256 security profile for signed and encrypted traffic using a
+X509 certificate and private key, which can be generated by the adapter as a self-signed certificated which is valid for
+365 days. A daily warning and metric value will be generated staring 30 days before the certificate expires. Server
+certificates will be checked using certificates and certificate revocation lists stored in subdirectories under the
+specified base directory for that server.
+
+```json
+"OPCUA-SERVER-1": {
+    "Address": "opc.tcp://myserver.com",
+    "Path": "OPCUA/SimulationServer",
+    "Port": 53530,
+    "SecurityPolicy": "Basic256Sha256",
+    "CertificateValidation": {
+    "Directory": "/etc/certificates/opcua1 ",
+    "ValidationOptions": {
+    "HostOrIP": true,
+    "Validity": true,
+    "KeyUsageEndEntity": true,
+    "ExtKeyUsageEndEntity" : true,
+    "KeyUsageIssuer": true,
+    "Revocation": true,
+    "ApplicationUri": true
+  }
+},
+    "Certificate": {
+    "CertificateFile": "/etc/certificates/certificate.pem",
+    "PrivateKeyFile": "/etc/certificates/ /private-key.pem",
+    "ExpirationWarningPeriod": 30,
+    "SelfSignedCertificate": {
+    "CommonName": "OPCUA-CONNECTOR",
+    "Organization": "AWS",
+    "OrganizationalUnit": "AIP",
+    "LocalityName": "AMS",
+    "StateName": "NH",
+    "CountryCode": "NL",
+    "ValidPeriodDays": 365
+}
+}
+}
+```
+
+
+
+## OPCUA Protocol Configuration
 
 This section describes the configuration types for the OPCUA protocol adapter and contains the extensions and specific
 configuration types
