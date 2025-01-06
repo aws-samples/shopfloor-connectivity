@@ -1,133 +1,72 @@
-
 # AWS CloudWatch Metrics
 
-AwsCloudWatchConfiguration configures the settings used by the AWS CloudWatch Metrics writer. It is used as a section names "CloudWatch" in the Metrics section of the SFC configuration
 
-[Metric Writers](./README.md)
+---
+- [AwsCloudWatchConfiguration](#AwsCloudWatchConfiguration)
+
 
 
 ## AwsCloudWatchConfiguration
 
-<table>
-<colgroup>
-<col style="width: 19%" />
-<col style="width: 27%" />
-<col style="width: 28%" />
-<col style="width: 24%" />
-</colgroup>
 
-<tbody>
-<tr class="odd">
-<td><strong>Name</strong></td>
-<td><strong>Description</strong></td>
-<td><strong>Type</strong></td>
-<td><strong>Comments</strong></td>
-</tr>
+**Properties:**
+- [BatchSize](#BatchSize)
+- [CloudWatchMetricsChannelSize](#CloudWatchMetricsChannelSize)
+- [CloudWatchMetricsChannelTimeout](#CloudWatchMetricsChannelTimeout)
+- [CredentialProviderClient](#CredentialProviderClient)
+- [Interval](#Interval)
+- [Region](#Region)
 
-<tr class="even">
-<td>Region</td>
-<td>AWS CloudWatch service region</td>
-<td>String</td>
-<td>Default is region setup for AWS SDK</td>
-</tr>
+---
+### BatchSize
+Number of data points to buffer to write as a batch to CloudWatch service
 
-<tr class="odd">
-<td>Interval/td>
-<td>Interval in seconds in which metrics are written to the service (or earlier if buffer size is reached)</td>
-<td>Integer</td>
-<td>Default is 60</td>
-</tr>
+**Type**: Int
 
-<tr class="even">
-<td>BatchSize</td>
-<td>Number of data points to buffer to write as a batch to CloudWatch service</td>
-<td>Int</td>
-<td>Default and max value is 1000</td>
-</tr>
+Default and max value is 1000
 
-<tr class="odd">
-<td>CredentialProviderClient</td>
-<td>Name of configured <a href="../core/aws-iot-credential-provider-configuration.md">credentials client</a> that will be used to read secrets stored in the AWS Secrets Manager service.</td>
-<td>String</td>
-<td>If not set the AWS SDK credential provider chain is used.</td>
-</tr>
+---
+### CloudWatchMetricsChannelSize
+Size of internal buffer to send metrics data to CloudWatch
 
-<tr class="even">
-<td>CloudWatchMetricsChannelSize</td>
-<td>Size of internal buffer to send metrics data to CloudWatch</td>
-<td>Int</td>
-<td>Default is 1000</td>
-</tr>
+**Type**: Int
 
-<tr class="odd">
-<td>CloudWatchMetricsChannelTimeout</td>
-<td>Time in milliseconds to send data to internal buffer</td>
-<td>Int</td>
-<td>Default is 1000</td>
-</tr>
+Default is 1000
 
-</tbody>
-</table>
+---
+### CloudWatchMetricsChannelTimeout
+Time in milliseconds to send data to internal buffer
 
-[^top](#aws-cloudwatch-metrics)
+**Type**: Int
 
-<table>
-<colgroup>
-<col style="width: 19%" />
-<col style="width: 27%" />
-<col style="width: 28%" />
-<col style="width: 24%" />
-</colgroup>
+Default is 1000
 
-<tbody>
-<tr class="odd">
-<td><strong>Name</strong></td>
-<td><strong>Description</strong></td>
-<td><strong>Type</strong></td>
-<td><strong>Comments</strong></td>
-</tr>
+---
+### CredentialProviderClient
+Name of configured credentials client that will be used to read secrets stored in the AWS Secrets Manager service.
 
-<tr class="even">
-<td>Region</td>
-<td>AWS CloudWatch service region</td>
-<td>String</td>
-<td>Default is region setup for AWS SDK</td>
-</tr>
+**Type**: String
 
-<tr class="odd">
-<td>Interval/td>
-<td>Interval in seconds in which metrics are written to the service (or earlier if buffer size is reached)</td>
-<td>Integer</td>
-<td>Default is 60</td>
-</tr>
+If not set the AWS SDK credential provider chain is used.
 
-<tr class="even">
-<td>BatchSize</td>
-<td>Number of data points to buffer to write as a batch to CloudWatch service</td>
-<td>Int</td>
-<td>Default and max value is 1000</td>
-</tr>
+---
+### Interval
+Interval in seconds in which metrics are written to the service (or earlier if buffer size is reached)
+Integer
 
-<tr class="odd">
-<td>CredentialProviderClient</td>
-<td>Name of configured <a href="../core/aws-iot-credential-provider-configuration.md">credentials client</a> that will be used to read secrets stored in the AWS Secrets Manager service.</td>
-<td>String</td>
-<td>If not set the AWS SDK credential provider chain is used.</td>
-</tr>
+**Type**: Integer
 
-<tr class="even">
-<td>CloudWatchMetricsChannelSize</td>
-<td>Size of internal buffer to send metrics data to CloudWatch</td>
-<td>Int</td>
-<td>Default is 1000</td>
-</tr>
+Default is 60
 
-<tr class="odd">
-<td>CloudWatchMetricsChannelTimeout</td>
-<td>Time in milliseconds to send data to internal buffer</td>
-<td>Int</td>
-<td>Default is 1000</td>
-</tr>
+---
+### Region
+AWS CloudWatch service region
 
-</tbody>
-</table>
+**Type**: String
+
+Default is region setup for AWS SDK
+
+[^top](#AWS CloudWatch Metrics)
+
+
+

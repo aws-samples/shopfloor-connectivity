@@ -1,3 +1,24 @@
+# OPC UA target adapter
+
+- [OPC UA target adapter data models and mapping](#OPC UA target adapter data models and mapping)
+  - [Automatic model mapping](#Automatic model mapping)
+  - [Query mapping](#Query mapping)
+
+
+
+**Configuration:**
+
+- [OpcuaTargetConfiguration](#OpcuaTargetConfiguration)
+- [CertificateConfiguration](#CertificateConfiguration)
+- [SelfSignedCertificateConfiguration](#SelfSignedCertificateConfiguration)
+- [CertificateValidationConfiguration](#CertificateValidationConfiguration)
+- [CertificateValidationOptions](#CertificateValidationOptions)
+- [DataModelConfiguration](#DataModelConfiguration)
+- [FolderNodeConfiguration](#FolderNodeConfiguration)
+- [VariableNodeConfiguration](#VariableNodeConfiguration)
+
+
+
 # OPC UA target adapter data models and mapping
 
 The OPC UA (Open Platform Communications Unified Architecture) target adapter exposes data collected from SFC source adapters as an OPC UA model. 
@@ -300,88 +321,95 @@ these names should be enclosed in double quotes. In JSON, double quotes need to 
 
 This configuration results in the model below.
 
-
 <img src="./img/opcua/opcua-3.png" />
 
 ---
 
 
-# OPCUA Target
-<br>
-<p>OpcuaTargetConfiguration extends the type <a href="../core/target-configuration.md" >TargetConfiguration</a> with specific configuration data for publishing the data through an OPC UA model. The Targets configuration element can contain entries of this type, the TargetType of these entries must be set to <strong>"OPCUA-TARGET"</strong></p>
-<br>
-
 
 ## OpcuaTargetConfiguration
 
-<table>
-<colgroup>
-<col style="width: 14%" />
-<col style="width: 17%" />
-<col style="width: 13%" />
-<col style="width: 55%" />
-</colgroup>
+OpcuaTargetConfiguration extends the type [TargetConfiguration](../core/target-configuration.md) with specific configuration data for publishing the data through an OPC UA model. The Targets configuration element can contain entries of this type, the TargetType of these entries must be set to **"OPCUA-TARGET"**
 
-<tbody>
-<tr class="odd">
-<td><strong>Name</strong></td>
-<td><strong>Description</strong></td>
-<td><strong>Type</strong></td>
-<td>Comments</td>
-</tr>
-<tr class="even">
-<td>DataModels</td>
-<td>OPC UA data model definitions</td>
-<td>Map[String, <a href="#datamodelconfiguration" >DataModelConfiguration]</a></td>
-<td>One or more data models that will be exposed through the OPC UA server to which SFC target data can be mapped. If no models are specified then the
-target adapter will build a model based on the SFC target data and values it receives.</td>
-</tr>
+**Properties:**
 
-<tr class="even">  
-<td>AutoCreate</td>  
-<td>When the value of this value is set to true, the adapter will automatically create nodes for target data elements that are not mapped to a node in the models, or if no models are configured. 
-If the value is false, then target data elements for which there is no mapped node in the model, the values will not be stored in the model.</td>  
-<td>Boolean</td>  
-<td>
+- [AutoCreate](#AutoCreate)
+- [CertificateValidation](#CertificateValidation)
+- [CertificateValidation](#CertificateValidation)
+- [DataModels](#DataModels)
+- [InitValuesWithNull](#InitValuesWithNull)
+
+- [ServerAnonymousDiscoveryEndPoint](#ServerAnonymousDiscoveryEndPoint)
+- [ServerMessageSecurityModes](#ServerMessageSecurityModes)
+- [ServerNetworkInterfaces](#ServerNetworkInterfaces)
+- [ServerPath](#ServerPath)
+- [ServerSecurityPolicies](#ServerSecurityPolicies)
+- [ServerTcpPort](#ServerTcpPort)
+- [The default binds all available network interfaces to the OPC UA server.
+Certificate](#The default binds all available network interfaces to the OPC UA server.
+Certificate)
+
+---
+### AutoCreate
+When the value of this value is set to true, the adapter will automatically create nodes for target data elements that are not mapped to a node in the models, or if no models are configured. 
+If the value is false, then target data elements for which there is no mapped node in the model, the values will not be stored in the model.
+
+**Type**: Boolean
+
+
 Default is true
 
 By setting this value to true, and not specifying any model, the data model is completely built based on the target data received by the adapter.
 
-</td> 
-</tr>  
-<tr class="odd">  
-<td>ServerTcpPort</td>  
-<td>TCP port used by the OPC UA server.</td>  
-<td>Integer</td>  
-<td>
 
-Default is 53530
 
-</td>  
+---
+### CertificateValidation
+Certificate settings for the OPC UA server
 
-</tr>  
-<tr class="even">  
-<td>ServerPath</td>  
-<td>Server path section for the server endpoints</td>  
-<td>String</td>  
-<td>Default is "sfc"
-</td>
-</tr>  
+**Type**: CertificateConfiguration
 
-<tr class="odd">  
-<td>ServerAnonymousDiscoveryEndPoint</td>  
-<td>When set to true a discovery-specific endpoint with no security is provided for each server address. Having these 
+No certificate is configured then a default self-signed certificate will be created.
+
+---
+### CertificateValidation
+Certificate validation configuration
+
+**Type**: CertificateValidationConfiguration
+
+---
+### DataModels
+OPC UA data model definitions
+
+**Type**: Map[String, DataModelConfiguration]
+
+One or more data models that will be exposed through the OPC UA server to which SFC target data can be mapped. If no models are specified then the
+target adapter will build a model based on the SFC target data and values it receives.
+
+---
+### InitValuesWithNull
+If set to true, variable nodes are initialized with a null value when no explicit initialization value is specified for the variable.
+
+**Type**: Boolean
+
+
+---
+### ServerAnonymousDiscoveryEndPoint
+When set to true a discovery-specific endpoint with no security is provided for each server address. Having these 
 endpoints is a good practice and the usage of the /discovery suffix is defined by OPC UA Part 6
-</td>  
-<td>Boolean</td>  
-<td>Default is true</td>  
-</tr>  
 
-<tr class="even">  
-<td>ServerMessageSecurityModes</td>  
-<td>Supported message security modes for OPC UA server</td>  
-<td>[String]</td>  
-<td>This setting is an array containing one or more of the following values:
+
+**Type**: Boolean
+
+Default is true
+
+---
+### ServerMessageSecurityModes
+Supported message security modes for OPC UA server
+
+**Type**: [String]
+
+This setting is an array containing one or more of the following values:
 
 - "None"
 - "Sign"
@@ -391,15 +419,30 @@ The default value is:
 
 ["None", "Sign", "SignAndEncrypt]
 
-</td>  
-</tr>  
 
 
-<tr class="odd">  
-<td>ServerSecurityPolicies</td>  
-<td>This setting contains the security policies for the OPC UA server</td>  
-<td>[String]</td>  
-<td>
+---
+### ServerNetworkInterfaces
+Names of the network interfaces that can be used to access the OPC UA server
+
+**Type**: [String]
+
+---
+### ServerPath
+Server path section for the server endpoints
+
+**Type**: String
+
+Default is "sfc"
+
+
+---
+### ServerSecurityPolicies
+This setting contains the security policies for the OPC UA server
+
+**Type**: [String]
+
+
 This setting is an array containing one or more of the following values:
 
 - "None"
@@ -412,386 +455,329 @@ The default value is:
 
 ["None", "Basic128Rsa15", "Basic256", "Basic256Sha256"]
 
-</td>  
-</tr> 
-
-<tr class="odd">
-<td>ServerNetworkInterfaces</td>
-<td>Names of the network interfaces that can be used to access the OPC UA server</td>
-<td>[String]</td>
-<td>The default binds all available network interfaces to the OPC UA server.
-</tr>
-
-<tr class="even">
-<td>Certificate</td>
-<td>Opcua Server certificate configuration</td>
-<td><a href="#certificateconfiguration">CertificateConfiguration</a></td>
-<td></td>
-</tr>
-
-<tr class="odd">
-<td>CertificateValidation</td>
-<td>Certificate settings for the OPC UA server</td>
-<td>CertificateConfiguration</td>
-<td>No certificate is configured then a default self-signed certificate will be created.</td>
-</tr>
-
-<tr class="even">
-<td>CertificateValidation</td>
-<td>Certificate validation configuration</td>
-<td><a href="#certificatevalidationconfiguration">CertificateValidationConfiguration</a></td>
-<td></td>
-</tr>
 
 
-<tr class="odd">
-<td>InitValuesWithNull</td>
-<td>If set to true, variable nodes are initialized with a null value when no explicit initialization value is specified for the variable.</td>
-<td>Boolean</td>
-<td>Default is true
-</tr>
+---
+### ServerTcpPort
+TCP port used by the OPC UA server.
 
-</tbody></table>
+**Type**: Integer
+
+
+
+Default is 53530
+
+
+
+---
+### The default binds all available network interfaces to the OPC UA server.
+Certificate
+Opcua Server certificate configuration
+
+**Type**: CertificateConfiguration
+
+[^top](#OPC UA target adapter data models and mapping)
 
 
 ## CertificateConfiguration
 
-Client certificate configuration for OPC UA server
 
-<table>
-<colgroup>
-<col style="width: 19%" />
-<col style="width: 27%" />
-<col style="width: 28%" />
-<col style="width: 24%" />
-</colgroup>
+**Properties:**
+- [Alias](#Alias)
+- [CertificateFile](#CertificateFile)
+- [Default is true
+Name](#Default is true
+Name)
+- [ExpirationWarningPeriod](#ExpirationWarningPeriod)
+- [Format](#Format)
+- [Password](#Password)
+- [PrivateKeyFile](#PrivateKeyFile)
+- [SelfSignedCertificate](#SelfSignedCertificate)
 
-<tbody>
-<tr class="odd">
-<td><strong>Name</strong></td>
-<td><strong>Description</strong></td>
-<td><strong>Type</strong></td>
-<td><strong>Comments</strong></td>
-</tr>
+---
+### Alias
+Alias to use for pkcs12 certificate files
 
-<tr class="even">
-<td>CertificateFile</td>
-<td>Pathname to pem or pkcs12 certificate file</td>
-<td>String</td>
-<td></td>
-</tr>
+**Type**: String
 
-<tr class="odd">
-<td>PrivateKeyFile</td>
-<td>Path name to pem private key file (optional for pkcs12, required for pem)</td>
-<td>String</td>
-<td></td>
-</tr>
+Default is "alias"
 
-<tr class="even">
-<td>Alias</td>
-<td>Alias to use for pkcs12 certificate files</td>
-<td>String</td>
-<td>Default is "alias"</td>
-</tr>
+---
+### CertificateFile
+Pathname to pem or pkcs12 certificate file
 
-<tr class="odd">
-<td>Password</td>
-<td>Password for pkcs12 certificate files</td>
-<td>String</td>
-<td></td>
-</tr>
+**Type**: String
 
-<tr class="even">
-<td>SelfSignedCertificate</td>
-<td>Self-signed certificate configuration used to generate a self-signed certificate fot the OPC UA server</td>
-<td><a href="#selfsignedcertificateconfiguration">SelfSignedCertificateConfiguration</a></td>
-<td></td>
-</tr>
+---
+### Default is true
+Name
+Description
 
-<tr class="odd">
-<td>Format</td>
-<td>Format of the certificate file, can either be "Pem" or "Pkcs12".</td>
-<td>String</td>
-<td>If not specified the adapter will attempt to determine the type from the filename of the key file.</td>
-</tr>
+**Type**: Type
 
-<tr class="even">
-<td>ExpirationWarningPeriod</td>
-<td>Period in days in which the adapter will generate a daily warning and metrics value before the client certificate expires.</td>
-<td>Integer</td>
-<td>Default is 30, set to 0 to disable.</td>
-</tr>
+Comments
 
+---
+### ExpirationWarningPeriod
+Period in days in which the adapter will generate a daily warning and metrics value before the client certificate expires.
 
-</tbody>
-</table>
+**Type**: Integer
 
-[Opcua Target Configuration](#opcua-target)
+Default is 30, set to 0 to disable.
+
+---
+### Format
+Format of the certificate file, can either be "Pem" or "Pkcs12".
+
+**Type**: String
+
+If not specified the adapter will attempt to determine the type from the filename of the key file.
+
+---
+### Password
+Password for pkcs12 certificate files
+
+**Type**: String
+
+---
+### PrivateKeyFile
+Path name to pem private key file (optional for pkcs12, required for pem)
+
+**Type**: String
+
+---
+### SelfSignedCertificate
+Self-signed certificate configuration used to generate a self-signed certificate fot the OPC UA server
+
+**Type**: SelfSignedCertificateConfiguration
+
+[^top](#OPC UA target adapter data models and mapping)
+
 
 ## SelfSignedCertificateConfiguration
 
 
-Configuration for generating self-signed certificates
+**Properties:**
+- [CommonName](#CommonName)
+- [CountryCode](#CountryCode)
+- [LocalityName](#LocalityName)
 
-<table style="width:100%;">
-<colgroup>
-<col style="width: 23%" />
-<col style="width: 26%" />
-<col style="width: 26%" />
-<col style="width: 22%" />
-</colgroup>
+- [Organization](#Organization)
+- [OrganizationalUnit](#OrganizationalUnit)
+- [StateName](#StateName)
+- [ValidPeriodInDays](#ValidPeriodInDays)
 
-<tbody>
-<tr class="odd">
-<td><strong>Name</strong></td>
-<td><strong>Description</strong></td>
-<td><strong>Type</strong></td>
-<td>Comments</td>
-</tr>
+---
+### CommonName
+Common name of the certificate
+X509 Name CN
 
-<tr class="even">
-<td>CommonName</td>
-<td><p>Common name of the certificate</p>
-<p>X509 Name CN</p></td>
-<td>String</td>
-<td>Must be specified</td>
-</tr>
+**Type**: String
 
-<tr class="odd">
-<td>Organization</td>
-<td>X509 Name O</td>
-<td>String</td>
-<td></td>
-</tr>
+Must be specified
 
-<tr class="even">
-<td>OrganizationalUnit</td>
-<td>X509 Name OU</td>
-<td>String</td>
-<td>Default is "alias"</td>
-</tr>
+---
+### CountryCode
+X509 Name C
 
-<tr class="odd">
-<td>LocalityName</td>
-<td>X509 Name L</td>
-<td>String</td>
-<td></td>
-</tr>
+**Type**: String
 
-<tr class="even">
-<td>StateName</td>
-<td>X509 Name ST</td>
-<td>String</td>
-<td></td>
-</tr>
+---
+### LocalityName
+X509 Name L
 
-<tr class="odd">
-<td>CountryCode</td>
-<td>X509 Name C</td>
-<td>String</td>
-<td></td>
-</tr>
-
-<tr class="even">
-<td>ValidPeriodInDays</td>
-<td>Number of days certificate is valid</td>
-<td>Integer</td>
-<td>Default is 1095 (=3 years)</td>
-</tr>
-
-</tbody>
-</table>
+**Type**: String
 
 
-If no self-signed certificate configuration is specified, the default settings for the self-signed 
-certificate are as follows:
+---
+### Organization
+X509 Name O
 
-- **Common Name**: "SFC-OPCUA-TARGET-\[hostname\]"
-- **DNS Names**: All hostnames for the used network interfaces
-- **IP Addresses**: All IP addresses for the used network interfaces
-- **Application URI**: "urn:amazonaws:sfc:opcua-target"
-- **Organization**: "AWS"
-- **Validity Period**: 1000 days
+**Type**: String
 
+---
+### OrganizationalUnit
+X509 Name OU
 
-[Opcua Target Configuration](#opcua-target)
+**Type**: String
+
+Default is "alias"
+
+---
+### StateName
+X509 Name ST
+
+**Type**: String
+
+---
+### ValidPeriodInDays
+Number of days certificate is valid
+
+**Type**: Integer
+
+Default is 1095 (=3 years)
+
+[^top](#OPC UA target adapter data models and mapping)
+
 
 ## CertificateValidationConfiguration
 
-Configuration for validating certificates
 
-<table>
-<colgroup>
-<col style="width: 19%" />
-<col style="width: 27%" />
-<col style="width: 28%" />
-<col style="width: 24%" />
-</colgroup>
+**Properties:**
+- [Active](#Active)
+- [Directory](#Directory)
 
-<tbody>
-<tr class="odd">
-<td><strong>Name</strong></td>
-<td><strong>Description</strong></td>
-<td><strong>Type</strong></td>
-<td><strong>Comments</strong></td>
-</tr>
+- [ValidationOptions](#ValidationOptions)
 
-<tr class="even">
-<td>Active</td>
-<td>Flag to set to enable or disable the validation of server certificates</td>
-<td>Boolean</td>
-<td>Default is true</td>
-</tr>
+---
+### Active
+Flag to set to enable or disable the validation of server certificates
 
-<tr class="odd">
-<td>Directory</td>
-<td>Pathname to the base directory under which certificates and certificate revocation lists are stored.</td>
-<td>String</td>
-<td>This directory must exist; subdirectories will be created by the adapter if they do not exist.</td>
-</tr>
+**Type**: Boolean
+
+Default is true
+
+---
+### Directory
+Pathname to the base directory under which certificates and certificate revocation lists are stored.
+
+**Type**: String
+
+This directory must exist; subdirectories will be created by the adapter if they do not exist.
 
 
-<tr class="even">
-<td>ValidationOptions</td>
-<td>Configuration of op optional checks</td>
-<td><a href="#certificatevalidationoptions">CertificateValidationOptions</a></td>
-<td>When not set then all options are enabled</td>
-</tr>
+---
+### ValidationOptions
+Configuration of op optional checks
 
+**Type**: CertificateValidationOptions
 
-</tbody>
-</table>
+When not set then all options are enabled
 
-The directory structure is:
+[^top](#OPC UA target adapter data models and mapping)
 
-```sh
-[Configured directory name]
-|----- issuers
-|        |---- certs
-|        |---- crl
-|      trusted
-|        |---- certs
-|        |---- crl
-|----- rejected
-```
-
-When a client connects for the first time, its certificate is rejected and stored in the rejected directory. 
-Clients gain access when their certificate is moved into the trusted/certs directory.
-
-[Opcua Target Configuration](#opcua-target)
 
 ## CertificateValidationOptions
 
-Optional validation options configuration applied by the OPC UA server
 
-<table>
-<colgroup>
-<col style="width: 19%" />
-<col style="width: 27%" />
-<col style="width: 28%" />
-<col style="width: 24%" />
-</colgroup>
+**Properties:**
+- [ApplicationUri](#ApplicationUri)
+- [ExtKeyUsageEndEntity](#ExtKeyUsageEndEntity)
+- [HostOrIp](#HostOrIp)
+- [KeyUsageEndEntity](#KeyUsageEndEntity)
 
-<tbody>
-<tr class="odd">
-<td><strong>Name</strong></td>
-<td><strong>Description</strong></td>
-<td><strong>Type</strong></td>
-<td><strong>Comments</strong></td>
-</tr>
+- [Revocation](#Revocation)
+- [RevocationLists](#RevocationLists)
+- [Validity](#Validity)
 
-<tr class="even">
-<td>HostOrIp</td>
-<td>Host or IP address must be present in Alternate Subject Names and will be checked</td>
-<td>Boolean</td>
-<td>Default is true</td>
-</tr>
+---
+### ApplicationUri
+Check Application description against the ApplicationUri from Subject Alternative Names
 
-<tr class="odd">
-<td>Validity</td>
-<td>Check certificate expiry</td>
-<td>Boolean</td>
-<td>Default is true</td>
-</tr>
+**Type**: Boolean
 
+Default is true
 
-<tr class="even">
-<td>KeyUsageEndEntity</td>
-<td>Key usage extension must be present and will be validated for end-entity certificates</td>
-<td>Boolean</td>
-<td>Default is true</td>
-</tr>
+---
+### ExtKeyUsageEndEntity
+Extended key usage extension must be present and will be validated for end-entity certificates
 
+**Type**: Boolean
 
-<tr class="odd">
-<td>ExtKeyUsageEndEntity</td>
-<td>Extended key usage extension must be present and will be validated for end-entity certificates</td>
-<td>Boolean</td>
-<td>Default is true</td>
-</tr>
+Default is true
 
-<tr class="odd">
-<td>RevocationLists</td>
-<td>Revocation list checking</td>
-<td>Boolean</td>
-<td>Default is true</td>
-</tr>
+---
+### HostOrIp
+Host or IP address must be present in Alternate Subject Names and will be checked
 
-<tr class="odd">
-<td>Revocation</td>
-<td>Revocation checking</td>
-<td>Boolean</td>
-<td>Default is true</td>
-</tr>
+**Type**: Boolean
+
+Default is true
+
+---
+### KeyUsageEndEntity
+Key usage extension must be present and will be validated for end-entity certificates
+
+**Type**: Boolean
+
+Default is true
 
 
-<tr class="even">
-<td>ApplicationUri</td>
-<td>Check Application description against the ApplicationUri from Subject Alternative Names</td>
-<td>Boolean</td>
-<td>Default is true</td>
-</tr>
+---
+### Revocation
+Revocation checking
 
+**Type**: Boolean
 
-</tbody>
-</table>
+Default is true
+
+---
+### RevocationLists
+Revocation list checking
+
+**Type**: Boolean
+
+Default is true
+
+---
+### Validity
+Check certificate expiry
+
+**Type**: Boolean
+
+Default is true
+
+[^top](#OPC UA target adapter data models and mapping)
 
 
 ## DataModelConfiguration
 
-<table>
-<colgroup>
-<col style="width: 19%" />
-<col style="width: 27%" />
-<col style="width: 28%" />
-<col style="width: 24%" />
-</colgroup>
 
-Top level folder for a configured data model.
+**Properties:**
+- [BrowseName](#BrowseName)
+- [Description](#Description)
+- [DisplayName](#DisplayName)
+- [Folders](#Folders)
+- [Id](#Id)
 
-Note that all keys in all tabled in a DataModel configuration must be unique.
+- [Namespace](#Namespace)
+- [Variables](#Variables)
 
-<tbody>
-<tr class="odd">
-<td><strong>Name</strong></td>
-<td><strong>Description</strong></td>
-<td><strong>Type</strong></td>
-<td><strong>Comments</strong></td>
-</tr>
+---
+### BrowseName
+Browse name for the folder.
 
-<tr class="even">
-<td>Namespace</td>
-<td>Namespace for the data model</td>
-<td>String</td>
-<td>Default is "urn:amazonaws.sfc"</td>
-</tr>
+**Type**: String
 
-<tr class="odd">
-<td>Id</td>
-<td>Id for the node</td>
-<td>String</td>
-<td>Optional, if not specified then the key for the model in the <a href="#opcua-target">OPC UA target configuration DataModels</a> table is used
+Optional, if not specified then the value of the id will be used as the display name
+
+---
+### Description
+Description for the folder.
+
+**Type**: String
+
+---
+### DisplayName
+Display name for the folder.
+
+**Type**: String
+
+Optional, if not specified then the value of the id will be used as the display name
+
+---
+### Folders
+Sub folder nodes to create in this top level folder
+
+**Type**: Map[String, FolderNodeConfiguration]
+
+---
+### Id
+Id for the node
+
+**Type**: String
+
+Optional, if not specified then the key for the model in the OPC UA target configuration DataModels table is used
 The the value of the id is used as the identifier in the node id for the folder. 
 
 - Id is a number: "ns=[namespace index];**i**= [numeric id]"
@@ -802,78 +788,73 @@ The value of the namespace index is set by the server when the model is built fr
 
 Note that all keys in all tabled in a DataModel configuration must be unique.
 
-</td>
-</tr>
-
-<tr class="even">
-<td>DisplayName</td>
-<td>Display name for the folder.</td>
-<td>String</td>
-<td>Optional, if not specified then the value of the id will be used as the display name</td>
-</tr>
-
-<tr class="odd">
-<td>BrowseName</td>
-<td>Browse name for the folder.</td>
-<td>String</td>
-<td>Optional, if not specified then the value of the id will be used as the display name</td>
-</tr>
-
-<tr class="odd">
-<td>Description</td>
-<td>Description for the folder.</td>
-<td>String</td>
-<td></td>
-</tr>
-
-<tr class="odd">
-<td>Folders</td>
-<td>Sub folder nodes to create in this top level folder</td>
-<td>Map[String, <a href="foldernodeconfiguration">FolderNodeConfiguration</a>]</td>
-<td></td>
-</tr>
-
-<tr class="even">
-<td>Variables</td>
-<td>Variable nodes to create at in this top level folder</td>
-<td>Map[String, <a href="variablenodeconfiguration">VariableNodeConfiguration</a>]</td>
-<td></td>
-</tr>
-
-</tbody>
-</table>
 
 
-[Opcua Target Configuration](#opcua-target)
 
+---
+### Namespace
+Namespace for the data model
+
+**Type**: String
+
+Default is "urn:amazonaws.sfc"
+
+---
+### Variables
+Variable nodes to create at in this top level folder
+
+**Type**: Map[String, VariableNodeConfiguration]
+
+[^top](#OPC UA target adapter data models and mapping)
 
 
 ## FolderNodeConfiguration
 
-<table>
-<colgroup>
-<col style="width: 19%" />
-<col style="width: 27%" />
-<col style="width: 28%" />
-<col style="width: 24%" />
-</colgroup>
 
-Folder node in a configured data model.
+**Properties:**
+- [BrowseName](#BrowseName)
+- [Description](#Description)
+- [DisplayName](#DisplayName)
+- [Folders](#Folders)
+- [Id](#Id)
 
-<tbody>
-<tr class="odd">
-<td><strong>Name</strong></td>
-<td><strong>Description</strong></td>
-<td><strong>Type</strong></td>
-<td><strong>Comments</strong></td>
-</tr>
+- [Variables](#Variables)
 
+---
+### BrowseName
+Browse name for the folder node.
 
-<tr class="even">
-<td>Id</td>
-<td>Id for the node</td>
-<td>String</td>
-<td>Optional; if not specified, the key used in the folder table in the parent folder or data model table is utilized. 
+**Type**: String
+
+Optional, if not specified then the value of the id will be used as the display name
+
+---
+### Description
+Description for the folder node.
+
+**Type**: String
+
+---
+### DisplayName
+Display name for the folder node.
+
+**Type**: String
+
+Optional, if not specified then the value of the id will be used as the display name
+
+---
+### Folders
+Map with sub folder nodes to create in this folder
+
+**Type**: Map[String, FolderNodeConfiguration]
+
+---
+### Id
+Id for the node
+
+**Type**: String
+
+Optional; if not specified, the key used in the folder table in the parent folder or data model table is utilized. 
 The value of the ID is then used as the identifier in the node ID for the folder.
 
 - Id is a number: "ns=[namespace index];**i**= [numeric id]"
@@ -884,119 +865,63 @@ The value of the namespace index is set by the server when the model is built fr
 
 Note that all keys in all tabled in a DataModel configuration must be unique.
 
-</td>
-</tr>
-
-<tr class="even">
-<td>DisplayName</td>
-<td>Display name for the folder node.</td>
-<td>String</td>
-<td>Optional, if not specified then the value of the id will be used as the display name</td>
-</tr>
-
-<tr class="odd">
-<td>BrowseName</td>
-<td>Browse name for the folder node.</td>
-<td>String</td>
-<td>Optional, if not specified then the value of the id will be used as the display name</td>
-</tr>
-
-<tr class="odd">
-<td>Description</td>
-<td>Description for the folder node.</td>
-<td>String</td>
-<td></td>
-</tr>
-
-<tr class="odd">
-<td>Folders</td>
-<td>Map with sub folder nodes to create in this folder</td>
-<td>Map[String, <a href="foldernodeconfiguration">FolderNodeConfiguration</a>]</td>
-<td></td>
-</tr>
-
-<tr class="even">
-<td>Variables</td>
-<td>Map with variable nodes to create at top level folder of model</td>
-<td>Map[String, <a href="variablenodeconfiguration">VariableNodeConfiguration</a>]</td>
-<td></td>
-</tr>
-
-</tbody>
-</table>
 
 
-[Opcua Target Configuration](#opcua-target)
 
+---
+### Variables
+Map with variable nodes to create at top level folder of model
 
+**Type**: Map[String, VariableNodeConfiguration]
+
+[^top](#OPC UA target adapter data models and mapping)
 
 
 ## VariableNodeConfiguration
 
 
-<table>
-<colgroup>
-<col style="width: 19%" />
-<col style="width: 27%" />
-<col style="width: 28%" />
-<col style="width: 24%" />
-</colgroup>
+**Properties:**
+- [ArrayDimensions](#ArrayDimensions)
+- [BrowseName](#BrowseName)
+- [DataType](#DataType)
+- [Description](#Description)
+- [DisplayName](#DisplayName)
+- [Id](#Id)
+- [InitValue](#InitValue)
 
-Variable node in a configured data model.
+- [TimestampQuery](#TimestampQuery)
+- [Transformation](#Transformation)
+- [ValueQuery](#ValueQuery)
 
-<tbody>
-<tr class="odd">
-<td><strong>Name</strong></td>
-<td><strong>Description</strong></td>
-<td><strong>Type</strong></td>
-<td><strong>Comments</strong></td>
-</tr>
+---
+### ArrayDimensions
+Dimensions of an array value
+
+**Type**: [Int]
 
 
-<tr class="even">
-<td>Id</td>
-<td>Id for the node</td>
-<td>String</td>
-<td>Optional; if not specified then the key used in the variable table in the parent folder or data model table is used
-The the value of the id is used as the identifier in the node id for the folder. 
+The array contains the sizes for the dimensions for an array variable;
+e.g.
 
-- Id is a number: "ns=[namespace index];**i**= [numeric id]"
-- Id is a guid: "ns=[namespace index];g= [guid id]"
-- Id is a string : "ns=[namespace index];s= [guid id]"
--
-The value of the namespace index is set by the server when the model is built from the model specification.
+[3] : Value array of 3 element
+[3,2] : Value array of 3 by 2 elements
 
-Note that all keys in all tabled in a DataModel configuration must be unique.
 
-</td>
-</tr>
+---
+### BrowseName
+Browse name for the variable node.
 
-<tr class="even">
-<td>DisplayName</td>
-<td>Display name for the variable node.</td>
-<td>String</td>
-<td>Optional, if not specified then the value of the id will be used as the display name</td>
-</tr>
+**Type**: String
 
-<tr class="odd">
-<td>BrowseName</td>
-<td>Browse name for the variable node.</td>
-<td>String</td>
-<td>Optional, if not specified then the value of the id will be used as the display name</td>
-</tr>
+Optional, if not specified then the value of the id will be used as the display name
 
-<tr class="odd">
-<td>Description</td>
-<td>Description for the variable node.</td>
-<td>String</td>
-<td></td>
-</tr>
+---
+### DataType
+Data type for the node
 
-<tr class="even">
-<td>DataType</td>
-<td>Data type for the node</td>
-<td>String</td>
-<td>The following data types are supported:
+**Type**: String
+
+The following data types are supported:
 
 - BOOLEAN
 - BYTE, SBYTE (signed byte)
@@ -1028,61 +953,68 @@ The '_' in the type names are used for clarity and can be omitted.
 
 Type names are not case-sensitive.
 
-</td>
-</tr>
 
-<tr class="odd">
-<td>InitValue</td>
-<td>Initial value for a variable node when created</td>
-<td>Any</td>
-<td>
+
+---
+### Description
+Description for the variable node.
+
+**Type**: String
+
+---
+### DisplayName
+Display name for the variable node.
+
+**Type**: String
+
+Optional, if not specified then the value of the id will be used as the display name
+
+---
+### Id
+Id for the node
+
+**Type**: String
+
+Optional; if not specified then the key used in the variable table in the parent folder or data model table is used
+The the value of the id is used as the identifier in the node id for the folder. 
+
+- Id is a number: "ns=[namespace index];**i**= [numeric id]"
+- Id is a guid: "ns=[namespace index];g= [guid id]"
+- Id is a string : "ns=[namespace index];s= [guid id]"
+-
+The value of the namespace index is set by the server when the model is built from the model specification.
+
+Note that all keys in all tabled in a DataModel configuration must be unique.
+
+
+
+---
+### InitValue
+Initial value for a variable node when created
+
+**Type**: Any
+
+
 If no initial value is specified, the value of the node will be set to null 
 when the "InitValuesWithNull" setting for the target is set to true, or left 
 undefined when it is false. The value must match the data type for the node. 
 If the value is an array, as described in "ArrayDimensions," the dimensions of 
 the initial value must match those of the variable. Initial array values can be 
 specified with up to three dimensions.
-</td>
-</tr>
 
-<tr class="odd">
-<td>ArrayDimensions</td>
-<td>Dimensions of an array value</td>
-<td>[Int]</td>
-<td>
-The array contains the sizes for the dimensions for an array variable;
-e.g.
 
-[3] : Value array of 3 element
-[3,2] : Value array of 3 by 2 elements
-</td>
-</tr>
 
-<tr class="even">
-<td>ValueQuery</td>
-<td><a href="https://jmespath.org">JMESPath Query</a> to select the value for a variable node from the target data</td>
-<td>String</td>
-<td>
+---
+### TimestampQuery
+JMESPath Query to select the timestamp for a variable node from the target data
+
+**Type**: String
+
+
 
 The value must be a valid JMESPath query https://jmespath.org.
 
-e.g. @.sources.<SourceName>.values.<ChannelName>.value
-
-Note that if the source or channel name contain non-alphanumeric characters, then these elements must be quoted.
-The quoted characters must be escaped with a \ character in the JSON configuration.
-
-</td>
-</tr>
-
-<tr class="odd">
-<td>TimestampQuery</td>
-<td>JMESPath Query to select the timestamp for a variable node from the target data</td>
-<td>String</td>
-<td>
-
-The value must be a valid JMESPath query https://jmespath.org.
-
-e.g. @.sources.<SourceName>.values.<ChannelName>.timestamp
+e.g. @.sources..values..timestamp
 
 Note that if the source or channel name contain  characters, not in  the ranges A-Z, a-z, 0-9, then these must be quoted.
 These quoted mst be escaped with a '\' character in the JSON configuration.
@@ -1090,28 +1022,37 @@ These quoted mst be escaped with a '\' character in the JSON configuration.
 If no query is specified in addition to the ValueQuery described above then the adapter will try to build a query from that ValueQuery by replacing the 
 "value" section of the query with  "timestamp". If that query does not return a timestamp then either the source or schedule timestamp will be used.
 
-</td>
-</tr>
 
 
-<tr class="even">
-<td>Transformation</td>
-<td>Transformation to be applied to the value obtained by the ValueQuery before it is written to the variable node.</td>
-<td>String</td>
-<td>
+---
+### Transformation
+Transformation to be applied to the value obtained by the ValueQuery before it is written to the variable node.
+
+**Type**: String
+
+
 The specified transformation must be the ID of an existing transformation in the "Transformations" section of the SFC 
 configuration. This transformation can be specifically applied when writing the value to OPC UA variable nodes, in addition 
 to the transformation that can be applied to a channel, which is used when the value is read from the source adapter.
 
-</td>
-</tr>
-
-</tbody>
-</table>
 
 
+---
+### ValueQuery
+JMESPath Query to select the value for a variable node from the target data
 
-[Opcua Target Configuration](#opcua-target)
+**Type**: String
 
 
-[^top](#opcua-target)
+
+The value must be a valid JMESPath query https://jmespath.org.
+
+e.g. @.sources..values..value
+
+Note that if the source or channel name contain non-alphanumeric characters, then these elements must be quoted.
+The quoted characters must be escaped with a \ character in the JSON configuration.
+
+
+
+[^top](#OPC UA target adapter data models and mapping)
+

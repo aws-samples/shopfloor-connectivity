@@ -131,22 +131,28 @@ In no port number is specified then the EndPoint address is searched for a train
 <td>String</td>  
 <td></td>  
 </tr>  
+
 <tr class="even">  
 <td>Username</td>  
 <td>Username if broker is using username and password authentication</td>  
 <td>String</td>  
 <td>Username and password should not be included as clear text in the configuration. It is strongly recommended to use placeholders and use the SFC integration with the AWS secrets manager.</td>
+</tr>
+
 <tr class="odd">  
 <td>Password</td>  
 <td>Password if broker is using username and password authentication</td>  
 <td>String</td>  
 <td>Username and password should not be included as clear text in the configuration. It is strongly recommended to use placeholders and use the SFC integration with the AWS secrets manager.</td>  
 </tr>  
+
 <tr class="even">  
 <td>ConnectionTimeout</td>  
 <td>Timeout for connecting to the broker in seconds</td>  
 <td>Int</td>  
 <td>Default is 10 seconds</td>
+</tr>
+
 <tr class="odd">  
 <td>WaitAfterConnectError</td>  
 <td>Period in seconds to wait before trying to connect after a connection failure</td>  
