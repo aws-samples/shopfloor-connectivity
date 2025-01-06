@@ -1,303 +1,420 @@
 ## TransformationOperator
-<br>
-
-A transformation operator consists of an operator name and an optional operand. It is a map that can must have an entry named "Operator" specifying the name of the transformation operator, with an optional entry named "Operand" for the operators that require this.</p>
-<p>For any operator that takes a numeric value as its operand either a numeric value, or a string containing a decimal, hexadecimal, or octal number. (See the java Integer.decode method documentation for supported values).</p>
-<p>Some operands have aliases that can be used as the operand name
-<br>
-<br>
 
 
-<table>
-<colgroup>
-<col style="width: 18%" />
-<col style="width: 27%" />
-<col style="width: 28%" />
-<col style="width: 25%" />
-</colgroup>
+**Properties:**
+- [Abs](#Abs)
+- [And
+alias is "&"](#And
+alias is "&")
+- [Aos](#Aos)
+- [Asin](#Asin)
+- [AtIndex
+Alias is "[]"](#AtIndex
+Alias is "[]")
+- [Atan](#Atan)
+- [BoolToNumber](#BoolToNumber)
+- [BytesToDoubleBE](#BytesToDoubleBE)
+- [BytesToDoubleLE](#BytesToDoubleLE)
+- [BytesToFloatBE](#BytesToFloatBE)
+- [BytesToFloatLE](#BytesToFloatLE)
+- [BytesToInt16](#BytesToInt16)
+- [Ceil](#Ceil)
+- [Celsius](#Celsius)
+- [Chunked](#Chunked)
+- [Cos](#Cos)
+- [Cosh](#Cosh)
+- [DecodeToString](#DecodeToString)
+- [Divide
+Alias is "/"](#Divide
+Alias is "/")
+- [EpocMilliSecondsToTimestamp](#EpocMilliSecondsToTimestamp)
+- [EpocSecondsToTimestamp](#EpocSecondsToTimestamp)
+- [Equals](#Equals)
+- [Exp](#Exp)
+- [Fahrenheit](#Fahrenheit)
+- [Flatten](#Flatten)
+- [Floor](#Floor)
+- [Int16ToBytes](#Int16ToBytes)
+- [Int16sToInt32](#Int16sToInt32)
+- [Int32ToInt16s](#Int32ToInt16s)
+- [IsoTimeStrSeconds](#IsoTimeStrSeconds)
+- [IsoTimeStrToEpocSeconds](#IsoTimeStrToEpocSeconds)
+- [IsoTimeStrToMilliSeconds](#IsoTimeStrToMilliSeconds)
+- [IsoTimeStrToNanoSeconds](#IsoTimeStrToNanoSeconds)
+- [IsoTimeStrToSeconds](#IsoTimeStrToSeconds)
+- [Ln](#Ln)
+- [Log10](#Log10)
+- [LowerCase](#LowerCase)
+- [MapRange](#MapRange)
+- [MapStringToNumber](#MapStringToNumber)
+- [Max](#Max)
+- [Min](#Min)
+- [Minus
+alias is "-"](#Minus
+alias is "-")
+- [Mod
+alias is "%"](#Mod
+alias is "%")
+- [Multiply
+alias is "*"](#Multiply
+alias is "*")
+- [Not
+alias is "!"](#Not
+alias is "!")
+- [NumbersToFloatBE](#NumbersToFloatBE)
+- [NumbersToFloatLE](#NumbersToFloatLE)
+- [Operator](#Operator)
+- [Or
+Alias = "|"](#Or
+Alias = "|")
+- [OutsideRangeExclusive](#OutsideRangeExclusive)
+- [OutsideRangeInclusive](#OutsideRangeInclusive)
+- [ParseInt](#ParseInt)
+- [ParseNumber](#ParseNumber)
+- [Plus
+alias is "+" or "Add"](#Plus
+alias is "+" or "Add")
+- [Query](#Query)
+- [ReverseList](#ReverseList)
+- [Round](#Round)
+- [Shl](#Shl)
+- [Shr](#Shr)
+- [Sign](#Sign)
+- [Sin](#Sin)
+- [Sinh](#Sinh)
+- [Sqrt](#Sqrt)
+- [Str](#Str)
+- [StrEquals](#StrEquals)
+- [SubString](#SubString)
+- [Tan](#Tan)
+- [Tanh](#Tanh)
+- [TimestampToEpocMilliSeconds](#TimestampToEpocMilliSeconds)
+- [TimestampToEpocSeconds](#TimestampToEpocSeconds)
+- [ToByte](#ToByte)
+- [ToDouble](#ToDouble)
+- [ToFloat](#ToFloat)
+- [ToInt](#ToInt)
+- [ToLong](#ToLong)
+- [ToShort](#ToShort)
+- [ToSigned](#ToSigned)
+- [ToUnsigned](#ToUnsigned)
+- [Trunc](#Trunc)
+- [TruncAt](#TruncAt)
+- [UpperCase](#UpperCase)
+- [WithinRangeExclusive](#WithinRangeExclusive)
+- [WithinRangeInclusive](#WithinRangeInclusive)
+- [Xor
+alias is "^"](#Xor
+alias is "^")
 
-<tbody>
-<tr>
-<td>Operator</td>
-<td><strong>Description</strong></td>
-<td><strong>Type</strong></td>
-<td>Operand</td>
-</tr>
+---
+### Abs
+Calculates absolute value.
 
-<tr>
-<td>Abs</td>
-<td><p>Calculates absolute value.</p>
-<p>Parameter: ""</p></td>
-<td>Datatype: Numeric</td>
-<td></td>
-</tr>
+**Type**: Datatype: Numeric
 
-<tr>
-<td>Aos</td>
-<td>Computes the arc; the returned value is an angle in the range from 0.0 to PI radians.</td>
-<td>Datatype: Numeric</td>
-<td></td>
-</tr>
+**Oparand**: None
 
-<tr>
-<td><p>And</p>
-<p>alias is "&amp;"</p></td>
-<td>Bitwise and of value and parameter.</td>
-<td>Datatype: Int, Byte, Short, Long</td>
-<td>Mask for AND operation</td>
-</tr>
+---
+### And
+Alias is "&"
+Bitwise and of value and parameter.
 
-<tr>
-<td>Asin</td>
-<td>Computes the arc; the returned value is an angle in the range from -PI/2 to PI/2 radians</td>
-<td>Datatype: Numeric</td>
-<td></td>
-</tr>
+**Type**: Datatype: Int, Byte, Short, Long
 
-<tr>
-<td>Atan</td>
-<td>Computes the arc; the returned value is an angle in the range from -PI/2 to PI/2 radians</td>
-<td>Datatype: Numeric</td>
-<td></td>
-</tr>
+**Operand**: Mask for AND operation
 
-<tr>
-<td><p>AtIndex</p>
-<p>Alias is "[]"</p></td>
-<td>Returns item from an array at the specified index.</td>
-<td>Datatype: Any[]</td>
-<td>Index for value to return, must be in the range of the array (0..items-1)</td>
-</tr>
+---
+### Arc
+Computes the arc; the returned value is an angle in the range from 0.0 to PI radians.
 
-<tr>
-<td>BoolToNumber</td>
-<td>Converts Boolean value to a number. False value returns 0, True value returns 1</td>
-<td>Datatype: Boolean</td>
-<td></td>
-</tr>
+**Type**: Datatype: Numeric
 
-<tr>
-<td>BytesToDoubleBE</td>
-<td>Converts array of 8 bytes to a float value (Big-Endian)</td>
-<td>Datatype: byte[8]</td>
-<td></td>
-</tr>
+**Oparand**: None
 
-<tr>
-<td>BytesToDoubleLE</td>
-<td>Converts array of 8 bytes to a float value (Little-Endian)</td>
-<td>Datatype: byte[8]</td>
-<td></td>
-</tr>
+---
+### Asin
+Computes the arc; the returned value is an angle in the range from -PI/2 to PI/2 radians
 
-<tr>
-<td>BytesToFloatBE</td>
-<td>Converts array of 4 bytes to a float value (Big-Endian)</td>
-<td>Datatype: byte[4]</td>
-<td></td>
-</tr>
+**Type**: Datatype: Numeric
 
-<tr>
-<td>BytesToFloatLE</td>
-<td>Converts array of 4 bytes to a float value (Little-Endian)</td>
-<td>Datatype: byte[4]</td>
-<td></td>
-</tr>
+**Oparand**: None
 
-<tr>
-<td>BytesToInt16</td>
-<td>Converts array of two bytes to a 16-bit integer (Big-Endian)</td>
-<td>Datatype: byte[2]</td>
-<td></td>
-</tr>
+---
+### AtIndex
+Alias is "[]"
+Returns item from an array at the specified index.
 
+**Type**: Datatype: Any[]
 
-<tr>
-<td>Ceil</td>
-<td>Rounds value up to the next largest integer.</td>
-<td>Datatypes: Numeric</td>
-<td></td>
-</tr>
+**Operand:** Index for value to return, must be in the range of the array (0..items-1)
 
-<tr>
-<td>Celsius</td>
-<td>Converts Fahrenheit temperature to Celsius.</td>
-<td>Datatypes: Numeric</td>
-<td></td>
-</tr>
+---
+### Atan
+Computes the arc; the returned value is an angle in the range from -PI/2 to PI/2 radians
 
-<tr>
-<td>Chunked</td>
-<td>Splits a value, which contains a list of values, into a lists of smaller lists, containing the specified chunk size. The last list may contain items less than the specified chunk size.</td>
-<td>Datatypes: Lists</td>
-<td></td>
-</tr>
+**Type**: Datatype: Numeric
 
+**Oparand**: None
 
-<tr>
-<td>Cos</td>
-<td>Computes the cosine of the angle given in radians</td>
-<td>Datatype: Numeric</td>
-<td></td>
-</tr>
+---
+### BoolToNumber
+Converts Boolean value to a number. False value returns 0, True value returns 1
 
-<tr>
-<td>Cosh</td>
-<td>Computes the hyperbolic cosine</td>
-<td>Datatype: Numeric</td>
-<td></td>
-</tr>
+**Type**: Datatype: Boolean
 
-<tr>
-<td>DecodeToString</td>
-<td>Decodes byte arrays (and ByteStrings) into UTF-8 String</td>
-<td>Datatype: Byte[]</td>
-<td></td>
-</tr>
+**Oparand**: None
 
-<tr>
-<td><p>Divide</p>
-<p>Alias is "/"</p></td>
-<td>Divides values</td>
-<td>Datatypes: Numeric</td>
-<td>Divider (must be &gt; 0)</td>
-</tr>
+---
+### BytesToDoubleBE
+Converts array of 8 bytes to a float value (Big-Endian)
 
-<tr>
-<td>Equals</td>
-<td>Compares two numbers. To compare unsigned numbers convert number to a signed number using ToSigned operator.</td>
-<td>Datatype: Number</td>
-<td>Parameter: Number to test for equality</td>
-</tr>
+**Type**: Datatype: byte[8]
 
-<tr>
-<td>Exp</td>
-<td>Computes Euler's number e raised to the power of the value</td>
-<td>Datatypes: Numeric</td>
-<td></td>
-</tr>
+**Oparand**: None
 
+---
+### BytesToDoubleLE
+Converts array of 8 bytes to a float value (Little-Endian)
 
-<tr>
-<td>EpocMilliSecondsToTimestamp</td>
-<td>Obtains a DateTime using milliseconds from the epoch of 1970-01-01T00:00:00Z.</td>
-<td>Datatypes: Long</td>
-<td></td>
-</tr>
+**Type**: Datatype: byte[8]
 
-<tr>
-<td>EpocSecondsToTimestamp</td>
-<td>Obtains a DateTime using seconds from the epoch of 1970-01-01T00:00:00Z.</td>
-<td>Datatypes: Long</td>
-<td></td>
-</tr>
+**Oparand**: None
 
-<tr>
-<td>Fahrenheit</td>
-<td>Converts Celsius temperature to Fahrenheit.</td>
-<td>Datatypes: Numeric</td>
-<td></td>
-</tr>
+---
+### BytesToFloatBE
+Converts array of 4 bytes to a float value (Big-Endian)
 
-<tr>
-<td>Flatten</td>
-<td>Flattens multi-dimensional array values into a single dimensional array value </td>
-<td>Datatypes: Any</td>
-<td></td>
-</tr>
+**Type**: Datatype: byte[4]
 
-<tr>
-<td>Floor</td>
-<td>Calculates the largest integer less than or equal to the value.</td>
-<td>Datatypes: Numeric</td>
-<td></td>
-</tr>
+**Oparand**: None
 
-<tr>
-<td>Int16sToInt32</td>
-<td>Converts an array of two 16-bit values to a single 32-bit value.</td>
-<td>Datatypes: int16[2]</td>
-<td></td>
-</tr>
+---
+### BytesToFloatLE
+Converts array of 4 bytes to a float value (Little-Endian)
 
-<tr>
-<td>Int16ToBytes</td>
-<td>Converts a 16-bit value in an array of 2 8-bit values.</td>
-<td>Datatype: 16-bit value</td>
-<td></td>
-</tr>
+**Type**: Datatype: byte[4]
 
-<tr>
-<td>Int32ToInt16s</td>
-<td>Converts a 32-bit value in an array of 2 16-bit values.</td>
-<td>Datatype: 32-bit Value</td>
-<td></td>
-</tr>
+**Oparand**: None
 
-<tr>
-<td>IsoTimeStrToMilliSeconds</td>
-<td>Converts a string in ISO-8601 duration format into milliseconds.
-Converts a string in a format such as 2007-12-03T10:15:30.00Z into the number of milliseconds from the epoch of 1970-01-01T00:00:00Z.
-The string must represent a valid instant in UTC</td>
-<td>Datatype : String</td>
-<td></td>
-</tr>
+---
+### BytesToInt16
+Converts array of two bytes to a 16-bit integer (Big-Endian)
 
-<tr>
-<td>IsoTimeStrSeconds</td>
-<td>Converts a string in ISO-8601 duration format into milliseconds.
+**Type**: Datatype: byte[2]
+
+**Oparand**: None
+
+---
+### Ceil
+Rounds value up to the next largest integer.
+
+**Type**: Datatypes: Numeric
+
+**Oparand**: None
+
+---
+### Celsius
+Converts Fahrenheit temperature to Celsius.
+
+**Type**: Datatypes: Numeric
+
+**Oparand**: None
+
+---
+### Chunked
+Splits a value, which contains a list of values, into a lists of smaller lists, containing the specified chunk size. The last list may contain items less than the specified chunk size.
+
+**Type**: Datatypes: Lists
+
+**Oparand**: Chunck size
+
+---
+### Cos
+Computes the cosine of the angle given in radians
+
+**Type**: Datatype: Numeric
+
+**Oparand**: None
+
+---
+### Cosh
+Computes the hyperbolic cosine
+
+**Type**: Datatype: Numeric
+
+**Oparand**: None
+
+---
+### DecodeToString
+Decodes byte arrays (and ByteStrings) into UTF-8 String
+
+**Type**: Datatype: Byte[]
+
+**Oparand**: None
+
+---
+### Divide
+Alias is "/"
+Divides values
+
+**Type**: Datatypes: Numeric
+
+**Operand:** Divider (must be > 0)
+
+---
+### EpocMilliSecondsToTimestamp
+Obtains a DateTime using milliseconds from the epoch of 1970-01-01T00:00:00Z.
+
+**Type**: Datatypes: Long
+
+**Oparand**: None
+
+---
+### EpocSecondsToTimestamp
+Obtains a DateTime using seconds from the epoch of 1970-01-01T00:00:00Z.
+
+**Type**: Datatypes: Long
+
+**Oparand**: None
+
+---
+### Equals
+Compares two numbers. To compare unsigned numbers convert number to a signed number using ToSigned operator.
+
+**Type**: Datatype: Number
+
+Operand:  Number to test for equality
+
+---
+### Exp
+Computes Euler's number e raised to the power of the value
+
+**Type**: Datatypes: Numeric
+
+**Oparand**: None
+
+---
+### Fahrenheit
+Converts Celsius temperature to Fahrenheit.
+
+**Type**: Datatypes: Numeric
+
+**Oparand**: None
+
+---
+### Flatten
+Flattens multi-dimensional array values into a single dimensional array value 
+
+**Type**: Datatypes: Any
+
+**Oparand**: None
+
+---
+### Floor
+Calculates the largest integer less than or equal to the value.
+
+**Type**: Datatypes: Numeric
+
+**Oparand**: None
+
+---
+### Int16ToBytes
+Converts a 16-bit value in an array of 2 8-bit values.
+
+**Type**: Datatype: 16-bit value
+
+**Oparand**: None
+
+---
+### Int16sToInt32
+Converts an array of two 16-bit values to a single 32-bit value.
+
+**Type**: Datatypes: int16[2]
+
+**Oparand**: None
+
+---
+### Int32ToInt16s
+Converts a 32-bit value in an array of 2 16-bit values.
+
+**Type**: Datatype: 32-bit Value
+
+**Oparand**: None
+
+---
+### IsoTimeStrSeconds
+Converts a string in ISO-8601 duration format into milliseconds.
 Converts a string in a format such as 2007-12-03T10:15:30.00Z into the number of seconds from the epoch of 1970-01-01T00:00:00Z.
-The string must represent a valid instant in UTC</td>
-<td>Datatype : String</td>
-<td></td>
+The string must represent a valid instant in UTC
 
-<tr>
-<td>IsoTimeStrToMilliSeconds</td>
-<td>Converts a string in ISO-8601 duration format into milliseconds</td>
-<td>Datatype : String</td>
-<td></td>
-</tr>
+**Type**: Datatype : String
 
-<tr>
-<td>IsoTimeStrToNanoSeconds</td>
-<td>Converts a string in ISO-8601 duration format into nanoseconds</td>
-<td>Datatype : String</td>
-<td></td>
-</tr>
+**Oparand**: None
 
-<tr>
-<td>IsoTimeStrToSeconds</td>
-<td>Converts a string in ISO-8601 duration format into seconds</td>
-<td>Datatype : String</td>
-<td></td>
-</tr>
+---
+### IsoTimeStrToEpocSeconds
+Converts a string in ISO-8601 duration format into milliseconds.
+Converts a string in a format such as 2007-12-03T10:15:30.00Z into the number of milliseconds from the epoch of 1970-01-01T00:00:00Z.
+The string must represent a valid instant in UTC
 
-<tr>
-<td>Ln</td>
-<td>Computes the natural logarithm (base E)</td>
-<td>Datatypes: Numeric</td>
-<td></td>
-</tr>
+**Type**: Datatype : String
 
-<tr>
-<td>Log10</td>
-<td>Computes the common logarithm (base 10)</td>
-<td>Datatype: Numeric</td>
-<td></td>
-</tr>
+---
+### IsoTimeStrToMilliSeconds
+Converts a string in ISO-8601 duration format into milliseconds
 
-<tr>
-<td>LowerCase</td>
-<td>Converts string to lowercase.</td>
-<td>Datatype: String</td>
-<td></td>
-</tr>
+**Type**: Datatype : String
 
-<tr>
-<td>MapRange</td>
-<td>Maps numeric ranges.</td>
-<td>Datatype: Numeric</td>
-<td><p>Structure containing both input and output range.</p>
+**Oparand**: None
+
+---
+### IsoTimeStrToNanoSeconds
+Converts a string in ISO-8601 duration format into nanoseconds
+
+**Type**: Datatype : String
+
+**Oparand**: None
+
+---
+### IsoTimeStrToSeconds
+Converts a string in ISO-8601 duration format into seconds
+
+**Type**: Datatype : String
+
+**Oparand**: None
+
+---
+### Ln
+Computes the natural logarithm (base E)
+
+**Type**: Datatypes: Numeric
+
+**Oparand**: None
+
+---
+### Log10
+Computes the common logarithm (base 10)
+
+**Type**: Datatype: Numeric
+
+**Oparand**: None
+
+---
+### LowerCase
+Converts string to lowercase.
+
+**Type**: Datatype: String
+
+**Oparand**: None
+
+---
+### MapRange
+Maps numeric ranges.
+
+**Type**: Datatype: Numeric
+
+**Operand:**  Structure containing both input and output range.
 
 ```json
 {
@@ -314,14 +431,15 @@ The string must represent a valid instant in UTC</td>
    }
 }
 ```
-<p>Maps range 0-1024 to range 1-100</p></td>
-</tr>
+Maps range 0-1024 to range 1-100
 
-<tr>
-<td>MapStringToNumber</td>
-<td>Maps a string value to an integer value or default value.</td>
-<td>Datatype: String</td>
-<td><p>
+---
+### MapStringToNumber
+Maps a string value to an integer value or default value.
+
+**Type**: Datatype: String
+
+**Default,Constraints,Examples**: 
 
 ```json
 {
@@ -337,102 +455,113 @@ The string must represent a valid instant in UTC</td>
 
 ```
 
-<p>Mappings: Map containing the string to value mapping</p>
-<p>Default: Default value is there is no mapping (default is 0)</p></td>
-</tr>
+**Operand**:  Map containing the string to value mapping
+Default: Default value is there is no mapping (default is 0)
 
-<tr>
-<td>Max</td>
-<td>Returns greater of value or parameter value.</td>
-<td>Datatype: Numeric</td>
-<td>Numeric test value</td>
-</tr>
+---
+### Max
+Returns greater of value or parameter value.
 
-<tr>
-<td>Min</td>
-<td>Return smaller of value or parameter value.</td>
-<td>Datatype: Numeric</td>
-<td>Numeric test value</td>
-</tr>
+**Type**: Datatype: Numeric
 
-<tr>
-<td><p>Minus</p>
-<p>alias is "-"</p></td> 
-<td>Subtracts parameter value from value.</td>
-<td>Datatype: Numeric</td>
-<td>Numeric value to subtract</td>
-</tr>
+**Operand**: Numeric test value
 
-<tr>
-<td><p>Mod</p>
-<p>alias is "%"</p></td>
-<td>Calculates the remainder of dividing value by parameter value.</td>
-<td>Datatype: Numeric</td>
-<td>Parameter: Divider</td>
-</tr>
+---
+### Min
+Return smallest of value or parameter value.
 
-<tr>
-<td><p>Multiply</p>
-<p>alias is "*"</p></td>
-<td>Multiplies value by parameter value.</td>
-<td>Datatype: Numeric</td>
-<td>Parameter: Multiplier</td>
-</tr>
+**Type**: Datatype: Numeric
 
-<tr>
-<td><p>Not</p>
-<p>alias is "!"</p></td>
-<td>Inverts a Boolean value</td>
-<td>Datatype : Boolean</td>
-<td></td>
-</tr>
+Operand: Numeric test value
 
-<tr>
-<td><p>NumbersToFloatBE</td>
-<td>Takes a list of two numbers and converts the individual bytes of these numbers into a float value using Big Endian encoding.</td>
-<td>Datatype : List of size 2 containing 2 numeric values. These values are first converted into 16 bit words from which the float value is decoded. </td>
-<td></td>
-</tr>
+---
+### Minus
+alias is "-"
+Subtracts parameter value from value.
 
-<tr>
-<td><p>NumbersToFloatLE</td>
-<td>Takes a list of two numbers and converts the individual bytes of these numbers into a float value using Little Endian encoding.</td>
-<td>Datatype : List of size 2 containing 2 numeric values. These values are first converted into 16 bit words from which the float value is decoded. </td>
-<td></td>
-</tr>
+**Type**: Datatype: Numeric
 
-<tr>
-<td><p>Or</p>
-<p>Alias = "|"</p></td>
-<td>Bitwise or of value and parameter.</td>
-<td>Datatype: Int, Byte, Short, Long.</td>
-<td>Parameter: or value</td>
-</tr>
+**Operand:**: Numeric value to subtract
 
-<tr>
-<td>OutsideRangeExclusive</td>
-<td>Test if a value is outside an exclusive range</td>
-<td>Datatype: Numeric</td>
-<td><p>
+---
+### Mod
+alias is "%"
+Calculates the remainder of dividing value by parameter value.
+
+**Type**: Datatype: Numeric
+
+Operand:  Parameter: Divider
+
+---
+### Multiply
+alias is "*"
+Multiplies value by parameter value.
+
+**Type**: Datatype: Numeric
+
+**Oparand**: Parameter: Multiplier
+
+---
+### Not
+alias is "!"
+Inverts a Boolean value
+
+**Type**: Datatype : Boolean
+
+**Oparand**: None
+
+---
+### NumbersToFloatBE
+Takes a list of two numbers and converts the individual bytes of these numbers into a float value using Big Endian encoding.
+
+**Type**: Datatype : List of size 2 containing 2 numeric values. These values are first converted into 16 bit words from which the float value is decoded. 
+
+**Oparand**: None
+
+---
+### NumbersToFloatLE
+Takes a list of two numbers and converts the individual bytes of these numbers into a float value using Little Endian encoding.
+
+**Type**: Datatype : List of size 2 containing 2 numeric values. These values are first converted into 16 bit words from which the float value is decoded. 
+
+**Oparand**: None
+
+---
+### Or
+Alias = "|"
+Bitwise or of value and parameter.
+
+**Type**: Datatype: Int, Byte, Short, Long.
+
+**Operand**:  or mask
+
+---
+### OutsideRangeExclusive
+Test if a value is outside an exclusive range
+
+**Type**: Datatype: Numeric
+
+**Oparand**: None
 
 ```json
 {
    "Operator": "OutsideRangeExclusive",
-   "Operand": {
-      "MinValue": 0,
-      "MaxValue": 100
-   }
+   	  "Operand": {
+        "MinValue": 0,
+        "MaxValue": 100
+     }
 }
 ```
 
-</td>
-</tr>
 
-<tr>
-<td>OutsideRangeInclusive</td>
-<td>Datatype: Numeric</td>
-<td>Datatype: Numeric</td>
-<td>
+
+---
+### OutsideRangeInclusive
+Datatype: Numeric
+
+**Type**: Datatype: Numeric
+
+**Oparand**: None
 
 ```json
 {
@@ -445,121 +574,139 @@ The string must represent a valid instant in UTC</td>
 ```
 
 
-</td>
-</tr>
 
-<tr>
-<td><p>Plus</p>
-<p>alias is "+" or "Add"</p></td>
-<td>Adds the value of the parameter to value.</td>
-<td>Datatype: Numeric</td>
-<td>Numeric value to add</td>
-</tr>
 
-<tr>
-<td>ParseInt</td>
-<td>Parses string value as an integer number. The string must be a valid representation of a number.</td>
-<td>Datatype: String</td>
-<td></td>
-</tr>
+---
+### ParseInt
+Parses string value as an integer number. The string must be a valid representation of a number.
 
-<tr>
-<td>ParseNumber</td>
-<td>Parses string value as a double number. The string must be a valid representation of a number.</td>
-<td>Datatype: String</td>
-<td></td>
-</tr>
+**Type**: Datatype: String
 
-<tr>
-<td>Query</td>
-<td>Evaluate a <a href="https://jmespath.org/">JMESpath</a> query against structured data type and returns the result.</td>
-<td>String</td>
-<td>Parameter: <a href="https://jmespath.org/">JMESPath</a> expression, see https://jmespath.org/</td>
-</tr>
+**Oparand**: None
 
-<tr>
-<td>ReverseList</td>
-<td>Reverses the elements in a list value.</td>
-<td>Datatype: Lists</td>
-<td></td>
-</tr>
+---
+### ParseNumber
+Parses string value as a double number. The string must be a valid representation of a number.
 
-<tr>
-<td>Round</td>
-<td>Rounds the given value towards the closest integer.</td>
-<td>Datatype: Numeric</td>
-<td></td>
-</tr>
+**Type**: Datatype: String
 
-<tr>
-<td>Shl</td>
-<td>Shifts this value left by a bit-count number of bits.</td>
-<td>Datatype: Int, Byte, Short, Long</td>
-<td>Parameter: bit-count</td>
-</tr>
+**Oparand**: None
 
-<tr>
-<td>Shr</td>
-<td>Shifts this value right by a bit-count number of bits.</td>
-<td>Datatype: Int, Byte, Short, Long</td>
-<td>Parameter: bit-count</td>
-</tr>
+---
+### Plus
+alias is "+" or "Add"
+Adds the value of the parameter to value.
 
-<tr>
-<td>Sin</td>
-<td>Computes the sine of the angle given in radians</td>
-<td>Datatype: Numeric</td>
-<td></td>
-</tr>
+**Type**: Datatype: Numeric
 
-<tr>
-<td>Sign</td>
-<td><p>Returns the sign of the value.</p>
-<p>-1.0 if the value is negative,</p>
-<p>zero if the value is zero,</p>
-<p>1.0 if the value is positive</p></td>
-<td>Datatype: Numeric</td>
-<td></td>
-</tr>
+**Operand**: Numeric value to add
 
-<tr>
-<td>Sinh</td>
-<td>Computes the hyperbolic sine of the value</td>
-<td>Datatype: Numeric</td>
-<td></td>
-</tr>
+---
+### Query
+Evaluate a JMESpath query against structured data type and returns the result.
 
-<tr>
-<td>Sqrt</td>
-<td>Computes the positive square root</td>
-<td>Datatype: Numeric</td>
-<td></td>
-</tr>
+**Type**: String
 
-<tr>
-<td>Str</td>
-<td>String representation of a number.</td>
-<td>Datatype: Numeric</td>
-<td></td>
-</tr>
+**Default,Constraints,Examples**: Parameter: JMESPath expression, see https://jmespath.org/
 
-<tr>
-<td>StrEquals</td>
-<td>Compares string value with a string parameter.</td>
-<td>Datatype: String</td>
-<td>Parameter: String to test for equality</td>
-</tr>
+---
+### ReverseList
+Reverses the elements in a list value.
 
-<tr>
-<td>SubString</td>
-<td><p>Returns the substring of string value starting at the start and ending right before the end.</p>
-<p>Start and End are zero based indexes when positive and automatically limited to the max length of the input string.</p>
-<p>Extracts first 4 characters of a string</p>
-<p>When using negative values, it is the offset from end of the input string (-1 is last character).</p>
-<p>If Start is omitted its default value is 0, for the beginning of the string.</p>
-<p>If End is omitted the default value is the end of the input string (length + 1)</p></td>
-<td>Datatype: String</td>
-<td>
+**Type**: Datatype: Lists
+
+**Oparand**: None
+
+---
+### Round
+Rounds the given value towards the closest integer.
+
+**Type**: Datatype: Numeric
+
+**Oparand**: None
+
+---
+### Shl
+Shifts this value left by a bit-count number of bits.
+
+**Type**: Datatype: Int, Byte, Short, Long
+
+**Oparand**: bit-count
+
+---
+### Shr
+Shifts this value right by a bit-count number of bits.
+
+**Type**: Datatype: Int, Byte, Short, Long
+
+**Oparand**: bit-count
+
+---
+### Sign
+Returns the sign of the value.
+
+- -1.0 if the value is negative
+- zero if the value is zero
+- 1.0 if the value is positive
+
+**Type**: Datatype: Numeric
+
+**Oparand**: None
+
+---
+### Sin
+Computes the sine of the angle given in radians
+
+**Type**: Datatype: Numeric
+
+**Oparand**: None
+
+---
+### Sinh
+Computes the hyperbolic sine of the value
+
+**Type**: Datatype: Numeric
+
+**Oparand**: None
+
+---
+### Sqrt
+Computes the positive square root
+
+**Type**: Datatype: Numeric
+
+**Oparand**: None
+
+---
+### Str
+String representation of a number.
+
+**Type**: Datatype: Numeric
+
+**Oparand**: None
+
+---
+### StrEquals
+Compares string value with a string parameter.
+
+**Type**: Datatype: String
+
+**Operand**: Parameter: String to test for equality
+
+---
+### SubString
+Returns the substring of string value starting at the start and ending right before the end.
+Start and End are zero based indexes when positive and automatically limited to the max length of the input string.
+
+When using negative values, it is the offset from end of the input string (-1 is last character)
+
+If Start is omitted its default value is 0, for the beginning of the string.
+
+If End is omitted the default value is the end of the input string (length + 1)
+
+**Type**: Datatype: String
+
+**Operand:** Start and end position
 
 ```json
 
@@ -572,125 +719,137 @@ The string must represent a valid instant in UTC</td>
 }
 ```
 
-<p>Start and End are zero based indexes when positive and automatically limited to the max length of the input string.</p>
-<p>Extracts first 4 characters of a string</p>
-<p>When using negative values, it is the offset from end of the input string (-1 is last character).</p>
-<p>If Start is omitted its default value is 0, for the beginning of the string.</p>
-<p>If End is omitted the default value is the end of the input string (length + 1)</p></td>
-</tr>
-
-<tr>
-<td>Tan</td>
-<td>Computes the tangent of the angle given in radians</td>
-<td>Datatype: Numeric</td>
-<td></td>
-</tr>
-
-<tr>
-<td>Tanh</td>
-<td>Computes the hyperbolic tangent of the value</td>
-<td>Datatype: Numeric</td>
-<td></td>
-</tr>
-
-<tr>
-<td>TimestampToEpocMilliSeconds</td>
-<td>Converts a datetime value  to the number of milliseconds from the epoch of 1970-01-01T00:00:00Z.</td>
-<td>Datatype: DateTime/Timestamp</td>
-<td></td>
-</tr>
-
-<tr>
-<td>TimestampToEpocSeconds</td>
-<td>Converts a datetime value  to the number of seconds from the epoch of 1970-01-01T00:00:00Z.</td>
-<td>Datatype: DateTime/Timestamp</td>
-<td></td>
-</tr>
-
-<tr>
-<td>ToByte</td>
-<td>Converts numeric value to a byte value</td>
-<td>Datatype: Numeric</td>
-<td>No operand</td>
-</tr>
-
-<tr>
-<td>ToDouble</td>
-<td>Converts numeric value to a double value</td>
-<td>Datatype: Numeric</td>
-<td>No operand</td>
-</tr>
-
-<tr>
-<td>ToFloat</td>
-<td>Converts numeric value to a float value</td>
-<td>Datatype: Numeric</td>
-<td>No operand</td>
-</tr>
-
-<tr>
-<td>ToInt</td>
-<td>Converts numeric value to an int value</td>
-<td>Datatype: Numeric</td>
-<td>No operand</td>
-</tr>
-
-<tr>
-<td>ToLong</td>
-<td>Converts numeric value to a long 64 bits value</td>
-<td>Datatype: Numeric</td>
-<td>No operand</td>
-</tr>
-
-<tr>
-<td>ToShort</td>
-<td>Converts numeric value to a short 16 bits value</td>
-<td>Datatype: Numeric</td>
-<td>No operand</td>
-</tr>
-
-<tr>
-<td>ToSigned</td>
-<td>Converts numeric value to a signed value</td>
-<td>Datatype: Numeric</td>
-<td>No operand</td>
-</tr>
 
 
-<tr>
-<td>ToUnsigned</td>
-<td>Converts numeric value to an unsigned value</td>
-<td>Datatype: Numeric</td>
-<td>No operand</td>
-</tr>
+---
+### Tan
+Computes the tangent of the angle given in radians
 
+**Type**: Datatype: Numeric
 
-<tr>
-<td>Trunc</td>
-<td>Rounds the given value to an integer towards zero.</td>
-<td>Datatype: Numeric</td>
-<td></td>
-</tr>
+**Oparand**: None
 
-<tr>
-<td>TruncAt</td>
-<td>Rounds the given value to a value with a specified number of decimals.</td>
-<td>Datatype: Numeric</td>
-<td>Number of decimals to truncate value at</td>
-</tr>
+---
+### Tanh
+Computes the hyperbolic tangent of the value
 
-<tr>
-<td>UpperCase</td>
-<td>Converts a string value to uppercase.</td>
-<td>Datatype: String</td>
-<td></td>
-</tr>
+**Type**: Datatype: Numeric
 
-<tr>
-<td>WithinRangeExclusive</td>
-<td>Datatype: Numeric</td>
-<td>Datatype : Numeric</td>
-<td>
+**Oparand**: None
+
+---
+### TimestampToEpocMilliSeconds
+Converts a datetime value  to the number of milliseconds from the epoch of 1970-01-01T00:00:00Z.
+
+**Type**: Datatype: DateTime/Timestamp
+
+**Oparand**: None
+
+---
+### TimestampToEpocSeconds
+Converts a datetime value  to the number of seconds from the epoch of 1970-01-01T00:00:00Z.
+
+**Type**: Datatype: DateTime/Timestamp
+
+**Oparand**: None
+
+---
+### ToByte
+Converts numeric value to a byte value
+
+**Type**: Datatype: Numeric
+
+**Default,Constraints,Examples**: No operand
+
+**Oparand**: None
+
+---
+### ToDouble
+Converts numeric value to a double value
+
+**Type**: Datatype: Numeric
+
+**Oparand**: None
+
+---
+### ToFloat
+Converts numeric value to a float value
+
+**Type**: Datatype: Numeric
+
+**Oparand**: None
+
+---
+### ToInt
+Converts numeric value to an int value
+
+**Type**: Datatype: Numeric
+
+**Oparand**: None
+
+---
+### ToLong
+Converts numeric value to a long 64 bits value
+
+**Type**: Datatype: Numeric
+
+**Default,Constraints,Examples**: No operand
+
+---
+### ToShort
+Converts numeric value to a short 16 bits value
+
+**Type**: Datatype: Numeric
+
+**Oparand**: None
+
+---
+### ToSigned
+Converts numeric value to a signed value
+
+**Type**: Datatype: Numeric
+
+**Oparand**: None
+
+---
+### ToUnsigned
+Converts numeric value to an unsigned value
+
+**Type**: Datatype: Numeric
+
+**Oparand**: None
+
+---
+### Trunc
+Rounds the given value to an integer towards zero.
+
+**Type**: Datatype: Numeric
+
+**Oparand**: None
+
+---
+### TruncAt
+Rounds the given value to a value with a specified number of decimals.
+
+**Type**: Datatype: Numeric
+
+**Operand**: Number of decimals to truncate value at
+
+---
+### UpperCase
+Converts a string value to uppercase.
+
+**Type**: Datatype: String
+
+**Oparand**: None
+
+---
+### WithinRangeExclusive
+Datatype: Numeric
+
+**Type**: Datatype : Numeric
+
+**Operand**: Range
 
 ```json
 {
@@ -702,14 +861,15 @@ The string must represent a valid instant in UTC</td>
 }
 ```
 
-</td>
-</tr>
 
-<tr>
-<td>WithinRangeInclusive</td>
-<td>Datatype: Numeric</td>
-<td>Datatype: Numeric</td>
-<td>
+
+---
+### WithinRangeInclusive
+Datatype: Numeric
+
+**Type**: Datatype: Numeric
+
+**Default,Constraints,Examples**: 
 
 ```json
 {
@@ -721,18 +881,16 @@ The string must represent a valid instant in UTC</td>
 }
 ```
 
-</td>
-</tr>
+**Operand** : Range
 
-<tr>
-<td><p>Xor</p>
-<p>alias is "^"</p></td>
-<td>Bitwise xor of value and parameter.</td>
-<td>Datatype: Int, Byte, Short, Long</td>
-<td>Parameter: xor value</td>
-</tr>
+---
+### Xor
+alias is "^"
+Bitwise xor of value and parameter.
 
-</tbody>
-</table>
+**Type**: Datatype: Int, Byte, Short, Long
 
-[SfcTopLevelConfiguration](sfc-top-level-config.md)
+**Operand** : Parameter: xor mask
+
+[^top](#TransformationOperator)
+

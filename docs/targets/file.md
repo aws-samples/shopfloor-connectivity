@@ -1,80 +1,79 @@
 # File Target
-<br>
-FileConfiguration extends the type <a href="../core/target-configuration.md" >TargetConfiguration</a> with specific configuration data for writing data to the local file system. The Targets configuration element can contain entries of this type, the TargetType of these entries must be set to <strong>"FILE-TARGET".</strong>
-<br>
-<br>
 
-[Targets](./README.md)
+
 
 ## FileConfiguration
 
-<table>
-<colgroup>
-<col style="width: 18%" />
-<col style="width: 26%" />
-<col style="width: 28%" />
-<col style="width: 26%" />
-</colgroup>
+FileConfiguration extends the type <a href="../core/target-configuration.md" >TargetConfiguration</a> with specific configuration data for writing data to the local file system. The Targets configuration element can contain entries of this type, the TargetType of these entries must be set to <strong>"FILE-TARGET".</strong>
 
-<tbody>
-<tr class="odd">
-<td><strong>Name</strong></td>
-<td><strong>Description</strong></td>
-<td><strong>Type</strong></td>
-<td>Comments</td>
 
-</tr>
-<tr class="even">
-<td>BufferSize</td>
-<td>Size in KB after which the internal buffer is written to an output file</td>
-<td>Int</td>
-<td>Must be in range 1-1024KB, default is 16KB</td>
+**Properties:**
+- [BufferSize](#BufferSize)
+- [Compression](#Compression)
+- [Directory](#Directory)
+- [Extension](#Extension)
+- [Interval](#Interval)
+- [Json](#Json)
 
-</tr>
-<tr class="odd">
-<td>Directory</td>
-<td>Directory where the output files are created.</td>
-<td>String</td>
-<td>The name of the output files in the directory will be yyyy/mm/dd/hh/mn/uuid.&lt;extension&gt;</td>
+- [UtcTime](#UtcTime)
 
-</tr>
-<tr class="even">
-<td>Extension</td>
-<td>Extension used for the output files</td>
-<td>String</td>
-<td>If no extension is specified, but the file is compressed then the corresponding extension for the compression method is used. For compression types that support entry names (e.g., zip) the extension of the entry will be set to ".json" if the Json field is true,</td>
+---
+### BufferSize
+Size in KB after which the internal buffer is written to an output file
 
-</tr>
-<tr class="odd">
-<td>Interval</td>
-<td>Interval in seconds after which the internal buffer is written to an output file.</td>
-<td>Int</td>
-<td>Must be in range 60-900 seconds, default is 60 seconds</td>
+**Type**: Int
 
-</tr>
-<tr class="even">
-<td>Compression</td>
-<td>Compression used to compress the data in the file</td>
-<td>"None" | "GZip" | "Zip"</td>
-<td>Default is "None"</td>
+Must be in range 1-1024KB, default is 16KB
 
-</tr>
-<tr class="odd">
-<td>Json</td>
-<td><p>Flag to indicate if the lines in the output file must form a valid JSON document. The target does this by wrapping the output in a '[' and ']' character and separating each line by a ',' character, making the output a JSON array.</p>
-<p>If not set the output may be processed as JSONP or text file.</p></td>
-<td>Boolean</td>
-<td>Default is true</td>
+---
+### Compression
+Compression used to compress the data in the file
 
-</tr>
-<tr class="even">
-<td>UtcTime</td>
-<td>If set to true then UTC time is used to build the name of the output file, otherwise the local date and time of the system running the adapter is used.</td>
-<td>Boolean</td>
-<td>Default is false</td>
+**Type**: "None" | "GZip" | "Zip"
 
-</tr>
-</tbody>
-</table>
+Default is "None"
 
-[^top](#file-target)
+---
+### Directory
+Directory where the output files are created.
+
+**Type**: String
+
+The name of the output files in the directory will be yyyy/mm/dd/hh/mn/uuid.<extension>
+
+---
+### Extension
+Extension used for the output files
+
+**Type**: String
+
+If no extension is specified, but the file is compressed then the corresponding extension for the compression method is used. For compression types that support entry names (e.g., zip) the extension of the entry will be set to ".json" if the Json field is true,
+
+---
+### Interval
+Interval in seconds after which the internal buffer is written to an output file.
+
+**Type**: Int
+
+Must be in range 60-900 seconds, default is 60 seconds
+
+---
+### Json
+Flag to indicate if the lines in the output file must form a valid JSON document. The target does this by wrapping the output in a '[' and ']' character and separating each line by a ',' character, making the output a JSON array.
+If not set the output may be processed as JSONP or text file.
+
+**Type**: Boolean
+
+Default is true
+
+
+---
+### UtcTime
+If set to true then UTC time is used to build the name of the output file, otherwise the local date and time of the system running the adapter is used.
+
+**Type**: Boolean
+
+Default is false
+
+[^top](#File Target)
+

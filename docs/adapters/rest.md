@@ -1,6 +1,28 @@
+# REST Protocol Adapter
 
 
-# REST Adapter data mapping
+
+- [REST Adapter data mapping](#REST Adapter data mapping)
+  - [All object properties  a single channel value](#All object properties  a single channel value)
+  - [Object properties as separate channel values](#Object properties as separate channel values)
+  - [Object properties as separate channel values](#Object properties as separate channel values)
+  - [Selecting object properties](#Selecting object properties)
+  - [Objects lists](#Objects lists)
+- 
+
+**Configuration**:
+
+- [REST Adapter Configuration](#REST Adapter Configuration)
+
+- [RestSourceConfiguration](#RestSourceConfiguration)
+- [RestChannelConfiguration](#RestChannelConfiguration)
+- [RestAdapterConfiguration](#RestAdapterConfiguration)
+- [RestServerConfiguration](#RestServerConfiguration)
+- [ClientProxyConfiguration](#ClientProxyConfiguration)
+
+
+
+## REST Adapter data mapping
 
 The REST adapter fetches data from a service using GET requests.
 
@@ -44,7 +66,7 @@ Adapter configuration
 
 For a source one or more channels must be defined. There are the following options:
 
-## All object properties  a single channel value
+### All object properties  a single channel value
 
 The source configuration below has a single channel named "Object", without further channel configuration data. It's assumed that
 the returned data is in JSON format. When the data is not JSON then the channel Configuration must include a setting `"Json" : false` 
@@ -86,7 +108,7 @@ This configuration results in the following output data
   }
 ```
 
-## Object properties as separate channel values
+### Object properties as separate channel values
 
 The "Decompose" channel option can be used to create individual values for every element of a returned object.
 
@@ -133,7 +155,7 @@ This results in the following output structure:
 
 ```
 
-## Selecting object properties
+### Selecting object properties
 
 By defining channels with a "Selector" object properties can be selected as the value for these channels. A selector
 is a <a href="https://jmespath.org/"> JMESPath</a> query to select the data from the returned object. Having individual
@@ -193,7 +215,7 @@ The structure of the output data is for this configuration is:
   }
 ```
 
-## Objects lists
+### Objects lists
 
 When a request returns a list of objects, then these values can be returned as a single channel value. Here a request "objects" is
 used with a single channel named "Objects".
@@ -370,296 +392,245 @@ This results in a numbered channel being created for every object in the returne
 ```
 
 
-# REST Adapter Configuration
 
-This section describes the configuration types for the Rest adapter and contains the extensions and specific
-configuration types
+## REST Adapter Configuration
 
-- [RestSourceConfiguration](#restsourceconfiguration)
-- [RestChannelConfiguration](#restchannelconfiguration)
-- [RestAdapterConfiguration](#restadapterconfiguration)
-- [RestServerConfiguration](#restserverconfiguration)
-- [ClientProxyConfiguration](#clientproxyconfiguration)
 
-[Protocol Adapters](./README.md)
 
 ## RestSourceConfiguration
 
-The RestSourceConfiguration extends the common <a href="../core/source-configuration.md">Source configuration</a> with 
-REST specific source configuration data. The AdapterType for the source must be set to **REST**.
 
-<table>
-<colgroup>
-<col style="width: 19%" />
-<col style="width: 27%" />
-<col style="width: 28%" />
-<col style="width: 24%" />
-</colgroup>
+**Properties:**
+- [Channels](#Channels)
+- [Request](#Request)
+- [RestServer](#RestServer)
 
-<tbody>
-<tr class="odd">
-<td><strong>Name</strong></td>
-<td><strong>Description</strong></td>
-<td><strong>Type</strong></td>
-<td><strong>Comments</strong></td>
-</tr>
+---
+### Channels
+The channels configuration for an REST source holds configuration data to read values from the result from a source REST query. 
+"Commented" out by adding a "#" at the beginning of the identifier of that channel.
 
-<tr class="even">
-<td>Channels</td>
-<td>The channels configuration for an REST source holds configuration data to read values from the result from a source REST query. 
-"Commented" out by adding a "#" at the beginning of the identifier of that channel.</td>
-<td>Map[String,<a href="#restchannelconfiguration">RestChannelConfiguration</a>]</td>
-<td>At least 1 channel must be configured.</td>
-</tr>
+**Type**: Map[String,RestChannelConfiguration]
 
-<tr class="odd">
-<td>RestServer</td>
-<td>Rest Server Identifier for the REST server to read from. This referenced server must be present in the RestServers section 
-of the adapter referred to by the ProtocolAdapter attribute of the source.</td>
-<td>String</td>
-<td>Must be an identifier of a server in the RestServers section of the REST adapter used by the source.</td>
-</tr>
-
-<tr class="even">
-<td>Request</td>
-<td>This is the REST query that is executed to retrieve the values from the server.</td>
-<td colspan="1">String</td>
-<td colspan="1">
-To retrieve an object from "https://api.restful-api.dev/objects/7", this would be "objects/7"</td>
-</tr>
+At least 1 channel must be configured.
 
 
-</tbody>
-</table>
 
-[^top](#rest-adapter-configuration)
+---
+### Request
+This is the REST query that is executed to retrieve the values from the server.
+
+**Type**: String
+
+To retrieve an object from "https://api.restful-api.dev/objects/7", this would be "objects/7"
+
+---
+### RestServer
+Rest Server Identifier for the REST server to read from. This referenced server must be present in the RestServers section 
+of the adapter referred to by the ProtocolAdapter attribute of the source.
+
+**Type**: String
+
+Must be an identifier of a server in the RestServers section of the REST adapter used by the source.
+
+[^top](#REST Adapter data mapping)
+
+
+
 
 ## RestChannelConfiguration
 
-The RestChannelConfiguration extends the common Channel configuration with REST specific channel configuration data.
-A RestSourceConfiguration must at least have one channel. If more than a single channel is configured, the selector for
-each channel will be executed to select the value for that channel from the result of the query defined for the source.
 
-<table>
-<colgroup>
-<col style="width: 19%" />
-<col style="width: 27%" />
-<col style="width: 28%" />
-<col style="width: 24%" />
-</colgroup>
+**Properties:**
+- [Json](#Json)
+- [Selector](#Selector)
 
-<tbody>
-<tr class="odd">
-<td><strong>Name</strong></td>
-<td><strong>Description</strong></td>
-<td><strong>Type</strong></td>
-<td><strong>Comments</strong></td>
-</tr>
+---
+### Json
+Indicates if the payload returned by the REST request is in Json format
 
-<tr class="even">
-<td>Selector</td>
-<td><p>A <a href="https://jmespath.org/">JMESpath</a> query for selecting data from the returned payload of the REST request.</p>
-<p>The selector can be used to select values from structured or list data types returned in the payload of the REST request.</p></td>
-<td>String</td>
-<td> <a href="https://jmespath.org/">JMESPath</a> expression, see https://jmespath.org/
+
+**Type**: Boolean
+
+
+Default is true
+
+---
+### Selector
+A JMESpath query for selecting data from the returned payload of the REST request.
+The selector can be used to select values from structured or list data types returned in the payload of the REST request.
+
+**Type**: String
+
+ JMESPath expression, see https://jmespath.org/
 If no Selector is specified then the value for the channel will be the complete-returned payload of the query of its source, in which case
 the data is the raw payload if the "Json" setting for the channel is set to false, or a JSON parsed value if "Json" is true.
 
 A Selector can only be used if "Json" is set to true (the default).
-</td>
-</tr>
 
-<tr class="even">
-<td>Json</td>
-<td>Indicates if the payload returned by the REST request is in Json format
-</td>
-<td>Boolean</td>
-<td>
-Default is true
-</td>
-</tr>
+[^top](#REST Adapter data mapping)
 
-</tbody>
-</table>
 
-[^top](#rest-adapter-configuration)
+
 
 ## RestAdapterConfiguration
 
-The RestAdapterConfiguration extends the common adapter configuration with REST specific adapter configuration settings. 
-The AdapterType to use for this adapter is <strong>"REST"</strong>.
+**Properties:**
 
-<table>
-<colgroup>
-<col style="width: 19%" />
-<col style="width: 27%" />
-<col style="width: 28%" />
-<col style="width: 24%" />
-</colgroup>
+- [RestServers](#RestServers)
 
-<tbody>
-<tr class="odd">
-<td><strong>Name</strong></td>
-<td><strong>Description</strong></td>
-<td><strong>Type</strong></td>
-<td><strong>Comments</strong></td>
-</tr>
 
-<tr class="even">
-<td>RestServers</td>
-<td>REST servers configured for this adapter. The REST source using the adapter must refer to one of these servers with the RestServer attribute.</td>
-<td>Map[String,<a href="#restserverconfiguration">RestServerConfiguration</a>]</td>
-<td></td>
-</tr>
 
-</tbody>
-</table>
+---
+### RestServers
+REST servers configured for this adapter. The REST source using the adapter must refer to one of these servers with the RestServer attribute.
 
-[^top](#rest-adapter-configuration)
+**Type**: Map[String,[RestServerConfiguration](#RestServerConfiguration)]
+
+[^top](#REST Adapter data mapping)
+
+
+
 
 ## RestServerConfiguration
 
-Configuration data for connecting to and reading from source REST servers
 
-<table>
-<colgroup>
-<col style="width: 19%" />
-<col style="width: 27%" />
-<col style="width: 28%" />
-<col style="width: 24%" />
-</colgroup>
+**Properties:**
+- [Headers](#Headers)
+- [Password](#Password)
+- [Port](#Port)
+- [Proxy](#Proxy)
+- [RequestTimeout](#RequestTimeout)
+- [Server](#Server)
+- [WaitAfterReadError](#WaitAfterReadError)
+- [WaitBeforeRetry](#WaitBeforeRetry)
 
-<tbody>
-<tr class="odd">
-<td><strong>Name</strong></td>
-<td><strong>Description</strong></td>
-<td><strong>Type</strong></td>
-<td>Comments</td>
-</tr>
+---
+### Headers
+Headers for server requests.
 
-<tr class="even">
-<td>Server</td>
-<td>REST server host</td>
-<td>String</td>
-<td>
+**Type**: Map[String,String]
+
+
+The header "Accept" is by default set to application/json.
+
+---
+### Password
+MaxRetries password
+
+**Type**: Integer
+
+Maximum number of retries for reading from the REST server.
+
+---
+### Port
+REST server port number
+
+**Type**: Integer
+
+Optional, if not specified then the port number for the used protocol is used.
+
+---
+### Proxy
+Client Proxy configuration if the client is using a proxy server to access the REST server.
+
+**Type**: ClientConfiguration
+
+Optional
+
+---
+### RequestTimeout
+Timeout in milliseconds for the server to return a result.
+
+**Type**: Integer
+
+Default is 5000
+
+---
+### Server
+REST server host
+
+**Type**: String
+
+
 
 To retrieve an objects using requests as "https://api.restful-api.dev/objects/7", this would be "https://api.restful-api.dev"
 If the server does not start with a  "http://" or "https:" protocol specification "https://" is used as default.
-</td>
-</tr>
-
-<tr class="odd">
-<td>Port</td>
-<td>REST server port number</td>
-<td>Integer</td>
-<td>Optional, if not specified then the port number for the used protocol is used.</td>
-</tr>
-
-<tr class="even">
-<td>WaitAfterReadError</td>
-<td>Period in milliseconds to pause reading from the server after an error reading from that server.</td>
-<td>Integer</td>
-<td>Default is 10000</td>
-</tr>
-
-<tr class="odd">
-<td>RequestTimeout</td>
-<td>Timeout in milliseconds for the server to return a result.</td>
-<td>Integer</td>
-<td>Default is 5000</td>
-</tr>
-
-<tr class="even">
-<td>WaitBeforeRetry</td>
-<td>Period in milliseconds to wait in between retires reading from the server.</td>
-<td>Integer</td>
-<td>Default is 1000</td>
-</tr>
-
-<tr class="odd">
-<td>Password</td>
-<td>MaxRetries password</td>
-<td>Integer</td>
-<td><strong>Maximum number of retries for reading from the REST server.</strong></td>
-</tr>
-
-<tr class="even">
-<td>Headers</td>
-<td>Headers for server requests.</td>
-<td>Map[String,String]</td>
-<td>
-The header "Accept" is by default set to application/json.
-</td>
-</tr>
-
-<tr class="odd">
-<td>Proxy</td>
-<td>Client Proxy configuration if the client is using a proxy server to access the REST server.</td>
-<td>ClientConfiguration</td>
-<td>Optional</td>
-</tr>
 
 
-</tbody>
-</table>
+---
+### WaitAfterReadError
+Period in milliseconds to pause reading from the server after an error reading from that server.
+
+**Type**: Integer
+
+Default is 10000
+
+---
+### WaitBeforeRetry
+Period in milliseconds to wait in between retires reading from the server.
+
+**Type**: Integer
+
+Default is 1000
+
+[^top](#REST Adapter data mapping)
+
+
+
 
 ## ClientProxyConfiguration
 
-Proxy configuration settings
 
-<table>
-<colgroup>
-<col style="width: 19%" />
-<col style="width: 27%" />
-<col style="width: 28%" />
-<col style="width: 24%" />
-</colgroup>
+**Properties:**
+- [NoProxyAddresses](#NoProxyAddresses)
+- [ProxyPassword](#ProxyPassword)
+- [ProxyUrl](#ProxyUrl)
+- [ProxyUsername](#ProxyUsername)
 
-<tbody>
-<tr class="odd">
-<td><strong>Name</strong></td>
-<td><strong>Description</strong></td>
-<td><strong>Type</strong></td>
-<td><strong>Comments</strong></td>
+---
+### Name
+Description
 
-</tr>
-<tr class="even">
-<td>ProxyUrl</td>
-<td>Url of the proxy server to use </td>
-<td>String</td>
-<td></td>
+**Type**: Type
 
-</tr>
-<tr class="odd">
-<td>ProxyUsername</td>
-<td>Proxy server username</td>
-<td>String</td>
-<td>Optional, if specified then the ProxyPassword must be configured as well.
+Comments
 
-Username and password should not be included as clear text in the configuration. 
-It is strongly recommended to use placeholders and use the SFC integration with the AWS secrets manager.</td>
+---
+### NoProxyAddresses
+Comma-separated list of addresses for which can be accessed without using the proxy
 
-</tr>
-<tr class="even">
-<td>ProxyPassword</td>
-<td>Proxy server password</td>
-<td>String</td>
-<td>Optional, if specified then the ProxyUsername must be configured as well.
+**Type**: String
+
+Optional
+
+---
+### ProxyPassword
+Proxy server password
+
+**Type**: String
+
+Optional, if specified then the ProxyUsername must be configured as well.
 
 Username and password should not be included as clear text in the configuration. 
-It is strongly recommended to use placeholders and use the SFC integration with the AWS secrets manager.</td>
+It is strongly recommended to use placeholders and use the SFC integration with the AWS secrets manager.
 
-</tr>
-<tr class="odd">
-<td>NoProxyAddresses</td>
-<td>Comma-separated list of addresses for which can be accessed without using the proxy</td>
-<td>String</td>
-<td>Optional</td>
+---
+### ProxyUrl
+Url of the proxy server to use 
 
-</tr>
+**Type**: String
 
-</tbody>
-</table>
+---
+### ProxyUsername
+Proxy server username
 
+**Type**: String
 
-[^top](#rest-adapter-configuration)
+Optional, if specified then the ProxyPassword must be configured as well.
+
+Username and password should not be included as clear text in the configuration. 
+It is strongly recommended to use placeholders and use the SFC integration with the AWS secrets manager.
+
+[^top](#REST Adapter data mapping)
+

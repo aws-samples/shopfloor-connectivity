@@ -1,67 +1,59 @@
 ## MetricsConfiguration
 
-Configuration for metrics configuration. In order to collect and write metrics this section must include a metrics writers
-<br>
-<br>
-<table>
-<colgroup>
-<col style="width: 19%" />
-<col style="width: 27%" />
-<col style="width: 28%" />
-<col style="width: 24%" />
-</colgroup>
 
-<tbody>
-<tr class="odd">
-<td><strong>Name</strong></td>
-<td><strong>Description</strong></td>
-<td><strong>Type</strong></td>
-<td><strong>Comments</strong></td>
-</tr>
+**Properties:**
+- [CollectCoreMetrics](#CollectCoreMetrics)
+- [CommonDimensions](#CommonDimensions)
+- [Enabled](#Enabled)
+- [Interval](#Interval)
+- [Namespace](#Namespace)
+- [Writer](#Writer)
 
-<tr class="even">
-<td>Enabled</td>
-<td>Collection enabled or disabled</td>
-<td>Boolean</td>
-<td>Default is true</td>
-</tr>
+---
+### CollectCoreMetrics
+Collection of core detailed metrics enabled or disabled
 
-<tr class="odd">
-<td>CommonDimensions</td>
-<td>Set of extra dimensions added to every datapoint</td>
-<td>Map(String,String)</td>
-<td>Optional</td>
-</tr>
+**Type**: Boolean
 
-<tr class="even">
-<td>CollectCoreMetrics</td>
-<td>Collection of core detailed metrics enabled or disabled</td>
-<td>Boolean</td>
-<td>Default is true</td>
-</tr>
+**Default,Constraints,Examples**: Default is true
 
-<tr class="odd">
-<td>Interval</td>
-<td>Interval in seconds for reading metrics from adapters, targets and core</td>
-<td>Integer</td>
-<td>Default is 10</td>
-</tr>
+---
+### CommonDimensions
+Set of extra dimensions added to every datapoint
 
-<tr class="even">
-<td>Writer</td>
-<td>Writer for writing collect metrics data</td>
-<td><a href="in-process-configuration.md">InprocessConfiguration</a></td>
-<td></td>
-</tr>
+**Type**: Map(String,String)
 
-<tr class="odd">
-<td>Namespace</td>
-<td>Namespace for collected metrics</td>
-<td>String</td>
-<td>Default is "SFC"</td>
-</tr>
-</tbody>
-</table>
+**Default,Constraints,Examples**: Optional
 
-[SfcTopLevelConfiguration](sfc-top-level-config.md)
+---
+### Enabled
+Collection enabled or disabled
+
+**Type**: Boolean
+
+**Default,Constraints,Examples**: Default is true
+
+---
+### Interval
+Interval in seconds for reading metrics from adapters, targets and core
+
+**Type**: Integer
+
+**Default,Constraints,Examples**: Default is 10
+
+---
+### Namespace
+Namespace for collected metrics
+
+**Type**: String
+
+**Default,Constraints,Examples**: Default is "SFC"
+
+---
+### Writer
+Writer for writing collect metrics data
+
+**Type**: InprocessConfiguration
+
+[^top](#MetricsConfiguration)
 
