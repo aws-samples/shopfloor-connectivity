@@ -7,7 +7,7 @@
 
 ---
 ### AdapterServer
-If the adapter runs as a service in a separate process, then this attribute must refer to an entry for that server in the [ProtocolAdapterServers](./sfc-top-level-config.md#AdapterServers) section.
+If the adapter runs as a service in a separate process, then this attribute must refer to an entry for that server in the [ProtocolAdapterServers](./sfc-top-level-config.md#protocoladapterservers) section.
 
 **Type**: String
 

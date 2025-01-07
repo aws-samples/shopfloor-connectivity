@@ -5,7 +5,6 @@
 - [Active](#Active)
 - [AsArrayWhenBuffered](#AsArrayWhenBuffered)
 - [CredentialProviderClient](#CredentialProviderClient)
-- [Name](#Name)
 - [TargetServer](#TargetServer)
 - [TargetChannelSize](#TargetChannelSize)
 - [TargetChannelTimeout](#TargetChannelTimeout)

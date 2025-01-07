@@ -4,7 +4,6 @@
 **Properties:**
 - [AllowedIpAddresses](#AllowedIpAddresses)
 - [Interface](#Interface)
-- [Name](#Name)
 - [Path](#Path)
 - [Port](#Port)
 - [RateLimit](#RateLimit)
@@ -77,7 +76,7 @@ Period in seconds after which repeated health probe requests did not return a po
 
 **Type**: Int
 
-Must be explicitly set in order to stop the service after the period of not returning a healthy response to health probes. The use case for this element is when the mechanism used to manage the instances of the services only checks if the process of a services is running and does stop processes.. An example of this is AWS Greengrass. 
+Must be explicitly set in order to stop the service after the period of not returning a healthy response to health probes. The use case for this element is when the mechanism used to manage the instances of the services only checks if the process of a services is running and does stop processes. An example of this is AWS Greengrass. 
 
 [^top](#HealthProbeConfiguration)
 

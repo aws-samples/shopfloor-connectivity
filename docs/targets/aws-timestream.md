@@ -1,7 +1,6 @@
 # AWS Timestream Target
 
 
-
 - [AwsTimestreamTargetConfiguration](#AwsTimestreamTargetConfiguration)
 - [AwsTimestreamRecordConfiguration](#AwsTimestreamRecordConfiguration)
 - [AwsTimestreamDimensionConfiguration](#AwsTimestreamDimensionConfiguration)
@@ -16,7 +15,7 @@ Requires IAM timestream:WriteRecords permission for the configures table as well
 
 
 **Properties:**
-- [Batch Size](#Batch Size)
+- [BatchSize](#BatchSize)
 - [Database](#Database)
 - [Interval](#Interval)
 
@@ -24,7 +23,7 @@ Requires IAM timestream:WriteRecords permission for the configures table as well
 - [TableName](#TableName)
 
 ---
-### Batch Size
+### BatchSize
 Batch size for writing records to table
 
 **Type**: Integer
@@ -58,7 +57,7 @@ Timestream table
 
 **Type**: String
 
-[^top](#AWS Timestream Target)
+[^top](#aws-timestream-target)
 
 
 ## AwsTimestreamRecordConfiguration
@@ -91,7 +90,7 @@ JMES path that selects the timestamp to use with to the property value from the 
 **Type**: String
 
 https://jmespath.org/
-If the data entries contain both value and timestamp, in case TimestampLevel "channel" or "both" is used in the root of the configuration file) the writer will automatically look for a field with the name used for timestamp values specified in "ElementNames" at the top level of the configuration for a path sourcename.valuename)
+If the data entries contain both value and timestamp, in case TimestampLevel "channel" or "both" is used in the root of the configuration file, the writer will automatically look for a field with the name used for timestamp values specified in "ElementNames" at the top level of the configuration for a path sourcename.valuename.
 
 ---
 ### MeasureValuePath
@@ -100,7 +99,7 @@ JMES path that selects the value to write to the record from the data received b
 **Type**: String
 
 https://jmespath.org/
-A path typically has the format sourcename.valuename or sourcename.valuename.value (If the data entries contain both value and timestamp, in case TimestampLevel "channel" or "both" is used in the root of the configuration file) the writer will automatically look for a field with the name used for data values specified in "ElementNames" at the top level of the configuration for a path sourcename.valuename)
+A path typically has the format sourcename.valuename or sourcename.valuename.value If the data entries contain both value and timestamp, in case TimestampLevel "channel" or "both" is used in the root of the configuration file, the writer will automatically look for a field with the name used for data values specified in "ElementNames" at the top level of the configuration for a path sourcename.valuename
 
 ---
 ### MeasureValueType
@@ -109,7 +108,7 @@ Type of the value
 **Type**: DOUBLE, BIGINT,VARCHAR,BOOLEAN
 
 
-[^top](#AWS Timestream Target)
+[^top](#aws-timestream-target)
 
 
 ## AwsTimestreamDimensionConfiguration
@@ -142,8 +141,8 @@ JMES path that selects the value to write to the dimensions from the data receiv
 **Type**: String
 
 https://jmespath.org/
-A path typically has the format sourcename.valuename or sourcename.valuename.value (If the data entries contain both value and timestamp, in case TimestampLevel "channel" or "both" is used in the root of the configuration file) the writer will automatically look for a field with the name used for data values specified in "ElementNames" at the top level of the configuration for a path sourcename.valuename)
+A path typically has the format sourcename.valuename or sourcename.valuename.value. If the data entries contain both value and timestamp, in case TimestampLevel "channel" or "both" is used in the root of the configuration file, the writer will automatically look for a field with the name used for data values specified in "ElementNames" at the top level of the configuration for a path sourcename.valuename.
 
 
-[^top](#AWS Timestream Target)
+[^top](#aws-timestream-target)
 

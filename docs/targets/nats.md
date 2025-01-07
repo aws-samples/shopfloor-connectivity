@@ -8,7 +8,7 @@
 
 ## NatsTargetConfiguration
 
-NatsTargetConfiguration extends the type <a href="../core/target-configuration.md" >TargetConfiguration</a> with specific configuration data for connecting to and sending to a NATS subject. The Targets configuration element can contain entries of this type, the TargetType of these entries must be set to <strong>"NATS-TARGET"</strong>
+NatsTargetConfiguration extends the type  [TargetConfiguration](../core/target-configuration.md) with specific configuration data for connecting to and sending to a NATS subject. The Targets configuration element can contain entries of this type, the TargetType of these entries must be set to <strong>"NATS-TARGET"</strong>
 
 
 **Properties:**
@@ -133,7 +133,7 @@ Note that the use of placeholders to send data to specific subjects will result 
 
 
 
-[^top](#NATS Target)
+[^top](#nats-target)
 
 
 ## NatsServerConfiguration
@@ -285,7 +285,7 @@ Number of seconds to wait after connecting to the sever failed.
 Default = 10
 
 
-[^top](#NATS Target)
+[^top](#nats-target)
 
 
 ## NatsTlsConfiguration
@@ -316,5 +316,5 @@ Path to root private  file.
 
 **Type**: String
 
-[^top](#NATS Target)
+[^top](#nats-target)
 

@@ -5,7 +5,7 @@
 ## AwsIotCoreTargetConfiguration
 
 
-AwsIotCoreTargetConfiguration extends the type <a href="../core/target-configuration.md" >TargetConfiguration</a> with specific configuration data for connecting to and sending to AWS IoT core topic using HTTP dataplane API. The Targets configuration element can contain entries of this type, the TargetType of these entries must be set to <strong>"AWS-IOT-CORE"</strong>
+AwsIotCoreTargetConfiguration extends the type  [TargetConfiguration](../core/target-configuration.md) with specific configuration data for connecting to and sending to AWS IoT core topic using HTTP dataplane API. The Targets configuration element can contain entries of this type, the TargetType of these entries must be set to <strong>"AWS-IOT-CORE"</strong>
 
 Requires IAM permissions iot:Connect, iot:DescribeEndpoint, iot:Publish for the topic the data is published to and iot:RetainPublish if the Retain option is used.
 
@@ -22,12 +22,10 @@ Requires IAM permissions iot:Connect, iot:DescribeEndpoint, iot:Publish for the 
 - [WarnAlternateTopicName](#WarnAlternateTopicName)
 
 ---
-### AlternateTopiName
+### AlternateTopicName
 Name or name template of the topic values are published in case there are unmapped template placeholders in the TopicName
 
 **Type**: String
-
-
 
 
 ---
@@ -121,7 +119,7 @@ Template examples:
 - plant1-%line%   : Values from all sources will be grouped by the value of the %line% metadata and published to a topic for that value
 
 In case a placeholder is not resolved, when a value for a used placeholder is part of the data,
-then an alternative topic name can be configured by setting the name of that topic to the [AlternateTopiName](#AlternateTopiName) setting.
+then an alternative topic name can be configured by setting the name of that topic to the [AlternateTopiName](#AlternateTopicName) setting.
 
 Note that the use of placeholders to send data to specific topics will result in additional publish calls and may result in throttling. Enabling buffering
 can be used to reduce the chance of throttling.
@@ -132,7 +130,7 @@ For AWS IoTCore the maximum number of topic levels is 8.
 
 ---
 ### WarnAlternateTopicName
-Generate warning if data is published to [AlternateTopiName](#AlternateTopiName).
+Generate warning if data is published to [AlternateTopiName](#AlternateTopicName).
 
 **Type**: Boolean
 
@@ -140,5 +138,5 @@ Generate warning if data is published to [AlternateTopiName](#AlternateTopiName)
 Default is tue
 
 
-[^top](#AWS IoT Core Target)
+[^top](#aws-iot-core-target)
 

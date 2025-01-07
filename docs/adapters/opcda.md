@@ -1,4 +1,4 @@
-[SFC Top Level]( TO_DO )>TO_DO>OPCDA Protocol Configuration( TO_DO )
+
 # OPCDA Protocol Configuration
 
 
@@ -44,11 +44,12 @@ Mode for reading values from OPCDA server.
 - "Polling", the connector will batch-read all items configured in the channels for the source with the interval defined in the schedule.
 
 
-**Type**: A string that can have the value “Subscription" or "Polling".
+**Type**: String 
+Possible values are “Subscription" or "Polling".
 
 Default is "Subscription".
 
-[^top](#OPCDA Protocol Configuration)
+[^top](#opcda-protocol-configuration)
 
 
 
@@ -65,7 +66,7 @@ A string containing the name of the item to read the value from or to monitor.
 
 **Type**: String
 
-[^top](#OPCDA Protocol Configuration)
+[^top](#opcda-protocol-configuration)
 
 
 
@@ -82,7 +83,7 @@ Opcda servers configured for this adapter. The Opcda source using the adapter mu
 
 **Type**: Map[String,[OpcdaServerConfiguration](#OpcdaServerConfiguration)]
 
-[^top](#OPCDA Protocol Configuration)
+[^top](#opcda-protocol-configuration)
 
 
 
@@ -149,5 +150,5 @@ Time in milliseconds to wait to reconnect after a connection error
 
 Default is 10000, the minimum value is 1000
 
-[^top](#OPCDA Protocol Configuration)
+[^top](#opcda-protocol-configuration)
 

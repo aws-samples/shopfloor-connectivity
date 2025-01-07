@@ -1,4 +1,4 @@
-[SFC Top Level]( ./sfc-top=level-config.md)>[Aggregation](#./sfc-top-level-config.md#Aggregation)
+[SFC Top Level]( ./sfc-top-level-config.md)>Aggregation
 
 ## Aggregation
 
@@ -7,7 +7,7 @@ An optional aggregation can be used for a schedule to collect the results of mul
 **Properties**
 
 - [Output](#Output)
-- [Size](#SIze)
+- [Size](#Size)
 - [Transformations](#Transformations)
 
 ---

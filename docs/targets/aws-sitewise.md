@@ -13,7 +13,7 @@
 
 
 
-AwsSitewiseTargetConfiguration extends the type <a href="../core/target-configuration.md" >TargetConfiguration</a> with specific configuration data for sending data to SiteWise assets. The Targets configuration element can contain entries of this type, the TargetType of 
+AwsSitewiseTargetConfiguration extends the type  [TargetConfiguration](../core/target-configuration.md) with specific configuration data for sending data to SiteWise assets. The Targets configuration element can contain entries of this type, the TargetType of 
 these entries must be set to <strong>"AWS-SITEWISE"</strong></p>
 
 <p></p>
@@ -41,7 +41,7 @@ these entries must be set to <strong>"AWS-SITEWISE"</strong></p>
 **Properties:**
 - [AssetCreation](#AssetCreation)
 - [Assets](#Assets)
-- [Batch Size](#Batch Size)
+- [Batch Size](#BatchSize)
 - [Interval](#Interval)
 - [Region](#Region)
 
@@ -66,7 +66,7 @@ AssetCreation setting.
 
 
 ---
-### Batch Size
+### BatchSize
 Batch size for writing asset data
 
 **Type**: Integer
@@ -88,7 +88,7 @@ AWS Region for SiteWise service
 
 **Type**: String
 
-[^top](#AWS SiteWise Target)
+[^top](#aws-sitewise-target)
 
 ## AwsSiteWiseAssetCreationConfiguration
 
@@ -101,11 +101,11 @@ Each source in the target  data will be mapped to a SiteWise AssetModel and Asse
 
 **Properties:**
 
-- [AssetDescription ](#AssetDescription )
+- [AssetDescription ](#assetdescription )
 
 - [AssetExternalId](#AssetExternalId)
 
-- [AssetModelDescription ](#AssetModelDescription )
+- [AssetModelDescription ](#assetmodeldescription )
 
 - [AssetModelExternalId](#AssetModelExternalId)
 
@@ -123,10 +123,10 @@ Each source in the target  data will be mapped to a SiteWise AssetModel and Asse
 
 - [AssetTags](#AssetTags)
 
-  
+
 
 ---
-### AssetDescription 
+### AssetDescription
 Template for description of created assets.
 
 **Type**: String
@@ -167,7 +167,7 @@ If this setting is not used then no external ID will be created for the asset.
 
 
 ---
-### AssetModelDescription 
+### AssetModelDescription
 Template for description of created asset models.
 
 **Type**: String
@@ -361,7 +361,7 @@ To use the values of metadata at the top or source level of the target data, the
 
 
 
-[^top](#AWS SiteWise Target)
+[^top](#aws-sitewise-target)
 
 
 
@@ -403,11 +403,11 @@ The asset's id, name OR external id must be specified, not both. If all properti
 ### Properties
 Properties to write to the asset
 
-**Type**: List of AwsSiteWiseAssetPropertyConfiguration]
+**Type**: List of [AwsSiteWiseAssetPropertyConfiguration](#awssitewiseassetpropertyconfiguration)
 
 Either property id or alias must be specified, but not both
 
-[^top](#AWS SiteWise Target)
+[^top](#aws-sitewise-target)
 
 
 
@@ -433,7 +433,7 @@ JMES path that selects the value to write to the property from the data received
 
 https://jmespath.org/
 A path typically has the format "sources.< source name >.values< value name >.value or sourcename.valuename.value"
-Note that JMESPath syntax treats chacterers like '-' as special characters and therefore the element in the path must be in quotes,
+Note that JMESPath syntax treats characters like '-' as special characters and therefore the element in the path must be in quotes,
 
 ---
 ### DataType
@@ -450,7 +450,7 @@ Alias of the asset property
 **Type**: String
 
 Only one of the property id, name, external id or alias must be specified
-If ProperyyAlias is used for all properties of an asset then the AssetId, AssetName and AssetExternalId must not be configured for that asset.
+If PropertyAlias is used for all properties of an asset then the AssetId, AssetName and AssetExternalId must not be configured for that asset.
 
 ---
 ### PropertyExternalId
@@ -498,5 +498,5 @@ Boolean
 Default is true
 
 
-[^top](#AWS SiteWise Target)
+[^top](#aws-sitewise-target)
 

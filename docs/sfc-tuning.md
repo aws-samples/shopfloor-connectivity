@@ -9,7 +9,7 @@ configuration file.
 - [Channel capacity warnings](#channel-capacity-warnings)
  - [Channel capacity errors](#channel-capacity-errors)
  - [SFC memory monitoring](#sfc-memory-monitoring)
- - [Concurrent reading from sources.](#concurrent-reading-from-sources.)
+ - [Concurrent reading from sources.](#concurrent-reading-from-sources)
 
 
 

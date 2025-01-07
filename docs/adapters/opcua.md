@@ -5,8 +5,8 @@ This section describes the configuration types for the OPCUA protocol adapter an
 
 
 
-- [OPCUA Alarm and Events types](#OPCUA Alarm and Event types)
-- [OPCUA security profiles and certificates](#OPCUA security profiles and certificates)
+- [OPCUA Alarm and Events types](#opcua-alarm-and-event-types)
+- [OPCUA security profiles and certificates](#opcua-security-profiles-and-certificates)
 
 
 
@@ -162,19 +162,19 @@ In order to secure the traffic between the OPCUA protocol adapter and the OPCUA 
 
 In the configuration for the OPCUA server in the adapter the security policies can be used by setting the [SecurityPolicy](#SecurityPolicy) of the server to any of the following policy names:
 
-| Name                | Sign / Encrypt   | Security Policy                                              |
-| ------------------- | ---------------- | ------------------------------------------------------------ |
-| None                |                  |                                                              |
-| Basic128Rsa15       | Sign             | http://opcfoundation.org/UA/SecurityPolicy#Basic128Rsa15     |
-| Basic256            | Sign and encrypt | http://opcfoundation.org/UA/SecurityPolicy#Basic256          |
-| Basic256Sha256      | Sign and encrypt | http://opcfoundation.org/UA/SecurityPolicy#Basic256Sha25     |
+| Name                | Sign / Encrypt   | Security Policy                                                  |
+|---------------------|------------------|------------------------------------------------------------------|
+| None                |                  |                                                                  |
+| Basic128Rsa15       | Sign             | http://opcfoundation.org/UA/SecurityPolicy#Basic128Rsa15         |
+| Basic256            | Sign and encrypt | http://opcfoundation.org/UA/SecurityPolicy#Basic256              |
+| Basic256Sha256      | Sign and encrypt | http://opcfoundation.org/UA/SecurityPolicy#Basic256Sha25         |
 | Aes128Sha256RsaOaep | Sign             | http://opcfoundation.org/UA/SecurityPolicy#Aes128_Sha256_RsaOaep |
 
 The Certificate section of the OPCUA Server contains the settings for the certificate used by the client of the adapter.
 
 The CertificateName contains the filename of the client certificate, which can be in pem or Pkcs12 format. If a pem format file is used, additionally the name of the corresponding private key file must be set in PrivateKeyFile. This is not required for PFX certificates as this type of file is a container which holds the certificate and private key. If the PFX file is password protected then the Password attribute must be set. (Avoid clear passwords in the configuration, use placeholders for secrets obtained from AWS Secrets manager instead). If an alias is used in the PFX container the value of that alias must be set in the Alias attribute of the configuration.
 
-The type of the certificate can be determined by the prefix of the filename (either ".pem "or ".pfx") optionally followed by ".cer", ".cert" or ".crt". If another extension is used then the type can be explicitly set by setting the server configuration's Format attribute to either "Pem" or "Pkcs12".
+The type of the certificate can be determined by the prefix of the filename (either ".pem" or ".pfx") optionally followed by ".cer", ".cert" or ".crt". If another extension is used then the type can be explicitly set by setting the server configuration's Format attribute to either "Pem" or "Pkcs12".
 
 If either the PEM or PFX certificate file does not exist, it is possible to let the OPCUA adapter generate a self-signed certificate and store that certificate in the specified file name. For PEM format certificates the name of the private key file must be set as well. If the private key file does exist it will be used to generate a pem or Pkcs12 formatted certificate. If it does not exist the keypair is generated and, if a pem formatted certificate is generated, stored in the specified file. For Pkcs12 formatted certificates the key will be stored with the certificate in the pfx file.
 
@@ -309,7 +309,8 @@ Mode for reading values from OPCUA server.
 - "Polling", the connector will batch-read all nodes configured in the channels for the source with the interval defined in the schedule.
 
 
-**Type**: A string that can have the value “Subscription" or "Polling".
+**Type**: String
+Values can be "Subscription" or "Polling".
 
 Default is "Subscription".
 
@@ -324,7 +325,7 @@ Time in milliseconds that will be used as the SubscribePublishingInterval when c
 
 
 
-[^top](#OPCUA Protocol adapter)
+[^top](#opcua-protocol-adapter)
 
 
 ## OpcuaNodeChannelConfiguration
@@ -406,7 +407,7 @@ The selector can be used to restructure or select values from structured data ty
 
 Parameter: JMESPath expression, see https://jmespath.org/
 
-[^top](#OPCUA Protocol adapter)
+[^top](#opcua-protocol-adapter)
 
 
 
@@ -438,7 +439,7 @@ Default is 0.0
 
 
 
-[^top](#OPCUA Protocol adapter)
+[^top](#opcua-protocol-adapter)
 
 
 ## OpcuaAdapterConfiguration
@@ -464,7 +465,7 @@ Profiles configured for this adapter. Servers in this adapter can have a referen
 
 
 
-[^top](#OPCUA Protocol adapter)
+[^top](#opcua-protocol-adapter)
 
 
 
@@ -481,9 +482,9 @@ Profiles configured for this adapter. Servers in this adapter can have a referen
 ### EventTypes
 Additional event types that can be used for a server,
 
-**Type**: Map[ String,  [OpcUaEvenTypeConfiguration](#OpcUaEvenTypeConfiguration)]
+**Type**: Map[ String,  [OpcUaEvenTypeConfiguration](#opcuaeventtypeconfiguration)]
 
-[^top](#OPCUA Protocol adapter)
+[^top](#opcua-protocol-adapter)
 
 
 
@@ -534,7 +535,7 @@ Properties defined for the event type. Each property is defined as a string whic
 
 Required, an at least one property must be defined.
 
-[^top](#OPCUA Protocol adapter)
+[^top](#opcua-protocol-adapter)
 
 
 
@@ -694,7 +695,7 @@ Time in milliseconds to wait after a read error
 
 Default is 10000, the minimum value is 1000
 
-[^top](#OPCUA Protocol adapter)
+[^top](#opcua-protocol-adapter)
 
 
 
@@ -759,7 +760,7 @@ Self-signed certificate configuration used to generate a self-signed certificate
 
 **Type**: SelfSignedCertificateConfiguration
 
-[^top](#OPCUA Protocol adapter)
+[^top](#opcua-protocol-adapter)
 
 
 
@@ -833,7 +834,7 @@ Number of days certificate is valid
 
 Default is 1095 (=3 years)
 
-[^top](#OPCUA Protocol adapter)
+[^top](#opcua-protocol-adapter)
 
 
 
@@ -872,7 +873,7 @@ Configuration of op optional checks
 
 When not set then all options are enabled
 
-[^top](#OPCUA Protocol adapter)
+[^top](#opcua-protocol-adapter)
 
 
 
@@ -947,5 +948,5 @@ Check certificate expiry
 
 Default is true
 
-[^top](#OPCUA Protocol adapter)
+[^top](#opcua-protocol-adapter)
 

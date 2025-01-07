@@ -4,7 +4,7 @@
 
 ## Aws3TargetConfiguration
 
-AwsS3TargetConfiguration extends the type <a href="../core/target-configuration.md" >TargetConfiguration</a> with specific configuration data for sending data to an S3 bucket. The Targets configuration element can contain entries of this type, the TargetType of these entries must be set to <strong>"AWS-S3"</strong>
+AwsS3TargetConfiguration extends the type  [TargetConfiguration](../core/target-configuration.md) with specific configuration data for sending data to an S3 bucket. The Targets configuration element can contain entries of this type, the TargetType of these entries must be set to <strong>"AWS-S3"</strong>
 
 <p>Requires IAM permission s3:putObject to write to the configured bucket</p>
 
@@ -70,5 +70,5 @@ AWS Region for S3 Bucket
 
 **Type**: String
 
-[^top](#AWS S3 Target)
+[^top](#aws-s3-target)
 

@@ -20,7 +20,7 @@ Logging output will contain the system date and time, the logging level, source 
 infrastructure will intercept and blank the values of secrets configured in the SFC configuration.
 
 Instead of writing to the console custom log writer can be implemented and [configured](./core/sfc-top-level-config.md). Details on how to implement a
-custom log writer can be found in section [Custom Logging](#custom-logging).
+custom log writer can be found in section [Custom Logging](#logging).
 
 
 
@@ -29,7 +29,7 @@ custom log writer can be found in section [Custom Logging](#custom-logging).
 The SFC core, protocol adapters and targets can collect metrics and write these to a configurable metrics writer. SFC
 comes with an implementation of a writer for AWS CloudWatch Metrics with can be configured to run in the same process as
 the SFC core or as an IPC service. Custom metrics writers can be implemented and configured to collect metrics data, see
-details in section [Custom Metrics Writers](#custom-metric-writers).
+details in section [Custom Metrics Writers](#metrics-collection).
 
 Metrics collection is enabled by adding a Metrics configuration section in top level of the SFC configuration. In this
 section the writer for metrics data is specified, which can an in-process metrics writer (by specifying the jar files
@@ -120,20 +120,20 @@ well as all required library files. The application tar file contains script fil
 
 The writers do have all the following command line parameters in common.
 
-| Parameter | Description |
-| --- | --- |
-| -connection | Security level used to secure traffic between SFC core and metrics service. PlainText : No encryption ServerSideTLS : Data is encrypted, requires -cert and -key parameters MutualTLS : Data is encrypted, required -cert, ca and -key parameters The connection type must match the connection type, as set to the ConnectionType attribute for the client, to communicates with the metrics service. |
-| -cert  | Server certificate file to secure IPC (gRPC) traffic for connection types ServerSideTLS and MutualTLS |
-| -key  | Server private file to secure IPC (gRPC) traffic for connection types ServerSideTLS and MutualTLS |
-| -ca  | CA certificate file to secure IPC (gRPC) traffic for connection type MutualTLS |
-| -envport  | The name of the environment variable that contains the port number for the service to listen on for requests. |
-| -error | Set log output level to error level. (Error message only) |
-| -h, -help | Shows command line parameter help. |
-| -info | Set log output level to info level. (Info, warning and error messages) |
-| -key  | Key file to secure IPC (gRPC) traffic using SSL (optional). |
-| -port | port number for the service to listen on for requests. |
-| -trace | Set log output level to most detailed trace level (Info, warning, error, and detailed trace messages) |
-| -warning | Set log output level to warning level. (Error and warning messages) |
+| Parameter     | Description                                                                                                                                                                                                                                                                                                                                                                                            |
+|---------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| -connection   | Security level used to secure traffic between SFC core and metrics service. PlainText : No encryption ServerSideTLS : Data is encrypted, requires -cert and -key parameters MutualTLS : Data is encrypted, required -cert, ca and -key parameters The connection type must match the connection type, as set to the ConnectionType attribute for the client, to communicates with the metrics service. |
+| -cert         | Server certificate file to secure IPC (gRPC) traffic for connection types ServerSideTLS and MutualTLS                                                                                                                                                                                                                                                                                                  |
+| -key          | Server private file to secure IPC (gRPC) traffic for connection types ServerSideTLS and MutualTLS                                                                                                                                                                                                                                                                                                      |
+| -ca           | CA certificate file to secure IPC (gRPC) traffic for connection type MutualTLS                                                                                                                                                                                                                                                                                                                         |
+| -envport      | The name of the environment variable that contains the port number for the service to listen on for requests.                                                                                                                                                                                                                                                                                          |
+| -error        | Set log output level to error level. (Error message only)                                                                                                                                                                                                                                                                                                                                              |
+| -h, -help     | Shows command line parameter help.                                                                                                                                                                                                                                                                                                                                                                     |
+| -info         | Set log output level to info level. (Info, warning and error messages)                                                                                                                                                                                                                                                                                                                                 |
+| -key          | Key file to secure IPC (gRPC) traffic using SSL (optional).                                                                                                                                                                                                                                                                                                                                            |
+| -port         | port number for the service to listen on for requests.                                                                                                                                                                                                                                                                                                                                                 |
+| -trace        | Set log output level to most detailed trace level (Info, warning, error, and detailed trace messages)                                                                                                                                                                                                                                                                                                  |
+| -warning      | Set log output level to warning level. (Error and warning messages)                                                                                                                                                                                                                                                                                                                                    |
 
 The port number, used by the service, can be specified using different methods which are applied in the following order
 

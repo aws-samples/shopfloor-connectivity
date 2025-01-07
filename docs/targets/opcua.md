@@ -1,8 +1,8 @@
 # OPC UA target adapter
 
-- [OPC UA target adapter data models and mapping](#OPC UA target adapter data models and mapping)
-  - [Automatic model mapping](#Automatic model mapping)
-  - [Query mapping](#Query mapping)
+- [OPC UA target adapter data models and mapping](#opc-ua-target-adapter-data-models-and-mapping)
+  - [Automatic model mapping](#automatic-model-mapping)
+  - [Query mapping](#query-mapping)
 
 
 
@@ -476,7 +476,7 @@ Opcua Server certificate configuration
 
 **Type**: CertificateConfiguration
 
-[^top](#OPC UA target adapter data models and mapping)
+[^top](#opc-ua-target-adapter-data-models-and-mapping)
 
 
 ## CertificateConfiguration
@@ -551,7 +551,7 @@ Self-signed certificate configuration used to generate a self-signed certificate
 
 **Type**: SelfSignedCertificateConfiguration
 
-[^top](#OPC UA target adapter data models and mapping)
+[^top](#opc-ua-target-adapter-data-models-and-mapping)
 
 
 ## SelfSignedCertificateConfiguration
@@ -617,7 +617,7 @@ Number of days certificate is valid
 
 Default is 1095 (=3 years)
 
-[^top](#OPC UA target adapter data models and mapping)
+[^top](#opc-ua-target-adapter-data-models-and-mapping)
 
 
 ## CertificateValidationConfiguration
@@ -654,7 +654,7 @@ Configuration of op optional checks
 
 When not set then all options are enabled
 
-[^top](#OPC UA target adapter data models and mapping)
+[^top](#opc-ua-target-adapter-data-models-and-mapping)
 
 
 ## CertificateValidationOptions
@@ -727,7 +727,7 @@ Check certificate expiry
 
 Default is true
 
-[^top](#OPC UA target adapter data models and mapping)
+[^top](#opc-ua-target-adapter-data-models-and-mapping)
 
 
 ## DataModelConfiguration
@@ -778,7 +778,7 @@ Id for the node
 **Type**: String
 
 Optional, if not specified then the key for the model in the OPC UA target configuration DataModels table is used
-The the value of the id is used as the identifier in the node id for the folder. 
+The value of the id is used as the identifier in the node id for the folder. 
 
 - Id is a number: "ns=[namespace index];**i**= [numeric id]"
 - Id is a guid: "ns=[namespace index];g= [guid id]"
@@ -805,7 +805,7 @@ Variable nodes to create at in this top level folder
 
 **Type**: Map[String, VariableNodeConfiguration]
 
-[^top](#OPC UA target adapter data models and mapping)
+[^top](#opc-ua-target-adapter-data-models-and-mapping)
 
 
 ## FolderNodeConfiguration
@@ -860,7 +860,7 @@ The value of the ID is then used as the identifier in the node ID for the folder
 - Id is a number: "ns=[namespace index];**i**= [numeric id]"
 - Id is a guid: "ns=[namespace index];g= [guid id]"
 - Id is a string : "ns=[namespace index];s= [guid id]"
--
+
 The value of the namespace index is set by the server when the model is built from the model specification.
 
 Note that all keys in all tabled in a DataModel configuration must be unique.
@@ -874,7 +874,7 @@ Map with variable nodes to create at top level folder of model
 
 **Type**: Map[String, VariableNodeConfiguration]
 
-[^top](#OPC UA target adapter data models and mapping)
+[^top](#opc-ua-target-adapter-data-models-and-mapping)
 
 
 ## VariableNodeConfiguration
@@ -976,7 +976,7 @@ Id for the node
 **Type**: String
 
 Optional; if not specified then the key used in the variable table in the parent folder or data model table is used
-The the value of the id is used as the identifier in the node id for the folder. 
+The value of the id is used as the identifier in the node id for the folder. 
 
 - Id is a number: "ns=[namespace index];**i**= [numeric id]"
 - Id is a guid: "ns=[namespace index];g= [guid id]"
@@ -1054,5 +1054,5 @@ The quoted characters must be escaped with a \ character in the JSON configurati
 
 
 
-[^top](#OPC UA target adapter data models and mapping)
+[^top](#opc-ua-target-adapter-data-models-and-mapping)
 

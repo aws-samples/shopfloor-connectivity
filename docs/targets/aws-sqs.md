@@ -60,5 +60,5 @@ AWS Region for SQS service
 
 **Type**: String
 
-[^top](#AWS SQS Target)
+[^top](#aws-sqs-target)
 

@@ -15,7 +15,6 @@
 **Properties:**
 - [AdapterDbServer](#AdapterDbServer)
 - [Channels](#Channels)
-- [Name](#Name)
 - [SingleRow](#SingleRow)
 - [SqlReadParameters](#SqlReadParameters)
 - [SqlReadStatement](#SqlReadStatement)
@@ -62,7 +61,7 @@ This is the SQL statement that is executed to retrieve the values from the datab
 
 The logic of the statement or is responsible that records are only read once or any other reading strategy. For example, the procedure can mark or delete the read records when returning the read records.
 
-[^top](#SQL Adapter Configuration)
+[^top](#sql-adapter-configuration)
 
 
 
@@ -85,7 +84,7 @@ If multiple column names are specified, or "*" is used, then the value will be a
 
 Default value is ["*"]
 
-[^top](#SQL Adapter Configuration)
+[^top](#sql-adapter-configuration)
 
 
 
@@ -104,7 +103,7 @@ Database servers configured for this adapter. The sql source using the adapter m
 
 
 
-[^top](#SQL Adapter Configuration)
+[^top](#sql-adapter-configuration)
 
 
 
@@ -198,5 +197,5 @@ Database username
 
 **For this value it is strongly recommended to use a placeholder for a value stored in [AWS Secrets manager](../core/secrets-manager-configuration.md).**
 
-[^top](#SQL Adapter Configuration)
+[^top](#sql-adapter-configuration)
 

@@ -227,7 +227,7 @@ parameters which are parsed consistently for all servers and call the run method
 # Implementing a target adapter
 
 The main activity of a target adapter is to write the data to a service or local target. The SFC core
-sends the data to be written to the configured target adapters. The core itself is not aware of the actual target adapter.The implementation of a target adapter will receivece the data and its specific configuration data, to translate to execute target-specific API or
+sends the data to be written to the configured target adapters. The core itself is not aware of the actual target adapter.The implementation of a target adapter will receive the data and its specific configuration data, to translate to execute target-specific API or
 service calls to write the data.
 
 For JVM implementations the SFC core defines the following interface:
@@ -250,12 +250,12 @@ Target implementations **need to implement** this interface.
 
 ## writeTargetData function
 
-The writeTargetData method is responsible for writing the data, reveived from the SFC core process, to the target specific destination.
+The writeTargetData method is responsible for writing the data, received from the SFC core process, to the target specific destination.
 
 When the SFC core is stopped it will create the adapter stop method to let the adapter cleanup resources or close any
 sessions.
 
-[^top](#quicklinks)
+[^top](#extending-the-sfc-framework)
 
 ## Creating in-process adapter instances
 
@@ -344,13 +344,13 @@ core it will stream values to the target until the SFC core closes the connectio
 
 The WriteValuesRequest contains data similar to the parameters of the TargetWriter interface writeTargetData method parameters,
 
-used for JVM implementations of a target. This makes it possible to provide a JVM implementation of an target that can run in the SFC core
+used for JVM implementations of a target. This makes it possible to provide a JVM implementation of a target that can run in the SFC core
 process, as well as an IPC service, with little effort as the SFC implementation contains generic Service helper classes
 to wrap the target classes.
 
 ## Using JVM target classes as IPC services
 
-An target class that implements the TargetWriter interface can simply be wrapped in a ServiceMain class to execute
+A target class that implements the TargetWriter interface can simply be wrapped in a ServiceMain class to execute
 it as a gRPC IPC service.
 
 The code below shows the implementation of the AWS IoT Core target service that uses the ServiceMain class to wrap an instance of the
@@ -378,7 +378,7 @@ class AwsIotCoreTargetService : ServiceMain() {
 The main method of the server application can simply create an instance of the class, passing the command line
 parameters which are parsed consistently for all servers and call the run method to run the service.
 
-[^top](#quicklinks)
+[^top](#extending-the-sfc-framework)
 
 # Custom Configuration Handlers
 
@@ -439,11 +439,11 @@ fun newInstance(vararg createParameters: Any?): ConfigWriter?
 A single value is through createParameters by the core when creating an in-process instance of the writer which is the
 configuration that may contain specific section for the type of the writer.
 
-[^top](#quicklinks)
+[^top](#extending-the-sfc-framework)
 
 # Custom Metric Writers
 
-Metrics Writers are used to write metrics datapoints collected by SFC to a metrics storage or processing destination (
+Metrics Writers are used to write metrics data points collected by SFC to a metrics storage or processing destination (
 e.g., AWS CloudWatchMetrics)
 
 A metrics Writer is a class that implements the MetricWriter Interface
@@ -465,7 +465,7 @@ fun newInstance(configReader: ConfigReader): MetricsWriter?
 The core passes a configuration reader to the method that the implementation can use to load a (writer specific)
 configuration from the SFC configuration.
 
-An implementation of a metrics writer can be exposed as an IPC service. This IPC service is defined in Metrics.proto as
+An implementation of a metrics writer can be exposed as an IPC service. This IPC service is defined in metrics.proto as
 MetricsWriterService
 
 ```kotlin

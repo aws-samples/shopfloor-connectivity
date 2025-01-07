@@ -123,7 +123,7 @@ Optional, default values for missing element are:
 ### HealthProbe
 Configuration for main process health probe endpoint
 
-**Type**: [HealthProbeConfiguration](,/health-probe-configuration.md)
+**Type**: [HealthProbeConfiguration](./health-probe-configuration.md)
 
 ---
 ### LogLevel
@@ -168,7 +168,7 @@ Controls the monitoring of included configuration files see Including configurat
 
 **Type**: Boolean
 
-Default value is true, set value to false to disable monitoring
+Default value is true, set the value to false to disable monitoring
 
 ---
 ### Name
@@ -211,7 +211,7 @@ Protocol adapters are the sources to read data from and abstract the actual prot
 ### Schedules
 List of one or more schedules that define how data is collected from their sources, processed, and send to the targets
 
-**Type**: [[Schedule](./schedule-configuration.md)]
+**Type**: [[Schedule](./schedule-config.md)]
 
 At least one active schedule needs to be present
 
@@ -270,7 +270,7 @@ Targets can be of different types that have specific configuration attributes. T
 For sending the data to the targets the SFC core only uses a subset of attributes that are common between all target types.
 
 
-**Type**: Map[String,[TargetConfiguration](#target-configuration.md)]
+**Type**: Map[String,[TargetConfiguration](./target-configuration.md)]
 
 ---
 ### Templates
@@ -278,7 +278,7 @@ Configuration Templates
 
 **Type**: Map[String,String]
 
-Map indexed by template names containing JSON objects used as [SFC configuration templates](../sfc-configuration.md#ConfigurationTemplates)
+Map indexed by template names containing JSON objects used as [SFC configuration templates](../sfc-configuration.md#configuration-templates)
 
 ---
 ### Transformations
@@ -367,5 +367,5 @@ User-defined version
 
 Optional
 
-[^top](#SFC top level configuration)
+[^top](#sfc-top-level-configuration)
 

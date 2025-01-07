@@ -4,7 +4,6 @@ Configuration for a client level proxy
 
 
 **Properties:**
-- [Name](#Name)
 - [NoProxyAddresses](#NoProxyAddresses)
 - [ProxyPassword](#ProxyPassword)
 - [ProxyUrl](#ProxyUrl)

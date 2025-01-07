@@ -6,7 +6,7 @@
 
 
 
-AwsMskTargetConfiguration extends the type <a href="../core/target-configuration.md" >TargetConfiguration</a> with specific configuration data for connecting to and sending to an AWS MSK topic. The Targets configuration element can contain entries of this type, the TargetType of these entries must be set to <strong>"AWS-MSK"</strong>
+AwsMskTargetConfiguration extends the type  [TargetConfiguration](../core/target-configuration.md) with specific configuration data for connecting to and sending to an AWS MSK topic. The Targets configuration element can contain entries of this type, the TargetType of these entries must be set to <strong>"AWS-MSK"</strong>
 
 
 **Properties:**
@@ -49,8 +49,13 @@ Addresses with port number for bootstrap brokers for AWS MSK cluster. (bootstrap
 **Type**: List[String]
 
 To get the broker addresses for a cluster use the CLI command 
-aws kafka get-bootstrap-brokers --cluster-arn `ClusterArn` and use the addresses returned in `"BootstrapBrokerStringPublicSaslIam"'.
-Getting the bootstrap brokers for an Amazon MSK cluster"
+```console
+aws kafka get-bootstrap-brokers --cluster-arn `ClusterArn`
+ ```
+and use the addresses returned in "BootstrapBrokerStringPublicSaslIam".
+
+See also 
+[Getting the bootstrap brokers for an Amazon MSK cluster](https://docs.aws.amazon.com/msk/latest/developerguide/msk-get-bootstrap-brokers.html)
 
 ---
 ### Compression
@@ -141,5 +146,5 @@ Name of the MSK topic
 
 **Type**: String
 
-[^top](#AWS MSK Target)
+[^top](#aws-msk-target)
 

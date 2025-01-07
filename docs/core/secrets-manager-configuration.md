@@ -64,7 +64,7 @@ Region of the used AWS Secrets Manager Service
 ### Secrets
 Configured secrets obtained by this secrets manager configuration
 
-**Type**: [CloudSecretConfiguration](./cloud-secret-coniguration.md)
+**Type**: [CloudSecretConfiguration](./cloud-secret-configuration.md)
 
 ---
 ### StoredSecretsDir

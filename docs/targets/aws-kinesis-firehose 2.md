@@ -36,5 +36,5 @@ Name of the delivery stream
 
 **Type**: String
 
-[^top](#AWS Kinesis Firehose Target)
+[^top](#aws-kinesis-firehose-target)
 

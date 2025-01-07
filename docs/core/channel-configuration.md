@@ -41,7 +41,7 @@ If the value is  list of structures and the value of the [Spread](#Spread) setti
 Default is false
 
 The names of the values for the fields in the structure start with the name of the value appended by the names of the sub elements, separated by a ".". 
-After decomposing the structured value into individual values, it is removed from the dataset. If the structure was an element in a list of structures the nameis the name of the element, followed by a zero indexed order number of the element in the list and the name of the sub element, all separated by a ".".
+After decomposing the structured value into individual values, it is removed from the dataset. If the structure was an element in a list of structures the name is the name of the element, followed by a zero indexed order number of the element in the list and the name of the sub element, all separated by a ".".
 
 ---
 ### Description

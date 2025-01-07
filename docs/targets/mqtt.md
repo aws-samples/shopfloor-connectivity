@@ -53,7 +53,7 @@ Whenever the number of messages, total message size or an interval is reached th
 
 ---
 ### BatchInterval
-Interval in milliseconds after which a batch of messages is sent to the a topic, even when the BatchSize or BatchCount limit is not reached.
+Interval in milliseconds after which a batch of messages is sent to the topic, even when the BatchSize or BatchCount limit is not reached.
 
 **Type**: Int
 
@@ -282,5 +282,5 @@ Generate warning if data is published to AlternateTopicName
 Default is tue
 
 
-[^top](#MQTT Target)
+[^top](#mqtt-target)
 

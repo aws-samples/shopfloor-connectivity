@@ -6,11 +6,9 @@
 - [And
 alias is "&"](#And
 alias is "&")
-- [Aos](#Aos)
+- [Abs](#Abs)
 - [Asin](#Asin)
-- [AtIndex
-Alias is "[]"](#AtIndex
-Alias is "[]")
+- [AtIndex](#atindex)
 - [Atan](#Atan)
 - [BoolToNumber](#BoolToNumber)
 - [BytesToDoubleBE](#BytesToDoubleBE)
@@ -24,9 +22,7 @@ Alias is "[]")
 - [Cos](#Cos)
 - [Cosh](#Cosh)
 - [DecodeToString](#DecodeToString)
-- [Divide
-Alias is "/"](#Divide
-Alias is "/")
+- [Divide](#divide)
 - [EpocMilliSecondsToTimestamp](#EpocMilliSecondsToTimestamp)
 - [EpocSecondsToTimestamp](#EpocSecondsToTimestamp)
 - [Equals](#Equals)
@@ -49,31 +45,18 @@ Alias is "/")
 - [MapStringToNumber](#MapStringToNumber)
 - [Max](#Max)
 - [Min](#Min)
-- [Minus
-alias is "-"](#Minus
-alias is "-")
-- [Mod
-alias is "%"](#Mod
-alias is "%")
-- [Multiply
-alias is "*"](#Multiply
-alias is "*")
-- [Not
-alias is "!"](#Not
-alias is "!")
+- [Minus](#minus)
+- [Mod](#mod)
+- [Multiply](#multiply)
+- [Not](#not)
 - [NumbersToFloatBE](#NumbersToFloatBE)
 - [NumbersToFloatLE](#NumbersToFloatLE)
-- [Operator](#Operator)
-- [Or
-Alias = "|"](#Or
-Alias = "|")
+- [Or](#or)
 - [OutsideRangeExclusive](#OutsideRangeExclusive)
 - [OutsideRangeInclusive](#OutsideRangeInclusive)
 - [ParseInt](#ParseInt)
 - [ParseNumber](#ParseNumber)
-- [Plus
-alias is "+" or "Add"](#Plus
-alias is "+" or "Add")
+- [Plus](#plus)
 - [Query](#Query)
 - [ReverseList](#ReverseList)
 - [Round](#Round)
@@ -103,9 +86,7 @@ alias is "+" or "Add")
 - [UpperCase](#UpperCase)
 - [WithinRangeExclusive](#WithinRangeExclusive)
 - [WithinRangeInclusive](#WithinRangeInclusive)
-- [Xor
-alias is "^"](#Xor
-alias is "^")
+- [Xor](#xor)
 
 ---
 ### Abs
@@ -113,7 +94,7 @@ Calculates absolute value.
 
 **Type**: Datatype: Numeric
 
-**Oparand**: None
+**Operand**: None
 
 ---
 ### And
@@ -130,7 +111,7 @@ Computes the arc; the returned value is an angle in the range from 0.0 to PI rad
 
 **Type**: Datatype: Numeric
 
-**Oparand**: None
+**Operand**: None
 
 ---
 ### Asin
@@ -138,7 +119,7 @@ Computes the arc; the returned value is an angle in the range from -PI/2 to PI/2
 
 **Type**: Datatype: Numeric
 
-**Oparand**: None
+**Operand**: None
 
 ---
 ### AtIndex
@@ -155,7 +136,7 @@ Computes the arc; the returned value is an angle in the range from -PI/2 to PI/2
 
 **Type**: Datatype: Numeric
 
-**Oparand**: None
+**Operand**: None
 
 ---
 ### BoolToNumber
@@ -163,7 +144,7 @@ Converts Boolean value to a number. False value returns 0, True value returns 1
 
 **Type**: Datatype: Boolean
 
-**Oparand**: None
+**Operand**: None
 
 ---
 ### BytesToDoubleBE
@@ -171,7 +152,7 @@ Converts array of 8 bytes to a float value (Big-Endian)
 
 **Type**: Datatype: byte[8]
 
-**Oparand**: None
+**Operand**: None
 
 ---
 ### BytesToDoubleLE
@@ -179,7 +160,7 @@ Converts array of 8 bytes to a float value (Little-Endian)
 
 **Type**: Datatype: byte[8]
 
-**Oparand**: None
+**Operand**: None
 
 ---
 ### BytesToFloatBE
@@ -187,7 +168,7 @@ Converts array of 4 bytes to a float value (Big-Endian)
 
 **Type**: Datatype: byte[4]
 
-**Oparand**: None
+**Operand**: None
 
 ---
 ### BytesToFloatLE
@@ -195,7 +176,7 @@ Converts array of 4 bytes to a float value (Little-Endian)
 
 **Type**: Datatype: byte[4]
 
-**Oparand**: None
+**Operand**: None
 
 ---
 ### BytesToInt16
@@ -203,7 +184,7 @@ Converts array of two bytes to a 16-bit integer (Big-Endian)
 
 **Type**: Datatype: byte[2]
 
-**Oparand**: None
+**Operand**: None
 
 ---
 ### Ceil
@@ -211,7 +192,7 @@ Rounds value up to the next largest integer.
 
 **Type**: Datatypes: Numeric
 
-**Oparand**: None
+**Operand**: None
 
 ---
 ### Celsius
@@ -219,7 +200,7 @@ Converts Fahrenheit temperature to Celsius.
 
 **Type**: Datatypes: Numeric
 
-**Oparand**: None
+**Operand**: None
 
 ---
 ### Chunked
@@ -227,7 +208,7 @@ Splits a value, which contains a list of values, into a lists of smaller lists, 
 
 **Type**: Datatypes: Lists
 
-**Oparand**: Chunck size
+**Operand**: Chunk size
 
 ---
 ### Cos
@@ -235,7 +216,7 @@ Computes the cosine of the angle given in radians
 
 **Type**: Datatype: Numeric
 
-**Oparand**: None
+**Operand**: None
 
 ---
 ### Cosh
@@ -243,7 +224,7 @@ Computes the hyperbolic cosine
 
 **Type**: Datatype: Numeric
 
-**Oparand**: None
+**Operand**: None
 
 ---
 ### DecodeToString
@@ -251,7 +232,7 @@ Decodes byte arrays (and ByteStrings) into UTF-8 String
 
 **Type**: Datatype: Byte[]
 
-**Oparand**: None
+**Operand**: None
 
 ---
 ### Divide
@@ -268,7 +249,7 @@ Obtains a DateTime using milliseconds from the epoch of 1970-01-01T00:00:00Z.
 
 **Type**: Datatypes: Long
 
-**Oparand**: None
+**Operand**: None
 
 ---
 ### EpocSecondsToTimestamp
@@ -276,7 +257,7 @@ Obtains a DateTime using seconds from the epoch of 1970-01-01T00:00:00Z.
 
 **Type**: Datatypes: Long
 
-**Oparand**: None
+**Operand**: None
 
 ---
 ### Equals
@@ -292,7 +273,7 @@ Computes Euler's number e raised to the power of the value
 
 **Type**: Datatypes: Numeric
 
-**Oparand**: None
+**Operand**: None
 
 ---
 ### Fahrenheit
@@ -300,7 +281,7 @@ Converts Celsius temperature to Fahrenheit.
 
 **Type**: Datatypes: Numeric
 
-**Oparand**: None
+**Operand**: None
 
 ---
 ### Flatten
@@ -308,7 +289,7 @@ Flattens multi-dimensional array values into a single dimensional array value
 
 **Type**: Datatypes: Any
 
-**Oparand**: None
+**Operand**: None
 
 ---
 ### Floor
@@ -316,7 +297,7 @@ Calculates the largest integer less than or equal to the value.
 
 **Type**: Datatypes: Numeric
 
-**Oparand**: None
+**Operand**: None
 
 ---
 ### Int16ToBytes
@@ -324,7 +305,7 @@ Converts a 16-bit value in an array of 2 8-bit values.
 
 **Type**: Datatype: 16-bit value
 
-**Oparand**: None
+**Operand**: None
 
 ---
 ### Int16sToInt32
@@ -332,7 +313,7 @@ Converts an array of two 16-bit values to a single 32-bit value.
 
 **Type**: Datatypes: int16[2]
 
-**Oparand**: None
+**Operand**: None
 
 ---
 ### Int32ToInt16s
@@ -340,7 +321,7 @@ Converts a 32-bit value in an array of 2 16-bit values.
 
 **Type**: Datatype: 32-bit Value
 
-**Oparand**: None
+**Operand**: None
 
 ---
 ### IsoTimeStrSeconds
@@ -350,7 +331,7 @@ The string must represent a valid instant in UTC
 
 **Type**: Datatype : String
 
-**Oparand**: None
+**Operand**: None
 
 ---
 ### IsoTimeStrToEpocSeconds
@@ -366,7 +347,7 @@ Converts a string in ISO-8601 duration format into milliseconds
 
 **Type**: Datatype : String
 
-**Oparand**: None
+**Operand**: None
 
 ---
 ### IsoTimeStrToNanoSeconds
@@ -374,7 +355,7 @@ Converts a string in ISO-8601 duration format into nanoseconds
 
 **Type**: Datatype : String
 
-**Oparand**: None
+**Operand**: None
 
 ---
 ### IsoTimeStrToSeconds
@@ -382,7 +363,7 @@ Converts a string in ISO-8601 duration format into seconds
 
 **Type**: Datatype : String
 
-**Oparand**: None
+**Operand**: None
 
 ---
 ### Ln
@@ -390,7 +371,7 @@ Computes the natural logarithm (base E)
 
 **Type**: Datatypes: Numeric
 
-**Oparand**: None
+**Operand**: None
 
 ---
 ### Log10
@@ -398,7 +379,7 @@ Computes the common logarithm (base 10)
 
 **Type**: Datatype: Numeric
 
-**Oparand**: None
+**Operand**: None
 
 ---
 ### LowerCase
@@ -406,7 +387,7 @@ Converts string to lowercase.
 
 **Type**: Datatype: String
 
-**Oparand**: None
+**Operand**: None
 
 ---
 ### MapRange
@@ -499,7 +480,7 @@ Multiplies value by parameter value.
 
 **Type**: Datatype: Numeric
 
-**Oparand**: Parameter: Multiplier
+**Operand**: Parameter: Multiplier
 
 ---
 ### Not
@@ -508,7 +489,7 @@ Inverts a Boolean value
 
 **Type**: Datatype : Boolean
 
-**Oparand**: None
+**Operand**: None
 
 ---
 ### NumbersToFloatBE
@@ -516,7 +497,7 @@ Takes a list of two numbers and converts the individual bytes of these numbers i
 
 **Type**: Datatype : List of size 2 containing 2 numeric values. These values are first converted into 16 bit words from which the float value is decoded. 
 
-**Oparand**: None
+**Operand**: None
 
 ---
 ### NumbersToFloatLE
@@ -524,7 +505,7 @@ Takes a list of two numbers and converts the individual bytes of these numbers i
 
 **Type**: Datatype : List of size 2 containing 2 numeric values. These values are first converted into 16 bit words from which the float value is decoded. 
 
-**Oparand**: None
+**Operand**: None
 
 ---
 ### Or
@@ -541,7 +522,7 @@ Test if a value is outside an exclusive range
 
 **Type**: Datatype: Numeric
 
-**Oparand**: None
+**Operand**: None
 
 ```json
 {
@@ -561,7 +542,7 @@ Datatype: Numeric
 
 **Type**: Datatype: Numeric
 
-**Oparand**: None
+**Operand**: None
 
 ```json
 {
@@ -582,7 +563,7 @@ Parses string value as an integer number. The string must be a valid representat
 
 **Type**: Datatype: String
 
-**Oparand**: None
+**Operand**: None
 
 ---
 ### ParseNumber
@@ -590,7 +571,7 @@ Parses string value as a double number. The string must be a valid representatio
 
 **Type**: Datatype: String
 
-**Oparand**: None
+**Operand**: None
 
 ---
 ### Plus
@@ -615,7 +596,7 @@ Reverses the elements in a list value.
 
 **Type**: Datatype: Lists
 
-**Oparand**: None
+**Operand**: None
 
 ---
 ### Round
@@ -623,7 +604,7 @@ Rounds the given value towards the closest integer.
 
 **Type**: Datatype: Numeric
 
-**Oparand**: None
+**Operand**: None
 
 ---
 ### Shl
@@ -631,7 +612,7 @@ Shifts this value left by a bit-count number of bits.
 
 **Type**: Datatype: Int, Byte, Short, Long
 
-**Oparand**: bit-count
+**Operand**: bit-count
 
 ---
 ### Shr
@@ -639,7 +620,7 @@ Shifts this value right by a bit-count number of bits.
 
 **Type**: Datatype: Int, Byte, Short, Long
 
-**Oparand**: bit-count
+**Operand**: bit-count
 
 ---
 ### Sign
@@ -651,7 +632,7 @@ Returns the sign of the value.
 
 **Type**: Datatype: Numeric
 
-**Oparand**: None
+**Operand**: None
 
 ---
 ### Sin
@@ -659,7 +640,7 @@ Computes the sine of the angle given in radians
 
 **Type**: Datatype: Numeric
 
-**Oparand**: None
+**Operand**: None
 
 ---
 ### Sinh
@@ -667,7 +648,7 @@ Computes the hyperbolic sine of the value
 
 **Type**: Datatype: Numeric
 
-**Oparand**: None
+**Operand**: None
 
 ---
 ### Sqrt
@@ -675,7 +656,7 @@ Computes the positive square root
 
 **Type**: Datatype: Numeric
 
-**Oparand**: None
+**Operand**: None
 
 ---
 ### Str
@@ -683,7 +664,7 @@ String representation of a number.
 
 **Type**: Datatype: Numeric
 
-**Oparand**: None
+**Operand**: None
 
 ---
 ### StrEquals
@@ -727,7 +708,7 @@ Computes the tangent of the angle given in radians
 
 **Type**: Datatype: Numeric
 
-**Oparand**: None
+**Operand**: None
 
 ---
 ### Tanh
@@ -735,7 +716,7 @@ Computes the hyperbolic tangent of the value
 
 **Type**: Datatype: Numeric
 
-**Oparand**: None
+**Operand**: None
 
 ---
 ### TimestampToEpocMilliSeconds
@@ -743,7 +724,7 @@ Converts a datetime value  to the number of milliseconds from the epoch of 1970-
 
 **Type**: Datatype: DateTime/Timestamp
 
-**Oparand**: None
+**Operand**: None
 
 ---
 ### TimestampToEpocSeconds
@@ -751,7 +732,7 @@ Converts a datetime value  to the number of seconds from the epoch of 1970-01-01
 
 **Type**: Datatype: DateTime/Timestamp
 
-**Oparand**: None
+**Operand**: None
 
 ---
 ### ToByte
@@ -761,7 +742,7 @@ Converts numeric value to a byte value
 
 **Default,Constraints,Examples**: No operand
 
-**Oparand**: None
+**Operand**: None
 
 ---
 ### ToDouble
@@ -769,7 +750,7 @@ Converts numeric value to a double value
 
 **Type**: Datatype: Numeric
 
-**Oparand**: None
+**Operand**: None
 
 ---
 ### ToFloat
@@ -777,7 +758,7 @@ Converts numeric value to a float value
 
 **Type**: Datatype: Numeric
 
-**Oparand**: None
+**Operand**: None
 
 ---
 ### ToInt
@@ -785,7 +766,7 @@ Converts numeric value to an int value
 
 **Type**: Datatype: Numeric
 
-**Oparand**: None
+**Operand**: None
 
 ---
 ### ToLong
@@ -801,7 +782,7 @@ Converts numeric value to a short 16 bits value
 
 **Type**: Datatype: Numeric
 
-**Oparand**: None
+**Operand**: None
 
 ---
 ### ToSigned
@@ -809,7 +790,7 @@ Converts numeric value to a signed value
 
 **Type**: Datatype: Numeric
 
-**Oparand**: None
+**Operand**: None
 
 ---
 ### ToUnsigned
@@ -817,7 +798,7 @@ Converts numeric value to an unsigned value
 
 **Type**: Datatype: Numeric
 
-**Oparand**: None
+**Operand**: None
 
 ---
 ### Trunc
@@ -825,7 +806,7 @@ Rounds the given value to an integer towards zero.
 
 **Type**: Datatype: Numeric
 
-**Oparand**: None
+**Operand**: None
 
 ---
 ### TruncAt
@@ -841,7 +822,7 @@ Converts a string value to uppercase.
 
 **Type**: Datatype: String
 
-**Oparand**: None
+**Operand**: None
 
 ---
 ### WithinRangeExclusive

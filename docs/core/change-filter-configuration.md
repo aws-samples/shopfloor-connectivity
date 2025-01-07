@@ -4,14 +4,13 @@
 
 Change filter to apply to a channel value.
 
-For more information see [DataFiltering](../sfc-data-processing-filtering.md#Data Filtering)
+For more information see [DataFiltering](../sfc-data-processing-filtering.md#data-filtering)
 
 
 
 
 **Properties:**
 - [AtLeast](#AtLeast)
-- [Name](#Name)
 - [Type](#Type)
 - [Value](#Value)
 
