@@ -54,7 +54,7 @@ Timeout for reading from Modbus device in milliseconds.
 
 Default is 10000.
 
-[^top](#Modbus TCP Protocol Configuration)
+[^top](#modbus-tcp-protocol-configuration)
 
 
 
@@ -84,14 +84,14 @@ The maximum gap between register addresses to combine read actions in a single r
 Default is 8
 
 ---
-### RegisterMaxGapSize
+### CoilMaxGapSize
 The maximum gap between the coil and distinct input addresses to combine read actions in a single request.
 
 **Type**: Integer
 
 Default is 16
 
-[^top](#Modbus TCP Protocol Configuration)
+[^top](#modbus-tcp-protocol-configuration)
 
 
 
@@ -131,7 +131,7 @@ Modbus channel type to read from
 - HoldingRegister”
 - “InputRegister”
 
-[^top](#Modbus TCP Protocol Configuration)
+[^top](#modbus-tcp-protocol-configuration)
 
 
 
@@ -150,7 +150,7 @@ Modbus devices configured for this adapter. The modbus tcp source using the adap
 
 
 
-[^top](#Modbus TCP Protocol Configuration)
+[^top](#modbus-tcp-protocol-configuration)
 
 
 
@@ -212,5 +212,5 @@ The period in milliseconds to wait after a read failure.
 
 Default is 10000, the minimum value is 1000
 
-[^top](#Modbus TCP Protocol Configuration)
+[^top](#modbus-tcp-protocol-configuration)
 

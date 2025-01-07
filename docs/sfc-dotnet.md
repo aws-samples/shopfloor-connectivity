@@ -1,12 +1,12 @@
 # .NET Core based protocol adapters
 
-- [.NET Core based protocol adapters](#.net-core-based-protocol-adapters)
+- [.NET Core based protocol adapters](#net-core-based-protocol-adapters)
 
-- [Running the .NET Core protocol adapters as an IPC Service](#running-the-.net-core-protocol-adapters-as-an-ipc-service)
+- [Running the .NET Core protocol adapters as an IPC Service](#running-the-net-core-protocol-adapters-as-an-ipc-service)
 
 - [Output logging format](#output-logging-format)
 
-- [Implementing a .NET Core Protocol adapter](#implementing-a-.net-core-protocol-adapter)
+- [Implementing a .NET Core Protocol adapter](#implementing-a-net-core-protocol-adapter)
 
 - [Service logging](#service-logging)
 
@@ -24,19 +24,19 @@ This section describes the steps to implement such a server and the key differen
 ## Running the .NET Core protocol adapters as an IPC Service
 
 | **Protocol** | **Application name** |
-| ------------ | -------------------- |
+|--------------|----------------------|
 | OPCDA        | opdua                |
 
 The applications do have all the following command line parameters in common.
 
-| Parameter | Description |
-| --- | --- |
-| --cert  | PKCS12 Certificate file to secure IPC (gRPC) traffic using SSL (optional). As the gRPC implementation for the .NET framework uses certificates in a pkcs12 format, these might have to be generated first. This can be done using the openssl tool. openssl pkcs12 -export -out certificate.pfx -inkey privateKey.key -in certificate.crt -certfile CACert.crt |
-| --config  | Name of the configuration file. The only value used from the configuration file is the port number the process will listen on for IPC requests. The SFC core will send an initialization request to the service on this port with the configuration data for the service to initialize its communication with the source device. |
-| --envport  | The name of the environment variable that contains the port number for the service to listen on for requests. |
-| --help | Shows command line parameter help. |
-| --password  | Password for the PKCS12 certificate file. |
-| --port | port number for the service to listen on for requests. |
+| Parameter       | Description                                                                                                                                                                                                                                                                                                                                                    |
+|-----------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| --cert          | PKCS12 Certificate file to secure IPC (gRPC) traffic using SSL (optional). As the gRPC implementation for the .NET framework uses certificates in a pkcs12 format, these might have to be generated first. This can be done using the openssl tool. openssl pkcs12 -export -out certificate.pfx -inkey privateKey.key -in certificate.crt -certfile CACert.crt |
+| --config        | Name of the configuration file. The only value used from the configuration file is the port number the process will listen on for IPC requests. The SFC core will send an initialization request to the service on this port with the configuration data for the service to initialize its communication with the source device.                               |
+| --envport       | The name of the environment variable that contains the port number for the service to listen on for requests.                                                                                                                                                                                                                                                  |
+| --help          | Shows command line parameter help.                                                                                                                                                                                                                                                                                                                             |
+| --password      | Password for the PKCS12 certificate file.                                                                                                                                                                                                                                                                                                                      |
+| --port          | port number for the service to listen on for requests.                                                                                                                                                                                                                                                                                                         |
 
 
 The port number, used by the service, can be specified using different methods which are applied in the following order
@@ -143,5 +143,5 @@ public sealed class OpcdaProtocolService : ProtocolServiceMain
 
 ## Service logging
 
-In order to integrate withthe [Microsoft logging extensions](https://docs.microsoft.com/en-us/dotnet/core/extensions/logging?tabs=command-line)  thecommand line parameters for logging (-trace, -info, -warning, -error) are not available for the .NET Core based adapter
+In order to integrate with the [Microsoft logging extensions](https://docs.microsoft.com/en-us/dotnet/core/extensions/logging?tabs=command-line)  the command line parameters for logging (-trace, -info, -warning, -error) are not available for the .NET Core based adapter
 implementations. The level of the logging output is configured in the appsettings.json file.

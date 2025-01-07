@@ -33,12 +33,12 @@ In order to protect the service from extensive load and unwanted the request the
 Health probe endpoints for SFC service are configured by adding a HealthProbe configuration sections at the following
 locations:
 
-| Service | HealthProbe Configuration | Checks |
-| --- | --- | --- |
-| SFC Core main process | At top level of configuration | Active status of all data read, write and aggregation(*) workers and metrics processor(*) (*) if used |
-| Protocol Adapters | In the server configuration used by an adapter in the AdapterServers section | Status of listening ports for the hosted gRPC service |
-| Target Adapters | In the server configuration used by a target in the TargetServers section | Status of listening ports for the hosted gRPC service |
-| Metrics writer | In the MetricsServer section for the writer configured in the top level Metrics section. | Status of listening ports for the hosted gRPC service |
+| Service               | HealthProbe Configuration                                                                | Checks                                                                                                |
+|-----------------------|------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------|
+| SFC Core main process | At top level of configuration                                                            | Active status of all data read, write and aggregation(*) workers and metrics processor(*) (*) if used |
+| Protocol Adapters     | In the server configuration used by an adapter in the AdapterServers section             | Status of listening ports for the hosted gRPC service                                                 |
+| Target Adapters       | In the server configuration used by a target in the TargetServers section                | Status of listening ports for the hosted gRPC service                                                 |
+| Metrics writer        | In the MetricsServer section for the writer configured in the top level Metrics section. | Status of listening ports for the hosted gRPC service                                                 |
 
 For details on the HealthProbe configuration see HealthProbeConfiguration
 

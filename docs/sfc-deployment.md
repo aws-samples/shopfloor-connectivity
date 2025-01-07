@@ -1,6 +1,6 @@
 # SFC Deployment
 
-- [Deploment types](#deployment-options)
+- [Deployment types](#deployment-options)
 - [In-process and IPC deployment models](#in-process-and-ipc-deployment-models)
 - [Mixed models](#mixed-models)
 

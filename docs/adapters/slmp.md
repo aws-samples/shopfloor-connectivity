@@ -36,7 +36,7 @@ Channels can be "commented" out by adding a "#" at the beginning of the identifi
 
 At least 1 channel must be configured.
 
-[^top](#SLMP Protocol Configuration)
+[^top](#slmp-protocol-configuration)
 
 
 
@@ -56,7 +56,7 @@ A string containing the access point for the value to read from the device.
 **Type**: String
 
 
-An access points consists of a device code and a decimal device number, e.g. "D200" for Data register 200, "X0" for Input 0 and "Y0" for output 0.
+Access points consists of a device code and a decimal device number, e.g. "D200" for Data register 200, "X0" for Input 0 and "Y0" for output 0.
 
 Valid devices codes and their data types are listed below.
 
@@ -135,7 +135,7 @@ The number of values to read starting from the access point.
 
 The number of items to read can be specified as well in the DataType of the channel, e.g. WORD[size]. The Size setting can be used if the DataType field is omitted to read the default data type for the device. If the length is both specified in the DataType in both the Size setting a configuration error is raised.
 
-[^top](#SLMP Protocol Configuration)
+[^top](#slmp-protocol-configuration)
 
 
 
@@ -184,7 +184,7 @@ A SLMP channel can now use both type "STRUCT1" as "STRUCT2" as a DataType. The d
 
 
 
-[^top](#SLMP Protocol Configuration)
+[^top](#slmp-protocol-configuration)
 
 
 
@@ -314,5 +314,5 @@ Time to wait after an error writing request packets to the controller in millise
 
 Default is 10000
 
-[^top](#SLMP Protocol Configuration)
+[^top](#slmp-protocol-configuration)
 

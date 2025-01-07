@@ -2,7 +2,7 @@
 
 
 
-- [PCCC Addressing](#PCCC Addressing)
+- [PCCC Addressing](#pccc-addressing)
 
 **Configuration**
 
@@ -378,7 +378,7 @@ Channels can be "commented" out by adding a "#" at the beginning of the identifi
 
 At least 1 channel must be configured.
 
-[^top](#PCCC Protocol Configuration)
+[^top](#pccc-protocol-configuration)
 
 
 
@@ -398,11 +398,11 @@ A string containing the address of the field to read from the controller.
 
 **Type**: String
 
-For supported datatype and address syntax see [PCCC Addressing](#PCCC Addressing).
+For supported datatype and address syntax see [PCCC Addressing](#pccc-addressing).
 
 
 
-[^top](#PCCC Protocol Configuration)
+[^top](#pccc-protocol-configuration)
 
 
 
@@ -422,7 +422,7 @@ PLCs servers configured for this adapter. The PCCC source using the adapter must
 
 
 
-[^top](#PCCC Protocol Configuration)
+[^top](#pccc-protocol-configuration)
 
 
 
@@ -555,7 +555,7 @@ Time to wait after an error writing request packets to the controller in millise
 
 Default is 10000
 
-[^top](#PCCC Protocol Configuration)
+[^top](#pccc-protocol-configuration)
 
 
 
@@ -598,6 +598,6 @@ Slot number
 
 Default is 0
 
-[^top](#PCCC Protocol Configuration)
+[^top](#pccc-protocol-configuration)
 
 

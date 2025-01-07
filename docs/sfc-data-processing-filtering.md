@@ -48,7 +48,7 @@ Source data -> Transformation(value)(*) -> Change Filter (*) -> Value Filter(*) 
 
 (`*`) optional, only applied if configured
 
-[^top](#sfc-data-processing-and-filteringf)
+[^top](#sfc-data-processing-and-filtering)
 
 # Transformations
 

@@ -7,7 +7,6 @@ Configuration for a secret obtained from AWS Secrets manager
 
 - [Alias](#Alias)
 - [Labels](#Labels)
-- [Name](#Name)
 - [SecretId](#SecretId)
 
 ---

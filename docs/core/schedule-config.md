@@ -1,4 +1,4 @@
-[SFC Top Level]( ./sfc-top-level-config.md )>[Schedules](#./sfc-top-level-config.md#Schedules)>Schedule
+[SFC Top Level]( ./sfc-top-level-config.md )>[Schedules](./sfc-top-level-config.md#schedules)>Schedule
 
 ## Schedule
 
@@ -23,7 +23,7 @@ Default is true
 
 ---
 ### Aggregation
-Optionally [aggregation](./aggregation-config-new) can be applied to the schedule output data by adding an Aggregation element. The collected values will be buffered and optionally one or more aggregation functions can be applied to these values before sending it to the targets.
+Optionally [aggregation](./aggregation-config.md) can be applied to the schedule output data by adding an Aggregation element. The collected values will be buffered and optionally one or more aggregation functions can be applied to these values before sending it to the targets.
 
 **Type**: Aggregation
 

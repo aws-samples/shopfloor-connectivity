@@ -39,7 +39,7 @@ At least 1 channel must be configured.
 
 
 
-[^top](#NATS Adapter Configuration)
+[^top](#natsadapterconfiguration)
 
 
 ## NatsChannelConfiguration
@@ -83,7 +83,7 @@ A string array containing the subjects for this channel to subscribe to. The sub
 
 The must be **at least one subject** in the list of subjects.
 
-[^top](#NATS Adapter Configuration)
+[^top](#natsadapterconfiguration)
 
 
 
@@ -161,7 +161,7 @@ The mapping is:
 The mapping above matches updates for sub-levels of the test subject, it will use the name of the sub-level to create a name for the received data.
 If an update is received for data in subject "test.a" then the name of the data value will be "test-a"
 
-[^top](#NATS Adapter Configuration)
+[^top](#natsadapterconfiguration)
 
 
 
@@ -202,7 +202,7 @@ AdapterServer attribute.
 
 **Type**: Map[String,[NatsServerConfiguration](#NatsServerConfiguration)]
 
-[^top](#NATS Adapter Configuration)
+[^top](#natsadapterconfiguration)
 
 
 
@@ -341,9 +341,9 @@ Number of seconds to wait after connecting to the sever failed.
 **Type**: Integer
 
 
-Default = 10
+Default is 10
 
-[^top](#NATS Adapter Configuration)
+[^top](#natsadapterconfiguration)
 
 
 
@@ -374,5 +374,5 @@ Path to root private  file.
 
 **Type**: String
 
-[^top](#NATS Adapter Configuration)
+[^top](#natsadapterconfiguration)
 

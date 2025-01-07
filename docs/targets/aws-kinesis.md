@@ -57,5 +57,5 @@ Name of the Kinesis stream
 
 **Type**: String
 
-[^top](#AWS Kinesis Target)
+[^top](#aws-kinesis-target)
 

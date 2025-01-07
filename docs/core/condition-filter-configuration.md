@@ -2,7 +2,6 @@
 
 
 **Properties:**
-- [Name](#Name)
 - [Operator](#Operator)
 - [Value](#Value)
 
@@ -25,7 +24,7 @@ Filter operator to apply
 - "or" or "||"
 
 
-A valid  oprator must be specified.
+A valid  operator must be specified.
 
 ---
 ### Value

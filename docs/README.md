@@ -11,40 +11,46 @@
   - [SFC data collection](#sfc-data-collection)
   - [Terminology and concepts](#terminology-and-concepts)
   - [Execution environments](#execution-environments)
+  
 - [High level design overview and tenets](#high-level-design-overview-and-tenets)
+  
   - [Execution environment and platform dependencies](#execution-environment-and-platform-dependencies)
-  
   - [Extensibility](#extensibility)
-  
   - [Networking](#networking)
-  
   - [Scalability](#scalability)
-  
-  - [Configuration](#configuration)
-  
-  - [Metrics](#metrics)
-  
-  - [Connectivity](#connectivity)
-  
+  - [Store and Forward](#store-and-forward)
   - [High availability](#high-availability)
-  
   - [Data types and formats](#data-types-and-formats)
-  
   - [Metadata](#metadata)
+  
 - [Deployment](sfc-deployment.md)
+
 - [Configuration](./sfc-configuration.md)
+
 - [Running the SFC core process](./sfc-running-core-process.md)
+
 - [Running SFC protocol adapters](./sfc-running-adapters.md)
+
 - [Running SFC targets](./sfc-running-targets.md)
+
 - [Output data format](./sfc-data-format.md)
+
 - [Data processing, transformations and filtering](./sfc-data-processing-filtering.md)
+
 - [Target chaining](./sfc-targets-chaining.md)
+
 - [Logging and Metrics collection](./sfc-logging-metrics.md)
+
 - [Securing Network Traffic between SFC components](./sfc-securing-component-traffic.md)
+
 - [AWS Service access credentials](sfc-aws-service-credentials.md)
+
 - [Target data transformation templates](./sfc-target-templates.md)
+
 - [Service Health Endpoints](./sfc-health-endpoints.md)
+
 - [SFC tuning](./sfc-tuning.md)
+
 - [.NET Core based protocol adapters](./sfc-dotnet.md)
 
   
@@ -153,7 +159,7 @@ SFC data collection is based on the following concepts
 
 - A [**source**](./core/source-configuration.md) defines from which protocol adapter the data is read and defines the 
 - [**channels**](./core/target-configuration.md), which represent the
-  actual values in a protocol agnostic way. A schedulecan read from multiple sources which can read from different
+  actual values in a protocol agnostic way. A schedule can read from multiple sources which can read from different
   protocol adapters.
 
 - A [**channel**](./core/target-configuration.md) defines the protocol specific details, like node id's, addresses etc., which are used by the adapter to

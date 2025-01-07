@@ -4,7 +4,7 @@
 
 ## AwsSnsTargetConfiguration
 
-AwsSnsTargetConfiguration extends the type <a href="../core/target-configuration.md" >TargetConfiguration</a> with specific configuration data for sending data to an SNS topic queue. The Targets configuration element can contain entries of this type, the TargetType of these entries must be set to <strong>"AWS-SNS"</strong>
+AwsSnsTargetConfiguration extends the type  [TargetConfiguration](../core/target-configuration.md) with specific configuration data for sending data to an SNS topic queue. The Targets configuration element can contain entries of this type, the TargetType of these entries must be set to <strong>"AWS-SNS"</strong>
 
 <p>Requires IAM permission sqs:putMessage for the receiving topic.
 
@@ -86,5 +86,5 @@ Arn of the receiving topic
 
 **Type**: String
 
-[^top](#AWS SNS Target)
+[^top](#aws-sns-target)
 

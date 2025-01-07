@@ -16,7 +16,6 @@
 **Properties:**
 - [AdapterDevice](#AdapterDevice)
 - [Channels](#Channels)
-- [Name](#Name)
 - [SourceAmsId](#SourceAmsId)
 - [SourceAmsPort](#SourceAmsPort)
 - [TargetAmsId](#TargetAmsId)
@@ -82,7 +81,7 @@ Contains the ADS port number of the client.
 
 This can be any value.
 
-[^top](#ADS Protocol Configuration)
+[^top](#ads-protocol-configuration)
 
 
 
@@ -99,7 +98,7 @@ A string containing the name of the symbol to read from the device.
 
 **Type**: String
 
-[^top](#ADS Protocol Configuration)
+[^top](#ads-protocol-configuration)
 
 
 
@@ -116,7 +115,7 @@ Devices configured for this adapter. The ADS source using the adapter must have 
 
 **Type**: Map[String,[AdsDeviceConfiguration](#AdsDeviceConfiguration)]
 
-[^top](#ADS Protocol Configuration)
+[^top](#ads-protocol-configuration)
 
 
 
@@ -198,5 +197,5 @@ Time to wait after an error writing request packets to the controller in millise
 
 Default is 10000
 
-[^top](#ADS Protocol Configuration)
+[^top](#ads-protocol-configuration)
 

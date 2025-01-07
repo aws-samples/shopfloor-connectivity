@@ -35,7 +35,7 @@ Channels can be "commented" out by adding a "#" at the beginning of the identifi
 
 At least 1 channel must be configured.
 
-[^top](#SNMP Protocol Configuration)
+[^top](#snmp-protocol-configuration)
 
 
 
@@ -56,7 +56,7 @@ ID of the object to read
 
 Must be in valid dot format notation
 
-[^top](#SNMP Protocol Configuration)
+[^top](#snmp-protocol-configuration)
 
 
 
@@ -74,7 +74,7 @@ Snmp devices configured for this adapter. The modbus tcp source using the adapte
 
 **Type**: Map[String,[SnmpDeviceConfiguration](#SnmpDeviceConfiguration)]
 
-[^top](#SNMP Protocol Configuration)
+[^top](#snmp-protocol-configuration)
 
 
 
@@ -154,5 +154,5 @@ The timeout period in milliseconds to read from the device.
 
 Default is 10000
 
-[^top](#SNMP Protocol Configuration)
+[^top](#snmp-protocol-configuration)
 

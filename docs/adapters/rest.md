@@ -2,17 +2,16 @@
 
 
 
-- [REST Adapter data mapping](#REST Adapter data mapping)
-  - [All object properties  a single channel value](#All object properties  a single channel value)
-  - [Object properties as separate channel values](#Object properties as separate channel values)
-  - [Object properties as separate channel values](#Object properties as separate channel values)
-  - [Selecting object properties](#Selecting object properties)
-  - [Objects lists](#Objects lists)
-- 
+- [REST Adapter data mapping](#rest-adapter-data-mapping)
+  - [All object properties  a single channel value](#all-object-properties--a-single-channel-value)
+  - [Object properties as separate channel values](#object-properties-as-separate-channel-values)
+  - [Selecting object properties](#selecting-object-properties)
+  - [Objects lists](#objects-lists)
+
 
 **Configuration**:
 
-- [REST Adapter Configuration](#REST Adapter Configuration)
+- [REST Adapter Configuration](#rest-adapter-configuration)
 
 - [RestSourceConfiguration](#RestSourceConfiguration)
 - [RestChannelConfiguration](#RestChannelConfiguration)
@@ -433,7 +432,7 @@ of the adapter referred to by the ProtocolAdapter attribute of the source.
 
 Must be an identifier of a server in the RestServers section of the REST adapter used by the source.
 
-[^top](#REST Adapter data mapping)
+[^top](#rest-adapter-data-mapping)
 
 
 
@@ -468,7 +467,7 @@ the data is the raw payload if the "Json" setting for the channel is set to fals
 
 A Selector can only be used if "Json" is set to true (the default).
 
-[^top](#REST Adapter data mapping)
+[^top](#rest-adapter-data-mapping)
 
 
 
@@ -487,7 +486,7 @@ REST servers configured for this adapter. The REST source using the adapter must
 
 **Type**: Map[String,[RestServerConfiguration](#RestServerConfiguration)]
 
-[^top](#REST Adapter data mapping)
+[^top](#rest-adapter-data-mapping)
 
 
 
@@ -574,7 +573,7 @@ Period in milliseconds to wait in between retires reading from the server.
 
 Default is 1000
 
-[^top](#REST Adapter data mapping)
+[^top](#rest-adapter-data-mapping)
 
 
 
@@ -632,5 +631,5 @@ Optional, if specified then the ProxyPassword must be configured as well.
 Username and password should not be included as clear text in the configuration. 
 It is strongly recommended to use placeholders and use the SFC integration with the AWS secrets manager.
 
-[^top](#REST Adapter data mapping)
+[^top](#rest-adapter-data-mapping)
 

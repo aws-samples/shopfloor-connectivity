@@ -4,7 +4,7 @@
 
 ## FileConfiguration
 
-FileConfiguration extends the type <a href="../core/target-configuration.md" >TargetConfiguration</a> with specific configuration data for writing data to the local file system. The Targets configuration element can contain entries of this type, the TargetType of these entries must be set to <strong>"FILE-TARGET".</strong>
+FileConfiguration extends the type  [TargetConfiguration](../core/target-configuration.md) with specific configuration data for writing data to the local file system. The Targets configuration element can contain entries of this type, the TargetType of these entries must be set to <strong>"FILE-TARGET".</strong>
 
 
 **Properties:**
@@ -59,7 +59,7 @@ Must be in range 60-900 seconds, default is 60 seconds
 
 ---
 ### Json
-Flag to indicate if the lines in the output file must form a valid JSON document. The target does this by wrapping the output in a '[' and ']' character and separating each line by a ',' character, making the output a JSON array.
+Flag to indicate if the lines in the output file must form a valid JSON document. The target does this by wrapping the output in an '[' and ']' character and separating each line by a ',' character, making the output a JSON array.
 If not set the output may be processed as JSONP or text file.
 
 **Type**: Boolean
@@ -75,5 +75,5 @@ If set to true then UTC time is used to build the name of the output file, other
 
 Default is false
 
-[^top](#File Target)
+[^top](#file-target)
 

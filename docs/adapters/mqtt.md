@@ -36,7 +36,7 @@ Channels can be "commented" out by adding a "#" at the beginning of the identifi
 
 At least 1 channel must be configured.
 
-[^top](#MQTT Protocol Configuration)
+[^top](#mqtt-protocol-configuration)
 
 
 
@@ -82,7 +82,7 @@ A string array  containing the topics to subscribe to. The topic names may conta
 
 The must be at least one topic in the list of topics.
 
-[^top](#MQTT Protocol Configuration)
+[^top](#mqtt-protocol-configuration)
 
 
 
@@ -163,7 +163,7 @@ The mapping above matches updates for sub-levels of the test topic, it will use 
 
 If an update is received for data in topic "test/a" then the name of the data value will be "test-a"
 
-[^top](#MQTT Protocol Configuration)
+[^top](#mqtt-protocol-configuration)
 
 
 
@@ -211,7 +211,7 @@ Timeout in milliseconds to send data to internal buffer for received data for to
 
 Default is 1000
 
-[^top](#MQTT Protocol Configuration)
+[^top](#mqtt-protocol-configuration)
 
 
 
@@ -328,5 +328,5 @@ Period in seconds to wait before trying to connect after a connection failure
 
 Default is 60 seconds
 
-[^top](#MQTT Protocol Configuration)
+[^top](#mqtt-protocol-configuration)
 

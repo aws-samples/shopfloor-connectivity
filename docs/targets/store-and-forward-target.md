@@ -4,7 +4,7 @@
 
 ## StoreForwardTargetConfiguration
 
-StoreForwardTargetConfiguration extends the type <a href="../core/target-configuration.md" >TargetConfiguration</a> with specific configuration data for forwarding and buffering target data to next targets configured for this target. The Targets configuration element can contain entries of this type, the TargetType of these entries must be set to <strong>"STORE-FORWARD".</strong>
+StoreForwardTargetConfiguration extends the type  [TargetConfiguration](../core/target-configuration.md) with specific configuration data for forwarding and buffering target data to next targets configured for this target. The Targets configuration element can contain entries of this type, the TargetType of these entries must be set to <strong>"STORE-FORWARD".</strong>
 
 
 **Properties:**
@@ -86,5 +86,5 @@ Timeout for write actions to the storage device in seconds
 
 Default is 10
 
-[^top](#Store and Forward Target)
+[^top](#store-and-forward-target)
 
