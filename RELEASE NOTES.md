@@ -1,5 +1,11 @@
 # Release Notes:
 
+## Version 1.7.3, 8 January 2025
+
+Fix in parsing configuration placeholders containing special characters
+Cleanup logging output
+
+---
 
 ## Version 1.7.2, 18 December 2024
 

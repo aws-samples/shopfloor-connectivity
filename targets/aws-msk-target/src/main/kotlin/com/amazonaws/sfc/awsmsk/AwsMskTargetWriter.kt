@@ -303,7 +303,7 @@ class AwsMskTargetWriter(
                     delay(1.toDuration(DurationUnit.SECONDS))
                 }
             }
-        } catch (e: TimeoutCancellationException) {
+        } catch (_ :  TimeoutCancellationException) {
             logger.getCtxErrorLog(className, "waitForCredentialsInitializationFinished")("Timeout obtaining credentials")
         }
     }

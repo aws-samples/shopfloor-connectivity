@@ -922,6 +922,8 @@ The JSON configuration can contain placeholders in the format **${name}**. These
 of environment variables with the specified name or a configured secret (see below). Using placeholders will help to
 keep consistency between (repeated) values in the configuration and values used in other configuration types.
 
+The following characters can be used for placeholer names : a-z, A-Z, 0-9, - , _ , :, /
+
 ## Configuration secrets
 
 SFC integrates with AWS Secrets Manager following the same logic as used in GreenGrass Secret manager. Secrets are

@@ -157,7 +157,7 @@ class AwsTimestreamRecordConfiguration : Validate {
         private const val CONFIG_RECORD_MEASURE_VALUE_PATH = "MeasureValuePath"
         private const val CONFIG_RECORD_MEASURE_TIME_PATH = "MeasureTimePath"
         private const val CONFIG_RECORD_MEASURE_VALUE_TYPE = "MeasureValueType"
-        private const val CONFIG_RECORD_DIMENSIONS = "MetricDimensions"
+        private const val CONFIG_RECORD_DIMENSIONS = "Dimensions"
 
         private val default = AwsTimestreamRecordConfiguration()
 
