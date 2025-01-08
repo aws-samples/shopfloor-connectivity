@@ -99,7 +99,7 @@ open class ConfigReader(val config: String, val allowUnresolved: Boolean = false
         var configOut = config
         getPlaceHolders(config).forEach {
             val secretIdOrAlias = it.groups[1]?.value
-            if (!secretIdOrAlias.isNullOrEmpty() && secretsManager.secrets.containsKey(secretIdOrAlias)) {
+            if (!secretIdOrAlias.isNullOrEmpty() && (secretsManager.secrets.containsKey(secretIdOrAlias)|| secretsManager.secrets.containsValue(secretIdOrAlias))) {
                 val secretValue = secretsManager.getSecret(secretIdOrAlias).secretString().trim('\'', '\"')
                 configOut = configOut.replace(it.groups[0]!!.value, secretValue)
                 usedSecrets[secretIdOrAlias] = secretValue
@@ -142,7 +142,7 @@ open class ConfigReader(val config: String, val allowUnresolved: Boolean = false
             return ConfigReader(configStr, allowUnresolved, secretsManager)
         }
 
-        private const val PLACEHOLDER_PATTERN = "\\\$\\{\\s*([a-zA-Z\\-0-9_]+)\\s*}"
+        private const val PLACEHOLDER_PATTERN = """\$\{\s*([a-zA-Z0-9\-_:/]+)\s*}"""
 
         private val CONFIG_PLACEHOLDER_REGEX = Regex(PLACEHOLDER_PATTERN)
         private val EXTERNAL_CONFIG_PLACEHOLDER_REGEX = Regex(PLACEHOLDER_PATTERN.replace("\\{", "\\{\\{").replace("}", "}}"))

@@ -219,7 +219,7 @@ class AwsMskTargetWriter(
                         flush()
 
                 }
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 // no action needed
             }
         }

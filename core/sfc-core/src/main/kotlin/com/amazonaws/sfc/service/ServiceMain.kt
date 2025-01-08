@@ -108,7 +108,7 @@ abstract class ServiceMain {
                 }
             }
         } catch (e: Exception) {
-            logs.errorEx("Error running service", e)
+            logs.error("Error running service, $e")
         } finally {
             memoryMonitor?.stop()
         }
