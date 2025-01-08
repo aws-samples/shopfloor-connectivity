@@ -56,6 +56,7 @@ class AwsTimestreamRecordConfiguration : Validate {
             return getExpression(_measureTimePath)
         }
 
+
     @SerializedName(CONFIG_RECORD_DIMENSIONS)
     private var _dimensions: List<AwsTimestreamDimensionConfiguration> = emptyList()
 

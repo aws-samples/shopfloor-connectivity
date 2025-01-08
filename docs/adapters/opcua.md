@@ -24,7 +24,7 @@ This section describes the configuration types for the OPCUA protocol adapter an
 - [SelfSignedCertificateConfiguration](#SelfSignedCertificateConfiguration)
 - [CertificateValidationConfiguration](#CertificateValidationConfiguration)
 - [CertificateValidationOptions](#CertificateValidationOptions)
-- 
+
 
 ## OPCUA Alarm and Event types
 

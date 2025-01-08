@@ -29,6 +29,7 @@ import com.amazonaws.sfc.targets.TargetException
 import com.amazonaws.sfc.util.MemoryMonitor
 import com.amazonaws.sfc.util.buildScope
 import com.amazonaws.sfc.util.canNotReachAwsService
+import com.amazonaws.sfc.util.isJobCancellationException
 import com.amazonaws.sfc.util.launch
 import io.burt.jmespath.Expression
 import kotlinx.coroutines.*
@@ -148,7 +149,7 @@ class AwsTimestreamTargetWriter(
                 }
                 timer = timerJob()
             } catch (e : Exception){
-                log.errorEx("Error writing to AWS Timestream", e)
+                if (!e.isJobCancellationException) log.errorEx("Error writing to AWS Timestream", e)
             }
         }
 
@@ -407,7 +408,7 @@ class AwsTimestreamTargetWriter(
                 log.trace("Timestream WriteRecords succeeded")
 
             } catch (e: Exception) {
-                log.errorEx("Error writing Timestream database \"${targetConfig.database}\", table \"${targetConfig.tableName}\"", e)
+                log.error("Error writing Timestream database \"${targetConfig.database}\", table \"${targetConfig.tableName}\", e")
                 runBlocking { metricsCollector?.put(targetID, METRICS_WRITE_ERRORS, 1.0, MetricUnits.COUNT, metricDimensions) }
                 if (canNotReachAwsService(e)) {
                     targetResults?.nackBuffered()
