@@ -1,6 +1,8 @@
-[SFC Top Level]( ./sfc-top-level-config.md )>[Schedules](./sfc-top-level-config.md#schedules)>Schedule
+## ScheduleConfiguration
 
-## Schedule
+
+- [Schema](#Schema)
+- [Examples](#Examples)
 
 
 **Properties:**
@@ -8,6 +10,7 @@
 - [Aggregation](#Aggregation)
 - [Description](#Description)
 - [Interval](#Interval)
+- [Metadata](#Metadata)
 - [Name](#Name)
 - [Sources](#Sources)
 - [Targets](#Targets)
@@ -46,7 +49,17 @@ Interval period in milliseconds for schedule reading values from source.
 Default is 1000
 
 ---
+
+### Metadata
+
+The optional [Metadata](../README.md#Metadata) element can be used to add additional data to the output at the schedule level. If metadata is specified, which is a map of string indexed values, it will be added to the output at the schedule level as an element that can be configured through the "Metadata" entry of the ElementNames configuration element.
+
+**Type**: Map[String, String]
+
+---
+
 ### Name
+
 Name of the schedule, this name is passed with the collected data to the configured targets.
 
 **Type**: String
@@ -83,5 +96,154 @@ Included timestamps in the schedule output.
 
 Default is "None"
 
-[^top](#Schedule)
+[^top](#ScheduleConfiguration)
 
+
+
+## Schema
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "Active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Indicates if the schema is active"
+    },
+    "Aggregation": {
+      "$ref": "#/definitions/AggregationConfiguration",
+      "description": "Aggregation settings for the schema"
+    },
+    "Description": {
+      "type": "string",
+      "description": "Description of the schema configuration"
+    },
+    "Interval": {
+      "type": "integer",
+      "description": "Data collection interval in milliseconds"
+    },
+    "Name": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Name of the schedule"
+    },
+    "Sources": {
+      "type": "object",
+      "patternProperties": {
+        "^[A-Za-z0-9_-]+$": {
+          "type": "object",
+        }
+      },
+      "minProperties": 1,
+      "description": "Map of data sources configurations"
+    },
+    "Targets": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems" : 1,
+      "description": "List of target references for the collected data"
+    },
+    "TimestampLevel": {
+      "type": "string",
+      "enum": ["None", "Channel", "Source", "Both"],
+      "default": "None",
+      "description": "Level at which timestamps are applied to the data"
+    },
+    "Metadata": {
+      "type": "object",
+      "description": "Metadata key-value pairs for the schema",
+      "additionalProperties": {
+        "type": "string"
+      }
+    }
+  },
+  "required": ["Name", "Sources", "Targets"]
+}
+```
+
+
+
+## Examples
+
+
+Basic configuration, colelcting all channels for source
+
+```json
+{
+  "Name": "TankData",
+  "Sources": {
+    "Tank1": {
+      "Channels": ["*"]
+    }
+  },
+  "Targets": ["S3TargetBucket"],
+  "Interval": 5000,
+  "TimestampLevel": "Source",
+}
+```
+
+
+
+Basic configuration, colelcting selected channels for source and adding metadata at schgedule level
+
+```json
+{
+  "Name": "TankData",
+  "Sources": {
+    "Tank1": {
+      "Channels": ["Temperature", "Pressure", "Level"]
+    }
+  },
+  "Targets": ["S3TargetBucket"],
+  "Interval": 5000,
+  "TimestampLevel": "Source",
+    "Metadata": {
+    "location": "Factory-1",
+    "line": "Production-A",
+    "criticality": "high",
+    "owner": "manufacturing-team"
+  }
+}
+```
+
+
+
+Configuration with aggregation to collect average, minimum and maximum values over 10 second period for all collected values.
+
+```json
+{
+  "Name": "ProductionLine1",
+  "Description": "Production line monitoring schedule",
+  "Active": true,
+  "Sources": {
+    "Assembly-A": {
+      "Channels": ["Speed", "Temperature"],
+    },
+    "Assembly-B": {
+      "Channels": ["Pressure", "Flow"],
+    }
+  },
+  "Targets": ["IoTSiteWise", "Timestream"],
+  "Interval": 1000,
+  "TimestampLevel": "Both",
+  "Aggregation": {
+    "Size": 10,
+    "Output": {
+      "*": {
+        "*": ["avg", "min", "max"]
+      }
+    }
+  },
+  "Metadata": {
+    "location": "Factory-1",
+    "line": "Production-A",
+    "criticality": "high",
+    "owner": "manufacturing-team"
+  }
+}
+```

@@ -1,7 +1,10 @@
 ## InProcessConfiguration
 
+- [Schema](#Schema)
+- [Examples](#Examples)
 
 **Properties:**
+
 - [FactoryClassName](#FactoryClassName)
 - [JarFiles](#JarFiles)
 
@@ -31,4 +34,78 @@ These entries can either be pathnames to the jar files of to the directory in wh
 **Type**: String[]
 
 [^top](#InProcessConfiguration)
+
+
+
+## Schema
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "FactoryClassName": {
+      "type": "string",
+      "description": "Fully qualified name of the factory class"
+    },
+    "JarFiles": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "description": "Path to JAR file or directory"
+      },
+      "description": "List of JAR files to be loaded or directories containing the JAR files"
+    }
+  },
+  "required": [
+    "FactoryClassName",
+    "JarFiles"
+  ]
+}
+
+```
+
+
+
+## Examples
+
+JAR Directory configuration
+
+```json
+{
+  "FactoryClassName": "com.amazonaws.sfc.AdapterNameClassFacory",
+  "JarFiles": [
+    "./adapters/myadapter-jars-directory",
+  ]
+}
+```
+
+
+
+Basic configuration, single jar file
+
+```json
+{
+  "FactoryClassName": "com.amazonaws.sfc.AdapterNameClassFacory",
+  "JarFiles": [
+     "./adapters/adapter-jar.jar,
+  ]
+}
+```
+
+
+
+Multiple JARs configuration:
+
+```json
+{
+  "FactoryClassName": "com.amazonaws.sfc.AdapterNameClassFacory",
+  "JarFiles": [
+    "./adapters/adapter-jar1.jar,
+    "./adapters/adapter-jar2.jar,
+  ]
+}
+```
+
+
 

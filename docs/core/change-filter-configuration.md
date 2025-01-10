@@ -1,4 +1,4 @@
-[SFC Top Level]( ./sfc-top-level-config.md)>[ChangeFilterConfiguration](./sfc-top-level-config.md#ChangeFilters )
+
 
 ## ChangeFilterConfiguration
 
@@ -6,7 +6,8 @@ Change filter to apply to a channel value.
 
 For more information see [DataFiltering](../sfc-data-processing-filtering.md#data-filtering)
 
-
+- [Schema](#Schema)
+- [Examples](#Examples)
 
 
 **Properties:**
@@ -47,3 +48,83 @@ Default is 0.0
 
 [^top](#ChangeFilterConfiguration)
 
+
+
+## Schema
+
+
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "FilterType": {
+      "type": "string",
+      "enum": [
+        "Absolute",
+        "Percent",
+        "Always"
+      ],
+      "default": "Always",
+      "description": "Type of change filter to apply"
+    },
+    "FilterValue": {
+      "type": "number",
+      "default": 0.0,
+      "description": "Threshold value for the filter"
+    },
+    "AtLeast": {
+      "type": "number",
+      "description": "Time interval to pas value even when not changed"
+    }
+  },
+  "additionalProperties": false
+}
+```
+
+
+
+## Examples
+
+Absolute change filter:
+
+```json
+{
+  "FilterType": "Absolute",
+  "FilterValue": 5.0
+}
+```
+
+
+
+Percentage change filter:
+
+```json
+{
+  "FilterType": "Percent",
+  "FilterValue": 10.0
+}
+```
+
+
+
+Any change:
+
+```json
+{
+  "FilterType": "Always"
+}
+```
+
+
+
+Absolurte change filter, with at least a value every 5 seconfs even when value did not change
+
+```json
+{
+  "FilterType": "Absolute",
+  "FilterValue": 5.0,
+  "Atleast" : 10000
+}
+```

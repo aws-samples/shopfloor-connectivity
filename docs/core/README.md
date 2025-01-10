@@ -1,23 +1,31 @@
 ## SFC Core Configuration
 
   - [SFC top level configuration](sfc-top-level-config.md)
-  - [Aggregation](aggregation-config.md)
-  - [AwsIotCredentialProviderClientConfiguration](aws-iot-credential-provider-configuration.md)
-  - [ChangeFilterConfiguration](change-filter-configuration.md)
-  - [ChannelConfiguration](channel-configuration.md)
-  - [ClientProxyConfiguration](client-proxy-configuration.md)
-  - [CloudSecretConfiguration](cloud-secret-configuration.md)
-  - [ConditionFilterConfiguration](condition-filter-configuration.md)
-  - [HealthProbeConfiguration](health-probe-configuration.md)
-  - [InProcessConfiguration](in-process-configuration.md)
+
+    
+
+    Core configuration types:
+
+    
+
   - [MetricsConfiguration](metrics-configuration.md)
-  - [MetricsWriterConfiguration](metrics-writer-configurarion.md)
+
+  - [MetricsWriterConfiguration](metrics-writer-configuration.md)
+
   - [ProtocolAdapterConfiguration](protocol-adapter-configuration.md)
-  - [Schedule](schedule-config.md)
+
+  - [Schedules](schedule-config.md)
+
   - [SecretsManagerConfiguration](secrets-manager-configuration.md)
+
   - [ServerConfiguration](server-configuration.md)
+
   - [SourceConfiguration](source-configuration.md)
-  - [TargetConfiguration](target-configuration.md)
+
+  - [Targets](target-configuration.md)
+
   - [TransformationOperator](transformation-operator-configuration.md)
+
   - [TuningConfiguration](tuning-configuration.md)
+
   - [ValueFilterConfiguration](value-filter-configuration.md)

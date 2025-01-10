@@ -1,15 +1,27 @@
-## HealthProbeConfiguration
+# HealthProbeConfiguration
 
+- [Schema](#Schema)
+- [Examples](#Examples)
 
 **Properties:**
+
 - [AllowedIpAddresses](#AllowedIpAddresses)
+
 - [Interface](#Interface)
+
 - [Path](#Path)
+
 - [Port](#Port)
+
 - [RateLimit](#RateLimit)
+
 - [Response](#Response)
+
 - [RetainStatePeriod](#RetainStatePeriod)
+
 - [StopAfterUnhealthyPeriod](#StopAfterUnhealthyPeriod)
+
+  
 
 ---
 ### AllowedIpAddresses
@@ -79,4 +91,141 @@ Period in seconds after which repeated health probe requests did not return a po
 Must be explicitly set in order to stop the service after the period of not returning a healthy response to health probes. The use case for this element is when the mechanism used to manage the instances of the services only checks if the process of a services is running and does stop processes. An example of this is AWS Greengrass. 
 
 [^top](#HealthProbeConfiguration)
+
+
+
+## Schema
+
+```json{
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "AllowedIpAddresses": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "format": "ipv4"
+      },
+      "description": "List of IP addresses allowed to access the health probe"
+    },
+    "Active": {
+      "type": "boolean",
+      "default": true
+    },
+    "Interface": {
+      "type": "string",
+      "description": "Network interface to bind the health probe"
+    },
+    "Path": {
+      "type": "string",
+      "description": "URL path for the health probe endpoint"
+    },
+    "Port": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 65535,
+      "description": "Port number for the health probe"
+    },
+    "RateLimit": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Maximum number of requests allowed per second",
+      "default": 10
+    },
+    "Response": {
+      "type": "string",
+      "default": "OK",
+      "description": "Response message for the health probe when service is healthy"
+    },
+    "RetainStatePeriod": {
+      "type": "integer",
+      "default": 1000
+    },
+    "StopAfterUnhealthyPeriod": {
+      "type": "integer"
+    }
+  },
+  "required": [
+    "Port"
+  ]
+}
+```
+
+
+
+## Examples
+
+Minimal configuration:
+
+```json
+{
+  "Port": 8080
+}
+```
+
+
+
+Basic configuration 
+
+```json
+{
+  "Port": 8080,
+  "Active": true,
+  "Path": "/health",
+  "Response": "OK",
+  "RateLimit": 10,
+  "RetainStatePeriod": 1000
+}
+```
+
+
+
+Full configuration:
+
+```json
+{
+  "Port": 8080,
+  "Active": true,
+  "Path": "/healthcheck",
+  "Interface": "eth0",
+  "AllowedIpAddresses": [
+    "192.168.1.100",
+    "10.0.0.50",
+    "172.16.0.1"
+  ],
+  "RateLimit": 15,
+  "Response": "Service Healthy",
+  "RetainStatePeriod": 1000,
+  "StopAfterUnhealthyPeriod": 600
+}
+```
+
+
+
+Custom path and response:
+
+```json
+{
+  "Port": 3000,
+  "Path": "/status",
+  "Response": "System operational",
+  "Active": true,
+  "RateLimit": 20,
+  "RetainStatePeriod": 1500
+}
+```
+
+
+
+1. Disabled probe configuration:
+
+```json
+{
+  "Port": 8080,
+  "Active": false,
+  "RetainStatePeriod": 1000,
+  "StopAfterUnhealthyPeriod": 3000
+}
+```
 

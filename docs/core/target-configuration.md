@@ -1,10 +1,19 @@
 ## TargetConfiguration
 
+Targer Configuration defines common properties for SFC target adapters. Target adapter implementations extend this type with their specific additional properties.
+
+
+
+- [Schema](#Schema)
+- [Examples](#Examples)
+
 
 **Properties:**
 - [Active](#Active)
 - [AsArrayWhenBuffered](#AsArrayWhenBuffered)
 - [CredentialProviderClient](#CredentialProviderClient)
+- [Description](#Description)
+- [Metrics](#Metrics)
 - [TargetServer](#TargetServer)
 - [TargetChannelSize](#TargetChannelSize)
 - [TargetChannelTimeout](#TargetChannelTimeout)
@@ -41,7 +50,24 @@ The client is used by the target to obtain session credentials from the AWS IoT 
 Must refer to an existing client configuration in [AwsIotCredentialProviderClients](./sfc-top-level-config.md#AwsIotCredentialProviderClients) section.
 
 ---
+### Description
+
+Description of the target
+
+Type: String
+
+---
+
+### Metrics
+
+Metrics configuration for the protocol adapter
+
+Type: [MetricsSourceConfigurarion](./metrics-source-configuration.md)
+
+---
+
 ### TargetServer
+
 Target server identifier of the server that is running the target as an IPC service in its process. The identifier must exist in the TargetServers section of the configuration.
 
 If a server is used then no in-process instance of the target is created in the SFC core process and the target type does not have to be configured in the TargetTypes section.
@@ -112,4 +138,117 @@ Do not set this flag to true if there are any key names in the output that consi
 
 
 [^top](#TargetConfiguration)
+
+
+
+## Schema
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "title": "Target Configuration",
+  "description": "Configuration for a target",
+  "properties": {
+    "Active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Flag indicating if the target is active"
+    },
+    "AsArrayWhenBuffered": {
+      "type": "boolean",
+      "default": false,
+      "description": "Flag indicating if buffered data should be sent as an array"
+    },
+    "CredentialProviderClient": {
+      "type": "string",
+      "description": "Reference to a CredentialsClient defined in AwsIotCredentialProviderClients"
+    },
+    "TargetServer": {
+      "type": "string",
+      "description": "Reference to a TargetServer defined in TargetServers"
+    },
+    "TargetChannelSize": {
+      "type": "integer",
+      "default" : 1000,
+      "description": "Size of the target channel"
+    },
+    "TargetChannelTimeout": {
+      "type": "integer",
+      "default": 10000,
+      "description": "Timeout for the target channel in milliseconds"
+    },
+    "TargetType": {
+      "type": "string",
+      "description": "Reference to a TargetType defined in TargetTypes"
+    },
+    "Template": {
+      "type": "string",
+      "description": "Template for target output formatting"
+    },
+    "UnquoteNumericJsonValues": {
+      "type": "boolean",
+      "default": false,
+      "description": "Flag indicating if numeric JSON values should be unquoted"
+    }, 
+    "Metrics": {
+      "$ref": "#/definitions/MetricsSourceConfiguration",
+      "description": "Configuration for metrics collection"
+    }
+  },
+  "oneOf": [
+    {
+      "required": ["TargetType"],
+      "not": {
+        "required": ["TargetServer"]
+      }
+    },
+    {
+      "required": ["TargetServer"],
+      "not": {
+        "required": ["TargetType"]
+      }
+    }
+  ],
+  "additionalProperties": false
+}
+
+```
+
+
+
+## Examples
+
+**<u>Note: TargetConfigurations always are instances of extented types with specific additional properties for the implementation of that type of target adapter.</u>**
+
+Basic in-process configuration with local TargetType (not requiring AWS credentials)
+
+```json
+{
+  "TargetType": "TargetTypeName"
+}
+```
+
+
+
+Basic in-process configuration with TargetType:
+
+```json
+{
+  "TargetType": "TargetTypeName",
+  "CredentialProviderClient": "IotCredentialsClientName"
+  
+}
+```
+
+
+
+Configuration with TargetServer, does not need target-type:
+
+```json
+{
+  "TargetServer": "TrargetServerName",
+  "CredentialProviderClient": "IotCredentialsClientName"
+}
+```
 

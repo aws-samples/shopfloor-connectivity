@@ -1,19 +1,32 @@
-[SFC Top Level]( ./sfc-top-level-config.md )>[Sources](./sfc-top-level-config.md#Sources)>[Channels](./source-configuration.md#Channels)(
+
 
 ## ChannelConfiguration
 
+- [Schema](#Schema)
+
+- [Examples](#Examples)
 
 **Properties:**
+
 - [ChangeFilter](#ChangeFilter)
-- [ChangeFilter](#ChangeFilter)
+
 - [ConditionFilter](#ConditionFilter)
+
 - [Decompose](#Decompose)
+
 - [Description](#Description)
+
+- [Metadata](#Metadata)
+
 - [Name](#Name)
-- [Name](#Name)
+
 - [Spread](#Spread)
+
 - [Transformation](#Transformation)
+
 - [ValueFilter](#ValueFilter)
+
+  
 
 ---
 ### ChangeFilter
@@ -33,7 +46,8 @@ Optional, if used it must refer to a configured filter in the [ConditionFilters]
 
 ---
 ### Decompose
-If set to true and the value of the channel the value is a structured value then the value is decomposed into a set of individual values for each (sub) element in  the structure.
+If set to true and the value of the channel  is a structured value then the value is decomposed into a set of individual values for each (sub) element in  the structure. Decomposition can also be set for all channels for a source by setting it's [Decompose](./source-configuration.md#Decompose) value to true. The value of the Decompse setting at channel level will override the setting at sorce level.
+
 If the value is  list of structures and the value of the [Spread](#Spread) setting is true then each structure in the list is decomposed. 
 
 **Type**: Boolean
@@ -49,6 +63,16 @@ User-defined description of the channel
 
 **Type**: String
 
+
+
+---
+
+### Metadata
+
+The optional [Metadata](../README.md#Metadata) element can be used to add additional data to the output at the channel level. If metadata is specified, which is a map of string indexed values, it will be added to the output at the channel level as an element that can be configured through the "Metadata" entry of the ElementNames configuration element.
+
+**Type**: Map[String, String]
+
 ---
 ### Name
  Name of the channel. If this element is specified, it is used as the channel key in the map of output values for its source. If no value is specified then the channel identifier is used. This name can be used to give a descriptive name in the output the data read from the channel (e.g., "InputTemperature", "RotationSpeed/RPM"
@@ -58,7 +82,7 @@ User-defined description of the channel
 ---
 ### Spread
 If set to true and the value of the channel the value is a list then for each element in the list a new individual value is created.
-The value of this setting overrules the setting of the Spread setting at source level.
+The value of this setting overrules the setting of the [Spread](./source-configuration.md#Spread) setting at source level.
 
 **Type**: Boolean
 
@@ -83,4 +107,213 @@ Optional, if used it must refer to a configured filter in the  [Transformations]
 Optional, if used it must refer to a configured filter in the [ValueFilters](./sfc-top-level-config.md#ValueFilters) element  at the sec top level configuration.
 
 [^top](#ChannelConfiguration)
+
+
+
+## Schema
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "Name": {
+      "type": "string",
+      "description": "Name of the channel"
+    },
+    "Description": {
+      "type": "string",
+      "description": "Description of the channel"
+    },
+    "Transformation": {
+      "type": "string",
+      "description": "Name of transformation to apply to the channel data"
+    },
+    "ChangeFilter": {
+      "type": "string",
+      "description": "Reference to a change filter transformation"
+    },
+    "ConditionFilter": {
+      "type": "string",
+      "description": "Reference to a condition filter"
+    },
+    "ValueFilter": {
+      "type": "string",
+      "description": "Reference to a value filter"
+    },
+    "Decompose": {
+      "type": "boolean",
+      "description": "Flag indicating if the properties of a channel value should be decomposed",
+      "default": false
+    },
+    "Spread": {
+      "type": "boolean",
+      "description": "Flag indicating if list values the channels should be spread into separate values",
+      "default": false
+    },
+    "Metadata": {
+      "type": "object",
+      "description": "Additional metadata key-value pairs for the channel",
+      "additionalProperties": {
+        "type": "string"
+      }
+    }
+  }
+}
+```
+
+
+
+
+
+## Examples
+
+<u>**Note that a the ChannelConfiguration is an abstract configuration class. Source adapters extend this type with additional properties specific for their adapter implementation.**</u>
+
+
+
+Minimal configuration:
+
+```json
+
+  "Channel": {}
+
+```
+
+
+
+Basic channel with name, overwriting the key for the channel in its source,  and description:
+
+```json
+{
+  "Temperature": {
+    "Name": "temperature_sensor_1",
+    "Description": "Primary temperature sensor in zone A"
+  }
+}
+```
+
+
+
+Basic channel with name and metadata:
+
+```json
+{
+  "Temperature": {
+    "Name": "temperature_sensor",
+    "Metadata": {
+      "location": "Building A",
+      "unit": "celsius",
+      "manufacturer": "Siemens"
+    }
+  }
+}
+```
+
+
+
+Channel with filter:
+
+```json
+{
+  "Pressure": {
+    "Name": "pressure_sensor",
+    "ChangeFilter": "pressureChangeFilter",
+    "Metadata": {
+      "unit": "PSI",
+      "range": "0-1000",
+      "calibration_date": "2024-01-15"
+    }
+  }
+}
+```
+
+
+
+Channel with decompose enabled:
+
+```json
+{
+  "ComposedStatusValue": {
+    "Name": "device_status",
+    "Decompose": true,
+    "Metadata": {
+      "device_type": "PLC",
+      "model": "S7-1200",
+      "protocol": "ModbusTCP"
+    }
+  }
+}
+```
+
+Channel with spread enabled:
+
+```json
+{
+  "TemparatureList": {
+    "Name": "temperature_array",
+    "Spread": true,
+    "Metadata": {
+      "sensor_count": "4",
+      "sampling_rate": "1Hz",
+      "array_type": "linear"
+    }
+  }
+}
+```
+
+
+
+Complete configuration:
+
+```json
+{
+  "Name": "production_line_sensor",
+  "Description": "Main production line monitoring sensor",
+  "Transformation": "productionDataTransform",
+  "ValueFilter": "validRangeFilter",
+  "Decompose": true,
+  "Spread": false,
+  "Metadata": {
+    "line_id": "PL-123",
+    "location": "Factory-1",
+    "department": "Assembly",
+    "criticality": "high"
+  }
+}
+```
+
+
+
+Channel with only transformation:
+
+```json
+{
+  "Transformation": "normalizeData",
+  "Metadata": {
+    "transform_type": "linear",
+    "scale_factor": "1.5"
+  }
+}
+```
+
+
+
+Channel with filters and transformation:
+
+```json
+{
+  "Transformation": "flowNormalization",
+  "ChangeFilter": "deltaFilter",
+  "ValueFilter": "rangeValidator",
+  "Metadata": {
+    "fluid_type": "water",
+    "pipe_size": "2inch",
+    "flow_unit": "m3/h"
+  }
+ 
+}
+```
+
+
 

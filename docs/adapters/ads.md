@@ -54,7 +54,7 @@ The ADS port number. ADS devices in the TwinCAT network are identified by an AMS
 
 **Type**: Integer
 
-**Default,Constraints,Examples**: The following decimal port numbers are invariant defined on each TwinCAT single system.
+The following decimal port numbers are invariant defined on each TwinCAT single system.
 
 - Runtime system 1: 851 (in TwinCAT 2: 801)
 - Runtime system 2: 852 (in TwinCAT 2: 811)

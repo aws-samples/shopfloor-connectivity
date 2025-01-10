@@ -1,5 +1,10 @@
 ## ServerConfiguration
 
+- [Schema](#Schema)
+- [Examples](#Examples)
+
+
+
 
 **Properties:**
 - [Address](#Address)
@@ -12,7 +17,7 @@
 - [HealthProbe](#HealthProbe)
 - [Port](#Port)
 - [ServerResultsChannelSize](#ServerResultsChannelSize)
-- [ServerResultsChannelSize](#ServerResultsChannelSize)
+- [ServerResultsChannelTimeout](#ServerResultsChannelTimeout)
 
 ---
 ### Address
@@ -99,7 +104,7 @@ Size of internal buffer used by IPC servers to send results to the SFC core
 Default is 1000
 
 ---
-### ServerResultsChannelSize
+### ServerResultsChannelTimeout
 Timeout in milliseconds to send data to internal results buffer
 
 **Type**: Int
@@ -107,4 +112,148 @@ Timeout in milliseconds to send data to internal results buffer
 Default is  10000
 
 [^top](#ServerConfiguration)
+
+
+
+## Schema
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "Address": {
+      "type": "string",
+      "pattern": "^([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]{0,61}[a-zA-Z0-9])(\\.([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]{0,61}[a-zA-Z0-9]))*$|^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$",
+      "description": "Server hostname or IP address"
+    },
+    "CaCertificate": {
+      "type": "string",
+      "description": "CA certificate for mutual TLS"
+    },
+    "ClientCertificate": {
+      "type": "string",
+      "description": "Client certificate for mutual TLS"
+    },
+    "ClientPrivateKey": {
+      "type": "string",
+      "description": "Client private key for TLS connections"
+    },
+    "Compression": {
+      "type": "boolean",
+      "default": false,
+      "description": "Enable/disable compression"
+    },
+    "ConnectionType": {
+      "type": "string",
+      "enum": ["PlainText", "ServerSideTLS", "MutualTLS"],
+      "default": "PlainText",
+      "description": "Type of connection security"
+    },
+    "ExpirationWarningPeriod": {
+      "type": "integer",
+      "minimum": 0,
+      "default": 30,
+      "description": "Certificate expiration warning period in seconds (0 to disable)"
+    },
+    "HealthProbe": {
+      "$ref": "#/definitions/HealthProbeConfiguration",
+      "description": "Health probe configuration"
+    },
+    "Port": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 65535,
+      "description": "Server port number"
+    },
+    "ServerResultsChannelSize": {
+      "type": "integer",
+      "minimum": 1,
+      "default": 1000,
+      "description": "Size of the server results channel"
+    },
+    "ServerResultsChannelTimeout": {
+      "type": "integer",
+      "minimum": 1,
+      "default": 1000,
+      "description": "Timeout for server results channel in milliseconds"
+    }
+  },
+  "required": ["Address", "Port"],
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "ConnectionType": { "const": "MutualTLS" }
+        }
+      },
+      "then": {
+        "required": ["CaCertificate", "ClientCertificate"]
+      }
+    }
+  ],
+  "additionalProperties": false
+}
+```
+
+
+
+## Examples
+
+Basic PlainText configuration with compression enabled:
+
+```json
+{
+  "Address": "localhost",
+  "Port": 8080,
+   "Compression": true,
+}
+```
+
+
+
+Server with TLS:
+
+```json
+{
+  "Address": "server.example.com",
+  "Port": 443,
+  "ConnectionType": "ServerSideTLS",
+  "Compression": true,
+  "ServerResultsChannelTimeout": 2000
+}
+```
+
+
+
+MutualTLS configuration:
+
+```json
+{
+  "Address": "192.168.1.100",
+  "Port": 8443,
+  "ConnectionType": "MutualTLS",
+  "CaCertificate": "/path/to/ca.crt",
+  "ClientCertificate": "/path/to/client.crt",
+  "ClientPrivateKey": "/path/to/client.key",
+  "ExpirationWarningPeriod": 30,
+  "Compression": true
+}
+```
+
+
+
+Configuration with health probe:
+
+```json
+{
+  "Address":  "192.168.1.100",
+  "Port": 9000,
+  "ConnectionType": "PlainText",
+  "HealthProbe": {
+      "Port": 8080,
+      "Path": "/health",
+    }
+}
+```
 

@@ -1,5 +1,12 @@
 ## SourceConfiguration
 
+SourceConfiguration defines common properties for SFC source adapters. Source adapter implementations extend this type with their specific additional properties.
+
+
+
+- [Schema](#Schema)
+- [Examples](#Examples)
+
 
 **Properties:**
 - [ChangeFilter](#ChangeFilter)
@@ -83,12 +90,12 @@ This will result in the Input0 and Output0 channel values being replaced by a ne
 
 ---
 ### Decompose
-If set to true and the value of the channel the value is a structured value then the value is decomposed into a set of individual values for each (sub) element in  the structure.
+If set to true and the value of the channel in the source is a structured value then the value is decomposed into a set of individual values for each (sub) element in  the structure.
 If the value is  list of structures and the value of the [Spread](#Spread) setting is true then each structure in the list is decomposed. 
 
 **Type**: Boolean
 
-**Default,Constraints,Examples**: Default is false
+Default is false
 
 The names of the values for the fields in the structure start with the name of the value appended by the names of the sub elements, separated by a ".".
 After decomposing the structured value into individual values, it is removed from the dataset. If the structure was an element in a list of structures the name is the name of the element, followed by a zero indexed order number of the element in the list and the name of the sub element, all separated by a ".".
@@ -119,7 +126,7 @@ Reference to the used protocol adapter.
 
 **Type**: String
 
-**Default,Constraints,Examples**: Must refer to an existing protocol adapter in the [ProtocolAdapters](./sfc-top-level-config.md#ProtocolAdapters) section.
+Must refer to an existing protocol adapter in the [ProtocolAdapters](./sfc-top-level-config.md#ProtocolAdapters) section.
 
 ---
 ### SourceTimestampAdjustment
@@ -133,7 +140,7 @@ To set the timestamp to a later value use a positive value, for an earlier value
 ### Spread
 If set to true and the value of the channel the value is a list then for each element in the list a new individual value is created.
 The value of this setting overrules the setting of the Spread setting at source level.
-The value of this setting can be overruled for specific channels by setting the Spread setting for that channel.
+The value of this setting can be overruled for specific channels by setting the [Spread](./channel-configuration.md#Spread) setting for that channel.
 
 **Type**: Boolean
 
@@ -144,4 +151,229 @@ The names of the values for the fields in the structure start with the name of t
 
 
 [^top](#SourceConfiguration)
+
+
+
+## Schema
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "ChangeFilter": {
+      "type": "string",
+      "description": "Reference to a changefilter defined in ChangeFilters section at top level config"
+    },
+    "ChannelTimestampAdjustment": {
+      "type": "integer",
+      "description": "Adjustment value for timestamps in milliseconds"
+    },
+    "Channels": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/ChannelConfiguration"
+      },
+      "minItems": 1,
+      "description": "List of channel configurations"
+    },
+    "Compose": {
+      "type": "object",
+      "patternProperties": {
+        "^.*$": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
+        }
+      },
+      "description": "Map of composed values"
+    },
+    "Decompose": {
+      "type": "boolean",
+      "default": false,
+      "description": "Enable/disable data decomposition"
+    },
+    "Description": {
+      "type": "string",
+      "description": "Description of the source"
+    },
+    "Metadata": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      },
+      "description": "Key-value pairs of metadata"
+    },
+    "Name": {
+      "type": "string",
+      "description": "Optional output name override for the source"
+    },
+    "ProtocolAdapter": {
+      "$ref": "#/definitions/ProtocolAdapterConfiguration",
+      "description": "Protocol adapter configuration"
+    },
+    "SourceTimestampAdjustment": {
+      "type": "integer",
+      "description": "Adjustment value for source timestamps in milliseconds"
+    },
+    "Spread": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Spread interval for data collection in milliseconds"
+    }
+  },
+  "required": ["Channels"]
+}
+
+```
+
+
+
+## Examples
+
+**<u>Note: In an SFC configuration sources will also be for a source type which extends the SourceConfiguration with their specific properties.</u>**
+
+
+
+Minimal configuration:
+
+```json
+{
+  "Channels": [
+    {
+      "Name": "Temperature"
+    },
+        {
+      "Name": "Pressure"
+    }
+   
+  ]
+}
+```
+
+
+
+Basic configuration with metadata:
+
+```json
+{
+  "Channels": [
+    {
+      "Name": "Temperature",
+    },
+    {
+      "Name": "Pressure"
+    }
+  ],
+  "Metadata": {
+    "location": "Building1",
+    "equipment": "Boiler3"
+  }
+}
+```
+
+
+
+Configuration with composition:
+
+```json
+{
+  "Channels": [
+    {
+      "Name": "Flow1"
+    },
+    {
+      "Name": "Flow2"
+    }
+  ],
+  "Compose": {
+    "TotalFlow": ["Flow1", "Flow2"],
+    "ProcessMetrics": ["Flow1", "Flow2"]
+  },
+  "Name": "FlowMeter",
+  "Description": "Flow measurement station"
+}
+```
+
+
+
+Configuration with timestamp adjustment of -200 milliseconds
+
+```json
+{
+  "Channels": [
+    {
+      "Name": "Level",
+      "DataType": "Double",
+      "ScanRate": 1000
+    }
+  ],
+  "ChannelTimestampAdjustment": -200,
+  "SourceTimestampAdjustment": 1000,
+  "Spread": 100
+}
+```
+
+
+
+1. Full configuration:
+
+```json
+{
+  "Name": "ProcessUnit1",
+  "Description": "Main process unit monitoring",
+  "Channels": [
+    {
+      "Name": "Temperature1",
+      "DataType": "Double",
+      "ScanRate": 1000
+    },
+    {
+      "Name": "Temperature2",
+      "DataType": "Double",
+      "ScanRate": 1000
+    },
+    {
+      "Name": "Pressure",
+      "DataType": "Double",
+      "ScanRate": 500
+    }
+  ],
+  "Compose": {
+    "AverageTemp": ["Temperature1", "Temperature2"],
+    "ProcessConditions": ["Temperature1", "Temperature2", "Pressure"]
+  },
+  "ChangeFilter": "DeadbandFilter",
+  "ChannelTimestampAdjustment": -100,
+  "SourceTimestampAdjustment": 500,
+  "Spread": 250,
+  "Decompose": false,
+  "Metadata": {
+    "area": "ProcessArea1",
+    "criticality": "high",
+    "maintainer": "Team1"
+  }
+}
+```
+
+
+
+Configuration with decomposition for all channels:
+
+```json
+{
+  "Channels": [
+    {
+      "Name": "BatchData",
+      "DataType": "JSON",
+      "ScanRate": 5000
+    }
+  ],
+  "Decompose": true,
+  "ChangeFilter": "JsonFilter",
+  "Description": "Batch process data collection"
+}
+```
 

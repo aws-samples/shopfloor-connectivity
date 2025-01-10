@@ -1,9 +1,12 @@
-
 ## TuningConfiguration
 
-[SFC tuning](../sfc-tuning.md) parameters.
+[SFC tuning](../sfc-tuning.md) parameters. Tuning parameters can be set to adjust sizes of internal channels and timeouts. The SFC log output will output messages when internal channels start blocking when these are at their maximum capacity or when timeouts occur waiting for a channel to unblock.
 
+- [Schema](#Schema)
 
+- [Examples](#Examples)
+
+  
 
 **Properties:**
 
@@ -181,4 +184,131 @@ Default is 1000
 Increment when getting timeouts on writerInputChannel and available memory is limited
 
 [^top](#TuningConfiguration)
+
+
+
+## Schema
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "AggregatorChannelSize": {
+      "type": "integer",
+      "default": 1000,
+      "description": "Size of the aggregator channel"
+    },
+    "AllSourcesReadTimeout": {
+      "type": "integer",
+      "default": 60000,
+      "description": "Timeout for reading from all sources in milliseconds"
+    },
+    "ChannelSizePerMetricsProvider": {
+      "type": "integer",
+      "default": 1000,
+      "description": "Channel size for each metrics provider"
+    },
+    "MaxConcurrentSourceReaders": {
+      "type": "integer",
+      "default": 5,
+      "description": "Maximum number of concurrent source readers"
+    },
+    "MetricsChannelTimeout": {
+      "type": "integer",
+      "default": 5000,
+      "description": "Timeout for metrics channel in milliseconds"
+    },
+    "ScheduleReaderResultsChannelSize": {
+      "type": "integer",
+      "default": 1,
+      "description": "Size of the schedule reader results channel"
+    },
+    "ScheduleReaderResultsChannelTimeout": {
+      "type": "integer",
+      "default": 0,
+      "description": "Timeout for schedule reader results channel in milliseconds"
+    },
+    "TargetForwardingChannelSize": {
+      "type": "integer",
+      "default": 5000,
+      "description": "Size of the target forwarding channel"
+    },
+    "TargetForwardingChannelTimeout": {
+      "type": "integer",
+      "default": 1000,
+      "description": "Timeout for target forwarding channel in milliseconds"
+    },
+    "TargetResubmitChannelSize": {
+      "type": "integer",
+      "default": 1000,
+      "description": "Size of the target resubmit channel"
+    },
+    "TargetResubmitChannelTimeout": {
+      "type": "integer",
+      "default": 1000,
+      "description": "Timeout for target resubmit channel in milliseconds"
+    },
+    "TargetResultsChannelSize": {
+      "type": "integer",
+      "default": 1000,
+      "description": "Size of the target results channel"
+    },
+    "TargetResultsChannelTimeout": {
+      "type": "integer",
+      "default": 5000,
+      "description": "Timeout for target results channel in milliseconds"
+    },
+    "WriterInputChannelSize": {
+      "type": "integer",
+      "default": 10000,
+      "description": "Size of the writer input channel"
+    },
+    "WriterInputChannelSizeTimeout": {
+      "type": "integer",
+      "default": 1000,
+      "description": "Timeout for writer input channel in milliseconds"
+    }
+  }
+}
+
+```
+
+
+
+## Examples
+
+Increase number of concurrent source readers
+
+```json
+{
+  "MaxConcurrentSourceReaders": 10
+}
+```
+
+
+
+Full configuration
+
+```json
+{
+  "AggregatorChannelSize": 1000,
+  "AllSourcesReadTimeout": 1000,
+  "ChannelSizePerMetricsProvider": 100,
+  "MaxConcurrentSourceReaders": 16,
+  "MetricsChannelTimeout": 1000,
+  "ScheduleReaderResultsChannelSize": 1000,
+  "ScheduleReaderResultsChannelTimeout": 1000,
+  "TargetForwardingChannelSize": 1000,
+  "TargetForwardingChannelTimeout": 1000,
+  "TargetResubmitChannelSize": 1000,
+  "TargetResubmitChannelTimeout": 1000,
+  "TargetResultsChannelSize": 1000,
+  "TargetResultsChannelTimeout": 1000,
+  "WriterInputChannelSize": 1000,
+  "WriterInputChannelSizeTimeout": 1000
+}
+```
+
+
 

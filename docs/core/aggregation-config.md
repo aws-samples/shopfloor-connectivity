@@ -1,14 +1,16 @@
-[SFC Top Level]( ./sfc-top-level-config.md)>Aggregation
-
 ## Aggregation
 
 An optional aggregation can be used for a schedule to collect the results of multiple read values and combine these in a single output message, optimally applying functions to aggregate the output data.
+
+- [Schema](#Schema)
+- [Examples](#Examples)
 
 **Properties**
 
 - [Output](#Output)
 - [Size](#Size)
 - [Transformations](#Transformations)
+- 
 
 ---
 ###  Size
@@ -155,27 +157,322 @@ The matching will be applied in the following order:
 "Transformations": {
    "source1": {
       "channel1": {
-      "avg": "tr1",
-      "min": "tr2",
-      "max": "tr2"
+         "avg": "transformation1",
+         "min": "transformation1",
+         "max": "transformation2"
     },
     "channel2": {
-        "sum": "tr3"
+        "sum": "transformation3"
     },
     "channel3": {
-        "*": "tr4"
+        "*": "transformation4"
     }
   }
 }
 ```
 
-Transformation "tr1" will be applied to the aggregated "avg" output for the values of "source1", "channel1".
+Transformation "transformation1" will be applied to the aggregated "avg" output for the values of "source1", "channel1".
 
-Transformation "tr2" will be applied to the aggregated "min" and "max" output for the values of "source1", "channel1".
+Transformation "transformation2" will be applied to the aggregated "min" and "max" output for the values of "source1", "channel1".
 
-Transformation "tr3" will be applied to the aggregated "sum" output for the values of "source1", "channel2".
+transformation3" will be applied to the aggregated "sum" output for the values of "source1", "channel2".
 
-Transformation "tr4" will be applied to all aggregated values of "source1", "channel3".
+Transformation "transformation4" will be applied to all aggregated values of "source1", "channel3".
 
 [^top](#Aggregation)
 
+
+
+## Schema:
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "type": "object",
+    "AggregationType": {
+      "type": "string",
+      "enum": [
+        "*",
+        "avg",
+        "count",
+        "first",
+        "last",
+        "max",
+        "median",
+        "min",
+        "mode",
+        "stddev",
+        "sum",
+        "values"
+      ]
+    }
+  },
+  "Aggregation": {
+    "type": "object",
+    "properties": {
+      "Size": {
+        "type": "integer",
+        "default": 1
+      },
+      "Output": {
+        "type": "object",
+        "patternProperties": {
+          "^.*$": {
+            "type": "object",
+            "patternProperties": {
+              "^.*$": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/AggregationType"
+                },
+                "minItems": 1
+              }
+            },
+            "minProperties": 1
+          }
+        },
+        "minProperties": 1,
+        "additionalProperties": false
+      },
+      "Transformations": {
+        "type": "object",
+        "patternProperties": {
+          "^.*$": {
+            "type": "object",
+            "patternProperties": {
+              "^.*$": {
+                "type": "object",
+                "patternProperties": {
+                  "^.*$": {
+                    "type": "string"
+                  }
+                },
+                "propertyNames": {
+                  "$ref": "#/definitions/AggregationType"
+                },
+                "minProperties": 1,
+                "additionalProperties": false
+              }
+            },
+            "minProperties": 1,
+            "additionalProperties": false
+          }
+        },
+        "minProperties": 1,
+        "additionalProperties": false
+      }
+    },
+    "required": ["Size", "Output"]
+  }
+}
+```
+
+
+
+## Examples:
+
+
+
+Basic example:
+
+```json
+{
+  "Aggregation": {
+    "Size": 10,
+    "Output": {
+      "sensor1": {
+        "temperature": ["avg", "min", "max"],
+        "humidity": ["sum"],
+        "pressure": ["*"]
+      }
+    }
+  }
+}
+```
+
+
+
+Multiple sources example:
+
+```json
+{
+  "Aggregation": {
+    "Size": 5,
+    "Output": {
+      "sensor1": {
+        "temperature": ["avg", "max"],
+        "humidity": ["min", "max"]
+      },
+      "sensor2": {
+        "pressure": ["median", "stddev"]
+      }
+    }
+  }
+}
+```
+
+
+
+Example with wildcard aggregation:
+
+```json
+{
+  "Aggregation": {
+    "Size": 20,
+    "Output": {
+      "sensor1": {
+        "temperature": ["*"]
+      }
+    }
+  }
+}
+```
+
+
+
+Example with multiple aggregation types:
+
+```json
+{
+  "Aggregation": {
+    "Size": 15,
+    "Output": {
+      "machine1": {
+        "vibration": ["min", "max", "avg", "stddev"],
+        "speed": ["avg", "median"],
+        "temperature": ["max", "min"]
+      }
+    }
+  }
+}
+```
+
+
+
+Basic example with single transformation:
+
+```json
+{
+  "Aggregation": {
+    "Size": 10,
+    "Output": {
+      "source1": {
+        "channel1": ["avg"]
+      }
+    },
+    "Transformations": {
+      "source1": {
+        "channel1": {
+          "avg": "simpleTransform"
+        }
+      }
+    }
+  }
+}
+```
+
+
+
+Multiple transformations for different aggregation types:
+
+```json
+{
+  "Aggregation": {
+    "Size": 5,
+    "Output": {
+      "sensor1": {
+        "temperature": ["avg", "max", "min"],
+        "humidity": ["avg", "stddev"]
+      }
+    },
+    "Transformations": {
+      "sensor1": {
+        "temperature": {
+          "avg": "tempAvgTransform",
+          "max": "tempMaxTransform",
+          "min": "tempMinTransform"
+        },
+        "humidity": {
+          "avg": "humidityAvgTransform",
+          "stddev": "humidityStdDevTransform"
+        }
+      }
+    }
+  }
+}
+```
+
+
+
+Using wildcard transformation:
+
+```json
+{
+  "Aggregation": {
+    "Size": 20,
+    "Output": {
+      "sensor1": {
+        "temperature": ["*"],
+        "pressure": ["avg", "max"]
+      }
+    },
+    "Transformations": {
+      "sensor1": {
+        "temperature": {
+          "*": "allTempTransform"
+        },
+        "pressure": {
+          "avg": "pressureAvgTransform",
+          "max": "pressureMaxTransform"
+        }
+      }
+    }
+  }
+}
+```
+
+
+
+Complex example with multiple sources and channels:
+
+```json
+{
+  "Aggregation": {
+    "Size": 15,
+    "Output": {
+      "machine1": {
+        "vibration": ["min", "max", "avg"],
+        "speed": ["avg", "median"]
+      },
+      "machine2": {
+        "temperature": ["max", "min"],
+        "pressure": ["avg", "stddev"]
+      }
+    },
+    "Transformations": {
+      "machine1": {
+        "vibration": {
+          "min": "vibrationMinTransform",
+          "max": "vibrationMaxTransform",
+          "avg": "vibrationAvgTransform"
+        },
+        "speed": {
+          "avg": "speedAvgTransform",
+          "median": "speedMedianTransform"
+        }
+      },
+      "machine2": {
+        "temperature": {
+          "max": "tempMaxTransform",
+          "min": "tempMinTransform"
+        },
+        "pressure": {
+          "avg": "pressureAvgTransform",
+          "stddev": "pressureStdDevTransform"
+        }
+      }
+    }
+  }
+}
+```

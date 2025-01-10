@@ -35,7 +35,7 @@ Software version must be set to "2022-04-02"
 
 **Type**: String
 
-**Default,Constraints,Examples**: Used for compatibility with future extensions and updates
+Used for compatibility with future extensions and updates
 
 ---
 ### AwsIotCredentialProviderClients
@@ -49,7 +49,7 @@ Filters that can be applied at source or channel value level to let pass values 
 
 **Type**: Map[String,[ChangeFilterConfiguration](./change-filter-configuration.md)
 
-**Default,Constraints,Examples**: 
+
 Example:
 
 ```json

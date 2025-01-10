@@ -5,6 +5,9 @@ An AWS IoT Credentials Provider Client configuration is used  to obtain temporar
 
 For more info see [Session credentials for targets accessing AWS Service](../sfc-aws-service-credentials.md)
 
+- [Schema](#Schema)
+- [Examples](#Examples)
+
 
 **Properties:**
 - [CertificateFile](#CertificateFile)
@@ -74,7 +77,7 @@ Proxy configuration if the client is using a proxy server to access the internet
 
 **Type**: 
 
-**Default,Constraints,Examples**: Optional
+Optional
 
 ---
 ### RoleAlias
@@ -94,7 +97,7 @@ For systems that don't have a reliable clock time, this setting can be set to tr
 
 **Type**: Boolean
 
-**Default,Constraints,Examples**: Default = false
+Default = false
 
 ---
 ### ThingName
@@ -103,4 +106,147 @@ AWS IoT thing name using the device certificate
 **Type**: String
 
 [^top](#AwsIotCredentialProviderClientConfiguration)
+
+
+
+## Schema
+
+
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "ThingName": {
+      "type": "string",
+      "minLength": 1
+    },
+    "RoleAlias": {
+      "type": "string",
+      "minLength": 1
+    },
+    "CertificateFile": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^([A-Za-z]:)?[\\/\\\\](?:[^\\/\\\\\\n\\r\\t\\f\\v]+[\\/\\\\])*[^\\/\\\\\\n\\r\\t\\f\\v]*$",
+      "description": "Path to certificate file. Can be either Windows style (C:\\path\\to\\cert.pem) or Unix style (/path/to/cert.pem)"
+    },
+    "PrivateKeyFile": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^([A-Za-z]:)?[\\/\\\\](?:[^\\/\\\\\\n\\r\\t\\f\\v]+[\\/\\\\])*[^\\/\\\\\\n\\r\\t\\f\\v]*$",
+      "description": "Path to private key file. Can be either Windows style (C:\\path\\to\\key.pem) or Unix style (/path/to/key.pem)"
+    },
+    "RootCaFile": {
+      "type": "string",
+      "pattern": "^([A-Za-z]:)?[\\/\\\\](?:[^\\/\\\\\\n\\r\\t\\f\\v]+[\\/\\\\])*[^\\/\\\\\\n\\r\\t\\f\\v]*$",
+      "description": "Optional path to root CA file. If specified, must be either Windows style (C:\\path\\to\\root-ca.pem) or Unix style (/path/to/root-ca.pem)"
+    },
+    "IotCredentialEndpoint": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[a-z0-9]+\\.credentials\\.iot\\.[a-z]{2}-[a-z]+-\\d{1}\\.amazonaws\\.com$",
+      "description": "AWS IoT endpoint"
+    },
+    "Region": {
+      "$ref": "#/definitions/AwsRegion"
+    },
+    "SkipCredentialsExpiryCheck": {
+      "type": "boolean",
+      "default": false
+    },
+    "ExpiryClockSkewSeconds": {
+      "type": "integer",
+      "minimum": 0,
+      "default": 300
+    },
+    "GreenGrassDeploymentPath": {
+      "type": "string",
+      "pattern": "^(/[^/]+)+$|^/$",
+      "description": "Optional GreenGrass deployment path, must be a valid Unix-style path"
+    },
+    "Proxy": {
+      "$ref": "#/definitions/ClientProxy",
+      "description": "Optional proxy configuration"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "GreenGrassDeploymentPath": {
+            "not": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "ThingName",
+          "RoleAlias",
+          "CertificateFile",
+          "PrivateKeyFile",
+          "RootCaFile",
+          "Endpoint"
+        ]
+      }
+    }
+  ]
+}
+```
+
+
+
+## Examples
+
+
+
+Configuration specifying all required properties:
+
+```json
+{
+  "ThingName": "MyIoTThing",
+  "RoleAlias": "GreengrassV2TokenExchangeRole",
+  "CertificateFile": "/greengrass/v2/device.pem.crt",
+  "PrivateKeyFile": "/greengrass/v2/private.pem.key",
+  "RootCaFile": "/greengrass/v2/AmazonRootCA1.pem",
+  "IotCredentialEndpoint": "c1alcfbzvfkjpi.credentials.iot.eu-west-1.amazonaws.com",
+  "Region": "eu-west-1"
+}
+```
+
+Configuration refering to a GreenGrass deployment configuration:
+
+```json
+"AwsIotCredentialProviderClient": {
+  "GreenGrassDeploymentPath": "/greengrass/v2",
+  "Region": "eu-west-1"
+}
+```
+
+
+
+Configuration using a proxy for internet access:
+
+```json
+{
+  "ThingName": "MyIoTThing",
+  "RoleAlias": "GreengrassV2TokenExchangeRole",
+  "CertificateFile": "C:\\greengrass\\v2\\device.pem.crt",
+  "PrivateKeyFile": "C:\\greengrass\\v2\\private.pem.key",
+  "RootCaFile": "C:\\greengrass\\v2\\AmazonRootCA1.pem",
+  "IotCredentialEndpoint": "c1alcfbzvfkjpi.credentials.iot.eu-west-1.amazonaws.com",
+  "Region": "eu-west-1",
+  "Proxy": {
+    "ProxyHost": "proxy.example.com",
+    "ProxyPort": 8080,
+    "Username": "proxyuser",
+    "Password": "proxypass",
+    "NonProxyAddresses": "localhost,127.0.0.1,internal.example.com"
+  }
+
+}
+```
 

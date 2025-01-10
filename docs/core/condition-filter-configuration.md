@@ -1,11 +1,15 @@
 ## ConditionFilterConfiguration
 
+- [Schema](#Schema)
+- [Examples](#Examples)
+
 
 **Properties:**
 - [Operator](#Operator)
+
 - [Value](#Value)
 
-
+  
 
 ---
 ### Operator
@@ -39,4 +43,183 @@ If the operator is "and" ("&&") or "or" ("||")it is a nested list of Condition t
 Operand used by the filter operator, or a list of nested ConditionConfigurations if the operator is "and" ("&&") or "or" ("||"). If the operand for an operand is a channel name or a list of channel names, the name is the key of the channel in the channels table for a source. Valid JMESPath expressions van be used as well to specify channel names to match against.
 
 [^top](#ConditionFilterConfiguration)
+
+
+
+## Schema
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "Operator": {
+      "type": "string",
+      "description": "The operator to use for the condition",
+      "enum": [
+        "all","##",
+        "any","**",
+        "none","!!",
+        "present","#",
+        "absent","&!",
+        "only","^",
+        "notonly","$",
+        "and","&&",
+        "or","||"
+      ]
+    },
+    "Value": {
+      "description": "Either a channel name or a list of nested conditions",
+      "oneOf": [
+        {
+          "type": "string",
+          "description": "Name of the channel"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ConditionFilterConfiguration"
+          },
+          "description": "List of nested condition filters"
+        }
+      ]
+    }
+  },
+  "required": [
+    "Operator",
+    "Value"
+  ],
+  "additionalProperties": false
+}
+```
+
+
+
+## Examples
+
+
+
+Simple channel condition, include if  "temperature_sensor" channel is present
+
+```json
+{
+  "Operator": "present",
+  "Value": "temperature_sensor"
+}
+```
+
+
+
+Nested AND condition, include if both "temperature" and "humidity" channels are present
+
+```json
+{
+  "Operator": "all",
+  "Value": [
+    {
+      "Operator": "present",
+      "Value": ["temperature", "humidity"]
+    }
+}
+```
+
+
+
+Nested AND condition, include if  channel" "temperature" is present and "humidity" is absent
+
+```json
+{
+  "Operator": "and",
+  "Value": [
+    {
+      "Operator": "present",
+      "Value": "temperature"
+    },
+    {
+      "Operator": "absent",
+      "Value": "humidity"
+    }
+  ]
+}
+```
+
+
+
+Complex OR condition, include if any of "pressure", "temperature" channel  are present  and channel "error_state" is absent
+
+```json
+{
+  "Operator": "and",
+  "Value": [
+    {
+      "Operator": "any",
+      "Value": ["pressure", "temperature"]
+    },
+    {
+      "Operator": "present",
+      "Value": "error_state"
+    }
+  ]
+}
+```
+
+
+
+1. Deeply nested conditions:
+
+```json
+{
+  "Operator": "and",
+  "Value": [
+    {
+      "Operator": "any",
+      "Value": [
+        {
+          "Operator": "present",
+          "Value": "sensor1"
+        },
+        {
+          "Operator": "absent",
+          "Value": "sensor2"
+        }
+      ]
+    },
+    {
+      "Operator": "none",
+      "Value": "error_flag"
+    }
+  ]
+}
+```
+
+
+
+Combined conditions
+
+```json
+{
+  "Operator": "all",
+  "Value": [
+    {
+      "Operator": "present",
+      "Value": "temperature"
+    },
+    {
+      "Operator": "and",
+      "Value": [
+        {
+          "Operator": "present",
+          "Value": "humidity"
+        },
+        {
+          "Operator": "absent",
+          "Value": "fault"
+        }
+      ]
+    }
+  ]
+}
+```
+
+
 
