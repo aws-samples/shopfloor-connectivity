@@ -1,5 +1,6 @@
-
 # MQTT Protocol Configuration
+
+MQTT Protocol adapter confighuration.
 
 
 ---
@@ -8,11 +9,16 @@
 - [TopicNameMapping](#TopicNameMapping)
 - [MqttAdapterConfiguration](#MqttAdapterConfiguration)
 - [MqttBrokerConfiguration](#MqttBrokerConfiguration)
+- [TopicNameMappingConfiguration](#TopicNameMappingConfiguration-type)
 
 ---
 
 ## MqttSourceConfiguration
 
+Source configuration for the MQTT protocol adapter. This type extends the [BaseSourceConfiguration](../core/base-source-configuration.md) type. 
+
+- [Schema](#MqttSourceConfiguration-Schema)
+- [Examples](#MqttSourceConfiguration-Examples)
 
 **Properties:**
 - [AdapterBroker](#AdapterBroker)
@@ -32,23 +38,79 @@ The channels configuration for an MQTT source holds configuration data to read v
 The element is a map indexed by the channel identifier.
 Channels can be "commented" out by adding a "#" at the beginning of the identifier of that channel.
 
-**Type**: Map[String,MqttChannelConfiguration]
+**Type**: Map[String,[MqttChannelConfiguration](#MqttChannelConfiguration)]
 
 At least 1 channel must be configured.
 
 [^top](#mqtt-protocol-configuration)
 
+### MqttSourceConfiguration Schema
 
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "MqttSourceConfiguration": {
+      "type": "object",
+      "description": "Configuration for MQTT source adapter",
+      "allOf": [
+        {
+          "$ref": "#/definitions/BaseSourceConfiguration"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "AdapterBroker": {
+              "type": "string",
+              "description": "Reference to the broker configuration to be used by this adapter"
+            },
+            "Channels": {
+              "type": "object",
+              "description": "Map of MQTT channel configurations",
+              "additionalProperties": {
+                "$ref": "#/definitions/MqttChannelConfiguration"
+              },
+              "minProperties": 1
+            }
+          },
+          "required": [
+            "AdapterBroker",
+            "Channels"
+          ]
+        }
+      ]
+    }
+  }
+}
 
+```
+
+### MqttSourceConfiguration Examples
+
+```json
+{
+  "ProtocolAdapter" : "mqtt-adapter",
+  "AdapterBroker": "mqtt-broker-1",
+  "Channels": {
+    "temperature_sensor": {
+      "Topics": ["sensors/temperature"]
+    }
+  }
+}
+```
 
 ## MqttChannelConfiguration
 
+The MqttChannelConfiguration type extends the [ChannelConfiguration](../core/channel-configuration.md) class with channel properties for the MQTT protocol adapter.
+
+- [Schema](#MqttChannelConfiguration-Schema)
+- [Examples](#MqttChannelConfiguration-Examples)
 
 **Properties:**
 - [Json](#Json)
 
 - [Selector](#Selector)
-- [TopicNameMapping](#TopicNameMapping)
+- [TopicNameMappingConfiguration](#TopicNameMappingConfiguration)
 - [Topics](#Topics)
 
 ---
@@ -69,10 +131,10 @@ The selector can be used to restructure or select values from structured data ty
 **Parameter**: JMESPath expression, see https://jmespath.org/
 
 ---
-### TopicNameMapping
+### TopicNameMappingConfiguration
 Mapping from topic names to alternative names. As a channel can have multiple topics, that also can include wildcards, this mapping can be used to build consistent and expected value names.
 
-**Type**: [TopicNameMapping](#TopicNameMapping)
+**Type**: [TopicNameMappingConfiguration](#TopicNameMappingConfiguration-type)
 
 ---
 ### Topics
@@ -84,19 +146,114 @@ The must be at least one topic in the list of topics.
 
 [^top](#mqtt-protocol-configuration)
 
+### MqttChannelConfiguration Schema
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "description": "Configuration for MQTT channel",
+  "allOf": [
+    {
+      "$ref": "#/definitions/ChannelConfiguration"
+    },
+    {
+      "type": "object",
+      "properties": {
+        "Json": {
+          "type": "boolean",
+          "description": "Indicates if the payload is in JSON format"
+        },
+        "Selector": {
+          "type": "string",
+          "description": "Selector for filtering messages"
+        },
+        "TopicNameMapping": {
+          "$ref": "#/definitions/TopicNameMappingConfiguration",
+          "description": "Configuration for mapping topic names"
+        },
+        "Topics": {
+          "type": "array",
+          "description": "List of MQTT topics to subscribe to",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
+        }
+      },
+      "required": [
+        "Topics"
+      ]
+    }
+  ]
+}
+```
+
+### MqttChannelConfiguration Examples
+
+```json
+{
+  "Topics": [
+    "sensors/temperature/room1"
+  ]
+}
+```
 
 
 
-## TopicNameMapping
+```json
+{
+  "Topics": [
+    "Topics" :[ "sensors/temperature"/#"]
+  ],
+  "TopicNameMappingConfiguration":{
+    "Mappings": {
+      "test/(\\w+)": "temperature-$1"
+    }
+}
+```
 
+
+
+## TopicNameMappingConfiguration type
+
+Mapping from topic names to alternative names. As a channel can have multiple topics, that also can include wildcards, this mapping can be used to build consistent and expected value names.
+
+**Type**: TopicNameMapping
+
+Example:
+
+Channel subscription is:
+
+```json
+	"Topics" :[ "test"/#"]
+```
+
+
+
+The mapping is:
+
+```json
+	"Mappings": {
+		"test/(\\w+)": "test-$1"
+	}
+```
+
+The mapping above matches updates for sub-levels of the test topic, it will use the name of the sub-level to create a name for the received data.
+
+If an update is received for data in topic "test/a" then the name of the data value will be "test-a"
+
+- [Schema](#TopicNameMappingConfiguration-Schema)
+- [Examples](#TopicNameMappingConfiguration-Examples)
 
 **Properties:**
 - [IncludeUnmappedTopics](#IncludeUnmappedTopics)
-- [Json](#Json)
+
 - [Mappings](#Mappings)
 
-- [Selector](#Selector)
-- [TopicNameMapping](#TopicNameMapping)
+  
+
+  
 
 ---
 ### IncludeUnmappedTopics
@@ -105,14 +262,6 @@ If set to false, updates for values from topics that do not match any of the exp
 **Type**: Boolean
 
 Default is false
-
----
-### Json
-Set to true if data received from topics is in JSON format
-
-**Type**: Boolean
-
-Default is true
 
 ---
 ### Mappings
@@ -125,15 +274,6 @@ The replacement string can include substitution parameters for capturing groups 
 **Type**: Map[String,String]
 
 The must be at least one topic in the list of topics.
-
----
-### Selector
-Evaluate a JMESpath query against the value of a structured data type and returns the result.
-The selector can be used to restructure or select values from structured data types.
-
-**Type**: String
-
-Parameter: JMESPath expression, see https://jmespath.org/
 
 ---
 ### TopicNameMapping
@@ -166,10 +306,88 @@ If an update is received for data in topic "test/a" then the name of the data va
 [^top](#mqtt-protocol-configuration)
 
 
+### TopicNameMappingConfiguration Schema
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "description": "Configuration for MQTT topic name mapping",
+  "properties": {
+    "IncludeUnmappedTopics": {
+      "type": "boolean",
+      "description": "Flag to include topics that don't match any mapping",
+      "default": false
+    },
+    "Mappings": {
+      "type": "object",
+      "description": "Map of source topic patterns to target topic patterns",
+      "additionalProperties": {
+        "type": "string"
+      },
+      "minProperties": 1
+    }
+  },
+  "required": [
+    "Mappings"
+  ]
+}
+```
+
+### TopicNameMappingConfiguration Examples
+
+
+
+Minimal configuration:
+
+```json
+{
+  "Mappings": {
+    "source/topic": "target/topic"
+  }
+}
+```
+
+
+
+Basic mapping with matching pattern for wildcards
+
+```json
+{
+  "IncludeUnmappedTopics": false,
+  "Mappings": {
+    "device/(\\w+)/temperature": "sensors/temp/{1}"
+  }
+}
+```
+
+
+
+Multiple mappings with unmapped topics included:
+
+```json
+{
+  "IncludeUnmappedTopics": true,
+  "Mappings": {
+    "device/(\\w+)/temperature": "sensors/tempe/{1}",
+    "device/(\\w+)/humidity": "sensors//humid/{1}",
+    "factory/line-(\w+)": "production/line/{1}"
+  }
+}
+```
+
 
 
 ## MqttAdapterConfiguration
 
+MqttAdapterConfiguration extension the [AdapterConfiguration](../core/protocol-adapter-configuration.md) with properties for the MQTT Protocol adapter.
+
+AdsAdapterConfiguration 
+
+The MqttAdapterConfiguration type extends the [ChannelConfiguration](../core/channel-configuration.md) class with channel properties for the MQTT  protocol adapter.
+
+- [Schema](#MqttAdapterConfiguration-Schema)
+- [Examples](#MqttAdapterConfiguration-Examples)
 
 **Properties:**
 - [Brokers](#Brokers)
@@ -213,15 +431,101 @@ Default is 1000
 
 [^top](#mqtt-protocol-configuration)
 
+### MqttAdapterConfiguration Schema
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "description": "Configuration for MQTT adapter",
+  "allOf": [
+    {
+      "$ref": "#/definitions/AdapterConfiguration"
+    },
+    {
+      "type": "object",
+      "properties": {
+        "Brokers": {
+          "type": "object",
+          "description": "Map of MQTT broker configurations",
+          "additionalProperties": {
+            "$ref": "#/definitions/MqttBrokerConfiguration"
+          },
+          "minProperties": 1
+        },
+        "ReadMode": {
+          "type": "string",
+          "description": "Mode for reading MQTT messages",
+          "enum": [
+            "KeepLast",
+            "KeepAll"
+          ],
+          "default": "KeepLast"
+        },
+        "ReceivedDataChannelSize": {
+          "type": "integer",
+          "description": "Size of the channel for received data",
+          "default": 1000
+        },
+        "ReceivedDataChannelTimeout": {
+          "type": "integer",
+          "description": "Timeout for the received data channel in milliseconds",
+          "default": 1000
+        }
+      },
+      "required": [
+        "Brokers"
+      ]
+    }
+  ]
+}
+```
+
+### MqttAdapterConfiguration Examples
+
+Minimal configuration:
+
+```json
+{
+  "AdapterType" : "MQTT",
+  "Brokers": {
+    "default-broker": {
+      // MqttBrokerConfiguration properties here
+    }
+  }
+}
+```
+
+Multiple brokers with KeepAll mode:
+
+```json
+{
+  "AdapterType" : "MQTT",
+  "Brokers": {
+    "primary-broker": {
+      // MqttBrokerConfiguration properties here
+    },
+    "backup-broker": {
+      // MqttBrokerConfiguration properties here
+    }
+  },
+  "ReadMode": "KeepAll",
+  "ReceivedDataChannelSize": 5000,
+  "ReceivedDataChannelTimeout": 10000
+}
+```
+
+
 
 
 
 ## MqttBrokerConfiguration
 
+- [Schema](#MqttBrokerConfiguration-Schema)
+- [Examples](#MqttBrokerConfiguration-Examples)
 
 **Properties:**
 - [Certificate](#Certificate)
-- [Connection](#Connection)
 - [ConnectionTimeout](#ConnectionTimeout)
 - [EndPoint](#EndPoint)
 - [Password](#Password)
@@ -230,6 +534,7 @@ Default is 1000
 - [RootCA](#RootCA)
 - [SslServerCertificate](#SslServerCertificate)
 - [Username](#Username)
+- [VerifyHostName](#VerifyHostName)
 - [WaitAfterConnectError](#WaitAfterConnectError)
 
 ---
@@ -237,16 +542,6 @@ Default is 1000
 Path to client certificate file. Used if broker used certificate authentication
 
 **Type**: String
-
----
-### Connection
-Connection type
-
-**Type**: String
-
-- "PlainText" (Default)
-- "ServerSideTLS"
-- "MutualTLS"
 
 ---
 ### ConnectionTimeout
@@ -321,6 +616,16 @@ Username if broker is using username and password authentication
 Username and password should not be included as clear text in the configuration. It is strongly recommended to use placeholders and use the SFC integration with the AWS secrets manager.
 
 ---
+
+### VerifyHostName
+
+Flag to enable verification of hostname
+
+**Type:** Boolean
+
+Default is true
+
+---
 ### WaitAfterConnectError
 Period in seconds to wait before trying to connect after a connection failure
 
@@ -329,4 +634,108 @@ Period in seconds to wait before trying to connect after a connection failure
 Default is 60 seconds
 
 [^top](#mqtt-protocol-configuration)
+
+### MqttBrokerConfiguration Schema
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "description": "Configuration for MQTT broker connection",
+  "properties": {
+    "Certificate": {
+      "type": "string",
+      "description": "Client certificate file path"
+    },
+    "ConnectionTimeout": {
+      "type": "integer",
+      "description": "Connection timeout in seconds".
+      "default" : 10
+    },
+    "EndPoint": {
+      "type": "string",
+      "description": "MQTT broker endpoint address"
+    },
+    "Password": {
+      "type": "string",
+      "description": "Password for authentication"
+    },
+    "Port": {
+      "type": "integer",
+      "description": "MQTT broker port number"
+    },
+    "PrivateKey": {
+      "type": "string",
+      "description": "Client private key file path"
+    },
+    "RootCA": {
+      "type": "string",
+      "description": "Root CA certificate file path"
+    },
+    "SslServerCertificate": {
+      "type": "string",
+      "description": "SSL server certificate file path"
+    },
+    "Username": {
+      "type": "string",
+      "description": "Username for authentication"
+    },
+    "VerifyHostName":{
+      "type" : "boolean",
+      "default" : true
+    },
+    
+    "WaitAfterConnectError": {
+      "type": "integer",
+      "description": "Wait time in seconds after connection error",
+      "defaul1": 10
+    }
+  },
+  "required": [
+    "EndPoint",
+    "Port"
+  ]
+}
+```
+
+### MqttBrokerConfiguration Examples
+
+Basic configuration with required fields only:
+
+```json
+{
+  "EndPoint": "localhost",
+  "Port": 1883
+}
+```
+
+
+
+SSL/TLS with certificate-based authentication:
+
+```json
+{
+  "EndPoint": "mqtt.example.com",
+  "Port": 8883,
+  "Certificate": "/path/to/client-cert.pem",
+  "PrivateKey": "/path/to/private-key.pem",
+  "RootCA": "/path/to/root-ca.pem",
+  "VerifyHostName": true
+}
+```
+
+
+
+Example 5 - AWS IoT Core configuration:
+
+```json
+{
+  "EndPoint": "xxxxxxxxxxxxxxx-ats.iot.region.amazonaws.com",
+  "Port": 8883,
+  "Certificate": "/certs/device-certificate.pem.crt",
+  "PrivateKey": "/certs/private.pem.key",
+  "RootCA": "/certs/AmazonRootCA1.pem",
+  "ConnectionTimeout": 15
+}
+```
 

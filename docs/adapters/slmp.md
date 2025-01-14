@@ -1,7 +1,20 @@
 # SLMP Protocol Configuration
 
+SLMP Protocol adapter configuration.
+
+This section describes the configuration types for the SLMP protocol adapter and contains the extensions and specific configuration types.
+
+IMPORTANT : SLMP controllers only supports a single concurrent session with the controller. When reading data by multiple schedules or adapters instances, or from another SLMP client, from the same controller, timeout and broken TCP pipe errors will occur.
+
+### SLMP channel reading optimization
+
+In order to reduce the number of interactions between the adapter and the controller read action for single BIT, WORD and DOUBLEWORD elements are combined in batches of maximum 192 values using the SLMP Read Random request. For reading arrays of multiple values, STRING values and values of custom structured types a per channel SLMP Read request is used.
+
 
 ---
+
+## Configuration
+
 - [SlmpSourceConfiguration](#SlmpSourceConfiguration)
 - [SlmpChannelConfiguration](#SlmpChannelConfiguration)
 - [SlmpAdapterConfiguration](#SlmpAdapterConfiguration)
@@ -9,10 +22,13 @@
 
 ---
 
-## SLMP channel reading optimization
 
 ## SlmpSourceConfiguration
 
+Source configuration for the SLMP protocol adapter. This type extends the [BaseSourceConfiguration](../core/base-source-configuration.md) type.
+
+- [Schema](#SlmpSourceConfiguration-Schema)
+- [Examples](#SlmpSourceConfiguration-Examples)
 
 **Properties:**
 - [AdapterController](#AdapterController)
@@ -32,9 +48,68 @@ The channels configuration for an SLMP source holds configuration data to read v
 The element is a map indexed by the channel identifier.
 Channels can be "commented" out by adding a "#" at the beginning of the identifier of that channel.
 
-**Type**: Map[String,[SLMPChannelConfiguration](#SLMPChannelConfiguration)]
+**Type**: Map[String,[SlmpChannelConfiguration](#SlmpChannelConfiguration)]
 
 At least 1 channel must be configured.
+
+### SlmpSourceConfiguration Schema
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "description": "Configuration for S7 source",
+  "allOf": [
+    {
+      "$ref": "#/definitions/SourceConfiguration"
+    },
+    {
+      "type": "object",
+      "properties": {
+        "AdapterController": {
+          "type": "string",
+          "description": "Reference to the S7 controller configuration in the adapter"
+        },
+        "Channels": {
+          "type": "object",
+          "description": "Map of SLMP channel configurations",
+          "additionalProperties": {
+            "$ref": "#/definitions/SLMPChannelConfiguration"
+          },
+          "minProperties": 1
+        }
+      },
+      "required": ["AdapterController", "Channels"]
+    }
+  ]
+}
+
+```
+
+### SlmpSourceConfiguration Examples
+
+```json
+{
+  "Name": "ProcessMonitor",
+  "ProtocolAdapter" : "SlmpAdapter",
+  "AdapterController": "MainPLC",
+  "Channels": {
+    "Temperature": {
+      "Name": "Temperature",
+      "Description": "Process temperature",
+      "AccessPoint": "D100",
+      "DataType": "Float"
+    },
+    "RunStatus": {
+      "Name": "RunStatus",
+      "Description": "Process running status",
+      "AccessPoint": "M0",
+      "DataType": "Bit"
+    }
+  }
+}
+
+```
 
 [^top](#slmp-protocol-configuration)
 
@@ -43,6 +118,10 @@ At least 1 channel must be configured.
 
 ## SlmpChannelConfiguration
 
+The SlmpChannelConfiguration type extends the [ChannelConfiguration](../core/channel-configuration.md) class with channel properties for the SLMP protocol adapter.
+
+- [Schema](#SlmpChannelConfiguration-Schema)
+- [Examples](#SlmpChannelConfiguration-Examples)
 
 **Properties:**
 - [AccessPoint](#AccessPoint)
@@ -135,6 +214,53 @@ The number of values to read starting from the access point.
 
 The number of items to read can be specified as well in the DataType of the channel, e.g. WORD[size]. The Size setting can be used if the DataType field is omitted to read the default data type for the device. If the length is both specified in the DataType in both the Size setting a configuration error is raised.
 
+### SlmpChannelConfiguration Schema
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "description": "Configuration for SLMP channel",
+  "allOf": [
+    {
+      "$ref": "#/definitions/ChannelConfiguration"
+    },
+    {
+      "type": "object",
+      "properties": {
+        "AccessPoint": {
+          "type": "string",
+          "description": "Access point address for the SLMP channel"
+        },
+        "DataType": {
+          "type": "string",
+          "description": "Data type of the channel"
+        },
+        "Size": {
+          "type": "integer",
+          "description": "Number of items to read",
+          "minimum": 1
+        }
+      },
+      "required": ["AccessPoint", "DataType"]
+    }
+  ]
+}
+
+```
+
+### SlmpChannelConfiguration Examples
+
+```json
+{
+  "Name": "MotorStatus",
+  "Description": "Motor running status",
+  "AccessPoint": "M100",
+  "DataType": "Bit"
+}
+
+```
+
 [^top](#slmp-protocol-configuration)
 
 
@@ -142,9 +268,18 @@ The number of items to read can be specified as well in the DataType of the chan
 
 ## SlmpAdapterConfiguration
 
+SlmpAdapterConfiguration extension the [AdapterConfiguration](../core/protocol-adapter-configuration.md) with properties for the SLMP Protocol adapter.
 
-**Properties:**
+- [Schema](#SlmpAdapterConfiguration-Schema)
+
+- [Examples](#SlmpAdapterConfiguration-Examples)
+
+  
+
+  **Properties:**
+
 - [Controllers](#Controllers)
+
 - [Structures](#Structures)
 
 ---
@@ -157,7 +292,7 @@ Controllers configured for this adapter. The SLMP source using the adapter must 
 
 ---
 ### Structures
-Custom data structures configured for this adapter. Structured defined in this section can be uses as custom structured data types for channel values. If a structure has a field which is of a custom structure type,t hen this type must be defined first.
+Custom data structures configured for this adapter. Structured defined in this section can be uses as custom structured data types for channel values. If a structure has a field which is of a custom structure type, then this type must be defined first.
 
 **Type**: Map[String,Map{String,String]]
 
@@ -182,7 +317,86 @@ Below is an example defining a custom structure "STRUCT1" containing two fields 
 
 A SLMP channel can now use both type "STRUCT1" as "STRUCT2" as a DataType. The data is returned as a map of values indexed by the names of the fields.
 
+### SlmpAdapterConfiguration Schema
 
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "description": "Configuration for SLMP adapter",
+  "allOf": [
+    {
+      "$ref": "#/definitions/AdapterConfiguration"
+    },
+    {
+      "type": "object",
+      "properties": {
+        "Controllers": {
+          "type": "object",
+          "description": "Map of SLMP controller configurations",
+          "additionalProperties": {
+            "$ref": "#/definitions/SlmpControllerConfiguration"
+          },
+          "minProperties": 1
+        },
+        "Structures": {
+          "type": "object",
+          "description": "Map of structure definitions",
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "minItems": 1
+            }
+          }
+        }
+      },
+      "required": ["Controllers"]
+    }
+  ]
+}
+
+```
+
+### SlmpAdapterConfiguration Examples
+
+```json
+{
+  "AdapterType": "SlmpAdapter",
+  "Controllers": {
+    "MainController": {
+      "Address": "192.168.1.100",
+      "Port": 1025,
+      "NetworkNumber": 1,
+      "StationNumber": 1
+    }
+  }
+}
+```
+
+
+
+```json
+{
+  "Name": "BasicSlmpAdapter",
+  "Controllers": {
+    "MainController": {
+      "Address": "192.168.1.100",
+      "Port": 1025,
+      "NetworkNumber": 1,
+      "StationNumber": 1
+    }
+  },
+  "Structures": {
+    "ProductData": {
+      "Fields": ["ItemCode", "Quantity", "Status"]
+    }
+  }
+}
+```
 
 [^top](#slmp-protocol-configuration)
 
@@ -191,6 +405,8 @@ A SLMP channel can now use both type "STRUCT1" as "STRUCT2" as a DataType. The d
 
 ## SlmpControllerConfiguration
 
+- [Schema](#SlmpControllerConfiguration-Schema)
+- [Examples](#SlmpControllerConfiguration-Examples)
 
 **Properties:**
 - [Address](#Address)
@@ -313,6 +529,86 @@ Time to wait after an error writing request packets to the controller in millise
 **Type**: Integer
 
 Default is 10000
+
+### SlmpControllerConfiguration Schema
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "description": "Configuration for SLMP controller",
+  "properties": {
+    "Address": {
+      "type": "string",
+      "description": "IP address of the SLMP controller"
+    },
+    "CommandTimeout": {
+      "type": "integer",
+      "description": "Timeout for command execution in milliseconds"
+    },
+    "ConnectTimeout": {
+      "type": "integer",
+      "description": "Timeout for connection establishment in milliseconds"
+    },
+    "ModuleNumber": {
+      "type": "integer",
+      "description": "Module number in the SLMP network"
+    },
+    "MonitoringTimer": {
+      "type": "integer",
+      "description": "Monitoring timer value in milliseconds"
+    },
+    "MultiDropStationNumber": {
+      "type": "integer",
+      "description": "Station number for multi-drop configuration"
+    },
+    "NetworkNumber": {
+      "type": "integer",
+      "description": "Network number in the SLMP system"
+    },
+    "Port": {
+      "type": "integer",
+      "description": "TCP port number for SLMP communication"
+    },
+    "ReadTimeout": {
+      "type": "integer",
+      "description": "Timeout for read operations in milliseconds"
+    },
+    "StationNumber": {
+      "type": "integer",
+      "description": "Station number in the SLMP network"
+    },
+    "WaitAfterConnectError": {
+      "type": "integer",
+      "description": "Wait time after connection error in milliseconds"
+    },
+    "WaitAfterReadError": {
+      "type": "integer",
+      "description": "Wait time after read error in milliseconds"
+    },
+    "WaitAfterWriteError": {
+      "type": "integer",
+      "description": "Wait time after write error in milliseconds"
+    }
+  },
+  "required": ["Address"]
+}
+
+```
+
+### SlmpControllerConfiguration Examples
+
+```json
+{
+  "Address": "192.168.1.100",
+  "Port": 1025,
+  "NetworkNumber": 1,
+  "StationNumber": 1,
+  "ReadTimeout": 5000,
+  "ConnectTimeout": 10000
+}
+```
+
 
 [^top](#slmp-protocol-configuration)
 

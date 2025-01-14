@@ -188,83 +188,107 @@ Transformation "transformation4" will be applied to all aggregated values of "so
 ```json
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "definitions": {
-    "type": "object",
-    "AggregationType": {
-      "type": "string",
-      "enum": [
-        "*",
-        "avg",
-        "count",
-        "first",
-        "last",
-        "max",
-        "median",
-        "min",
-        "mode",
-        "stddev",
-        "sum",
-        "values"
-      ]
+  "type": "object",
+  "properties": {
+    "Size": {
+      "type": "integer",
+      "default": 1
+    },
+    "Output": {
+      "type": "object",
+      "patternProperties": {
+        "^.*$": {
+          "type": "object",
+          "patternProperties": {
+            "^.*$": {
+              "oneOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "const": "*"
+                  },
+                  "minItems": 1,
+                  "maxItems": 1
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "enum": [
+                      "avg",
+                      "count",
+                      "first",
+                      "last",
+                      "max",
+                      "median",
+                      "min",
+                      "mode",
+                      "stddev",
+                      "sum",
+                      "values"
+                    ]
+                  },
+                  "minItems": 1
+                }
+              ]
+            }
+          },
+          "minProperties": 1
+        }
+      },
+      "minProperties": 1,
+      "additionalProperties": false
+    },
+    "Transformations": {
+      "type": "object",
+      "patternProperties": {
+        "^.*$": {
+          "type": "object",
+          "patternProperties": {
+            "^.*$": {
+              "type": "object",
+              "patternProperties": {
+                "^.*$": {
+                  "type": "string"
+                }
+              },
+              "propertyNames": {
+                "oneOf": [
+                  {
+                    "const": "*"
+                  },
+                  {
+                    "enum": [
+                      "avg",
+                      "count",
+                      "first",
+                      "last",
+                      "max",
+                      "median",
+                      "min",
+                      "mode",
+                      "stddev",
+                      "sum",
+                      "values"
+                    ]
+                  }
+                ]
+              },
+              "minProperties": 1,
+              "additionalProperties": false
+            }
+          },
+          "minProperties": 1,
+          "additionalProperties": false
+        }
+      },
+      "minProperties": 1,
+      "additionalProperties": false
     }
   },
-  "Aggregation": {
-    "type": "object",
-    "properties": {
-      "Size": {
-        "type": "integer",
-        "default": 1
-      },
-      "Output": {
-        "type": "object",
-        "patternProperties": {
-          "^.*$": {
-            "type": "object",
-            "patternProperties": {
-              "^.*$": {
-                "type": "array",
-                "items": {
-                  "$ref": "#/definitions/AggregationType"
-                },
-                "minItems": 1
-              }
-            },
-            "minProperties": 1
-          }
-        },
-        "minProperties": 1,
-        "additionalProperties": false
-      },
-      "Transformations": {
-        "type": "object",
-        "patternProperties": {
-          "^.*$": {
-            "type": "object",
-            "patternProperties": {
-              "^.*$": {
-                "type": "object",
-                "patternProperties": {
-                  "^.*$": {
-                    "type": "string"
-                  }
-                },
-                "propertyNames": {
-                  "$ref": "#/definitions/AggregationType"
-                },
-                "minProperties": 1,
-                "additionalProperties": false
-              }
-            },
-            "minProperties": 1,
-            "additionalProperties": false
-          }
-        },
-        "minProperties": 1,
-        "additionalProperties": false
-      }
-    },
-    "required": ["Size", "Output"]
-  }
+  "required": [
+    "Size",
+    "Output"
+  ]
 }
 ```
 

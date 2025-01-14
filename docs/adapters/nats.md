@@ -1,18 +1,23 @@
 # NATS Adapter Configuration
 
+NATS Protocol adapter configuration
 
 ---
 - [NatsSourceConfiguration](#NatsSourceConfiguration)
 - [NatsChannelConfiguration](#NatsChannelConfiguration)
-- [SubjectNameMapping](#SubjectNameMapping)
+- [SubjectNameMappingConfiguration](#SubjectNameMappingConfiguration-Type)
 - [NatsAdapterConfiguration](#NatsAdapterConfiguration)
 - [NatsServerConfiguration](#NatsServerConfiguration)
-- [NatsTlsConfiguration](#NatsTlsConfiguration)
+- [TlsConfiguration](#TlsConfiguration)
 
 ---
 
 ## NatsSourceConfiguration
 
+Source configuration for the NATS protocol adapter. This type extends the [BaseSourceConfiguration](../core/base-source-configuration.md) type. 
+
+- [Schema](#NatsSourceConfiguration-Schema)
+- [Examples](#NatsSourceConfiguration-Examples)
 
 **Properties:**
 - [AdapterServer](#AdapterServer)
@@ -37,18 +42,76 @@ Channels can be "commented" out by adding a "#" at the beginning of the identifi
 
 At least 1 channel must be configured.
 
+### NatsSourceConfiguration Schema
 
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "description": "Configuration for NATS source",
+  "allOf": [
+    {
+      "$ref": "#/definitions/BaseSourceConfiguration"
+    },
+    {
+      "type": "object",
+      "properties": {
+        "AdapterServer": {
+          "type": "string",
+          "description": "Reference to the NATS server configuration to be used by this adapter"
+        },
+        "Channels": {
+          "type": "object",
+          "description": "Map of NATS channel configurations",
+          "additionalProperties": {
+            "$ref": "#/definitions/NatsChannelConfiguration"
+          },
+          "minProperties": 1
+        }
+      },
+      "required": [
+        "AdapterServer",
+        "Channels"
+      ]
+    }
+  ]
+}
+```
+
+### NatsSourceConfiguration Examples
+
+```json
+{
+  "ProtocolAdapter" : "NatsAdapter",
+  "AdapterServer": "main-nats",
+  "Channels": {
+    "temperature": {
+      "Subjects": [
+        "sensors.temperature"
+      ],
+      "Json": true
+    }
+  }
+}
+```
 
 [^top](#natsadapterconfiguration)
 
-
 ## NatsChannelConfiguration
 
+The NatsChannelConfiguration type extends the [ChannelConfiguration](../core/channel-configuration.md) class with channel properties for the NATS protocol adapter.
+
+- [Schema](#NatsChannelConfiguration-Schema)
+
+- [Examples](#NatsChannelConfiguration-Examples)
+
+  
 
 **Properties:**
+
 - [Json](#Json)
 - [Selector](#Selector)
-- [SubjectNameMapping](#SubjectNameMapping)
+- [SubjectNameMappingConfiguration](#SubjectNameMappingConfiguration)
 - [Subjects](#Subjects)
 
 ---
@@ -69,11 +132,11 @@ The selector can be used to restructure or select values from structured data ty
 Parameter: JMESPath expression, see https://jmespath.org/
 
 ---
-### SubjectNameMapping
+### SubjectNameMappingConfiguration
 Mapping from subject names to alternative names. As a channel can have multiple subjects, that also can include wildcards, 
 this mapping can be used to build consistent and expected value names.
 
-**Type**: [SubjectNameMapping](#SubjectNameMapping)
+**Type**: [SubjectNameMappingConfiguration](#SubjectNameMappingConfiguration-Type)
 
 ---
 ### Subjects
@@ -85,18 +148,88 @@ The must be **at least one subject** in the list of subjects.
 
 [^top](#natsadapterconfiguration)
 
+### NatsChannelConfiguration Schema
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "description": "Configuration for NATS channel",
+  "allOf": [
+    {
+      "$ref": "#/definitions/ChannelConfiguration"
+    },
+    {
+      "type": "object",
+      "properties": {
+        "Json": {
+          "type": "boolean",
+          "description": "Indicates if the payload is in JSON format"
+        },
+        "Selector": {
+          "type": "string",
+          "description": "Selector for filtering messages"
+        },
+        "SubjectNameMappingConfiguration": {
+          "$ref": "#/definitions/SubjectNameMappingConfiguration",
+          "description": "Configuration for mapping subject names"
+        },
+        "Subjects": {
+          "type": "array",
+          "description": "List of NATS subjects to subscribe to",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
+        }
+      },
+      "required": [
+        "Subjects"
+      ]
+    }
+  ]
+}
+```
+
+### NatsChannelConfiguration Examples
+
+```json
+{
+  "Subjects": [
+    "sensors.temperature"
+  ]
+}
+```
 
 
 
-## SubjectNameMapping
+```json
+{
+  "Subjects": [
+    "devices.*.readings",
+    "devices.*.status"
+  ],
+  "SubjectNameMappingConfiguration": {
+    "Mappings": {
+      "devices\\.(\\w+)\\.(\\w+)": "devices-{2}-{1}"
+    }
+  }
+}
+```
 
+
+
+
+
+## SubjectNameMappingConfiguration type
+
+- [Schema](#SubjectNameMappingConfiguration-Schema)
+- [Examples](#SubjectNameMappingConfiguration-Examples)
 
 **Properties:**
+
 - [IncludeUnmappedSubjects](#IncludeUnmappedSubjects)
-- [Json](#Json)
 - [Mappings](#Mappings)
-- [Selector](#Selector)
-- [SubjectNameMapping](#SubjectNameMapping)
 
 ---
 ### IncludeUnmappedSubjects
@@ -106,13 +239,6 @@ If set to false, updates for values from subjects that do not match any of the e
 
 Default is false
 
----
-### Json
-Set to true if data received from subjects is in JSON format
-
-**Type**: Boolean
-
-Default is true
 
 ---
 ### Mappings
@@ -122,24 +248,6 @@ This element is a map that uses regular expression strings as indexes. The entri
 used as replacement strings if the regular expression of the entry matches the name of the subject for an update.
 The replacement string can include substitution parameters for capturing groups in the regular expression.
 
-**Type**: Map[String,String]
-
-The must be at least one subject in the list of subjects.
-
----
-### Selector
-Evaluate a JMESpath query against the value of a structured data type and returns the result.
-The selector can be used to restructure or select values from structured data types.
-
-**Type**: String
-
-Parameter: JMESPath expression, see https://jmespath.org/
-
----
-### SubjectNameMapping
-Mapping from subject names to alternative names. As a channel can have multiple subjects, that also can include wildcards, this mapping can be used to build consistent and expected value names.
-
-**Type**: SubjectNameMapping
 
 Example:
 Channel subscription is:
@@ -156,22 +264,94 @@ The mapping is:
 	}
 ```
 
+**Type**: Map[String,String]
 
+The must be at least one subject in the list of subjects.
 
 The mapping above matches updates for sub-levels of the test subject, it will use the name of the sub-level to create a name for the received data.
 If an update is received for data in subject "test.a" then the name of the data value will be "test-a"
 
-[^top](#natsadapterconfiguration)
+### SubjectNameMappingConfiguration Schema
 
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "IncludeUnmappedSubjects": {
+      "type": "boolean",
+      "description": "Flag to include subjects that don't match any mapping",
+      "default": false
+    },
+    "Mappings": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      },
+      "minProperties": 1
+    }
+  },
+  "required": [
+    "Mappings"
+  ]
+}
+```
+
+### SubjectNameMappingConfiguration Examples
+
+
+
+```json
+{
+  "Mappings": {
+    "source\\.subject": "target.topic"
+  }
+}
+```
+
+
+
+Basic mapping with matching pattern for wildcards
+
+```json
+{
+  "Mappings": {
+    "device\\.(\\w+)\\.temperature": "sensors-temperature-{1}"
+  }
+}
+```
+
+
+
+Multiple mappings with unmapped topics included:
+
+```json
+{
+  "IncludeUnmappedSubjects": true,
+  "Mappings": {
+    "device\\.(\\w+)\\.temperature": "sensors/temp/{1}",
+    "device\\.(\\w+)\\.humidity": "sensors/humid/{1}",
+    "factory\\.line-(\w+)": "production/line-{1}"
+  }
+}
+```
+
+^top](#natsadapterconfiguration)
 
 
 
 ## NatsAdapterConfiguration
 
+NatsAdapterConfiguration extension the [AdapterConfiguration](../core/protocol-adapter-configuration.md) with properties for the NATS Protocol adapter.
+
+- [Schema](#NatsAdapterConfiguration-Schema)
+- [Examples](#NatsAdapterConfiguration-Examples)
+
 **Properties:**
 
 - [ReadMode](#ReadMode)
 - [ReceivedDataChannelSize](#ReceivedDataChannelSize)
+- [ReceivedDataChannelTimeout](#ReceivedDataChannelTimeout)
 - [Servers](#Servers)
 
 
@@ -186,10 +366,29 @@ Set to "KeepLast", which is the default, to keep only the last received message.
 - "KeepLast" to collect last message received in read interval (Default)
 - "KeepAll" to collect all messages received in read interval
 
+- 
+
 
 ---
+
 ### ReceivedDataChannelSize
+
 Size of internal buffer to receive data for subject subscriptions
+
+**Type**: Int
+
+Default is 1000
+
+
+---
+
+### ReceivedDataChannelTimeout
+
+Timeout in milliseconds to send data to internal buffer for received data for subject subscriptions
+
+**Type**: Int
+
+Default is 1000
 
 **Type**: Int
 
@@ -204,10 +403,61 @@ AdapterServer attribute.
 
 [^top](#natsadapterconfiguration)
 
+### NatsAdapterConfiguration Schema
 
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "description": "Configuration for NATS adapter",
+  "allOf": [
+    {
+      "$ref": "#/definitions/AdapterConfiguration"
+    },
+    {
+      "type": "object",
+      "properties": {
+        "Servers": {
+          "type": "object",
+          "description": "Map of NATS server configurations",
+          "additionalProperties": {
+            "$ref": "#/definitions/NatsServerConfiguration"
+          },
+          "minProperties": 1
+        }
+      },
+      "required": [
+        "Servers"
+      ]
+    }
+  ]
+}
+```
 
+### NatsAdapterConfiguration Examples
+
+```json
+{
+  "AdapterType" : "NATS",
+  "Servers": {
+    "main": {
+      "Url": "nats://secure.nats.com:4222",
+      "CredentialsFile": "/path/to/nats.creds",
+      "Tls": {
+        "Certificate": "/path/to/client-cert.pem",
+        "PrivateKey": "/path/to/private-key.pem",
+        "RootCA": "/path/to/root-ca.pem"
+      }
+    }
+  }
+}
+
+```
 
 ## NatsServerConfiguration
+
+- [Schema](#NatsServerConfiguration-Schema)
+- [Examples](#NatsServerConfiguration-Examples)
 
 **Properties:**
 
@@ -286,7 +536,7 @@ connect with TLS.
 Moreover, if configured to connect with TLS, client libraries will fail to connect to a 
 server without TLS.
 
-**Type**: TlsConfiguration
+**Type**: [TlsConfiguration](#TlsConfiguration)
 
 
 https://docs.nats.io/using-nats/developer/connecting/tls
@@ -343,17 +593,148 @@ Number of seconds to wait after connecting to the sever failed.
 
 Default is 10
 
+### NatsServerConfiguration Schema
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "description": "Configuration for NATS server connection",
+  "properties": {
+    "ConnectRetries": {
+      "type": "integer",
+      "description": "Number of connection retry attempts",
+      "default": 3
+    },
+    "CredentialsFile": {
+      "type": "string",
+      "description": "Path to NATS credentials file"
+    },
+    "NKeyFile": {
+      "type": "string",
+      "description": "Path to NATS NKey file"
+    },
+    "Password": {
+      "type": "string",
+      "description": "Password for authentication"
+    },
+    "Tls": {
+      "$ref": "#/definitions/TlsConfiguration",
+      "description": "TLS configuration for secure connection"
+    },
+    "Token": {
+      "type": "string",
+      "description": "Authentication token"
+    },
+    "Url": {
+      "type": "string",
+      "description": "NATS server URL"
+    },
+    "Username": {
+      "type": "string",
+      "description": "Username for authentication"
+    },
+    "WaitAfterConnectError": {
+      "type": "integer",
+      "description": "Wait time in seconds after connection error",
+      "default": 10
+    }
+  },
+  "required": [
+    "Url"
+  ]
+}
+```
+
+### NatsServerConfiguration Examples
+
+Basic configuration:
+
+```
+{
+  "Url": "nats://localhost:4222"
+}
+```
+
+
+
+Basic configuration using 2 servers in a cluster
+
+```
+{
+  "Url": "nats://server1:4222,nats://server2:4222"
+}
+```
+
+
+
+Username/Password authentication using configuration placeholders
+
+```json
+{
+  "Url": "nats://nats.example.com:4222",
+  "Username": "${nats_user}",
+  "Password": "${nats_password}",
+  "ConnectRetries": 5,
+  "WaitAfterConnectError": 15
+}
+```
+
+
+
+TLS with credentials file:
+
+```json
+{
+  "Url": "nats://secure.nats.com:4222",
+  "CredentialsFile": "/path/to/nats.creds",
+  "Tls": {
+    "Certificate": "/path/to/client-cert.pem",
+    "PrivateKey": "/path/to/private-key.pem",
+    "RootCA": "/path/to/root-ca.pem"
+  }
+}
+```
+
+
+
+NKey authentication:
+
+```json
+{
+  "Url": "nats://nats.example.com:4222",
+  "NKeyFile": "/path/to/user.nkey",
+}
+```
+
+
+
+Token authentication with TLS usin g configuration placeholder for the token.
+
+```json
+{
+  "Url": "nats://nats.example.com:4222",
+  "Token": "${secret-token}",
+  "ConnectRetries": 3,
+  "WaitAfterConnectError": 10
+}
+```
+
+
+
 [^top](#natsadapterconfiguration)
 
 
 
 
-## NatsTlsConfiguration
+## TlsConfiguration
 
+- [Schema](#TlsConfiguration-Schema)
+- [Examples](#TlsConfiguration-Examples)
 
 **Properties:**
 - [Certificate](#Certificate)
-- [RootCA](#RootCA)
+- [PrivateKey](#RootCA)
 - [RootCA](#RootCA)
 
 ---
@@ -363,16 +744,51 @@ Path to client certificate file.
 **Type**: String
 
 ---
-### RootCA
+### PrivateKey
 Path to root certificate file.
 
 **Type**: String
 
 ---
 ### RootCA
-Path to root private  file.
+Path to root CA certificate  file.
 
 **Type**: String
+
+### TlsConfiguration Schema
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "description": "Configuration for TLS/SSL connection",
+  "properties": {
+    "Certificate": {
+      "type": "string",
+      "description": "Path to client certificate file"
+    },
+    "PrivateKey": {
+      "type": "string",
+      "description": "Path to client private key file"
+    },
+    "RootCA": {
+      "type": "string",
+      "description": "Path to root CA certificate file"
+    }
+  }
+}
+```
+
+### TlsConfiguration Examples
+
+```json
+{
+  "Certificate": "/etc/ssl/certs/client-cert.pem",
+  "PrivateKey": "/etc/ssl/private/client-key.pem",
+  "RootCA": "/etc/ssl/certs/ca.pem"
+}
+
+```
 
 [^top](#natsadapterconfiguration)
 

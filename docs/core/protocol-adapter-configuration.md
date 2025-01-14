@@ -126,7 +126,7 @@ Example with AdapterType and Metrics:
 
 ```json
 {
-  "AdapterType": "BacNet",
+  "AdapterType": "OPCUA",
   "Description": "Building automation controller",
   "Metrics": {
     "CommonDimensions": {

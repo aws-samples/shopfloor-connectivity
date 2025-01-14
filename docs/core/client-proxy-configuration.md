@@ -141,8 +141,8 @@ With authentication:
 {
   "ProxyHost": "proxy.example.com",
   "ProxyPort": 8080,
-  "Username": "proxyuser",
-  "Password": "proxypass"
+  "Username": "${proxyuser}",
+  "Password": "${proxypass}"
 }
 ```
 
@@ -164,8 +164,8 @@ Complete configuration, all fields:
 {
   "ProxyHost": "proxy.example.com",
   "ProxyPort": 8080,
-  "Username": "proxyuser",
-  "Password": "proxypass",
+  "Username": "${proxyuser}",
+  "Password": "${proxypass}"
   "NonProxyAddresses": "localhost,127.0.0.1,*.internal.example.com,10.0.0.*"
 }
 

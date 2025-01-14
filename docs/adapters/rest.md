@@ -1,7 +1,5 @@
 # REST Protocol Adapter
 
-
-
 - [REST Adapter data mapping](#rest-adapter-data-mapping)
   - [All object properties  a single channel value](#all-object-properties--a-single-channel-value)
   - [Object properties as separate channel values](#object-properties-as-separate-channel-values)
@@ -398,6 +396,10 @@ This results in a numbered channel being created for every object in the returne
 
 ## RestSourceConfiguration
 
+Source configuration for the REST protocol adapter. This type extends the [BaseSourceConfiguration](../core/base-source-configuration.md) type.
+
+- [Schema](#RestSourceConfiguration-Schema)
+- [Examples](#RestSourceConfiguration-Examples)
 
 **Properties:**
 - [Channels](#Channels)
@@ -409,7 +411,7 @@ This results in a numbered channel being created for every object in the returne
 The channels configuration for an REST source holds configuration data to read values from the result from a source REST query. 
 "Commented" out by adding a "#" at the beginning of the identifier of that channel.
 
-**Type**: Map[String,RestChannelConfiguration]
+**Type**: Map[String,[RestChannelConfiguration](#RestChannelConfiguration)
 
 At least 1 channel must be configured.
 
@@ -432,13 +434,78 @@ of the adapter referred to by the ProtocolAdapter attribute of the source.
 
 Must be an identifier of a server in the RestServers section of the REST adapter used by the source.
 
+### RestSourceConfiguration Schema
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "description": "Configuration for REST source",
+  "allOf": [
+    {
+      "$ref": "#/definitions/SourceConfiguration"
+    },
+    {
+      "type": "object",
+      "properties": {
+        "Channels": {
+          "type": "object",
+          "description": "Map of REST channel configurations",
+          "additionalProperties": {
+            "$ref": "#/definitions/RestChannelConfiguration"
+          },
+          "minProperties": 1
+        },
+        "Request": {
+          "type": "string",
+          "description": "Request path or endpoint"
+        },
+        "RestServer": {
+          "type": "string",
+          "description": "Reference to the REST server configuration"
+        }
+      },
+      "required": ["Channels", "Request", "RestServer"]
+    }
+  ]
+}
+
+```
+
+### RestSourceConfiguration Examples
+
+```json
+{
+  "Name": "TemperatureSensor",
+  "ProtocolAdapter" : "RestAdapter",
+  "RestServer": "MainAPI",
+  "Request": "/sensors/temperature",
+  "Channels": {
+    "CurrentTemp": {
+      "Name": "CurrentTemp",
+      "Json": true,
+      "Selector": "@.temperature.current"
+    },
+    "Humidity": {
+      "Name": "Humidity",
+      "Json": true,
+      "Selector": "@.humidity.value"
+    }
+  }
+}
+
+```
+
 [^top](#rest-adapter-data-mapping)
 
 
 
 
 ## RestChannelConfiguration
+The RestChannelConfiguration type extends the [ChannelConfiguration](../core/channel-configuration.md) class with channel properties for the REST protocol adapter.
 
+- [Schema](#RestChannelConfiguration-Schema)
+- [Examples](#RestChannelConfiguration-Examples)
 
 **Properties:**
 - [Json](#Json)
@@ -467,12 +534,57 @@ the data is the raw payload if the "Json" setting for the channel is set to fals
 
 A Selector can only be used if "Json" is set to true (the default).
 
+### RestChannelConfiguration Schema
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "description": "Configuration for REST channel",
+  "allOf": [
+    {
+      "$ref": "#/definitions/ChannelConfiguration"
+    },
+    {
+      "type": "object",
+      "properties": {
+        "Json": {
+          "type": "boolean",
+          "description": "Indicates if the response should be parsed as JSON"
+        },
+        "Selector": {
+          "type": "string",
+          "description": "JSON path selector for extracting values from response"
+        }
+      }
+    }
+  ]
+}
+
+```
+
+### RestChannelConfiguration Examples
+
+```json
+{
+  "Name": "Temperature",
+  "Json": true,
+  "Selector": "@.sensor.temperature"
+}
+
+```
+
 [^top](#rest-adapter-data-mapping)
 
 
 
 
 ## RestAdapterConfiguration
+
+RestAdapterConfiguration extension the [AdapterConfiguration](../core/protocol-adapter-configuration.md) with properties for the REST Protocol adapter.
+
+- [Schema](#RestAdapterConfiguration-Schema)
+- [Examples](#RestAdapterConfiguration-Examples)
 
 **Properties:**
 
@@ -486,6 +598,109 @@ REST servers configured for this adapter. The REST source using the adapter must
 
 **Type**: Map[String,[RestServerConfiguration](#RestServerConfiguration)]
 
+### RestAdapterConfiguration Schema
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "description": "Configuration for REST adapter",
+  "properties": {
+    "RestServers": {
+      "type": "object",
+      "description": "Map of REST server configurations",
+      "additionalProperties": {
+        "$ref": "#/definitions/RestServerConfiguration"
+      },
+      "minProperties": 1
+    }
+  },
+  "required": ["RestServers"]
+}
+
+```
+
+### RestAdapterConfiguration Examples
+
+Here's the JSON Schema for RestAdapterConfiguration:
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "allOf": [
+    {
+      "$ref": "#/definitions/AdapterConfiguration"
+    },
+    {
+      "type": "object",
+      "properties": {
+        "RestServers": {
+          "type": "object",
+          "description": "Map of REST server configurations",
+          "additionalProperties": {
+            "$ref": "#/definitions/RestServerConfiguration"
+          },
+          "minProperties": 1
+        }
+      },
+      "required": [
+        "RestServers"
+      ]
+    }
+  ]
+}
+```
+
+
+
+Single server configuration:
+
+```json
+{
+  "RestServers": {
+    "MainAPI": {
+      "Server": "http://api.example.com",
+      "Headers": {
+        "Content-Type": "application/json",
+        "Accept": "application/json"
+      },
+      "RequestTimeout": 5000
+    }
+  }
+}
+```
+
+
+
+Example 2 - Multiple servers configuration:
+
+```json
+{
+  "AdapterType" : "RestAdapterType",
+  "RestServers": {
+    "ProductionAPI": {
+      "Server": "https://api.production.com",
+      "Headers": {
+        "Content-Type": "application/json",
+        "Authorization": "${prod-token}"
+      },
+      "RequestTimeout": 10000
+    },
+    "MonitoringAPI": {
+      "Server": "https://monitoring.production.com",
+      "Headers": {
+        "Content-Type": "application/json",
+        "API-Key": "${key}"
+      },
+      "RequestTimeout": 5000
+    }
+  }
+}
+```
+
+
+
+
 [^top](#rest-adapter-data-mapping)
 
 
@@ -493,10 +708,13 @@ REST servers configured for this adapter. The REST source using the adapter must
 
 ## RestServerConfiguration
 
+- [Schema](#RestServerConfiguration-Schema)
+- [Examples](#RestServerConfiguration-Examples)
 
 **Properties:**
+
 - [Headers](#Headers)
-- [Password](#Password)
+- [MaxRetries](#MaxRetries)
 - [Port](#Port)
 - [Proxy](#Proxy)
 - [RequestTimeout](#RequestTimeout)
@@ -514,8 +732,7 @@ Headers for server requests.
 The header "Accept" is by default set to application/json.
 
 ---
-### Password
-MaxRetries password
+### MaxRetries
 
 **Type**: Integer
 
@@ -572,6 +789,94 @@ Period in milliseconds to wait in between retires reading from the server.
 **Type**: Integer
 
 Default is 1000
+
+
+
+### RestServerConfiguration Schema
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "description": "Configuration for REST server",
+  "properties": {
+    "Headers": {
+      "type": "object",
+      "description": "HTTP headers to be included in requests",
+      "additionalProperties": {
+        "type": "string"
+      },
+      "minProperties": 1
+    },
+    "Password": {
+      "type": "string",
+      "description": "Password for authentication"
+    },
+    "Port": {
+      "type": "integer",
+      "description": "Server port number"
+    },
+    "Proxy": {
+      "$ref": "#/definitions/ProxyConfiguration",
+      "description": "Proxy configuration for the REST server"
+    },
+    "RequestTimeout": {
+      "type": "integer",
+      "description": "Timeout for REST requests in milliseconds"
+    },
+    "Server": {
+      "type": "string",
+      "description": "Server host address",
+      "pattern": "^https?://.*"
+    },
+    "WaitAfterReadError": {
+      "type": "integer",
+      "description": "Wait time after read error in milliseconds"
+    },
+    "WaitBeforeRetry": {
+      "type": "integer",
+      "description": "Wait time before retry in milliseconds"
+    }
+  },
+  "required": ["Server"]
+}
+
+```
+
+### RestServerConfiguration Examples
+
+Basic configuration:
+
+```json
+{
+  "Server": "http://api.example.com",
+  "Headers": {
+    "Content-Type": "application/json",
+    "Accept": "application/json"
+  },
+  "RequestTimeout": 5000
+}
+```
+
+
+
+Secure configuration with authentication:
+
+```json
+{
+  "Server": "https://secure-api.example.com",
+  "Port": 443,
+  "Headers": {
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+    "API-Key": "${key}",
+    "Authorization": "${token}"
+  },
+  "MaxRetries" : 5,
+  "RequestTimeout": 5000,
+  "WaitBeforeRetry": 1000
+}
+```
 
 [^top](#rest-adapter-data-mapping)
 
@@ -630,6 +935,131 @@ Optional, if specified then the ProxyPassword must be configured as well.
 
 Username and password should not be included as clear text in the configuration. 
 It is strongly recommended to use placeholders and use the SFC integration with the AWS secrets manager.
+
+
+
+## Schema:
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "ProxyHost": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Proxy server hostname"
+    },
+    "ProxyPort": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 65535,
+      "description": "Proxy server port number"
+    },
+    "Username": {
+      "type": "string",
+      "description": "Optional proxy authentication username"
+    },
+    "Password": {
+      "type": "string",
+      "description": "Optional proxy authentication password"
+    },
+    "NonProxyAddresses": {
+      "type": "string",
+      "description": "Optional comma-separated list of hosts that should bypass the proxy",
+      "examples": [
+        "localhost,127.0.0.1",
+        "internal.example.com,*.local,10.0.0.*"
+      ]
+    }
+  },
+  "required": [
+    "ProxyHost",
+    "ProxyPort"
+  ],
+  "additionalProperties": false,
+  "allOf": [
+    {
+      "if": {
+        "required": [
+          "Username"
+        ]
+      },
+      "then": {
+        "required": [
+          "Password"
+        ]
+      }
+    },
+    {
+      "if": {
+        "required": [
+          "Password"
+        ]
+      },
+      "then": {
+        "required": [
+          "Username"
+        ]
+      }
+    }
+  ]
+}
+```
+
+## Examples
+
+Basic configuration (only required fields):
+
+```json
+{
+  "ProxyHost": "proxy.example.com",
+  "ProxyPort": 8080
+
+}
+```
+
+
+
+With authentication:
+
+```json
+{
+  "ProxyHost": "proxy.example.com",
+  "ProxyPort": 8080,
+  "Username": "${proxyuser}",
+  "Password": "${proxypass}"
+}
+```
+
+With non-proxy addresses:
+
+```json
+{
+  "ProxyHost": "proxy.example.com",
+  "ProxyPort": 8080,
+  "NonProxyAddresses": "localhost,127.0.0.1,*.internal.example.com"
+}
+```
+
+
+
+Complete configuration, all fields:
+
+```json
+{
+  "ProxyHost": "proxy.example.com",
+  "ProxyPort": 8080,
+  "Username": "${proxyuser}",
+  "Password": "${proxypass}"
+  "NonProxyAddresses": "localhost,127.0.0.1,*.internal.example.com,10.0.0.*"
+}
+
+```
+
+
+
+
 
 [^top](#rest-adapter-data-mapping)
 

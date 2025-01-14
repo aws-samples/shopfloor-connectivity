@@ -1,6 +1,6 @@
 # PCCC Protocol Configuration
 
-
+Configuration for PCCC protocol adapter.
 
 - [PCCC Addressing](#pccc-addressing)
 
@@ -26,31 +26,31 @@ Syntax: `0<filenumber>:<element index>[/bit offset][,arraylen]`
 
 **O0:0** First 16 output bits as Boolean values in logical order, the bit at offset 0 becomes the first item in the array.
 
-![img](http://localhost:63343/markdownPreview/744924703/docs/adapters/img/pccc/image1.png)
+![img](./img/pccc/image1.png)
 
 
 
 **O0:0.1** Second set of 16 output bites as 16 Boolean values in logical order
 
-![img](http://localhost:63343/markdownPreview/744924703/docs/adapters/img/pccc/image2.png)
+![img](./img/pccc/image2.png)
 
 
 
 **O0:0,2** First 32 output bits as 2 sets of 16 Boolean values in logical order
 
-![img](http://localhost:63343/markdownPreview/744924703/docs/adapters/img/pccc/image3.png)
+![img](./img/pccc/image3.png)
 
 
 
 **O0:0/0** First output at offset 0 bit as Boolean value
 
-![img](http://localhost:63343/markdownPreview/744924703/docs/adapters/img/pccc/image4.png)
+![img](./img/pccc/image4.png)
 
 
 
 **O0:0/15** Fifteenth output bit at offset 15 as Boolean value
 
-![img](http://localhost:63343/markdownPreview/744924703/docs/adapters/img/pccc/image5.png)
+![img](./img/pccc/image5.png)
 
 
 
@@ -68,31 +68,31 @@ Syntax: `0<file number>:<element index>[/bit offset][,array len]`
 
 **I1:0** First 16 input bits as Boolean values in logical order, the bit at offset 0 becomes the first item in the array.
 
-![img](http://localhost:63343/markdownPreview/744924703/docs/adapters/img/pccc/image6.png)
+![img](./img/pccc/image6.png)
 
 
 
 **I1:0.1.** Second set of 16 input bites as 16 Boolean values in logical
 
-![img](http://localhost:63343/markdownPreview/744924703/docs/adapters/img/pccc/image7.png)
+![img](./img/pccc/image7.png)
 
 
 
 **I1:0,2** First 32 input bits as 2 sets of 16 Boolean values in logical order
 
-![img](http://localhost:63343/markdownPreview/744924703/docs/adapters/img/pccc/image8.png)
+![img](./img/pccc/image8.png)
 
 
 
 **I1:0/0**. First input bit at offset 0 as Boolean value
 
-![img](http://localhost:63343/markdownPreview/744924703/docs/adapters/img/pccc/image9.png)
+![img](./img/pccc/image9.png)
 
 
 
 **O0:0/15** Fifteenth output at offset 15 bit as Boolean value
 
-![img](http://localhost:63343/markdownPreview/744924703/docs/adapters/img/pccc/image10.png)
+![img](./img/pccc/image10.png)
 
 
 
@@ -106,25 +106,25 @@ Syntax: `B<file number>:<element index>[/bit offset]`
 
 **B3:0** First 16 binary bits as Boolean values in logical order, the bit shown below at offset 0 becomes the first item in the array.
 
-![img](http://localhost:63343/markdownPreview/744924703/docs/adapters/img/pccc/image11.png)
+![img](./img/pccc/image11.png)
 
 
 
 **B3:0.1** Second set of 16 binary bites as 16 Boolean values in logical
 
-![img](http://localhost:63343/markdownPreview/744924703/docs/adapters/img/pccc/image12.png)
+![img](./img/pccc/image12.png)
 
 
 
 **B3:0/0.** First binary bit at offset as Boolean value
 
-![img](http://localhost:63343/markdownPreview/744924703/docs/adapters/img/pccc/image13.png)
+![img](./img/pccc/image13.png)
 
 
 
 **B3:0/15** Fifteenth binary bit at offset 15 as Boolean value
 
-![img](http://localhost:63343/markdownPreview/744924703/docs/adapters/img/pccc/image14.png)
+![img](./img/pccc/image14.png)
 
 
 
@@ -142,19 +142,19 @@ Syntax:
 
 **T4:0** Timer as a structure containing all elements
 
-![img](http://localhost:63343/markdownPreview/744924703/docs/adapters/img/pccc/image15.png)
+![img](./img/pccc/image15.png)
 
 
 
 **T4:0.ACC** Timer numeric ACC value.
 
-![img](http://localhost:63343/markdownPreview/744924703/docs/adapters/img/pccc/image16.png)
+![img](./img/pccc/image16.png)
 
 
 
 **T4:0.EN** Timer Boolean EN bit value
 
-![img](http://localhost:63343/markdownPreview/744924703/docs/adapters/img/pccc/image17.png)
+![img](./img/pccc/image17.png)
 
 
 
@@ -172,19 +172,19 @@ Syntax:
 
 **C5:0** Counter as a structure containing all elements
 
-![img](http://localhost:63343/markdownPreview/744924703/docs/adapters/img/pccc/image18.png)
+![img](./img/pccc/image18.png)
 
 
 
 **C5:0.ACC Counter ACC numeric value**
 
-![img](http://localhost:63343/markdownPreview/744924703/docs/adapters/img/pccc/image19.png)
+![img](./img/pccc/image19.png)
 
 
 
 **C5:0.ACC Counter CU bit value**
 
-![img](http://localhost:63343/markdownPreview/744924703/docs/adapters/img/pccc/image20.png)
+![img](./img/pccc/image20.png)
 
 
 
@@ -202,19 +202,19 @@ Syntax:
 
 **R6:0** Control as a structure containing all elements
 
-![img](http://localhost:63343/markdownPreview/744924703/docs/adapters/img/pccc/image21.png)
+![img](./img/pccc/image21.png)
 
 
 
 **R6:0.POS Counter POS numeric value**
 
-![img](http://localhost:63343/markdownPreview/744924703/docs/adapters/img/pccc/image22.png)
+![img](./img/pccc/image22.png)
 
 
 
 **R6:0.ACC Control EN bit value**
 
-![img](http://localhost:63343/markdownPreview/744924703/docs/adapters/img/pccc/image23.png)
+![img](./img/pccc/image23.png)
 
 
 
@@ -228,19 +228,19 @@ Syntax: `N<file number>:<element index>[<array len>]`
 
 **N7:0 First 16 bits integer value**
 
-![img](http://localhost:63343/markdownPreview/744924703/docs/adapters/img/pccc/image24.png)
+![img](./img/pccc/image24.png)
 
 
 
 **N7:1 Second 16 bits integer value**
 
-![img](http://localhost:63343/markdownPreview/744924703/docs/adapters/img/pccc/image25.png)
+![img](./img/pccc/image25.png)
 
 
 
 **N7:0,3 First 3 16 bits integer values**
 
-![img](http://localhost:63343/markdownPreview/744924703/docs/adapters/img/pccc/image26.png)
+![img](./img/pccc/image26.png)
 
 
 
@@ -252,19 +252,19 @@ Syntax: `F<file number>:<element index>[<array len>]`
 
 **F8:0 First float value**
 
-![img](http://localhost:63343/markdownPreview/744924703/docs/adapters/img/pccc/image27.png)
+![img](./img/pccc/image27.png)
 
 
 
 **F8:1 Second float value**
 
-![img](http://localhost:63343/markdownPreview/744924703/docs/adapters/img/pccc/image28.png)
+![img](./img/pccc/image28.png)
 
 
 
 **F8:0,2 First 2 float value**
 
-![img](http://localhost:63343/markdownPreview/744924703/docs/adapters/img/pccc/image29.png)
+![img](./img/pccc/image29.png)
 
 
 
@@ -276,13 +276,13 @@ Syntax: `ST<file number>:<element index>`
 
 **ST9:0 First string value**
 
-![img](http://localhost:63343/markdownPreview/744924703/docs/adapters/img/pccc/image30.png)
+![img](./img/pccc/image30.png)
 
 
 
 **ST9:1 Second string value**
 
-![img](http://localhost:63343/markdownPreview/744924703/docs/adapters/img/pccc/image31.png)
+![img](./img/pccc/image31.png)
 
 
 
@@ -294,19 +294,19 @@ Syntax: `L<file number>:<element index>[<array len>]`
 
 **L10:0 First 32 bits integer value**
 
-![img](http://localhost:63343/markdownPreview/744924703/docs/adapters/img/pccc/image32.png)
+![img](./img/pccc/image32.png)
 
 
 
 **L10:1 Second 32 bits integer value**
 
-![img](http://localhost:63343/markdownPreview/744924703/docs/adapters/img/pccc/image33.png)
+![img](./img/pccc/image33.png)
 
 
 
 **L10:0,3 First 3 32 bits integer values**
 
-![img](http://localhost:63343/markdownPreview/744924703/docs/adapters/img/pccc/image34.png)
+![img](./img/pccc/image34.png)
 
 
 
@@ -320,25 +320,25 @@ Syntax: `A<file number>:<element index>[/character offset]`
 
 **A11:0 First character pair**
 
-![img](http://localhost:63343/markdownPreview/744924703/docs/adapters/img/pccc/image35.png)
+![img](./img/pccc/image35.png)
 
 
 
 **A11:0 Second character pair**
 
-![img](http://localhost:63343/markdownPreview/744924703/docs/adapters/img/pccc/image36.png)
+![img](./img/pccc/image36.png)
 
 
 
 **A11:0/0 First character of in first character pair**
 
-![img](http://localhost:63343/markdownPreview/744924703/docs/adapters/img/pccc/image37.png)
+![img](./img/pccc/image37.png)
 
 
 
 **A11:0/0 Second character of in seconds character pair**
 
-![img](http://localhost:63343/markdownPreview/744924703/docs/adapters/img/pccc/image38.png)
+![img](./img/pccc/image38.png)
 
 ---
 
@@ -349,6 +349,11 @@ Syntax: `A<file number>:<element index>[/character offset]`
 
 
 ## PcccSourceConfiguration
+
+Source configuration for the PCCC protocol adapter. This type extends the [BaseSourceConfiguration](../core/base-source-configuration.md) type.
+
+- [Schema](#PcccSourceConfiguration-Schema)
+- [Examples](#PcccSourceConfiguration-Examples)
 
 
 **Properties:**
@@ -378,6 +383,63 @@ Channels can be "commented" out by adding a "#" at the beginning of the identifi
 
 At least 1 channel must be configured.
 
+### PcccSourceConfiguration Schema
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "description": "Configuration for PCCC source",
+  "allOf": [
+    {
+      "$ref": "#/definitions/SourceConfiguration"
+    },
+    {
+      "type": "object",
+      "properties": {
+        "AdapterController": {
+          "type": "string",
+          "description": "Reference to the PCCC controller configuration in the adapter"
+        },
+        "Channels": {
+          "type": "object",
+          "description": "Map of PCCC channel configurations",
+          "additionalProperties": {
+            "$ref": "#/definitions/PcccChannelConfiguration"
+          },
+          "minProperties": 1
+        }
+      },
+      "required": ["AdapterController", "Channels"]
+    }
+  ]
+}
+
+```
+
+### PcccSourceConfiguration Examples
+
+```json
+{
+  "Name": "ProductionLine1",
+  "ProtocolAdapter" : "PCCCAdapter",
+  "AdapterController": "MainPLC",
+  "Channels": {
+    "ProductCount": {
+      "Name": "count",
+      "Address": "N7:0",
+      "Description": "Daily production counter"
+    },
+    "MachineStatus": {
+      "Name": "status",
+      "Address": "B3:0",
+      "Description": "Machine running status"
+    }
+  }
+}
+
+```
+
 [^top](#pccc-protocol-configuration)
 
 
@@ -385,6 +447,10 @@ At least 1 channel must be configured.
 
 ## PcccChannelConfiguration
 
+The PcccChannelConfiguration type extends the [ChannelConfiguration](../core/channel-configuration.md) class with channel properties for the PCCC protocol adapter.
+
+- [Schema](#PcccChannelConfiguration-Schema)
+- [Examples](#PcccChannelConfiguration-Examples)
 
 **Properties:**
 
@@ -400,6 +466,93 @@ A string containing the address of the field to read from the controller.
 
 For supported datatype and address syntax see [PCCC Addressing](#pccc-addressing).
 
+### PcccChannelConfiguration Schema
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "description": "Configuration for PCCC channel",
+  "allOf": [
+    {
+      "$ref": "#/definitions/ChannelConfiguration"
+    },
+    {
+      "type": "object",
+      "properties": {
+        "Address": {
+          "type": "string",
+          "description": "PCCC address for the channel",
+          "pattern": "^[A-Z]:\\d+(\\.\\d+)?$"
+        }
+      },
+      "required": ["Address"]
+    }
+  ]
+}
+
+```
+
+### PcccChannelConfiguration Examples
+
+Basic integer address:
+
+```json
+{
+  "Name": "Counter1",
+  "Address": "N7:0",
+  "Description": "Production counter"
+}
+```
+
+.
+
+Bit address:
+
+```json
+{
+  "Name": "RunningStatus",
+  "Address": "B3:0",
+  "Description": "Machine running status bit"
+}
+```
+
+.
+
+ Float address:
+
+```json
+{
+  "Name": "Temperature",
+  "Address": "F8:0",
+  "Description": "Process temperature"
+}
+```
+
+.
+
+Timer address:
+
+```json
+{
+  "Name": "CycleTimer",
+  "Address": "T4:0",
+  "Description": "Process cycle timer"
+}
+```
+
+.
+
+Counter with bit:
+
+```json
+{
+  "Name": "PartCounter",
+  "Address": "C5:0.0",
+  "Description": "Parts counter done bit"
+}
+```
+
 
 
 [^top](#pccc-protocol-configuration)
@@ -407,6 +560,11 @@ For supported datatype and address syntax see [PCCC Addressing](#pccc-addressing
 
 
 ## PcccAdapterConfiguration
+
+PcccAdapterConfiguration extension the [AdapterConfiguration](../core/protocol-adapter-configuration.md) with properties for the PCCC Protocol adapter.
+
+- [Schema](#PcccAdapterConfiguration-Schema)
+- [Examples](#PcccAdapterConfiguration-Examples)
 
 **Properties:**
 
@@ -420,7 +578,54 @@ PLCs servers configured for this adapter. The PCCC source using the adapter must
 
 **Type**: Map[String,[PcccControllerConfiguration](#PcccControllerConfiguration)]
 
+### PcccAdapterConfiguration Schema
 
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "description": "Configuration for PCCC adapter",
+  "allOf": [
+    {
+      "$ref": "#/definitions/AdapterConfiguration"
+    },
+    {
+      "type": "object",
+      "properties": {
+        "Controllers": {
+          "type": "object",
+          "description": "Map of PCCC controller configurations",
+          "additionalProperties": {
+            "$ref": "#/definitions/PcccControllerConfiguration"
+          },
+          "minProperties": 1
+        }
+      },
+      "required": ["Controllers"]
+    }
+  ]
+}
+```
+
+### PcccAdapterConfiguration Examples
+
+```json
+{
+  "AdapterType": "PcccAdapterType",
+  "Controllers": {
+    "MainPLC": {
+      "Address": "192.168.1.100",
+      "ConnectPath": {
+        "Backplane": 1,
+        "Slot": 0
+      },
+      "ConnectTimeout": 10000,
+      "ReadTimeout": 5000
+    }
+  }
+}
+
+```
 
 [^top](#pccc-protocol-configuration)
 
@@ -429,6 +634,8 @@ PLCs servers configured for this adapter. The PCCC source using the adapter must
 
 ## PcccControllerConfiguration
 
+- [Schema](#PcccControllerConfiguration-Schema)
+- [Examples](#PcccControllerConfiguration-Examples)
 
 **Properties:**
 
@@ -555,6 +762,83 @@ Time to wait after an error writing request packets to the controller in millise
 
 Default is 10000
 
+### PcccControllerConfiguration Schema
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "description": "Configuration for PCCC controller",
+  "properties": {
+    "Address": {
+      "type": "string",
+      "description": "IP address or hostname of the PCCC controller"
+    },
+    "ConnectPath": {
+      "$ref": "#/definitions/PcccConnectPathConfiguration",
+      "description": "Connection path configuration"
+    },
+    "ConnectTimeout": {
+      "type": "integer",
+      "description": "Timeout for connection attempts in milliseconds",
+      "default": 10000
+    },
+    "MaxReadGap": {
+      "type": "integer",
+      "description": "Maximum gap between addresses to combine reads",
+      "default": 32
+    },
+    "OptimizeReads": {
+      "type": "boolean",
+      "description": "Enable read optimization by combining adjacent addresses",
+      "default": true
+    },
+    "Port": {
+      "type": "integer",
+      "description": "Port number for the PCCC connection",
+      "default": 44818
+    },
+    "ReadTimeout": {
+      "type": "integer",
+      "description": "Timeout for read operations in milliseconds",
+      "default": 10000
+    },
+    "WaitAfterConnectError": {
+      "type": "integer",
+      "description": "Wait time after connection error in milliseconds",
+      "minimum": 0,
+      "default": 5000
+    },
+    "WaitAfterReadError": {
+      "type": "integer",
+      "description": "Wait time after read error in milliseconds",
+      "minimum": 0,
+      "default": 10000
+    },
+    "WaitAfterWriteError": {
+      "type": "integer",
+      "description": "Wait time after write error in milliseconds",
+      "minimum": 0,
+      "default": 10000
+    }
+  },
+  "required": ["Address", "ConnectPath"]
+}
+
+```
+
+### PcccControllerConfiguration Examples
+
+```json
+{
+  "Address": "192.168.1.100",
+  "ConnectPath": {
+    "Backplane": 1,
+    "Slot": 0
+  }
+}
+```
+
 [^top](#pccc-protocol-configuration)
 
 
@@ -562,6 +846,8 @@ Default is 10000
 
 ## PcccConnectPathConfiguration
 
+- [Schema](#PcccConnectPathConfiguration-Schema)
+- [Examples](#PcccConnectPathConfiguration-Examples)
 
 **Properties:**
 
@@ -598,6 +884,38 @@ Slot number
 
 Default is 0
 
-[^top](#pccc-protocol-configuration)
+### PcccConnectPathConfiguration Schema
 
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "description": "Configuration for PCCC connection path",
+  "properties": {
+    "Backplane": {
+      "type": "integer",
+      "description": "Backplane number",
+      "default" : 1
+    },
+    "Slot": {
+      "type": "integer",
+      "description": "Slot number",
+      "default": 0
+    }
+  }
+}
+
+```
+
+### PcccConnectPathConfiguration Examples
+
+```json
+{
+  "Backplane": 1,
+  "Slot": 0
+}
+
+```
+
+[^top](#pccc-protocol-configuration)
 

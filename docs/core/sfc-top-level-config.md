@@ -1,16 +1,26 @@
 ## SFC top level configuration
 
+SFC top level configuration structure	
+
+- [Schema](#Schema)
+
+- [Examples](#Examples)
+
+  
 
 **Properties:**
+
 - [AWSVersion](#AWSVersion)
 - [AwsIotCredentialProviderClients](#AwsIotCredentialProviderClients)
 - [ChangeFilters](#ChangeFilters)
 - [ConditionFilters](#ConditionFilters)
 - [ConfigProvider](#ConfigProvider)
+- [Description](#Description)
 - [ElementNames](#ElementNames)
 - [HealthProbe](#HealthProbe)
 - [LogLevel](#LogLevel)
 - [LogWriter](#LogWriter)
+- [Metadata](#Metadata)
 - [Metrics](#Metrics)
 - [MonitorIncludedConfigContentInterval](#MonitorIncludedConfigContentInterval)
 - [MonitorIncludedConfigFiles](#MonitorIncludedConfigFiles)
@@ -84,6 +94,14 @@ Configuration for custom configuration handler
 **Type**: [InProcessConfiguration](./in-process-configuration.md)
 
 ---
+
+### Description
+
+User-defined description of the configuration
+
+**Type**: String
+
+---
 ### ElementNames
 
 Names of the output elements. This is a map containing the following entries:
@@ -147,6 +165,14 @@ Configuration for custom log writer
 **Type**: [InProcessConfiguration](./in-process-configuration.md)
 
 Default built-in writer logs to console
+
+---
+
+### Metadata
+
+The optional [Metadata](../README.md#Metadata) element can be used to add additional data to the output at the top level which is combined with the metadata of each schedule. If metadata is specified, which is a map of string indexed values, it will be added to the output at the source level as an element that can be configured through the "Metadata" entry of the ElementNames configuration element.
+
+**Type**: Map[String, String]
 
 ---
 ### Metrics
@@ -368,4 +394,648 @@ User-defined version
 Optional
 
 [^top](#sfc-top-level-configuration)
+
+## Schema
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "AWSVersion": {
+      "type": "string",
+      "const": "2022-04-02"
+    },
+    "Schedules": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/Schedule"
+      },
+      "minItems": 1
+    },
+    "Sources": {
+      "type": "object",
+      "patternProperties": {
+        "^.*$": {
+          "$ref": "#/definitions/SourceConfiguration"
+        }
+      },
+      "minProperties": 1
+    },
+    "Targets": {
+      "type": "object",
+      "patternProperties": {
+        "^.*$": {
+          "$ref": "#/definitions/TargetConfiguration"
+        }
+      },
+      "minProperties": 1
+    },
+    "AwsIotCredentialProviderClients": {
+      "type": "object",
+      "patternProperties": {
+        "^.*$": {
+          "$ref": "#/definitions/AwsIotCredentialProviderClientConfiguration"
+        }
+      }
+    },
+    "ChangeFilters": {
+      "type": "object",
+      "patternProperties": {
+        "^.*$": {
+          "$ref": "#/definitions/ChangeFilterConfiguration"
+        }
+      }
+    },
+    "ConditionFilters": {
+      "type": "object",
+      "patternProperties": {
+        "^.*$": {
+          "$ref": "#/definitions/ConditionFilterConfiguration"
+        }
+      }
+    },
+    "ConfigProvider": {
+      "$ref": "#/definitions/InProcessConfiguration"
+    },
+    "Description": {
+      "type": "string"
+    },
+    "ElementNames": {
+      "type": "object",
+      "propertyNames": {
+        "enum": [
+          "Metadata",
+          "Schedule",
+          "Sources",
+          "Timestamp",
+          "Value",
+          "Values",
+          "Serial"
+        ]
+      },
+      "patternProperties": {
+        "^.*$": {
+          "type": "string"
+        }
+      },
+      "default": {
+        "Metadata": "metadata",
+        "Schedule": "schedule",
+        "Sources": "sources",
+        "Timestamp": "timestamp",
+        "Value": "value",
+        "Values": "values",
+        "Serial": "serial"
+      }
+    },
+    "HealthProbe": {
+      "$ref": "#/definitions/HealthProbeConfiguration"
+    },
+    "LogLevel": {
+      "type": "string",
+      "enum": [
+        "trace",
+        "info",
+        "warn",
+        "error"
+      ]
+    },
+    "LogWriter": {
+      "$ref": "#/definitions/InProcessConfiguration"
+    },
+    "Metadata": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "Metrics": {
+      "$ref": "#/definitions/MetricsConfiguration"
+    },
+    "MonitorIncludedConfigContentInterval": {
+      "type": "integer",
+      "default": 60
+    },
+    "MonitorIncludedConfigFiles": {
+      "type": "boolean",
+      "default": true
+    },
+    "Name": "string",
+    "ProtocolAdapterServers": {
+      "type": "object",
+      "patternProperties": {
+        "^.*$": {
+          "$ref": "#/definitions/ServerConfiguration"
+        }
+      }
+    },
+    "ProtocolAdapterTypes": {
+      "type": "object",
+      "patternProperties": {
+        "^.*$": {
+          "$ref": "#/definitions/InProcessConfiguration"
+        }
+      }
+    },
+    "ProtocolAdapters": {
+      "type": "object"
+    },
+    "SecretsManager": {
+      "$ref": "#/definitions/SecretsManagerConfiguration"
+    },
+    "TargetServers": {
+      "type": "object",
+      "patternProperties": {
+        "^.*$": {
+          "$ref": "#/definitions/ServerConfiguration"
+        }
+      }
+    },
+    "TargetTypes": {
+      "type": "object",
+      "patternProperties": {
+        "^.*$": {
+          "$ref": "#/definitions/InProcessConfiguration"
+        }
+      }
+    },
+    "Templates": {
+      "type": "object",
+      "patternProperties": {
+        "^.*$": {
+          "type": "string"
+        }
+      }
+    },
+    "Transformations": {
+      "type": "object",
+      "patternProperties": {
+        "^.*$": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/TransformationOperator"
+          },
+          "minItems": 1
+        }
+      }
+    },
+    "Tuning": {
+      "$ref": "#/definitions/TuningConfiguration"
+    },
+    "ValueFilters": {
+      "type": "object",
+      "patternProperties": {
+        "^.*$": {
+          "$ref": "#/definitions/ValueFilterConfiguration"
+        }
+      }
+    },
+    "Version": {
+      "type": "integer"
+    }
+  },
+  "required": [
+    "AWSVersion",
+    "Schedules",
+    "Sources",
+    "Targets"
+  ],
+  "allOf": [
+    {
+      "anyOf": [
+        {
+          "required": [
+            "TargetTypes"
+          ],
+          "properties": {
+            "TargetTypes": {
+              "minProperties": 1
+            }
+          }
+        },
+        {
+          "required": [
+            "TargetServers"
+          ],
+          "properties": {
+            "TargetServers": {
+              "minProperties": 1
+            }
+          }
+        }
+      ]
+    },
+    {
+      "anyOf": [
+        {
+          "required": [
+            "ProtocolAdapterTypes"
+          ],
+          "properties": {
+            "ProtocolAdapterTypes": {
+              "minProperties": 1
+            }
+          }
+        },
+        {
+          "required": [
+            "ProtocolAdapterServers"
+          ],
+          "properties": {
+            "ProtocolAdapterServers": {
+              "minProperties": 1
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
+```
+
+
+
+## Examples
+
+
+
+
+S7 data to (debug) terminal  and OPCUA targets, in-process configuration
+
+```json
+{
+  "AWSVersion": "2022-04-02",
+  "Schedules": [
+    {
+      "Name": "ConveyorData",
+      "Interval": 1000,
+      "TimestampLevel": "Both",
+      "Sources": {
+        "S7-SOURCE": ["*"]
+      },
+      "Targets": [
+        "DebugTarget",
+        "OpcuaTarget"
+      ]
+    }
+  ],
+  
+  "Sources": {
+    "S7-SOURCE": {
+      "Name": "FluidConveyor",
+      "ProtocolAdapter": "S7",
+      "AdapterController": "S7-PLC-1",
+      "Channels": {
+        "Power": {
+          "Address": "%DB120:230:DINT"
+        },
+        "Speed": {
+          "Address": "%DB120:234:DINT"
+        },
+        "Temperature": {
+          "Address": "%DB120:242:REAL",
+          "Metadata": {
+            "Unit": "Celsius"
+          }
+        },
+        "Pressure": {
+          "Address": "%DB120:246:REAL"
+        }
+      }
+    }
+  },
+  
+  "Targets": {
+    "DebugTarget": {
+      "TargetType": "DEBUG-TARGET"
+    },
+    "OpcuaTarget": {
+      "LogLevel": "Info",
+      "TargetType": "OPCUA-TARGET",
+      "AutoCreate" : true
+    }
+  },
+  
+  "TargetTypes": {
+    "DEBUG-TARGET": {
+      "JarFiles": [
+        "./debug-target/lib"
+      ],
+      "FactoryClassName": "com.amazonaws.sfc.debugtarget.DebugTargetWriter"
+    },
+    
+    "OPCUA-TARGET": {
+      "JarFiles": [
+        "./opcua-target/lib"
+      ],
+      "FactoryClassName": "com.amazonaws.sfc.opcuatarget.OpcuaTargetWriter"
+    }
+  },
+  
+  "AdapterTypes": {
+    "S7": {
+      "JarFiles": [
+        "./s7/lib"
+      ],
+      "FactoryClassName": "com.amazonaws.sfc.s7.S7Adapter"
+    }
+  },
+  
+  "ProtocolAdapters": {
+    "S7": {
+      "AdapterType": "S7",
+      "Controllers": {
+        "S7-PLC-1": {
+          "Address": "192.168.1.130",
+          "ControllerType": "S7-1200"
+        }
+      }
+    }
+  }
+}
+```
+
+
+
+Example with OPCUA source and AWS IoT Core target with metadata, filtering and transformations, in process configuration. Using a credentials client to obrtain credentials using X509 certificates required to make IoT Core service calls
+
+```json
+{
+  "AWSVersion": "2022-04-02",
+  "Schedules": [
+    {
+      "Name": "Pumpdata",
+      "Interval": 100,
+      "TimestampLevel": "Both",
+      "Sources": {
+        "MainPump": ["*"]
+      },
+      "Targets": [ "IoTCoreTarget" ]
+    }
+  ],
+  
+  "ChangeFilters": {
+    "ChangedBy10Percent": {
+      "Type": "Percent",
+      "Value": 10,
+      "AtLeast": 60000
+    }
+  },
+  
+  "ValueFilters": {
+    "GreaterThan0": {
+      "Operator": "gt",
+      "Value": 0
+    }
+  },
+  
+  "Transformations": {
+    "TwoDigits": [
+      {
+        "Operator": "TruncAt",
+        "Operand": 2
+      }
+    ]
+  },
+  
+ "Sources": {
+   
+    "Pump": {
+      "Name": "MainLiquidPump",
+      "ProtocolAdapter": "OPCUA",
+      "AdapterOpcuaServer": "PUMP-OPCUA-SERVER",
+      "SourceReadingMode": "Subscription",
+      
+      "Metadata" : {
+        "location" : "AMS",
+        "environment" : "Production",
+        "line" : "Prod-1"
+      },
+      
+      "Channels": {
+        "Pressure": {
+          "Name": "MainPressure",
+          "NodeId": "ns=3;i=1001",
+          "ChangeFilter": "ChangedBy10Percent",
+          "Transformation": "TwoDigits",
+          "Metadata": {
+            "Units": "Bar"
+          }
+        },
+        
+        "Flow": {
+          "NodeId": "ns=3;i=1002",
+          "Transformation": "TwoDigits",
+          "Metadata": {
+            "Units": "meter/sec"
+          }
+        },
+        
+        "Power": {
+          "NodeId": "ns=3;i=1003",
+          "Transformation": "TwoDigits",
+          "ValueFilter": "GreaterThan0",
+          "Metadata": {
+            "Units": "watt"
+          }
+        }
+      }
+    }
+  },
+  
+  "Targets": {
+    "IoTCoreTarget": {
+      "TargetType": "AWS-IOT-CORE",
+      "Region": "eu-west-1",
+      "TopicName": "pump-data-topic",
+      "CredentialProviderClient": "AwsIotClient"
+    }
+  },
+  
+  "TargetTypes": {
+    "AWS-IOT-CORE": {
+      "JarFiles": [ "./sfc/aws-iot-core-target/lib"],
+      "FactoryClassName": "com.amazonaws.sfc.awsiotcore.AwsIotCoreTargetWriter"
+    }
+  },
+  "AdapterTypes": {
+    "OPCUA": {
+      "JarFiles": ["./sfc/opcua/lib" ],
+      "FactoryClassName": "com.amazonaws.sfc.opcua.OpcuaAdapter"
+    }
+  },
+  
+  "ProtocolAdapters": {
+    "OPCUA": {
+      "AdapterType": "OPCUA",
+      "OpcuaServers": {
+        "PUMP-OPCUA-SERVER": {
+          "Address": "opc.tcp://uademo.prosysopc.com",
+          "Path": "OPCUA/SimulationServer",
+          "Port": 53530
+        }
+      }
+    }
+  },
+  
+  "AwsIotCredentialProviderClients": {
+    "AwsIotClient": {
+      "IotCredentialEndpoint": "aaaaaaaaaa.credentials.iot.eu-west-1.amazonaws.com",
+      "RoleAlias": "PumpTokenExchangeRoleAlias",
+      "ThingName": "PumpThing-1",
+      "Certificate": "./certificates/thingCert.crt",
+      "PrivateKey": "./certificates/privKey.key",
+      "RootCa": "./certificates/rootCA.pem"
+    }
+  }
+}
+```
+
+
+
+Example with 2 OPCUA sources and AWS IoT Core and Amazon S3 targets using IPC configuration.
+
+Condifuration is using Templates for repeating channel sections and region value.
+
+```json
+{
+  "AWSVersion": "2022-04-02",
+  "Schedules": [
+    {
+      "Name": "Pumpdata",
+      "Interval": 100,
+      "TimestampLevel": "Both",
+      "Sources": {
+        "OPCUA-SOURCE": ["*" ]
+      },
+      "Targets": ["IoTCoreTarget", "S3Target"]
+    }
+  ],
+  
+  
+  "Sources": {
+    
+    "Pump1": {
+      "Name": "MainLiquidPump1",
+      "ProtocolAdapter": "OPCUA",
+      "AdapterOpcuaServer": "PUMP1-OPCUA-SERVER",
+      "SourceReadingMode": "Subscription",
+      "Metadata": {
+        "location": "AMS",
+        "environment": "Production",
+        "line": "Prod-1"
+      },
+      "Channels": "$(PUMPDATA-CHANNELS-TEMPLATE)"
+    },
+    
+    "Pump2": {
+      "Name": "MainLiquidPump2",
+      "ProtocolAdapter": "OPCUA",
+      "AdapterOpcuaServer": "PUMP2-OPCUA-SERVER",
+      "SourceReadingMode": "Subscription",
+      "Metadata": {
+        "location": "AMS",
+        "environment": "Production",
+        "line": "Prod-2"
+      },
+      "Channels": "$(PUMPDATA-CHANNELS-TEMPLATE)"
+    }
+  },
+  
+  "Targets": {
+    "IoTCoreTarget": {
+      "TargetServer": "IotCoreTargetServer",
+      "TargetType": "AWS-IOT-CORE",
+      "Region": "$(REGION-TEMPLATE)",
+      "TopicName": "pump-data-topic",
+      "CredentialProviderClient": "AwsIotClient"
+    },
+    "S3Target": {
+      "Active": true,
+      "TargetType": "AWS-S3",
+      "TargetServer": "S3TargetServer",
+      "Region": "$(REGION)",
+      "BucketName": "ams-production",
+      "Interval": 60,
+      "BufferSize": 1,
+      "Prefix": "pumpdata",
+      "CredentialProviderClient": "AwsIotClient",
+      "Compression": "Zip"
+    }
+  },
+  
+  "ProtocolAdapters": {
+    "OPCUA": {
+      "AdapterType": "OPCUA",
+      "AdapterServer": "OpcuaProtocolAdapterServer",
+      "OpcuaServers": {
+        "PUMP1-OPCUA-SERVER": {
+          "Address": "opc.tcp://production1",
+          "Path": "/pumpdata",
+          "Port": 53530
+        },
+        "PUMP2-OPCUA-SERVER": {
+          "Address": "opc.tcp://production2",
+          "Path": "/pumpdata",
+          "Port": 53530
+        }
+      }
+    }
+  },
+  "AdapterServers": {
+    "OpcuaProtocolAdapterServer": {
+      "Address": "192.168.1.10",
+      "Port": 50000
+    }
+  },
+  "TargetServers": {
+    "IotCoreTargetServer": {
+      "Address": "192.168.1.11",
+      "Port": 40000
+    },
+    "S3TargetServer": {
+      "Address": "192.168.1.11",
+      "Port": 40001
+    }
+  },
+  
+  "AwsIotCredentialProviderClients": {
+    "AwsIotClient": {
+      "IotCredentialEndpoint": "aaaaaaaaaa.credentials.iot.$(REGION-TEMPLATE).amazonaws.com",
+      "RoleAlias": "PumpTokenExchangeRoleAlias",
+      "ThingName": "PumpThing-1",
+      "Certificate": "./certificates/thingCert.crt",
+      "PrivateKey": "./certificates/privKey.key",
+      "RootCa": "./certificates/rootCA.pem"
+    }
+  },
+  
+  "Templates": {
+    
+    "REGION-TEMPLATE": "eu-west1",
+    
+    "PUMPDATA-CHANNELS-TEMPLATE": {
+      "Pressure": {
+        "NodeId": "ns=3;i=1001",
+        "Metadata": {
+          "Units": "bar"
+        }
+      },
+      "Flow": {
+        "NodeId": "ns=3;i=1002",
+        "Metadata": {
+          "Units": "meter/sec"
+        }
+      },
+      "Power": {
+        "NodeId": "ns=3;i=1003",
+        "Metadata": {
+          "Units": "watt"
+        }
+      }
+    }
+  }
+}
+```
 

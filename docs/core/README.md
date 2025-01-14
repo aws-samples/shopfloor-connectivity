@@ -1,31 +1,33 @@
 ## SFC Core Configuration
 
-  - [SFC top level configuration](sfc-top-level-config.md)
+
+
+  - **[SFC top level configuration](sfc-top-level-config.md)**
 
     
 
-    Core configuration types:
+    ## Core Configuration types
 
-    
-
-  - [MetricsConfiguration](metrics-configuration.md)
-
-  - [MetricsWriterConfiguration](metrics-writer-configuration.md)
-
-  - [ProtocolAdapterConfiguration](protocol-adapter-configuration.md)
-
-  - [Schedules](schedule-config.md)
-
+  - [AggregationConfiguration](./aggregation-config.md)
+  - [AwsIotCredentialProviderClientConfiguration](./aws-iot-credential-provider-configuration.md)
+  - [BaseSurceConfiguration](./base-source-configuration.md)
+  - [ChangeFilterConfiguration](./change-filter-configuration.md)
+  - [ChannelConfiguration](./channel-configuration.md)
+  - [ClientProxyConfiguration](./client-proxy-configuration.md)
+  - [CloudSecretConfiguration](./cloud-secret-configuration.md)
+  - [ConditionFilterConfiguration](./condition-filter-configuration.md)
+  - [HealthProbeConfiguration](./health-probe-configuration.md)
+  - [InProcessConfiguration](./in-process-configuration.md)
+  - [MetricsConfiguration](./metrics-configuration.md)
+  - [MetricsSourceConfiguration](./metrics-source-configuration.md)
+  - [MetricsWriterConfiguration](./metrics-writer-configuration.md)
+  - [ProtocolAdapterConfiguration](./protocol-adapter-configuration.md)
+  - [Schedule](./schedule-config.md)
   - [SecretsManagerConfiguration](secrets-manager-configuration.md)
-
+  - [SelfSignedCertificateConfiguration](./self-signed-certificate-configuration.md)
   - [ServerConfiguration](server-configuration.md)
-
   - [SourceConfiguration](source-configuration.md)
-
-  - [Targets](target-configuration.md)
-
-  - [TransformationOperator](transformation-operator-configuration.md)
-
+  - [TargetConfiguration](target-configuration.md)
+  - [TransformationOperatorConfiguration](transformation-operator-configuration.md)
   - [TuningConfiguration](tuning-configuration.md)
-
   - [ValueFilterConfiguration](value-filter-configuration.md)

@@ -4,18 +4,22 @@
 ---
 - [AwsCloudWatchConfiguration](#AwsCloudWatchConfiguration)
 
-
+- [Schema](#Schema)
+- [Example](#Example)
 
 ## AwsCloudWatchConfiguration
 
 
 **Properties:**
 - [BatchSize](#BatchSize)
-- [CloudWatchMetricsChannelSize](#CloudWatchMetricsChannelSize)
-- [CloudWatchMetricsChannelTimeout](#CloudWatchMetricsChannelTimeout)
+
 - [CredentialProviderClient](#CredentialProviderClient)
+
 - [Interval](#Interval)
+
 - [Region](#Region)
+
+  
 
 ---
 ### BatchSize
@@ -24,22 +28,6 @@ Number of data points to buffer to write as a batch to CloudWatch service
 **Type**: Int
 
 Default and max value is 1000
-
----
-### CloudWatchMetricsChannelSize
-Size of internal buffer to send metrics data to CloudWatch
-
-**Type**: Int
-
-Default is 1000
-
----
-### CloudWatchMetricsChannelTimeout
-Time in milliseconds to send data to internal buffer
-
-**Type**: Int
-
-Default is 1000
 
 ---
 ### CredentialProviderClient
@@ -70,3 +58,48 @@ Default is region setup for AWS SDK
 
 
 
+## Schema
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "AwsCloudWatchConfiguration",
+  "type": "object",
+  "properties": {
+    "BatchSize": {
+      "type": "integer",
+      "description": "Size of the batch for CloudWatch metrics",
+      "minimum": 1,
+      "maximum": 1000,
+      "default": 1000
+    },
+    "CredentialProviderClient": {
+      "type": "string",
+      "description": "Name of the AWS IoT credentials provider client"
+    },
+    "Interval": {
+      "type": "integer",
+      "description": "Interval in seconds between metrics submissions",
+      "minimum": 1,
+      "default": 60
+    },
+    "Region": {
+      "type": "string",
+      "description": "AWS region for CloudWatch"
+    }
+  }
+}
+
+```
+
+## Example
+
+```json
+{
+  "BatchSize": 500,
+  "CredentialProviderClient": "MyAwsCredentialsProvider",
+  "Interval": 120,
+  "Region": "us-west-2"
+}
+
+```

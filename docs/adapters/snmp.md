@@ -1,5 +1,6 @@
 # SNMP Protocol Configuration
 
+SNMP Protocol adapter configuration
 
 ---
 - [SnmpSourceConfiguration](#SnmpSourceConfiguration)
@@ -10,6 +11,11 @@
 ---
 
 ## SnmpSourceConfiguration
+
+Source configuration for the SNMP protocol adapter. This type extends the [BaseSourceConfiguration](../core/base-source-configuration.md) type.
+
+- [Schema](#SnmpSourceConfiguration-Schema)
+- [Examples](#SnmpSourceConfiguration-Examples)
 
 
 **Properties:**
@@ -35,12 +41,79 @@ Channels can be "commented" out by adding a "#" at the beginning of the identifi
 
 At least 1 channel must be configured.
 
+### SnmpSourceConfiguration Schema
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "description": "Configuration for SNMP source",
+  "allOf": [
+    {
+      "$ref": "#/definitions/SourceConfiguration"
+    },
+    {
+      "type": "object",
+      "properties": {
+        "AdapterDevice": {
+          "type": "string",
+          "description": "Reference to the SNMP device configuration in the adapter"
+        },
+        "Channels": {
+          "type": "object",
+          "description": "Map of SNMP channel configurations",
+          "additionalProperties": {
+            "$ref": "#/definitions/SnmpChannelConfiguration"
+          },
+          "minProperties": 1
+        }
+      },
+      "required": ["AdapterDevice", "Channels"]
+    }
+  ]
+}
+
+```
+
+### SnmpSourceConfiguration Examples
+
+```json
+{
+  "ProtocolAdapter": "SnmpAdapter",
+  "Description": "Core switch monitoring",
+  "AdapterDevice": "CoreSwitch",
+  "Channels": {
+    "Uptime": {
+      "Name": "SystemUptime",
+      "Description": "System uptime",
+      "ObjectId": "1.3.6.1.2.1.1.3.0"
+    },
+    "InOctets": {
+      "Name": "IncomingTraffic",
+      "Description": "Incoming traffic on port 1",
+      "ObjectId": "1.3.6.1.2.1.2.2.1.10.1"
+    },
+    "OutOctets": {
+      "Name": "OutgoingTraffic",
+      "Description": "Outgoing traffic on port 1",
+      "ObjectId": "1.3.6.1.2.1.2.2.1.16.1"
+    }
+  }
+}
+
+```
+
 [^top](#snmp-protocol-configuration)
 
 
 
 
 ## SnmpChannelConfiguration
+
+The SnmpChannelConfiguration type extends the [ChannelConfiguration](../core/channel-configuration.md) class with channel properties for the SNMP protocol adapter.
+
+- [Schema](#SnmpChannelConfiguration-Schema)
+- [Examples](#SnmpChannelConfiguration-Examples)
 
 **Properties:**
 
@@ -56,6 +129,42 @@ ID of the object to read
 
 Must be in valid dot format notation
 
+### SnmpChannelConfiguration Schema
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "description": "Configuration for SNMP channel",
+  "allOf": [
+    {
+      "$ref": "#/definitions/ChannelConfiguration"
+    },
+    {
+      "type": "object",
+      "properties": {
+        "ObjectId": {
+          "type": "string",
+          "description": "SNMP Object Identifier (OID)",
+          "pattern": "^([0-9]+\\.)*[0-9]+$"
+        }
+      },
+      "required": ["ObjectId"]
+    }
+  ]
+}
+```
+
+### SnmpChannelConfiguration Examples
+
+```json
+{
+  "Name": "SystemUptime",
+  "Description": "System uptime in timeticks",
+  "ObjectId": "1.3.6.1.2.1.1.3.0"
+}
+```
+
 [^top](#snmp-protocol-configuration)
 
 
@@ -63,10 +172,14 @@ Must be in valid dot format notation
 
 ## SnmpAdapterConfiguration
 
+SnmpAdapterConfiguration extension the [AdapterConfiguration](../core/protocol-adapter-configuration.md) with properties for the SNMP Protocol adapter.
+
+- [Schema](#SnmpAdapterConfiguration-Schema)
+- [Examples](#SnmpAdapterConfiguration-Examples)
 
 **Properties:**
 - [Devices](#Devices)
-- 
+
 
 ---
 ### Devices
@@ -74,12 +187,73 @@ Snmp devices configured for this adapter. The modbus tcp source using the adapte
 
 **Type**: Map[String,[SnmpDeviceConfiguration](#SnmpDeviceConfiguration)]
 
+### SnmpAdapterConfiguration Schema
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "description": "Configuration for SNMP adapter",
+  "allOf": [
+    {
+      "$ref": "#/definitions/AdapterConfiguration"
+    },
+    {
+      "type": "object",
+      "properties": {
+        "Devices": {
+          "type": "object",
+          "description": "Map of SNMP device configurations",
+          "additionalProperties": {
+            "$ref": "#/definitions/SnmpDeviceConfiguration"
+          },
+          "minProperties": 1
+        }
+      },
+      "required": ["Devices"]
+    }
+  ]
+}
+
+```
+
+### SnmpAdapterConfiguration Examples
+
+```json
+{
+  "AdapterType": "SnmpAdapter",
+  "Description": "Basic network device monitoring",
+  "Devices": {
+    "MainSwitch": {
+      "Address": "192.168.1.1",
+      "Community": "public",
+      "SnmpVersion": 2",
+      "Port": 161,
+      "Timeout": 5000,
+      "Retries": 3
+    },
+    "BackupSwitch": {
+      "Address": "192.168.1.2",
+      "Community": "public",
+      "SnmpVersion": 2,
+      "Port": 161,
+      "Timeout": 5000,
+      "Retries": 3
+    }
+  }
+}
+
+```
+
 [^top](#snmp-protocol-configuration)
 
 
 
 
 ## SnmpDeviceConfiguration
+
+- [Schema](#SnmpDeviceConfiguration-Schema)
+- [Examples](#SnmpDeviceConfiguration-Examples)
 
 
 **Properties:**
@@ -153,6 +327,72 @@ The timeout period in milliseconds to read from the device.
 **Type**: Integer
 
 Default is 10000
+
+### SnmpDeviceConfiguration Schema
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "description": "Configuration for SNMP device",
+  "properties": {
+    "Address": {
+      "type": "string",
+      "description": "IP address or hostname of the SNMP device"
+    },
+    "Community": {
+      "type": "string",
+      "description": "SNMP community string"
+      "default" : "public"
+    },
+    "NetworkProtocol": {
+      "type": "string",
+      "description": "Network protocol to use",
+      "enum": ["UDP", "TCP"],
+      "default" : "UDP"
+    },
+    "Port": {
+      "type": "integer",
+      "description": "SNMP port number",
+      "default": 161
+    },
+    "ReadBatchSize": {
+      "type": "integer",
+      "description": "Number of OIDs to read in a single SNMP request"
+    },
+    "Retries": {
+      "type": "integer",
+      "description": "Number of retry attempts for failed requests"
+    },
+    "SnmpVersion": {
+      "type": "integer",
+      "description": "SNMP protocol version",
+      "enum": [1, 2],
+      "default" : 2
+    },
+    "Timeout": {
+      "type": "integer",
+      "description": "Timeout in milliseconds for SNMP requests"
+    }
+  },
+  "required": ["Address"]
+}
+
+```
+
+### SnmpDeviceConfiguration Examples
+
+```json
+{
+  "Address": "192.168.1.100",
+  "Community": "public",
+  "SnmpVersion": "v2c",
+  "Port": 161,
+  "Timeout": 5000,
+  "Retries": 3
+}
+
+```
 
 [^top](#snmp-protocol-configuration)
 

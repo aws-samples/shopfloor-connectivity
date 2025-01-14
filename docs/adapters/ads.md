@@ -12,8 +12,14 @@
 
 ## AdsSourceConfiguration
 
+Source configuration for the ADS protocol adapter. This type extends the [BaseSourceConfiguration](../core/base-source-configuration.md) type. 
+
+- [Schema](#AdsSourceConfiguration-Schema)
+
+- [Examples](#AdsSourceConfiguration-example) 
 
 **Properties:**
+
 - [AdapterDevice](#AdapterDevice)
 - [Channels](#Channels)
 - [SourceAmsId](#SourceAmsId)
@@ -85,8 +91,102 @@ This can be any value.
 
 
 
+### AdsSourceConfiguration Schema
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "#/definitions/BaseSourceConfiguration"
+    },
+    {
+      "type": "object",
+      "properties": {
+        "AdapterDevice": {
+          "type": "string"
+          "description": "ADS adapter device identifier"
+        },
+        "Channels": {
+          "type": "object",
+          "description": "Map of channel configurations indexed by string",
+          "patternProperties": {
+            "^.*$": {
+              "$ref": "external-schema.json#/definitions/AdsChannelConfiguration"
+            }
+          },
+          "minProperties" : 1,
+        },
+        "SourceAmsId": {
+          "type": "string"
+          "description": "Source AMS ID for the ADS connection"
+        },
+        "SourceAmsPort": {
+          "type":"integer", 
+          "description": "Source AMS port number",
+          "minimum": 0,
+          "maximum": 65535
+        },
+        "TargetAmsId": {
+          "type": "string"
+          "description": "Target AMS ID for the ADS connection"
+        },
+        "TargetAmsPort": {
+          "type": "integer"
+          "description": "Target AMS port number"
+        }
+      },
+      "required": ["Channels"],
+      "additionalProperties": false
+    }
+  ]
+}
+
+```
+
+### AdsSourceConfiguration Example
+
+```json
+{
+  "Description": "Assembly Line PLC",
+  "Name": "AssemblyPLC1",
+  "ProtocolAdapter": "ads-adapter",
+  "AdapterDevice": "PLC1",
+  "Channels": {
+    "temperature": {
+      "Name": "Temperature_Sensor",
+      "SymbolName": "MAIN.Temperature"
+    },
+    "pressure": {
+      "Name": "Pressure_Sensor",
+      "SymbolName": "MAIN.PressureValue"
+    },
+    "speed": {
+      "Name": "Conveyor_Speed",
+      "SymbolName": "MAIN.ConveyorSpeed"
+    }
+  },
+  "SourceAmsId": "192.168.1.10.1.1",
+  "SourceAmsPort": 851,
+  "TargetAmsId": "192.168.1.20.1.1",
+  "TargetAmsPort": 852
+}
+```
+
+
+
+
+
 
 ## AdsChannelConfiguration
+
+The AdsChannelConfiguration type extends the [ChannelConfiguration](../core/channel-configuration.md) class with channel properties for the ADS protocol adapter.
+
+
+
+- [Schema](#AdsChannelConfiguration-Schema)
+- [Example](#AdsChannelConfiguration-Example)
 
 **Properties:**
 
@@ -100,13 +200,53 @@ A string containing the name of the symbol to read from the device.
 
 [^top](#ads-protocol-configuration)
 
+### AdsChannelConfiguration Schema
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "external-schema.json#/definitions/ChannelConfiguration"
+    },
+    {
+      "type": "object",
+      "properties": {
+        "SymbolName": {
+          "type": "string",
+          "description": "ADS symbol name for the channel"
+        }
+      },
+      "additionalProperties": false
+    }
+  ]
+}
+
+```
+
+
+
+## AdsChannelConfiguration Example
+
+```json
+{
+      "Name": "Temperature_Sensor",
+      "SymbolName": "MAIN.Temperature"
+    }
+```
 
 
 
 ## AdsAdapterConfiguration
 
+AdsAdapterConfiguration extension the [AdapterConfiguration](../core/protocol-adapter-configuration.md) with properties for the ADS Protocol adapter.
+
+- [Schema](#AdsAdapterConfiguration-Schema)
+- [Example](#AdsAdapterConfiguration-Example)
 
 **Properties:**
+
 - [Controllers](#Controllers)
 
 ---
@@ -119,8 +259,75 @@ Devices configured for this adapter. The ADS source using the adapter must have 
 
 
 
+### AdsAdapterConfiguration Schema
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "external-schema.json#/definitions/AdapterConfiguration"
+    },
+    {
+      "type": "object",
+      "properties": {
+        "Controllers": {
+          "type": "object",
+          "description": "Map of ADS device controllers indexed by string",
+          "patternProperties": {
+            "^.*$": {
+              "$ref": "external-schema.json#/definitions/AdsDeviceController"
+            }
+          },
+          "minProperties": 1
+        }
+      },
+      "required": ["Controllers"]
+    }
+  ]
+}
+
+```
+
+
+
+### AdsAdapterConfiguration Example
+
+```json
+{
+  "Name": "ProductionAdsAdapter",
+  "Description": "Production line ADS adapter",
+  "AdapterType" : "ADS",
+  "Controllers": {
+    "assembly_plc": {
+      "Name": "AssemblyPLC",
+      "IpAddress": "192.168.1.101"
+    },
+    "packaging_plc": {
+      "Name": "PackagingPLC",
+      "IpAddress": "192.168.1.102"
+    },
+    "quality_plc": {
+      "Name": "QualityControlPLC",
+      "IpAddress": "192.168.1.103"
+    }
+  }
+}
+
+```
+
+
+
+
 
 ## AdsDeviceConfiguration
+
+Configuration for an ADS Controller.
+
+\- [Schema](#AdsDeviceConfiguration-schema)
+
+-[Example](#AdsDeviceConfiguration-example)
 
 
 **Properties:**
@@ -198,4 +405,101 @@ Time to wait after an error writing request packets to the controller in millise
 Default is 10000
 
 [^top](#ads-protocol-configuration)
+
+
+
+### AdsDeviceConfiguration Schema
+
+```json
+[
+  {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "properties": ":"
+  },
+  {
+    "type": "object",
+    "properties": {
+      "Address": {
+        "type": "string",
+        "description": "IP address or hostname of the ADS device"
+      },
+      "CommandTimeout": {
+        "type": [
+          "integer",
+          "null"
+        ],
+        "description": "Timeout for command execution in milliseconds",
+        "default": 10000
+      },
+      "ConnectTimeout": {
+        "type": "integer",
+        "description": "Timeout for connection establishment in milliseconds",
+        "default": 10000
+      },
+      "Port": {
+        "type": "integer",
+        "description": "TCP port number for the ADS connection",
+        "default": 48898
+      },
+      "ReadTimeout": {
+        "type": "integer",
+        "description": "Timeout for read operations in milliseconds",
+        "default": 10000
+      },
+      "WaitAfterConnectError": {
+        "type": "integer",
+        "description": "Wait time after connection error in milliseconds"
+      },
+      "WaitAfterReadError": {
+        "type": [
+          "integer",
+          "null"
+        ],
+        "description": "Wait time after read error in milliseconds",
+        "default": 10000
+      },
+      "WaitAfterWriteError": {
+        "type": [
+          "integer",
+          "null"
+        ],
+        "description": "Wait time after write error in milliseconds",
+        "default": 10000
+      }
+    }
+  }
+]
+```
+
+
+
+### AdsDeviceConfiguration Example
+
+Basic configuration:
+
+```json
+{
+  "Address": "192.168.1.100",
+  "Port": 48898
+}
+```
+
+Full configuration:
+
+```json
+{
+  "Address": "192.168.1.100",
+  "Port": 48898,
+  "CommandTimeout": 5000,
+  "ConnectTimeout": 10000,
+  "ReadTimeout": 1000,
+  "WaitAfterConnectError": 5000,
+  "WaitAfterReadError": 1000,
+  "WaitAfterWriteError": 1000
+}
+```
+
+```json
+```
 

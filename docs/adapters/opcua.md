@@ -1,13 +1,11 @@
 # OPCUA Protocol adapter
 
-This section describes the configuration types for the OPCUA protocol adapter and contains the extensions and specific configuration types.
-
+Configuration types for the OPCUA protocol adapter and contains the extensions and specific configuration types.
 
 
 
 - [OPCUA Alarm and Events types](#opcua-alarm-and-event-types)
 - [OPCUA security profiles and certificates](#opcua-security-profiles-and-certificates)
-
 
 
 **Configuration**
@@ -155,7 +153,6 @@ Sources are configured to read from adapter "OPCUA" and server "OPCUA-SERVER", w
 
 
 
-
 # OPCUA security profiles and certificates
 
 In order to secure the traffic between the OPCUA protocol adapter and the OPCUA Server it can be signed and encrypted using certificates.
@@ -259,6 +256,10 @@ Example of OPCUA server configuration using Basic256Sha256 security profile for 
 
 ## OpcuaSourceConfiguration
 
+Source configuration for the OPCUA protocol adapter. This type extends the [BaseSourceConfiguration](../core/base-source-configuration.md) type.
+
+- [Schema](#OpcuaSourceConfiguration-Schema)
+- [Examples](#OpcuaSourceConfiguration-Examples)
 
 **Properties:**
 - [AdapterOpcuaServer](#AdapterOpcuaServer)
@@ -327,8 +328,88 @@ Time in milliseconds that will be used as the SubscribePublishingInterval when c
 
 [^top](#opcua-protocol-adapter)
 
+### OpcuaSourceConfiguration Schema
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "description": "Configuration for OPC UA source",
+  "allOf": [
+    {
+      "$ref": "#/definitions/SourceConfiguration"
+    },
+    {
+      "type": "object",
+      "properties": {
+        "AdapterOpcuaServer": {
+          "type": "string",
+          "description": "Reference to the OPC UA server configuration in the adapter"
+        },
+        "Channels": {
+          "type": "object",
+          "description": "Map of channel configurations",
+          "additionalProperties": {
+            "$ref": "#/definitions/OpcuaNodeChannelConfiguration"
+          }
+        },
+        "EventQueueSize": {
+          "type": "integer",
+          "description": "Size of the event queue"
+        },
+        "EventSamplingInterval": {
+          "type": "integer",
+          "description": "Sampling interval for events in milliseconds"
+        },
+        "SourceReadingMode": {
+          "type": "string",
+          "description": "Reading mode for the source",
+          "enum": ["Polling", "Subscription"],
+          "default" : "Subscription"
+        },
+        "SubscribePublishingInterval": {
+          "type": "integer",
+          "description": "Publishing interval for subscriptions in milliseconds",
+          "minimum": 0
+        }
+      },
+      "required": ["AdapterOpcuaServer", "Channels"]
+    }
+  ]
+}
+
+
+```
+
+### OpcuaSourceConfiguration Examples
+
+```json
+{
+  "Name": "ProductionLine1",
+  "SourceReadingMode" : "Subscription",
+  "ProtocolAdapter": "OpcuaAdapter",
+  "AdapterOpcuaServer" : "OpcuaServer1",
+  "Channels": {
+    "Temperature": {
+      "Name": "temperature",
+      "NodeId": "ns=2;i=1234",
+      "Description": "Temperature sensor reading"
+    },
+    "Pressure": {
+      "Name": "pressure",
+      "NodeId": "ns=2;i=1235",
+      "Description": "Pressure sensor reading"
+    }
+  }
+}
+```
 
 ## OpcuaNodeChannelConfiguration
+
+The OpcuaNodeChannelConfiguration type extends the [ChannelConfiguration](../core/channel-configuration.md) class with channel properties for the OPCUA protocol adapter.
+
+- [Schema](#OpcuaNodeChannelConfiguration-Schema)
+- [Examples](#OpcuaNodeChannelConfiguration-Examples)
 
 
 **Properties:**
@@ -372,7 +453,7 @@ If not set all values from an array are read. For syntax see https://reference.o
 ### NodeChangeFilter
 Change filter used in subscription for node that defines the conditions when a value change must be reported.
 
-**Type**: OpcuaNodeChangeFilter
+**Type**: [OpcuaNodeChangeFilter](#OpcuaNodeChangeFilter)
 
 Optional
 
@@ -390,7 +471,7 @@ with the fields:
 `<namespace index>`: The namespace index formatted as a number.
 `<identifier type>`: A flag that specifies the identifier type. The flag has the following values:
 
-- I: Intege
+- I: Integer
 - S: String
 - G: Guid
 - B: ByteString
@@ -409,10 +490,114 @@ Parameter: JMESPath expression, see https://jmespath.org/
 
 [^top](#opcua-protocol-adapter)
 
+### OpcuaNodeChannelConfiguration Schema
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "description": "Configuration for OPC UA node channel",
+  "allOf": [
+    {
+      "$ref": "#/definitions/NodeChannelConfiguration"
+    },
+    {
+      "type": "object",
+      "properties": {
+        "EventSamplingInterval": {
+          "type": "integer",
+          "description": "Sampling interval for events in milliseconds"
+        },
+        "EventType": {
+          "type": "string",
+          "description": "Type of event to monitor"
+        },
+        "IndexRange": {
+          "type": "string",
+          "description": "Index range for array elements",
+          "pattern": "^\\d+:\\d+$|^\\d+$"
+        },
+        "NodeChangeFilter": {
+          "$ref": "#/definitions/OpcuaNodeChangeFilter",
+          "description": "Filter configuration for node value changes"
+        },
+        "NodeId": {
+          "type": "string",
+          "description": "OPC UA node identifier",
+          "pattern": "^(ns=\\d+;)?(i|s|g|b)=[^;]+$"
+        },
+        "Selector": {
+          "type": "string",
+          "description": "Selector for specific elements or properties"
+        }
+      },
+      "required": ["NodeId"]
+    }
+  ]
+}
+
+```
+
+### OpcuaNodeChannelConfiguration Examples
+
+Basic node configuration:
+
+```json
+{
+  "Name": "Temperature",
+  "NodeId": "ns=2;i=1234",
+  "Description": "Temperature sensor reading"
+}
+```
+
+
+
+Node with change filter:
+
+```json
+{
+  "Name": "Pressure",
+  "NodeId": "ns=3;s=Pressure_Sensor_01",
+  "NodeChangeFilter": {
+    "Type": "Percent",
+    "Value": 5.0
+  },
+  "Description": "Pressure sensor with 5% change filter"
+}
+```
+
+Event monitoring configuration:
+
+```json
+{
+  "Name": "AlarmEvent",
+  "NodeId": "ns=2;i=1000",
+  "EventType": "AlarmType",
+  "EventSamplingInterval": 1000,
+  "Description": "Equipment alarm monitoring"
+}
+```
+
+
+
+Array element monitoring:
+
+```json
+{
+  "Name": "VibrationArray",
+  "NodeId": "ns=4;s=VibrationSensors",
+  "IndexRange": "0:3",
+  "Description": "First 4 elements of vibration sensor array"
+}
+```
+
 
 
 
 ## OpcuaNodeChangeFilter
+
+- [Schema](#OpcuaNodeChangeFilter-Schema)
+- [Examples](#OpcuaNodeChangeFilter-Examples)
 
 **Properties:**
 
@@ -437,6 +622,60 @@ Data change value
 
 Default is 0.0
 
+### OpcuaNodeChangeFilter Schema
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "description": "Configuration for OPC UA node change filter",
+  "properties": {
+    "Type": {
+      "type": "string",
+      "description": "Type of the change filter",
+      "enum": ["Absolute", "Percent"],
+      "default": "Absolute"
+    },
+    "Value": {
+      "type": "number",
+      "description": "The value for the change filter"
+    }
+  },
+  "required": ["Value"]
+}
+
+```
+
+### OpcuaNodeChangeFilter Examples
+
+
+
+ Basic absolute change filter:
+
+```json
+{
+  "Value": 10.0
+}
+```
+
+Percentage 5% change filter:
+
+```json
+{
+  "Type": "Percent",
+  "Value": 5.0
+}
+```
+
+Explicit absolute change filter:
+
+```json
+{
+  "Type": "Absolute",
+  "Value": 2.5
+}
+```
+
 
 
 [^top](#opcua-protocol-adapter)
@@ -444,12 +683,15 @@ Default is 0.0
 
 ## OpcuaAdapterConfiguration
 
+OpcuaAdapterConfiguration extension the [AdapterConfiguration](../core/protocol-adapter-configuration.md) with properties for the OPCUA Protocol adapter.
+
+- [Schema](#OpcuaAdapterConfiguration-Schema)
+- [Examples](#OpcuaAdapterConfiguration-Examples)
+
 **Properties:**
 
 - [OpcuaServers](#OpcuaServers)
 - [ServerProfiles](#ServerProfiles)
-
-
 
 ---
 ### OpcuaServers
@@ -463,6 +705,99 @@ Profiles configured for this adapter. Servers in this adapter can have a referen
 
 **Type**: Map[String,[OpcuaServerProfileConfiguration](#OpcuaServerProfileConfiguration)]
 
+### OpcuaAdapterConfiguration Schema
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "description": "Configuration for OPC UA adapter",
+  "allOf": [
+    {
+      "$ref": "#/definitions/AdapterConfiguration"
+    },
+    {
+      "type": "object",
+      "properties": {
+        "AdapterType" : "OpcusAdapterType",
+        "OpcuaServers": {
+          "type": "object",
+          "description": "Map of OPC UA server configurations",
+          "additionalProperties": {
+            "$ref": "#/definitions/OpcuaServerConfiguration"
+          },
+          "minProperties": 1
+        },
+        "ServerProfiles": {
+          "type": "object",
+          "description": "Map of OPC UA server profile configurations",
+          "additionalProperties": {
+            "$ref": "#/definitions/OpcuaServerProfileConfiguration"
+          }
+        }
+      },
+      "required": ["OpcuaServers"]
+    }
+  ]
+}
+
+```
+
+### OpcuaAdapterConfiguration Examples
+
+
+
+```json
+{
+  "AdapterType" : "OpcuaAdapterType",
+  "OpcuaServers": {
+    "Server1": {
+      "Address": "site1.company.com",
+      "Port": 4840
+    },
+    "Server2": {
+      "Address": "site2.company.com",
+      "Port": 4840
+    },
+  }
+}
+
+```
+
+
+```json
+{
+  AdapterType" : "OpcuaAdapterType",
+  "OpcuaServers": {
+    "Server1": {
+      "Address": "site1.company.com",
+      "Port": 4840,
+      "ServerProfile" : "StandardProfile"
+    },
+    "Server2": {
+      "Address": "site2.company.com",
+      "Port": 4840,
+      "ServerProfile" : "StandardProfile"
+    },
+  },
+  "ServerProfiles": {
+    "StandardProfile": {
+      "EventTypes": {
+        "ProcessEvent": {
+          "NodeId": "ns=2;s=ProcessEventType",
+          "Properties": ["ProcessId", "Value", "Timestamp", "Quality"]
+        },
+        "SystemEvent": {
+          "NodeId": "ns=2;s=SystemEventType",
+          "Properties": ["EventId", "Severity", "Message"]
+        }
+      }
+    }
+  }
+}
+
+```
+
 
 
 [^top](#opcua-protocol-adapter)
@@ -472,8 +807,11 @@ Profiles configured for this adapter. Servers in this adapter can have a referen
 
 ## OpcuaServerProfileConfiguration
 
+- [Schema](#OpcuaServerProfileConfiguration-Schema)
+- [Examples](#OpcuaServerProfileConfiguration-Examples)
 
 **Properties:**
+
 - [EventTypes](#EventTypes)
 
   
@@ -482,7 +820,54 @@ Profiles configured for this adapter. Servers in this adapter can have a referen
 ### EventTypes
 Additional event types that can be used for a server,
 
-**Type**: Map[ String,  [OpcUaEvenTypeConfiguration](#opcuaeventtypeconfiguration)]
+**Type**: Map[ String,  [OpcuaEvenTypeConfiguration](#opcuaeventtypeconfiguration)]
+
+### OpcuaServerProfileConfiguration Schema
+
+```json
+
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "description": "Configuration for OPC UA server profile",
+  "properties": {
+    "EventTypes": {
+      "type": "object",
+      "description": "Map of event type configurations",
+      "additionalProperties": {
+        "$ref": "#/definitions/OpcuaEventTypeConfiguration"
+      },
+      "minProperties": 1
+    }
+  },
+  "required": ["EventTypes"]
+}
+```
+
+### OpcuaServerProfileConfiguration Examples
+
+```json
+{
+  "EventTypes": {
+    "CustomEventType1": {
+      "NodeId": "ns=9;i=9000",
+      "Properties": [
+        "99:CustomProperty1",
+        "99:CustomProperty2"
+      ],
+      "Inherits": "BaseEventType"
+    },
+    "CustomEventType2": {
+      "NodeId": "ns=9;i=9001",
+      "Properties": [
+        "99:CustomProperty3",
+        "99:CustomProperty4"
+      ],
+      "Inherits": "CustomEventType1"
+    }
+  }
+}
+```
 
 [^top](#opcua-protocol-adapter)
 
@@ -491,6 +876,8 @@ Additional event types that can be used for a server,
 
 ## OpcuaEventTypeConfiguration
 
+- [Schema](#OpcuaEventTypeConfiguration-Schema)
+- [Examples](#OpcuaEventTypeConfiguration-Examples)
 
 **Properties:**
 - [Inherits](#Inherits)
@@ -535,12 +922,57 @@ Properties defined for the event type. Each property is defined as a string whic
 
 Required, an at least one property must be defined.
 
+### OpcuaEventTypeConfiguration Schema
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "description": "Configuration for OPC UA event type",
+  "properties": {
+    "Inherits": {
+      "type": "string",
+      "description": "The node ID of the parent event type to inherit from"
+    },
+    "NodeId": {
+      "type": "string",
+      "description": "The node ID of the event type"
+    },
+    "Properties": {
+      "type": "array",
+      "description": "List of property names to monitor for this event type",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1
+    }
+  },
+  "required": ["NodeId", "Properties"]
+}
+
+```
+
+### OpcuaEventTypeConfiguration Examples
+
+```json
+{
+  "NodeId": "ns=9;i=9000",
+  "Properties": [
+    "99:CustomProperty1",
+    "99:CustomProperty2"
+  ],
+  "Inherits": "BaseEventType"
+}
+```
+
 [^top](#opcua-protocol-adapter)
 
 
 
 ## OpcuaServerConfiguration
 
+- [Schema](#OpcuaServerConfiguration-Schema)
+- [Examples](#OpcuaServerConfiguration-Examples)
 
 **Properties:**
 - [Address](#Address)
@@ -570,13 +1002,13 @@ Address of the OPCUA server
 ### Certificate
 Client certificate configuration
 
-**Type**: CertificateConfiguration
+**Type**: [CertificateConfiguration](#CertificateConfiguration)
 
 ---
 ### CertificateValidation
 Certificate validation configuration
 
-**Type**: CertificateValidationConfiguration
+**Type**: [CertificateValidationConfiguration](#CertificateValidationConfiguration)
 
 ---
 ### ConnectTimeout
@@ -695,12 +1127,114 @@ Time in milliseconds to wait after a read error
 
 Default is 10000, the minimum value is 1000
 
+### OpcuaServerConfiguration Schema
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "description": "Configuration for OPC UA server",
+  "properties": {
+    "Address": {
+      "type": "string",
+      "description": "The IP address or hostname of the OPC UA server"
+    },
+    "Certificate": {
+      "$ref": "#/definitions/CertificateConfiguration",
+      "description": "Certificate configuration for secure connections"
+    },
+    "CertificateValidation": {
+      "$ref": "#/definitions/CertificateValidationConfiguration",
+      "description": "Configuration for certificate validation"
+    },
+    "ConnectTimeout": {
+      "type": "integer",
+      "description": "Connection timeout in milliseconds"
+    },
+    "ConnectionWatchdogInterval": {
+      "type": "integer",
+      "description": "Interval for connection watchdog in milliseconds"
+    },
+    "MaxChunkCount": {
+      "type": "integer",
+      "description": "Maximum number of chunks in a message"
+    },
+    "MaxChunkSize": {
+      "type": "integer",
+      "description": "Maximum size of a chunk in bytes"
+    },
+    "MaxMessageSize": {
+      "type": "integer",
+      "description": "Maximum size of a message in bytes"
+    },
+    "Path": {
+      "type": "string",
+      "description": "Path component of the OPC UA server URL"
+    },
+    "Port": {
+      "type": "integer",
+      "description": "Port number of the OPC UA server"
+    },
+    "ReadBatchSize": {
+      "type": "integer",
+      "description": "Number of items to read in a single batch"
+    },
+    "ReadTimeout": {
+      "type": "integer",
+      "description": "Timeout for read operations in milliseconds"
+    },
+    "SecurityPolicy": {
+      "type": "string",
+      "description": "Security policy for the OPC UA connection",
+      "enum": ["None", "Basic128Rsa15", "Basic256", "Basic256Sha256", "Aes128_Sha256_RsaOaep""]
+      "default" : "None"         
+    },
+    "ServerProfile": {
+      "type": "string",
+      "description": "Profile of the OPC UA server"
+    },
+    "WaitAfterConnectError": {
+      "type": "integer",
+      "description": "Wait time after a connection error in milliseconds"
+    },
+    "WaitAfterReadError": {
+      "type": "integer",
+      "description": "Wait time after a read error in milliseconds"
+    }
+  },
+  "required": ["Address", "Port"]
+}
+
+
+```
+
+### OpcuaServerConfiguration Examples
+
+
+
+Basic configuration:
+
+```json
+
+{
+    "Address": "opc.tcp://localhost",
+    "Path": "OPCUA/SimulationServer",
+    "Port": 53530
+}
+
+```
+
+
+
 [^top](#opcua-protocol-adapter)
 
 
 
 
 ## CertificateConfiguration
+
+- [Schema](#CertificateConfiguration-Schema)
+- [Examples](#CertificateConfiguration-Examples)
 
 
 **Properties:**
@@ -756,9 +1290,104 @@ Path name to pem private key file (optional for pkcs12, required for pem)
 
 ---
 ### SelfSignedCertificate
-Self-signed certificate configuration used to generate a self-signed certificate
+Self-signed certificate configuration used to generate a self-signed certificate. If this this propertie is set and the certificate file does not exist a self signed certificate will be created.
 
-**Type**: SelfSignedCertificateConfiguration
+**Type**: [SelfSignedCertificateConfiguration](#SelfSignedCertificateConfiguration)
+
+### CertificateConfiguration Schema
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "Alias": {
+      "type": "string",
+      "description": "Alias name for the certificate"
+    },
+    "CertificateFile": {
+      "type": "string",
+      "description": "Path to the certificate file"
+    },
+    "ExpirationWarningPeriod": {
+      "type": "integer",
+      "description": "Number of days before certificate expiration to start warning",
+      "default": 30
+    },
+    "Format": {
+      "type": "string",
+      "description": "Format of the certificate",
+      "enum": ["pem", "pfx"]
+    },
+    "Password": {
+      "type": "string",
+      "description": "Password for the certificate private key"
+    },
+    "PrivateKeyFile": {
+      "type": "string",
+      "description": "Path to the private key file"
+    },
+    "SelfSignedCertificate": {
+      "$ref": "#/definitions/SelfSignedCertificateConfiguration",
+      "description": "Configuration for self-signed certificate generation"
+    }
+  },
+  "oneOf": [
+    {
+      "required": ["CertificateFile"]
+    },
+    {
+      "required": ["SelfSignedCertificate"]
+    }
+  ]
+}
+
+```
+
+### CertificateConfiguration Examples
+
+Basic configuration with existing certificate:
+
+```json
+{
+  "CertificateFile": "/certs/server.crt",
+  "PrivateKeyFile": "/certs/server.key",
+  "Format": "pem,",
+  "ExpirationWarningPeriod": 30
+}
+```
+
+Configuration with password-protected private key:
+
+```json
+{
+  "CertificateFile": "C:\\Certificates\\client.pfx",
+  "Password": "${CERT_PASSWORD}",
+  "Format": "pfx",
+  "Alias": "client-cert",
+  "ExpirationWarningPeriod": 14
+}
+```
+
+
+
+Example 3 - Self-signed certificate configuration:
+
+```json
+{
+  "CertificateFile": "/certs/server.crt",
+  "PrivateKeyFile": "/certs/server.key",
+  "SelfSignedCertificate": {
+    "CommonName": "example.com",
+    "Organization": "Example Corp",
+    "ValidityPeriod": 365
+  },
+  "ExpirationWarningPeriod": 60
+}
+```
+
+
+
 
 [^top](#opcua-protocol-adapter)
 
@@ -767,7 +1396,9 @@ Self-signed certificate configuration used to generate a self-signed certificate
 
 ## SelfSignedCertificateConfiguration
 
-
+- [Schema](#SelfSignedCertificateConfiguration-Schema)
+- [Examples](#SelfSignedCertificateConfiguration-Examples)
+- 
 **Properties:**
 - [CommonName](#CommonName)
 - [CountryCode](#CountryCode)
@@ -834,6 +1465,127 @@ Number of days certificate is valid
 
 Default is 1095 (=3 years)
 
+### SelfSignedCertificateConfiguration Schema
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "CommonName": {
+      "type": String
+      "description": "Common name for the certificate"
+    },
+    "Organization": {
+   Type:   String
+      "description": "Organization name for the certificate"
+    },
+    "OrganizationalUnit": {
+   Type:   String
+      "description": "Organizational unit for the certificate"
+    },
+    "LocalityName": {
+   Type:   String
+      "description": "Locality (city) for the certificate"
+    },
+    "StateName": {
+   Type:   String
+      "description": "State/province for the certificate"
+    },
+    "CountryCode": {
+   Type:   String
+      "description": "Two-letter country code",
+      "minLength": 2,
+      "maxLength": 2
+    },
+    "DnsNames": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "List of DNS names for the certificate"
+    },
+    "IpAddress": {
+      "type": "array",
+      "items": {
+        "type": String
+        "format": "ipv4"
+      },
+      "description": "List of IP addresses for the certificate"
+    },
+    "ApplicationUri": {
+   Type:   String
+      "description": "Application URI for the certificate"
+    },
+    "ValidityPeriodDays": {
+      "type": "integer",
+      "description": "Number of days the certificate will be valid",
+      "minimum": 1
+    }
+  },
+  "required": [
+    "commonName"
+  ]
+}
+```
+
+### SelfSignedCertificateConfiguration Examples
+
+Mininal configuration
+
+```json
+{
+  "CommonName": "example.com"
+}
+```
+
+
+
+Complete configuration
+
+```json
+{
+  "CommonName": "example.com",
+  "Organization": "Example Corporation",
+  "OrganizationalUnit": "IT Department",
+  "LocalityName": "Seattle",
+  "StateName": "Washington",
+  "CountryCode": "US",
+  "DnsNames": [
+    "example.com",
+    "*.example.com",
+    "api.example.com",
+    "web.example.com"
+  ],
+  "IpAddress": [
+    "192.168.1.1",
+    "10.0.0.1",
+    "172.16.0.1"
+  ],
+  "ApplicationUri": "urn:example:application:cert",
+  "ValidityPeriodDays": 365
+}
+```
+
+
+
+Partial configuration
+
+```json
+{
+  "CommonName": "api.company.com",
+  "Organization": "Company Ltd",
+  "CountryCode": "GB",
+  "DnsNames": [
+    "api.company.com",
+    "*.api.company.com"
+  ],
+  "ValidityPeriodDays": 730
+}
+```
+
+
+
 [^top](#opcua-protocol-adapter)
 
 
@@ -841,6 +1593,8 @@ Default is 1095 (=3 years)
 
 ## CertificateValidationConfiguration
 
+- [Schema](#CertificateValidationConfiguration-Schema)
+- [Examples](#CertificateValidationConfiguration-Example)
 
 **Properties:**
 - [Active](#Active)
@@ -869,9 +1623,64 @@ This directory must exist, subdirectories will be created by the adapter if they
 ### ValidationOptions
 Configuration of op optional checks
 
-**Type**: CertificateValidationOptions
+**Type**: CertificateValidationOptions 
 
 When not set then all options are enabled
+
+### CertificateValidationConfiguration Schema
+
+```json
+ {
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "description": "Configuration for certificate validation",
+  "properties": {
+    "Active": {
+      "type": "boolean",
+      "description": "Enable or disable certificate validation",
+      "default": true
+    },
+    "Directory": {
+      "type": "string",
+      "description": "Directory path for certificate storage and validation"
+    },
+    "ValidationOptions": {
+      "$ref": "#/definitions/ValidationOptions",
+      "description": "Options for certificate validation"
+    }
+  }
+}
+
+```
+
+### CertificateValidationConfiguration Example
+
+Basic configuration:
+
+```json
+{
+  "Directory": "./certificates",
+  "Active": true
+}
+```
+
+With validation options:
+
+```json
+{
+  "Directory": "./certificates",
+  "Active": true,
+  "ValidationOptions": {
+    "ApplicationUri": false,
+    "ExtKeyUsageEndEntity": false,
+    "HostOrIp": false,
+    "KeyUsageEndEntity": false,
+    "KeyUsageIssuer": true,
+    "Revocation": true,
+    "Validity": true
+  }
+}
+```
 
 [^top](#opcua-protocol-adapter)
 
@@ -880,6 +1689,8 @@ When not set then all options are enabled
 
 ## CertificateValidationOptions
 
+- [Schema](#CertificateValidationOptions-Schema)
+- [Examples](#CertificateValidationOptions-Examples)
 
 **Properties:**
 - [ApplicationUri](#ApplicationUri)
@@ -947,6 +1758,70 @@ Check certificate expiry
 **Type**: Boolean
 
 Default is true
+
+### CertificateValidationOptions Schema
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "description": "Configuration options for certificate validation",
+  "properties": {
+    "ApplicationUri": {
+      "type": "boolean",
+      "description": "Enable validation of application URI",
+      "default": true
+    },
+    "ExtKeyUsageEndEntity": {
+      "type": "boolean",
+      "description": "Enable validation of extended key usage for end entity certificates",
+      "default": true
+    },
+    "HostOrIp": {
+      "type": "boolean",
+      "description": "Enable validation of host name or IP address",
+      "default": true
+    },
+    "KeyUsageEndEntity": {
+      "type": "boolean",
+      "description": "Enable validation of key usage for end entity certificates",
+      "default": true
+    },
+    "KeyUsageIssuer": {
+      "type": "boolean",
+      "description": "Enable validation of key usage for issuer certificates",
+      "default": true
+    },
+    "Revocation": {
+      "type": "boolean",
+      "description": "Enable certificate revocation checking",
+      "default": true
+    },
+    "Validity": {
+      "type": "boolean",
+      "description": "Enable validation of certificate validity period",
+      "default": true
+    }
+  }
+}
+
+```
+
+### CertificateValidationOptions Examples
+
+```json
+{
+  "ApplicationUri": false,
+  "ExtKeyUsageEndEntity": false,
+  "HostOrIp": false,
+  "KeyUsageEndEntity": false,
+  "KeyUsageIssuer": true,
+  "Revocation": true,
+  "Validity": true
+}
+
+```
+
 
 [^top](#opcua-protocol-adapter)
 

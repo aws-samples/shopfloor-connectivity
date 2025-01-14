@@ -1,7 +1,7 @@
 # Modbus TCP Protocol Configuration
 
+Configuration for Modbus TCP protocol adapter.
 
----
 - [ModbusSourceConfiguration](#ModbusSourceConfiguration)
 - [ModbusOptimization](#ModbusOptimization)
 - [ModbusChannelConfiguration](#ModbusChannelConfiguration)
@@ -11,6 +11,11 @@
 ---
 
 ## ModbusSourceConfiguration
+
+Source configuration for the Modbus protocol adapter. This type extends the [BaseSourceConfiguration](../core/base-source-configuration.md) type. 
+
+- [Schema](#ModbusSourceConfiguration-schema)
+- [Example](#ModbusSourceConfiguration-example)
 
 
 **Properties:**
@@ -34,7 +39,7 @@ The channels hold configuration data to read values from the Modbus source devic
 The element is a map indexed by the channel identifier.
 Channels can be "commented" out by adding a "#" at the beginning of the identifier of that channel.
 
-**Type**: Map[String,ModbusChannelConfiguration]
+**Type**: Map[String,[ModbusChannelConfiguration](#ModbusChannelConfiguration)
 
 At least 1 channel must be configured.
 
@@ -54,18 +59,123 @@ Timeout for reading from Modbus device in milliseconds.
 
 Default is 10000.
 
-[^top](#modbus-tcp-protocol-configuration)
+[^top](#modbus-tcp-protocol-configuration)\
+
+### ModbusSourceConfiguration Schema
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ModbusSourceConfiguration",
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "external-schema.json#/definitions/SourceConfiguration"
+    },
+    {
+      "type": "object",
+      "properties": {
+        "AdapterDevice": {
+          "type": "string",
+          "description": "Identifier of the Modbus adapter device"
+        },
+        "Channels": {
+          "type": "object",
+          "description": "Map of Modbus channel configurations indexed by string",
+          "patternProperties": {
+            "^.*$": {
+              "$ref": "external-schema.json#/definitions/ModbusChannelConfiguration"
+            }
+          },
+          "minProperties": 1
+        },
+        "Optimization": {
+          "type": "boolean",
+          "description": "Enable/disable Modbus optimization"
+        },
+        "ReadTimeout": {
+          "type": "integer",
+          "description": "Timeout for read operations in milliseconds",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "AdapterDevice",
+        "Channels"
+      ],
+      "additionalProperties": false
+    }
+  ]
+}
+
+```
+
+
+
+### ModbusSourceConfiguration Example
+
+Minimal configuration:
+
+```json
+{
+  "AdapterDevice": "ModbusDevice1",
+  "ProtocolAdapter" : "ModbusAdapter",
+  "Channels": {
+    "temperature": {
+      "Name": "Temperature",
+      "Address": 40001,
+      "Type": "DiscreteInput"
+    }
+  }
+}
+```
+
+
+
+Full configuration:
+
+```json
+{
+  "Name": "ModbusSource1",
+  "Description": "Production line Modbus source",
+  "AdapterDevice": "PLC1",
+  "Channels": {
+    "temp1": {
+      "Name": "Temperature1",
+      "Address": 40001,
+      "Type": "HoldingRegister"
+    },
+    "pressure1": {
+      "Name": "Pressure1",
+      "Address": 40002,
+      "Type": "HoldingRegister"
+    },
+    "status": {
+      "Name": "Status",
+      "Address": 10001,
+      "Type": "DiscreteInput"
+    }
+  },
+  "Optimization": true,
+  "ReadTimeout": 5000
+}
+```
+
 
 
 
 
 ## ModbusOptimization
 
+- [Schema](#ModbusOptimization-schema)
+
+- [Example](#ModbusOptimization-example)
 
 **Properties:**
+
 - [Active](#Active)
 - [RegisterMaxGapSize](#RegisterMaxGapSize)
-- [RegisterMaxGapSize](#RegisterMaxGapSize)
+- [CoilMaxGapSize](#CoilMaxGapSize)
 
 ---
 ### Active
@@ -95,8 +205,55 @@ Default is 16
 
 
 
+### ModbusOptimization Schema
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ModbusOptimization",
+  "type": "object",
+  "properties": {
+    "Active": {
+      "type": "boolean",
+      "description": "Enable/disable Modbus optimization",
+      "default" : true
+    },
+    "RegisterMaxGapSize": {
+      "type": "integer",
+      "description": "Maximum gap size between registers for optimization",
+      "default": 8
+    },
+    "CoilMaxGapSize": {
+      "type": "integer",
+      "description": "Maximum gap size between coils for optimization",
+      "default": 16
+    }
+  }
+}
+
+```
+
+
+
+### ModbusOptimization Example
+
+```json
+{
+  "Active": true,
+  "RegisterMaxGapSize": 8,
+  "CoilMaxGapSize": 16
+}
+```
+
+
 
 ## ModbusChannelConfiguration
+
+The ModbusChannelConfiguration type extends the [ChannelConfiguration](../core/channel-configuration.md) class with channel properties for the Modbus TCP  protocol adapter.
+
+- [Schema](#ModbusChannelConfiguration-schema)
+
+- [Examples](#ModbusChannelConfiguration-examples)
 
 
 **Properties:**
@@ -135,11 +292,96 @@ Modbus channel type to read from
 
 
 
+### ModbusChannelConfiguration Schema
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "external-schema.json#/definitions/ChannelConfiguration"
+    },
+    {
+      "type": "object",
+      "properties": {
+        "Address": {
+          "type": "integer",
+          "description": "Modbus address for the channel",
+          "minimum": 0
+        },
+        "Size": {
+          "type": "integer",
+          "description": "Size of the channel in registers/coils",
+          "default": 1
+        },
+        "Type": {
+          "type": "string",
+          "description": "Type of Modbus data point",
+          "enum": [
+            "Coil",
+            "DiscreteInput",
+            "HoldingRegister",
+            "InputRegister"
+          ]
+        }
+      },
+      "required": [
+        "Address",
+        "Type"
+      ]
+    }
+  ]
+}
+
+```
+
+
+
+### ModbusChannelConfiguration Examples
+
+```json
+{    
+   "Address": 10001,
+   "Type": "DiscreteInput"
+}
+```
+
+
+
+```json
+{
+    "Name": "Speed",
+    "Address": 40001,
+    "Size": 2,
+    "Type": "HoldingRegister"
+  }
+```
+
+
+
+```json
+{
+    "Name": "Pump",
+    "Address": 1,
+    "Type": "Coil"
+  }
+```
+
+
 
 ## ModbusTcpAdapterConfiguration
 
+ModbusTcpAdapterConfiguration extension the [AdapterConfiguration](../core/protocol-adapter-configuration.md) with properties for the Modbus TCP Protocol adapter.
+
+AdsAdapterConfiguration 
+
+- [Schema](#ModbusTcpAdapterConfiguration-schema)
+
+- [Example](#ModbusTcpAdapterConfiguration-example)
 
 **Properties:**
+
 - [Devices](#Devices)
 
 ---
@@ -150,15 +392,73 @@ Modbus devices configured for this adapter. The modbus tcp source using the adap
 
 
 
+### ModbusTcpAdapterConfiguration schema
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "external-schema.json#/definitions/AdapterConfiguration"
+    },
+    {
+      "type": "object",
+      "properties": {
+        "Devices": {
+          "type": "object",
+          "description": "Map of Modbus TCP device configurations indexed by string",
+          "patternProperties": {
+            "^.*$": {
+              "$ref": "external-schema.json#/definitions/ModbusTcpDeviceConfiguration"
+            }
+          },
+          "minProperties": 1
+        }
+      },
+      "required": ["Devices"],
+    }
+  ]
+}
+
+```
+
+### ModbusTcpAdapterConfiguration Example
+
+```json
+{
+  "AdapterType" : "MODBUS-TCP",
+  "Devices": {
+    "plc1": {
+      "Name": "PLC1",
+      "Address": "192.168.1.100",
+      "Port": 502,
+      "ConnectTimeout": 5000,
+      "WaitAfterConnectError": 5000,
+      "WaitAfterWriteError": 1000,
+      "WaitAfterReadError": 1000
+    }
+  }
+}
+
+```
+
+
+
 [^top](#modbus-tcp-protocol-configuration)
+
 
 
 
 
 ## ModbusTcpDeviceConfiguration
 
+- [Schema](#ModbusTcpDeviceConfiguration-schema)
+
+- [Example](#ModbusTcpDeviceConfiguration-example)
 
 **Properties:**
+
 - [Address](#Address)
 - [ConnectTimeout](#ConnectTimeout)
 - [DeviceId](#DeviceId)
@@ -211,6 +511,71 @@ The period in milliseconds to wait after a read failure.
 **Type**: Integer
 
 Default is 10000, the minimum value is 1000
+
+
+
+### ModbusTcpDeviceConfiguration Schema
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "Address": {
+      "type": "string",
+      "description": "IP address or hostname of the Modbus TCP device"
+    },
+    "ConnectTimeout": {
+      "type": "integer",
+      "description": "Connection timeout in milliseconds",
+      "minimum": 1000,
+      "default" : 1000
+    },
+    "DeviceId": {
+      "type": "integer",
+      "description": "Modbus device identifier",
+      "default" : 1
+    },
+    "Port": {
+      "type": "integer",
+      "description": "TCP port number",
+      "default": 502
+    },
+    "WaitAfterConnectError": {
+      "type": "integer",
+      "description": "Wait time after connection error in milliseconds",
+      "minimum": 1000,
+      "default" : 10000
+    },
+    "WaitAfterReadError": {
+      "type": "integer",
+      "description": "Wait time after read error in milliseconds",
+      "minimum": 1000,
+      "default" : 10000
+    }
+  },
+  "required": [
+    "Address"
+  ]
+}
+```
+
+
+
+### ModbusTcpDeviceConfiguration Example
+
+```json
+{
+  "Address": ""192.168.1.100",
+  "ConnectTimeout": 10000,
+  "DeviceId": 1,
+  "Port": 502,
+  "WaitAfterConnectError": 5000,
+  "WaitAfterReadError": 1000
+}
+```
+
+
 
 [^top](#modbus-tcp-protocol-configuration)
 
