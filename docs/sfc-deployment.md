@@ -35,10 +35,12 @@ to initialize the adapter or the target instance.
 
 <p align="center">
 <img src="img/fig07.png" width="35%"/>
-</p>
+
+
 <p align="center">
     <em>Fig. 7. SFC In-process deployment (e.g. in a single host context)</em>
-</p>
+
+
 
 As an alternative, they can be deployed to run in their processes and communicate with the core using GRPC. Use cases
 for this deployment model are to allow the following scenarios:
@@ -67,10 +69,12 @@ protocol and adapter processes.
 
 <p align="center">
 <img src="img/fig08.png" width="50%"/>
-</p>
+
+
 <p align="center">
     <em>Fig. 8. SFC IPC deployment (e.g. in a distributed OT/IT context)</em>
-</p>
+
+
 
 
 ## Mixed models
@@ -79,7 +83,9 @@ It is possible to mix instances of in-process and IPC adapters and targets in a 
 
 <p align="center">
 <img src="img/fig09.png" width="50%"/>
-</p>
+
+
 <p align="center">
     <em>Fig. 9. SFC Mixed deployment options</em>
-</p>
+
+

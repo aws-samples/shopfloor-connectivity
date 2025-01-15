@@ -28,8 +28,8 @@ The newInstance method for targets has an additional parameter:
 
 ---
 ### JarFiles
-List of pathnames to JarFiles, that implement a target type, that needs to be loaded by the SFC core.
-These entries can either be pathnames to the jar files of to the directory in which these reside. If the entry is a directory it will expand to a list of all jar files in that directory,
+List of path names to JarFiles, that implement a target type, that needs to be loaded by the SFC core.
+These entries can either be path names to the jar files of to the directory in which these reside. If the entry is a directory it will expand to a list of all jar files in that directory,
 
 **Type**: String[]
 

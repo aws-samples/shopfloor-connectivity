@@ -2,14 +2,15 @@
 
 - [NatsTargetConfiguration](#NatsTargetConfiguration)
 - [NatsServerConfiguration](#NatsServerConfiguration)
-- [NatsTlsConfiguration](#NatsTlsConfiguration)
 
 ---
 
 ## NatsTargetConfiguration
 
-NatsTargetConfiguration extends the type  [TargetConfiguration](../core/target-configuration.md) with specific configuration data for connecting to and sending to a NATS subject. The Targets configuration element can contain entries of this type, the TargetType of these entries must be set to <strong>"NATS-TARGET"</strong>
+NatsTargetConfiguration extends the type  [TargetConfiguration](../core/target-configuration.md) with specific configuration data for connecting to and sending to a NATS subject. The Targets configuration element can contain entries of this type, the TargetType of these entries must be set to **"NATS-TARGET"**
 
+- [Schema](#NatsTargetConfiguration-Schema)
+- [Examples](#NatsTargetConfiguration-Examples)
 
 **Properties:**
 - [AlternateSubjectName](#AlternateSubjectName)
@@ -18,7 +19,6 @@ NatsTargetConfiguration extends the type  [TargetConfiguration](../core/target-c
 - [BatchSize](#BatchSize)
 - [Compression](#Compression)
 - [MaxPayloadSize](#MaxPayloadSize)
-
 - [NatsServer](#NatsServer)
 - [PublishTimeout](#PublishTimeout)
 - [SubjectName](#SubjectName)
@@ -28,9 +28,6 @@ NatsTargetConfiguration extends the type  [TargetConfiguration](../core/target-c
 Name or name template of the subject values are published in case there are unmapped template placeholders in the SubjectName
 
 **Type**: Boolean
-
-
-
 
 ---
 ### BatchCount
@@ -65,15 +62,12 @@ The size is calculated on the uncompressed payload of the messages.
 ### Compression
 Compression method for NATS message payloads.
 
-**Type**: String
-
-- "None"
+**Values:**
+- "None" (Default)
 - "Zip"
 - "GZip"
 
-
-
-Default is "None"
+**Type**: String
 
 ---
 ### MaxPayloadSize
@@ -89,7 +83,7 @@ of messages will be sent to the subject when this size is reached.
 ### NatsServer
 Nats target server for publishing data
 
-**Type**: NatsServerConfiguration
+**Type**: [NatsServerConfiguration](#natsserverconfiguration)
 
 Comments
 
@@ -131,6 +125,119 @@ then an alternative subject name can be configured by setting the name of that s
 
 Note that the use of placeholders to send data to specific subjects will result in additional publish calls to the server.
 
+### NatsTargetConfiguration Schema
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "NatsTargetConfiguration",
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "#/definitions/TargetConfiguration"
+    },
+    {
+      "type": "object",
+      "properties": {
+        "AlternateSubjectName": {
+          "type": "string",
+          "description": "Alternate subject name when primary subject is unavailable"
+        },
+        "BatchCount": {
+          "type": "integer",
+          "description": "Number of messages to batch before publishing"
+        },
+        "BatchInterval": {
+          "type": "integer",
+          "description": "Interval in milliseconds between batch publishes"
+        },
+        "BatchSize": {
+          "type": "integer",
+          "description": "Maximum size of batched messages in bytes"
+        },
+        "Compression": {
+          "type": "string",
+          "description": "Type of message compression",
+          "enum": ["None", "Zip", "GZip"],
+          "default": "None"
+        },
+        "MaxPayloadSize": {
+          "type": "integer",
+          "description": "Maximum size of message payload in bytes"
+        },
+        "NatsServer": {
+          "$ref": "#/definitions/NatsServerConfiguration",
+          "description": "NATS server configuration"
+        },
+        "PublishTimeout": {
+          "type": "integer",
+          "description": "Timeout for publish operations in milliseconds"
+        },
+        "SubjectName": {
+          "type": "string",
+          "description": "Primary subject name for publishing"
+        }
+      },
+      "required": ["NatsServer", "SubjectName"]
+    }
+  ]
+}
+
+```
+
+### NatsTargetConfiguration Examples
+
+```json
+  "TargetType" : "NATS-TARGET"
+```
+
+Example 1 - Basic Configuration:
+
+```json
+{
+  "TargetType" : "NATS-TARGET",
+  "SubjectName": "sensors.data",
+  "NatsServer": {
+    "Url": "nats://nats.example.com:4222",
+    "ConnectRetries": 5,
+    "WaitAfterConnectError": 10000
+  },
+  "Compression": "None"
+}
+```
+
+Batched Publishing Configuration:
+
+```json
+{
+  "SubjectName": "metrics.production",
+  "BatchCount": 100,
+  "BatchSize": 128,
+  "BatchInterval": 1000,
+  "NatsServer": {
+    "Url": "nats://nats.example.com:4222"
+  }
+}
+```
+
+
+
+Dynamic subject names based on target- and metadata values
+
+```json
+{
+  "SubjectName": "data/%location%/%line%/%source%",
+  "AlternateSubjectName": "data/sensors",
+  "WarnAlternateSubjectName": true,
+  "BatchCount": 100,
+  "BatchSize": 128,
+  "BatchInterval": 1000,
+  "NatsServer": {
+    "Url": "nats://nats.example.com:4222"
+  }
+}
+```
+
 
 
 [^top](#nats-target)
@@ -138,12 +245,13 @@ Note that the use of placeholders to send data to specific subjects will result 
 
 ## NatsServerConfiguration
 
+- [Schema](#NatsServerConfiguration-Schema)
+- [Examples](#NatsServerConfiguration-Examples)
 
 **Properties:**
 - [ConnectRetries](#ConnectRetries)
 - [CredentialsFile](#CredentialsFile)
 - [NKeyFile](#NKeyFile)
-
 - [Password](#Password)
 - [Tls](#Tls)
 - [Token](#Token)
@@ -219,7 +327,7 @@ connect with TLS.
 Moreover, if configured to connect with TLS, client libraries will fail to connect to a 
 server without TLS.
 
-**Type**: TlsConfiguration
+**Type**: [TlsConfiguration](../core/transformation-operator-configuration.md)
 
 
 https://docs.nats.io/using-nats/developer/connecting/tls
@@ -284,37 +392,117 @@ Number of seconds to wait after connecting to the sever failed.
 
 Default = 10
 
+### NatsServerConfiguration Schema
 
-[^top](#nats-target)
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "NatsServerConfiguration",
+  "type": "object",
+  "properties": {
+    "ConnectRetries": {
+      "type": "integer",
+      "description": "Number of connection retry attempts"
+    },
+    "CredentialsFile": {
+      "type": "string", 
+      "description": "Path to NATS credentials file"
+    },
+    "NKeyFile": {
+      "type": "string",
+      "description": "Path to NATS NKey file"
+    },
+    "Password": {
+      "type": "string",
+      "description": "Password for authentication"
+    },
+    "Tls": {
+      "$ref": "#/definitions/TlsConfiguration",
+      "description": "TLS configuration settings"
+    },
+    "Token": {
+      "type": "string",
+      "description": "Authentication token"
+    },
+    "Url": {
+      "type": "string",
+      "description": "NATS server URL"
+    },
+    "Username": {
+      "type": "string",
+      "description": "Username for authentication"
+    },
+    "WaitAfterConnectError": {
+      "type": "integer",
+      "description": "Wait time in milliseconds after connection error"
+    }
+  },
+  "required": ["Url"]
+}
+
+```
+
+### NatsServerConfiguration Examples
+
+```json
+"TargetType" : "NATS-TARGET"
+```
+
+Basic Configuration:
+
+```json
+{
+  "TargetType" : "NATS-TARGET",
+  "Url": "nats://localhost:4222",
+  "Username": "${user}",
+  "Password": "${password}",
+  "ConnectRetries": 3,
+  "WaitAfterConnectError": 5000
+}
+```
 
 
-## NatsTlsConfiguration
+
+Secure Configuration with TLS:
+
+```json
+{
+  "Url": "nats://nats.example.com:4222",
+  "Tls": {
+    "CertificateFile": "/path/to/client-cert.pem",
+    "PrivateKeyFile": "/path/to/private-key.pem"
+  },
+  "ConnectRetries": 5,
+  "WaitAfterConnectError": 10000
+}
+```
 
 
-**Properties:**
-- [Certificate](#Certificate)
 
-- [RootCA](#RootCA)
-- [RootCA](#RootCA)
+Token-Based Authentication:
 
----
-### Certificate
-Path to client certificate file.
+```json
+{
+  "Url": "nats://nats-server:4222",
+  "Token": "${token}",
+  "ConnectRetries": 3,
+  "WaitAfterConnectError": 3000
+}
+```
 
-**Type**: String
 
 
----
-### RootCA
-Path to root certificate file.
+Credentials File Configuration:
 
-**Type**: String
+```json
+{
+  "Url": "nats://prod.nats.com:4222",
+  "CredentialsFile": "/path/to/credentials.creds",
+  "NKeyFile": "/path/to/user.nkey"
+}
+```
 
----
-### RootCA
-Path to root private  file.
 
-**Type**: String
 
 [^top](#nats-target)
 

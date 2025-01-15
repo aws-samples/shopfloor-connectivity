@@ -51,7 +51,7 @@ Used for compatibility with future extensions and updates
 ### AwsIotCredentialProviderClients
 Configuration for clients using the AWS IoT Credential Provider Service to obtain session credentials.
 
-**Type**: Map[String,AwsIotCredentialProviderClientConfiguration]
+**Type**: Map[String,[AwsIotCredentialProviderClientConfiguration](./aws-iot-credential-provider-configuration.md)]
 
 ---
 ### ChangeFilters
@@ -194,7 +194,7 @@ Controls the monitoring of included configuration files see Including configurat
 
 **Type**: Boolean
 
-Default value is true, set the value to false to disable monitoring
+Default value is true, set the value false to disable monitoring
 
 ---
 ### Name
@@ -758,7 +758,7 @@ S7 data to (debug) terminal  and OPCUA targets, in-process configuration
 
 
 
-Example with OPCUA source and AWS IoT Core target with metadata, filtering and transformations, in process configuration. Using a credentials client to obrtain credentials using X509 certificates required to make IoT Core service calls
+Example with OPCUA source and AWS IoT Core target with metadata, filtering and transformations, in process configuration. Using a credentials client to obtain credentials using X509 certificates required to make IoT Core service calls
 
 ```json
 {
@@ -896,7 +896,7 @@ Example with OPCUA source and AWS IoT Core target with metadata, filtering and t
 
 Example with 2 OPCUA sources and AWS IoT Core and Amazon S3 targets using IPC configuration.
 
-Condifuration is using Templates for repeating channel sections and region value.
+Configuration is using Templates for repeating channel sections and region value.
 
 ```json
 {

@@ -4,14 +4,15 @@
 
 ## StoreForwardTargetConfiguration
 
-StoreForwardTargetConfiguration extends the type  [TargetConfiguration](../core/target-configuration.md) with specific configuration data for forwarding and buffering target data to next targets configured for this target. The Targets configuration element can contain entries of this type, the TargetType of these entries must be set to <strong>"STORE-FORWARD".</strong>
+StoreForwardTargetConfiguration extends the type  [TargetConfiguration](../core/target-configuration.md) with specific configuration data for forwarding and buffering target data to next targets configured for this target. The Targets configuration element can contain entries of this type, the TargetType of these entries must be set to **"STORE-FORWARD".**
 
+- [Schema](#StoreForwardTargetConfiguration-Schema)
+- [Examples](#StoreForwardTargetConfiguration-Examples)
 
 **Properties:**
 - [CleanupInterval](#CleanupInterval)
 - [Directory](#Directory)
 - [Fifo](#Fifo)
-
 - [RetainFiles](#RetainFiles)
 - [RetainPeriod](#RetainPeriod)
 - [RetainSize](#RetainSize)
@@ -85,6 +86,83 @@ Timeout for write actions to the storage device in seconds
 **Type**: Int
 
 Default is 10
+
+### StoreForwardTargetConfiguration Schema
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "StoreForwardTargetConfiguration",
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "#/definitions/TargetConfiguration"
+    },
+    {
+      "type": "object",
+      "properties": {
+        "CleanupInterval": {
+          "type": "integer",
+          "description": "Interval in seconds between cleanup operations"
+        },
+        "Directory": {
+          "type": "string",
+          "description": "Directory path for storing files"
+        },
+        "Fifo": {
+          "type": "boolean",
+          "description": "Use FIFO (First In First Out) processing order",
+          "default": true
+        },
+        "RetainFiles": {
+          "type": "integer",
+          "description": "Maximum number of files to retain"
+        },
+        "RetainPeriod": {
+          "type": "integer",
+          "description": "Period in minutes to retain files"
+        },
+        "RetainSize": {
+          "type": "integer",
+          "description": "Maximum total size in MBto retain",
+          "minimum": 0
+        },
+        "Targets": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "List of target IDs to forward data to",
+          "minItems": 1
+        },
+        "WriteTimeout": {
+          "type": "integer",
+          "description": "Timeout in seconds for write operations",
+          "minimum": 0
+        }
+      },
+      "required": ["Directory", "Targets"]
+    }
+  ]
+}
+
+```
+
+### StoreForwardTargetConfiguration Examples
+
+```json
+
+{
+  "TargetType" : "STORE-FORWARD",
+  "Directory": "./store",
+  "Targets": ["s3-target", "iot-core-target"],
+  "Fifo": true,
+  "RetainSize": 10240,
+  "RetainFiles": 1000,
+  "CleanupInterval": 60
+}
+
+```
 
 [^top](#store-and-forward-target)
 

@@ -9,7 +9,8 @@ The `AWS-SITEWISEEDGE-TARGET` is a specific type of target configuration in SFC 
 This type extends the type  [TargetConfiguration](../core/target-configuration.md) with specific configuration data for this adapter.
 This target adapter follows the Time Quality Value (TQV) schema for ingesting data into SiteWise Edge. For a better understanding of the TQV schema, please refer to the [Ingest data using the AWS IoT SiteWise API](https://docs.aws.amazon.com/iot-sitewise/latest/userguide/ingest-api.html) documentation.
 
-
+- [Schema](#SiteWiseEdgeTargetConfiguration-Schema)
+- [Examples](#SiteWiseEdgeTargetConfiguration-Examples)
 
 
 **Properties:**
@@ -117,14 +118,11 @@ If no scheme is specified in the address, then it will be added based on the Con
 
 To get the ATS endpoint for an account use the AWS CLI command
 
-```consoleaws 
+```console 
 iot describe-endpoint --endpoint-type iot:Data-ATS
 ```
 
-
-
 https://awscli.amazonaws.com/v2/documentation/api/latest/reference/iot/describe-endpoint.html
-
 
 
 ---
@@ -210,6 +208,127 @@ Period in seconds to wait before trying to connect after a connection failure
 **Type**: Int
 
 Default is 60 seconds
+
+### SiteWiseEdgeTargetConfiguration Schema
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SiteWiseEdgeTargetConfiguration",
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "#/definitions/TargetConfiguration"
+    },
+    {
+      "$ref": "#/definitions/AwsServiceConfig"
+    },
+    {
+      "type": "object",
+      "properties": {
+        "BatchCount": {
+          "type": "integer",
+          "description": "Number of messages to batch"
+        },
+        "BatchInterval": {
+          "type": "integer",
+          "description": "Interval between batch processing in milliseconds"
+        },
+        "BatchSize": {
+          "type": "integer",
+          "description": "Size of the batch in bytes"
+        },
+        "Certificate": {
+          "type": "string",
+          "description": "Client certificate for authentication"
+        },
+        "ClientName": {
+          "type": "string",
+          "description": "Name of the client"
+        },
+        "ConnectRetries": {
+          "type": "integer",
+          "description": "Number of connection retry attempts"
+        },
+        "Connection": {
+          "type": "string",
+          "description": "Connection string"
+        },
+        "ConnectionTimeout": {
+          "type": "integer",
+          "description": "Connection timeout in milliseconds"
+        },
+        "EndPoint": {
+          "type": "string",
+          "description": "Endpoint URL"
+        },
+        "Password": {
+          "type": "string",
+          "description": "Password for authentication"
+        },
+        "Port": {
+          "type": "integer",
+          "description": "Port number"
+        },
+        "PrivateKey": {
+          "type": "string",
+          "description": "Private key for authentication"
+        },
+        "PublishTimeout": {
+          "type": "integer",
+          "description": "Timeout for publish operations in milliseconds"
+        },
+        "RootCA": {
+          "type": "string",
+          "description": "Root CA certificate"
+        },
+        "SslServerCertificate": {
+          "type": "string",
+          "description": "SSL server certificate"
+        },
+        "TopicName": {
+          "type": "string",
+          "description": "Name of the topic"
+        },
+        "Username": {
+          "type": "string",
+          "description": "Username for authentication"
+        },
+        "VerifyHostname": {
+          "type": "boolean",
+          "description": "Whether to verify hostname in SSL certificate"
+        },
+        "WaitAfterConnectError": {
+          "type": "integer",
+          "description": "Wait time after connection error in milliseconds"
+        }
+      }
+    }
+  ]
+}
+
+```
+
+### SiteWiseEdgeTargetConfiguration Examples
+
+```json
+{
+  "Active": true,
+  "TargetType": "AWS-SITEWISEEDGE-TARGET",
+  "TopicName": "%channel%",
+  "ClientName": "${CLIENT_ID}",
+  "EndPoint": "ssl://${GATEWAY_HOSTNAME}",
+  "Port": 8883,
+  "Connection": "ServerSideTLS",
+  "RootCA": "${GATEWAY_CA_FILE}",
+  "Certificate": "${CLIENT_CERTIFICATE_FILE}",
+  "PrivateKey": "${CLIENT_KEY_FILE}",
+  "VerifyHostname": false,
+  "BatchSize": 1000,
+  "BatchInterval": 5000,
+  "BatchCount": 10
+}
+```
 
 [^top](#aws-sitewise-edge-target)
 

@@ -10,9 +10,12 @@
 
   - [AggregationConfiguration](./aggregation-config.md)
   - [AwsIotCredentialProviderClientConfiguration](./aws-iot-credential-provider-configuration.md)
-  - [BaseSurceConfiguration](./base-source-configuration.md)
+  - [AwsServiceConfig](./aws-service-config.md)
+  - [BaseSourceConfiguration](./base-source-configuration.md)
   - [ChangeFilterConfiguration](./change-filter-configuration.md)
   - [ChannelConfiguration](./channel-configuration.md)
+  - [CertificateConfiguration](./certificate-configuration.md)
+  - [CertificateValidationOptions](./certificate-validation-options.md)
   - [ClientProxyConfiguration](./client-proxy-configuration.md)
   - [CloudSecretConfiguration](./cloud-secret-configuration.md)
   - [ConditionFilterConfiguration](./condition-filter-configuration.md)

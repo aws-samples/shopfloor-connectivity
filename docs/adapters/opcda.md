@@ -50,7 +50,7 @@ Mode for reading values from OPCDA server.
 
 
 **Type**: String 
-Possible values are “Subscription" or "Polling".
+Possible values are "Subscription" or "Polling".
 
 Default is "Subscription".
 
@@ -115,7 +115,6 @@ Basic configuration with subscription:
 }
 ```
 
-CopyInsert at cursorjson
 
 Multiple channels with polling
 

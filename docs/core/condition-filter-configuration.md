@@ -125,7 +125,7 @@ Nested AND condition, include if both "temperature" and "humidity" channels are 
 
 
 
-Nested AND condition, include if  channel" "temperature" is present and "humidity" is absent
+Nested AND condition, include if  channel "temperature" is present and "humidity" is absent
 
 ```json
 {

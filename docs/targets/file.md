@@ -4,8 +4,10 @@
 
 ## FileConfiguration
 
-FileConfiguration extends the type  [TargetConfiguration](../core/target-configuration.md) with specific configuration data for writing data to the local file system. The Targets configuration element can contain entries of this type, the TargetType of these entries must be set to <strong>"FILE-TARGET".</strong>
+FileConfiguration extends the type  [TargetConfiguration](../core/target-configuration.md) with specific configuration data for writing data to the local file system. The Targets configuration element can contain entries of this type, the TargetType of these entries must be set to **"FILE-TARGET".**
 
+- [Schema](#FileConfiguration-Schema)
+- [Examples](#FileConfiguration-Examples)
 
 **Properties:**
 - [BufferSize](#BufferSize)
@@ -74,6 +76,93 @@ If set to true then UTC time is used to build the name of the output file, other
 **Type**: Boolean
 
 Default is false
+
+### FileConfiguration Schema
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "FileConfiguration",
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "#/definitions/TargetConfiguration"
+    },
+    {
+      "type": "object",
+      "properties": {
+        "BufferSize": {
+          "type": "integer",
+          "description": "Buffer size in MB",
+          "minimum": 1,
+          "maximum": 1024,
+          "default": 16
+        },
+        "Compression": {
+          "type": "string",
+          "description": "Type of compression to use",
+          "enum": ["None", "Zip", "GZip"],
+          "default": "None"
+        },
+        "Directory": {
+          "type": "string",
+          "description": "Directory path where files will be written"
+        },
+        "Extension": {
+          "type": "string",
+          "description": "File extension"
+        },
+        "Interval": {
+          "type": "integer",
+          "description": "Interval in seconds between file writes",
+          "minimum": 60,
+          "maximum": 900,
+          "default": 60
+        },
+        "Json": {
+          "type": "boolean",
+          "description": "Whether to write in JSON format"
+        },
+        "UtcTime": {
+          "type": "boolean",
+          "description": "Whether to use UTC time for timestamps"
+        }
+      },
+      "required": ["Directory"]
+    }
+  ]
+}
+
+```
+
+### FileConfiguration Examples
+
+```json
+
+{
+  "TargetType" : "FILE-TARGET",
+  "Directory": "/data/logs",
+  "Extension": ".json",
+  "Json": true,
+  "UtcTime": true,
+  "Interval": 300,
+  "BufferSize": 32
+}
+```
+
+ Compressed Files:
+
+```json
+{
+  "TargetType" : "FILE-TARGET",
+  "Directory": "/var/log/sensors",
+  "Extension": ".json",
+  "Compression": "GZip",
+  "BufferSize": 64,
+  "Interval": 600,
+  "UtcTime": true
+}
+```
 
 [^top](#file-target)
 

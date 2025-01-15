@@ -1,6 +1,6 @@
 ## TargetConfiguration
 
-Targer Configuration defines common properties for SFC target adapters. Target adapter implementations extend this type with their specific additional properties.
+Target Configuration defines common properties for SFC target adapters. Target adapter implementations extend this type with their specific additional properties.
 
 
 
@@ -62,7 +62,7 @@ Type: String
 
 Metrics configuration for the protocol adapter
 
-Type: [MetricsSourceConfigurarion](./metrics-source-configuration.md)
+Type: [MetricsSourceConfiguration](./metrics-source-configuration.md)
 
 ---
 
@@ -219,7 +219,7 @@ Do not set this flag to true if there are any key names in the output that consi
 
 ## Examples
 
-**<u>Note: TargetConfigurations always are instances of extented types with specific additional properties for the implementation of that type of target adapter.</u>**
+**<u>Note: TargetConfigurations always are instances of extended types with specific additional properties for the implementation of that type of target adapter.</u>**
 
 Basic in-process configuration with local TargetType (not requiring AWS credentials)
 

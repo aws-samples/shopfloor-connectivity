@@ -4,16 +4,21 @@
 
 ## AwsMskTargetConfiguration
 
+AwsMskTargetConfiguration extends the type  [TargetConfiguration](../core/target-configuration.md) with specific configuration data for connecting to and sending to an AWS MSK topic. The Targets configuration element can contain entries of this type, the TargetType of these entries must be set to **"AWS-MSK"**
 
 
-AwsMskTargetConfiguration extends the type  [TargetConfiguration](../core/target-configuration.md) with specific configuration data for connecting to and sending to an AWS MSK topic. The Targets configuration element can contain entries of this type, the TargetType of these entries must be set to <strong>"AWS-MSK"</strong>
 
+Required IAM permissions are `kafka-cluster:WriteDataIdempotently`, `kafka-cluster:CreateTopic`, `kafka-cluster:DescribeTopic` `,kafka-cluster:Connect`, `kafka-cluster:WriteData,`
+
+- [Schema](#AwsMskTargetConfiguration-Schema)
+- [Examples](#AwsMskTargetConfiguration-Examples)
 
 **Properties:**
 - [Acknowledgements](#Acknowledgements)
 - [BatchSize](#BatchSize)
 - [BootstrapBrokers](#BootstrapBrokers)
 - [Compression](#Compression)
+- [CredentialProviderClient](#CredentialProviderClient)
 - [Headers](#Headers)
 - [Interval](#Interval)
 - [Key](#Key)
@@ -28,9 +33,7 @@ Acknowledgements (acks)
 
 **Type**: String
 
-
-
-- "all" = 0
+- "None" = 0
 - "leader" = 1 (default)
 - "all" = -1
 
@@ -51,7 +54,7 @@ Addresses with port number for bootstrap brokers for AWS MSK cluster. (bootstrap
 To get the broker addresses for a cluster use the CLI command 
 ```console
 aws kafka get-bootstrap-brokers --cluster-arn `ClusterArn`
- ```
+```
 and use the addresses returned in "BootstrapBrokerStringPublicSaslIam".
 
 See also 
@@ -74,6 +77,17 @@ Possible values:
 
 
 ---
+### CredentialProviderClient
+
+Name of the AWS credential provider client defined in the SFC top level configuration section [AwsIotCredentialProviderClients]
+(../core/sfc-top-level-config.md#AwsIotCredentialProviderClients) obtaining credentials using X509 certificates from the [AWS IoT credentials provider](../sfc-aws-service-credentials.md).
+
+If no CredentialProviderClient is configured the [AWS Java SDK credential provider chain is used](https://docs.aws.amazon.com/sdk-for-java/latest/developer-guide/credentials.html#credentials-chain)
+
+**Type:** String
+
+---
+
 ### Headers
 Map of headers set for written records
 
@@ -145,6 +159,108 @@ and the transformation output is written as a string to the topic.
 Name of the MSK topic
 
 **Type**: String
+
+### AwsMskTargetConfiguration Schema
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "AwsMskTargetConfiguration",
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "#/definitions/TargetConfiguration"
+    },
+    {
+      "$ref": "#/definitions/AwsServiceConfig"
+    },
+    {
+      "type": "object",
+      "properties": {
+        "Acknowledgements": {
+          "type": "string",
+          "description": "Acknowledgement level for messages",
+          "enum": ["all", "one", "leader"]
+        },
+        "BatchSize": {
+          "type": "integer",
+          "description": "Size of the batch for MSK messages"
+        },
+        "BootstrapBrokers": {
+          "type": "array",
+          "description": "List of bootstrap broker addresses",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
+        },
+        "Compression": {
+          "type": "string",
+          "description": "Compression type for messages",
+          "enum": ["none", "snappy", "lz4", "gzip", "zstd"],
+          "default": "none"
+        },
+        "CredentialProviderClient": {
+          "type": "string",
+          "description": "The credential provider client name"
+        },
+        "Headers": {
+          "type": "object",
+          "description": "Message headers"
+        },
+        "Interval": {
+          "type": "integer",
+          "description": "Interval in milliseconds between batch publishes"
+        },
+        "Key": {
+          "type": "string",
+          "description": "Message key"
+        },
+        "Partition": {
+          "type": "integer",
+          "description": "Partition number"
+        },
+        "ProviderProperties": {
+          "type": "object",
+          "description": "Provider specific properties",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "Serialization": {
+          "type": "string",
+          "description": "Message serialization format",
+          "enum": ["json", "protobuf"],
+          "default" : "json"
+        },
+        "TopicName": {
+          "type": "string",
+          "description": "Name of the MSK topic"
+        }
+      },
+      "required": ["TopicName", "BootstrapBrokers"]
+    }
+  ]
+}
+
+```
+
+### AwsMskTargetConfiguration Examples
+
+
+
+```json
+{
+  "TargetType" : "AWS-MSK",    
+  "TopicName": "data-topic",
+  "BootstrapBrokers": ["broker1.example.com:9092"],
+  "Compression": "gzip",
+  "Acknowledgements": "all",
+  "Serialization": "json",
+  "CredentialProviderClient": "aws-credentials-provider"
+}
+
+```
 
 [^top](#aws-msk-target)
 

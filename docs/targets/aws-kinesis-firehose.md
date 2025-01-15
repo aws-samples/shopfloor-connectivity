@@ -1,50 +1,124 @@
 
 # AWS Kinesis Firehose Target
 
-AwsKinesisFirehoseTargetConfiguration extends the type  [TargetConfiguration](../core/target-configuration.md) with specific configuration data for sending to a delivery stream for the AWS Kinesis Firehose service. The Targets configuration element can contain entries of this type, the TargetType of these entries must be set to <strong>"AWS-FIREHOSE"</strong>
 
-<p>Requires IAM permission firehose:PutRecordBatch for the delivery stream the data is sent to.</p>
-
-
-[Targets](./README.md)
 
 ## AwsKinesisFirehoseTargetConfiguration
 
-<table>
-<colgroup>
-<col style="width: 18%" />
-<col style="width: 27%" />
-<col style="width: 29%" />
-<col style="width: 23%" />
-</colgroup>
+AwsKinesisFirehoseTargetConfiguration extends the type [TargetConfiguration](../core/target-configuration.md) with specific configuration data for sending to a delivery stream for the AWS Kinesis Firehose service. The Targets configuration element can contain entries of this type, the TargetType of these entries must be set to **"AWS-FIREHOSE"**
 
-<tbody>
-<tr class="odd">
-<td><strong>Name</strong></td>
-<td><strong>Description</strong></td>
-<td><strong>Type</strong></td>
-<td>Comments</td>
-</tr>
-<tr class="even">
-<td>StreamName</td>
-<td>Name of the delivery stream</td>
-<td>String</td>
-<td></td>
-</tr>
-<tr class="odd">
-<td>Region</td>
-<td>AWS Region for Kinesis Firehose service</td>
-<td>String</td>
-<td></td>
-</tr>
-<tr class="even">
-<td>BatchSize</td>
-<td><p>Number of output messages to combine in a single putRecordBatch API call.</p>
-<p>The target will send buffered data before the batch size is reached if the entire size of the message will exceed the maximum size for a single request.</p></td>
-<td>Integer</td>
-<td>Default is 10</td>
-</tr>
-</tbody>
-</table>
+Requires IAM permission `firehose:PutRecordBatch` for the delivery stream the data is sent to.
+
+- [Schema](#AwsKinesisFirehoseTargetConfiguration-Schema)
+- [Examples](#AwsKinesisFirehoseTargetConfiguration-Examples)
+
+**Properties:**
+- [BatchSize](#BatchSize)
+- [CredentialProviderClient](#CredentialProviderClient)
+- [Region](#Region)
+- [StreamName](#StreamName)
+
+---
+### BatchSize
+Number of output messages to combine in a single putRecordBatch API call.
+The target will send buffered data before the batch size is reached if the entire size of the message will exceed the maximum size for a single request.
+
+**Type**: Integer
+
+Default is 10
+
+---
+### CredentialProviderClient
+
+Name of the AWS credential provider client defined in the SFC top level configuration section [AwsIotCredentialProviderClients]
+(../core/sfc-top-level-config.md#AwsIotCredentialProviderClients) obtaining credentials using X509 certificates from the [AWS IoT credentials provider](../sfc-aws-service-credentials.md).
+
+If no CredentialProviderClient is configured the [AWS Java SDK credential provider chain is used](https://docs.aws.amazon.com/sdk-for-java/latest/developer-guide/credentials.html#credentials-chain)
+
+**Type:** String
+
+---
+
+### Region
+AWS Region for Kinesis Firehose service
+
+**Type**: String
+
+---
+### StreamName
+Name of the delivery stream
+
+**Type**: String
+
+### AwsKinesisFirehoseTargetConfiguration Schema
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "AwsKinesisFirehoseTargetConfiguration",
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "#/definitions/TargetConfiguration"
+    },
+    {
+      "$ref": "#/definitions/AwsServiceConfig"
+    },
+    {
+      "type": "object",
+      "properties": {
+        "BatchSize": {
+          "type": "integer",
+          "description": "Size of the batch for Kinesis Firehose messages"
+        },
+        "CredentialProviderClient": {
+          "type": "string",
+          "description": "The credential provider client name"
+        },
+        "Region": {
+          "type": "string",
+          "description": "AWS region for Kinesis Firehose"
+        },
+        "StreamName": {
+          "type": "string",
+          "description": "Name of the Kinesis Firehose delivery stream"
+        }
+      },
+      "required": ["StreamName"]
+    }
+  ]
+}
+
+```
+
+### AwsKinesisFirehoseTargetConfiguration Examples
+
+Configuration using CredentialProviderClient
+
+```json
+{
+  "TargetType" : "AWS-FIREHOSE",
+  "StreamName": "data-delivery-stream",
+  "Region": "us-east-1",
+  "BatchSize": 500,
+  "CredentialProviderClient": "aws-credentials-provider"
+}
+
+```
+
+Configuration using  default AWS SDK credential provider chain.
+
+```json
+{
+  "TargetType" : "AWS-FIREHOSE",
+  "StreamName": "data-delivery-stream",
+  "Region": "us-east-1",
+  "BatchSize": 500
+}
+
+```
+
+[
 
 [^top](#aws-kinesis-firehose-target)
+

@@ -70,7 +70,7 @@ class NatsServerConfiguration : Validate {
 
 
 
-    //https://docs.nats.io/using-nats/developer/connecting/tls
+    // https://docs.nats.io/using-nats/developer/connecting/tls
     @SerializedName(CONFIG_TLS_SSL)
     private var _tslConfig: TlsConfiguration? = null
     val tlsConfiguration: TlsConfiguration?

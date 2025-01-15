@@ -123,7 +123,7 @@ Compound AND condition:
 }
 ```
 
-Compund OR condition:
+Compound OR condition:
 
 ```json
 {

@@ -172,7 +172,7 @@ Valid devices codes and their data types are listed below.
 - "V" 		Edge relay (BIT)
 - "W"		Link register (WORD)
 - "X"   	      Input (BIT)
-- "Y" 		utput (BIT)
+- "Y" 		output (BIT)
 - "Z"		 Index register (WORD)
 - "ZR"	       File register ZR (WORD)
 

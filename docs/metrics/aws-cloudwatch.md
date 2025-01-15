@@ -4,11 +4,12 @@
 ---
 - [AwsCloudWatchConfiguration](#AwsCloudWatchConfiguration)
 
-- [Schema](#Schema)
-- [Example](#Example)
+
 
 ## AwsCloudWatchConfiguration
 
+- [Schema](#Schema)
+- [Example](#Example)
 
 **Properties:**
 - [BatchSize](#BatchSize)

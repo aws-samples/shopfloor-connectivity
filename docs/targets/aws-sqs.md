@@ -8,12 +8,14 @@ AwsSqsTargetConfiguration extends the type [TargetConfiguration](../core/target-
 
 Requires IAM permission sqs:SendMessageBatch for the receiving queue.
 
-
+- [Schema](#AwsSqsTargetConfiguration-Schema)
+- [Examples](#AwsSqsTargetConfiguration-Examples)
 
 **Properties:**
 
 - [BatchSize](#BatchSize)
 - [Compression](#Compression)
+- [CredentialProviderClient](#CredentialProviderClient)
 - [Interval](#Interval)
 
 - [QueueUrl](#QueueUrl)
@@ -40,6 +42,17 @@ When using compression for the message verify if actual compression out weights 
 Default is "None"
 
 ---
+### CredentialProviderClient
+
+Name of the AWS credential provider client defined in the SFC top level configuration section [AwsIotCredentialProviderClients]
+(../core/sfc-top-level-config.md#AwsIotCredentialProviderClients) obtaining credentials using X509 certificates from the [AWS IoT credentials provider](../sfc-aws-service-credentials.md).
+
+If no CredentialProviderClient is configured the [AWS Java SDK credential provider chain is used](https://docs.aws.amazon.com/sdk-for-java/latest/developer-guide/credentials.html#credentials-chain)
+
+**Type:** String
+
+---
+
 ### Interval
 Interval in milliseconds after which data is sent to queue even if the buffer is not full
 
@@ -59,6 +72,84 @@ Url of the receiving queue
 AWS Region for SQS service
 
 **Type**: String
+
+### AwsSqsTargetConfiguration Schema
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "AwsSqsTargetConfiguration",
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "#/definitions/TargetConfiguration"
+    },
+    {
+      "$ref": "#/definitions/AwsServiceConfig"
+    },
+    {
+      "type": "object",
+      "properties": {
+        "BatchSize": {
+          "type": "integer",
+          "description": "Size of the batch for SQS messages"
+        },
+        "Compression": {
+          "type": "string",
+          "description": "Compression type for messages",
+          "enum": ["None", "Zip", "GZip"],
+          "default": "None"
+        },
+        "Interval": {
+          "type": "integer",
+          "description": "Interval in milliseconds between sends"
+        },
+        "QueueUrl": {
+          "type": "string",
+          "description": "URL of the SQS queue"
+        },
+        "Region": {
+          "type": "string",
+          "description": "AWS region for SQS"
+        }
+      },
+      "required": ["QueueUrl"]
+    }
+  ]
+}
+  
+```
+
+### AwsSqsTargetConfiguration Examples
+
+Configuration using CredentialProviderClient.
+
+```json
+{
+  "TargetType" : "AWS-SQS", 
+  "QueueUrl": "https://sqs.us-west-2.amazonaws.com/123456789012/BatchQueue",
+  "Region": "us-west-2",
+  "BatchSize": 100,
+  "Interval": 10000,
+  "Compression": "GZip",
+  "CredentialProviderClient": "aws-credentials-provider"
+}
+```
+
+Configuration using  default AWS SDK credential provider chain.
+
+```json
+{
+  "TargetType" : "AWS-SQS", 
+  "QueueUrl": "https://sqs.us-west-2.amazonaws.com/123456789012/BatchQueue",
+  "Region": "us-west-2",
+  "BatchSize": 100,
+  "Interval": 10000,
+  "Compression": "GZip"
+}
+```
+
+
 
 [^top](#aws-sqs-target)
 

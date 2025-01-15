@@ -2,16 +2,22 @@
 
 
 
+
 ## AwsLambdaTargetConfiguration
 
-AwsLambdaFunctionConfiguration extends the type  [TargetConfiguration](../core/target-configuration.md) with specific configuration data for calling an AWS lambda function. The Targets configuration element can contain entries of this type, the TargetType of these entries must be set to <strong>"AWS-LAMBDA"</strong>
+AwsLambdaFunctionConfiguration extends the type  [TargetConfiguration](../core/target-configuration.md) with specific configuration data for calling an AWS lambda function. The Targets configuration element can contain entries of this type, the TargetType of these entries must be set to **"AWS-LAMBDA"**
 
-<p>Requires IAM permission lambda:InvokeFunction for the lambda function that is called.</p>
 
+Requires IAM permission `lambda:InvokeFunction` for the lambda function that is called.
+
+- [Schema](#AwsLambdaTargetConfiguration-Schema)
+- [Examples](#AwsLambdaTargetConfiguration-Examples)
 
 **Properties:**
+
 - [BatchSize](#BatchSize)
 - [Compression](#Compression)
+- [CredentialProviderClient](#CredentialProviderClient)
 - [FunctionName](#FunctionName)
 - [Interval](#Interval)
 - [Qualifier](#Qualifier)
@@ -34,9 +40,25 @@ The data is wrapped in structure with the following fields:
 - "payload": Compressed data as a base64 encoded string.
 When using compression for the lambda payload verify if actual compression out weights the overhead of the base64 encoded of the compressed data.
 
-**Type**: "None" | "GZip" | "Zip"
+**Type**: String
 
-Default is "None"
+**Values:** 
+
+- "None"  (Default)
+
+- "GZip"
+- "Zip"
+
+---
+
+### CredentialProviderClient
+
+Name of the AWS credential provider client defined in the SFC top level configuration section [AwsIotCredentialProviderClients]
+(../core/sfc-top-level-config.md#AwsIotCredentialProviderClients) obtaining credentials using X509 certificates from the [AWS IoT credentials provider](../sfc-aws-service-credentials.md).
+
+If no CredentialProviderClient is configured the [AWS Java SDK credential provider chain is used](https://docs.aws.amazon.com/sdk-for-java/latest/developer-guide/credentials.html#credentials-chain)
+
+**Type:** String
 
 ---
 ### FunctionName
@@ -65,6 +87,94 @@ Default is latest
 AWS Region for Lambda service
 
 **Type**: String
+
+### AwsLambdaTargetConfiguration Schema
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "AwsLambdaTargetConfiguration",
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "#/definitions/TargetConfiguration"
+    },
+    {
+      "$ref": "#/definitions/AwsServiceConfig"
+    },
+    {
+      "type": "object",
+      "properties": {
+        "BatchSize": {
+          "type": "integer",
+          "description": "Size of the batch for Lambda invocations"
+        },
+        "Compression": {
+          "type": "string",
+          "description": "Compression type for payload",
+          "enum": ["None", "Zip", "GZip"],
+          "default": "None"
+        },
+        "CredentialProviderClient": {
+          "type": "string",
+          "description": "The credential provider client name"
+        },
+        "FunctionName": {
+          "type": "string",
+          "description": "Name or ARN of the Lambda function"
+        },
+        "Interval": {
+          "type": "integer",
+          "description": "Interval in milliseconds between batch invocations"
+        },
+        "Qualifier": {
+          "type": "string",
+          "description": "Version or alias of the Lambda function"
+        },
+        "Region": {
+          "type": "string",
+          "description": "AWS region for Lambda"
+        }
+      },
+      "required": ["FunctionName"]
+    }
+  ]
+}
+
+```
+
+### AwsLambdaTargetConfiguration Examples
+
+
+
+Configuration using CredentialProviderClient,
+
+```json
+{
+  "TargetType" : "AWS-LAMBDA",  
+  "FunctionName": "process-data-function",
+  "Region": "us-east-1",
+  "BatchSize": 50,
+  "Interval": 1000,
+  "CredentialProviderClient": "aws-credentials-provider"
+}
+
+```
+
+
+
+```json
+{
+  "TargetType" : "AWS-LAMBDA",    
+  "FunctionName": "process-data-function",
+  "Region": "us-east-1,
+  "BatchSize": 50,
+  "Interval": 1000
+}
+
+```
+
+
 
 [^top](#aws-lambda-target)
 

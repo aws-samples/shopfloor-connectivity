@@ -96,7 +96,8 @@ There are three main type of components that make up SFC.
 
 <p align="center">
   <img src="img/fig01.png" width="75%"/>
-</p>
+
+
 
 ## Protocol Adapters
 
@@ -264,7 +265,7 @@ OT (Operational Technology) networks, on the other hand, are used for controllin
 industrial and manufacturing environments. These networks are designed for real-time monitoring and control of
 machinery, production processes, and other industrial systems. They typically use specialized protocols and are managed
 by operations or engineering departments. OT networks are often modelled after
-the [Perdue network model](https://en.wikipedia.org/wiki/Purdue_Enterprise_Reference_Architecture).
+the [Purdue network model](https://en.wikipedia.org/wiki/Purdue_Enterprise_Reference_Architecture).
 
 In reality in most industrial environments OT and IT networks are not directly connected. Industrial devices are
 unlikely to connect to the public internet. Solutions that retrieve data from these devices and submit this machine data
@@ -278,7 +279,8 @@ different networking or cloud environments The diagrams below show some of the p
 
 <p align="center">
 <img src="img/fig02.png" width="75%" align="center"/>
-</p>
+
+
 
 
 SFC components running as microservices can explicitly specify which network interface to use for network connections to (OT) data sources and other components. By specifying the network interface, microservices can ensure that their network traffic flows through the desired network path, which can be important for optimizing network performance and ensuring network security.
@@ -359,7 +361,8 @@ Metadata at channel-level will be added to the values under a metadata-level nod
 
 <p align="center">
 <img src="img/fig06.png" width="75%"/>
-</p>
+
+
 
 
 

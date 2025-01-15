@@ -3,7 +3,7 @@
 
 
 Targets publishing their data to AWS services need credentials to get access to these services. Besides using the
-standard chain credential (environment variables, credentials files) used by the (Java) AWS SDK's, SFC has additional
+standard chain credential (environment variables, credentials files) used by the (Java) AWS SDK, SFC has additional
 support for using device certificates to obtain session credentials from
 the [AWS IoT Credentials Provider Service](https://aws.amazon.com/blogs/security/how-to-eliminate-the-need-for-hardcoded-aws-credentials-in-devices-by-using-the-aws-iot-credentials-provider/).
 Targets can refer to a client configuration that contains entries for the files with for the required device
@@ -40,3 +40,4 @@ As targets may need to access the internet over a proxy server, to obtain the se
 and to make the required AWS service calls, the client configuration referred by the target can also include proxy
 configuration information.
 
+For more info see https://aws.amazon.com/blogs/security/how-to-eliminate-the-need-for-hardcoded-aws-credentials-in-devices-by-using-the-aws-iot-credentials-provider/

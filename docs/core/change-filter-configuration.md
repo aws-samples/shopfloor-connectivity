@@ -119,7 +119,7 @@ Any change:
 
 
 
-Absolurte change filter, with at least a value every 5 seconfs even when value did not change
+Absolute change filter, with at least a value every 5 seconds even when value did not change
 
 ```json
 {

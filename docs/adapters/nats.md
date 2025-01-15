@@ -8,7 +8,6 @@ NATS Protocol adapter configuration
 - [SubjectNameMappingConfiguration](#SubjectNameMappingConfiguration-Type)
 - [NatsAdapterConfiguration](#NatsAdapterConfiguration)
 - [NatsServerConfiguration](#NatsServerConfiguration)
-- [TlsConfiguration](#TlsConfiguration)
 
 ---
 
@@ -536,7 +535,7 @@ connect with TLS.
 Moreover, if configured to connect with TLS, client libraries will fail to connect to a 
 server without TLS.
 
-**Type**: [TlsConfiguration](#TlsConfiguration)
+**Type**: [CertificateConfiguration](../core/certificate-configuration)
 
 
 https://docs.nats.io/using-nats/developer/connecting/tls
@@ -619,7 +618,7 @@ Default is 10
       "description": "Password for authentication"
     },
     "Tls": {
-      "$ref": "#/definitions/TlsConfiguration",
+      "$ref": "#/definitions/CertificateConfiguration",
       "description": "TLS configuration for secure connection"
     },
     "Token": {
@@ -709,7 +708,7 @@ NKey authentication:
 
 
 
-Token authentication with TLS usin g configuration placeholder for the token.
+Token authentication with TLS using configuration placeholder for the token.
 
 ```json
 {
@@ -724,71 +723,5 @@ Token authentication with TLS usin g configuration placeholder for the token.
 
 [^top](#natsadapterconfiguration)
 
-
-
-
-## TlsConfiguration
-
-- [Schema](#TlsConfiguration-Schema)
-- [Examples](#TlsConfiguration-Examples)
-
-**Properties:**
-- [Certificate](#Certificate)
-- [PrivateKey](#RootCA)
-- [RootCA](#RootCA)
-
----
-### Certificate
-Path to client certificate file.
-
-**Type**: String
-
----
-### PrivateKey
-Path to root certificate file.
-
-**Type**: String
-
----
-### RootCA
-Path to root CA certificate  file.
-
-**Type**: String
-
-### TlsConfiguration Schema
-
-```json
-{
-  "$schema": "http://json-schema.org/draft-07/schema#",
-  "type": "object",
-  "description": "Configuration for TLS/SSL connection",
-  "properties": {
-    "Certificate": {
-      "type": "string",
-      "description": "Path to client certificate file"
-    },
-    "PrivateKey": {
-      "type": "string",
-      "description": "Path to client private key file"
-    },
-    "RootCA": {
-      "type": "string",
-      "description": "Path to root CA certificate file"
-    }
-  }
-}
-```
-
-### TlsConfiguration Examples
-
-```json
-{
-  "Certificate": "/etc/ssl/certs/client-cert.pem",
-  "PrivateKey": "/etc/ssl/private/client-key.pem",
-  "RootCA": "/etc/ssl/certs/ca.pem"
-}
-
-```
-
-[^top](#natsadapterconfiguration)
+[
 

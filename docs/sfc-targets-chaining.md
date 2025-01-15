@@ -44,10 +44,12 @@ changes to the actual end-targets.
 
 <p align="center">
 <img src="img/fig05.png" width="75%"/>
-</p>
+
+
 <p align="center">
-    <em>Fig. 3. Example of target daisy chaining</em>
-</p>
+    <em>Fig. 3. Example of target daisy-chaining</em>
+
+
 
 
 Store and forwarding functionality for SFC targets is implemented using an intermediate target of type
@@ -114,19 +116,23 @@ Used cases for the router target are:
 
 <p align="center">
 <img src="img/fig11.png" width="50%"/>
-</p>
+
+
 <p align="center">
     <em>Fig. 11. SFC Router target - bundling data</em>
-</p>
+
+
 
 - *Routing* of data *to alternative targets* if data cannot be written to primary targets
 
 <p align="center">
 <img src="img/fig12.png" width="50%"/>
-</p>
+
+
 <p align="center">
     <em>Fig. 12. SFC Router target - failover target</em>
-</p>
+
+
 
 - *Routing* of data to a *success target* after it has been written to primary targets or their alternative targets. The
   success target can be used to archive delivered messages or a custom target van notify the source of the data that the
@@ -134,14 +140,18 @@ Used cases for the router target are:
 
 <p align="center">
 <img src="img/fig13.png" width="50%"/>
-</p>
+
+
 <p align="center">
     <em>Fig. 13. SFC Router target - routing to a final `success` target</em>
-</p>
+
+
 
 <p align="center">
 <img src="img/fig14.png" width="50%"/>
-</p>
+
+
 <p align="center">
     <em>Fig. 14. SFC Router target - routing to a final `success` target</em>
-</p>
+
+

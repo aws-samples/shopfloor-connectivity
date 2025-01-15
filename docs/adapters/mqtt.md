@@ -1,6 +1,6 @@
 # MQTT Protocol Configuration
 
-MQTT Protocol adapter confighuration.
+MQTT Protocol adapter configuration.
 
 
 ---

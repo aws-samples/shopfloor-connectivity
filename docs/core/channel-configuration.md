@@ -46,7 +46,7 @@ Optional, if used it must refer to a configured filter in the [ConditionFilters]
 
 ---
 ### Decompose
-If set to true and the value of the channel  is a structured value then the value is decomposed into a set of individual values for each (sub) element in  the structure. Decomposition can also be set for all channels for a source by setting it's [Decompose](./source-configuration.md#Decompose) value to true. The value of the Decompse setting at channel level will override the setting at sorce level.
+If set to true and the value of the channel  is a structured value then the value is decomposed into a set of individual values for each (sub) element in  the structure. Decomposition can also be set for all channels for a source by setting its [Decompose](./source-configuration.md#Decompose) value to true. The value of the Decompose setting at channel level will override the setting at source level.
 
 If the value is  list of structures and the value of the [Spread](#Spread) setting is true then each structure in the list is decomposed. 
 
@@ -168,7 +168,7 @@ Optional, if used it must refer to a configured filter in the [ValueFilters](./s
 
 ## Examples
 
-<u>**Note that a the ChannelConfiguration is an abstract configuration class. Source adapters extend this type with additional properties specific for their adapter implementation.**</u>
+<u>**Note that the ChannelConfiguration is an abstract configuration class. Source adapters extend this type with additional properties specific for their adapter implementation.**</u>
 
 
 

@@ -9,12 +9,10 @@
 **Configuration:**
 
 - [OpcuaTargetConfiguration](#OpcuaTargetConfiguration)
-- [CertificateConfiguration](#CertificateConfiguration)
-- [SelfSignedCertificateConfiguration](#SelfSignedCertificateConfiguration)
-- [CertificateValidationConfiguration](#CertificateValidationConfiguration)
-- [CertificateValidationOptions](#CertificateValidationOptions)
 - [DataModelConfiguration](#DataModelConfiguration)
 - [FolderNodeConfiguration](#FolderNodeConfiguration)
+- [OpcuaCertificateValidationConfiguration](#OpcuaCertificateValidationConfiguration)
+- [OpcuaCertificateValidationOptions](#OpcuaCertificateValidationOptions-type)
 - [VariableNodeConfiguration](#VariableNodeConfiguration)
 
 
@@ -331,23 +329,34 @@ This configuration results in the model below.
 
 OpcuaTargetConfiguration extends the type [TargetConfiguration](../core/target-configuration.md) with specific configuration data for publishing the data through an OPC UA model. The Targets configuration element can contain entries of this type, the TargetType of these entries must be set to **"OPCUA-TARGET"**
 
+- [Schema](#OpcuaTargetConfiguration-Schema)
+- [Examples](#OpcuaTargetConfiguration-Examples)
+
 **Properties:**
 
 - [AutoCreate](#AutoCreate)
+
 - [CertificateValidation](#CertificateValidation)
-- [CertificateValidation](#CertificateValidation)
+
 - [DataModels](#DataModels)
+
 - [InitValuesWithNull](#InitValuesWithNull)
 
 - [ServerAnonymousDiscoveryEndPoint](#ServerAnonymousDiscoveryEndPoint)
+
 - [ServerMessageSecurityModes](#ServerMessageSecurityModes)
+
 - [ServerNetworkInterfaces](#ServerNetworkInterfaces)
+
 - [ServerPath](#ServerPath)
+
 - [ServerSecurityPolicies](#ServerSecurityPolicies)
+
+- [ServerCertificate](#ServerCertificate)
+
 - [ServerTcpPort](#ServerTcpPort)
-- [The default binds all available network interfaces to the OPC UA server.
-Certificate](#The default binds all available network interfaces to the OPC UA server.
-Certificate)
+
+  
 
 ---
 ### AutoCreate
@@ -367,21 +376,13 @@ By setting this value to true, and not specifying any model, the data model is c
 ### CertificateValidation
 Certificate settings for the OPC UA server
 
-**Type**: CertificateConfiguration
-
-No certificate is configured then a default self-signed certificate will be created.
-
----
-### CertificateValidation
-Certificate validation configuration
-
-**Type**: CertificateValidationConfiguration
+**Type**: [OpcuaCertificateValidationConfiguration](#OpcuaCertificateValidationConfiguration)
 
 ---
 ### DataModels
 OPC UA data model definitions
 
-**Type**: Map[String, DataModelConfiguration]
+**Type**: Map[String, [DataModelConfiguration](#DataModelConfiguration)]
 
 One or more data models that will be exposed through the OPC UA server to which SFC target data can be mapped. If no models are specified then the
 target adapter will build a model based on the SFC target data and values it receives.
@@ -411,13 +412,9 @@ Supported message security modes for OPC UA server
 
 This setting is an array containing one or more of the following values:
 
-- "None"
+- "None" (Default)
 - "Sign"
 - "SignAndEncrypt"
-
-The default value is:
-
-["None", "Sign", "SignAndEncrypt]
 
 
 
@@ -426,6 +423,8 @@ The default value is:
 Names of the network interfaces that can be used to access the OPC UA server
 
 **Type**: [String]
+
+The default binds all available network interfaces to the OPC UA server.
 
 ---
 ### ServerPath
@@ -445,293 +444,230 @@ This setting contains the security policies for the OPC UA server
 
 This setting is an array containing one or more of the following values:
 
-- "None"
+- "None" 
 - "Basic128Rsa15" : http://opcfoundation.org/UA/SecurityPolicy#Basic128Rsa15
 - "Basic256" : http://opcfoundation.org/UA/SecurityPolicy#Basic256
 - "Basic256Sha256" : http://opcfoundation.org/UA/SecurityPolicy#Basic256Sha25
 - "Aes128Sha256RsaOaep" : http://opcfoundation.org/UA/SecurityPolicy#Aes128_Sha256_RsaOaep
 
-The default value is:
+The default value are all security policy types:
 
 ["None", "Basic128Rsa15", "Basic256", "Basic256Sha256"]
 
 
 
 ---
+### ServerCertificate
+
+Certificate for the OPCUA server
+
+Type: [CertificateConfiguration](../core/certificate-configuration.md)
+
+No certificate is configured then a default self-signed certificate will be created.
+
+---
+
 ### ServerTcpPort
+
 TCP port used by the OPC UA server.
 
 **Type**: Integer
-
-
 
 Default is 53530
 
 
 
 ---
-### The default binds all available network interfaces to the OPC UA server.
-Certificate
+### 
+### Certificate
+
 Opcua Server certificate configuration
 
-**Type**: CertificateConfiguration
+**Type**: [CertificateConfiguration](../core/certificate-configuration.md)n
+
+
+
+
+
+### OpcuaTargetConfiguration Schema
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "OpcuaTargetConfiguration",
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "#/definitions/TargetConfiguration"
+    },
+    {
+      "$ref": "#/definitions/AwsServiceConfig"
+    },
+    {
+      "type": "object",
+      "properties": {
+        "AutoCreate": {
+          "type": "boolean",
+          "description": "Automatically create nodes if they don't exist",
+          "default": false
+        },
+        "CertificateValidation": {
+          "$ref": "#/definitions/OpcuaCertificateValidationConfiguration",
+          "description": "Certificate validation configuration"
+        },
+        "DataModels": {
+          "$ref": "#/definitions/DataModelConfiguration",
+          "description": "Data models configuration"
+        },
+        "InitValuesWithNull": {
+          "type": "boolean",
+          "description": "Initialize values with null",
+          "default": false
+        },
+        "ServerAnonymousDiscoveryEndPoint": {
+          "type": "boolean",
+          "description": "Enable anonymous discovery endpoint",
+          "default": false
+        },
+        "ServerMessageSecurityModes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["None", "Sign", "SignAndEncrypt"]
+          },
+          "description": "Supported message security modes"
+        },
+        "ServerNetworkInterfaces": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Network interfaces to bind server to"
+        },
+        "ServerPath": {
+          "type": "string",
+          "description": "Server path"
+        },
+        "ServerSecurityPolicies": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "None",
+              "Basic128Rsa15",
+              "Basic256",
+              "Basic256Sha256",
+              "Aes128_Sha256_RsaOaep",
+              "Aes256_Sha256_RsaPss"
+            ]
+          },
+          "description": "Supported security policies"
+        },
+        "ServerCertificate":{
+          "$ref": "#/definitions/CertificateConfiguration",
+          "description": "Server Certificate configuration"
+        },
+        "ServerTcpPort": {
+          "type": "integer",
+          "description": "Server TCP port",
+          "default": 4840
+        }
+      },
+      "required": ["ServerPath"]
+    }
+  ]
+}
+
+```
+
+### OpcuaTargetConfiguration Examples
+
+Basic Configuration, model is created automatically from received data.
+
+```json
+{
+  "TargetType": "OPCUA-TARGET",
+  "ServerPath": "/opcua/server",
+  "ServerTcpPort": 4840,
+  "ServerNetworkInterfaces": [
+    "lo",
+    "en1"
+  ],
+  "ServerSecurityPolicies": [
+    "None",
+    "Basic128Rsa15",
+    "Basic256",
+    "Basic256Sha256"
+  ],
+  "AutoCreate": true
+}
+```
+
+Configuration with data model
+
+```json
+{
+  "TargetType": "OPCUA-TARGET",
+  "ServerPath": "/opcua/server",
+  "ServerTcpPort": 4840,
+  "ServerNetworkInterfaces": [
+    "lo",
+    "en1"
+  ],
+  "ServerSecurityPolicies": [
+    "None",
+    "Basic128Rsa15",
+    "Basic256",
+    "Basic256Sha256"
+  ],
+  "DataModels": {
+    
+    "ConveyorDataModel": {
+      "DisplayName": "Conveyor DataModel",
+      
+      "Folders": {
+        
+        "DeviceData": {
+          "DisplayName": "Pump Motor Data",
+          "Variables": {
+            "MotorPower": {
+              "DisplayName": "Motor Power",
+              "DataType": "INT32",
+              "ValueQuery": "@.sources.FluidConveyor.values.Power.value"
+            },
+            
+            "MotorSpeed": {
+              "DisplayName": "Motor RPM",
+              "DataType": "INT32",
+              "ValueQuery": "@.sources.FluidConveyor.values.Speed.value"
+            },
+            
+            "MotorTorque": {
+              "DisplayName": "Motor Torque",
+              "DataType": "REAL",
+              "ValueQuery": "@.sources.FluidConveyor.values.Torque.value"
+            }
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+
+
+
 
 [^top](#opc-ua-target-adapter-data-models-and-mapping)
 
 
-## CertificateConfiguration
-
-
-**Properties:**
-- [Alias](#Alias)
-- [CertificateFile](#CertificateFile)
-- [Default is true
-Name](#Default is true
-Name)
-- [ExpirationWarningPeriod](#ExpirationWarningPeriod)
-- [Format](#Format)
-- [Password](#Password)
-- [PrivateKeyFile](#PrivateKeyFile)
-- [SelfSignedCertificate](#SelfSignedCertificate)
-
----
-### Alias
-Alias to use for pkcs12 certificate files
-
-**Type**: String
-
-Default is "alias"
-
----
-### CertificateFile
-Pathname to pem or pkcs12 certificate file
-
-**Type**: String
-
----
-### Default is true
-Name
-Description
-
-**Type**: Type
-
-Comments
-
----
-### ExpirationWarningPeriod
-Period in days in which the adapter will generate a daily warning and metrics value before the client certificate expires.
-
-**Type**: Integer
-
-Default is 30, set to 0 to disable.
-
----
-### Format
-Format of the certificate file, can either be "Pem" or "Pkcs12".
-
-**Type**: String
-
-If not specified the adapter will attempt to determine the type from the filename of the key file.
-
----
-### Password
-Password for pkcs12 certificate files
-
-**Type**: String
-
----
-### PrivateKeyFile
-Path name to pem private key file (optional for pkcs12, required for pem)
-
-**Type**: String
-
----
-### SelfSignedCertificate
-Self-signed certificate configuration used to generate a self-signed certificate fot the OPC UA server
-
-**Type**: SelfSignedCertificateConfiguration
-
-[^top](#opc-ua-target-adapter-data-models-and-mapping)
-
-
-## SelfSignedCertificateConfiguration
-
-
-**Properties:**
-- [CommonName](#CommonName)
-- [CountryCode](#CountryCode)
-- [LocalityName](#LocalityName)
-
-- [Organization](#Organization)
-- [OrganizationalUnit](#OrganizationalUnit)
-- [StateName](#StateName)
-- [ValidPeriodInDays](#ValidPeriodInDays)
-
----
-### CommonName
-Common name of the certificate
-X509 Name CN
-
-**Type**: String
-
-Must be specified
-
----
-### CountryCode
-X509 Name C
-
-**Type**: String
-
----
-### LocalityName
-X509 Name L
-
-**Type**: String
-
-
----
-### Organization
-X509 Name O
-
-**Type**: String
-
----
-### OrganizationalUnit
-X509 Name OU
-
-**Type**: String
-
-Default is "alias"
-
----
-### StateName
-X509 Name ST
-
-**Type**: String
-
----
-### ValidPeriodInDays
-Number of days certificate is valid
-
-**Type**: Integer
-
-Default is 1095 (=3 years)
-
-[^top](#opc-ua-target-adapter-data-models-and-mapping)
-
-
-## CertificateValidationConfiguration
-
-
-**Properties:**
-- [Active](#Active)
-- [Directory](#Directory)
-
-- [ValidationOptions](#ValidationOptions)
-
----
-### Active
-Flag to set to enable or disable the validation of server certificates
-
-**Type**: Boolean
-
-Default is true
-
----
-### Directory
-Pathname to the base directory under which certificates and certificate revocation lists are stored.
-
-**Type**: String
-
-This directory must exist; subdirectories will be created by the adapter if they do not exist.
-
-
----
-### ValidationOptions
-Configuration of op optional checks
-
-**Type**: CertificateValidationOptions
-
-When not set then all options are enabled
-
-[^top](#opc-ua-target-adapter-data-models-and-mapping)
-
-
-## CertificateValidationOptions
-
-
-**Properties:**
-- [ApplicationUri](#ApplicationUri)
-- [ExtKeyUsageEndEntity](#ExtKeyUsageEndEntity)
-- [HostOrIp](#HostOrIp)
-- [KeyUsageEndEntity](#KeyUsageEndEntity)
-
-- [Revocation](#Revocation)
-- [RevocationLists](#RevocationLists)
-- [Validity](#Validity)
-
----
-### ApplicationUri
-Check Application description against the ApplicationUri from Subject Alternative Names
-
-**Type**: Boolean
-
-Default is true
-
----
-### ExtKeyUsageEndEntity
-Extended key usage extension must be present and will be validated for end-entity certificates
-
-**Type**: Boolean
-
-Default is true
-
----
-### HostOrIp
-Host or IP address must be present in Alternate Subject Names and will be checked
-
-**Type**: Boolean
-
-Default is true
-
----
-### KeyUsageEndEntity
-Key usage extension must be present and will be validated for end-entity certificates
-
-**Type**: Boolean
-
-Default is true
-
-
----
-### Revocation
-Revocation checking
-
-**Type**: Boolean
-
-Default is true
-
----
-### RevocationLists
-Revocation list checking
-
-**Type**: Boolean
-
-Default is true
-
----
-### Validity
-Check certificate expiry
-
-**Type**: Boolean
-
-Default is true
-
-[^top](#opc-ua-target-adapter-data-models-and-mapping)
 
 
 ## DataModelConfiguration
 
+- [Schema](#DataModelConfiguration-Schema)
+- [Examples](#DataModelConfiguration-Examples)
 
 **Properties:**
 - [BrowseName](#BrowseName)
@@ -805,7 +741,115 @@ Variable nodes to create at in this top level folder
 
 **Type**: Map[String, VariableNodeConfiguration]
 
+
+
+### DataModelConfiguration Schema
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "DataModelConfiguration",
+  "type": "object",
+  "properties": {
+    "BrowseName": {
+      "type": "string",
+      "description": "Browse name of the data model"
+    },
+    "Description": {
+      "type": "string",
+      "description": "Description of the data model"
+    },
+    "DisplayName": {
+      "type": "string",
+      "description": "Display name of the data model"
+    },
+    "Folders": {
+      "type": "object",
+      "description": "Map of folder configurations",
+      "additionalProperties": {
+        "$ref": "#/definitions/FolderNodeConfiguration"
+      }
+    },
+    "Id": {
+      "type": "string",
+      "description": "Identifier of the data model"
+    },
+    "Variables": {
+      "type": "object",
+      "description": "Map of variable configurations",
+      "additionalProperties": {
+        "$ref": "#/definitions/VariableNodeConfiguration"
+      }
+    }
+  }
+}
+
+```
+
+### DataModelConfiguration Examples
+
+```json
+{
+  "DisplayName": "Conveyor DataModel",
+  "Folders": {
+    "DeviceData": {
+      "DisplayName": "Pump Motor Data",
+      "Variables": {
+        "MotorPower": {
+          "DisplayName": "Motor Power",
+          "DataType": "INT32",
+          "ValueQuery": "@.sources.FluidConveyor.values.Power.value"
+        },
+        "MotorSpeed": {
+          "DisplayName": "Motor RPM",
+          "DataType": "INT32",
+          "ValueQuery": "@.sources.FluidConveyor.values.Speed.value"
+        },
+        "MotorTorque": {
+          "DisplayName": "Motor Torque",
+          "DataType": "REAL",
+          "ValueQuery": "@.sources.FluidConveyor.values.Torque.value"
+        }
+      },
+      "Folders": {
+        "MotorTemperature": {
+          "DisplayName": "Motor Temperature",
+          "Variables": {
+            "Value": {
+              "DataType": "INT",
+              "ValueQuery": "@.sources.FluidConveyor.values.Temperature.value",
+              "Transformation": "ToCelsius"
+            },
+            "Unit": {
+              "DataType": "STRING",
+              "ValueQuery": "@.sources.FluidConveyor.values.Temperature.metadata.Unit"
+            }
+          }
+        }
+      }
+    },
+    "PumpData": {
+      "DisplayName": "Pump Data",
+      "Variables": {
+        "PumpFlow": {
+          "DisplayName": "Pump Flow",
+          "DataType": "REAL",
+          "ValueQuery": "@.sources.FluidConveyor.values.Flow.value"
+        },
+        "PumpPressure": {
+          "DisplayName": "Pump Pressure",
+          "DataType": "REAL",
+          "ValueQuery": "@.sources.FluidConveyor.values.Pressure.value"
+        }
+      }
+    }
+  }
+}
+```
+
 [^top](#opc-ua-target-adapter-data-models-and-mapping)
+
+
 
 
 ## FolderNodeConfiguration
@@ -846,7 +890,7 @@ Optional, if not specified then the value of the id will be used as the display 
 ### Folders
 Map with sub folder nodes to create in this folder
 
-**Type**: Map[String, FolderNodeConfiguration]
+**Type**: Map[String, [FolderNodeConfiguration](#FolderNodeConfiguration)]
 
 ---
 ### Id
@@ -874,11 +918,352 @@ Map with variable nodes to create at top level folder of model
 
 **Type**: Map[String, VariableNodeConfiguration]
 
+### FolderNodeConfiguration Schema
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "FolderNodeConfiguration",
+  "type": "object",
+  "properties": {
+    "BrowseName": {
+      "type": "string",
+      "description": "Browse name of the data model"
+    },
+    "Description": {
+      "type": "string",
+      "description": "Description of the data model"
+    },
+    "DisplayName": {
+      "type": "string",
+      "description": "Display name of the data model"
+    },
+    "Folders": {
+      "type": "object",
+      "description": "Map of folder configurations",
+      "additionalProperties": {
+        "$ref": "#/definitions/FolderNodeConfiguration"
+      }
+    },
+    "Id": {
+      "type": "string",
+      "description": "Identifier of the folder"
+    },
+    "Variables": {
+      "type": "object",
+      "description": "Map of variable configurations",
+      "additionalProperties": {
+        "$ref": "#/definitions/VariableNodeConfiguration"
+      }
+    }
+  }
+}
+
+```
+
+### FolderNodeConfiguration Examples
+
+```json
+{
+  "DeviceData": {
+    "DisplayName": "Pump Motor Data",
+    "Variables": {
+      "MotorPower": {
+        "DisplayName": "Motor Power",
+        "DataType": "INT32",
+        "ValueQuery": "@.sources.FluidConveyor.values.Power.value"
+      },
+      "MotorSpeed": {
+        "DisplayName": "Motor RPM",
+        "DataType": "INT32",
+        "ValueQuery": "@.sources.FluidConveyor.values.Speed.value"
+      },
+      "MotorTorque": {
+        "DisplayName": "Motor Torque",
+        "DataType": "REAL",
+        "ValueQuery": "@.sources.FluidConveyor.values.Torque.value"
+      }
+    },
+    "Folders": {
+      "MotorTemperature": {
+        "DisplayName": "Motor Temperature",
+        "Variables": {
+          "Value": {
+            "DataType": "INT",
+            "ValueQuery": "@.sources.FluidConveyor.values.Temperature.value",
+            "Transformation": "ToCelsius"
+          },
+          "Unit": {
+            "DataType": "STRING",
+            "ValueQuery": "@.sources.FluidConveyor.values.Temperature.metadata.Unit"
+          }
+        }
+      }
+    }
+  }
+}
+```
+
 [^top](#opc-ua-target-adapter-data-models-and-mapping)
+
+
+
+## OpcuaCertificateValidationConfiguration
+
+- [Schema](#OpcuaCertificateValidationConfiguration-Schema)
+- [Examples](#OpcuaCertificateValidationConfiguration-Example)
+
+**Properties:**
+
+- [Active](#Active)
+- [Directory](#Directory)
+- [ValidationOptions](#ValidationOptions)
+
+------
+
+### Active
+
+Flag to set to enable or disable the validation of server certificates
+
+**Type**: Boolean
+
+Default is true
+
+------
+
+### Directory
+
+Pathname to base directory under which certificates and certificate revocation lists are stored
+
+**Type**: String
+
+This directory must exist, subdirectories will be created by the adapter if they do not exist.
+
+------
+
+### ValidationOptions
+
+Configuration of op optional checks
+
+**Type**: [OpcuaCertificateValidationOptions](#OpcuaCertificateValidationOptions-type)
+
+When not set then all options are enabled
+
+### OpcuaCertificateValidationConfiguration Schema
+
+```json
+ {
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "description": "Configuration for certificate validation",
+  "properties": {
+    "Active": {
+      "type": "boolean",
+      "description": "Enable or disable certificate validation",
+      "default": true
+    },
+    "Directory": {
+      "type": "string",
+      "description": "Directory path for certificate storage and validation"
+    },
+    "ValidationOptions": {
+      "$ref": "#/definitions/ValidationOptions",tificate-vatificate-validation-configuration
+      "description": "Options for certificate validation"
+    }
+  }
+}
+```
+
+### OpcuaCertificateValidationConfiguration Example
+
+Basic configuration:
+
+```json
+{
+  "Directory": "./certificates",
+  "Active": true
+}
+```
+
+With validation options:
+
+```json
+{
+  "Directory": "./certificates",
+  "Active": true,
+  "ValidationOptions": {
+    "ApplicationUri": false,
+    "ExtKeyUsageEndEntity": false,
+    "HostOrIp": false,
+    "KeyUsageEndEntity": false,
+    "KeyUsageIssuer": true,
+    "Revocation": true,
+    "Validity": true
+  }
+}
+```
+
+
+
+## OpcuaCertificateValidationOptions type
+
+- [Schema](#OpcuaCertificateValidationOptions-Type-Schema)
+- [Examples](#OpcuaCertificateValidationOptions-Type-Example)
+
+**Properties:**
+
+- [ApplicationUri](#ApplicationUri)
+- [ExtKeyUsageEndEntity](#ExtKeyUsageEndEntity)
+- [HostOrIp](#HostOrIp)
+- [KeyUsageEndEntity](#KeyUsageEndEntity)
+- [KeyUsageIssuer](#KeyUsageIssuer)
+- [Revocation](#Revocation)
+- [Validity](#Validity)
+
+---
+
+### ApplicationUri
+
+Check Application description against the ApplicationUri from Subject Alternative Names
+
+**Type**: Boolean
+
+Default is true
+
+---
+
+### ExtKeyUsageEndEntity
+
+Extended key usage extension must be present and will be validated for end-entity certificates
+
+**Type**: Boolean
+
+Default is true
+
+---
+
+### HostOrIp
+
+Host or IP address must be present in Alternate Subject Names and will be checked
+
+**Type**: Boolean
+
+Default is true
+
+---
+
+### KeyUsageEndEntity
+
+Key usage extension must be present and will be validated for end-entity certificates
+
+**Type**: Boolean
+
+Default is true
+
+---
+
+### KeyUsageIssuer
+
+Key usage must be present and will be checked for CA certificates
+
+**Type**: Boolean
+
+Default is true
+
+
+
+---
+
+### Revocation
+
+Revocation checking
+
+**Type**: Boolean
+
+Default is true
+
+---
+
+### Validity
+
+Check certificate expiry
+
+**Type**: Boolean
+
+Default is true
+
+### OpcuaCertificateValidationOptions Type Schema
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "description": "Configuration options for certificate validation",
+  "properties": {
+    "ApplicationUri": {
+      "type": "boolean",
+      "description": "Enable validation of application URI",
+      "default": true
+    },
+    "ExtKeyUsageEndEntity": {
+      "type": "boolean",
+      "description": "Enable validation of extended key usage for end entity certificates",
+      "default": true
+    },
+    "HostOrIp": {
+      "type": "boolean",
+      "description": "Enable validation of host name or IP address",
+      "default": true
+    },
+    "KeyUsageEndEntity": {
+      "type": "boolean",
+      "description": "Enable validation of key usage for end entity certificates",
+      "default": true
+    },
+    "KeyUsageIssuer": {
+      "type": "boolean",
+      "description": "Enable validation of key usage for issuer certificates",
+      "default": true
+    },
+    "Revocation": {
+      "type": "boolean",
+      "description": "Enable certificate revocation checking",
+      "default": true
+    },
+    "Validity": {
+      "type": "boolean",
+      "description": "Enable validation of certificate validity period",
+      "default": true
+    }
+  }
+}
+
+```
+
+### OpcuaCertificateValidationOptions Type Example
+
+```json
+{
+  "ApplicationUri": false,
+  "ExtKeyUsageEndEntity": false,
+  "HostOrIp": false,
+  "KeyUsageEndEntity": false,
+  "KeyUsageIssuer": true,
+  "Revocation": true,
+  "Validity": true
+}
+
+```
+
+
+
+
 
 
 ## VariableNodeConfiguration
 
+- [Schema](#VariableNodeConfiguration-Schema)
+- [Examples](#VariableNodeConfiguration-Examples)
 
 **Properties:**
 - [ArrayDimensions](#ArrayDimensions)
@@ -1043,14 +1428,128 @@ JMESPath Query to select the value for a variable node from the target data
 
 **Type**: String
 
-
-
 The value must be a valid JMESPath query https://jmespath.org.
 
 e.g. @.sources..values..value
 
 Note that if the source or channel name contain non-alphanumeric characters, then these elements must be quoted.
 The quoted characters must be escaped with a \ character in the JSON configuration.
+
+### VariableNodeConfiguration Schema
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "VariableNodeConfiguration",
+  "type": "object",
+  "properties": {
+    "ArrayDimensions": {
+      "type": "array",
+      "items": {
+        "type": "integer"
+      },
+      "description": "Array dimensions for array variables"
+    },
+    "BrowseName": {
+      "type": "string",
+      "description": "Browse name of the variable node"
+    },
+    "DataType": {
+      "type": "string",
+      "description": "Data type of the variable",
+      "enum": [
+        "BOOLEAN",
+        "BYTE",
+        "SBYTE",
+        "BYTE_STRING", 
+        "DATETIME",
+        "DOUBLE",
+        "REAL",
+        "EXPANDED_NODE_ID",
+        "FLOAT",
+        "INT",
+        "INTEGER",
+        "INT32",
+        "LOCALIZED_TEXT",
+        "LONG",
+        "INT64",
+        "NODE_ID",
+        "QUALIFIED_NAME",
+        "SHORT",
+        "INT16",
+        "STRING",
+        "UINT",
+        "UINT32",
+        "UINTEGER",
+        "UUID",
+        "XML_ELEMENT",
+        "UBYTE",
+        "ULONG",
+        "UINT64",
+        "USHORT",
+        "UINT16",
+        "STRUCT",
+        "VARIANT"
+      ]
+    },
+    "Description": {
+      "type": "string",
+      "description": "Description of the variable node"
+    },
+    "DisplayName": {
+      "type": "string", 
+      "description": "Display name of the variable node"
+    },
+    "Id": {
+      "type": "string",
+      "description": "Identifier of the variable node"
+    },
+    "InitValue": {
+      "description": "Initial value of the variable"
+    },
+    "TimestampQuery": {
+      "type": "string",
+      "description": "Query to extract timestamp information"
+    },
+    "Transformation": {
+      "type": "string",
+      "description": "Transformation to apply to the value"
+    },
+    "ValueQuery": {
+      "type": "string",
+      "description": "Query to extract the variable value"
+    }
+  },
+  "required": [ "DataType"]
+}
+
+```
+
+### VariableNodeConfiguration Examples
+
+Node with explicit string id, browsename  and displayname. Node id will be `ns:<ns>;s=speed`
+
+```json
+{
+  "Id" : "speed",
+  "DisplayName": "Motor RPM",
+  "BrowseName" : "motors-speed"
+  "DataType": "INT32",
+  "ValueQuery": "@.sources.FluidConveyor.values.Speed.value"
+}
+```
+
+
+
+Node with explicit numeric id, Node id will be `ns:<ns>;i=1001`
+
+```json
+{
+  "Id" : "1001",
+  "DataType": "INT32",
+  "ValueQuery": "@.sources.FluidConveyor.values.Speed.value"
+}
+```
 
 
 

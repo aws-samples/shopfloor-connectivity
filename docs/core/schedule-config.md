@@ -171,7 +171,7 @@ Default is "None"
 ## Examples
 
 
-Basic configuration, colelcting all channels for source
+Basic configuration, collecting all channels for source
 
 ```json
 {
@@ -189,7 +189,7 @@ Basic configuration, colelcting all channels for source
 
 
 
-Basic configuration, colelcting selected channels for source and adding metadata at schgedule level
+Basic configuration, collecting selected channels for source and adding metadata at schedule level
 
 ```json
 {
@@ -213,7 +213,7 @@ Basic configuration, colelcting selected channels for source and adding metadata
 
 
 
-Configuration with aggregation to collect average, minimum and maximum values over 10 second period for all collected values.
+Configuration with aggregation to collect average, minimum and maximum values over 10-second period for all collected values.
 
 ```json
 {

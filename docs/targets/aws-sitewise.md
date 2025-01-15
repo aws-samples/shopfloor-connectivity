@@ -1,3 +1,7 @@
+
+
+
+
 # AWS SiteWise Target
 
 
@@ -11,37 +15,39 @@
 
 ## AwsSitewiseTargetConfiguration
 
-
-
 AwsSitewiseTargetConfiguration extends the type  [TargetConfiguration](../core/target-configuration.md) with specific configuration data for sending data to SiteWise assets. The Targets configuration element can contain entries of this type, the TargetType of 
-these entries must be set to <strong>"AWS-SITEWISE"</strong></p>
+these entries must be set to **"AWS-SITEWISE"**
 
-<p></p>
-<p style='text-align: justify;'>Required IAM permissions</p>
 
-- <p style='text-align: justify;'>iotsitewise:BatchPutAssetPropertyValue</p>
-- <p style='text-align: justify;'>iotsitewise:CreateAsset (*)</p>
-- <p style='text-align: justify;'>iotsitewise:CreateAssetModel (*)</p>
-- <p style='text-align: justify;'>iotsitewise:DescribeAsset (*) (**)</p>
-- <p style='text-align: justify;'>iotsitewise:DescribeAssetModel (*) (**)</p>
-- <p style='text-align: justify;'>iotsitewise:DescribeEndpoint</p>
-- <p style='text-align: justify;'>iotsitewise:ListAssetModels (*) (**)</p>
-- <p style='text-align: justify;'>iotsitewise:ListAssetModelProperties (*) (**)</p>
-- <p style='text-align: justify;'>iotsitewise:ListAssets (*) (**)</p>
-- <p style='text-align: justify;'>iotsitewise:UpdateAssetModel (*)</p>
-- <p style='text-align: justify;'>iotsitewise:UpdateAssetModelProperty (*)</p>
-- <p style='text-align: justify;'>iotsitewise:TagResource (*)</p>
+
+Required IAM permissions:
+
+- `iotsitewise:BatchPutAssetPropertyValue`
+- `iotsitewise:CreateAsset` (*)
+- `iotsitewise:CreateAssetModel` (*)
+- `iotsitewise:DescribeAsset` (*) (**)
+- `iotsitewise:DescribeAssetModel` (*) (**)
+- `iotsitewise:DescribeEndpoint`
+- `iotsitewise:ListAssetModels` (*) (**)
+- `iotsitewise:ListAssetModelProperties` (*) (**)
+- `iotsitewise:ListAssets` (*) (**)
+- `iotsitewise:UpdateAssetModel` (*)
+- `iotsitewise:UpdateAssetModelProperty` (*)
+- `iotsitewise:TagResource` (*)
 
 (*) required when using Asset creation
+
 (**) required when  using AssetName, AssetExternalId, AssetPropertyName,AssetPropertyExternalId in asset and asset property configuration
 
 
-
+- [Schema](#AwsSitewiseTargetConfiguration-Schema)
+- [Examples](#AwsSitewiseTargetConfiguration-Examples)
 
 **Properties:**
 - [AssetCreation](#AssetCreation)
 - [Assets](#Assets)
 - [Batch Size](#BatchSize)
+- [CredentialProviderClient](#CredentialProviderClient)
 - [Interval](#Interval)
 - [Region](#Region)
 
@@ -49,8 +55,7 @@ these entries must be set to <strong>"AWS-SITEWISE"</strong></p>
 ### AssetCreation
 Settings for AssetModels and Assets automatically created by the adapter.
 
-**Type**: 
-AwsSiteWiseAssetCreationConfiguration
+**Type**:  [AwsSiteWiseAssetCreationConfiguration](#AwsSiteWiseAssetCreationConfiguration)
 
 When present automatic creation of AssetModels and Assets is enabled, can be empty when using the default settings.
 
@@ -58,7 +63,7 @@ When present automatic creation of AssetModels and Assets is enabled, can be emp
 ### Assets
 Assets to write to
 
-**Type**: List of AwsSiteWiseAssetConfiguration
+**Type**: List of [AwsSiteWiseAssetConfiguration](#AwsSiteWiseAssetConfiguration)
 
 This setting is used to map data to existing assets and asset properties. It is possible to combine these with assets 
  which are automatically created by the target adapter using the 
@@ -74,7 +79,19 @@ Batch size for writing asset data
 Default is 10
 
 ---
+### CredentialProviderClient
+
+Name of the AWS credential provider client defined in the SFC top level configuration section [AwsIotCredentialProviderClients]
+(../core/sfc-top-level-config.md#AwsIotCredentialProviderClients) obtaining credentials using X509 certificates from the [AWS IoT credentials provider](../sfc-aws-service-credentials.md).
+
+If no CredentialProviderClient is configured the [AWS Java SDK credential provider chain is used](https://docs.aws.amazon.com/sdk-for-java/latest/developer-guide/credentials.html#credentials-chain)
+
+**Type:** String
+
+---
+
 ### Interval
+
 Interval in milliseconds after which data is sent to stream even if the buffer is not full
 
 **Type**: Integer
@@ -88,6 +105,196 @@ AWS Region for SiteWise service
 
 **Type**: String
 
+---
+
+
+
+### AwsSitewiseTargetConfiguration Schema
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "AwsSitewiseTargetConfiguration",
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "#/definitions/TargetConfiguration"
+    },
+    {
+      "$ref": "#/definitions/AwsServiceConfig"
+    },
+    {
+      "type": "object",
+      "properties": {
+        "AssetCreation": {
+          "$ref": "#/definitions/AwsSiteWiseAssetCreationConfiguration",
+          "description": "Configuration for asset creation"
+        },
+        "Assets": {
+          "type": "array",
+          "description": "List of asset configurations",
+          "items": {
+            "$ref": "#/definitions/AwsSiteWiseAssetConfiguration"
+          }
+        },
+        "BatchSize": {
+          "type": "integer",
+          "description": "Size of the batch for SiteWise operations"
+        },
+        "Interval": {
+          "type": "integer",
+          "description": "Interval in milliseconds between operations"
+        },
+        "Region": {
+          "type": "string",
+          "description": "AWS region for SiteWise"
+        }
+      },
+      "oneOf": [
+        {
+          "required": ["AssetCreation"]
+        },
+        {
+          "required": ["Assets"],
+          "properties": {
+            "Assets": {
+              "minItems": 1
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
+
+```
+
+### AwsSitewiseTargetConfiguration Examples
+
+ Config with full asset creation for all:
+
+```json
+{
+  "TargetType" : "AWS-SITEWISE",     
+  "Region": "us-east-1",
+  "AssetCreation": {
+    "AssetName": "Production Line %source%",
+    "AssetDescription": "Main production line %source%",
+    "AssetModelName": "ProductionLineModel  %source%",
+    "AssetPropertyName": "Temperature",
+    "AssetTags": {
+      "Location": "%plant%",
+      "Department": "Production"
+    }
+  },
+  "CredentialProviderClient": "aws-credentials-provider"
+}
+```
+
+
+
+Configuration using existing model and assets:
+
+```json
+{
+  "TargetType" : "AWS-SITEWISE",       
+  
+  "Region": "eu-west-1",
+  
+  "AssetCreation": {
+    "AssetName": "%plant%-%source%",
+    "AssetModelName": "%plant%-%source%-model",
+    "AssetPropertyName": "%plant%-%source%-%channel%",
+    "AssetTags": {
+      "Location": "%plant%-%source%",
+      "Department": "Production"
+    }
+  },
+  
+  "Assets": [
+    {
+      "AssetName": "AMS-Motor-1",
+      "Properties": [
+        {
+          "PropertyId": "speed",
+          "DataType": "double",
+          "DataPath": "@.sources.Motor1.values.Speed.value"
+        },
+        {
+          "PropertyId": "power",
+          "DataType": "double",
+          "DataPath": "@.sources.Motor1.values.Power.value"
+        },
+      ]
+    },
+    {
+      "AssetName": "AMS-Motor-2",
+      "Properties": [
+        {
+          "PropertyId": "speed",
+          "DataType": "double",
+          "DataPath": "@.sources.Motor2.values.Speed.value"
+        },
+        {
+          "PropertyId": "power",
+          "DataType": "double",
+          "DataPath": "@.sources.Motor2.values.Power.value"
+        },
+      ]
+    },
+  ],
+  "CredentialProviderClient": "aws-credentials-provider"
+}
+```
+
+
+
+Mixed Configuration:
+
+```json
+{
+  
+  "TargetType" : "AWS-SITEWISE",     
+  
+  "Region": "eu-west-1",
+  "Assets": [
+    {
+      "AssetName": "Motor-1",
+      "Properties": [
+        {
+          "PropertyId": "speed",
+          "DataType": "double",
+          "DataPath": "@.sources.Motor1.values.Speed.value"
+        },
+        {
+          "PropertyId": "power",
+          "DataType": "double",
+          "DataPath": "@.sources.Motor1.values.Power.value"
+        },
+      ]
+    },
+    {
+      "AssetName": "Motor-2",
+      "Properties": [
+        {
+          "PropertyId": "speed",
+          "DataType": "double",
+          "DataPath": "@.sources.Motor2.values.Speed.value"
+        },
+        {
+          "PropertyId": "power",
+          "DataType": "double",
+          "DataPath": "@.sources.Motor2.values.Power.value"
+        },
+      ]
+    },
+  ],
+  "CredentialProviderClient": "aws-credentials-provider"
+}
+```
+
+Copy
+
 [^top](#aws-sitewise-target)
 
 ## AwsSiteWiseAssetCreationConfiguration
@@ -97,7 +304,8 @@ AWS Region for SiteWise service
 The SiteWise target adapter can automatically create and update AssetModels and Assets using the target data received by the adapter.
 Each source in the target  data will be mapped to a SiteWise AssetModel and Asset using configurable naming templates.
 
-
+- [Schema](#AwsSiteWiseAssetCreationConfiguration-Schema)
+- [Examples](#AwsSiteWiseAssetCreationConfiguration-Examples)
 
 **Properties:**
 
@@ -356,18 +564,137 @@ available:
 To use the values of metadata at the top or source level of the target data, the name af the metadata value can be used with a '%' prefix and postfix.
 
 
-
 **Type**: Map[String.String]
 
 
 
 [^top](#aws-sitewise-target)
 
+### AwsSiteWiseAssetCreationConfiguration Schema
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "AwsSiteWiseAssetCreationConfiguration",
+  "type": "object",
+  "properties": {
+    "AssetDescription": {
+      "type": "string",
+      "description": "Description of the asset"
+    },
+    "AssetExternalId": {
+      "type": "string",
+      "description": "External ID of the asset"
+    },
+    "AssetModelDescription": {
+      "type": "string",
+      "description": "Description of the asset model"
+    },
+    "AssetModelExternalId": {
+      "type": "string",
+      "description": "External ID of the asset model"
+    },
+    "AssetModelName": {
+      "type": "string",
+      "description": "Name of the asset model"
+    },
+  "AssetModelTags": {
+    "type": "object",
+    "description": "Tags for the asset model",
+    "patternProperties": {
+      "^.*$": {
+        "type": "string"
+      }
+    },
+    "additionalProperties": false
+  },
+  "AssetName": {
+    "type": "string",
+    "description": "Name of the asset"
+  },
+  "AssetPropertyAlias": {
+    "type": "string",
+    "description": "Alias for the asset property"
+  },
+  "AssetPropertyName": {
+    "type": "string",
+    "description": "Name of the asset property"
+  },
+  "AssetPropertyTimestamp": {
+    "type": "string",
+    "description": "Timestamp type for the asset property",
+    "enum": ["Channel", "Source", "Schedule", "System"],
+    "default": "System"
+  },
+  "AssetTags": {
+    "type": "object",
+    "description": "Tags for the asset",
+    "patternProperties": {
+      "^.*$": {
+        "type": "string"
+      }
+    },
+    "additionalProperties": false
+  }
+}
+}
+
+```
+
+### AwsSiteWiseAssetCreationConfiguration Examples
+
+Config using all defaults
+
+```json
+{
+}
+```
+
+
+Configuration overwriting defaults for AssetPropertyName and alias using values from target- and meta-data.
+
+```json
+{
+  "AssetPropertyName": "%plant%-%source%-%channel%",
+  "AssetPropertyAlias": "%plant%-%source%-%channel%-alias",
+  "AssetTags":{
+     "environment" : "production",
+     "location" : "%plant%",
+     "batch" : "%batch-number%"
+   }
+}
+```
+
+Setting all possible values and adding tags for assetmodel and asset
+
+```json
+{
+  "AssetName": "Assembly-Robot-%source%",
+  "AssetDescription": "Robotic assembly unit for schedule %schedule% for lacoaction %location",
+  "AssetExternalId": "%source%-external",
+  "AssetModelName": "RoboticAssemblyModel",
+  "AssetModelDescription": "Standard model for robotic assembly units from source %source%",
+  "AssetModelExternalId": "%source%-external",
+  "AssetPropertyName": "%source%-%channel%",
+  "AssetPropertyAlias": "%source%-%channel%-alias",
+  "AssetPropertyTimestamp": "Channel",
+  "AssetTags": {
+    "Type": "Robot %source%",
+    "Function": "Assembly"
+  },
+  "AssetModelTags": {
+    "Manufacturer": "Robot %source%",
+    "Version": "2.0"
+  }
+}
+```
 
 
 
 ## AwsSiteWiseAssetConfiguration
 
+- [Schema](#AwsSiteWiseAssetConfiguration-Schema)
+- [Examples](#AwsSiteWiseAssetConfiguration-Examples)
 
 **Properties:**
 - [AssetExternalId](#AssetExternalId)
@@ -407,6 +734,86 @@ Properties to write to the asset
 
 Either property id or alias must be specified, but not both
 
+### AwsSiteWiseAssetConfiguration Schema
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "AwsSiteWiseAssetConfiguration",
+  "type": "object",
+  "properties": {
+    "AssetExternalId": {
+      "type": "string",
+      "description": "External ID of the asset"
+    },
+    "AssetId": {
+      "type": "string", 
+      "description": "ID of the asset"
+    },
+    "AssetName": {
+      "type": "string",
+      "description": "Name of the asset"
+    },
+    "Properties": {
+      "type": "array",
+      "description": "List of asset property configurations",
+      "items": {
+        "$ref": "#/definitions/AwsSiteWiseAssetPropertyConfiguration"
+      },
+      "minItems": 1
+    }
+  },
+  "oneOf": [
+    {
+      "required": ["AssetId"],
+      "not": {
+        "required": ["AssetExternalId"]
+      },
+      "allOf": [
+        {
+          "required": ["Properties"]
+        }
+      ]
+    },
+    {
+      "required": ["AssetExternalId"],
+      "not": {
+        "required": ["AssetId"]
+      },
+      "allOf": [
+        {
+          "required": ["Properties"]
+        }
+      ]
+    }
+  ]
+}
+
+```
+
+### AwsSiteWiseAssetConfiguration Examples
+
+```json
+{
+  "AssetId": "a1b2c3d4-5678-90ef-ghij-klmnopqrstuv",
+  "AssetName": "Production Line 1",
+  "Properties": [
+    {
+      "PropertyName": "IsActive",
+      "DataType": "boolean",
+      "DataPath": "@.sources.PumpMotor.values.Active.value",
+      "WarnIfNotPresent": true
+    },
+    {
+      "PropertyId": "Speed",
+      "DataType": "double",
+      "DataPath": "@.sources.PumpMotor.values.Speed.value"
+    }
+  ]
+}
+
+```
+
 [^top](#aws-sitewise-target)
 
 
@@ -414,6 +821,8 @@ Either property id or alias must be specified, but not both
 
 ## AwsSiteWiseAssetPropertyConfiguration
 
+- [Schema](#AwsSiteWiseAssetPropertyConfiguration-Schema)
+- [Examples](#AwsSiteWiseAssetPropertyConfiguration-Examples)
 
 **Properties:**
 - [DataPath](#DataPath)
@@ -496,6 +905,108 @@ Boolean
 
 **Type**: 
 Default is true
+
+### AwsSiteWiseAssetPropertyConfiguration Schema
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "AwsSiteWiseAssetPropertyConfiguration",
+  "type": "object",
+  "properties": {
+    "DataPath": {
+      "type": "string",
+      "description": "JMES Path to the data value in the source message"
+    },
+    "DataType": {
+      "type": "string",
+      "description": "Data type of the asset property",
+      "enum": ["string", "integer", "double", "boolean"]
+    },
+    "PropertyAlias": {
+      "type": "string",
+      "description": "Alias of the asset property"
+    },
+    "PropertyExternalId": {
+      "type": "string",
+      "description": "External ID of the asset property"
+    },
+    "PropertyId": {
+      "type": "string",
+      "description": "ID of the asset property"
+    },
+    "PropertyName": {
+      "type": "string",
+      "description": "Name of the asset property"
+    },
+    "TimestampPath": {
+      "type": "string",
+      "description": "JMES Path to the timestamp value in the source message"
+    },
+    "WarnIfNotPresent": {
+      "type": "boolean",
+      "description": "Whether to generate a warning if the property is not present"
+    }
+  },
+  "oneOf": [
+    {
+      "required": ["PropertyId"],
+      "not": {
+        "anyOf": [
+          { "required": ["PropertyName"] },
+          { "required": ["PropertyExternalId"] },
+          { "required": ["PropertyAlias"] }
+        ]
+      }
+    },
+    {
+      "required": ["PropertyName"],
+      "not": {
+        "anyOf": [
+          { "required": ["PropertyId"] },
+          { "required": ["PropertyExternalId"] },
+          { "required": ["PropertyAlias"] }
+        ]
+      }
+    },
+    {
+      "required": ["PropertyExternalId"],
+      "not": {
+        "anyOf": [
+          { "required": ["PropertyId"] },
+          { "required": ["PropertyName"] },
+          { "required": ["PropertyAlias"] }
+        ]
+      }
+    },
+    {
+      "required": ["PropertyAlias"],
+      "not": {
+        "anyOf": [
+          { "required": ["PropertyId"] },
+          { "required": ["PropertyName"] },
+          { "required": ["PropertyExternalId"] }
+        ]
+      }
+    }
+  ]
+}
+
+
+```
+
+### AwsSiteWiseAssetPropertyConfiguration Examples
+
+```json
+{
+  "PropertyName": "IsActive",
+  "DataType": "boolean",
+  "DataPath": "@.sources.PumpMotor.values.Active.value",
+  "TimestampPath": "@.sources.Pump.values.Active.timestamp",
+  "WarnIfNotPresent": true
+}
+
+```
 
 
 [^top](#aws-sitewise-target)

@@ -217,7 +217,7 @@ Configuration specifying all required properties:
 }
 ```
 
-Configuration refering to a GreenGrass deployment configuration:
+Configuration referring to a GreenGrass deployment configuration:
 
 ```json
 "AwsIotCredentialProviderClient": {

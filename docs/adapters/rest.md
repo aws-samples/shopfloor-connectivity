@@ -659,7 +659,7 @@ Single server configuration:
 {
   "RestServers": {
     "MainAPI": {
-      "Server": "http://api.example.com",
+      "Server": "https://api.example.com",
       "Headers": {
         "Content-Type": "application/json",
         "Accept": "application/json"
@@ -849,7 +849,7 @@ Basic configuration:
 
 ```json
 {
-  "Server": "http://api.example.com",
+  "Server": "https://api.example.com",
   "Headers": {
     "Content-Type": "application/json",
     "Accept": "application/json"

@@ -33,7 +33,7 @@ If the adapter is running in the same process as the SFC core module, then it mu
 
 ### Description
 
-User defined descriotion of the adapter
+User defined description of the adapter
 
 **Type**: String
 
@@ -45,7 +45,7 @@ Optional
 
 Metrics configuration for the protocol adapter
 
-Type: [MetricsSourceConfigurarion](./metrics-source-configuration.md)
+Type: [MetricsSourceConfiguration](./metrics-source-configuration.md)
 
 [^top](#ProtocolAdapterConfiguration)
 

@@ -51,10 +51,12 @@ to the SFC Core.
 
 <p align="center">
 <img src="img/fig03.png" width="50%"/>
-</p>
+
+
 <p align="center">
     <em>Fig. 3. SFC default config provider</em>
-</p>
+
+
 
 
 As in customer environment configuration data may be managed and stored in external systems, it is possible to implement
@@ -65,10 +67,12 @@ data it will use to build the SFC configuration.
 
 <p align="center">
 <img src="img/fig04.png" width="50%"/>
-</p>
+
+
 <p align="center">
     <em>Fig. 4. Extensible config providers</em>
-</p>
+
+
 
 
 As different protocol and target adapters need specific configuration data the SFC configuration data the SFC
@@ -107,7 +111,13 @@ keep consistency between (repeated) values in the configuration and values used 
 
 Name of the placeholders can contain the characters:
 
-*a-z A-Z 0-9  :  / ,  - _*
+- a-z 
+- A-Z 
+- 0-9  
+- :  
+- /   
+- \-
+- _
 
 ## Configuration secrets
 

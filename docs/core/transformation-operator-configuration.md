@@ -2,7 +2,7 @@
 
 ## TransformationOperator
 
-A transformation, defined in the Transformations section of the SFC top level transformation  consists of one or more TranformationOperators. Each Transformation operator has a property named : "Operator". Depending of the operator type, a Transformation can have no, or an operand,of which the type depends on that operator.
+A transformation, defined in the Transformations section of the SFC top level transformation  consists of one or more TransformationOperators. Each Transformation operator has a property named : "Operator". Depending on the operator type, a Transformation can have no, or an operand,of which the type depends on that operator.
 
 - [Schema](#Schema)
 - [Examples](#Examples)
@@ -161,7 +161,7 @@ Returns item from an array at the specified index.
 
 **Type**: Datatype: Any[]
 
-**Operand:** Index for value to return, must be in the range of the array (0..items-1)
+**Operand:** Index for value to return, must be in the range of the array (0 .. items-1)
 
 
 
