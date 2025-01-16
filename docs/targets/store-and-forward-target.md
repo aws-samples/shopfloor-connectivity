@@ -1,5 +1,7 @@
 # Store and Forward Target
 
+[SFC Configuration](../core/sfc-top-level-config.md) > [Targets](../core/sfc-top-level-config.md#Targets) >  [Target](../core/target-configuration.md) 
+
 
 
 ## StoreForwardTargetConfiguration
@@ -10,6 +12,7 @@ StoreForwardTargetConfiguration extends the type  [TargetConfiguration](../core/
 - [Examples](#StoreForwardTargetConfiguration-Examples)
 
 **Properties:**
+
 - [CleanupInterval](#CleanupInterval)
 - [Directory](#Directory)
 - [Fifo](#Fifo)

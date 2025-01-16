@@ -1,11 +1,16 @@
 # NATS Target
 
 - [NatsTargetConfiguration](#NatsTargetConfiguration)
+
 - [NatsServerConfiguration](#NatsServerConfiguration)
 
----
+  
 
 ## NatsTargetConfiguration
+
+[SFC Configuration](../core/sfc-top-level-config.md) > [Targets](../core/sfc-top-level-config.md#Targets) >  [Target](../core/target-configuration.md) 
+
+
 
 NatsTargetConfiguration extends the type  [TargetConfiguration](../core/target-configuration.md) with specific configuration data for connecting to and sending to a NATS subject. The Targets configuration element can contain entries of this type, the TargetType of these entries must be set to **"NATS-TARGET"**
 
@@ -242,8 +247,11 @@ Dynamic subject names based on target- and metadata values
 
 [^top](#nats-target)
 
-
 ## NatsServerConfiguration
+
+[NatsTarget](#NatsTargetConfiguration) > [NatsServer](#NatsServer])
+
+
 
 - [Schema](#NatsServerConfiguration-Schema)
 - [Examples](#NatsServerConfiguration-Examples)

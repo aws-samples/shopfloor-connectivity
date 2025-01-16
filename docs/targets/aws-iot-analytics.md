@@ -2,6 +2,10 @@
 
 ## AwsIotAnalyticsTargetConfiguration
 
+[SFC Configuration](../core/sfc-top-level-config.md) > [Targets](../core/sfc-top-level-config.md#Targets) >  [Target](../core/target-configuration.md) 
+
+
+
 - [Schema](#AwsIotAnalyticsTargetConfiguration-Schema)
 - [Examples](#AwsIotAnalyticsTargetConfiguration-Examples)
 

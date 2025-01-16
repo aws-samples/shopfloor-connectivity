@@ -9,6 +9,10 @@
 
 ## AwsTimestreamTargetConfiguration
 
+[SFC Configuration](../core/sfc-top-level-config.md) > [Targets](../core/sfc-top-level-config.md#Targets) >  [Target](../core/target-configuration.md) 
+
+
+
 AwsSTimestreamTargetConfiguration extends the type [TargetConfiguration](../core/target-configuration.md) with specific configuration data for sending data to a Timestream table. The Targets configuration element can contain entries of this type, the TargetType of these entries must be set to **"AWS-TIMESTREAM"**
 
 Requires IAM timestream:WriteRecords permission for the configures table as well timestream:DescribeEndpoints
@@ -181,8 +185,11 @@ Timestream table
 
 [^top](#aws-timestream-target)
 
-
 ## AwsTimestreamRecordConfiguration
+
+[AwsTimstreamTarget](#AwsTimestreamTargetConfiguration) > [Records](#Records)
+
+
 
 - [Schema](#AwsTimestreamRecordConfiguration-Schema)
 - [Examples](#AwsTimestreamRecordConfiguration-Examples)
@@ -305,8 +312,11 @@ Any of "DOUBLE", "BIGINT", "VARCHAR","BOOLEAN"
 
 [^top](#aws-timestream-target)
 
-
 ## AwsTimestreamDimensionConfiguration
+
+[AwsTimstreamTarget](#AwsTimestreamTargetConfiguration) > [Records](#Records) > [Record](#AwsTimestreamRecordConfiguration) > [Dimensions](#dimensions)
+
+
 
 - [Schema](#AwsTimestreamDimensionConfiguration-Schema)
 - [Examples](#AwsTimestreamDimensionConfiguration-Examples)

@@ -5,6 +5,10 @@
 
 ## SiteWiseEdgeTargetConfiguration
 
+[SFC Configuration](../core/sfc-top-level-config.md) > [Targets](../core/sfc-top-level-config.md#Targets) >  [Target](../core/target-configuration.md) 
+
+
+
 The `AWS-SITEWISEEDGE-TARGET` is a specific type of target configuration in SFC that allows you to connect and send data to an MQTT topic consumed by the AWS IoT SiteWise Edge service. The `Targets` configuration element can contain entries of this type, and the `TargetType` of these entries must be set to `"AWS-SITEWISEEDGE-TARGET"`.
 This type extends the type  [TargetConfiguration](../core/target-configuration.md) with specific configuration data for this adapter.
 This target adapter follows the Time Quality Value (TQV) schema for ingesting data into SiteWise Edge. For a better understanding of the TQV schema, please refer to the [Ingest data using the AWS IoT SiteWise API](https://docs.aws.amazon.com/iot-sitewise/latest/userguide/ingest-api.html) documentation.

@@ -15,6 +15,10 @@
 
 ## AwsSitewiseTargetConfiguration
 
+[SFC Configuration](../core/sfc-top-level-config.md) > [Targets](../core/sfc-top-level-config.md#Targets) >  [Target](../core/target-configuration.md) 
+
+
+
 AwsSitewiseTargetConfiguration extends the type  [TargetConfiguration](../core/target-configuration.md) with specific configuration data for sending data to SiteWise assets. The Targets configuration element can contain entries of this type, the TargetType of 
 these entries must be set to **"AWS-SITEWISE"**
 
@@ -298,6 +302,8 @@ Copy
 [^top](#aws-sitewise-target)
 
 ## AwsSiteWiseAssetCreationConfiguration
+
+[AwsSitewiseTarget](#AwsSitewiseTargetConfiguration) > [AssetCreation](#AssetCreation)
 
 
 
@@ -693,10 +699,15 @@ Setting all possible values and adding tags for assetmodel and asset
 
 ## AwsSiteWiseAssetConfiguration
 
+[AwsSitewiseTarget](#AwsSitewiseTargetConfiguration) > [Assets](#Assets) 
+
+
+
 - [Schema](#AwsSiteWiseAssetConfiguration-Schema)
 - [Examples](#AwsSiteWiseAssetConfiguration-Examples)
 
 **Properties:**
+
 - [AssetExternalId](#AssetExternalId)
 - [AssetId](#AssetId)
 - [AssetName](#AssetName)
@@ -818,8 +829,11 @@ Either property id or alias must be specified, but not both
 
 
 
-
 ## AwsSiteWiseAssetPropertyConfiguration
+
+[AwsSitewiseTarget](#AwsSitewiseTargetConfiguration) > [Assets](#Assets) > [Asset](#AssetConfiguration) > [Properties](#Properties)
+
+
 
 - [Schema](#AwsSiteWiseAssetPropertyConfiguration-Schema)
 - [Examples](#AwsSiteWiseAssetPropertyConfiguration-Examples)

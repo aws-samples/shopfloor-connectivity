@@ -327,6 +327,10 @@ This configuration results in the model below.
 
 ## OpcuaTargetConfiguration
 
+[SFC Configuration](../core/sfc-top-level-config.md) > [Targets](../core/sfc-top-level-config.md#Targets) >  [Target](../core/target-configuration.md) 
+
+
+
 OpcuaTargetConfiguration extends the type [TargetConfiguration](../core/target-configuration.md) with specific configuration data for publishing the data through an OPC UA model. The Targets configuration element can contain entries of this type, the TargetType of these entries must be set to **"OPCUA-TARGET"**
 
 - [Schema](#OpcuaTargetConfiguration-Schema)
@@ -663,8 +667,11 @@ Configuration with data model
 
 
 
-
 ## DataModelConfiguration
+
+[OpcuaTargetConfiguration](#OpcuaTargetConfiguration) > [DataModels](#datamodels) 
+
+
 
 - [Schema](#DataModelConfiguration-Schema)
 - [Examples](#DataModelConfiguration-Examples)
@@ -851,11 +858,16 @@ Variable nodes to create at in this top level folder
 
 
 
-
 ## FolderNodeConfiguration
+
+[OpcuaTargetConfiguration](#OpcuaTargetConfiguration) > [DataModels](#datamodels) > [Model](#DatamodelConfiguration) > [Folders](#Folders)
+
+\* > [Folder](#FolderNodeConfiguration) > [Folders](#Folders)
+
 
 
 **Properties:**
+
 - [BrowseName](#BrowseName)
 - [Description](#Description)
 - [DisplayName](#DisplayName)
@@ -1010,6 +1022,10 @@ Map with variable nodes to create at top level folder of model
 
 ## OpcuaCertificateValidationConfiguration
 
+[OpcuaTargetConfiguration](#OpcuaTargetConfiguration) > [CertificateValidation](#CertificateValidation)
+
+
+
 - [Schema](#OpcuaCertificateValidationConfiguration-Schema)
 - [Examples](#OpcuaCertificateValidationConfiguration-Example)
 
@@ -1106,6 +1122,8 @@ With validation options:
 
 
 ## OpcuaCertificateValidationOptions type
+
+[OpcuaTargetConfiguration](#OpcuaTargetConfiguration) > [CertificateValidation](#CertificateValidation) > [ValidationOptions](#ValidationOptions)
 
 - [Schema](#OpcuaCertificateValidationOptions-Type-Schema)
 - [Examples](#OpcuaCertificateValidationOptions-Type-Example)
@@ -1259,8 +1277,15 @@ Default is true
 
 
 
-
 ## VariableNodeConfiguration
+
+[OpcuaTargetConfiguration](#OpcuaTargetConfiguration) > [DataModels](#datamodels) > [Model](#DatamodelConfiguration) > [Folders](#Folders) > [Folder](#FolderNodeConfiguration) > [Variables](#Variables)
+
+ \* > [Folder](#FolderNodeConfiguration) > [Variables](#Variables)
+
+
+
+[Folder](#FolderNodeConfiguration) > [Folders](#Folders)
 
 - [Schema](#VariableNodeConfiguration-Schema)
 - [Examples](#VariableNodeConfiguration-Examples)

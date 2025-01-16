@@ -1,5 +1,7 @@
 # Router Target
 
+[SFC Configuration](../core/sfc-top-level-config.md) > [Targets](../core/sfc-top-level-config.md#Targets) >  [Target](../core/target-configuration.md) 
+
 
 
 
@@ -39,7 +41,7 @@ A success target can be specified to which data is routed if the data has been w
 
 The targets must be targets that are configured either as in-process or IPC service targets in the same configuration.
 
-## RouterTargetConfiguration Schema
+### RouterTargetConfiguration Schema
 
 ```json
 {
@@ -75,7 +77,7 @@ The targets must be targets that are configured either as in-process or IPC serv
 
 ```
 
-## RouterTargetConfiguration Examples
+### RouterTargetConfiguration Examples
 ```json
 {
   "TargetType" : "ROUTER",
@@ -93,6 +95,10 @@ The targets must be targets that are configured either as in-process or IPC serv
 [^top](#router-target)
 
 ## RoutesConfiguration
+
+[RouterTarget](#RouterTargetConfiguration) > [Routes](#Routes)
+
+
 
 - [Schema](#RoutesConfiguration-Schema)
 - [Examples](#RoutesConfiguration-Examples)

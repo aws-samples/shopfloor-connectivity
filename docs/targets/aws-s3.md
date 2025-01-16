@@ -1,5 +1,7 @@
 # AWS S3 Target
 
+[SFC Configuration](../core/sfc-top-level-config.md) > [Targets](../core/sfc-top-level-config.md#Targets) >  [Target](../core/target-configuration.md) 
+
 
 
 
