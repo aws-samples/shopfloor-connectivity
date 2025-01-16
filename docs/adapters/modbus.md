@@ -12,7 +12,7 @@ Configuration for Modbus TCP protocol adapter.
 
 ## ModbusSourceConfiguration
 
-[SFC Configuration](../core/sfc-top-level-config.md) > [Sources](../core/sfc-top-level-config.md#Sources) >  [Source](../core/source-configuration.md) 
+[SFC Configuration](../core/sfc-configuration) > [Sources](../core/sfc-configuration#Sources) >  [Source](../core/source-configuration.md) 
 
 
 
@@ -257,7 +257,7 @@ Default is 16
 
 ## ModbusChannelConfiguration
 
-[SFC Configuration](../core/sfc-top-level-config.md) > [Sources](../core/sfc-top-level-config.md#Sources) > [Source](../core/source-configuration.md)  > [Channels](../core/source-configuration.md#Channels) > [Channel](../core/channel-configuration.md)
+[SFC Configuration](../core/sfc-configuration) > [Sources](../core/sfc-configuration#Sources) > [Source](../core/source-configuration.md)  > [Channels](../core/source-configuration.md#Channels) > [Channel](../core/channel-configuration.md)
 
 
 
@@ -384,7 +384,7 @@ Modbus channel type to read from
 
 ## ModbusTcpAdapterConfiguration
 
-[SFC Configuration](../core/sfc-top-level-config.md) > [ProtocolAdapters](../core/sfc-top-level-config.md#ProtocolAdapters) > [Adapter](../core/protocol-adapter-configuration.md) 
+[SFC Configuration](../core/sfc-configuration) > [ProtocolAdapters](../core/sfc-configuration#ProtocolAdapters) > [Adapter](../core/protocol-adapter-configuration.md) 
 
 
 

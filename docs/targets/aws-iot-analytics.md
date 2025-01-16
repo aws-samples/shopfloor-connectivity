@@ -2,7 +2,7 @@
 
 ## AwsIotAnalyticsTargetConfiguration
 
-[SFC Configuration](../core/sfc-top-level-config.md) > [Targets](../core/sfc-top-level-config.md#Targets) >  [Target](../core/target-configuration.md) 
+[SFC Configuration](../core/sfc-configuration) > [Targets](../core/sfc-configuration#Targets) >  [Target](../core/target-configuration.md) 
 
 
 
@@ -37,7 +37,7 @@ Name of the IoT Analytics channel
 ---
 ### CredentialProviderClient
 
-Name of the AWS credential provider client defined in the SFC top level configuration section [AwsIotCredentialProviderClients](../core/sfc-top-level-config.md#AwsIotCredentialProviderClients) obtaining credentials using X509 certificates from the [AWS IoT credentials provider](../sfc-aws-service-credentials.md).
+Name of the AWS credential provider client defined in the SFC top level configuration section [AwsIotCredentialProviderClients](../core/sfc-configuration#AwsIotCredentialProviderClients) obtaining credentials using X509 certificates from the [AWS IoT credentials provider](../sfc-aws-service-credentials.md).
 
 If no CredentialProviderClient is configured the [AWS Java SDK credential provider chain is used](https://docs.aws.amazon.com/sdk-for-java/latest/developer-guide/credentials.html#credentials-chain)
 

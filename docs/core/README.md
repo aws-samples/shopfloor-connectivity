@@ -2,20 +2,19 @@
 
 
 
-  - **[SFC top level configuration](sfc-top-level-config.md)**
+  - **[SFC top level configuration](sfc-configuration)**
 
     
 
     ## Core Configuration types
 
-  - [AggregationConfiguration](./aggregation-config.md)
+  - [AggregationConfiguration](./aggregation-configuration)
   - [AwsIotCredentialProviderClientConfiguration](./aws-iot-credential-provider-configuration.md)
-  - [AwsServiceConfig](./aws-service-config.md)
+  - [AwsServiceConfig](./aws-service-configuration)
   - [BaseSourceConfiguration](./base-source-configuration.md)
   - [ChangeFilterConfiguration](./change-filter-configuration.md)
   - [ChannelConfiguration](./channel-configuration.md)
   - [CertificateConfiguration](./certificate-configuration.md)
-  - [CertificateValidationOptions](./certificate-validation-options.md)
   - [ClientProxyConfiguration](./client-proxy-configuration.md)
   - [CloudSecretConfiguration](./cloud-secret-configuration.md)
   - [ConditionFilterConfiguration](./condition-filter-configuration.md)
@@ -25,7 +24,7 @@
   - [MetricsSourceConfiguration](./metrics-source-configuration.md)
   - [MetricsWriterConfiguration](./metrics-writer-configuration.md)
   - [ProtocolAdapterConfiguration](./protocol-adapter-configuration.md)
-  - [Schedule](./schedule-config.md)
+  - [Schedule](./schedule-configuration)
   - [SecretsManagerConfiguration](secrets-manager-configuration.md)
   - [SelfSignedCertificateConfiguration](./self-signed-certificate-configuration.md)
   - [ServerConfiguration](server-configuration.md)

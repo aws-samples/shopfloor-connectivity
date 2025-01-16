@@ -12,7 +12,7 @@ SNMP Protocol adapter configuration
 
 ## SnmpSourceConfiguration
 
-[SFC Configuration](../core/sfc-top-level-config.md) > [Sources](../core/sfc-top-level-config.md#Sources) >  [Source](../core/source-configuration.md) 
+[SFC Configuration](../core/sfc-configuration) > [Sources](../core/sfc-configuration#Sources) >  [Source](../core/source-configuration.md) 
 
 
 
@@ -113,7 +113,7 @@ At least 1 channel must be configured.
 
 ## SnmpChannelConfiguration
 
-[SFC Configuration](../core/sfc-top-level-config.md) > [Sources](../core/sfc-top-level-config.md#Sources) > [Source](../core/source-configuration.md)  > [Channels](../core/source-configuration.md#Channels) > [Channel](../core/channel-configuration.md)
+[SFC Configuration](../core/sfc-configuration) > [Sources](../core/sfc-configuration#Sources) > [Source](../core/source-configuration.md)  > [Channels](../core/source-configuration.md#Channels) > [Channel](../core/channel-configuration.md)
 
 
 
@@ -178,7 +178,7 @@ Must be in valid dot format notation
 
 ## SnmpAdapterConfiguration
 
-[SFC Configuration](../core/sfc-top-level-config.md) > [ProtocolAdapters](../core/sfc-top-level-config.md#ProtocolAdapters) > [Adapter](../core/protocol-adapter-configuration.md) 
+[SFC Configuration](../core/sfc-configuration) > [ProtocolAdapters](../core/sfc-configuration#ProtocolAdapters) > [Adapter](../core/protocol-adapter-configuration.md) 
 
 
 
@@ -261,8 +261,7 @@ Snmp devices configured for this adapter. The modbus tcp source using the adapte
 
 ## SnmpDeviceConfiguration
 
-[SnmpAdapter](#SnmpAdapter) > [Devices](#devices])
-
+[SnmpAdapter](#SnmpAdapterConfiguration) > [Devices](#Devices)
 
 
 - [Schema](#SnmpDeviceConfiguration-Schema)

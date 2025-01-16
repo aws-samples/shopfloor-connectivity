@@ -19,7 +19,7 @@ starting the SCF core or a protocol adapter or target writer service.
 Logging output will contain the system date and time, the logging level, source of the event and a message. The logging
 infrastructure will intercept and blank the values of secrets configured in the SFC configuration.
 
-Instead of writing to the console custom log writer can be implemented and [configured](./core/sfc-top-level-config.md#logwriter). Details on how to implement a
+Instead of writing to the console custom log writer can be implemented and [configured](./core/sfc-configuration#logwriter). Details on how to implement a
 custom log writer can be found in section [Custom Logging](#logging).
 
 
@@ -28,7 +28,7 @@ custom log writer can be found in section [Custom Logging](#logging).
 
 The SFC core, protocol adapters and targets can collect metrics and write these to a configurable metrics writer. SFC
 comes with an implementation of a writer for AWS CloudWatch Metrics with can be configured to run in the same process as
-the SFC core or as an IPC service. Custom metrics writers can be implemented and [configured](./core/sfc-top-level-config.md#metrics) to collect metrics data, see
+the SFC core or as an IPC service. Custom metrics writers can be implemented and [configured](./core/sfc-configuration#metrics) to collect metrics data, see
 details in section [Custom Metrics Writers](#metrics-collection).
 
 Metrics collection is enabled by adding a Metrics configuration section in top level of the SFC configuration. In this
@@ -70,7 +70,7 @@ collected for that component.
 Additional settings can be set for the actual configured writer. For the AWS CloudWatch Metrics writer, a section
 named "CloudWatch" can be added with the following properties:
 
-- CredentialProviderClient: name of a configured client in the [AwsIotCredentialProviderClients](./core/sfc-top-level-config.md#AwsIotCredentialProviderClients) section of the SFC
+- CredentialProviderClient: name of a configured client in the [AwsIotCredentialProviderClients](./core/sfc-configuration#AwsIotCredentialProviderClients) section of the SFC
   configuration to use to obtain credentials to put metrics data. (The role used for the client must give permission for
   calls to the PutMetricData API call for the AWS CloudWatch service). If no client is configured
   the [AWS Java SDK credential provider chain is used](https://docs.aws.amazon.com/sdk-for-java/latest/developer-guide/credentials.html#credentials-chain).

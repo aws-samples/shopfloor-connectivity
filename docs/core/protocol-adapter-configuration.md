@@ -1,4 +1,4 @@
-[SFC Configuration](./sfc-top-level-config.md#Metrics) > [ProtocolAdapters](./sfc-top-level-config.md#ProtocolAdapters) 
+[SFC Configuration](./sfc-configuration#Metrics) > [ProtocolAdapters](./sfc-configuration#ProtocolAdapters) 
 
 ## ProtocolAdapterConfiguration
 
@@ -16,7 +16,7 @@ ProtocolAdapterConfiguration which is extended by the implementation of a protoc
 
 ---
 ### AdapterServer
-If the adapter runs as a service in a separate process, then this attribute must refer to an entry for that server in the [ProtocolAdapterServers](./sfc-top-level-config.md#protocoladapterservers) section.
+If the adapter runs as a service in a separate process, then this attribute must refer to an entry for that server in the [ProtocolAdapterServers](./sfc-configuration#protocoladapterservers) section.
 
 **Type**: String
 
@@ -25,7 +25,7 @@ If the adapter runs as a service in a separate process, then this attribute must
 ---
 ### AdapterType
 Type of the adapter. These types are predefined for each adapter type (e.g., OPCUA, MQTT,MODBUS-TCP, SNMP, S7, ADS ).
-If the adapter is running in the same process as the SFC core module, then it must refer to an entry in the [ProtocolAdapterTypes](./sfc-top-level-config.md#ProtocolAdapterTypes) section. 
+If the adapter is running in the same process as the SFC core module, then it must refer to an entry in the [ProtocolAdapterTypes](./sfc-configuration#ProtocolAdapterTypes) section. 
 
 **Type**: String
 

@@ -1,4 +1,4 @@
-[SFC Configuration](./sfc-top-level-config.md) > [Transformations](./sfc-top-level-config.md#Transformations) 
+[SFC Configuration](./sfc-configuration) > [Transformations](./sfc-configuration#Transformations) 
 
 ## TransformationOperator
 

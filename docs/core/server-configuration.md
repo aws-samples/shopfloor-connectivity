@@ -1,8 +1,8 @@
-[SFC Configuration](./sfc-top-level-config.md) > [TargetServers](./sfc-top-level-config.md#TargetServers) > [TargetServer](./server-configuration.md) 
+[SFC Configuration](./sfc-configuration) > [TargetServers](./sfc-configuration#TargetServers) > [TargetServer](./server-configuration.md) 
 
-[SFC Configuration](./sfc-top-level-config.md) > [AdapterServers](./sfc-top-level-config.md#ProtocolAdapterServers) > [AdapterServer](./server-configuration.md) 
+[SFC Configuration](./sfc-configuration) > [AdapterServers](./sfc-configuration#ProtocolAdapterServers) > [AdapterServer](./server-configuration.md) 
 
-[SFC Configuration](./sfc-top-level-config.md#Metrics) > [Metrics](./sfc-top-level-config.md#Metrics) > [Writer](./metrics-writer-configuration#MetricsWriter) > [MetricsServer](./metrics-writer-configuration.md#MetricsServer)
+[SFC Configuration](./sfc-configuration#Metrics) > [Metrics](./sfc-configuration#Metrics) > [Writer](./metrics-writer-configuration#MetricsWriter) > [MetricsServer](./metrics-writer-configuration.md#MetricsServer)
 
 ## ServerConfiguration
 

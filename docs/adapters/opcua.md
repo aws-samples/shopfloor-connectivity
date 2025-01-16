@@ -250,7 +250,7 @@ Example of OPCUA server configuration using Basic256Sha256 security profile for 
 
 ## OpcuaSourceConfiguration
 
-[SFC Configuration](../core/sfc-top-level-config.md) > [Sources](../core/sfc-top-level-config.md#Sources) >  [Source](../core/source-configuration.md) 
+[SFC Configuration](../core/sfc-configuration) > [Sources](../core/sfc-configuration#Sources) >  [Source](../core/source-configuration.md) 
 
 
 
@@ -404,7 +404,7 @@ Time in milliseconds that will be used as the SubscribePublishingInterval when c
 
 ## OpcuaNodeChannelConfiguration
 
-[SFC Configuration](../core/sfc-top-level-config.md) > [Sources](../core/sfc-top-level-config.md#Sources) > [Source](../core/source-configuration.md)  > [Channels](../core/source-configuration.md#Channels) > [Channel](../core/channel-configuration.md)
+[SFC Configuration](../core/sfc-configuration) > [Sources](../core/sfc-configuration#Sources) > [Source](../core/source-configuration.md)  > [Channels](../core/source-configuration.md#Channels) > [Channel](../core/channel-configuration.md)
 
 
 
@@ -687,7 +687,7 @@ Explicit absolute change filter:
 
 ## OpcuaAdapterConfiguration
 
-[SFC Configuration](../core/sfc-top-level-config.md) > [ProtocolAdapters](../core/sfc-top-level-config.md#ProtocolAdapters) > [Adapter](../core/protocol-adapter-configuration.md) 
+[SFC Configuration](../core/sfc-configuration) > [ProtocolAdapters](../core/sfc-configuration#ProtocolAdapters) > [Adapter](../core/protocol-adapter-configuration.md) 
 
 
 
@@ -884,7 +884,7 @@ Additional event types that can be used for a server,
 
 ## OpcuaEventTypeConfiguration
 
-[OpcuaAdapter](#OpcuaAdapterType) > [ServerProfiles](#ServerProfiles) > [EventTypes](#EventTypes)
+[OpcuaAdapter](#OpcuaAdapterConfiguration) > [ServerProfiles](#ServerProfiles) > [EventTypes](#EventTypes)
 
 
 
@@ -1024,7 +1024,7 @@ Client certificate configuration
 ### CertificateValidation
 Certificate validation configuration
 
-**Type**: [CertificateValidationConfiguration](../core/certificate-validation-options.md)
+**Type**: [CertificateValidationConfiguration](#OpcuaCertificateValidationConfiguration)
 
 ---
 ### ConnectTimeout
@@ -1241,4 +1241,260 @@ Basic configuration:
 ```
 
 [^top](#opcua-protocol-adapter)
+
+
+## OpcuaCertificateValidationConfiguration
+
+[OpcuaAdapterConfiguration](#OpcuaAdapterConfiguration) >   [OpcuaServers](#OpcuaServers) > [OpcUaServer](#OpcuaServers) > [CertificateValidation](#CertificateValidation)
+
+
+
+- [Schema](#OpcuaCertificateValidationConfiguration-Schema)
+- [Examples](#OpcuaCertificateValidationConfiguration-Example)
+
+**Properties:**
+
+- [Active](#Active)
+- [Directory](#Directory)
+- [ValidationOptions](#ValidationOptions)
+
+------
+
+### Active
+
+Flag to set to enable or disable the validation of server certificates
+
+**Type**: Boolean
+
+Default is true
+
+------
+
+### Directory
+
+Pathname to base directory under which certificates and certificate revocation lists are stored
+
+**Type**: String
+
+This directory must exist, subdirectories will be created by the adapter if they do not exist.
+
+------
+
+### ValidationOptions
+
+Configuration of op optional checks
+
+**Type**: [OpcuaCertificateValidationOptions](#OpcuaCertificateValidationOptions-type)
+
+When not set then all options are enabled
+
+### OpcuaCertificateValidationConfiguration Schema
+
+```json
+ {
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "description": "Configuration for certificate validation",
+  "properties": {
+    "Active": {
+      "type": "boolean",
+      "description": "Enable or disable certificate validation",
+      "default": true
+    },
+    "Directory": {
+      "type": "string",
+      "description": "Directory path for certificate storage and validation"
+    },
+    "ValidationOptions": {
+      "$ref": "#/definitions/ValidationOptions",tificate-vatificate-validation-configuration
+      "description": "Options for certificate validation"
+    }
+  }
+}
+```
+
+### OpcuaCertificateValidationConfiguration Example
+
+Basic configuration:
+
+```json
+{
+  "Directory": "./certificates",
+  "Active": true
+}
+```
+
+With validation options:
+
+```json
+{
+  "Directory": "./certificates",
+  "Active": true,
+  "ValidationOptions": {
+    "ApplicationUri": false,
+    "ExtKeyUsageEndEntity": false,
+    "HostOrIp": false,
+    "KeyUsageEndEntity": false,
+    "KeyUsageIssuer": true,
+    "Revocation": true,
+    "Validity": true
+  }
+}
+```
+
+
+
+## OpcuaCertificateValidationOptions type
+
+[OpcuaAdapterConfiguration](#OpcuaAdapterConfiguration) >   [OpcuaServers](#OpcuaServers) > [OpcUaServer](#OpcuaServers) > [CertificateValidation](#CertificateValidation) > [ValidationOptions](#ValidationOptions)
+
+
+
+- [Schema](#OpcuaCertificateValidationOptions-Type-Schema)
+- [Examples](#OpcuaCertificateValidationOptions-Type-Example)
+
+**Properties:**
+
+- [ApplicationUri](#ApplicationUri)
+- [ExtKeyUsageEndEntity](#ExtKeyUsageEndEntity)
+- [HostOrIp](#HostOrIp)
+- [KeyUsageEndEntity](#KeyUsageEndEntity)
+- [KeyUsageIssuer](#KeyUsageIssuer)
+- [Revocation](#Revocation)
+- [Validity](#Validity)
+
+---
+
+### ApplicationUri
+
+Check Application description against the ApplicationUri from Subject Alternative Names
+
+**Type**: Boolean
+
+Default is true
+
+---
+
+### ExtKeyUsageEndEntity
+
+Extended key usage extension must be present and will be validated for end-entity certificates
+
+**Type**: Boolean
+
+Default is true
+
+---
+
+### HostOrIp
+
+Host or IP address must be present in Alternate Subject Names and will be checked
+
+**Type**: Boolean
+
+Default is true
+
+---
+
+### KeyUsageEndEntity
+
+Key usage extension must be present and will be validated for end-entity certificates
+
+**Type**: Boolean
+
+Default is true
+
+---
+
+### KeyUsageIssuer
+
+Key usage must be present and will be checked for CA certificates
+
+**Type**: Boolean
+
+Default is true
+
+
+
+---
+
+### Revocation
+
+Revocation checking
+
+**Type**: Boolean
+
+Default is true
+
+---
+
+### Validity
+
+Check certificate expiry
+
+**Type**: Boolean
+
+Default is true
+
+### OpcuaCertificateValidationOptions Type Schema
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "description": "Configuration options for certificate validation",
+  "properties": {
+    "ApplicationUri": {
+      "type": "boolean",
+      "description": "Enable validation of application URI",
+      "default": true
+    },
+    "ExtKeyUsageEndEntity": {
+      "type": "boolean",
+      "description": "Enable validation of extended key usage for end entity certificates",
+      "default": true
+    },
+    "HostOrIp": {
+      "type": "boolean",
+      "description": "Enable validation of host name or IP address",
+      "default": true
+    },
+    "KeyUsageEndEntity": {
+      "type": "boolean",
+      "description": "Enable validation of key usage for end entity certificates",
+      "default": true
+    },
+    "KeyUsageIssuer": {
+      "type": "boolean",
+      "description": "Enable validation of key usage for issuer certificates",
+      "default": true
+    },
+    "Revocation": {
+      "type": "boolean",
+      "description": "Enable certificate revocation checking",
+      "default": true
+    },
+    "Validity": {
+      "type": "boolean",
+      "description": "Enable validation of certificate validity period",
+      "default": true
+    }
+  }
+}
+
+```
+
+### OpcuaCertificateValidationOptions Type Example
+
+```json
+{
+  "ApplicationUri": false,
+  "ExtKeyUsageEndEntity": false,
+  "HostOrIp": false,
+  "KeyUsageEndEntity": false,
+  "KeyUsageIssuer": true,
+  "Revocation": true,
+  "Validity": true
+}
+
+```
 

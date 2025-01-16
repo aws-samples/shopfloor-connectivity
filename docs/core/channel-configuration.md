@@ -1,4 +1,4 @@
-[SFC Configuration](./sfc-top-level-config.md) > [Sources](./sfc-top-level-config.md#Sources) > [Channels](./source-configuration.md#channels)
+[SFC Configuration](./sfc-configuration) > [Sources](./sfc-configuration#Sources) > [Channels](./source-configuration.md#channels)
 
 ## ChannelConfiguration
 
@@ -34,7 +34,7 @@
 
 **Type**: String
 
-Optional, if used it must refer to a configured filter in the [ChangeFilters](./sfc-top-level-config.md#ChangeFilters) element at the sec top level configuration.
+Optional, if used it must refer to a configured filter in the [ChangeFilters](./sfc-configuration#ChangeFilters) element at the sec top level configuration.
 
 ---
 ### ConditionFilter
@@ -42,7 +42,7 @@ ConditionFilter to apply to this channel, see condition filters
 
 **Type**: String
 
-Optional, if used it must refer to a configured filter in the [ConditionFilters](./sfc-top-level-config.md#ConditionFilters) element  at the sec top level configuration.
+Optional, if used it must refer to a configured filter in the [ConditionFilters](./sfc-configuration#ConditionFilters) element  at the sec top level configuration.
 
 ---
 ### Decompose
@@ -92,11 +92,11 @@ The names of the values for the fields in the structure start with the name of t
 
 ---
 ### Transformation
-[Transformation](./transformation-operator-configuration.md) to apply to this channel value, the name must be an existing entry in the [Transformations](./sfc-top-level-config.md#Transformations) element at the top level of the SFC configuration.
+[Transformation](./transformation-operator-configuration.md) to apply to this channel value, the name must be an existing entry in the [Transformations](./sfc-configuration#Transformations) element at the top level of the SFC configuration.
 
 **Type**: String
 
-Optional, if used it must refer to a configured filter in the  [Transformations](./sfc-top-level-config.md#Transformations)  element in the SFC top level configuration.
+Optional, if used it must refer to a configured filter in the  [Transformations](./sfc-configuration#Transformations)  element in the SFC top level configuration.
 
 ---
 ### ValueFilter
@@ -104,7 +104,7 @@ Optional, if used it must refer to a configured filter in the  [Transformations]
 
 **Type**: String
 
-Optional, if used it must refer to a configured filter in the [ValueFilters](./sfc-top-level-config.md#ValueFilters) element  at the sec top level configuration.
+Optional, if used it must refer to a configured filter in the [ValueFilters](./sfc-configuration#ValueFilters) element  at the sec top level configuration.
 
 [^top](#ChannelConfiguration)
 

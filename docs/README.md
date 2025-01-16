@@ -27,7 +27,7 @@
 
 - [Configuration](./sfc-configuration.md)
 
-- [SFC configuration file](./core/sfc-top-level-config.md)
+- [SFC configuration file](./core/sfc-configuration)
 
 - [Running the SFC core process](./sfc-running-core-process.md)
 
@@ -65,7 +65,7 @@
 
 **SFC Configuration Specifications**
 
-- [SFC Configuration File](./core/sfc-top-level-config.md)
+- [SFC Configuration File](./core/sfc-configuration)
 - [Protocol Adapters](./adapters/README.md)
 - [Target Adapters](./targets/README.md)
 
@@ -141,9 +141,9 @@ in order to provide additional functionality which is discussed in this document
 
 ## SFC data collection
 
-Configuring data collection with SFC involves defining one or more collection [schedules](./core/sfc-top-level-config.md#Schedules) that 
-specify the interval and sources of data collection, as well as the targets for sending the collected data. These [sources](./core/sfc-top-level-config.md#sources) 
-can include multiple [protocol adapter](./core/sfc-top-level-config.md#ProtocolAdapters) types, and individual data items can be transformed, filtered, or [aggregated](./core/schedule-config#Aggregation) when needed. 
+Configuring data collection with SFC involves defining one or more collection [schedules](./core/sfc-configuration#Schedules) that 
+specify the interval and sources of data collection, as well as the targets for sending the collected data. These [sources](./core/sfc-configuration#sources) 
+can include multiple [protocol adapter](./core/sfc-configuration#ProtocolAdapters) types, and individual data items can be transformed, filtered, or [aggregated](./core/schedule-configuration#Aggregation) when needed. 
 SFC is designed as an active data collector handling all steps defined in the schedules automatically, without requiring 
 additional coding.
 
@@ -151,7 +151,7 @@ additional coding.
 
 SFC data collection is based on the following concepts
 
-- The SFC Core process runs one or more configured [**schedules**](./core/schedule-config.md).
+- The SFC Core process runs one or more configured [**schedules**](./core/schedule-configuration).
 
 - A schedule defines from which **sources** the data is read, to **targets** the data is sent and the **interval** at
   which this happens.
@@ -171,7 +171,7 @@ SFC data collection is based on the following concepts
 - A [**filter**](./sfc-data-processing-filtering.md#data-filtering) is a configured set of conditions to filter values based on 
 relative or absolute values changes since the last time a value was read, of based on the actual value, defining a combination of boundaries and ranges.
 
-- In order to reduce the amount of data written, or number of write actions to the [**targets, aggregation**](./core/aggregation-config.md) can be
+- In order to reduce the amount of data written, or number of write actions to the [**targets, aggregation**](./core/aggregation-configuration) can be
   applied for a schedule. An aggregation defines the number of values to combine per batch, the aggregation functions
   that are applies to the aggregated data and the [**transformation**](./sfc-data-processing-filtering.md#transformations) for these values.
 
@@ -179,7 +179,7 @@ relative or absolute values changes since the last time a value was read, of bas
   for the specific adapter as well as common configuration items as buffer size, compression, applied transformation
   parameters, credentials providers etc.
 
-- A [**schedule**](./core/schedule-config.md) can send data to one or more [**targets**](./core/target-configuration.md) of different types.
+- A [**schedule**](./core/schedule-configuration) can send data to one or more [**targets**](./core/target-configuration.md) of different types.
 
   
 
@@ -341,7 +341,7 @@ target adapters. The SFC framework comes with a rich set of [transformation oper
 A source configuration can be configured to compose structured values from selected individual from that source. Channels, containing structures values,
 can be configured to be decomposed into individual values in the output.
 
-The SFC core can also [aggregate](./core/aggregation-config.md) the data into batches and apply aggregation function to that data, which then can be
+The SFC core can also [aggregate](./core/aggregation-configuration) the data into batches and apply aggregation function to that data, which then can be
 sent instead of, or with the individual values. This can be used to reduce the data volume by sending only the output of
 selected aggregation functions or the number of data messages to the consuming targets. Additionally, transformations,
 as described above, can be applied to the aggregated data.
@@ -359,7 +359,7 @@ The data can be enriched with additional information before it is sent to the ta
 In the configuration information at schedule-level, source and channel level maps of (string) data can be configured
 that will be added to the output data.
 
-Configuration [top-level](./core/sfc-top-level-config.md#Metadata) metadata will be merged with the data at [schedule-level](./core/schedule-config.md#Metadata) and added to the target data under the
+Configuration [top-level](./core/sfc-configuration#Metadata) metadata will be merged with the data at [schedule-level](./core/schedule-configuration#Metadata) and added to the target data under the
 metadata node at top-level. If a value is defined at both top-level and schedule-level, the schedule-level value is
 used (allowing the overwriting of top-level values at schedule-level).
 

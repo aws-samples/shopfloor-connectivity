@@ -1,8 +1,8 @@
-[SFC Configuration](./sfc-top-level-config.md) > [Targets](./sfc-top-level-config.md#Targets) 
+[SFC Configuration](./sfc-configuration) > [Targets](./sfc-configuration#Targets) 
 
 ## TargetConfiguration
 
-Target Configuration defines common properties for [SFC target adapters](./sfc-top-level-config.md#Targets). Target adapter implementations extend this type with their specific additional properties.
+Target Configuration defines common properties for [SFC target adapters](./sfc-configuration#Targets). Target adapter implementations extend this type with their specific additional properties.
 
 - [Schema](#Schema)
 - [Examples](#Examples)
@@ -47,7 +47,7 @@ The client is used by the target to obtain session credentials from the AWS IoT 
 
 **Type**: String
 
-Must refer to an existing client configuration in [AwsIotCredentialProviderClients](./sfc-top-level-config.md#AwsIotCredentialProviderClients) section.
+Must refer to an existing client configuration in [AwsIotCredentialProviderClients](./sfc-configuration#AwsIotCredentialProviderClients) section.
 
 ---
 ### Description
@@ -76,7 +76,7 @@ The IPC server must implement the (gRPC) ProtocolAdapterService.
 
 **Type**: String
 
-Set to a configured target server in the [TargetServers](./sfc-top-level-config.md#TargetServers) section of the top level configuration to use IPC to send data to a target running as an external IPC service.
+Set to a configured target server in the [TargetServers](./sfc-configuration#TargetServers) section of the top level configuration to use IPC to send data to a target running as an external IPC service.
 
 ---
 ### TargetChannelSize
@@ -99,7 +99,7 @@ Default is 1000
 ---
 ### TargetType
 TargetType is a code that identifies the type of the target (e.g., "AWS-SQS", "AWS-KINESIS").
-If a target runs in the same process as the SFC core then this type must be defined in the [TargetTypes](./sfc-top-level-config.md#TargetTypes) section of the configuration. The SFC core requires the information from that section to create instances of the target type.
+If a target runs in the same process as the SFC core then this type must be defined in the [TargetTypes](./sfc-configuration#TargetTypes) section of the configuration. The SFC core requires the information from that section to create instances of the target type.
 
 Target implementations will typically define the target name, and use it to select and verify the configuration data that is passed to their instances.
 
@@ -107,7 +107,7 @@ Target implementations will typically define the target name, and use it to sele
 
 ---
 ### Template
-Pathname to file containing an [Apache velocity](https://velocity.apache.org/) template that can be applied to transform the output data of the target
+Pathname to file containing an [Apache velocity](https://velocity.apache.org/) template that can be applied to [transform the output data](../sfc-target-templates.md) of the target
 
 **Type**: String
 

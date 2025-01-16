@@ -1,4 +1,4 @@
-[SFC Configuration](./sfc-top-level-config.md) > [ConditionFilters](./sfc-top-level-config.md#ConditionFilters)
+[SFC Configuration](./sfc-configuration) > [ConditionFilters](./sfc-configuration#ConditionFilters)
 
 ## ConditionFilterConfiguration
 

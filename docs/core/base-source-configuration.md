@@ -1,4 +1,4 @@
-[SFC Configuration](./sfc-top-level-config.md) > [Sources](./sfc-top-level-config.md#Sources)
+[SFC Configuration](./sfc-configuration) > [Sources](./sfc-configuration#Sources)
 
 # BaseSourceConfiguration
 
@@ -26,13 +26,13 @@ Type: String
 
 ### Name
 
-Name of the source in the output data. This property only needs to be set if the sourcename in the output must be different from the key for the source in the SFC toplevel configuration [Sources](./sfc-top-level-config#Sources) property.
+Name of the source in the output data. This property only needs to be set if the sourcename in the output must be different from the key for the source in the SFC toplevel configuration [Sources](./sfc-configuration#Sources) property.
 
 ---
 
 ### ProtocolAdapter
 
-Reference to the adapter for the source in the SFC toplevel configuration [Sources](./sfc-top-level-config#Sources) property.
+Reference to the adapter for the source in the SFC toplevel configuration [Sources](./sfc-configuration#Sources) property.
 
 ---
 

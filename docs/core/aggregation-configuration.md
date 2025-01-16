@@ -1,4 +1,4 @@
-[SFC Configuration](./sfc-top-level-config.md) > [Sources](./sfc-top-level-config.md#Sources) > [Source](./source-configuration.md) > [Aggregation]((./source-configuration.md#Aggregation)
+[SFC Configuration](./sfc-configuration) > [Sources](./sfc-configuration#Sources) > [Source](./source-configuration.md) > [Aggregation]((./source-configuration.md#Aggregation)
 
 ## Aggregation
 
@@ -131,7 +131,7 @@ The values aggregation output value is a list of the input values used for the a
 
 Transformations applied to the aggregated data. 
 
-This element is similar to the Output element, but it has an additional map level for the name of the output on which a transformation will be applied.  Transformations element is a three-level map, where the first level contains is indexed by the source identifier. Each entry is another map that is indexed by the channel identifier.  Each entry of the channel map at that level contains a map indexed by the aggregation output e.g., "values", "avg". Each entry contains a single transformation identifier of the transformation that will be applied to the aggregated output value. This transformation identifier must exist in the [Transformations](./sfc-top-level-config.md#Transformations) section.   
+This element is similar to the Output element, but it has an additional map level for the name of the output on which a transformation will be applied.  Transformations element is a three-level map, where the first level contains is indexed by the source identifier. Each entry is another map that is indexed by the channel identifier.  Each entry of the channel map at that level contains a map indexed by the aggregation output e.g., "values", "avg". Each entry contains a single transformation identifier of the transformation that will be applied to the aggregated output value. This transformation identifier must exist in the [Transformations](./sfc-configuration#Transformations) section.   
 
 Wildcards can be applied at each level of the map. The "\*" wildcard can be used at source identifier, channel identifier and/or output name. If wildcards are used are combined with more specific entries the best matching entry will be applied.  
 

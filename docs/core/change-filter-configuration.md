@@ -1,4 +1,4 @@
-[SFC Configuration](./sfc-top-level-config.md) > [ChangeFilters](./sfc-top-level-config.md#ChangeFilters)
+[SFC Configuration](./sfc-configuration) > [ChangeFilters](./sfc-configuration#ChangeFilters)
 
 
 

@@ -1,4 +1,4 @@
-[SFC Configuration](../core/sfc-top-level-config.md) > [Metrics](../core/sfc-top-level-config.md#Metrics) 
+[SFC Configuration](../core/sfc-configuration) > [Metrics](../core/sfc-configuration#Metrics) 
 
 # AWS CloudWatch Metrics
 
@@ -10,7 +10,7 @@
 
 ## AwsCloudWatchConfiguration
 
-[SFC Configuration](../core/sfc-top-level-config.md) > [Metrics](../core/sfc-top-level-config.md#Metrics) 
+[SFC Configuration](../core/sfc-configuration) > [Metrics](../core/sfc-configuration#Metrics) 
 
 
 

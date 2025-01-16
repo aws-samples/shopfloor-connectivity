@@ -22,7 +22,7 @@
 
 - [Securing the configuration](#securing-the-configuration)
 
-- [SFC top level configuration](./core/sfc-top-level-config.md)
+- [SFC top level configuration](./core/sfc-configuration)
 
 ## Configuration concepts
 
@@ -420,7 +420,7 @@ When processing a configuration file SFC will first load all included content an
 
 ## Configuration providers
 
-In the architecture of the SFC core the [configuration method](./core/sfc-top-level-config.md) is abstracted by using configuration providers. These
+In the architecture of the SFC core the [configuration method](./core/sfc-configuration) is abstracted by using configuration providers. These
 plug-able providers read the configuration data from their specific source and method and provide the initial
 configuration and updates to an SFC service process, which can be the Service, a source service or a target service,
 as a channel of configuration versions. An SFC service process will receive the new configuration version and apply

@@ -1,7 +1,7 @@
 
 # AWS Kinesis Firehose Target
 
-[SFC Configuration](../core/sfc-top-level-config.md) > [Targets](../core/sfc-top-level-config.md#Targets) >  [Target](../core/target-configuration.md) 
+[SFC Configuration](../core/sfc-configuration) > [Targets](../core/sfc-configuration#Targets) >  [Target](../core/target-configuration.md) 
 
 
 

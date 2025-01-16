@@ -1,8 +1,8 @@
-[SFC Configuration](./sfc-top-level-config.md) > [Metrics](./sfc-top-level-config.md#Metrics)
+[SFC Configuration](./sfc-configuration) > [Metrics](./sfc-configuration#Metrics)
 
-[SFC Configuration](./sfc-top-level-config.md) > [ProtocolAdapters](./sfc-top-level-config.md#ProtocolAdapters) > [ProtocolAdapter](./protocol-adapter-configuration.md) > [Metrics](./protocol-adapter-configuration.md#Metrics) 
+[SFC Configuration](./sfc-configuration) > [ProtocolAdapters](./sfc-configuration#ProtocolAdapters) > [ProtocolAdapter](./protocol-adapter-configuration.md) > [Metrics](./protocol-adapter-configuration.md#Metrics) 
 
-[SFC Configuration](./sfc-top-level-config.md) > [Targets](./sfc-top-level-config.md#Targets) > [TargetAdapter](./target-configuration.md) > [Metrics](./target-configuration.md#Metrics) 
+[SFC Configuration](./sfc-configuration) > [Targets](./sfc-configuration#Targets) > [TargetAdapter](./target-configuration.md) > [Metrics](./target-configuration.md#Metrics) 
 
 ## MetricsConfiguration
 

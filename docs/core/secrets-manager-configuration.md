@@ -1,4 +1,4 @@
-[SFC Configuration](./sfc-top-level-config.md#Metrics) > [SecretsManager](./sfc-top-level-config.md#SecretsManager) 
+[SFC Configuration](./sfc-configuration#Metrics) > [SecretsManager](./sfc-configuration#SecretsManager) 
 
 ## SecretsManagerConfiguration
 

@@ -1,4 +1,4 @@
-[SFC Configuration](./sfc-top-level-config.md) > [ValueFilters](./sfc-top-level-config.md#ValueFilters)
+[SFC Configuration](./sfc-configuration) > [ValueFilters](./sfc-configuration#ValueFilters)
 
 ## ValueFilterConfiguration
 

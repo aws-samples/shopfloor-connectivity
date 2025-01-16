@@ -1,8 +1,8 @@
-[SFC Configuration](./sfc-top-level-config.md) > [HealthProbe](./sfc-top-level-config.md#healthprobe)
+[SFC Configuration](./sfc-configuration) > [HealthProbe](./sfc-configuration#healthprobe)
 
-[SFC Configuration](./sfc-top-level-config.md) > [TargetServers](./sfc-top-level-config.md#TargetServers) > [TargetServer](./server-configuration.md) > [HealthProbe](./server-configuration.md#healthprobe)
+[SFC Configuration](./sfc-configuration) > [TargetServers](./sfc-configuration#TargetServers) > [TargetServer](./server-configuration.md) > [HealthProbe](./server-configuration.md#healthprobe)
 
-[SFC Configuration](./sfc-top-level-config.md) > [ProtocolAdapterServers](./sfc-top-level-config.md#ProtocolAdapterServers) > [AdapterServer](./server-configuration.md) > [HealthProbe](./server-configuration.md#healthprobe)
+[SFC Configuration](./sfc-configuration) > [ProtocolAdapterServers](./sfc-configuration#ProtocolAdapterServers) > [AdapterServer](./server-configuration.md) > [HealthProbe](./server-configuration.md#healthprobe)
 
 # HealthProbeConfiguration
 

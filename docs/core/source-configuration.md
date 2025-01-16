@@ -1,4 +1,4 @@
-[SFC Configuration](./sfc-top-level-config.md) > [Sources](./sfc-top-level-config.md#Sources) 
+[SFC Configuration](./sfc-configuration) > [Sources](./sfc-configuration#Sources) 
 
 ## SourceConfiguration
 
@@ -27,7 +27,7 @@ Change filter to apply on every channel value in this source.
 
 **Type**: String
 
-Optional, if used it must refer to a configured filter in the [ChangeFilters](./sfc-top-level-config.md#ChangeFilters) element
+Optional, if used it must refer to a configured filter in the [ChangeFilters](./sfc-configuration#ChangeFilters) element
 
 ---
 ### ChannelTimestampAdjustment
@@ -126,7 +126,7 @@ Reference to the used protocol adapter.
 
 **Type**: String
 
-Must refer to an existing protocol adapter in the [ProtocolAdapters](./sfc-top-level-config.md#ProtocolAdapters) section.
+Must refer to an existing protocol adapter in the [ProtocolAdapters](./sfc-configuration#ProtocolAdapters) section.
 
 ---
 ### SourceTimestampAdjustment

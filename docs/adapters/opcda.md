@@ -13,7 +13,7 @@ Configuration for OPCDA protocol adapter.
 
 ## OpcdaSourceConfiguration
 
-[SFC Configuration](../core/sfc-top-level-config.md) > [Sources](../core/sfc-top-level-config.md#Sources) >  [Source](../core/source-configuration.md)
+[SFC Configuration](../core/sfc-configuration) > [Sources](../core/sfc-configuration#Sources) >  [Source](../core/source-configuration.md)
 
 
 
@@ -172,7 +172,7 @@ Copy
 
 ## OpcdaChannelConfiguration
 
-[SFC Configuration](../core/sfc-top-level-config.md) > [Sources](../core/sfc-top-level-config.md#Sources) > [Source](../core/source-configuration.md)  > [Channels](../core/source-configuration.md#Channels) > [Channel](../core/channel-configuration.md)
+[SFC Configuration](../core/sfc-configuration) > [Sources](../core/sfc-configuration#Sources) > [Source](../core/source-configuration.md)  > [Channels](../core/source-configuration.md#Channels) > [Channel](../core/channel-configuration.md)
 
 
 
@@ -244,7 +244,7 @@ Temperature sensor:
 
 ## OpcdaAdapterConfiguration
 
-[SFC Configuration](../core/sfc-top-level-config.md) > [ProtocolAdapters](../core/sfc-top-level-config.md#ProtocolAdapters) > [Adapter](../core/protocol-adapter-configuration.md) 
+[SFC Configuration](../core/sfc-configuration) > [ProtocolAdapters](../core/sfc-configuration#ProtocolAdapters) > [Adapter](../core/protocol-adapter-configuration.md) 
 
 
 
@@ -313,7 +313,7 @@ Opcda servers configured for this adapter. The Opcda source using the adapter mu
 
 ## OpcdaServerConfiguration
 
-[OpcdaAdapter][OpcdaAdapterConfiguration]> [OpcdaServers](#OpcdaServers)
+[OpcdaAdapter](#OpcdaAdapterConfiguration)> [OpcdaServers](#OpcdaServers)
 
 
 

@@ -1,4 +1,4 @@
-[SFC Configuration](./sfc-top-level-config.md) > [AwsIotCredentialProviderClients](./sfc-top-level-config.md#AwsIotCredentialProviderClients) > [Proxy](./aws-iot-credential-provider-configuration.md#Proxy)
+[SFC Configuration](./sfc-configuration) > [AwsIotCredentialProviderClients](./sfc-configuration#AwsIotCredentialProviderClients) > [Proxy](./aws-iot-credential-provider-configuration.md#Proxy)
 
 ## ClientProxyConfiguration
 

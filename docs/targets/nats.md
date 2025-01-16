@@ -8,7 +8,7 @@
 
 ## NatsTargetConfiguration
 
-[SFC Configuration](../core/sfc-top-level-config.md) > [Targets](../core/sfc-top-level-config.md#Targets) >  [Target](../core/target-configuration.md) 
+[SFC Configuration](../core/sfc-configuration) > [Targets](../core/sfc-configuration#Targets) >  [Target](../core/target-configuration.md) 
 
 
 
@@ -249,8 +249,7 @@ Dynamic subject names based on target- and metadata values
 
 ## NatsServerConfiguration
 
-[NatsTarget](#NatsTargetConfiguration) > [NatsServer](#NatsServer])
-
+[NatsTarget](#NatsTargetConfiguration) > [NatsServer](#NatsServer)
 
 
 - [Schema](#NatsServerConfiguration-Schema)
