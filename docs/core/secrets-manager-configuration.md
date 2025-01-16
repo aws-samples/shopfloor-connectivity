@@ -1,6 +1,6 @@
-[SFC Configuration](./sfc-configuration#Metrics) > [SecretsManager](./sfc-configuration#SecretsManager) 
-
 ## SecretsManagerConfiguration
+
+[SFC Configuration](./sfc-configuration#Metrics) > [SecretsManager](./sfc-configuration#SecretsManager) 
 
 - [Schema](#Schema)
 - [Examples](#Examples)

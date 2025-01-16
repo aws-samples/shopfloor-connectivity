@@ -1,6 +1,6 @@
-[SFC Configuration](./sfc-configuration) > [Sources](./sfc-configuration#Sources) > [Channels](./source-configuration.md#channels)
-
 ## ChannelConfiguration
+
+[SFC Configuration](./sfc-configuration) > [Sources](./sfc-configuration#Sources) > [Channels](./source-configuration.md#channels)
 
 - [Schema](#Schema)
 

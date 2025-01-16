@@ -1,6 +1,6 @@
-[SFC Configuration](./sfc-configuration) > [Sources](./sfc-configuration#Sources) > [Source](./source-configuration.md) > [Aggregation]((./source-configuration.md#Aggregation)
-
 ## Aggregation
+
+[SFC Configuration](./sfc-configuration) > [Sources](./sfc-configuration#Sources) > [Source](./source-configuration.md) > [Aggregation](./source-configuration.md#Aggregation)
 
 An optional aggregation can be used for a schedule to collect the results of multiple read values and combine these in a single output message, optimally applying functions to aggregate the output data.
 

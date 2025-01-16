@@ -1,6 +1,6 @@
-[SFC Configuration](./sfc-configuration) > [Tuning](./sfc-configuration#Tuning) 
-
 ## TuningConfiguration
+
+[SFC Configuration](./sfc-configuration) > [Tuning](./sfc-configuration#Tuning) 
 
 [SFC tuning](../sfc-tuning.md) parameters. Tuning parameters can be set to adjust sizes of internal channels and timeouts. The SFC log output will output messages when internal channels start blocking when these are at their maximum capacity or when timeouts occur waiting for a channel to unblock.
 
@@ -8,7 +8,6 @@
 
 - [Examples](#Examples)
 
-  
 
 **Properties:**
 

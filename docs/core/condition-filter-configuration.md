@@ -1,6 +1,6 @@
-[SFC Configuration](./sfc-configuration) > [ConditionFilters](./sfc-configuration#ConditionFilters)
-
 ## ConditionFilterConfiguration
+
+[SFC Configuration](./sfc-configuration) > [ConditionFilters](./sfc-configuration#ConditionFilters)
 
 - [Schema](#Schema)
 - [Examples](#Examples)

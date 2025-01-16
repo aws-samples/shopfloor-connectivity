@@ -1,6 +1,6 @@
-[SFC Configuration](./sfc-configuration#Metrics) > [ProtocolAdapters](./sfc-configuration#ProtocolAdapters) 
-
 ## ProtocolAdapterConfiguration
+
+[SFC Configuration](./sfc-configuration#Metrics) > [ProtocolAdapters](./sfc-configuration#ProtocolAdapters) 
 
 ProtocolAdapterConfiguration which is extended by the implementation of a protocol adapter with specific properties for that adapter.
 

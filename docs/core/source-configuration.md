@@ -1,14 +1,14 @@
-[SFC Configuration](./sfc-configuration) > [Sources](./sfc-configuration#Sources) 
-
 ## SourceConfiguration
 
-SourceConfiguration defines common properties for SFC source adapters. Source adapter implementations extend this type with their specific additional properties.
+[SFC Configuration](./sfc-configuration) > [Sources](./sfc-configuration#Sources) 
+
+SourceConfiguration defines common properties for [SFC source adapters](../adapters/README.md). Source adapter implementations extend this type with their specific additional properties.
 
 - [Schema](#Schema)
 - [Examples](#Examples)
 
-
 **Properties:**
+
 - [ChangeFilter](#ChangeFilter)
 - [ChannelTimestampAdjustment](#ChannelTimestampAdjustment)
 - [Channels](#Channels)

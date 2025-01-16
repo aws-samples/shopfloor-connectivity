@@ -1,8 +1,6 @@
-[SFC Configuration](./sfc-configuration) > [ChangeFilters](./sfc-configuration#ChangeFilters)
-
-
-
 ## ChangeFilterConfiguration
+
+[SFC Configuration](./sfc-configuration) > [ChangeFilters](./sfc-configuration#ChangeFilters)
 
 Change filter to apply to a channel value.
 

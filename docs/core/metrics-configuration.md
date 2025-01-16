@@ -1,10 +1,10 @@
+## MetricsConfiguration
+
 [SFC Configuration](./sfc-configuration) > [Metrics](./sfc-configuration#Metrics)
 
 [SFC Configuration](./sfc-configuration) > [ProtocolAdapters](./sfc-configuration#ProtocolAdapters) > [ProtocolAdapter](./protocol-adapter-configuration.md) > [Metrics](./protocol-adapter-configuration.md#Metrics) 
 
 [SFC Configuration](./sfc-configuration) > [Targets](./sfc-configuration#Targets) > [TargetAdapter](./target-configuration.md) > [Metrics](./target-configuration.md#Metrics) 
-
-## MetricsConfiguration
 
 - [Schema](#Schema)
 - [Examples](#Schema)

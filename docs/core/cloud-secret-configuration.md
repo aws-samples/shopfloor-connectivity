@@ -1,6 +1,6 @@
-[SFC Configuration](./sfc-configuration) > [SecretsManager](./sfc-configuration#SecretsManager) > [Secrets](./secrets-manager-configuration.md#Secrets)
-
 ## CloudSecretConfiguration
+
+[SFC Configuration](./sfc-configuration) > [SecretsManager](./sfc-configuration#SecretsManager) > [Secrets](./secrets-manager-configuration.md#Secrets)
 
 Configuration for a secret obtained from AWS Secrets manager
 

@@ -1,3 +1,5 @@
+## InProcessConfiguration
+
 [SFC Configuration](./sfc-configuration) > [ProtocolAdapterTypes](./sfc-configuration#ProtocolAdapterTypes)
 
 [SFC Configuration](./sfc-configuration) > [TargetTypes](./sfc-configuration#TargetTypes) 
@@ -7,8 +9,6 @@
 [SFC Configuration](./sfc-configuration) > [LogWriter](./sfc-configuration#LogWriter)
 
 [SFC Configuration](./sfc-configuration) > [ConfigProvider](./sfc-configuration#ConfigProvider)
-
-## InProcessConfiguration
 
 - [Schema](#Schema)
 - [Examples](#Examples)

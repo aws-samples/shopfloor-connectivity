@@ -1,6 +1,6 @@
-[SFC Configuration](./sfc-configuration#Metrics) > [Schedules](./sfc-configuration#Schedules) 
-
 ## ScheduleConfiguration
+
+[SFC Configuration](./sfc-configuration#Metrics) > [Schedules](./sfc-configuration#Schedules) 
 
 
 - [Schema](#Schema)

@@ -1,12 +1,10 @@
-[SFC Configuration](./sfc-configuration) > [ValueFilters](./sfc-configuration#ValueFilters)
-
 ## ValueFilterConfiguration
+
+[SFC Configuration](./sfc-configuration) > [ValueFilters](./sfc-configuration#ValueFilters)
 
 - [Schema](#Schema)
 
 - [Example](#Examples)
-
-  
 
 **Properties:**
 

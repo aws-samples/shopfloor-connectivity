@@ -1,10 +1,10 @@
+# HealthProbeConfiguration
+
 [SFC Configuration](./sfc-configuration) > [HealthProbe](./sfc-configuration#healthprobe)
 
 [SFC Configuration](./sfc-configuration) > [TargetServers](./sfc-configuration#TargetServers) > [TargetServer](./server-configuration.md) > [HealthProbe](./server-configuration.md#healthprobe)
 
 [SFC Configuration](./sfc-configuration) > [ProtocolAdapterServers](./sfc-configuration#ProtocolAdapterServers) > [AdapterServer](./server-configuration.md) > [HealthProbe](./server-configuration.md#healthprobe)
-
-# HealthProbeConfiguration
 
 - [Schema](#Schema)
 - [Examples](#Examples)
@@ -224,7 +224,7 @@ Custom path and response:
 
 
 
-1. Disabled probe configuration:
+Disabled probe configuration:
 
 ```json
 {
