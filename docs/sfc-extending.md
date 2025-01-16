@@ -16,27 +16,18 @@
 
 
 
-
 This section describes how additional protocol adapters and targets can be implemented.
 
-Both protocol adapters and targets can be implemented in languages like Java, Kotlin, or any other JVM language. These
-adapters and targets have the option to run in the same process as the SFC core module or as an external IPC service.
-The SFC framework, which is a JVM-based application, provides a set of classes that implements most of the
-infrastructure for adapter and target servers, logging, and configuration, so developers can focus on implementing the
-actual protocol.
+Protocol adapters and targets can be implemented in languages such as Java, Kotlin, or any other JVM language. These adapters and targets have the option to run either in the same process as the SFC core module or as an external IPC service. The SFC framework, which is a JVM-based application, provides a set of classes that implement most of the infrastructure for adapter and target servers, logging, and configuration. This allows developers to focus on implementing the actual protocol.
 
-For protocols or targets that require libraries or languages that cannot be executed in a JVM environment, an IPC server
-implementation can be used. The requirement is that the language and runtime must support the gRPC protocol.
+For protocols or targets that require libraries or languages that cannot be executed in a JVM environment, an IPC server implementation can be used. The only requirement is that the chosen language and runtime must support the gRPC protocol.
 
 
 # Implementing a protocol adapter
 
-The main activity of a protocol adapter is to read data from industrial devices using a specific protocol. The SFC core
-instructs the protocol adapter which data to read. The core itself is not aware of the actual protocol used by the
-adapter and the instructions are generic, so they can be used for any type of adapter. The implementation of an adapter
-will use these instructions, and its specific configuration data, to translate to execute protocol-specific API or
-service calls to read the data. The data is returned to the SFC core in a format that is not specific to the used
-protocol.
+The main function of a protocol adapter is to read data from industrial devices using a specific protocol. The SFC core instructs the protocol adapter on which data to read. The core itself is not aware of the actual protocol used by the adapter, and its instructions are generic, allowing them to be used for any type of adapter.
+
+The implementation of an adapter uses these instructions, along with its specific configuration data, to translate and execute protocol-specific API or service calls to read the data. The data is then returned to the SFC core in a format that is not specific to the protocol used.
 
 For JVM implementations the SFC core defines the following interface:
 
@@ -54,44 +45,34 @@ Protocol implementations **need to implement** this interface.
 
 ## Read function
 
-This method takes the source ID which refers to a protocol-specific source configuration. The schedules running in the
-SFC core can request data from multiple sources that use the same protocol, so the adapter may receive requests for
-different sources. The channels parameter is a list of value names, which are a part of the source configuration. Note
-that all of these values are simple protocol agnostic string identifiers. The adapter implementation will need to map
-these identifiers, using its specific configuration for the source and values to the required API or service calls.
+This method takes the source ID, which refers to a protocol-specific source configuration. The schedules running in the SFC core can request data from multiple sources that use the same protocol, so the adapter may receive requests for different sources. The 'channels' parameter is a list of value names, which are part of the source configuration. Note that all these values are simple, protocol-agnostic string identifiers. The adapter implementation will need to map these identifiers, using its specific configuration for the source and values, to the required API or service calls.
 
 Examples of sources and channels for protocols are:
 
-- OPCUA, sources are OPCUA server, channels are OPCUA nodes
-- MODBUS, sources are MODBUS devices, channels are (ranges of) registers or discrete input or outputs
-- MQTT, sources are brokers, channels are topic names
+- OPCUA: sources are OPCUA servers, channels are OPCUA nodes
+- MODBUS: sources are MODBUS devices, channels are (ranges of) registers or discrete inputs/outputs
+- MQTT: sources are brokers, channels are topic names
 
-The returned SourceReadResult can be an instance of either a SourceReadSuccess if the values were read successfully from
-the source, or a SourceReadError if the reading of the values failed.
+The returned SourceReadResult can be an instance of either SourceReadSuccess if the values were read successfully from the source, or SourceReadError if the reading of the values failed.
 
-A SourceReadSuccess contains a map of ChannelReadValues, indexed by their abstract channel name. Each ChannelReadValue
-holds the actual value that was read, which could be of any type, and optionally a timestamp for that value. The besides
-this per value timestamp, the SourceReadSuccess also contains a timestamp at the source level. If the timestamp is the
-same for each read value are the same then this source level timestamp can be used to reduce the volume of data. The SFC
-core will automatically use the source level timestamp if a value does not have a per value timestamp.
+A SourceReadSuccess contains a map of ChannelReadValues, indexed by their abstract channel name. Each ChannelReadValue holds the actual value that was read, which could be of any type, and optionally a timestamp for that value. Besides this per-value timestamp, the SourceReadSuccess also contains a timestamp at the source level. If the timestamps for each read value are the same, then this source-level timestamp can be used to reduce the volume of data. The SFC core will automatically use the source-level timestamp if a value does not have a per-value timestamp.
 
-If no timestamps are set by the adapter the SFC core will use the local date and time as the moment of reading.
+If no timestamps are set by the adapter, the SFC core will use the local date and time as the moment of reading.
 
-The SourceReadError, which is returned if reading from a source failed, contains a description of the error and a
-timestamp. The SFC core will automatically log these errors.
+The SourceReadError, which is returned if reading from a source failed, contains a description of the error and a timestamp. The SFC core will automatically log these errors.
 
-When the SFC core is stopped it will create the adapter stop method to let the adapter cleanup resources or close any
-sessions.
+When the SFC core is stopped, it will call the adapter's stop method to let the adapter clean up resources or close any sessions.
 
 
 
 ## Creating an in-process protocol adapter instance
 
-The SFC core is responsible for creating and closing down instances of adapters that run in the same process. As the SFC
-core is not aware of the actual protocol it depends solely on the InProcess configuration for the protocol source. This
-configuration contains which jar files that implement the adapter will need to be explicitly loaded by the SCF core
-process and the name of a factory class. After loading the jar files the core will create an instance of the factory
-class and call it the static "newInstance" method.
+The SFC core is responsible for creating and closing down instances of adapters that run in the same process. As the SFC core is not aware of the actual protocol, it relies solely on the InProcess configuration for the protocol source. This configuration contains:
+
+- The jar files that implement the adapter, which need to be explicitly loaded by the SFC core process
+- The name of a factory class
+
+After loading the jar files, the core creates an instance of the factory class and calls its static "newInstance" method.
 
 Each adapter implementation must implement a factory class that implements this method with the following signature:
 
@@ -141,33 +122,18 @@ service ProtocolAdapterService {
 }
 ```
 
-The InitializeAdapter message is sent by the core to the service, providing it with the subset of the configuration
-information that is relevant for the adapter instance. This allows the service to bootstrap with a minimum of
-configuration, just enough to bootstrap and listen for the InitializeAdapter request. When the SFC core starts, it will
-send a specific InitializeAdapterRequest to the adapter service. The service uses the configuration information in the
-request to (re-)configure the protocol adapter. The service returns a response containing an indication of whether the
-configuration of the adapter was successful, and if this is not the case additional error information. When the request
-fails, a timeout occurs or the service is not reachable, then the SFC core will periodically retry by re-sending the
-request. The configuration, as JSON format in the adapterConfiguration field, contains all relevant configuration data
-selected by the SFC core for that adapter. The adapter can use an instance of the SFC ConfigReader class, to read the
-configuration data as an instance of the configuration type class for the adapter.
+Initialization Process: The InitializeAdapter message is sent by the core to the service, providing it with the subset of configuration information relevant for the adapter instance. This allows the service to bootstrap with minimal configuration, just enough to listen for the InitializeAdapter request. When the SFC core starts, it sends a specific InitializeAdapterRequest to the adapter service. The service uses this configuration information to (re-)configure the protocol adapter. The service returns a response indicating whether the configuration was successful, including additional error information if it wasn't. If the request fails, times out, or the service is unreachable, the SFC core will periodically retry by re-sending the request. The configuration, in JSON format in the adapterConfiguration field, contains all relevant configuration data selected by the SFC core for that adapter. The adapter can use an instance of the SFC ConfigReader class to read the configuration data as an instance of the configuration type class for the adapter.
 
-The ReadValues method is a streaming server request, meaning that after receiving the ReadValues request from the SCF
-core it can stream values it read with the specified interval back to the client, that resides in the SFC core until the
-SFC core closes the connection. The SourceReadValueRequest contains the identifier of the source and a list of channels
-to read for that source, similar to the ProtocolAdapters interface read method parameters, used for JVM implementations
-of an adapter. This makes it possible to provide a JVM implementation of an adapter that can run in the SFC core
-process, as well as an IPC service, with little effort as the SFC implementation contains generic Service helper classes
-to wrap the adapter classes.
+ReadValues Method: The ReadValues method is a streaming server request. After receiving the ReadValues request from the SFC core, it can stream values read at the specified interval back to the client in the SFC core until the core closes the connection. The SourceReadValueRequest contains the identifier of the source and a list of channels to read for that source, similar to the ProtocolAdapters interface read method parameters used for JVM implementations of an adapter. This allows for easy implementation of both JVM adapters running in the SFC core process and IPC services, as the SFC implementation contains generic Service helper classes to wrap the adapter classes.
 
-The data returned by the service as stream to the core contains the ID of the source, a map indexed by the channel names
-containing the values, a timestamp, and in case of an error description. The structure of the returned data is the same
-as returned by the ProtocolAdapters read method. A major difference is that, to provide type-fidelity between the data
-read by the adapter and received by the SFC core, that the message for returning the ChannelValues has a specific one-of
-field in the message for every datatype supported by the SFC core. The SFC framework has helpers that abstract storing
-the value in the distinctive field for the type of the data by the adapter. The SFC core has internal helpers to extract
-the data in the original format. Additional wrappers for other than JVM implementation will be part of future adapter
-implementations.
+Data Structure: The data returned by the service as a stream to the core contains:
+
+- The ID of the source
+- A map indexed by channel names containing the values
+- A timestamp
+- An error description in case of failure
+
+The structure of the returned data is the same as that returned by the ProtocolAdapters read method. A key difference is that, to provide type-fidelity between the data read by the adapter and received by the SFC core, the message for returning the ChannelValues has a specific one-of field for every datatype supported by the SFC core. The SFC framework provides helpers that abstract storing the value in the distinctive field for the data type by the adapter. The SFC core has internal helpers to extract the data in the original format. Additional wrappers for non-JVM implementations will be part of future adapter implementations.
 
 ## Using JVM protocol adapter classes as IPC services
 
@@ -502,11 +468,17 @@ This method is receiving a config reader and a logger instance.
 
 ## Metrics Collection
 
-Protocol adapters and targets which do support the collection of metrics must return a non-null instance of an
-implementation of the MetricsProvider interface as defined in the ProtocolAdapter or TargetWriter interface. The
-component using the adapter or the target will use the interface to read the collected metrics.
+Protocol adapters and targets that support metric collection must return a non-null instance of a MetricsProvider interface implementation, as defined in the ProtocolAdapter or TargetWriter interface. The component using the adapter or target will use this interface to read the collected metrics.
 
-If the adapter or target is hosted in an IPC service process, then the base classes for these services will provide the
-metrics provider as part of the exposed service that will provide metrics as a server-side streaming methods. The IPC
-client classes for adapters and targets,do implement a MetricsProvider implementation that will invoke and read the data
-from the method that will stream the data to the client.
+For adapters or targets hosted in an IPC service process:
+
+- The base classes for these services will provide the metrics provider as part of the exposed service.
+- This provider will offer metrics through server-side streaming methods.
+
+- The IPC client classes for adapters and targets implement a MetricsProvider that:
+
+  - Invokes the streaming method
+
+  - Reads the data streamed to the client
+
+This structure ensures consistent metric collection and access across different implementation types (in-process and IPC).

@@ -13,31 +13,18 @@ session credentials using these certificates and key files. These client configu
 CredentialProviderClient to an entry in that section. If the CredentialProviderClient is not set then SFC will fall back
 on the default credentials provider chain as described [here](https://docs.aws.amazon.com/sdk-for-java/v1/developer-guide/credentials.html).
 
-The logic for obtaining the session credentials is ported from Greengrass V2 into SFC and is fully compatible with, but
-not dependent on Greengrass. Certificates can be deployed manually to the device running SFC, or in case Greengrass is
-deployed on the same machine make use of the Greengrass certificate management and deployment functionality. The
-configuration provides a shortcut option to specify that the certificate and key files of a Greengrass deployment on
-that device can use, without the need to specify the location of each certificate or key file.
+The SFC system incorporates logic for obtaining session credentials, ported from Greengrass V2, ensuring compatibility without dependency. This approach offers flexibility in certificate deployment, allowing manual deployment to the SFC-running device or utilization of Greengrass certificate management when available. The configuration provides a streamlined option to use Greengrass deployment certificate and key files without specifying individual file locations.
 
-The SFC core will provide the content of the certificate and key files as part of the configuration to the targets. The
-targets can use this content to obtain session credentials, using SFC helper classes that will cache the session access
-key id, secret access key, and session token, and obtain a new session if it expires.
+The SFC core includes certificate and key file content in the target configuration. Targets can use this information to obtain session credentials, leveraging SFC helper classes that cache session access key ID, secret access key, and session token, while managing token expiration and renewal.
 
-In scenarios where a target is running as an IPC service on a different device as the device running the SFC core the
-configuration data, including the device certificate and private key, over the network, this data needs to be protected.
-This can be done using the following methods:
+For scenarios where targets run as IPC services on different devices than the SFC core, protecting configuration data transmission, including device certificates and private keys, is crucial. Two methods are available for this purpose:
 
-- Protect all data exchanged between the SFC core and the target over the network by specifying a certificate and key
-  for that IPC server. If these are used the traffic is encrypted using TLS/SSL.
-- Per client configuration, there is the option to set the CertificatesAndKeysByFileReference option to true. When this
-  option is set for a target the SFC core will not pass the content of the certificate and key files over the network,
-  but only the configured paths for these files. This means that these files should either be accessible in a secure way
-  from the device running the target or physically be deployed to that device, manually or using Greengrass certificate
-  management.
+- Encrypt all data exchanges between the SFC core and the target using TLS/SSL by specifying a certificate and key for the IPC server.
+- Enable the CertificatesAndKeysByFileReference option in the client configuration. This setting instructs the SFC core to transmit only file paths rather than actual certificate and key content, requiring secure file access or physical deployment on the target device.
 
-As targets may need to access the internet over a proxy server, to obtain the session credentials as described above,
-and to make the required AWS service calls, the client configuration referred by the target can also include proxy
-configuration information.
+To accommodate targets that require internet access via proxy servers for obtaining session credentials or making AWS service calls, the client configuration can include proxy configuration information.
+
+This comprehensive approach to credential management and secure communication ensures that SFC can operate efficiently and securely across various deployment scenarios and network configurations.
 
 For more info see https://aws.amazon.com/blogs/security/how-to-eliminate-the-need-for-hardcoded-aws-credentials-in-devices-by-using-the-aws-iot-credentials-provider/
 

@@ -1,34 +1,30 @@
 
 # Service Health Endpoints
 
-In order to check the state of an SFC process (sfc-main service and protocol adapters, target adapters and metric
-writer, running as a service on the local or a remote server) each of these can be configured to have a health probe
-endpoint. This endpoint can be polled by the platform used to control the service instances (e.g., Docker Compose,
-Kubernetes). Servers will respond with a configurable response (default is "OK") if the service is in non-faulty state,
-which is determined by the logic of that service implementation.
+- Health Probe Configuration for SFC Processes
 
-The health probe endpoints of the adapter, target and metric services, become active after they have been initialized by
-the initialization call made by the sfc-main process, as the request for that call contains the required information to
-start the health probe.
+  
 
-Optionally the health probe can be configured use a different network adapter/network as used by the data streams
-between the core process and the service.
+  Each component of an SFC process (sfc-main service, protocol adapters, target adapters, and metric writers) can be configured with a health probe endpoint. This endpoint can be polled by the platform used to control service instances (e.g., Docker Compose, Kubernetes). Servers will respond with a configurable response (default is "OK") if the service is in a non-faulty state, as determined by the service implementation's logic.
 
-After receiving the initialization data, the health probe will listen for HTTP GET and HEAD requests on the configured
-port on the default or explicit configured network interface (`http://address:port/`) . Optionally a path can be
-configured to be appended to the endpoint address (`http://address:port/path`)
+  Key points:
 
-Optionally a period can be configured after which repeated health probe requests did not return a positive result the
-process will be stopped. This option can be used if the environment which is controlling the instances does not try to
-stop the unhealthy service instances itself before a new instance is started.
+- Health probe endpoints for adapter, target, and metric services become active after initialization by the sfc-main process.
 
-In order to protect the service from extensive load and unwanted the request the handler for this service:
+- The health probe can optionally use a different network adapter/network than the data streams between the core process and the service.
 
-- A configurable rate limiter is used to limit the number of calls per second (default is 10 request/second)
-- The status of the service is cached by the probe handler and retained for a configurable period before being
-  re-evaluated (default is 1000 milliseconds)
-- A list of IP filters can be configured to restrict the IP addresses from which requests can be made
-- The handler is restricted to only use a single thread for handling probe requests
+- After initialization, the health probe listens for HTTP GET and HEAD requests on the configured port and network interface (`http://address:port/`). An optional path can be appended (`http://address:port/path`).
+
+- A configurable period can be set after which, if repeated health probe requests fail, the process will be stopped.
+
+  Protection measures:
+
+- A configurable rate limiter limits the number of calls per second (default: 10 requests/second).
+- The service status is cached and retained for a configurable period before re-evaluation (default: 1000 milliseconds).
+- IP filters can be configured to restrict the IP addresses from which requests can be made.
+- The handler is restricted to using a single thread for handling probe requests.
+
+These measures protect the service from excessive load and unwanted requests.
 
 Health probe endpoints for SFC service are configured by adding a HealthProbe configuration sections at the following
 locations:

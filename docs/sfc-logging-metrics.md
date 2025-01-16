@@ -26,23 +26,13 @@ custom log writer can be found in section [Custom Logging](#logging).
 
 ## Metrics collection
 
-The SFC core, protocol adapters and targets can collect metrics and write these to a configurable metrics writer. SFC
-comes with an implementation of a writer for AWS CloudWatch Metrics with can be configured to run in the same process as
-the SFC core or as an IPC service. Custom metrics writers can be implemented and [configured](./core/sfc-configuration#metrics) to collect metrics data, see
-details in section [Custom Metrics Writers](#metrics-collection).
+Metrics collection is enabled by adding a Metrics configuration section in the top level of the SFC configuration. This section specifies the writer for metrics data, which can be either an in-process metrics writer or a MetricsServer. For an in-process metrics writer, specify the jar files that implement it and provide a factory class name to create an instance. For a MetricsServer, specify the address and port number of the service.
 
-Metrics collection is enabled by adding a Metrics configuration section in top level of the SFC configuration. In this
-section the writer for metrics data is specified, which can an in-process metrics writer (by specifying the jar files
-that implement it and a factory class name to create an instance) or a MetricsServer (by specifying the address and port
-number of the service). Metrics can be disabled, by setting a property "Enabled", to false.
+Metrics can be disabled by setting the "Enabled" property to false in the Metrics section. This disables metrics collection from all sources. A property "Namespace" can be set for use by the writer implementation, with a default value of "SFC".
 
-Metrics collection can be disabled from the metrics sources by setting a property, named Enabled, in the Metrics section
-to false. A property metrics Namespace, which defaults to "SFC" can be set for use by the writer implementation.
+The metrics collector automatically gathers warning and error messages from SFC logging. The default collection interval is 60 seconds, which can be modified by setting the "Interval" property to the desired time in seconds.
 
-Furthermore, the metrics collector automatically gathers warning and error messages from the SFC logging.
-
-Every 60 seconds, which is the default which can be modified by setting a property named Interval, to the interval time
-in seconds.
+This structure provides a clear overview of how to configure metrics collection in the SFC system, including options for enabling/disabling, setting the namespace, and adjusting the collection interval.
 
 For each metrics data point the following information is collected:
 

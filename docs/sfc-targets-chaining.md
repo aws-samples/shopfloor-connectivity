@@ -26,21 +26,17 @@ messages.
 
 ## Target chaining and buffering
 
-Targets receive data from the SFC core in order to deliver this data to a target specific destination, which could be a
-local store, a local service or a cloud service.
+Targets receive data from the SFC core to deliver to a target-specific destination, which could be a local store, a local service, or a cloud service.To enhance the functionality of target data delivery, special intermediate targets can be configured between the sfc-core and the final targets. From the sfc-core's perspective, these intermediate targets appear as regular targets when writing data. 
 
-In order to add functionality to the delivery of target data, special targets can be configured in between the sfc-core
-and the targets that do the actual delivery of the data. For the sfc-core intermediate targets look like other targets
-when writing the data. The intermediate targets implement their specific logic acting on the received data, and pass the
-data to the configured next targets in the chain. The intermediate targets do pass a handler to these targets, that
-these targets can use to report back the results of delivering the data to their destinations. The data messages can
-either be acknowledged if the data was delivered successfully to the destination, not-acknowledged if the destination of
-the target was not available ,e.g. due to loss of connectivity, or reported as error if the data could not be processed
-by the target (e.g., die to invalid data for that target). The intermediate target can the take action based on the
-result received from the next targets in the chain.
+However, they serve a unique purpose:
 
-Using this strategy additional functionality can be added to delivering data to target destinations without making
-changes to the actual end-targets.
+- Intermediate targets implement specific logic to process the received data. They then pass the processed data to the next targets in the chain. They provide a handler to subsequent targets for reporting delivery results.
+
+- The data messages can be acknowledged if successfully delivered to the destination, not acknowledged if the destination was unavailable (e.g., due to connectivity loss), or reported as an error if the target couldn't process the data (e.g., due to invalid data format).Intermediate targets can then take appropriate actions based on the results received from the next targets in the chain.
+
+This strategy allows for the addition of new functionalities in data delivery to target destinations without modifying the actual end-targets. It provides a flexible and modular approach to extending the capabilities of the SFC system's data delivery process.
+
+
 
 <p align="center">
 <img src="img/fig05.png" width="75%"/>
@@ -52,10 +48,13 @@ changes to the actual end-targets.
 
 
 
-Store and forwarding functionality for SFC targets is implemented using an intermediate target of type
-store-forward-target. It will use the returned results from the targets to buffer messages that could not be delivered
-to the destinations of the targets behind the store and forward target. When the targets can resume delivering data to
-their destinations the store and forward target will resubmit the data to these targets.
+Store and forwarding functionality for SFC targets is implemented using an intermediate target of type "store-forward-target". This target serves two main purposes:
+
+- The store-forward-target buffers messages that could not be delivered to the destinations of the targets behind it. This decision is based on the results returned from these downstream targets. When the downstream targets can resume delivering data to their destinations, the store and forward target will resubmit the buffered data to these targets.
+
+- This mechanism ensures that data is not lost when downstream targets are temporarily unable to deliver it, providing a robust solution for handling intermittent connectivity or destination unavailability issues in the SFC system.
+
+  
 
 
 ## Store and forward target

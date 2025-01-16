@@ -160,7 +160,7 @@ modifications to the rest of the framework.
 
 The SFC-Core component is the controller of the SFC Framework. It handles configuration and scheduling of the data
 collection through the protocol adapters. It can optionally transform each received data value using a combination of
-one or more of the 60+ transformation functions available functions, which can address complex data transformations
+one or more of the 90+ transformation functions available functions, which can address complex data transformations
 requirements. The core has end-to-end datatype fidelity, the data can be sent to the targets in the data format it was
 read from the source, including complex structured datatypes and multidimensional arrays.
 
@@ -317,11 +317,11 @@ the [Purdue network model](https://en.wikipedia.org/wiki/Purdue_Enterprise_Refer
 
 In reality in most industrial environments OT and IT networks are not directly connected. Industrial devices are
 unlikely to connect to the public internet. Solutions that retrieve data from these devices and submit this machine data
-to a cloud service must be capable of handling this network separation, restrictions due to firewalls, proxies, DMZ’s
+to a cloud service must be capable of handling this network separation, restrictions due to firewalls, proxies, DMZ's
 and offline and/or intermittent connectivity.
 
 SFC is designed so that protocol adapters, the SFC Core and target adapters can be deployed as separate services in
-different networking or cloud environments The diagrams below show some of the possible deployment scenarios.
+different networking or cloud environments. The diagrams below show some of the possible deployment scenarios.
 
 
 

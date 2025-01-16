@@ -125,9 +125,7 @@ and != operators can be used.
 
 ## Condition Filters
 
-After the Data Change and Value Change filters, if any, have been applied [Condition filters](./core/condition-filter-configuration.md) can be used to select values
-based on other values of the same source. This makes it possible to include or exclude values if other values, or
-combinations of values do exist, or do not exist in the same source. Operators that can be used are :
+After applying the Data Change and Value Change filters, if any, [Condition filters](./core/condition-filter-configuration.md) can be used to select values based on other values from the same source. This makes it possible to include or exclude values if other values or combinations of values exist or do not exist in the same source. Operators that can be used include:
 
 - ***any*** : Any of a list of values must exist
 
@@ -238,19 +236,14 @@ filters as the filter value.
 }
 ```
 
-The value on which the filter is applies is include when it is not the only value for that source and value a and b must
-exist for that source.
 
-The names as values for the filters are the names which are used as the keys in the channel configuration of the
-source (not the name value which is used to set the name of the value in the output). If a value is a structured value,
-including sub values these can be specified by adding a "." plus the name of these fields, e.g. ServerStatus.state.
 
-The condition filters use the JMESPath syntax (https://jmespath.org/) to match the name of the values and their sub
-values, allowing to use the full JMESPath syntax to build complex filters.
+Filters are applied to values in the source configuration. A value is included when it is not the only value for that source, and both values 'a' and 'b' must exist for that source.
 
-If a name of a field, or a part of it does contain other than alphanumeric characters, then these must be included in
-double quotes, e.g. "System-Status", "System-Status".state, "System.Status".state.
+The names used as values for the filters correspond to the keys in the channel configuration of the source (not the 'name' value used to set the name of the value in the output). For structured values with sub-values, these can be specified by adding a '.' followed by the name of these fields, e.g., 'ServerStatus.state'.
 
-Condition filters are as a map in the "ConditionFilters" section of the configuration. The name of the entry which
-defines a filter can be used as the value of the "ConditionFilter" for a channel to apply that filter for the channel.
+Condition filters use JMESPath syntax (https://jmespath.org/) to match the names of values and their sub-values, allowing the use of full JMESPath syntax to build complex filters.
 
+If a field name, or part of it, contains non-alphanumeric characters, it must be enclosed in double quotes, e.g., "System-Status", "System-Status".state, "System.Status".state.
+
+Condition filters are defined as a map in the 'ConditionFilters' section of the configuration. The name of an entry defining a filter can be used as the value of the 'ConditionFilter' for a channel to apply that filter to the channel."

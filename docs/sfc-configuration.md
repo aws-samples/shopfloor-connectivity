@@ -75,33 +75,19 @@ data it will use to build the SFC configuration.
 
 
 
-As different protocol and target adapters need specific configuration data the SFC configuration data the SFC
-configuration consists of generic and non-adapter specific data which is abstract and used by the SFC Core, and
-extensions of the generic core data classes that contain additional and specific data for that adapter. The core will
-only use the generic configuration data and will pass the adapter specific configuration data to the adapters. The
-implementation of the adapters is responsible for handling the specific configuration data. This separation of generic
-and specific data makes it possible to add new adapters, using their own specific configuration data, without the need
-to make changes to the SFC core. Additionally, the adapter can optionally implement specific logic to validate the
-provided configuration data. The SFC Core does provide a configuration reader, which is used by the core, as well as by
-the target adapters, to read, validate and replace placeholders in a consistent way.
+SFC employs a modular configuration approach, separating generic core data from adapter-specific data. This design allows the SFC Core to operate with abstract, non-adapter specific information while passing specialized configuration data to individual adapters. This separation enables the addition of new adapters with unique configuration requirements without necessitating changes to the SFC core.
 
-To protect the configuration from unauthorized modification SFC has tooling and an API to sign the configuration data.
-The SFC Core will use the digital signature from the configuration data and reject it verification fails.
+The configuration structure includes generic core data used by the SFC Core and adapter-specific extensions of core data classes. Adapters are responsible for handling their specific configuration data, with the option to implement custom validation logic. The SFC Core provides a consistent configuration reader used by both the core and target adapters for reading, validating, and replacing placeholders in configuration data.
 
-As the core only is aware of its input sources and output targets by name. The parts of the configuration model which
-are used by the core do not contain any protocol or target-specific information. The core knows its input and outputs
-only by its identifiers.
+To ensure configuration integrity, SFC incorporates tooling and an API for digitally signing configuration data. The SFC Core verifies this signature and rejects configurations that fail verification, protecting against unauthorized modifications.
 
-The configuration model for each type of input protocol and a target does contain their specific details. SFC implements
-a configuration layer that gives each adapter or target its specific view of the configuration data.
+The core's awareness of input sources and output targets is limited to their identifiers, maintaining abstraction from protocol or target-specific details. Each adapter type (input protocol or target) has its own configuration model containing specific details. SFC's configuration layer provides each adapter or target with a tailored view of its configuration data, preventing dependencies, mix-ups, or redefinition of attributes across different types.
 
-As a result, the core and each protocol or target can have their view of its specific configuration data, without
-dependencies, mix-up, or re-definition of attributes used by other types.
+For loading configuration data from a JSON source, consumers call the configuration layer, specifying the class implementing the type-specific data model. These classes can optionally include additional validation logic, raising detailed configuration exceptions for invalid data.
 
-To load the configuration data from a JSON source, the consumer makes a call to the configuration layer, specifying the
-class that implements the type-specific model of the data. These classes can optionally implement additional logic to
-validate the loaded data, which can raise a configuration exception, including a detailed description if the data is not
-valid according to the validation logic.
+This comprehensive approach to configuration management ensures flexibility in adapter integration, maintains security through digital signatures, and provides clear separation of concerns in configuration handling across the SFC system.
+
+
 
 ## Configuration placeholders
 
