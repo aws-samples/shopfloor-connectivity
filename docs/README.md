@@ -2,8 +2,52 @@
 
 # SFC Documentation
 
+The documentation provides a comprehensive overview of SFC's architecture, capabilities, and deployment options for industrial data collection and ingestion to AWS.
+
+## **Summary **
+
+SFC (Shop Floor Connectivity) is a data ingestion technology for collecting industrial data and delivering it to AWS services.
+
+- Main components:
+  - [Protocol Adapters](#Protocol-Adapters) - Read data from industrial devices
+  - [SFC Core](#Core) - Handles configuration, scheduling, data processing
+  - [Target Adapters](#target-adapters) - Send data to AWS/local services
+  
+- Key features:
+  - [Extensible](#Extensibility) - Can add new protocol/target adapters
+  - [Flexible deployment](./sfc-deployment.md) - Standalone, containers, Greengrass
+  - [Data transformations and filtering](./sfc-data-processing-filtering.md)
+  - Aggregation and buffering
+  - [Secure communication](./sfc-securing-component-traffic.md) between components
+  - [Integration](./sfc-configuration.md##configuration-secrets) with AWS Secrets Manager
+  
+- [Concepts](#Terminology-and-concepts):
+  
+  - Schedules define data collection and delivery
+  - Sources specify protocol adapters and channels to read from
+  - Targets specify where to send data
+  - Transformations, filters, aggregations can be applied
+  
+- Design principles:
+  - [Platform independence](#execution-environments)
+  - [Extensibility](#extensibility)
+  - [Network flexibility](#networking) (OT/IT separation)
+  - [Scalability](#Scalability)
+  - [High availability](#high-availability)
+  - [Data type fidelity](#data-types-and-formats)
+  - [Metadata enrichment](#metadata)
+  
+  
+
+
+
+## Table of content
+
+
+
 
 - [Introduction](#introduction)
+  
   - [SFC Components](#sfc-components)
   - [Protocol Adapters](#protocol-adapters)
   - [Core](#core)
@@ -73,6 +117,12 @@
 
 - [Greengrass CDK](../deployment/README.md)
 - [Greengrass Lab](../examples/greengrass-in-process/README.md)
+
+
+
+---
+
+
 
 # Introduction
 
