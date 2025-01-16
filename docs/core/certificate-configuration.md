@@ -4,7 +4,7 @@
 
 - [Examples](#CertificateConfiguration-Examples)
 
-  
+- 
 
   **Properties:**
 
@@ -71,6 +71,7 @@ Self-signed certificate configuration used to generate a self-signed certificate
 **Type**: [SelfSignedCertificateConfiguration](./self-signed-certificate-configuration.md)
 
 [^top](#CertificateConfiguration)
+
 
 ### CertificateConfiguration Schema
 

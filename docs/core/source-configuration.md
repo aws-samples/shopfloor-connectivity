@@ -38,6 +38,7 @@ Time in ms to adjust the value of the timestamp for all values in the source.
 To set the timestamp to a later value use a positive value, for an earlier value use a negative value.
 
 ---
+
 ### Channels
 Channels are an abstraction of the values read from the source. For processing the value from these channels, the SFC core only uses a small set of generic attributes which are common for all protocols.
 

@@ -6,7 +6,6 @@ SFC top level configuration structure
 
 - [Examples](#Examples)
 
-  
 
 **Properties:**
 
