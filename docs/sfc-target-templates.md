@@ -1,12 +1,11 @@
 # SFC Target data transformation templates
 
-- [Output Structure Transformation](#output-structure-transformation)
+- [Output Structure Transformation Examples](#output-structure-transformation)
     - [CSV output](#csv-output)
     - [XML format](#xml-format)
     - [YAML format](#yaml-format)
     
-    
-
+  
 # **Output Structure Transformation**
 
 For situations where the structure of the data needs to be converted, this can be another JSON format, XML, CSV etc.,

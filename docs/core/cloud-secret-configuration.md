@@ -1,3 +1,4 @@
+[SFC Configuration](./sfc-top-level-config.md) > [SecretsManager](./sfc-top-level-config.md#SecretsManager) > [Secrets](./secrets-manager-configuration.md#Secrets)
 
 ## CloudSecretConfiguration
 
@@ -123,3 +124,4 @@ Secret by ARN with alias
 }
 ```
 
+[^top](#CloudSecretConfiguration)

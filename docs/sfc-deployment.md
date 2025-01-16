@@ -21,9 +21,12 @@ The components don’t have any runtime environment-specific dependencies, they 
 
 - *Standalone applications* on the target platform supporting the JVM or runtimes are used to implement additional
   adapters and targets.
+  
 - *AWS IoT Greengrass v2 components* or containers
+
 - *Docker* or *Kubernetes* containers
-- 
+
+  
 
 ## In-process and IPC deployment models
 
@@ -74,6 +77,12 @@ protocol and adapter processes.
 <p align="center">
     <em>Fig. 8. SFC IPC deployment (e.g. in a distributed OT/IT context)</em>
 
+
+See Also
+
+- [Running SFC protocol adapters](./sfc-running-adapters.md)
+
+- [Running SFC targets](./sfc-running-targets.md)
 
 
 

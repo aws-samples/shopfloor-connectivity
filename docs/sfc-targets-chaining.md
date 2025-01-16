@@ -60,7 +60,7 @@ their destinations the store and forward target will resubmit the data to these 
 
 ## Store and forward target
 
-As described above store and forwarding for SFC targets is implemented by an intermediate target that can be configured
+As described above store and forwarding for SFC targets is implemented by an intermediate [store and forward  target](./targets/store-and-forward-target.md) that can be configured
 in between the SFC-Core and the actual targets. This target stores the buffered data to disk if it cannot be delivered
 to the destination of the targets that are configured as next targets in the chain.
 
@@ -103,7 +103,7 @@ device.
 
 ## Router Target
 
-The router target can be used to forward data to one or more targets in a target chain. For each target an alternative
+The [router target](./targets/router.md) can be used to forward data to one or more targets in a target chain. For each target an alternative
 target can be configured to which the data is routed if that data cannot be written to its primary target.
 
 Each primary target can also have a target configured to which the data is routed if it has been written successfully to

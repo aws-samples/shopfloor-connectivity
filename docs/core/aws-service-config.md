@@ -32,6 +32,8 @@ Name of a valid AWS service region
 
 **Type :** String
 
+[^top](#AWSServiceConfig)
+
 ### AWSServiceConfig Schema
 
 ```json
@@ -62,3 +64,5 @@ Name of a valid AWS service region
 }
 
 ```
+
+[^top](#AWSServiceConfig)

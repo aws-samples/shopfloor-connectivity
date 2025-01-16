@@ -12,7 +12,11 @@ Configuration for Modbus TCP protocol adapter.
 
 ## ModbusSourceConfiguration
 
-Source configuration for the Modbus protocol adapter. This type extends the [BaseSourceConfiguration](../core/base-source-configuration.md) type. 
+[SFC Configuration](../core/sfc-top-level-config.md) > [Sources](../core/sfc-top-level-config.md#Sources) >  [Source](../core/source-configuration.md) 
+
+
+
+Source configuration for the Modbus protocol adapter. This type extends the [SourceConfiguration](../core/source-configuration.md) type. 
 
 - [Schema](#ModbusSourceConfiguration-schema)
 - [Example](#ModbusSourceConfiguration-example)
@@ -167,6 +171,10 @@ Full configuration:
 
 ## ModbusOptimization
 
+[ModbusSource](#ModbusSourceConfiguration) > [Optimization](#modbusoptimization)
+
+
+
 - [Schema](#ModbusOptimization-schema)
 
 - [Example](#ModbusOptimization-example)
@@ -248,6 +256,10 @@ Default is 16
 
 
 ## ModbusChannelConfiguration
+
+[SFC Configuration](../core/sfc-top-level-config.md) > [Sources](../core/sfc-top-level-config.md#Sources) > [Source](../core/source-configuration.md)  > [Channels](../core/source-configuration.md#Channels) > [Channel](../core/channel-configuration.md)
+
+
 
 The ModbusChannelConfiguration type extends the [ChannelConfiguration](../core/channel-configuration.md) class with channel properties for the Modbus TCP  protocol adapter.
 
@@ -372,6 +384,10 @@ Modbus channel type to read from
 
 ## ModbusTcpAdapterConfiguration
 
+[SFC Configuration](../core/sfc-top-level-config.md) > [ProtocolAdapters](../core/sfc-top-level-config.md#ProtocolAdapters) > [Adapter](../core/protocol-adapter-configuration.md) 
+
+
+
 ModbusTcpAdapterConfiguration extension the [AdapterConfiguration](../core/protocol-adapter-configuration.md) with properties for the Modbus TCP Protocol adapter.
 
 AdsAdapterConfiguration 
@@ -449,9 +465,11 @@ Modbus devices configured for this adapter. The modbus tcp source using the adap
 
 
 
-
-
 ## ModbusTcpDeviceConfiguration
+
+[ModbusTcpAdapter](#ModbusTcpAdapterConfiguration) > [Devices](#Devices)
+
+
 
 - [Schema](#ModbusTcpDeviceConfiguration-schema)
 

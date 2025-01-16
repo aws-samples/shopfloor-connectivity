@@ -11,8 +11,7 @@ certificate, private key and root CA certificate. SFC provides helpers, that can
 session credentials using these certificates and key files. These client configurations are in the
 [AwsIotCredentialProviderClients](./core/aws-iot-credential-provider-configuration.md) section of the configuration file and are referred by the targets by setting the
 CredentialProviderClient to an entry in that section. If the CredentialProviderClient is not set then SFC will fall back
-on the default credentials provider chain as
-described [here](https://docs.aws.amazon.com/sdk-for-java/v1/developer-guide/credentials.html).
+on the default credentials provider chain as described [here](https://docs.aws.amazon.com/sdk-for-java/v1/developer-guide/credentials.html).
 
 The logic for obtaining the session credentials is ported from Greengrass V2 into SFC and is fully compatible with, but
 not dependent on Greengrass. Certificates can be deployed manually to the device running SFC, or in case Greengrass is
@@ -41,3 +40,6 @@ and to make the required AWS service calls, the client configuration referred by
 configuration information.
 
 For more info see https://aws.amazon.com/blogs/security/how-to-eliminate-the-need-for-hardcoded-aws-credentials-in-devices-by-using-the-aws-iot-credentials-provider/
+
+
+

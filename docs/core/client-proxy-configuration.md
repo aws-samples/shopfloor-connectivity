@@ -1,3 +1,5 @@
+[SFC Configuration](./sfc-top-level-config.md) > [AwsIotCredentialProviderClients](./sfc-top-level-config.md#AwsIotCredentialProviderClients) > [Proxy](./aws-iot-credential-provider-configuration.md#Proxy)
+
 ## ClientProxyConfiguration
 
 Configuration for a client level proxy
@@ -17,8 +19,6 @@ Configuration for a client level proxy
 - [ProxyUsername](#ProxyUsername)
 
   
-
-
 
 ---
 ### NoProxyAddresses
@@ -171,3 +171,4 @@ Complete configuration, all fields:
 
 ```
 
+[^top](#ClientProxyConfiguration)

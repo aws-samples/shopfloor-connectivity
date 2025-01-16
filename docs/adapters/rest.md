@@ -10,12 +10,10 @@
 **Configuration**:
 
 - [REST Adapter Configuration](#rest-adapter-configuration)
-
 - [RestSourceConfiguration](#RestSourceConfiguration)
 - [RestChannelConfiguration](#RestChannelConfiguration)
 - [RestAdapterConfiguration](#RestAdapterConfiguration)
 - [RestServerConfiguration](#RestServerConfiguration)
-- [ClientProxyConfiguration](#ClientProxyConfiguration)
 
 
 
@@ -396,7 +394,11 @@ This results in a numbered channel being created for every object in the returne
 
 ## RestSourceConfiguration
 
-Source configuration for the REST protocol adapter. This type extends the [BaseSourceConfiguration](../core/base-source-configuration.md) type.
+[SFC Configuration](../core/sfc-top-level-config.md) > [Sources](../core/sfc-top-level-config.md#Sources) >  [Source](../core/source-configuration.md) 
+
+
+
+Source configuration for the REST protocol adapter. This type extends the [SourceConfiguration](../core/source-configuration.md) type.
 
 - [Schema](#RestSourceConfiguration-Schema)
 - [Examples](#RestSourceConfiguration-Examples)
@@ -500,8 +502,12 @@ Must be an identifier of a server in the RestServers section of the REST adapter
 
 
 
-
 ## RestChannelConfiguration
+
+[SFC Configuration](../core/sfc-top-level-config.md) > [Sources](../core/sfc-top-level-config.md#Sources) > [Source](../core/source-configuration.md)  > [Channels](../core/source-configuration.md#Channels) > [Channel](../core/channel-configuration.md)
+
+
+
 The RestChannelConfiguration type extends the [ChannelConfiguration](../core/channel-configuration.md) class with channel properties for the REST protocol adapter.
 
 - [Schema](#RestChannelConfiguration-Schema)
@@ -705,8 +711,11 @@ Example 2 - Multiple servers configuration:
 
 
 
-
 ## RestServerConfiguration
+
+[RestAdapter](#RestAdapterConfiguration) > [RestServers](#RestServers)
+
+
 
 - [Schema](#RestServerConfiguration-Schema)
 - [Examples](#RestServerConfiguration-Examples)
@@ -750,7 +759,7 @@ Optional, if not specified then the port number for the used protocol is used.
 ### Proxy
 Client Proxy configuration if the client is using a proxy server to access the REST server.
 
-**Type**: ClientConfiguration
+**Type**: [ClientProxyConfiguration](../core/client-proxy-configuration.md)
 
 Optional
 
@@ -881,185 +890,4 @@ Secure configuration with authentication:
 [^top](#rest-adapter-data-mapping)
 
 
-
-
-## ClientProxyConfiguration
-
-
-**Properties:**
-- [NoProxyAddresses](#NoProxyAddresses)
-- [ProxyPassword](#ProxyPassword)
-- [ProxyUrl](#ProxyUrl)
-- [ProxyUsername](#ProxyUsername)
-
----
-### Name
-Description
-
-**Type**: Type
-
-Comments
-
----
-### NoProxyAddresses
-Comma-separated list of addresses for which can be accessed without using the proxy
-
-**Type**: String
-
-Optional
-
----
-### ProxyPassword
-Proxy server password
-
-**Type**: String
-
-Optional, if specified then the ProxyUsername must be configured as well.
-
-Username and password should not be included as clear text in the configuration. 
-It is strongly recommended to use placeholders and use the SFC integration with the AWS secrets manager.
-
----
-### ProxyUrl
-Url of the proxy server to use 
-
-**Type**: String
-
----
-### ProxyUsername
-Proxy server username
-
-**Type**: String
-
-Optional, if specified then the ProxyPassword must be configured as well.
-
-Username and password should not be included as clear text in the configuration. 
-It is strongly recommended to use placeholders and use the SFC integration with the AWS secrets manager.
-
-
-
-## Schema:
-
-```json
-{
-  "$schema": "http://json-schema.org/draft-07/schema#",
-  "type": "object",
-  "properties": {
-    "ProxyHost": {
-      "type": "string",
-      "minLength": 1,
-      "description": "Proxy server hostname"
-    },
-    "ProxyPort": {
-      "type": "integer",
-      "minimum": 1,
-      "maximum": 65535,
-      "description": "Proxy server port number"
-    },
-    "Username": {
-      "type": "string",
-      "description": "Optional proxy authentication username"
-    },
-    "Password": {
-      "type": "string",
-      "description": "Optional proxy authentication password"
-    },
-    "NonProxyAddresses": {
-      "type": "string",
-      "description": "Optional comma-separated list of hosts that should bypass the proxy",
-      "examples": [
-        "localhost,127.0.0.1",
-        "internal.example.com,*.local,10.0.0.*"
-      ]
-    }
-  },
-  "required": [
-    "ProxyHost",
-    "ProxyPort"
-  ],
-  "additionalProperties": false,
-  "allOf": [
-    {
-      "if": {
-        "required": [
-          "Username"
-        ]
-      },
-      "then": {
-        "required": [
-          "Password"
-        ]
-      }
-    },
-    {
-      "if": {
-        "required": [
-          "Password"
-        ]
-      },
-      "then": {
-        "required": [
-          "Username"
-        ]
-      }
-    }
-  ]
-}
-```
-
-## Examples
-
-Basic configuration (only required fields):
-
-```json
-{
-  "ProxyHost": "proxy.example.com",
-  "ProxyPort": 8080
-
-}
-```
-
-
-
-With authentication:
-
-```json
-{
-  "ProxyHost": "proxy.example.com",
-  "ProxyPort": 8080,
-  "Username": "${proxyuser}",
-  "Password": "${proxypass}"
-}
-```
-
-With non-proxy addresses:
-
-```json
-{
-  "ProxyHost": "proxy.example.com",
-  "ProxyPort": 8080,
-  "NonProxyAddresses": "localhost,127.0.0.1,*.internal.example.com"
-}
-```
-
-
-
-Complete configuration, all fields:
-
-```json
-{
-  "ProxyHost": "proxy.example.com",
-  "ProxyPort": 8080,
-  "Username": "${proxyuser}",
-  "Password": "${proxypass}"
-  "NonProxyAddresses": "localhost,127.0.0.1,*.internal.example.com,10.0.0.*"
-}
-
-```
-
-
-
-
-
-[^top](#rest-adapter-data-mapping)
 

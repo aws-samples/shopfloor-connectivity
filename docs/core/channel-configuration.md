@@ -1,4 +1,4 @@
-
+[SFC Configuration](./sfc-top-level-config.md) > [Sources](./sfc-top-level-config.md#Sources) > [Channels](./source-configuration.md#channels)
 
 ## ChannelConfiguration
 
@@ -317,3 +317,4 @@ Channel with filters and transformation:
 
 
 
+[^top](#ChannelConfiguration)

@@ -13,7 +13,11 @@ Configuration for OPCDA protocol adapter.
 
 ## OpcdaSourceConfiguration
 
-Source configuration for the OPCDA protocol adapter. This type extends the [BaseSourceConfiguration](../core/base-source-configuration.md) type.
+[SFC Configuration](../core/sfc-top-level-config.md) > [Sources](../core/sfc-top-level-config.md#Sources) >  [Source](../core/source-configuration.md)
+
+
+
+Source configuration for the OPCDA protocol adapter. This type extends the [SourceConfiguration](../core/source-configuration.md) type.
 
 - [Schema](#OpcdaSourceConfiguration-Schema)
 - [Examples](#OpcdaSourceConfiguration-Examples)
@@ -168,6 +172,10 @@ Copy
 
 ## OpcdaChannelConfiguration
 
+[SFC Configuration](../core/sfc-top-level-config.md) > [Sources](../core/sfc-top-level-config.md#Sources) > [Source](../core/source-configuration.md)  > [Channels](../core/source-configuration.md#Channels) > [Channel](../core/channel-configuration.md)
+
+
+
 The OpcdaChannelConfiguration type extends the [ChannelConfiguration](../core/channel-configuration.md) class with channel properties for the OPCDA protocol adapter.
 
 - [Schema](#OpcdaChannelConfiguration-Schema)
@@ -236,6 +244,10 @@ Temperature sensor:
 
 ## OpcdaAdapterConfiguration
 
+[SFC Configuration](../core/sfc-top-level-config.md) > [ProtocolAdapters](../core/sfc-top-level-config.md#ProtocolAdapters) > [Adapter](../core/protocol-adapter-configuration.md) 
+
+
+
 OpcdaAdapterConfiguration extension the [AdapterConfiguration](../core/protocol-adapter-configuration.md) with properties for the OPCDA Protocol adapter.
 
 - [Schema](#OpcdaAdapterConfiguration-Schema)
@@ -299,8 +311,11 @@ Opcda servers configured for this adapter. The Opcda source using the adapter mu
 
 ```
 
-
 ## OpcdaServerConfiguration
+
+[OpcdaAdapter][OpcdaAdapterConfiguration]> [OpcdaServers](#OpcdaServers)
+
+
 
 - [Schema](#OpcdaServerConfiguration-Schema)
 - [Examples](#OpcdaServerConfiguration-Examples)

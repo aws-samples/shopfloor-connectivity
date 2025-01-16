@@ -1,3 +1,5 @@
+[SFC Configuration](./sfc-top-level-config.md) > [Sources](./sfc-top-level-config.md#Sources) > [Source](./source-configuration.md) > [Aggregation]((./source-configuration.md#Aggregation)
+
 ## Aggregation
 
 An optional aggregation can be used for a schedule to collect the results of multiple read values and combine these in a single output message, optimally applying functions to aggregate the output data.
@@ -10,7 +12,6 @@ An optional aggregation can be used for a schedule to collect the results of mul
 - [Output](#Output)
 - [Size](#Size)
 - [Transformations](#Transformations)
-- 
 
 ---
 ###  Size
@@ -500,3 +501,5 @@ Complex example with multiple sources and channels:
   }
 }
 ```
+
+[^top](#Aggregation)

@@ -1,8 +1,8 @@
+[SFC Configuration](./sfc-top-level-config.md) > [Targets](./sfc-top-level-config.md#Targets) 
+
 ## TargetConfiguration
 
-Target Configuration defines common properties for SFC target adapters. Target adapter implementations extend this type with their specific additional properties.
-
-
+Target Configuration defines common properties for [SFC target adapters](./sfc-top-level-config.md#Targets). Target adapter implementations extend this type with their specific additional properties.
 
 - [Schema](#Schema)
 - [Examples](#Examples)

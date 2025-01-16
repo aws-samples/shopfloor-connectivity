@@ -40,7 +40,7 @@ locations:
 | Target Adapters       | In the server configuration used by a target in the TargetServers section                | Status of listening ports for the hosted gRPC service                                                 |
 | Metrics writer        | In the MetricsServer section for the writer configured in the top level Metrics section. | Status of listening ports for the hosted gRPC service                                                 |
 
-For details on the HealthProbe configuration see HealthProbeConfiguration
+For details on the HealthProbe configuration see [HealthProbeConfiguration](./core/health-probe-configuration.md)
 
 
 

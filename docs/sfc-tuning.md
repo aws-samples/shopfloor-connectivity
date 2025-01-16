@@ -1,3 +1,5 @@
+[SFC Configuration](./core/sfc-top-level-config.md) > [Tuning](./core/sfc-top-level-config.md#tuning)
+
 # SFC tuning
 
 

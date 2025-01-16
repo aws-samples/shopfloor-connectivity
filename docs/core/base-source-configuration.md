@@ -1,3 +1,5 @@
+[SFC Configuration](./sfc-top-level-config.md) > [Sources](./sfc-top-level-config.md#Sources)
+
 # BaseSourceConfiguration
 
 The BaseSourceConfiguration class contains the common properties for protocol adapter sources. Protocol adapters extend this class with specific properties for that adapter.
@@ -73,3 +75,6 @@ Reference to the adapter for the source in the SFC toplevel configuration [Sourc
 }
 ```
 
+
+
+[^top](#BaseSourceConfiguration)

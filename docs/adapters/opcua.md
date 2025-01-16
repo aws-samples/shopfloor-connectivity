@@ -2,8 +2,6 @@
 
 Configuration types for the OPCUA protocol adapter and contains the extensions and specific configuration types.
 
-
-
 - [OPCUA Alarm and Events types](#opcua-alarm-and-event-types)
 - [OPCUA security profiles and certificates](#opcua-security-profiles-and-certificates)
 
@@ -250,10 +248,13 @@ Example of OPCUA server configuration using Basic256Sha256 security profile for 
 
 ---
 
-
 ## OpcuaSourceConfiguration
 
-Source configuration for the OPCUA protocol adapter. This type extends the [BaseSourceConfiguration](../core/base-source-configuration.md) type.
+[SFC Configuration](../core/sfc-top-level-config.md) > [Sources](../core/sfc-top-level-config.md#Sources) >  [Source](../core/source-configuration.md) 
+
+
+
+Source configuration for the OPCUA protocol adapter. This type extends the [SourceConfiguration](../core/source-configuration.md) type.
 
 - [Schema](#OpcuaSourceConfiguration-Schema)
 - [Examples](#OpcuaSourceConfiguration-Examples)
@@ -402,6 +403,10 @@ Time in milliseconds that will be used as the SubscribePublishingInterval when c
 ```
 
 ## OpcuaNodeChannelConfiguration
+
+[SFC Configuration](../core/sfc-top-level-config.md) > [Sources](../core/sfc-top-level-config.md#Sources) > [Source](../core/source-configuration.md)  > [Channels](../core/source-configuration.md#Channels) > [Channel](../core/channel-configuration.md)
+
+
 
 The OpcuaNodeChannelConfiguration type extends the [ChannelConfiguration](../core/channel-configuration.md) class with channel properties for the OPCUA protocol adapter.
 
@@ -590,8 +595,11 @@ Array element monitoring:
 
 
 
-
 ## OpcuaNodeChangeFilter
+
+[OpcuaNodeChannel](#OpcuaNodeChannelConfiguration) > [NodeChangeFilter](#NodeChangeFilter)
+
+
 
 - [Schema](#OpcuaNodeChangeFilter-Schema)
 - [Examples](#OpcuaNodeChangeFilter-Examples)
@@ -677,8 +685,11 @@ Explicit absolute change filter:
 
 [^top](#opcua-protocol-adapter)
 
-
 ## OpcuaAdapterConfiguration
+
+[SFC Configuration](../core/sfc-top-level-config.md) > [ProtocolAdapters](../core/sfc-top-level-config.md#ProtocolAdapters) > [Adapter](../core/protocol-adapter-configuration.md) 
+
+
 
 OpcuaAdapterConfiguration extension the [AdapterConfiguration](../core/protocol-adapter-configuration.md) with properties for the OPCUA Protocol adapter.
 
@@ -740,9 +751,9 @@ Profiles configured for this adapter. Servers in this adapter can have a referen
 
 ```
 
+
+
 ### OpcuaAdapterConfiguration Examples
-
-
 
 ```json
 {
@@ -801,8 +812,9 @@ Profiles configured for this adapter. Servers in this adapter can have a referen
 
 
 
-
 ## OpcuaServerProfileConfiguration
+
+[OpcuaAdapter](#OpcuaAdapterConfiguration) > [Servers](#OpcuaServers) > [OpcuaServer](#OpcuaServerConfiguration) > [OpcuaServer](#OpcuaServerConfiguration) > [ServerProfile](#ServerProfile)
 
 - [Schema](#OpcuaServerProfileConfiguration-Schema)
 - [Examples](#OpcuaServerProfileConfiguration-Examples)
@@ -870,8 +882,11 @@ Additional event types that can be used for a server,
 
 
 
-
 ## OpcuaEventTypeConfiguration
+
+[OpcuaAdapter](#OpcuaAdapterType) > [ServerProfiles](#ServerProfiles) > [EventTypes](#EventTypes)
+
+
 
 - [Schema](#OpcuaEventTypeConfiguration-Schema)
 - [Examples](#OpcuaEventTypeConfiguration-Examples)
@@ -967,6 +982,10 @@ Required, an at least one property must be defined.
 
 
 ## OpcuaServerConfiguration
+
+[OpcuaAdapter](#OpcuaAdapterConfiguration) > [OpcuaServers](#OpcuaServers)
+
+
 
 - [Schema](#OpcuaServerConfiguration-Schema)
 - [Examples](#OpcuaServerConfiguration-Examples)

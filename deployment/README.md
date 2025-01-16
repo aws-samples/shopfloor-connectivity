@@ -1,5 +1,6 @@
 SFC Deployment & Installers
-===========================
+---
+
 
 That area describes how you can deploy & install SFC on the edge and/or into your aws account as AWS IoT Greengrass v2 components.
 

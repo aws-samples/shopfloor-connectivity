@@ -22,7 +22,7 @@
 
 - [Securing the configuration](#securing-the-configuration)
 
-  
+- [SFC top level configuration](./core/sfc-top-level-config.md)
 
 ## Configuration concepts
 
@@ -173,17 +173,17 @@ Templates are JSON elements containing configuration data and are defined in the
 Below is a snippet of an SFC configuration file defining an S3 Target
 ```json
 "Targets": {
-"S3Target": {
-"Active": true,
-"TargetType": "AWS-S3",
-"Region": "eu-west-1",
-"BucketName": "sfc-bucket",
-"Interval": 60,
-"BufferSize": 1,
-"Prefix": "data",
-"CredentialProviderClient": "AwsClient",
-"CertificatesAndKeysByFileReference": false,
-"Compression": "Zip"
+    "S3Target": {
+    "Active": true,
+    "TargetType": "AWS-S3",
+    "Region": "eu-west-1",
+    "BucketName": "sfc-bucket",
+    "Interval": 60,
+    "BufferSize": 1,
+    "Prefix": "data",
+    "CredentialProviderClient": "AwsClient",
+    "CertificatesAndKeysByFileReference": false,
+    "Compression": "Zip"
 }
 ```
 
@@ -191,17 +191,17 @@ We can define a template for this section:
 
 ```json
 "Templates" : {
-"S3Target": {
-"Active": true,
-"TargetType": "AWS-S3",
-"Region": "eu-west-1",
-"BucketName": "sfc-bucket",
-"Interval": 60,
-"BufferSize": 1,
-"Prefix": "data",
-"CredentialProviderClient": "AwsIotClient",
-"Compression": "Zip"
-}
+    "S3Target": {
+        "Active": true,
+        "TargetType": "AWS-S3",
+        "Region": "eu-west-1",
+        "BucketName": "sfc-bucket",
+        "Interval": 60,
+        "BufferSize": 1,
+        "Prefix": "data",
+        "CredentialProviderClient": "AwsIotClient",
+        "Compression": "Zip"
+    }
 }
 ```
 
@@ -209,7 +209,7 @@ The template can be used from its original location in the Targets section. The 
 
 ```json
 "Targets": {
-"S3Target": "$(S3Target)"
+    "S3Target": "$(S3Target)"
 }
 ```
 
@@ -219,17 +219,17 @@ Within a template it is possible to have placeholders for values making these te
 
 ```json
 "Templates" : {
-"S3Target": {
-"Active": true,
-"TargetType": "AWS-S3",
-"Region": "%region%",
-"BucketName": "%bucket-name%",
-"Interval": 60,
-"BufferSize": 1,
-"Prefix": "data",
-"CredentialProviderClient": "AwsIotClient",
-"Compression": "Zip"
-}
+    "S3Target": {
+        "Active": true,
+        "TargetType": "AWS-S3",
+        "Region": "%region%",
+        "BucketName": "%bucket-name%",
+        "Interval": 60,
+        "BufferSize": 1,
+        "Prefix": "data",
+        "CredentialProviderClient": "AwsIotClient",
+        "Compression": "Zip"
+    }
 }
 ```
 
@@ -237,8 +237,8 @@ Now this template can be used by specifying in an SFC  its name and the names of
 
 ```json
 "Targets": {
-"S3Target-1": "$(S3Target, bucket-name=sfc-bucket-1, region=eu-west-1)",
-"S3Target-2": "$(S3Target, bucket-name=sfc-bucket-2, region=eu-west-1)"
+    "S3Target-1": "$(S3Target, bucket-name=sfc-bucket-1, region=eu-west-1)",
+    "S3Target-2": "$(S3Target, bucket-name=sfc-bucket-2, region=eu-west-1)"
 }
 ```
 
@@ -247,20 +247,20 @@ It is also possible to use nested  templates within templates, Below is the S3 t
 
 ```json
 "Templates" : {
-"S3Target": {
-"Active": true,
-"TargetType": "AWS-S3",
-"Region": "%region%",
-"BucketName": "%bucket-name%",
-"Interval": 60,
-"BufferSize": 1,
-"Prefix": "$(S3Prefix)",
-"CredentialProviderClient": "AwsIotClient",
-"CertificatesAndKeysByFileReference": false,
-"Compression": "Zip"
-},
+    "S3Target": {
+      "Active": true,
+      "TargetType": "AWS-S3",
+      "Region": "%region%",
+      "BucketName": "%bucket-name%",
+      "Interval": 60,
+      "BufferSize": 1,
+      "Prefix": "$(S3Prefix)",
+      "CredentialProviderClient": "AwsIotClient",
+      "CertificatesAndKeysByFileReference": false,
+      "Compression": "Zip"
+    },
 
-"S3Prefix" : "data"
+		"S3Prefix" : "data"
 }
 ```
 
@@ -270,16 +270,17 @@ It is possible to partially replace parts of  values. Note that this works only 
 
 ```json
 "Templates" : {
-"S3Type" : {
-"JarFiles": ["$(DeploymentDir)/aws-s3-target/lib"],
-"FactoryClassName": "com.amazonaws.sfc.awss3.AwsS3TargetWriter"
-},
-"DebugType" : {
-"JarFiles": ["$(DeploymentDir)/debug-target/lib"],
-"FactoryClassName":"com.amazonaws.sfc.debugtarget.DebugTargetWriter"
-},
 
-"DeploymentDir" : "/sfc"
+    "S3Type" : {
+        "JarFiles": ["$(DeploymentDir)/aws-s3-target/lib"],
+        "FactoryClassName": "com.amazonaws.sfc.awss3.AwsS3TargetWriter"
+    },
+    "DebugType" : {
+        "JarFiles": ["$(DeploymentDir)/debug-target/lib"],
+        "FactoryClassName":"com.amazonaws.sfc.debugtarget.DebugTargetWriter"
+    },
+
+    "DeploymentDir" : "/sfc"
 }
 ```
 
@@ -296,7 +297,7 @@ Below is an example where the value of “AwsIoTClient” is read from a file na
 
 ```json
 "AwsIotCredentialProviderClients": {
-"AwsIotClient": "@file:aws-iot-client.json"
+		"AwsIotClient": "@file:aws-iot-client.json"
 }
 ```
 
@@ -304,12 +305,12 @@ This file contains the following JSON data:
 
 ```json
 {
-  "IotCredentialEndpoint": "abcdefghijklmn.credentials.iot.eu-west-1.amazonaws.com",
-  "RoleAlias": "GreengrassV2TokenExchangeRoleAlias",
-  "ThingName": "GreengrassCore-1",
-  "CertificateFile": "../thingCert.crt",
-  "PrivateKeyFile": "../privKey.key",
-  "RootCa": "../rootCA.pem"
+    "IotCredentialEndpoint": "abcdefghijklmn.credentials.iot.eu-west-1.amazonaws.com",
+    "RoleAlias": "GreengrassV2TokenExchangeRoleAlias",
+    "ThingName": "GreengrassCore-1",
+    "CertificateFile": "../thingCert.crt",
+    "PrivateKeyFile": "../privKey.key",
+    "RootCa": "../rootCA.pem"
 }
 ```
 
@@ -318,7 +319,7 @@ For getting the content from a hypothetical configuration server named "config-s
 
 ```json
 "AwsIotCredentialProviderClients": {
-"AwsIotClient": "@https:config-server/sfc/aws-iot-client.json"
+		"AwsIotClient": "@https:config-server/sfc/aws-iot-client.json"
 }
 ```
 
@@ -342,18 +343,18 @@ The following included file "s3-inproc.json" contains two elements. The first el
 ```json
 {
   "S3TargetType" : {
-    "JarFiles": ["/sfc/s3-target/aws-s3-target/lib"],
-    "FactoryClassName": "com.amazonaws.sfc.awss3.AwsS3TargetWriter"
+      "JarFiles": ["/sfc/s3-target/aws-s3-target/lib"],
+      "FactoryClassName": "com.amazonaws.sfc.awss3.AwsS3TargetWriter"
   },
 
   "S3Target": {
-    "TargetType": "AWS-S3",
-    "Region": "eu-west-1",
-    "BucketName": "sfc-bucket-name",
-    "Interval": 60,
-    "BufferSize": 1,
-    "CredentialProviderClient": "AwsIotClient",
-    "Compression": "Zip"
+      "TargetType": "AWS-S3",
+      "Region": "eu-west-1",
+      "BucketName": "sfc-bucket-name",
+      "Interval": 60,
+      "BufferSize": 1,
+      "CredentialProviderClient": "AwsIotClient",
+      "Compression": "Zip"
   }
 
 }
@@ -363,13 +364,13 @@ The "S3TargetType" and "S3Target" are selected in the "TargetTypes" and "Target"
 
 ```json
 "TargetTypes": {
-"AWS-S3":  "@file:s3-inproc.json@S3TargetType"
+		"AWS-S3":  "@file:s3-inproc.json@S3TargetType"
 }
 ```
 
 ```json
 "Targets": {
-"S3Target": "@file:s3-inproc.json@S3Target"
+		"S3Target": "@file:s3-inproc.json@S3Target"
 }
 ```
 
@@ -384,15 +385,15 @@ For example the file s3-target.json does include the following definition of an 
 
 ```json
 {
-  "Active": true,
-  "TargetType": "AWS-S3",
-  "Region": "%region%",
-  "BucketName": "%bucket-name%",
-  "Interval": 60,
-  "BufferSize": 1,
-  "CredentialProviderClient": "AwsIotClient",
-  "CertificatesAndKeysByFileReference": false,
-  "Compression": "Zip"
+    "Active": true,
+    "TargetType": "AWS-S3",
+    "Region": "%region%",
+    "BucketName": "%bucket-name%",
+    "Interval": 60,
+    "BufferSize": 1,
+    "CredentialProviderClient": "AwsIotClient",
+    "CertificatesAndKeysByFileReference": false,
+    "Compression": "Zip"
 }
 ```
 
@@ -401,7 +402,7 @@ This file is loaded from the templates section:
 
 ```json
 "Templates" : {
-"S3Target": "@file:s3-target.json"
+		"S3Target": "@file:s3-target.json"
 }
 ```
 
@@ -410,7 +411,7 @@ The template then can be used as a normal template in the targets section:
 
 ```json
 "Targets": {
-"S3Target": "$(S3Target, bucket-name=sfc-bucket, region=eu-west-1)"
+		"S3Target": "$(S3Target, bucket-name=sfc-bucket, region=eu-west-1)"
 }
 ```
 

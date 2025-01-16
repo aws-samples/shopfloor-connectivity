@@ -1,3 +1,13 @@
+[SFC Configuration](./sfc-top-level-config.md) > [ProtocolAdapterTypes](./sfc-top-level-config.md#ProtocolAdapterTypes)
+
+[SFC Configuration](./sfc-top-level-config.md) > [TargetTypes](./sfc-top-level-config.md#TargetTypes) 
+
+[SFC Configuration](./sfc-top-level-config.md) > [Metrics](./sfc-top-level-config.md#Metrics) > [Writer](./metrics-writer-configuration#MetricsWriter)
+
+[SFC Configuration](./sfc-top-level-config.md) > [LogWriter](./sfc-top-level-config.md#LogWriter)
+
+[SFC Configuration](./sfc-top-level-config.md) > [ConfigProvider](./sfc-top-level-config.md#ConfigProvider)
+
 ## InProcessConfiguration
 
 - [Schema](#Schema)
@@ -109,3 +119,4 @@ Multiple JARs configuration:
 
 
 
+[^top](#InProcessConfiguration)

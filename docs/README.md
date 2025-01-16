@@ -27,6 +27,8 @@
 
 - [Configuration](./sfc-configuration.md)
 
+- [SFC configuration file](./core/sfc-top-level-config.md)
+
 - [Running the SFC core process](./sfc-running-core-process.md)
 
 - [Running SFC protocol adapters](./sfc-running-adapters.md)
@@ -55,24 +57,22 @@
 
   
 
-## Quicklinks
+## Quick links
 
 **SFC Examples**
 
 - [SFC examples collection](./examples/README.md)
 
+**SFC Configuration Specifications**
+
+- [SFC Configuration File](./core/sfc-top-level-config.md)
+- [Protocol Adapters](./adapters/README.md)
+- [Target Adapters](./targets/README.md)
+
 **SFC Deployment**
 
 - [Greengrass CDK](../deployment/README.md)
 - [Greengrass Lab](../examples/greengrass-in-process/README.md)
-
-**SFC Configuration Specifications**
-
-- [SFC Core](./core/README.md)
-- [Protocol Adapters](./adapters/README.md)
-- [Target Adapters](./targets/README.md)
-
-
 
 # Introduction
 
@@ -90,9 +90,9 @@ on licenses for additional connectivity products.
 
 There are three main type of components that make up SFC.
 
-- Protocol Adapters
+- [Protocol Adapters](./adapters/README.md)
 - SFC Core
-- Target Adapters
+- [Target Adapters](./targets/README.md)
 
 <p align="center">
   <img src="img/fig01.png" width="75%"/>
@@ -103,7 +103,7 @@ There are three main type of components that make up SFC.
 
 An [SFC protocol adapter](./adapters/README.md) is used to read data from one or more industrial devices. This adapter 
 interface abstracts the used protocol from and delivers the data with additional metadata in a common format to the SFC Core. The interface is
-designed so that AWS, 3rd parties, or customers can easily extend SFC with new protocol adapters without any
+designed so that AWS, 3rd parties, or customers can [easily extend SFC](./sfc-extending.md) with new protocol adapters without any
 modifications to the rest of the framework.
 
 ## Core
@@ -118,9 +118,7 @@ Optionally the data can be buffered and aggregated at the edge to reduce network
 available aggregation functions. After the aggregation has taken place, an additional transformation step can be
 performed on the aggregated data. Before sending it to one or more SFC target adapters.
 
-The core integrates with [AWS Secrets Manager](./core/cloud-secret-configuration.md) and allows the use of placeholders 
-for secrets used in the configuration, which will be transparently retrieved from AWS Secrets manager and substituted into 
-the configuration.
+The core integrates with [AWS Secrets Manager](./sfc-configuration.md#configuration-secrets) and allows the use of placeholders for secrets used in the [configuration](./sfc-configuration.md), which will be transparently retrieved from AWS Secrets manager and substituted into the configuration.
 
 In order to adapt to customer environments, logging, (dynamic) configuration and metrics collection is fully
 configurable. Default implementations are provided, but can be replaced by custom ones by implementing a minimal
@@ -143,9 +141,9 @@ in order to provide additional functionality which is discussed in this document
 
 ## SFC data collection
 
-Configuring data collection with SFC involves defining one or more collection [schedules](./core/schedule-config.md) that 
-specify the interval and sources of data collection, as well as the targets for sending the collected data. These sources 
-can include multiple  protocol adapter types, and individual data items can be transformed, filtered, or aggregated as needed. 
+Configuring data collection with SFC involves defining one or more collection [schedules](./core/sfc-top-level-config.md#Schedules) that 
+specify the interval and sources of data collection, as well as the targets for sending the collected data. These [sources](./core/sfc-top-level-config.md#sources) 
+can include multiple [protocol adapter](./core/sfc-top-level-config.md#ProtocolAdapters) types, and individual data items can be transformed, filtered, or [aggregated](./core/schedule-config#Aggregation) when needed. 
 SFC is designed as an active data collector handling all steps defined in the schedules automatically, without requiring 
 additional coding.
 
@@ -287,6 +285,16 @@ SFC components running as microservices can explicitly specify which network int
 
 By [configuring](./sfc-securing-component-traffic.md) the required X509 certificates all network traffic can be secured using server side or mutual TLS.
 
+See also:
+
+- [Running the SFC core process](./sfc-running-core-process.md)
+
+- [Running SFC protocol adapters](./sfc-running-adapters.md)
+
+- [Running SFC targets](./sfc-running-targets.md)
+
+
+
 
 
 ## Scalability
@@ -351,13 +359,13 @@ The data can be enriched with additional information before it is sent to the ta
 In the configuration information at schedule-level, source and channel level maps of (string) data can be configured
 that will be added to the output data.
 
-Configuration top-level metadata will be merged with the data at schedule-level and added to the target data under the
+Configuration [top-level](./core/sfc-top-level-config.md#Metadata) metadata will be merged with the data at [schedule-level](./core/schedule-config.md#Metadata) and added to the target data under the
 metadata node at top-level. If a value is defined at both top-level and schedule-level, the schedule-level value is
 used (allowing the overwriting of top-level values at schedule-level).
 
-Metadata at source-level will be added under a metadata node at source-level.
+Metadata at source-level will be added under a metadata node at [source-level](./core/source-configuration.md#Metadata).
 
-Metadata at channel-level will be added to the values under a metadata-level node at value level.
+Metadata at channel-level will be added to the values under a metadata-level node at [channel-level](./core/channel-configuration.md#Metadata).
 
 <p align="center">
 <img src="img/fig06.png" width="75%"/>

@@ -1,5 +1,9 @@
 # MQTT Protocol Configuration
 
+[SFC Configuration](../core/sfc-top-level-config.md) > [Sources](../core/sfc-top-level-config.md#Sources) >  [Source](../core/source-configuration.md) 
+
+
+
 MQTT Protocol adapter configuration.
 
 
@@ -15,7 +19,7 @@ MQTT Protocol adapter configuration.
 
 ## MqttSourceConfiguration
 
-Source configuration for the MQTT protocol adapter. This type extends the [BaseSourceConfiguration](../core/base-source-configuration.md) type. 
+Source configuration for the MQTT protocol adapter. This type extends the [SourceConfiguration](../core/source-configuration.md) type. 
 
 - [Schema](#MqttSourceConfiguration-Schema)
 - [Examples](#MqttSourceConfiguration-Examples)
@@ -100,6 +104,10 @@ At least 1 channel must be configured.
 ```
 
 ## MqttChannelConfiguration
+
+[SFC Configuration](../core/sfc-top-level-config.md) > [Sources](../core/sfc-top-level-config.md#Sources) > [Source](../core/source-configuration.md)  > [Channels](../core/source-configuration.md#Channels) > [Channel](../core/channel-configuration.md)
+
+
 
 The MqttChannelConfiguration type extends the [ChannelConfiguration](../core/channel-configuration.md) class with channel properties for the MQTT protocol adapter.
 
@@ -216,6 +224,10 @@ The must be at least one topic in the list of topics.
 
 
 ## TopicNameMappingConfiguration type
+
+[MqttSource](#MqttSourceConfiguration) > [Channels](#Channels) > [Channel](#MqttChannelConfiguration) > [TopicNameMappingConfiguration](#TopicNameMappingConfiguration)
+
+
 
 Mapping from topic names to alternative names. As a channel can have multiple topics, that also can include wildcards, this mapping can be used to build consistent and expected value names.
 
@@ -380,6 +392,10 @@ Multiple mappings with unmapped topics included:
 
 ## MqttAdapterConfiguration
 
+[SFC Configuration](../core/sfc-top-level-config.md) > [ProtocolAdapters](../core/sfc-top-level-config.md#ProtocolAdapters) > [Adapter](../core/protocol-adapter-configuration.md) 
+
+
+
 MqttAdapterConfiguration extension the [AdapterConfiguration](../core/protocol-adapter-configuration.md) with properties for the MQTT Protocol adapter.
 
 AdsAdapterConfiguration 
@@ -520,6 +536,10 @@ Multiple brokers with KeepAll mode:
 
 
 ## MqttBrokerConfiguration
+
+[MqttProtocolAdapter](#MqttAdapterConfiguration) > [Brokers](#Brokers) 
+
+
 
 - [Schema](#MqttBrokerConfiguration-Schema)
 - [Examples](#MqttBrokerConfiguration-Examples)

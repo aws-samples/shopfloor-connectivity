@@ -1,3 +1,5 @@
+[CertificateValidation](./certificate-validation-configuration.md) > [ValidationOptions](./certificate-validation-configuration.md#ValidationOptions)
+
 ## CertificateValidationOptions
 
 - [Schema](#CertificateValidationOptions-Schema)
@@ -84,6 +86,8 @@ Check certificate expiry
 **Type**: Boolean
 
 Default is true
+
+[^top](#CertificateValidationOptions)
 
 ### CertificateValidationOptions Schema
 

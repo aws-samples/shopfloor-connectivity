@@ -12,7 +12,11 @@ SNMP Protocol adapter configuration
 
 ## SnmpSourceConfiguration
 
-Source configuration for the SNMP protocol adapter. This type extends the [BaseSourceConfiguration](../core/base-source-configuration.md) type.
+[SFC Configuration](../core/sfc-top-level-config.md) > [Sources](../core/sfc-top-level-config.md#Sources) >  [Source](../core/source-configuration.md) 
+
+
+
+Source configuration for the SNMP protocol adapter. This type extends the [SourceConfiguration](../core/source-configuration.md) type.
 
 - [Schema](#SnmpSourceConfiguration-Schema)
 - [Examples](#SnmpSourceConfiguration-Examples)
@@ -107,8 +111,11 @@ At least 1 channel must be configured.
 
 
 
-
 ## SnmpChannelConfiguration
+
+[SFC Configuration](../core/sfc-top-level-config.md) > [Sources](../core/sfc-top-level-config.md#Sources) > [Source](../core/source-configuration.md)  > [Channels](../core/source-configuration.md#Channels) > [Channel](../core/channel-configuration.md)
+
+
 
 The SnmpChannelConfiguration type extends the [ChannelConfiguration](../core/channel-configuration.md) class with channel properties for the SNMP protocol adapter.
 
@@ -169,8 +176,11 @@ Must be in valid dot format notation
 
 
 
-
 ## SnmpAdapterConfiguration
+
+[SFC Configuration](../core/sfc-top-level-config.md) > [ProtocolAdapters](../core/sfc-top-level-config.md#ProtocolAdapters) > [Adapter](../core/protocol-adapter-configuration.md) 
+
+
 
 SnmpAdapterConfiguration extension the [AdapterConfiguration](../core/protocol-adapter-configuration.md) with properties for the SNMP Protocol adapter.
 
@@ -249,8 +259,11 @@ Snmp devices configured for this adapter. The modbus tcp source using the adapte
 
 
 
-
 ## SnmpDeviceConfiguration
+
+[SnmpAdapter](#SnmpAdapter) > [Devices](#devices])
+
+
 
 - [Schema](#SnmpDeviceConfiguration-Schema)
 - [Examples](#SnmpDeviceConfiguration-Examples)

@@ -1,3 +1,5 @@
+[SFC Configuration](./sfc-top-level-config.md) > [ChangeFilters](./sfc-top-level-config.md#ChangeFilters)
+
 
 
 ## ChangeFilterConfiguration
@@ -128,3 +130,7 @@ Absolute change filter, with at least a value every 5 seconds even when value di
   "Atleast" : 10000
 }
 ```
+
+
+
+[^top](#ChangeFilterConfiguration)

@@ -12,7 +12,11 @@ SQL Protocol adapter configuration
 
 ## SqlSourceConfiguration
 
-Source configuration for the SQL protocol adapter. This type extends the [BaseSourceConfiguration](../core/base-source-configuration.md) type.
+[SFC Configuration](../core/sfc-top-level-config.md) > [Sources](../core/sfc-top-level-config.md#Sources) >  [Source](../core/source-configuration.md) 
+
+
+
+Source configuration for the SQL protocol adapter. This type extends the [SourceConfiguration](../core/source-configuration.md) type.
 
 - [Schema](#SqlSourceConfiguration-Schema)
 - [Examples](#SqlSourceConfiguration-Examples)
@@ -152,8 +156,11 @@ The logic of the statement or is responsible that records are only read once or 
 
 
 
-
 ## SqlChannelConfiguration
+
+[SFC Configuration](../core/sfc-top-level-config.md) > [Sources](../core/sfc-top-level-config.md#Sources) > [Source](../core/source-configuration.md)  > [Channels](../core/source-configuration.md#Channels) > [Channel](../core/channel-configuration.md)
+
+
 
 The SqlChannelConfiguration type extends the [ChannelConfiguration](../core/channel-configuration.md) class with channel properties for the SQL protocol adapter.
 
@@ -226,8 +233,11 @@ Default value is ["*"]
 
 [^top](#sql-adapter-configuration)
 
-
 ## SqlAdapterConfiguration
+
+[SFC Configuration](../core/sfc-top-level-config.md) > [ProtocolAdapters](../core/sfc-top-level-config.md#ProtocolAdapters) > [Adapter](../core/protocol-adapter-configuration.md) 
+
+
 
 SqlAdapterConfiguration extension the [AdapterConfiguration](../core/protocol-adapter-configuration.md) with properties for the SQL Protocol adapter.
 
@@ -335,8 +345,11 @@ Example 2 - Multi-database configuration:
 
 
 
-
 ## DbServerConfiguration
+
+[SqlAdapter](#SqlAdapterConfiguration) > [DbServers](#DbServers)
+
+
 
 - [Schema](#DbServerConfiguration-Schema)
 - [Examples](#DbServerConfiguration-Examples)

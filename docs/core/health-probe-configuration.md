@@ -1,3 +1,9 @@
+[SFC Configuration](./sfc-top-level-config.md) > [HealthProbe](./sfc-top-level-config.md#healthprobe)
+
+[SFC Configuration](./sfc-top-level-config.md) > [TargetServers](./sfc-top-level-config.md#TargetServers) > [TargetServer](./server-configuration.md) > [HealthProbe](./server-configuration.md#healthprobe)
+
+[SFC Configuration](./sfc-top-level-config.md) > [ProtocolAdapterServers](./sfc-top-level-config.md#ProtocolAdapterServers) > [AdapterServer](./server-configuration.md) > [HealthProbe](./server-configuration.md#healthprobe)
+
 # HealthProbeConfiguration
 
 - [Schema](#Schema)
@@ -229,3 +235,4 @@ Custom path and response:
 }
 ```
 
+[^top](#HealthProbeConfiguration)

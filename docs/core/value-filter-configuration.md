@@ -1,3 +1,5 @@
+[SFC Configuration](./sfc-top-level-config.md) > [ValueFilters](./sfc-top-level-config.md#ValueFilters)
+
 ## ValueFilterConfiguration
 
 - [Schema](#Schema)

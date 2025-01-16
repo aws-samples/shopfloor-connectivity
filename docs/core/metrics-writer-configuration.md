@@ -1,3 +1,9 @@
+[SFC Configuration](./sfc-top-level-config.md#Metrics) > [Metrics](./sfc-top-level-config.md#Metrics) > [Writer](./metrics-writer-configuration#MetricsWriter)
+
+[SFC Configuration](./sfc-top-level-config.md) > [ProtocolAdapters](./sfc-top-level-config.md#ProtocolAdapters) > [ProtocolAdapter](./protocol-adapter-configuration.md) > [Metrics](./protocol-adapter-configuration.md#Metrics) > [Writer](./metrics-writer-configuration#MetricsWriter)
+
+[SFC Configuration](./sfc-top-level-config.md) > [TargetAdapters](./sfc-top-level-config.md#Targets) > [Target](./target-configuration.md) > [Metrics](./target-configuration.md#Metrics) > [Writer](./metrics-writer-configuration#MetricsWriter)
+
 ## MetricsWriterConfiguration
 
 - [Schema](#Schema)
@@ -82,5 +88,5 @@ Using IPC MetricsServer:
 }
 ```
 
-
+[^top](#MetricsWriterConfiguration)
 

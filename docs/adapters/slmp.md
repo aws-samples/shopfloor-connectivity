@@ -22,10 +22,13 @@ In order to reduce the number of interactions between the adapter and the contro
 
 ---
 
-
 ## SlmpSourceConfiguration
 
-Source configuration for the SLMP protocol adapter. This type extends the [BaseSourceConfiguration](../core/base-source-configuration.md) type.
+[SFC Configuration](../core/sfc-top-level-config.md) > [Sources](../core/sfc-top-level-config.md#Sources) >  [Source](../core/source-configuration.md) 
+
+
+
+Source configuration for the SLMP protocol adapter. This type extends the [SourceConfiguration](../core/source-configuration.md) type.
 
 - [Schema](#SlmpSourceConfiguration-Schema)
 - [Examples](#SlmpSourceConfiguration-Examples)
@@ -115,8 +118,11 @@ At least 1 channel must be configured.
 
 
 
-
 ## SlmpChannelConfiguration
+
+[SFC Configuration](../core/sfc-top-level-config.md) > [Sources](../core/sfc-top-level-config.md#Sources) > [Source](../core/source-configuration.md)  > [Channels](../core/source-configuration.md#Channels) > [Channel](../core/channel-configuration.md)
+
+
 
 The SlmpChannelConfiguration type extends the [ChannelConfiguration](../core/channel-configuration.md) class with channel properties for the SLMP protocol adapter.
 
@@ -265,8 +271,11 @@ The number of items to read can be specified as well in the DataType of the chan
 
 
 
-
 ## SlmpAdapterConfiguration
+
+[SFC Configuration](../core/sfc-top-level-config.md) > [ProtocolAdapters](../core/sfc-top-level-config.md#ProtocolAdapters) > [Adapter](../core/protocol-adapter-configuration.md) 
+
+
 
 SlmpAdapterConfiguration extension the [AdapterConfiguration](../core/protocol-adapter-configuration.md) with properties for the SLMP Protocol adapter.
 
@@ -402,8 +411,11 @@ A SLMP channel can now use both type "STRUCT1" as "STRUCT2" as a DataType. The d
 
 
 
-
 ## SlmpControllerConfiguration
+
+[SlmpAdapter](#SlmpAdapterConfiguration) > [Controllers](#Controllers)
+
+
 
 - [Schema](#SlmpControllerConfiguration-Schema)
 - [Examples](#SlmpControllerConfiguration-Examples)

@@ -1,8 +1,5 @@
-
 # ADS Protocol Configuration
 
-
----
 - [AdsSourceConfiguration](#AdsSourceConfiguration)
 - [AdsChannelConfiguration](#AdsChannelConfiguration)
 - [AdsAdapterConfiguration](#AdsAdapterConfiguration)
@@ -12,7 +9,11 @@
 
 ## AdsSourceConfiguration
 
-Source configuration for the ADS protocol adapter. This type extends the [BaseSourceConfiguration](../core/base-source-configuration.md) type. 
+[SFC Configuration](../core/sfc-top-level-config.md) > [Sources](../core/sfc-top-level-config.md#Sources) >  [Source](../core/source-configuration.md) 
+
+
+
+Source configuration for the ADS protocol adapter. This type extends the [SourceConfiguration](../core/source-configuration.md) type. 
 
 - [Schema](#AdsSourceConfiguration-Schema)
 
@@ -29,15 +30,15 @@ Source configuration for the ADS protocol adapter. This type extends the [BaseSo
 
 ---
 ### AdapterDevice
-Device Identifier for the controller to read from. This referenced server must be present in the Devices section of the adapter referred to by the ProtocolAdapter attribute of the source.
+Device Identifier for the device to read from. This referenced device must be present in the Devices section of the adapter referred to by the ProtocolAdapter attribute of the source.
 
 **Type**: String
 
-Must be an identifier of a server in the [Controllers](#Controllers) section of the [ADS adapter](#AdsAdapterConfiguration) used by the source.
+Must be an identifier of a server in the [Devices](#Devices) section of the [ADS adapter](#AdsAdapterConfiguration) used by the source.
 
 ---
 ### Channels
-The channels configuration for an ADS source holds configuration data to read values from fields on the source controller.
+The channels configuration for an ADS source holds configuration data to read values from fields on the source device.
 The element is a map indexed by the channel identifier.
 Channels can be "commented" out by adding a "#" at the beginning of the identifier of that channel.
 
@@ -178,8 +179,11 @@ This can be any value.
 
 
 
-
 ## AdsChannelConfiguration
+
+[SFC Configuration](../core/sfc-top-level-config.md) > [Sources](../core/sfc-top-level-config.md#Sources) > [Source](../core/source-configuration.md)  > [Channels](../core/source-configuration.md#Channels) > [Channel](../core/channel-configuration.md)
+
+
 
 The AdsChannelConfiguration type extends the [ChannelConfiguration](../core/channel-configuration.md) class with channel properties for the ADS protocol adapter.
 
@@ -199,6 +203,8 @@ A string containing the name of the symbol to read from the device.
 **Type**: String
 
 [^top](#ads-protocol-configuration)
+
+
 
 ### AdsChannelConfiguration Schema
 
@@ -227,7 +233,7 @@ A string containing the name of the symbol to read from the device.
 
 
 
-## AdsChannelConfiguration Example
+### AdsChannelConfiguration Example
 
 ```json
 {
@@ -240,6 +246,10 @@ A string containing the name of the symbol to read from the device.
 
 ## AdsAdapterConfiguration
 
+[SFC Configuration](../core/sfc-top-level-config.md) > [ProtocolAdapters](../core/sfc-top-level-config.md#ProtocolAdapters) > [Adapter](../core/protocol-adapter-configuration.md) 
+
+
+
 AdsAdapterConfiguration extension the [AdapterConfiguration](../core/protocol-adapter-configuration.md) with properties for the ADS Protocol adapter.
 
 - [Schema](#AdsAdapterConfiguration-Schema)
@@ -247,10 +257,10 @@ AdsAdapterConfiguration extension the [AdapterConfiguration](../core/protocol-ad
 
 **Properties:**
 
-- [Controllers](#Controllers)
+- [Devices](#Devices)
 
 ---
-### Controllers
+### Devices
 Devices configured for this adapter. The ADS source using the adapter must have a reference to one of these in its AdapterDevice attribute.
 
 **Type**: Map[String,[AdsDeviceConfiguration](#AdsDeviceConfiguration)]
@@ -274,10 +284,10 @@ Devices configured for this adapter. The ADS source using the adapter must have 
       "properties": {
         "Controllers": {
           "type": "object",
-          "description": "Map of ADS device controllers indexed by string",
+          "description": "Map of ADS devices indexed by string",
           "patternProperties": {
             "^.*$": {
-              "$ref": "external-schema.json#/definitions/AdsDeviceController"
+              "$ref": "external-schema.json#/definitions/AdsDevice"
             }
           },
           "minProperties": 1
@@ -323,7 +333,11 @@ Devices configured for this adapter. The ADS source using the adapter must have 
 
 ## AdsDeviceConfiguration
 
-Configuration for an ADS Controller.
+[AdsAdapterConfiguration](#AdsAdapterConfiguration) > [Devices](#Devices)
+
+
+
+Configuration for an ADS Device.
 
 \- [Schema](#AdsDeviceConfiguration-schema)
 
@@ -374,7 +388,7 @@ Default is 48898
 
 ---
 ### ReadTimeout
-Timeout for reading response packets from the controller in milliseconds
+Timeout for reading response packets from the device in milliseconds
 
 **Type**: Integer
 
@@ -390,7 +404,7 @@ Default is 10000
 
 ---
 ### WaitAfterReadError
-Time to wait before reading values from the controller after a read error in milliseconds
+Time to wait before reading values from the device after a read error in milliseconds
 
 **Type**: Integer
 
@@ -398,7 +412,7 @@ Default is 10000
 
 ---
 ### WaitAfterWriteError
-Time to wait after an error writing request packets to the controller in milliseconds
+Time to wait after an error writing request packets to the device in milliseconds
 
 **Type**: Integer
 

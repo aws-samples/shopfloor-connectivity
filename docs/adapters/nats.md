@@ -13,7 +13,11 @@ NATS Protocol adapter configuration
 
 ## NatsSourceConfiguration
 
-Source configuration for the NATS protocol adapter. This type extends the [BaseSourceConfiguration](../core/base-source-configuration.md) type. 
+[SFC Configuration](../core/sfc-top-level-config.md) > [Sources](../core/sfc-top-level-config.md#Sources) >  [Source](../core/source-configuration.md) 
+
+
+
+Source configuration for the NATS protocol adapter. This type extends the [SourceConfiguration](../core/source-configuration.md) type. 
 
 - [Schema](#NatsSourceConfiguration-Schema)
 - [Examples](#NatsSourceConfiguration-Examples)
@@ -97,6 +101,10 @@ At least 1 channel must be configured.
 [^top](#natsadapterconfiguration)
 
 ## NatsChannelConfiguration
+
+[SFC Configuration](../core/sfc-top-level-config.md) > [Sources](../core/sfc-top-level-config.md#Sources) > [Source](../core/source-configuration.md)  > [Channels](../core/source-configuration.md#Channels) > [Channel](../core/channel-configuration.md)
+
+
 
 The NatsChannelConfiguration type extends the [ChannelConfiguration](../core/channel-configuration.md) class with channel properties for the NATS protocol adapter.
 
@@ -222,6 +230,10 @@ The must be **at least one subject** in the list of subjects.
 
 ## SubjectNameMappingConfiguration type
 
+[NatsChannel](#NatsChannelConfiguration) > [SubjectNameMappingConfiguration](#SubjectNameMappingConfiguration)
+
+
+
 - [Schema](#SubjectNameMappingConfiguration-Schema)
 - [Examples](#SubjectNameMappingConfiguration-Examples)
 
@@ -341,6 +353,10 @@ Multiple mappings with unmapped topics included:
 
 ## NatsAdapterConfiguration
 
+[SFC Configuration](../core/sfc-top-level-config.md) > [ProtocolAdapters](../core/sfc-top-level-config.md#ProtocolAdapters) > [Adapter](../core/protocol-adapter-configuration.md) 
+
+
+
 NatsAdapterConfiguration extension the [AdapterConfiguration](../core/protocol-adapter-configuration.md) with properties for the NATS Protocol adapter.
 
 - [Schema](#NatsAdapterConfiguration-Schema)
@@ -454,6 +470,10 @@ AdapterServer attribute.
 ```
 
 ## NatsServerConfiguration
+
+[NatsAdapter](#NatsAdapterConfiguration) > [Servers](#Servers)
+
+
 
 - [Schema](#NatsServerConfiguration-Schema)
 - [Examples](#NatsServerConfiguration-Examples)

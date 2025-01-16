@@ -123,7 +123,7 @@ If you do not have a S3 bucket yet, you will have to create one:
 aws s3api create-bucket --bucket ${SFC_S3_BUCKET_NAME} --region ${AWS_REGION}
 ```
 
-Next we will have to configure the SFC. This is done via a configuration file you can specify at execution time (e.g. `sfc-main -config example.json`) We are first defining following variables which we will then use in an example configuration file. The following configuration sets SFC up, to connect to a OPCUA-Server and forward it to the S3 Bucket in your AWS Account:
+Next we will have to configure the SFC. This is done via a [configuration file](./docs/core/sfc-top-level-config.md) you can specify at execution time (e.g. `sfc-main -config example.json`) We are first defining following variables which we will then use in an example configuration file. The following configuration sets SFC up, to connect to a OPCUA-Server and forward it to the S3 Bucket in your AWS Account:
 > Note: **Please** expand the section below, to see the json config...
 <details>
   <summary><b>Expand</b></summary>

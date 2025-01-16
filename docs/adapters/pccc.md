@@ -350,11 +350,12 @@ Syntax: `A<file number>:<element index>[/character offset]`
 
 ## PcccSourceConfiguration
 
-Source configuration for the PCCC protocol adapter. This type extends the [BaseSourceConfiguration](../core/base-source-configuration.md) type.
+[SFC Configuration](../core/sfc-top-level-config.md) > [Sources](../core/sfc-top-level-config.md#Sources) >  [Source](../core/source-configuration.md) 
+
+Source configuration for the PCCC protocol adapter. This type extends the [SourceConfiguration](../core/source-configuration.md) type.
 
 - [Schema](#PcccSourceConfiguration-Schema)
 - [Examples](#PcccSourceConfiguration-Examples)
-
 
 **Properties:**
 
@@ -444,8 +445,9 @@ At least 1 channel must be configured.
 
 
 
-
 ## PcccChannelConfiguration
+
+[SFC Configuration](../core/sfc-top-level-config.md) > [Sources](../core/sfc-top-level-config.md#Sources) > [Source](../core/source-configuration.md)  > [Channels](../core/source-configuration.md#Channels) > [Channel](../core/channel-configuration.md)
 
 The PcccChannelConfiguration type extends the [ChannelConfiguration](../core/channel-configuration.md) class with channel properties for the PCCC protocol adapter.
 
@@ -561,6 +563,10 @@ Counter with bit:
 
 ## PcccAdapterConfiguration
 
+[SFC Configuration](../core/sfc-top-level-config.md)../core/sfc-top-level-config.md > [ProtocolAdapters](../core/sfc-top-level-config.md#ProtocolAdapters) > [Adapter](../core/protocol-adapter-configuration.md) 
+
+
+
 PcccAdapterConfiguration extension the [AdapterConfiguration](../core/protocol-adapter-configuration.md) with properties for the PCCC Protocol adapter.
 
 - [Schema](#PcccAdapterConfiguration-Schema)
@@ -631,8 +637,11 @@ PLCs servers configured for this adapter. The PCCC source using the adapter must
 
 
 
-
 ## PcccControllerConfiguration
+
+[PccAdapter](#PcccAdapterConfiguration) > [Controllers](#controllers)
+
+
 
 - [Schema](#PcccControllerConfiguration-Schema)
 - [Examples](#PcccControllerConfiguration-Examples)
@@ -843,8 +852,11 @@ Default is 10000
 
 
 
-
 ## PcccConnectPathConfiguration
+
+[PccAdapter](#PcccAdapterConfiguration) > [Controllers](#controllers) > [PcccController](#PcccControllerConfiguration) > [ConnectPath](#ConnectPath)
+
+
 
 - [Schema](#PcccConnectPathConfiguration-Schema)
 - [Examples](#PcccConnectPathConfiguration-Examples)

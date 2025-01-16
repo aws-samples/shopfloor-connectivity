@@ -228,7 +228,7 @@ Only JVM implementations of protocol adapters can be used to run in the same pro
 **Type**: Map[String,[InProcessConfiguration](./in-process-configuration.md)]
 
 ---
-### ProtocolAdapters
+### 	ProtocolAdapters
 Protocol adapters are the sources to read data from and abstract the actual protocol that is us used to read the data. Each source used in a schedule must have a reference to a protocol adapter. As protocol adapters can be of different types, each inherited type has additional specific attributes for the protocol.
 
 **Type**: Map[String, [ProtocolAdapterConfiguration](./protocol-adapter-configuration.md)]
@@ -270,7 +270,7 @@ Servers that run target instances as separate processes. The SFC core will send 
 The targets-servers can be referenced by their identifier from the Targets section of the configuration.
 
 
-**Type**: Map[String,ServerConfiguration]
+**Type**: Map[String,[ServerConfiguration](./server-configuration.md)]
 
 ---
 ### TargetTypes
@@ -1039,3 +1039,4 @@ Configuration is using Templates for repeating channel sections and region value
 }
 ```
 
+[^top](#sfc-top-level-configuration)

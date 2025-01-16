@@ -1,8 +1,8 @@
+[SFC Configuration](./sfc-top-level-config.md) > [Sources](./sfc-top-level-config.md#Sources) 
+
 ## SourceConfiguration
 
 SourceConfiguration defines common properties for SFC source adapters. Source adapter implementations extend this type with their specific additional properties.
-
-
 
 - [Schema](#Schema)
 - [Examples](#Examples)

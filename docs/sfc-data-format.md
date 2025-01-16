@@ -35,7 +35,7 @@
 [metadata] --name* -- value
 ```
 
-Custom element names in brackets can be set for all elements above in brackets using the "ElementNames" configuration
+Custom element names in brackets can be set for all elements above in brackets using the [ElementNames](../docs/core/sfc-top-level-config.md#ElementNames) configuration
 setting. The name keys for the sources and value maps get the value of the "Name" element for the source and channel in
 their configuration (default is the key used as the id for the source/value in the configuration).
 

@@ -1,8 +1,8 @@
+[SFC Configuration](./sfc-top-level-config.md#Metrics) > [ProtocolAdapters](./sfc-top-level-config.md#ProtocolAdapters) 
+
 ## ProtocolAdapterConfiguration
 
 ProtocolAdapterConfiguration which is extended by the implementation of a protocol adapter with specific properties for that adapter.
-
-
 
 - [Schema](#Schema)
 - [Examples](#Examples)
@@ -137,3 +137,5 @@ Example with AdapterType and Metrics:
   }
 }
 ```
+
+[^top](#ProtocolAdapterConfiguration)
