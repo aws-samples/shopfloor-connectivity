@@ -1,6 +1,6 @@
 ## TargetConfiguration
 
-[SFC Configuration](./sfc-configuration) > [Targets](./sfc-configuration#Targets) 
+[SFC Configuration](./sfc-configuration.md) > [Targets](./sfc-configuration#Targets) 
 
 Target Configuration defines common properties for [SFC target adapters](./sfc-configuration#Targets). Target adapter implementations extend this type with their specific additional properties.
 

@@ -19,7 +19,7 @@ SFC (Shop Floor Connectivity) is a data ingestion technology for collecting indu
   - [Data transformations and filtering](./sfc-data-processing-filtering.md)
   - Aggregation and buffering
   - [Secure communication](./sfc-securing-component-traffic.md) between components
-  - [Integration](./sfc-configuration.md##configuration-secrets) with AWS Secrets Manager
+  - [Integration](./sfc-configuration.md#configuration-secrets) with AWS Secrets Manager
   
 - [Concepts](#Terminology-and-concepts):
   

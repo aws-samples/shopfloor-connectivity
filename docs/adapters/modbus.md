@@ -12,7 +12,7 @@ Configuration for Modbus TCP protocol adapter.
 
 ## ModbusSourceConfiguration
 
-[SFC Configuration](../core/sfc-configuration) > [Sources](../core/sfc-configuration#Sources) >  [Source](../core/source-configuration.md) 
+[SFC Configuration](../core/sfc-configuration.md) > [Sources](../core/sfc-configuration#Sources) >  [Source](../core/source-configuration.md) 
 
 
 
@@ -21,7 +21,6 @@ Source configuration for the Modbus protocol adapter. This type extends the [Sou
 - [Schema](#ModbusSourceConfiguration-schema)
 - [Example](#ModbusSourceConfiguration-example)
 
-
 **Properties:**
 - [AdapterDevice](#AdapterDevice)
 - [Channels](#Channels)
@@ -29,6 +28,7 @@ Source configuration for the Modbus protocol adapter. This type extends the [Sou
 - [ReadTimeout](#ReadTimeout)
 
 ---
+
 ### AdapterDevice
 Identifier for the device to read from. This referenced device must be present in the Devices section of the adapter referred to by the ProtocolAdapter attribute of the source.
 
@@ -257,7 +257,7 @@ Default is 16
 
 ## ModbusChannelConfiguration
 
-[SFC Configuration](../core/sfc-configuration) > [Sources](../core/sfc-configuration#Sources) > [Source](../core/source-configuration.md)  > [Channels](../core/source-configuration.md#Channels) > [Channel](../core/channel-configuration.md)
+[SFC Configuration](../core/sfc-configuration.md) > [Sources](../core/sfc-configuration#Sources) > [Source](../core/source-configuration.md)  > [Channels](../core/source-configuration.md#Channels) > [Channel](../core/channel-configuration.md)
 
 
 
@@ -384,7 +384,7 @@ Modbus channel type to read from
 
 ## ModbusTcpAdapterConfiguration
 
-[SFC Configuration](../core/sfc-configuration) > [ProtocolAdapters](../core/sfc-configuration#ProtocolAdapters) > [Adapter](../core/protocol-adapter-configuration.md) 
+[SFC Configuration](../core/sfc-configuration.md) > [ProtocolAdapters](../core/sfc-configuration#ProtocolAdapters) > [Adapter](../core/protocol-adapter-configuration.md) 
 
 
 

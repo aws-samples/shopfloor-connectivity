@@ -1,6 +1,6 @@
 ## TransformationOperator
 
-[SFC Configuration](./sfc-configuration) > [Transformations](./sfc-configuration#Transformations) 
+[SFC Configuration](./sfc-configuration.md) > [Transformations](./sfc-configuration#Transformations) 
 
 A transformation, defined in the Transformations section of the SFC top level transformation  consists of one or more TransformationOperators. Each Transformation operator has a property named : "Operator". Depending on the operator type, a Transformation can have no, or an operand,of which the type depends on that operator.
 

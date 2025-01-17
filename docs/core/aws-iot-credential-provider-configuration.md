@@ -1,6 +1,6 @@
 ## AwsIotCredentialProviderClientConfiguration
 
-[SFC Configuration](./sfc-configuration) > [AwsIotCredentialProviderClientConfiguration](./sfc-configuration#AwsIotCredentialProviderClients)
+[SFC Configuration](./sfc-configuration.md) > [AwsIotCredentialProviderClientConfiguration](./sfc-configuration#AwsIotCredentialProviderClients)
 
 An AWS IoT Credentials Provider Client configuration is used  to obtain temporary credentials used when AWS service API calls using X509 certificates. When used by AWS service targets the name of the configuration is specified as the value for the CredentialProviderClient in the configuration for that target.
 

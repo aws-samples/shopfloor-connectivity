@@ -1,14 +1,14 @@
 ## InProcessConfiguration
 
-[SFC Configuration](./sfc-configuration) > [ProtocolAdapterTypes](./sfc-configuration#ProtocolAdapterTypes)
+[SFC Configuration](./sfc-configuration.md) > [ProtocolAdapterTypes](./sfc-configuration#ProtocolAdapterTypes)
 
-[SFC Configuration](./sfc-configuration) > [TargetTypes](./sfc-configuration#TargetTypes) 
+[SFC Configuration](./sfc-configuration.md) > [TargetTypes](./sfc-configuration#TargetTypes) 
 
-[SFC Configuration](./sfc-configuration) > [Metrics](./sfc-configuration#Metrics) > [Writer](./metrics-writer-configuration#MetricsWriter)
+[SFC Configuration](./sfc-configuration.md) > [Metrics](./sfc-configuration#Metrics) > [Writer](./metrics-writer-configuration#MetricsWriter)
 
-[SFC Configuration](./sfc-configuration) > [LogWriter](./sfc-configuration#LogWriter)
+[SFC Configuration](./sfc-configuration.md) > [LogWriter](./sfc-configuration#LogWriter)
 
-[SFC Configuration](./sfc-configuration) > [ConfigProvider](./sfc-configuration#ConfigProvider)
+[SFC Configuration](./sfc-configuration.md) > [ConfigProvider](./sfc-configuration#ConfigProvider)
 
 - [Schema](#Schema)
 - [Examples](#Examples)

@@ -12,7 +12,7 @@ Configuration for PCCC protocol adapter.
 - [PcccControllerConfiguration](#PcccControllerConfiguration)
 - [PcccConnectPathConfiguration](#PcccConnectPathConfiguration)
 
-## 
+
 
 ## PCCC Addressing
 
@@ -350,7 +350,7 @@ Syntax: `A<file number>:<element index>[/character offset]`
 
 ## PcccSourceConfiguration
 
-[SFC Configuration](../core/sfc-configuration) > [Sources](../core/sfc-configuration#Sources) >  [Source](../core/source-configuration.md) 
+[SFC Configuration](../core/sfc-configuration.md) > [Sources](../core/sfc-configuration#Sources) >  [Source](../core/source-configuration.md) 
 
 Source configuration for the PCCC protocol adapter. This type extends the [SourceConfiguration](../core/source-configuration.md) type.
 
@@ -447,7 +447,7 @@ At least 1 channel must be configured.
 
 ## PcccChannelConfiguration
 
-[SFC Configuration](../core/sfc-configuration) > [Sources](../core/sfc-configuration#Sources) > [Source](../core/source-configuration.md)  > [Channels](../core/source-configuration.md#Channels) > [Channel](../core/channel-configuration.md)
+[SFC Configuration](../core/sfc-configuration.md) > [Sources](../core/sfc-configuration#Sources) > [Source](../core/source-configuration.md)  > [Channels](../core/source-configuration.md#Channels) > [Channel](../core/channel-configuration.md)
 
 The PcccChannelConfiguration type extends the [ChannelConfiguration](../core/channel-configuration.md) class with channel properties for the PCCC protocol adapter.
 
@@ -563,7 +563,7 @@ Counter with bit:
 
 ## PcccAdapterConfiguration
 
-[SFC Configuration](../core/sfc-configuration)../core/sfc-top-level-config.md > [ProtocolAdapters](../core/sfc-configuration#ProtocolAdapters) > [Adapter](../core/protocol-adapter-configuration.md) 
+[SFC Configuration](../core/sfc-configuration.md) > [ProtocolAdapters](../core/sfc-configuration#ProtocolAdapters) > [Adapter](../core/protocol-adapter-configuration.md) 
 
 
 

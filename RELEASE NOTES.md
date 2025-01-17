@@ -1,5 +1,11 @@
 # Release Notes:
 
+## Version 1.7.4, 17 January 2025
+
+- Documentation restructure.
+
+---
+
 ## Version 1.7.3, 8 January 2025
 
 Fix in parsing configuration placeholders containing special characters

@@ -3,7 +3,7 @@ Example: OPC UA to AWS IoT Core using filters
 
 ## What does the example do?
 This example reads data from a public, open OPC UA server (uademo.prosysopc.com) and sends it to AWS IoT Core, demonstrating the 
-usage of *Metadata*, *Transformations* as well as the following filter types: *Change Filter*, *Condition Filter*, *Value Filter*.  
+usage of *[Metadata](../../docs/README.md#metadata)*, *[Transformations](../../docs/sfc-data-processing-filtering.md#transformations)* as well as the following filter types: *[Change Filter](../../docs/sfc-data-processing-filtering.md#data-change-filters)*, *[Condition Filter](../../docs/sfc-data-processing-filtering.md#condition-filters)*, *[Value Filter](../../docs/sfc-data-processing-filtering.md#data-change-filters)*.  
 
 The public OPC UA server exposes simulation tags which we will use. We use two tags:  
 1. A counter tag that is incremented by 1 from 0 to 30 in an infinite loop.  
@@ -25,7 +25,7 @@ A real-world use case for this setup is to create a snapshot of certain OPC-UA t
 This can be used in scenarios where the tags hold final processing data like torque moments to be captured when a part's processing is finished on a machine.
 
 ## How to set up and run the example?
-The setup of the scenario is similar to the steps in the [Quickstart example](../../README.md#) of this repo with small modifications.  
+The setup of the scenario is similar to the steps in the [Quickstart example](../../README.md) of this repo with small modifications.  
 Please note that sending data to AWS IoT Core might incur a cost when exceeding the free tier limit.
 
 >**Requirements**: Java runtime, aws cli [Credentials Configuration](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html#configure-precedence). 
@@ -125,7 +125,7 @@ cat << EOF > $SFC_DEPLOYMENT_DIR/example.json
         "ProtocolAdapter": "OPC-UA",
         "AdapterOpcuaServer": "OPCUA-SERVER-1",
         "Description": "Remote OPCUA test server",
-        "SourceReadingMode": "Subscribing",
+        "SourceReadingMode": "Subscription",
         "SubscribePublishingInterval": 100,
         "Metadata": {
           "Some": "...arbitrary data",

@@ -1,6 +1,6 @@
 ## SourceConfiguration
 
-[SFC Configuration](./sfc-configuration) > [Sources](./sfc-configuration#Sources) 
+[SFC Configuration](./sfc-configuration.md) > [Sources](./sfc-configuration#Sources) 
 
 SourceConfiguration defines common properties for [SFC source adapters](../adapters/README.md). Source adapter implementations extend this type with their specific additional properties.
 

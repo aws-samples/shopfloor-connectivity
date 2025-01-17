@@ -327,7 +327,7 @@ This configuration results in the model below.
 
 ## OpcuaTargetConfiguration
 
-[SFC Configuration](../core/sfc-configuration) > [Targets](../core/sfc-configuration#Targets) >  [Target](../core/target-configuration.md) 
+[SFC Configuration](../core/sfc-configuration.md) > [Targets](../core/sfc-configuration#Targets) >  [Target](../core/target-configuration.md) 
 
 
 
