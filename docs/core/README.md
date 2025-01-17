@@ -2,7 +2,7 @@
 
 
 
-  - **[SFC top level configuration](sfc-configuration)**
+  - **[SFC top level configuration](sfc-configuration.md)**
 
     
 

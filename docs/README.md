@@ -71,7 +71,7 @@ SFC (Shop Floor Connectivity) is a data ingestion technology for collecting indu
 
 - [Configuration](./sfc-configuration.md)
 
-- [SFC configuration file](./core/sfc-configuration)
+- [SFC configuration file](./core/sfc-configuration.md)
 
 - [Running the SFC core process](./sfc-running-core-process.md)
 
@@ -107,11 +107,19 @@ SFC (Shop Floor Connectivity) is a data ingestion technology for collecting indu
 
 - [SFC examples collection](./examples/README.md)
 
+  
+
 **SFC Configuration Specifications**
 
-- [SFC Configuration File](./core/sfc-configuration)
+- [SFC Configuration File](./core/sfc-configuration.md)
+
+  
+
 - [Protocol Adapters](./adapters/README.md)
+
 - [Target Adapters](./targets/README.md)
+
+  
 
 **SFC Deployment**
 
