@@ -1,22 +1,22 @@
 ## ScheduleConfiguration
 
-[SFC Configuration](./sfc-configuration#Metrics) > [Schedules](./sfc-configuration#Schedules) 
+[SFC Configuration](./sfc-configuration.md) > [Schedules](./sfc-configuration.md#schedules) 
 
 
-- [Schema](#Schema)
-- [Examples](#Examples)
+- [Schema](#schema)
+- [Examples](#examples)
 
 
 **Properties:**
-- [Active](#Active)
-- [Aggregation](#Aggregation)
-- [Description](#Description)
-- [Interval](#Interval)
-- [Metadata](#Metadata)
-- [Name](#Name)
-- [Sources](#Sources)
-- [Targets](#Targets)
-- [TimestampLevel](#TimestampLevel)
+- [Active](#active)
+- [Aggregation](#aggregation)
+- [Description](#description)
+- [Interval](#interval)
+- [Metadata](#metadata)
+- [Name](#name)
+- [Sources](#sources)
+- [Targets](#targets)
+- [TimestampLevel](#timestamplevel)
 
 ---
 ### Active
@@ -28,7 +28,7 @@ Default is true
 
 ---
 ### Aggregation
-Optionally [aggregation](./aggregation-configuration) can be applied to the schedule output data by adding an Aggregation element. The collected values will be buffered and optionally one or more aggregation functions can be applied to these values before sending it to the targets.
+Optionally [aggregation](./aggregation-configuration.md) can be applied to the schedule output data by adding an Aggregation element. The collected values will be buffered and optionally one or more aggregation functions can be applied to these values before sending it to the targets.
 
 **Type**: Aggregation
 
@@ -54,7 +54,7 @@ Default is 1000
 
 ### Metadata
 
-The optional [Metadata](../README.md#Metadata) element can be used to add additional data to the output at the schedule level. If metadata is specified, which is a map of string indexed values, it will be added to the output at the schedule level as an element that can be configured through the "Metadata" entry of the ElementNames configuration element.
+The optional [Metadata](../README.md#metadata) element can be used to add additional data to the output at the schedule level. If metadata is specified, which is a map of string indexed values, it will be added to the output at the schedule level as an element that can be configured through the "Metadata" entry of the ElementNames configuration element.
 
 **Type**: Map[String, String]
 
@@ -98,7 +98,7 @@ Included timestamps in the schedule output.
 
 Default is "None"
 
-[^top](#ScheduleConfiguration)
+[^top](#scheduleconfiguration)
 
 
 

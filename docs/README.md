@@ -9,19 +9,19 @@ The documentation provides a comprehensive overview of SFC's architecture, capab
 SFC (Shop Floor Connectivity) is a data ingestion technology for collecting industrial data and delivering it to AWS services.
 
 - Main components:
-  - [Protocol Adapters](#Protocol-Adapters) - Read data from industrial devices
-  - [SFC Core](#Core) - Handles configuration, scheduling, data processing
+  - [Protocol Adapters](#protocol-adapters) - Read data from industrial devices
+  - [SFC Core](#core) - Handles configuration, scheduling, data processing
   - [Target Adapters](#target-adapters) - Send data to AWS/local services
   
 - Key features:
-  - [Extensible](#Extensibility) - Can add new protocol/target adapters
+  - [Extensible](#extensibility) - Can add new protocol/target adapters
   - [Flexible deployment](./sfc-deployment.md) - Standalone, containers, Greengrass
   - [Data transformations and filtering](./sfc-data-processing-filtering.md)
   - Aggregation and buffering
   - [Secure communication](./sfc-securing-component-traffic.md) between components
   - [Integration](./sfc-configuration.md#configuration-secrets) with AWS Secrets Manager
   
-- [Concepts](#Terminology-and-concepts):
+- [Concepts](#terminology-and-concepts):
   
   - Schedules define data collection and delivery
   - Sources specify protocol adapters and channels to read from
@@ -32,7 +32,7 @@ SFC (Shop Floor Connectivity) is a data ingestion technology for collecting indu
   - [Platform independence](#execution-environments)
   - [Extensibility](#extensibility)
   - [Network flexibility](#networking) (OT/IT separation)
-  - [Scalability](#Scalability)
+  - [Scalability](#scalability)
   - [High availability](#high-availability)
   - [Data type fidelity](#data-types-and-formats)
   - [Metadata enrichment](#metadata)
@@ -191,9 +191,9 @@ in order to provide additional functionality which is discussed in this document
 
 ## SFC data collection
 
-Configuring data collection with SFC involves defining one or more collection [schedules](./core/sfc-configuration#Schedules) that 
-specify the interval and sources of data collection, as well as the targets for sending the collected data. These [sources](./core/sfc-configuration#sources) 
-can include multiple [protocol adapter](./core/sfc-configuration#ProtocolAdapters) types, and individual data items can be transformed, filtered, or [aggregated](./core/schedule-configuration#Aggregation) when needed. 
+Configuring data collection with SFC involves defining one or more collection [schedules](./core/sfc-configuration.md#schedules) that 
+specify the interval and sources of data collection, as well as the targets for sending the collected data. These [sources](./core/sfc-configuration.md#sources) 
+can include multiple [protocol adapter](./core/sfc-configuration.md#protocoladapters) types, and individual data items can be transformed, filtered, or [aggregated](./core/schedule-configuration#aggregation) when needed. 
 SFC is designed as an active data collector handling all steps defined in the schedules automatically, without requiring 
 additional coding.
 
@@ -221,7 +221,7 @@ SFC data collection is based on the following concepts
 - A [**filter**](./sfc-data-processing-filtering.md#data-filtering) is a configured set of conditions to filter values based on 
 relative or absolute values changes since the last time a value was read, of based on the actual value, defining a combination of boundaries and ranges.
 
-- In order to reduce the amount of data written, or number of write actions to the [**targets, aggregation**](./core/aggregation-configuration) can be
+- In order to reduce the amount of data written, or number of write actions to the [**targets, aggregation**](./core/aggregation-configuration.md) can be
   applied for a schedule. An aggregation defines the number of values to combine per batch, the aggregation functions
   that are applies to the aggregated data and the [**transformation**](./sfc-data-processing-filtering.md#transformations) for these values.
 
@@ -391,7 +391,7 @@ target adapters. The SFC framework comes with a rich set of [transformation oper
 A source configuration can be configured to compose structured values from selected individual from that source. Channels, containing structures values,
 can be configured to be decomposed into individual values in the output.
 
-The SFC core can also [aggregate](./core/aggregation-configuration) the data into batches and apply aggregation function to that data, which then can be
+The SFC core can also [aggregate](./core/aggregation-configuration.md) the data into batches and apply aggregation function to that data, which then can be
 sent instead of, or with the individual values. This can be used to reduce the data volume by sending only the output of
 selected aggregation functions or the number of data messages to the consuming targets. Additionally, transformations,
 as described above, can be applied to the aggregated data.
@@ -409,13 +409,13 @@ The data can be enriched with additional information before it is sent to the ta
 In the configuration information at schedule-level, source and channel level maps of (string) data can be configured
 that will be added to the output data.
 
-Configuration [top-level](./core/sfc-configuration#Metadata) metadata will be merged with the data at [schedule-level](./core/schedule-configuration#Metadata) and added to the target data under the
+Configuration [top-level](./core/sfc-configuration.md#metadata) metadata will be merged with the data at [schedule-level](./core/schedule-configuration#metadata) and added to the target data under the
 metadata node at top-level. If a value is defined at both top-level and schedule-level, the schedule-level value is
 used (allowing the overwriting of top-level values at schedule-level).
 
-Metadata at source-level will be added under a metadata node at [source-level](./core/source-configuration.md#Metadata).
+Metadata at source-level will be added under a metadata node at [source-level](./core/source-configuration.md#metadata).
 
-Metadata at channel-level will be added to the values under a metadata-level node at [channel-level](./core/channel-configuration.md#Metadata).
+Metadata at channel-level will be added to the values under a metadata-level node at [channel-level](./core/channel-configuration.md#metadata).
 
 <p align="center">
 <img src="img/fig06.png" width="75%"/>

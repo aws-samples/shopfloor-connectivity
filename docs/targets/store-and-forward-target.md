@@ -1,6 +1,6 @@
 # Store and Forward Target
 
-[SFC Configuration](../core/sfc-configuration.md) > [Targets](../core/sfc-configuration#Targets) >  [Target](../core/target-configuration.md) 
+[SFC Configuration](../core/sfc-configuration.md) > [Targets](../core/sfc-configuration.md#targets) >  [Target](../core/target-configuration.md) 
 
 
 
@@ -8,19 +8,19 @@
 
 StoreForwardTargetConfiguration extends the type  [TargetConfiguration](../core/target-configuration.md) with specific configuration data for forwarding and buffering target data to next targets configured for this target. The Targets configuration element can contain entries of this type, the TargetType of these entries must be set to **"STORE-FORWARD".**
 
-- [Schema](#StoreForwardTargetConfiguration-Schema)
-- [Examples](#StoreForwardTargetConfiguration-Examples)
+- [Schema](#storeforwardtargetconfiguration-schema)
+- [Examples](#storeforwardtargetconfiguration-examples)
 
 **Properties:**
 
-- [CleanupInterval](#CleanupInterval)
-- [Directory](#Directory)
-- [Fifo](#Fifo)
-- [RetainFiles](#RetainFiles)
-- [RetainPeriod](#RetainPeriod)
-- [RetainSize](#RetainSize)
-- [Targets](#Targets)
-- [WriteTimeout](#WriteTimeout)
+- [CleanupInterval](#cleanupinterval)
+- [Directory](#directory)
+- [Fifo](#fifo)
+- [RetainFiles](#retainfiles)
+- [RetainPeriod](#retainperiod)
+- [RetainSize](#retainsize)
+- [Targets](#targets)
+- [WriteTimeout](#writetimeout)
 
 ---
 ### CleanupInterval

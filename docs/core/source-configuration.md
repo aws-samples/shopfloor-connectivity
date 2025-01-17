@@ -1,25 +1,25 @@
 ## SourceConfiguration
 
-[SFC Configuration](./sfc-configuration.md) > [Sources](./sfc-configuration#Sources) 
+[SFC Configuration](./sfc-configuration.md) > [Sources](./sfc-configuration.md#sources) 
 
 SourceConfiguration defines common properties for [SFC source adapters](../adapters/README.md). Source adapter implementations extend this type with their specific additional properties.
 
-- [Schema](#Schema)
-- [Examples](#Examples)
+- [Schema](#schema)
+- [Examples](#examples)
 
 **Properties:**
 
-- [ChangeFilter](#ChangeFilter)
-- [ChannelTimestampAdjustment](#ChannelTimestampAdjustment)
-- [Channels](#Channels)
-- [Compose](#Compose)
-- [Decompose](#Decompose)
-- [Description](#Description)
-- [Metadata](#Metadata)
-- [Name](#Name)
-- [ProtocolAdapter](#ProtocolAdapter)
-- [SourceTimestampAdjustment](#SourceTimestampAdjustment)
-- [Spread](#Spread)
+- [ChangeFilter](#changefilter)
+- [ChannelTimestampAdjustment](#channeltimestampadjustment)
+- [Channels](#channels)
+- [Compose](#compose)
+- [Decompose](#decompose)
+- [Description](#description)
+- [Metadata](#metadata)
+- [Name](#name)
+- [ProtocolAdapter](#protocoladapter)
+- [SourceTimestampAdjustment](#sourcetimestampadjustment)
+- [Spread](#spread)
 
 ---
 ### ChangeFilter
@@ -27,7 +27,7 @@ Change filter to apply on every channel value in this source.
 
 **Type**: String
 
-Optional, if used it must refer to a configured filter in the [ChangeFilters](./sfc-configuration#ChangeFilters) element
+Optional, if used it must refer to a configured filter in the [ChangeFilters](./sfc-configuration.md#changefilters) element
 
 ---
 ### ChannelTimestampAdjustment
@@ -92,7 +92,7 @@ This will result in the Input0 and Output0 channel values being replaced by a ne
 ---
 ### Decompose
 If set to true and the value of the channel in the source is a structured value then the value is decomposed into a set of individual values for each (sub) element in  the structure.
-If the value is  list of structures and the value of the [Spread](#Spread) setting is true then each structure in the list is decomposed. 
+If the value is  list of structures and the value of the [Spread](#spread) setting is true then each structure in the list is decomposed. 
 
 **Type**: Boolean
 
@@ -109,7 +109,7 @@ User-defined description of the source
 
 ---
 ### Metadata
-The optional [Metadata](../README.md#Metadata) element can be used to add additional data to the output at the source level. If metadata is specified, which is a map of string indexed values, it will be added to the output at the source level as an element that can be configured through the "Metadata" entry of the ElementNames configuration element.
+The optional [Metadata](../README.md#metadata) element can be used to add additional data to the output at the source level. If metadata is specified, which is a map of string indexed values, it will be added to the output at the source level as an element that can be configured through the "Metadata" entry of the ElementNames configuration element.
 
 **Type**: Map[String, String]
 
@@ -127,7 +127,7 @@ Reference to the used protocol adapter.
 
 **Type**: String
 
-Must refer to an existing protocol adapter in the [ProtocolAdapters](./sfc-configuration#ProtocolAdapters) section.
+Must refer to an existing protocol adapter in the [ProtocolAdapters](./sfc-configuration.md#protocoladapters) section.
 
 ---
 ### SourceTimestampAdjustment
@@ -141,7 +141,7 @@ To set the timestamp to a later value use a positive value, for an earlier value
 ### Spread
 If set to true and the value of the channel the value is a list then for each element in the list a new individual value is created.
 The value of this setting overrules the setting of the Spread setting at source level.
-The value of this setting can be overruled for specific channels by setting the [Spread](./channel-configuration.md#Spread) setting for that channel.
+The value of this setting can be overruled for specific channels by setting the [Spread](./channel-configuration.md#spread) setting for that channel.
 
 **Type**: Boolean
 
@@ -151,7 +151,7 @@ The names of the values for the fields in the structure start with the name of t
 
 
 
-[^top](#SourceConfiguration)
+[^top](#sourceconfiguration)
 
 
 

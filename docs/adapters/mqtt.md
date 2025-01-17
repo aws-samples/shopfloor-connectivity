@@ -1,6 +1,6 @@
 # MQTT Protocol Configuration
 
-[SFC Configuration](../core/sfc-configuration.md) > [Sources](../core/sfc-configuration#Sources) >  [Source](../core/source-configuration.md) 
+[SFC Configuration](../core/sfc-configuration.md) > [Sources](../core/sfc-configuration.md#sources) >  [Source](../core/source-configuration.md) 
 
 
 
@@ -8,12 +8,12 @@ MQTT Protocol adapter configuration.
 
 
 ---
-- [MqttSourceConfiguration](#MqttSourceConfiguration)
-- [MqttChannelConfiguration](#MqttChannelConfiguration)
-- [TopicNameMapping](#TopicNameMapping)
-- [MqttAdapterConfiguration](#MqttAdapterConfiguration)
-- [MqttBrokerConfiguration](#MqttBrokerConfiguration)
-- [TopicNameMappingConfiguration](#TopicNameMappingConfiguration-type)
+- [MqttSourceConfiguration](#mqttsourceconfiguration)
+- [MqttChannelConfiguration](#mqttchannelconfiguration)
+- [TopicNameMapping](#topicnamemapping)
+- [MqttAdapterConfiguration](#mqttadapterconfiguration)
+- [MqttBrokerConfiguration](#mqttbrokerconfiguration)
+- [TopicNameMappingConfiguration](#topicnamemappingconfiguration-type)
 
 ---
 
@@ -21,12 +21,12 @@ MQTT Protocol adapter configuration.
 
 Source configuration for the MQTT protocol adapter. This type extends the [SourceConfiguration](../core/source-configuration.md) type. 
 
-- [Schema](#MqttSourceConfiguration-Schema)
-- [Examples](#MqttSourceConfiguration-Examples)
+- [Schema](#mqttsourceconfiguration-schema)
+- [Examples](#mqttsourceconfiguration-examples)
 
 **Properties:**
-- [AdapterBroker](#AdapterBroker)
-- [Channels](#Channels)
+- [AdapterBroker](#adapterbroker)
+- [Channels](#channels)
 
 ---
 ### AdapterBroker
@@ -42,7 +42,7 @@ The channels configuration for an MQTT source holds configuration data to read v
 The element is a map indexed by the channel identifier.
 Channels can be "commented" out by adding a "#" at the beginning of the identifier of that channel.
 
-**Type**: Map[String,[MqttChannelConfiguration](#MqttChannelConfiguration)]
+**Type**: Map[String,[MqttChannelConfiguration](#mqttchannelconfiguration)]
 
 At least 1 channel must be configured.
 
@@ -105,21 +105,20 @@ At least 1 channel must be configured.
 
 ## MqttChannelConfiguration
 
-[SFC Configuration](../core/sfc-configuration.md) > [Sources](../core/sfc-configuration#Sources) > [Source](../core/source-configuration.md)  > [Channels](../core/source-configuration.md#Channels) > [Channel](../core/channel-configuration.md)
+[SFC Configuration](../core/sfc-configuration.md) > [Sources](../core/sfc-configuration.md#sources) > [Source](../core/source-configuration.md)  > [Channels](../core/source-configuration.md#channels) > [Channel](../core/channel-configuration.md)
 
 
 
 The MqttChannelConfiguration type extends the [ChannelConfiguration](../core/channel-configuration.md) class with channel properties for the MQTT protocol adapter.
 
-- [Schema](#MqttChannelConfiguration-Schema)
-- [Examples](#MqttChannelConfiguration-Examples)
+- [Schema](#mqttchannelconfiguration-schema)
+- [Examples](#mqttchannelconfiguration-examples)
 
 **Properties:**
-- [Json](#Json)
-
-- [Selector](#Selector)
-- [TopicNameMappingConfiguration](#TopicNameMappingConfiguration)
-- [Topics](#Topics)
+- [Json](#json)
+- [Selector](#selector)
+- [TopicNameMappingConfiguration](#topicnamemappingconfiguration)
+- [Topics](#topics)
 
 ---
 ### Json
@@ -142,7 +141,7 @@ The selector can be used to restructure or select values from structured data ty
 ### TopicNameMappingConfiguration
 Mapping from topic names to alternative names. As a channel can have multiple topics, that also can include wildcards, this mapping can be used to build consistent and expected value names.
 
-**Type**: [TopicNameMappingConfiguration](#TopicNameMappingConfiguration-type)
+**Type**: [TopicNameMappingConfiguration](#topicnamemappingconfiguration-type)
 
 ---
 ### Topics
@@ -225,13 +224,13 @@ The must be at least one topic in the list of topics.
 
 ## TopicNameMappingConfiguration type
 
-[MqttSource](#MqttSourceConfiguration) > [Channels](#Channels) > [Channel](#MqttChannelConfiguration) > [TopicNameMappingConfiguration](#TopicNameMappingConfiguration)
+[MqttSource](#mqttsourceconfiguration) > [Channels](#channels) > [Channel](#mqttchannelconfiguration) > [TopicNameMappingConfiguration](#topicnamemappingconfiguration)
 
 
 
 Mapping from topic names to alternative names. As a channel can have multiple topics, that also can include wildcards, this mapping can be used to build consistent and expected value names.
 
-**Type**: TopicNameMapping
+**Type**: [TopicNameMapping](#topicnamemappingconfiguration)
 
 Example:
 
@@ -255,13 +254,12 @@ The mapping above matches updates for sub-levels of the test topic, it will use 
 
 If an update is received for data in topic "test/a" then the name of the data value will be "test-a"
 
-- [Schema](#TopicNameMappingConfiguration-Schema)
-- [Examples](#TopicNameMappingConfiguration-Examples)
+- [Schema](#topicnamemappingconfiguration-schema)
+- [Examples](#topicnamemappingconfiguration-examples)
 
 **Properties:**
-- [IncludeUnmappedTopics](#IncludeUnmappedTopics)
-
-- [Mappings](#Mappings)
+- [IncludeUnmappedTopics](#includeunmappedtopics)
+- [Mappings](#mappings)
 
   
 
@@ -291,7 +289,7 @@ The must be at least one topic in the list of topics.
 ### TopicNameMapping
 Mapping from topic names to alternative names. As a channel can have multiple topics, that also can include wildcards, this mapping can be used to build consistent and expected value names.
 
-**Type**: TopicNameMapping
+**Type**: [TopicNameMapping](#topicnamemappingconfiguration-type)
 
 Example:
 
@@ -392,7 +390,7 @@ Multiple mappings with unmapped topics included:
 
 ## MqttAdapterConfiguration
 
-[SFC Configuration](../core/sfc-configuration.md) > [ProtocolAdapters](../core/sfc-configuration#ProtocolAdapters) > [Adapter](../core/protocol-adapter-configuration.md) 
+[SFC Configuration](../core/sfc-configuration.md) > [ProtocolAdapters](../core/sfc-configuration.md#protocoladapters) > [Adapter](../core/protocol-adapter-configuration.md) 
 
 
 
@@ -402,20 +400,20 @@ AdsAdapterConfiguration
 
 The MqttAdapterConfiguration type extends the [ChannelConfiguration](../core/channel-configuration.md) class with channel properties for the MQTT  protocol adapter.
 
-- [Schema](#MqttAdapterConfiguration-Schema)
-- [Examples](#MqttAdapterConfiguration-Examples)
+- [Schema](#mqttadapterconfiguration-schema)
+- [Examples](#mqttadapterconfiguration-examples)
 
 **Properties:**
-- [Brokers](#Brokers)
-- [ReadMode](#ReadMode)
-- [ReceivedDataChannelSize](#ReceivedDataChannelSize)
-- [ReceivedDataChannelTimeout](#ReceivedDataChannelTimeout)
+- [Brokers](#brokers)
+- [ReadMode](#readmode)
+- [ReceivedDataChannelSize](#receiveddatachannelsize)
+- [ReceivedDataChannelTimeout](#receiveddatachanneltimeout)
 
 ---
 ### Brokers
 Brokers configured for this adapter. The mqtt source using the adapter must refer to one of these servers with the AdapterBroker attribute.
 
-**Type**: Map[String,[MqttBrokerConfiguration](#MqttBrokerConfiguration)]
+**Type**: Map[String,[MqttBrokerConfiguration](#mqttbrokerconfiguration)]
 
 ---
 ### ReadMode
@@ -537,25 +535,25 @@ Multiple brokers with KeepAll mode:
 
 ## MqttBrokerConfiguration
 
-[MqttProtocolAdapter](#MqttAdapterConfiguration) > [Brokers](#Brokers) 
+[MqttProtocolAdapter](#mqttadapterconfiguration) > [Brokers](#brokers) 
 
 
 
-- [Schema](#MqttBrokerConfiguration-Schema)
-- [Examples](#MqttBrokerConfiguration-Examples)
+- [Schema](#mqttbrokerconfiguration-schema)
+- [Examples](#mqttbrokerconfiguration-examples)
 
 **Properties:**
-- [Certificate](#Certificate)
-- [ConnectionTimeout](#ConnectionTimeout)
-- [EndPoint](#EndPoint)
-- [Password](#Password)
-- [Port](#Port)
-- [PrivateKey](#PrivateKey)
-- [RootCA](#RootCA)
-- [SslServerCertificate](#SslServerCertificate)
-- [Username](#Username)
-- [VerifyHostName](#VerifyHostName)
-- [WaitAfterConnectError](#WaitAfterConnectError)
+- [Certificate](#certificate)
+- [ConnectionTimeout](#connectiontimeout)
+- [EndPoint](#endpoint)
+- [Password](#password)
+- [Port](#port)
+- [PrivateKey](#privatekey)
+- [RootCA](#rootca)
+- [SslServerCertificate](#sslservercertificate)
+- [Username](#username)
+- [VerifyHostName](#verifyhostname)
+- [WaitAfterConnectError](#waitafterconnecterror)
 
 ---
 ### Certificate

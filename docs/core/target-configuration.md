@@ -1,25 +1,25 @@
 ## TargetConfiguration
 
-[SFC Configuration](./sfc-configuration.md) > [Targets](./sfc-configuration#Targets) 
+[SFC Configuration](./sfc-configuration.md) > [Targets](./sfc-configuration.md#targets) 
 
-Target Configuration defines common properties for [SFC target adapters](./sfc-configuration#Targets). Target adapter implementations extend this type with their specific additional properties.
+Target Configuration defines common properties for [SFC target adapters](./sfc-configuration.md#targets). Target adapter implementations extend this type with their specific additional properties.
 
-- [Schema](#Schema)
-- [Examples](#Examples)
+- [Schema](#schema)
+- [Examples](#examples)
 
 
 **Properties:**
-- [Active](#Active)
-- [AsArrayWhenBuffered](#AsArrayWhenBuffered)
-- [CredentialProviderClient](#CredentialProviderClient)
-- [Description](#Description)
-- [Metrics](#Metrics)
-- [TargetServer](#TargetServer)
-- [TargetChannelSize](#TargetChannelSize)
-- [TargetChannelTimeout](#TargetChannelTimeout)
-- [TargetType](#TargetType)
-- [Template](#Template)
-- [UnquoteNumericJsonValues](#UnquoteNumericJsonValues)
+- [Active](#active)
+- [AsArrayWhenBuffered](#asarraywhenbuffered)
+- [CredentialProviderClient](#credentialproviderclient)
+- [Description](#description)
+- [Metrics](#metrics)
+- [TargetServer](#targetserver)
+- [TargetChannelSize](#targetchannelsize)
+- [TargetChannelTimeout](#targetchanneltimeout)
+- [TargetType](#targettype)
+- [Template](#template)
+- [UnquoteNumericJsonValues](#unquotenumericjsonvalues)
 
 ---
 ### Active
@@ -47,7 +47,7 @@ The client is used by the target to obtain session credentials from the AWS IoT 
 
 **Type**: String
 
-Must refer to an existing client configuration in [AwsIotCredentialProviderClients](./sfc-configuration#AwsIotCredentialProviderClients) section.
+Must refer to an existing client configuration in [AwsIotCredentialProviderClients](./sfc-configuration.md#awsiotcredentialproviderclients) section.
 
 ---
 ### Description
@@ -76,7 +76,7 @@ The IPC server must implement the (gRPC) ProtocolAdapterService.
 
 **Type**: String
 
-Set to a configured target server in the [TargetServers](./sfc-configuration#TargetServers) section of the top level configuration to use IPC to send data to a target running as an external IPC service.
+Set to a configured target server in the [TargetServers](./sfc-configuration.md#targetservers) section of the top level configuration to use IPC to send data to a target running as an external IPC service.
 
 ---
 ### TargetChannelSize
@@ -99,7 +99,7 @@ Default is 1000
 ---
 ### TargetType
 TargetType is a code that identifies the type of the target (e.g., "AWS-SQS", "AWS-KINESIS").
-If a target runs in the same process as the SFC core then this type must be defined in the [TargetTypes](./sfc-configuration#TargetTypes) section of the configuration. The SFC core requires the information from that section to create instances of the target type.
+If a target runs in the same process as the SFC core then this type must be defined in the [TargetTypes](./sfc-configuration.md#targettypes) section of the configuration. The SFC core requires the information from that section to create instances of the target type.
 
 Target implementations will typically define the target name, and use it to select and verify the configuration data that is passed to their instances.
 
@@ -137,7 +137,7 @@ Do not set this flag to true if there are any key names in the output that consi
 
 
 
-[^top](#TargetConfiguration)
+[^top](#targetconfiguration)
 
 
 

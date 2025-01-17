@@ -1,27 +1,27 @@
 ## ServerConfiguration
 
-[SFC Configuration](./sfc-configuration.md) > [TargetServers](./sfc-configuration#TargetServers) > [TargetServer](./server-configuration.md) 
+[SFC Configuration](./sfc-configuration.md) > [TargetServers](./sfc-configuration.md#targetservers) > [TargetServer](./server-configuration.md) 
 
-[SFC Configuration](./sfc-configuration.md) > [AdapterServers](./sfc-configuration#ProtocolAdapterServers) > [AdapterServer](./server-configuration.md) 
+[SFC Configuration](./sfc-configuration.md) > [AdapterServers](./sfc-configuration.md#protocoladapterservers) > [AdapterServer](./server-configuration.md) 
 
-[SFC Configuration](./sfc-configuration#Metrics) > [Metrics](./sfc-configuration#Metrics) > [Writer](./metrics-writer-configuration#MetricsWriter) > [MetricsServer](./metrics-writer-configuration.md#MetricsServer)
+[SFC Configuration](./sfc-configuration.md) > [Metrics](./sfc-configuration.md#metrics) > [Writer](./metrics-writer-configuration.md#metricswriter) > [MetricsServer](./metrics-writer-configuration.md#metricsserver)
 
-- [Schema](#Schema)
-- [Examples](#Examples)
+- [Schema](#schema)
+- [Examples](#examples)
 
 
 **Properties:**
-- [Address](#Address)
-- [CaCertificate](#CaCertificate)
-- [ClientCertificate](#ClientCertificate)
-- [ClientPrivateKey](#ClientPrivateKey)
-- [Compression](#Compression)
-- [ConnectionType](#ConnectionType)
-- [ExpirationWarningPeriod](#ExpirationWarningPeriod)
-- [HealthProbe](#HealthProbe)
-- [Port](#Port)
-- [ServerResultsChannelSize](#ServerResultsChannelSize)
-- [ServerResultsChannelTimeout](#ServerResultsChannelTimeout)
+- [Address](#address)
+- [CaCertificate](#cacertificate)
+- [ClientCertificate](#clientcertificate)
+- [ClientPrivateKey](#clientprivatekey)
+- [Compression](#compression)
+- [ConnectionType](#connectiontype)
+- [ExpirationWarningPeriod](#expirationwarningperiod)
+- [HealthProbe](#healthprobe)
+- [Port](#port)
+- [ServerResultsChannelSize](#serverresultschannelsize)
+- [ServerResultsChannelTimeout](#serverresultschanneltimeout)
 
 ---
 ### Address
@@ -115,7 +115,7 @@ Timeout in milliseconds to send data to internal results buffer
 
 Default is  10000
 
-[^top](#ServerConfiguration)
+[^top](#serverconfiguration)
 
 
 

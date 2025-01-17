@@ -1,7 +1,7 @@
 
 # AWS Kinesis Firehose Target
 
-[SFC Configuration](../core/sfc-configuration.md) > [Targets](../core/sfc-configuration#Targets) >  [Target](../core/target-configuration.md) 
+[SFC Configuration](../core/sfc-configuration.md) > [Targets](../core/sfc-configuration.md#targets) >  [Target](../core/target-configuration.md) 
 
 
 
@@ -11,14 +11,14 @@ AwsKinesisFirehoseTargetConfiguration extends the type [TargetConfiguration](../
 
 Requires IAM permission `firehose:PutRecordBatch` for the delivery stream the data is sent to.
 
-- [Schema](#AwsKinesisFirehoseTargetConfiguration-Schema)
-- [Examples](#AwsKinesisFirehoseTargetConfiguration-Examples)
+- [Schema](#awskinesisfirehosetargetconfiguration-schema)
+- [Examples](#awskinesisfirehosetargetconfiguration-examples)
 
 **Properties:**
-- [BatchSize](#BatchSize)
-- [CredentialProviderClient](#CredentialProviderClient)
-- [Region](#Region)
-- [StreamName](#StreamName)
+- [BatchSize](#batchsize)
+- [CredentialProviderClient](#credentialproviderclient)
+- [Region](#region)
+- [StreamName](#streamname)
 
 ---
 ### BatchSize

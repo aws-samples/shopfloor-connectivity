@@ -1,27 +1,27 @@
 ## AwsIotCredentialProviderClientConfiguration
 
-[SFC Configuration](./sfc-configuration.md) > [AwsIotCredentialProviderClientConfiguration](./sfc-configuration#AwsIotCredentialProviderClients)
+[SFC Configuration](./sfc-configuration.md) > [AwsIotCredentialProviderClientConfiguration](./sfc-configuration.md#awsiotcredentialproviderclients)
 
 An AWS IoT Credentials Provider Client configuration is used  to obtain temporary credentials used when AWS service API calls using X509 certificates. When used by AWS service targets the name of the configuration is specified as the value for the CredentialProviderClient in the configuration for that target.
 
 For more info see [Session credentials for targets accessing AWS Service](../sfc-aws-service-credentials.md)
 
-- [Schema](#Schema)
-- [Examples](#Examples)
+- [Schema](#schema)
+- [Examples](#examples)
 
 
 **Properties:**
-- [CertificateFile](#CertificateFile)
-- [CertificatesByFileReference](#CertificatesByFileReference)
-- [ExpiryClockSkewSeconds](#ExpiryClockSkewSeconds)
-- [GreenGrassDeploymentPath](#GreenGrassDeploymentPath)
-- [IotCredentialEndpoint](#IotCredentialEndpoint)
-- [PrivateKeyFile](#PrivateKeyFile)
-- [Proxy](#Proxy)
-- [RoleAlias](#RoleAlias)
-- [RootCA](#RootCA)
-- [SkipCredentialsExpiryCheck](#SkipCredentialsExpiryCheck)
-- [ThingName](#ThingName)
+- [CertificateFile](#certificatefile)
+- [CertificatesByFileReference](#certificatesbyfilereference)
+- [ExpiryClockSkewSeconds](#expiryclockskewseconds)
+- [GreenGrassDeploymentPath](#greengrassdeploymentpath)
+- [IotCredentialEndpoint](#iotcredentialendpoint)
+- [PrivateKeyFile](#privatekeyfile)
+- [Proxy](#proxy)
+- [RoleAlias](#rolealias)
+- [RootCA](#rootca)
+- [SkipCredentialsExpiryCheck](#skipcredentialsexpirycheck)
+- [ThingName](#thingname)
 
 ---
 ### CertificateFile
@@ -106,7 +106,7 @@ AWS IoT thing name using the device certificate
 
 **Type**: String
 
-[^top](#AwsIotCredentialProviderClientConfiguration)
+[^top](#awsiotcredentialproviderclientconfiguration)
 
 ## Schema
 
@@ -249,4 +249,4 @@ Configuration using a proxy for internet access:
 }
 ```
 
-[^top](#AwsIotCredentialProviderClientConfiguration)
+[^top](#awsiotcredentialproviderclientconfiguration)

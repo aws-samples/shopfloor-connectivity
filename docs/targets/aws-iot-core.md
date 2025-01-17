@@ -1,6 +1,6 @@
 # AWS IoT Core Target
 
-[SFC Configuration](../core/sfc-configuration.md) > [Targets](../core/sfc-configuration#Targets) >  [Target](../core/target-configuration.md) 
+[SFC Configuration](../core/sfc-configuration.md) > [Targets](../core/sfc-configuration.md#targets) >  [Target](../core/target-configuration.md) 
 
 
 
@@ -10,21 +10,21 @@ AwsIotCoreTargetConfiguration extends the type  [TargetConfiguration](../core/ta
 
 Requires IAM permissions `iot:Connect`, `iot:DescribeEndpoint`, `iot:Publish` for the topic the data is published to and `iot:RetainPublish` if the Retain option is used.
 
-- [Schema](#AwsIotCoreTargetConfiguration-Schema)
-- [Examples](#AwsIotCoreTargetConfiguration-Examples)
+- [Schema](#awsiotcoretargetconfiguration-schema)
+- [Examples](#awsiotcoretargetconfiguration-examples)
 
 **Properties:**
 
-- [AlternateTopicName](#AlternateTopicName)
-- [BatchCount](#BatchCount)
-- [BatchInterval](#BatchInterval)
-- [BatchSize](#BatchSize)
-- [Compression](#Compression)
-- [CredentialProviderClient](#CredentialProviderClient)
-- [Region](#Region)
-- [Retain](#Retain)
-- [TopicName](#TopicName)
-- [WarnAlternateTopicName](#WarnAlternateTopicName)
+- [AlternateTopicName](#alternatetopicname)
+- [BatchCount](#batchcount)
+- [BatchInterval](#batchinterval)
+- [BatchSize](#batchsize)
+- [Compression](#compression)
+- [CredentialProviderClient](#credentialproviderclient)
+- [Region](#region)
+- [Retain](#retain)
+- [TopicName](#topicname)
+- [WarnAlternateTopicName](#warnalternatetopicname)
 
 ---
 ### AlternateTopicName
@@ -78,7 +78,7 @@ Compression method for MQTT message payloads.
 ---
 ### CredentialProviderClient
 
-Name of the AWS credential provider client defined in the SFC top level configuration section [AwsIotCredentialProviderClients](../core/sfc-configuration#AwsIotCredentialProviderClients) obtaining credentials using X509 certificates from the [AWS IoT credentials provider](../sfc-aws-service-credentials.md).
+Name of the AWS credential provider client defined in the SFC top level configuration section [AwsIotCredentialProviderClients](../core/sfc-configuration.md#awsiotcredentialproviderclients) obtaining credentials using X509 certificates from the [AWS IoT credentials provider](../sfc-aws-service-credentials.md).
 
 If no CredentialProviderClient is configured the [AWS Java SDK credential provider chain is used](https://docs.aws.amazon.com/sdk-for-java/latest/developer-guide/credentials.html#credentials-chain)
 
@@ -132,7 +132,7 @@ Template examples:
 - plant1-%line%   : Values from all sources will be grouped by the value of the %line% metadata and published to a topic for that value
 
 In case a placeholder is not resolved, when a value for a used placeholder is part of the data,
-then an alternative topic name can be configured by setting the name of that topic to the [AlternateTopiName](#AlternateTopicName) setting.
+then an alternative topic name can be configured by setting the name of that topic to the [AlternateTopiName](#alternatetopicname) setting.
 
 Note that the use of placeholders to send data to specific topics will result in additional publish calls and may result in throttling. Enabling buffering
 can be used to reduce the chance of throttling.
@@ -143,7 +143,7 @@ For AWS IoTCore the maximum number of topic levels is 8.
 
 ---
 ### WarnAlternateTopicName
-Generate warning if data is published to [AlternateTopiName](#AlternateTopicName).
+Generate warning if data is published to [AlternateTopiName](#alternatetopicname).
 
 **Type**: Boolean
 

@@ -15,27 +15,27 @@ In order to reduce the number of interactions between the adapter and the contro
 
 ## Configuration
 
-- [SlmpSourceConfiguration](#SlmpSourceConfiguration)
-- [SlmpChannelConfiguration](#SlmpChannelConfiguration)
-- [SlmpAdapterConfiguration](#SlmpAdapterConfiguration)
-- [SlmpControllerConfiguration](#SlmpControllerConfiguration)
+- [SlmpSourceConfiguration](#slmpsourceconfiguration)
+- [SlmpChannelConfiguration](#slmpchannelconfiguration)
+- [SlmpAdapterConfiguration](#slmpadapterconfiguration)
+- [SlmpControllerConfiguration](#slmpcontrollerconfiguration)
 
 ---
 
 ## SlmpSourceConfiguration
 
-[SFC Configuration](../core/sfc-configuration.md) > [Sources](../core/sfc-configuration#Sources) >  [Source](../core/source-configuration.md) 
+[SFC Configuration](../core/sfc-configuration.md) > [Sources](../core/sfc-configuration.md#sources) >  [Source](../core/source-configuration.md) 
 
 
 
 Source configuration for the SLMP protocol adapter. This type extends the [SourceConfiguration](../core/source-configuration.md) type.
 
-- [Schema](#SlmpSourceConfiguration-Schema)
-- [Examples](#SlmpSourceConfiguration-Examples)
+- [Schema](#slmpsourceconfiguration-schema)
+- [Examples](#slmpsourceconfiguration-examples)
 
 **Properties:**
-- [AdapterController](#AdapterController)
-- [Channels](#Channels)
+- [AdapterController](#adaptercontroller)
+- [Channels](#channels)
 
 ---
 ### AdapterController
@@ -51,7 +51,7 @@ The channels configuration for an SLMP source holds configuration data to read v
 The element is a map indexed by the channel identifier.
 Channels can be "commented" out by adding a "#" at the beginning of the identifier of that channel.
 
-**Type**: Map[String,[SlmpChannelConfiguration](#SlmpChannelConfiguration)]
+**Type**: Map[String,[SlmpChannelConfiguration](#slmpchannelconfiguration)]
 
 At least 1 channel must be configured.
 
@@ -120,19 +120,19 @@ At least 1 channel must be configured.
 
 ## SlmpChannelConfiguration
 
-[SFC Configuration](../core/sfc-configuration.md) > [Sources](../core/sfc-configuration#Sources) > [Source](../core/source-configuration.md)  > [Channels](../core/source-configuration.md#Channels) > [Channel](../core/channel-configuration.md)
+[SFC Configuration](../core/sfc-configuration.md) > [Sources](../core/sfc-configuration.md#sources) > [Source](../core/source-configuration.md)  > [Channels](../core/source-configuration.md#channels) > [Channel](../core/channel-configuration.md)
 
 
 
 The SlmpChannelConfiguration type extends the [ChannelConfiguration](../core/channel-configuration.md) class with channel properties for the SLMP protocol adapter.
 
-- [Schema](#SlmpChannelConfiguration-Schema)
-- [Examples](#SlmpChannelConfiguration-Examples)
+- [Schema](#slmpchannelconfiguration-schema)
+- [Examples](#slmpchannelconfiguration-examples)
 
 **Properties:**
-- [AccessPoint](#AccessPoint)
-- [DataType](#DataType)
-- [Size](#Size)
+- [AccessPoint](#accesspoint)
+- [DataType](#datatype)
+- [Size](#size)
 
 ---
 ### AccessPoint
@@ -273,29 +273,27 @@ The number of items to read can be specified as well in the DataType of the chan
 
 ## SlmpAdapterConfiguration
 
-[SFC Configuration](../core/sfc-configuration.md) > [ProtocolAdapters](../core/sfc-configuration#ProtocolAdapters) > [Adapter](../core/protocol-adapter-configuration.md) 
+[SFC Configuration](../core/sfc-configuration.md) > [ProtocolAdapters](../core/sfc-configuration.md#protocoladapters) > [Adapter](../core/protocol-adapter-configuration.md) 
 
 
 
 SlmpAdapterConfiguration extension the [AdapterConfiguration](../core/protocol-adapter-configuration.md) with properties for the SLMP Protocol adapter.
 
-- [Schema](#SlmpAdapterConfiguration-Schema)
-
-- [Examples](#SlmpAdapterConfiguration-Examples)
+- [Schema](#slmpadapterconfiguration-schema)
+- [Examples](#slmpadapterconfiguration-examples)
 
   
 
   **Properties:**
 
-- [Controllers](#Controllers)
-
-- [Structures](#Structures)
+- [Controllers](#controllers)
+- [Structures](#structures)
 
 ---
 ### Controllers
 Controllers configured for this adapter. The SLMP source using the adapter must have a reference to one of these in its AdapterController attribute.
 
-**Type**: Map[String,[SlmpControllerConfiguration](#SlmpControllerConfiguration)]
+**Type**: Map[String,[SlmpControllerConfiguration](#slmpcontrollerconfiguration)]
 
 
 
@@ -413,27 +411,27 @@ A SLMP channel can now use both type "STRUCT1" as "STRUCT2" as a DataType. The d
 
 ## SlmpControllerConfiguration
 
-[SlmpAdapter](#SlmpAdapterConfiguration) > [Controllers](#Controllers)
+[SlmpAdapter](#slmpadapterconfiguration) > [Controllers](#controllers)
 
 
 
-- [Schema](#SlmpControllerConfiguration-Schema)
-- [Examples](#SlmpControllerConfiguration-Examples)
+- [Schema](#slmpcontrollerconfiguration-schema)
+- [Examples](#slmpcontrollerconfiguration-examples)
 
 **Properties:**
-- [Address](#Address)
-- [CommandTimeout](#CommandTimeout)
-- [ConnectTimeout](#ConnectTimeout)
-- [ModuleNumber](#ModuleNumber)
-- [MonitoringTimer](#MonitoringTimer)
-- [MultiDropStationNumber](#MultiDropStationNumber)
-- [NetworkNumber](#NetworkNumber)
-- [Port](#Port)
-- [ReadTimeout](#ReadTimeout)
-- [StationNumber](#StationNumber)
-- [WaitAfterConnectError](#WaitAfterConnectError)
-- [WaitAfterReadError](#WaitAfterReadError)
-- [WaitAfterWriteError](#WaitAfterWriteError)
+- [Address](#address)
+- [CommandTimeout](#commandtimeout)
+- [ConnectTimeout](#connecttimeout)
+- [ModuleNumber](#modulenumber)
+- [MonitoringTimer](#monitoringtimer)
+- [MultiDropStationNumber](#multidropstationnumber)
+- [NetworkNumber](#networknumber)
+- [Port](#port)
+- [ReadTimeout](#readtimeout)
+- [StationNumber](#stationnumber)
+- [WaitAfterConnectError](#waitafterconnecterror)
+- [WaitAfterReadError](#waitafterreaderror)
+- [WaitAfterWriteError](#waitafterwriteerror)
 
 ---
 ### Address

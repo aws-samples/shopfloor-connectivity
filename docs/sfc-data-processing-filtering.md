@@ -76,7 +76,7 @@ Transformations, which are lists of transformation operands, are defined at the 
 Below is an example of a "Transformations" section defining 3 transformations, including the "ToInteger" one mentioned above. This transformation first gets the absolute value from the input value, it then rounds it and explicitly converts it into an Integer value. SFC will validate if the input value, or the resulting value of an operator, is valid for the input of the first or next operator of a transformation.
 
 A configured operator consists of the name of the operator specified by the "Operator" setting and in case the operator takes arguments, the value of the argument specified by the "Operand" setting.
-Transformations can also be applied to aggregated data if a schedule has an aggregation setup. See the setting "Transformations" in  [Aggregation](./core/aggregation-configuration) for more details.
+Transformations can also be applied to aggregated data if a schedule has an aggregation setup. See the setting "Transformations" in  [Aggregation](./core/aggregation-configuration.md) for more details.
 
 
 See [TransformationOperator configuration](./core/transformation-operator-configuration.md) for a list of all available operators.

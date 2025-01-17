@@ -1,6 +1,6 @@
 # AWS SNS Target
 
-[SFC Configuration](../core/sfc-configuration.md) > [Targets](../core/sfc-configuration#Targets) >  [Target](../core/target-configuration.md) 
+[SFC Configuration](../core/sfc-configuration.md) > [Targets](../core/sfc-configuration.md#targets) >  [Target](../core/target-configuration.md) 
 
 
 
@@ -11,20 +11,20 @@ AwsSnsTargetConfiguration extends the type  [TargetConfiguration](../core/target
 
 Requires IAM permission sqs:putMessage for the receiving topic.
 
-- [Schema](#AwsSnsTargetConfiguration-Schema)
-- [Examples](#AwsSnsTargetConfiguration-Examples)
+- [Schema](#awssnstargetconfiguration-schema)
+- [Examples](#awssnstargetconfiguration-examples)
 
 **Properties:**
 
-- [BatchSize](#BatchSize)
-- [Compression](#Compression)
-- [CredentialProviderClient](#CredentialProviderClient)
-- [Interval](#Interval)
-- [MessageGroupId](#MessageGroupId)
-- [Region](#Region)
-- [SerialAsMessageDeduplicationId](#SerialAsMessageDeduplicationId)
-- [Subject](#Subject)
-- [TopicArn](#TopicArn)
+- [BatchSize](#batchsize)
+- [Compression](#compression)
+- [CredentialProviderClient](#credentialproviderclient)
+- [Interval](#interval)
+- [MessageGroupId](#messagegroupid)
+- [Region](#region)
+- [SerialAsMessageDeduplicationId](#serialasmessagededuplicationid)
+- [Subject](#subject)
+- [TopicArn](#topicarn)
 
 ---
 ### BatchSize

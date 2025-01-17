@@ -1,19 +1,19 @@
 ## ChangeFilterConfiguration
 
-[SFC Configuration](./sfc-configuration.md) > [ChangeFilters](./sfc-configuration.md#ChangeFilters)
+[SFC Configuration](./sfc-configuration.md) > [ChangeFilters](./sfc-configuration.md#changefilters)
 
 Change filter to apply to a channel value.
 
 For more information see [DataFiltering](../sfc-data-processing-filtering.md#data-filtering)
 
-- [Schema](#Schema)
-- [Examples](#Examples)
+- [Schema](#schema)
+- [Examples](#examples)
 
 
 **Properties:**
-- [AtLeast](#AtLeast)
-- [Type](#Type)
-- [Value](#Value)
+- [AtLeast](#atleast)
+- [Type](#type)
+- [Value](#value)
 
 ---
 ### AtLeast
@@ -46,7 +46,7 @@ Change amount value
 
 Default is 0.0
 
-[^top](#ChangeFilterConfiguration)
+[^top](#changefilterconfiguration)
 
 
 
@@ -131,4 +131,4 @@ Absolute change filter, with at least a value every 5 seconds even when value di
 
 
 
-[^top](#ChangeFilterConfiguration)
+[^top](#changefilterconfiguration)

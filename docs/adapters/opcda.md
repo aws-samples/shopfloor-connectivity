@@ -4,28 +4,28 @@
 Configuration for OPCDA protocol adapter.
 
 ---
-- [OpcdaSourceConfiguration](#OpcdaSourceConfiguration)
-- [OpcdaChannelConfiguration](#OpcdaChannelConfiguration)
-- [OpcdaAdapterConfiguration](#OpcdaAdapterConfiguration)
-- [OpcdaServerConfiguration](#OpcdaServerConfiguration)
+- [OpcdaSourceConfiguration](#opcdasourceconfiguration)
+- [OpcdaChannelConfiguration](#opcdachannelconfiguration)
+- [OpcdaAdapterConfiguration](#opcdaadapterconfiguration)
+- [OpcdaServerConfiguration](#opcdaserverconfiguration)
 
 ---
 
 ## OpcdaSourceConfiguration
 
-[SFC Configuration](../core/sfc-configuration.md) > [Sources](../core/sfc-configuration#Sources) >  [Source](../core/source-configuration.md)
+[SFC Configuration](../core/sfc-configuration.md) > [Sources](../core/sfc-configuration.md#sources) >  [Source](../core/source-configuration.md)
 
 
 
 Source configuration for the OPCDA protocol adapter. This type extends the [SourceConfiguration](../core/source-configuration.md) type.
 
-- [Schema](#OpcdaSourceConfiguration-Schema)
-- [Examples](#OpcdaSourceConfiguration-Examples)
+- [Schema](#opcdasourceconfiguration-schema)
+- [Examples](#opcdasourceconfiguration-examples)
 
 **Properties:**
-- [AdapterOpcdaServer](#AdapterOpcdaServer)
-- [Channels](#Channels)
-- [SourceReadingMode](#SourceReadingMode)
+- [AdapterOpcdaServer](#adapteropcdaserver)
+- [Channels](#channels)
+- [SourceReadingMode](#sourcereadingmode)
 
 ---
 ### AdapterOpcdaServer
@@ -41,7 +41,7 @@ The channels configuration for an OPCDA source holds configuration data to read 
 The element is a map indexed by the channel identifier.
 Channels can be "commented" out by adding a "#" at the beginning of the identifier of that channel.
 
-**Type**: Map[String,[OpcdaChannelConfiguration](#OpcdaChannelConfiguration)]
+**Type**: Map[String,[OpcdaChannelConfiguration](#opcdachannelconfiguration)]
 
 At least 1 channel must be configured.
 
@@ -172,17 +172,17 @@ Copy
 
 ## OpcdaChannelConfiguration
 
-[SFC Configuration](../core/sfc-configuration.md) > [Sources](../core/sfc-configuration#Sources) > [Source](../core/source-configuration.md)  > [Channels](../core/source-configuration.md#Channels) > [Channel](../core/channel-configuration.md)
+[SFC Configuration](../core/sfc-configuration.md) > [Sources](../core/sfc-configuration.md#sources) > [Source](../core/source-configuration.md)  > [Channels](../core/source-configuration.md#channels) > [Channel](../core/channel-configuration.md)
 
 
 
 The OpcdaChannelConfiguration type extends the [ChannelConfiguration](../core/channel-configuration.md) class with channel properties for the OPCDA protocol adapter.
 
-- [Schema](#OpcdaChannelConfiguration-Schema)
-- [Examples](#OpcdaChannelConfiguration-Examples)
+- [Schema](#opcdachannelconfiguration-schema)
+- [Examples](#opcdachannelconfiguration-examples)
 
 **Properties:**
-- [Item](#Item)
+- [Item](#item)
 
 ---
 ### Item
@@ -244,24 +244,24 @@ Temperature sensor:
 
 ## OpcdaAdapterConfiguration
 
-[SFC Configuration](../core/sfc-configuration.md) > [ProtocolAdapters](../core/sfc-configuration#ProtocolAdapters) > [Adapter](../core/protocol-adapter-configuration.md) 
+[SFC Configuration](../core/sfc-configuration.md) > [ProtocolAdapters](../core/sfc-configuration.md#protocoladapters) > [Adapter](../core/protocol-adapter-configuration.md) 
 
 
 
 OpcdaAdapterConfiguration extension the [AdapterConfiguration](../core/protocol-adapter-configuration.md) with properties for the OPCDA Protocol adapter.
 
-- [Schema](#OpcdaAdapterConfiguration-Schema)
-- [Examples](#OpcdaAdapterConfiguration-Examples)
+- [Schema](#opcdaadapterconfiguration-schema)
+- [Examples](#opcdaadapterconfiguration-examples)
 
 **Properties:**
 
-- [OpcdaServers](#OpcdaServers)
+- [OpcdaServers](#opcdaservers)
 
 ---
 ### OpcdaServers
 Opcda servers configured for this adapter. The Opcda source using the adapter must refer to one of these servers with the AdapterOpcdaServer attribute.
 
-**Type**: Map[String,[OpcdaServerConfiguration](#OpcdaServerConfiguration)]
+**Type**: Map[String,[OpcdaServerConfiguration](#opcdaserverconfiguration)]
 
 [^top](#opcda-protocol-configuration)
 
@@ -313,23 +313,23 @@ Opcda servers configured for this adapter. The Opcda source using the adapter mu
 
 ## OpcdaServerConfiguration
 
-[OpcdaAdapter](#OpcdaAdapterConfiguration)> [OpcdaServers](#OpcdaServers)
+[OpcdaAdapter](#opcdaadapterconfiguration)> [OpcdaServers](#opcdaservers)
 
 
 
-- [Schema](#OpcdaServerConfiguration-Schema)
-- [Examples](#OpcdaServerConfiguration-Examples)
+- [Schema](#opcdaserverconfiguration-schema)
+- [Examples](#opcdaserverconfiguration-examples)
 
 
 
 **Properties:**
 
-- [ConnectTimeout](#ConnectTimeout)
-- [ReadBatchSize](#ReadBatchSize)
-- [ReadTimeout](#ReadTimeout)
-- [SamplingRate](#SamplingRate)
-- [Url](#Url)
-- [WaitAfterConnectError](#WaitAfterConnectError)
+- [ConnectTimeout](#connecttimeout)
+- [ReadBatchSize](#readbatchsize)
+- [ReadTimeout](#readtimeout)
+- [SamplingRate](#samplingrate)
+- [Url](#url)
+- [WaitAfterConnectError](#waitafterconnecterror)
 
 ---
 ### ConnectTimeout

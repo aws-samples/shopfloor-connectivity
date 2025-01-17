@@ -6,16 +6,16 @@
 
 
 ---
-- [AwsSitewiseTargetConfiguration](#AwsSitewiseTargetConfiguration)
-- [AwsSiteWiseAssetCreationConfiguration](#AwsSiteWiseAssetCreationConfiguration)
-- [AwsSiteWiseAssetConfiguration](#AwsSiteWiseAssetConfiguration)
-- [AwsSiteWiseAssetPropertyConfiguration](#AwsSiteWiseAssetPropertyConfiguration)
+- [AwsSitewiseTargetConfiguration](#awssitewisetargetconfiguration)
+- [AwsSiteWiseAssetCreationConfiguration](#awssitewiseassetcreationconfiguration)
+- [AwsSiteWiseAssetConfiguration](#awssitewiseassetconfiguration)
+- [AwsSiteWiseAssetPropertyConfiguration](#awssitewiseassetpropertyconfiguration)
 
 ---
 
 ## AwsSitewiseTargetConfiguration
 
-[SFC Configuration](../core/sfc-configuration.md) > [Targets](../core/sfc-configuration#Targets) >  [Target](../core/target-configuration.md) 
+[SFC Configuration](../core/sfc-configuration.md) > [Targets](../core/sfc-configuration.md#targets) >  [Target](../core/target-configuration.md) 
 
 
 
@@ -44,22 +44,22 @@ Required IAM permissions:
 (**) required when  using AssetName, AssetExternalId, AssetPropertyName,AssetPropertyExternalId in asset and asset property configuration
 
 
-- [Schema](#AwsSitewiseTargetConfiguration-Schema)
-- [Examples](#AwsSitewiseTargetConfiguration-Examples)
+- [Schema](#awssitewisetargetconfiguration-schema)
+- [Examples](#awssitewisetargetconfiguration-examples)
 
 **Properties:**
-- [AssetCreation](#AssetCreation)
-- [Assets](#Assets)
-- [Batch Size](#BatchSize)
-- [CredentialProviderClient](#CredentialProviderClient)
-- [Interval](#Interval)
-- [Region](#Region)
+- [AssetCreation](#assetcreation)
+- [Assets](#assets)
+- [Batch Size](#batchsize)
+- [CredentialProviderClient](#credentialproviderclient)
+- [Interval](#interval)
+- [Region](#region)
 
 ---
 ### AssetCreation
 Settings for AssetModels and Assets automatically created by the adapter.
 
-**Type**:  [AwsSiteWiseAssetCreationConfiguration](#AwsSiteWiseAssetCreationConfiguration)
+**Type**:  [AwsSiteWiseAssetCreationConfiguration](#awssitewiseassetcreationconfiguration)
 
 When present automatic creation of AssetModels and Assets is enabled, can be empty when using the default settings.
 
@@ -67,7 +67,7 @@ When present automatic creation of AssetModels and Assets is enabled, can be emp
 ### Assets
 Assets to write to
 
-**Type**: List of [AwsSiteWiseAssetConfiguration](#AwsSiteWiseAssetConfiguration)
+**Type**: List of [AwsSiteWiseAssetConfiguration](#awssitewiseassetconfiguration)
 
 This setting is used to map data to existing assets and asset properties. It is possible to combine these with assets 
  which are automatically created by the target adapter using the 
@@ -303,39 +303,29 @@ Copy
 
 ## AwsSiteWiseAssetCreationConfiguration
 
-[AwsSitewiseTarget](#AwsSitewiseTargetConfiguration) > [AssetCreation](#AssetCreation)
+[AwsSitewiseTarget](#awssitewisetargetconfiguration) > [AssetCreation](#assetcreation)
 
 
 
 The SiteWise target adapter can automatically create and update AssetModels and Assets using the target data received by the adapter.
 Each source in the target  data will be mapped to a SiteWise AssetModel and Asset using configurable naming templates.
 
-- [Schema](#AwsSiteWiseAssetCreationConfiguration-Schema)
-- [Examples](#AwsSiteWiseAssetCreationConfiguration-Examples)
+- [Schema](#awssitewiseassetcreationconfiguration-schema)
+- [Examples](#awssitewiseassetcreationconfiguration-examples)
 
 **Properties:**
 
 - [AssetDescription ](#assetdescription )
-
-- [AssetExternalId](#AssetExternalId)
-
+- [AssetExternalId](#assetexternalid)
 - [AssetModelDescription ](#assetmodeldescription )
-
-- [AssetModelExternalId](#AssetModelExternalId)
-
-- [AssetModelName](#AssetModelName)
-
-- [AssetModelTags](#AssetModelTags)
-
-- [AssetName](#AssetName)
-
-- [AssetPropertyAlias](#AssetPropertyAlias)
-
-- [AssetPropertyName](#AssetPropertyName)
-
-- [AssetPropertyTimestamp](#AssetPropertyTimestamp)
-
-- [AssetTags](#AssetTags)
+- [AssetModelExternalId](#assetmodelexternalid)
+- [AssetModelName](#assetmodelname)
+- [AssetModelTags](#assetmodeltags)
+- [AssetName](#assetname)
+- [AssetPropertyAlias](#assetpropertyalias)
+- [AssetPropertyName](#assetpropertyname)
+- [AssetPropertyTimestamp](#assetpropertytimestamp)
+- [AssetTags](#assettags)
 
 
 
@@ -699,19 +689,18 @@ Setting all possible values and adding tags for assetmodel and asset
 
 ## AwsSiteWiseAssetConfiguration
 
-[AwsSitewiseTarget](#AwsSitewiseTargetConfiguration) > [Assets](#Assets) 
+[AwsSitewiseTarget](#awssitewisetargetconfiguration) > [Assets](#assets) 
 
 
-
-- [Schema](#AwsSiteWiseAssetConfiguration-Schema)
-- [Examples](#AwsSiteWiseAssetConfiguration-Examples)
+- [Schema](#awssitewiseassetconfiguration-schema)
+- [Examples](#awssitewiseassetconfiguration-examples)
 
 **Properties:**
 
-- [AssetExternalId](#AssetExternalId)
-- [AssetId](#AssetId)
-- [AssetName](#AssetName)
-- [Properties](#Properties)
+- [AssetExternalId](#assetexternalid)
+- [AssetId](#assetid)
+- [AssetName](#assetname)
+- [Properties](#properties)
 
 ---
 ### AssetExternalId
@@ -831,22 +820,23 @@ Either property id or alias must be specified, but not both
 
 ## AwsSiteWiseAssetPropertyConfiguration
 
-[AwsSitewiseTarget](#AwsSitewiseTargetConfiguration) > [Assets](#Assets) > [Asset](#AwsSiteWiseAssetConfiguration) > [Properties](#Properties)
+[AwsSitewiseTarget](#awssitewisetargetconfiguration) > [Assets](#assets) > [Asset](#awssitewiseassetconfiguration) > [Properties](#properties)
 
 
 
-- [Schema](#AwsSiteWiseAssetPropertyConfiguration-Schema)
-- [Examples](#AwsSiteWiseAssetPropertyConfiguration-Examples)
+- [Schema](#awssitewiseassetpropertyconfiguration-schema)
+- [Examples](#awssitewiseassetpropertyconfiguration-examples)
 
 **Properties:**
-- [DataPath](#DataPath)
-- [DataType](#DataType)
-- [PropertyAlias](#PropertyAlias)
-- [PropertyExternalId](#PropertyExternalId)
-- [PropertyId](#PropertyId)
-- [PropertyName](#PropertyName)
-- [TimestampPath](#TimestampPath)
-- [WarnIfNotPresent](#WarnIfNotPresent)
+
+- [DataPath](#datapath)
+- [DataType](#datatype)
+- [PropertyAlias](#propertyalias)
+- [PropertyExternalId](#propertyexternalid)
+- [PropertyId](#propertyid)
+- [PropertyName](#propertyname)
+- [TimestampPath](#timestamppath)
+- [WarnIfNotPresent](#warnifnotpresent)
 
 ---
 ### DataPath

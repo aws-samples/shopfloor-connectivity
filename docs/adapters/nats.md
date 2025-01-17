@@ -3,28 +3,28 @@
 NATS Protocol adapter configuration
 
 ---
-- [NatsSourceConfiguration](#NatsSourceConfiguration)
-- [NatsChannelConfiguration](#NatsChannelConfiguration)
-- [SubjectNameMappingConfiguration](#SubjectNameMappingConfiguration-Type)
-- [NatsAdapterConfiguration](#NatsAdapterConfiguration)
-- [NatsServerConfiguration](#NatsServerConfiguration)
+- [NatsSourceConfiguration](#natssourceconfiguration)
+- [NatsChannelConfiguration](#natschannelconfiguration)
+- [SubjectNameMappingConfiguration](#subjectnamemappingconfiguration-type)
+- [NatsAdapterConfiguration](#natsadapterconfiguration)
+- [NatsServerConfiguration](#natsserverconfiguration)
 
 ---
 
 ## NatsSourceConfiguration
 
-[SFC Configuration](../core/sfc-configuration.md) > [Sources](../core/sfc-configuration#Sources) >  [Source](../core/source-configuration.md) 
+[SFC Configuration](../core/sfc-configuration.md) > [Sources](../core/sfc-configuration.md#sources) >  [Source](../core/source-configuration.md) 
 
 
 
 Source configuration for the NATS protocol adapter. This type extends the [SourceConfiguration](../core/source-configuration.md) type. 
 
-- [Schema](#NatsSourceConfiguration-Schema)
-- [Examples](#NatsSourceConfiguration-Examples)
+- [Schema](#natssourceconfiguration-schema)
+- [Examples](#natssourceconfiguration-examples)
 
 **Properties:**
-- [AdapterServer](#AdapterServer)
-- [Channels](#Channels)
+- [AdapterServer](#adapterserver)
+- [Channels](#channels)
 
 ---
 ### AdapterServer
@@ -33,7 +33,7 @@ referred to by the ProtocolAdapter attribute of the source.
 
 **Type**: String
 
-Must be an identifier of a server in the [Servers](#Servers) section of the NATS server used by the source.
+Must be an identifier of a server in the [Servers](#servers) section of the NATS server used by the source.
 
 ---
 ### Channels
@@ -41,7 +41,7 @@ The channels configuration for an NATS source holds configuration data to read v
 The element is a map indexed by the channel identifier.
 Channels can be "commented" out by adding a "#" at the beginning of the identifier of that channel.
 
-**Type**: Map[String,[NatsChannelConfiguration](#NatsChannelConfiguration)]
+**Type**: Map[String,[NatsChannelConfiguration](#natschannelconfiguration)]
 
 At least 1 channel must be configured.
 
@@ -102,24 +102,23 @@ At least 1 channel must be configured.
 
 ## NatsChannelConfiguration
 
-[SFC Configuration](../core/sfc-configuration.md) > [Sources](../core/sfc-configuration#Sources) > [Source](../core/source-configuration.md)  > [Channels](../core/source-configuration.md#Channels) > [Channel](../core/channel-configuration.md)
+[SFC Configuration](../core/sfc-configuration.md) > [Sources](../core/sfc-configuration.md#sources) > [Source](../core/source-configuration.md)  > [Channels](../core/source-configuration.md#channels) > [Channel](../core/channel-configuration.md)
 
 
 
 The NatsChannelConfiguration type extends the [ChannelConfiguration](../core/channel-configuration.md) class with channel properties for the NATS protocol adapter.
 
-- [Schema](#NatsChannelConfiguration-Schema)
-
-- [Examples](#NatsChannelConfiguration-Examples)
+- [Schema](#natschannelconfiguration-schema)
+- [Examples](#natschannelconfiguration-examples)
 
   
 
 **Properties:**
 
-- [Json](#Json)
-- [Selector](#Selector)
-- [SubjectNameMappingConfiguration](#SubjectNameMappingConfiguration)
-- [Subjects](#Subjects)
+- [Json](#json)
+- [Selector](#selector)
+- [SubjectNameMappingConfiguration](#subjectnamemappingconfiguration)
+- [Subjects](#subjects)
 
 ---
 ### Json
@@ -143,7 +142,7 @@ Parameter: JMESPath expression, see https://jmespath.org/
 Mapping from subject names to alternative names. As a channel can have multiple subjects, that also can include wildcards, 
 this mapping can be used to build consistent and expected value names.
 
-**Type**: [SubjectNameMappingConfiguration](#SubjectNameMappingConfiguration-Type)
+**Type**: [SubjectNameMappingConfiguration](#subjectnamemappingconfiguration-type)
 
 ---
 ### Subjects
@@ -230,17 +229,17 @@ The must be **at least one subject** in the list of subjects.
 
 ## SubjectNameMappingConfiguration type
 
-[NatsChannel](#NatsChannelConfiguration) > [SubjectNameMappingConfiguration](#SubjectNameMappingConfiguration)
+[NatsChannel](#natschannelconfiguration) > [SubjectNameMappingConfiguration](#subjectnamemappingconfiguration)
 
 
 
-- [Schema](#SubjectNameMappingConfiguration-Schema)
-- [Examples](#SubjectNameMappingConfiguration-Examples)
+- [Schema](#subjectnamemappingconfiguration-schema)
+- [Examples](#subjectnamemappingconfiguration-examples)
 
 **Properties:**
 
-- [IncludeUnmappedSubjects](#IncludeUnmappedSubjects)
-- [Mappings](#Mappings)
+- [IncludeUnmappedSubjects](#includeunmappedsubjects)
+- [Mappings](#mappings)
 
 ---
 ### IncludeUnmappedSubjects
@@ -353,21 +352,21 @@ Multiple mappings with unmapped topics included:
 
 ## NatsAdapterConfiguration
 
-[SFC Configuration](../core/sfc-configuration.md) > [ProtocolAdapters](../core/sfc-configuration#ProtocolAdapters) > [Adapter](../core/protocol-adapter-configuration.md) 
+[SFC Configuration](../core/sfc-configuration.md) > [ProtocolAdapters](../core/sfc-configuration.md#protocoladapters) > [Adapter](../core/protocol-adapter-configuration.md) 
 
 
 
 NatsAdapterConfiguration extension the [AdapterConfiguration](../core/protocol-adapter-configuration.md) with properties for the NATS Protocol adapter.
 
-- [Schema](#NatsAdapterConfiguration-Schema)
-- [Examples](#NatsAdapterConfiguration-Examples)
+- [Schema](#natsadapterconfiguration-schema)
+- [Examples](#natsadapterconfiguration-examples)
 
 **Properties:**
 
-- [ReadMode](#ReadMode)
-- [ReceivedDataChannelSize](#ReceivedDataChannelSize)
-- [ReceivedDataChannelTimeout](#ReceivedDataChannelTimeout)
-- [Servers](#Servers)
+- [ReadMode](#readmode)
+- [ReceivedDataChannelSize](#receiveddatachannelsize)
+- [ReceivedDataChannelTimeout](#receiveddatachanneltimeout)
+- [Servers](#servers)
 
 
 
@@ -414,7 +413,7 @@ Default is 1000
 Servers configured for this adapter. The nats source using the adapter must refer to one of these servers with the 
 AdapterServer attribute.
 
-**Type**: Map[String,[NatsServerConfiguration](#NatsServerConfiguration)]
+**Type**: Map[String,[NatsServerConfiguration](#natsserverconfiguration)]
 
 [^top](#natsadapterconfiguration)
 
@@ -471,25 +470,24 @@ AdapterServer attribute.
 
 ## NatsServerConfiguration
 
-[NatsAdapter](#NatsAdapterConfiguration) > [Servers](#Servers)
+[NatsAdapter](#natsadapterconfiguration) > [Servers](#servers)
 
 
 
-- [Schema](#NatsServerConfiguration-Schema)
-- [Examples](#NatsServerConfiguration-Examples)
+- [Schema](#natsserverconfiguration-schema)
+- [Examples](#natsserverconfiguration-examples)
 
 **Properties:**
 
-- [ConnectRetries](#ConnectRetries)
-- [CredentialsFile](#CredentialsFile)
-- [NKeyFile](#NKeyFile)
-
-- [Password](#Password)
-- [Tls](#Tls)
-- [Token](#Token)
-- [Url](#Url)
-- [Username](#Username)
-- [WaitAfterConnectError](#WaitAfterConnectError)
+- [ConnectRetries](#connectretries)
+- [CredentialsFile](#credentialsfile)
+- [NKeyFile](#nkeyfile)
+- [Password](#password)
+- [Tls](#tls)
+- [Token](#token)
+- [Url](#url)
+- [Username](#username)
+- [WaitAfterConnectError](#waitafterconnecterror)
 
 ---
 ### ConnectRetries

@@ -3,30 +3,30 @@
 SQL Protocol adapter configuration
 
 ---
-- [SqlSourceConfiguration](#SqlSourceConfiguration)
-- [SqlChannelConfiguration](#SqlChannelConfiguration)
-- [SqlAdapterConfiguration](#SqlAdapterConfiguration)
-- [DbServerConfiguration](#DbServerConfiguration)
+- [SqlSourceConfiguration](#sqlsourceconfiguration)
+- [SqlChannelConfiguration](#sqlchannelconfiguration)
+- [SqlAdapterConfiguration](#sqladapterconfiguration)
+- [DbServerConfiguration](#dbserverconfiguration)
 
 ---
 
 ## SqlSourceConfiguration
 
-[SFC Configuration](../core/sfc-configuration.md) > [Sources](../core/sfc-configuration#Sources) >  [Source](../core/source-configuration.md) 
+[SFC Configuration](../core/sfc-configuration.md) > [Sources](../core/sfc-configuration.md#sources) >  [Source](../core/source-configuration.md) 
 
 
 
 Source configuration for the SQL protocol adapter. This type extends the [SourceConfiguration](../core/source-configuration.md) type.
 
-- [Schema](#SqlSourceConfiguration-Schema)
-- [Examples](#SqlSourceConfiguration-Examples)
+- [Schema](#sqlsourceconfiguration-schema)
+- [Examples](#sqlsourceconfiguration-examples)
 
 **Properties:**
-- [AdapterDbServer](#AdapterDbServer)
-- [Channels](#Channels)
-- [SingleRow](#SingleRow)
-- [SqlReadParameters](#SqlReadParameters)
-- [SqlReadStatement](#SqlReadStatement)
+- [AdapterDbServer](#adapterdbserver)
+- [Channels](#channels)
+- [SingleRow](#singlerow)
+- [SqlReadParameters](#sqlreadparameters)
+- [SqlReadStatement](#sqlreadstatement)
 
 ---
 ### AdapterDbServer
@@ -40,7 +40,7 @@ Must be an identifier of a database in the DbServers section of the SQL adapter 
 ### Channels
 The channels configuration for an SQL source holds configuration data to read values through SQL statements. "commented" out by adding a "#" at the beginning of the identifier of that channel.
 
-**Type**: Map[String,[SqlChannelConfiguration](#SqlChannelConfiguration)]
+**Type**: Map[String,[SqlChannelConfiguration](#sqlchannelconfiguration)]
 
 At least 1 channel must be configured.
 
@@ -158,18 +158,18 @@ The logic of the statement or is responsible that records are only read once or 
 
 ## SqlChannelConfiguration
 
-[SFC Configuration](../core/sfc-configuration.md) > [Sources](../core/sfc-configuration#Sources) > [Source](../core/source-configuration.md)  > [Channels](../core/source-configuration.md#Channels) > [Channel](../core/channel-configuration.md)
+[SFC Configuration](../core/sfc-configuration.md) > [Sources](../core/sfc-configuration.md#sources) > [Source](../core/source-configuration.md)  > [Channels](../core/source-configuration.md#channels) > [Channel](../core/channel-configuration.md)
 
 
 
 The SqlChannelConfiguration type extends the [ChannelConfiguration](../core/channel-configuration.md) class with channel properties for the SQL protocol adapter.
 
-- [Schema](#SqlChannelConfiguration-Schema)
-- [Examples](#SqlChannelConfiguration-Examples)
+- [Schema](#sqlchannelconfiguration-schema)
+- [Examples](#sqlchannelconfiguration-examples)
 
 
 **Properties:**
-- [ColumnNames](#ColumnNames)
+- [ColumnNames](#columnnames)
 
 ---
 ### ColumnNames
@@ -235,24 +235,24 @@ Default value is ["*"]
 
 ## SqlAdapterConfiguration
 
-[SFC Configuration](../core/sfc-configuration.md) > [ProtocolAdapters](../core/sfc-configuration#ProtocolAdapters) > [Adapter](../core/protocol-adapter-configuration.md) 
+[SFC Configuration](../core/sfc-configuration.md) > [ProtocolAdapters](../core/sfc-configuration.md#protocoladapters) > [Adapter](../core/protocol-adapter-configuration.md) 
 
 
 
 SqlAdapterConfiguration extension the [AdapterConfiguration](../core/protocol-adapter-configuration.md) with properties for the SQL Protocol adapter.
 
-- [Schema](#SqlAdapterConfiguration-Schema)
-- [Examples](#SqlAdapterConfiguration-Examples)
+- [Schema](#sqladapterconfiguration-schema)
+- [Examples](#sqladapterconfiguration-examples)
 
 
 **Properties:**
-- [DbServers](#DbServers)
+- [DbServers](#dbservers)
 
 ---
 ### DbServers
 Database servers configured for this adapter. The sql source using the adapter must refer to one of these servers with the AdapterDbServer attribute.
 
-**Type**: Map[String,[DbServerConfiguration](#DbServerConfiguration)]
+**Type**: Map[String,[DbServerConfiguration](#dbserverconfiguration)]
 
 ### SqlAdapterConfiguration Schema
 
@@ -347,23 +347,23 @@ Example 2 - Multi-database configuration:
 
 ## DbServerConfiguration
 
-[SqlAdapter](#SqlAdapterConfiguration) > [DbServers](#DbServers)
+[SqlAdapter](#sqladapterconfiguration) > [DbServers](#dbservers)
 
 
 
-- [Schema](#DbServerConfiguration-Schema)
-- [Examples](#DbServerConfiguration-Examples)
+- [Schema](#dbserverconfiguration-schema)
+- [Examples](#dbserverconfiguration-examples)
 
 **Properties:**
-- [ConnectTimeout](#ConnectTimeout)
-- [DatabaseName](#DatabaseName)
-- [DatabaseType](#DatabaseType)
-- [Host](#Host)
-- [InitScript](#InitScript)
-- [InitSql](#InitSql)
-- [Password](#Password)
-- [Port](#Port)
-- [UserName](#UserName)
+- [ConnectTimeout](#connecttimeout)
+- [DatabaseName](#databasename)
+- [DatabaseType](#databasetype)
+- [Host](#host)
+- [InitScript](#initscript)
+- [InitSql](#initsql)
+- [Password](#password)
+- [Port](#port)
+- [UserName](#username)
 
 ---
 ### ConnectTimeout

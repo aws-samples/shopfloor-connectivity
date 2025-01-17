@@ -1,32 +1,31 @@
 # NATS Target
 
-- [NatsTargetConfiguration](#NatsTargetConfiguration)
-
-- [NatsServerConfiguration](#NatsServerConfiguration)
+- [NatsTargetConfiguration](#natstargetconfiguration)
+- [NatsServerConfiguration](#natsserverconfiguration)
 
   
 
 ## NatsTargetConfiguration
 
-[SFC Configuration](../core/sfc-configuration.md) > [Targets](../core/sfc-configuration#Targets) >  [Target](../core/target-configuration.md) 
+[SFC Configuration](../core/sfc-configuration.md) > [Targets](../core/sfc-configuration.md#targets) >  [Target](../core/target-configuration.md) 
 
 
 
 NatsTargetConfiguration extends the type  [TargetConfiguration](../core/target-configuration.md) with specific configuration data for connecting to and sending to a NATS subject. The Targets configuration element can contain entries of this type, the TargetType of these entries must be set to **"NATS-TARGET"**
 
-- [Schema](#NatsTargetConfiguration-Schema)
-- [Examples](#NatsTargetConfiguration-Examples)
+- [Schema](#natstargetconfiguration-schema)
+- [Examples](#natstargetconfiguration-examples)
 
 **Properties:**
-- [AlternateSubjectName](#AlternateSubjectName)
-- [BatchCount](#BatchCount)
-- [BatchInterval](#BatchInterval)
-- [BatchSize](#BatchSize)
-- [Compression](#Compression)
-- [MaxPayloadSize](#MaxPayloadSize)
-- [NatsServer](#NatsServer)
-- [PublishTimeout](#PublishTimeout)
-- [SubjectName](#SubjectName)
+- [AlternateSubjectName](#alternatesubjectname)
+- [BatchCount](#batchcount)
+- [BatchInterval](#batchinterval)
+- [BatchSize](#batchsize)
+- [Compression](#compression)
+- [MaxPayloadSize](#maxpayloadsize)
+- [NatsServer](#natsserver)
+- [PublishTimeout](#publishtimeout)
+- [SubjectName](#subjectname)
 
 ---
 ### AlternateSubjectName
@@ -249,22 +248,22 @@ Dynamic subject names based on target- and metadata values
 
 ## NatsServerConfiguration
 
-[NatsTarget](#NatsTargetConfiguration) > [NatsServer](#NatsServer)
+[NatsTarget](#natstargetconfiguration) > [NatsServer](#natsserver)
 
 
-- [Schema](#NatsServerConfiguration-Schema)
-- [Examples](#NatsServerConfiguration-Examples)
+- [Schema](#natsserverconfiguration-schema)
+- [Examples](#natsserverconfiguration-examples)
 
 **Properties:**
-- [ConnectRetries](#ConnectRetries)
-- [CredentialsFile](#CredentialsFile)
-- [NKeyFile](#NKeyFile)
-- [Password](#Password)
-- [Tls](#Tls)
-- [Token](#Token)
-- [Url](#Url)
-- [Username](#Username)
-- [WaitAfterConnectError](#WaitAfterConnectError)
+- [ConnectRetries](#connectretries)
+- [CredentialsFile](#credentialsfile)
+- [NKeyFile](#nkeyfile)
+- [Password](#password)
+- [Tls](#tls)
+- [Token](#token)
+- [Url](#url)
+- [Username](#username)
+- [WaitAfterConnectError](#waitafterconnecterror)
 
 ---
 ### ConnectRetries

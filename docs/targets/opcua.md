@@ -8,12 +8,12 @@
 
 **Configuration:**
 
-- [OpcuaTargetConfiguration](#OpcuaTargetConfiguration)
-- [DataModelConfiguration](#DataModelConfiguration)
-- [FolderNodeConfiguration](#FolderNodeConfiguration)
-- [OpcuaCertificateValidationConfiguration](#OpcuaCertificateValidationConfiguration)
-- [OpcuaCertificateValidationOptions](#OpcuaCertificateValidationOptions-type)
-- [VariableNodeConfiguration](#VariableNodeConfiguration)
+- [OpcuaTargetConfiguration](#opcuatargetconfiguration)
+- [DataModelConfiguration](#datamodelconfiguration)
+- [FolderNodeConfiguration](#foldernodeconfiguration)
+- [OpcuaCertificateValidationConfiguration](#opcuacertificatevalidationconfiguration)
+- [OpcuaCertificateValidationOptions](#opcuacertificatevalidationoptions-type)
+- [VariableNodeConfiguration](#variablenodeconfiguration)
 
 
 
@@ -172,12 +172,12 @@ include a JMESPath query, named "ValueQuery," in their definitions, which select
 from the target data. Optionally, a transformation can be specified to apply to the selected value before it 
 is written to the node.
 
-The DataModels configuration contains the definition for a single custom model named "ConveyorDataModel," 
+The [DataModels](#datamodelconfiguration) configuration contains the definition for a single custom model named "ConveyorDataModel," 
 which has a structure different from the target data. For each variable node in this model, 
 a JMESPath query is specified to query the target data. If the query returns a value, the variable node is 
 updated with that value.
 
-"Temperature" is configured as a folder node because it includes metadata. This metadata, along with the actual value, is stored as variable nodes within the "MotorTemperature" folder node. Additionally, this variable has a transformation applied to convert the value into degrees Celsius and round it to an integer to match the datatype in the model. The transformation, "ToCelsius," is defined in the "Transformations" section of the SFC configuration.
+"Temperature" is configured as a [folder](#foldernodeconfiguration) node because it includes metadata. This metadata, along with the actual value, is stored as [variable](#variablenodeconfiguration) nodes within the "MotorTemperature" folder node. Additionally, this variable has a transformation applied to convert the value into degrees Celsius and round it to an integer to match the datatype in the model. The transformation, "ToCelsius", is defined in the ["Transformations"](../core/sfc-configuration.md#transformations) section of the [SFC configuration](../core/sfc-configuration.md).
 
 <details>
 <summary>Show Transformations</summary>
@@ -244,11 +244,11 @@ updated with that value.
 
 </details>
 
-The code below shows the "DataModels" section of the OPC UA target adapter configuration. To keep this 
-JSON example brief, optional configuration settings for the nodes, except for "DisplayName," are omitted.
+The code below shows the [DataModels](#datamodels) section of the OPC UA target adapter configuration. To keep this 
+JSON example brief, optional configuration settings for the nodes, except for [DisplayName](#displayname) are omitted.
 
-The node configurations allow setting the identifier of NodeId by specifying the "Id" setting as a numeric, 
-string, or GUID value. Alternatively, you can use "BrowseName" to set a node's browse name. If these fields are 
+The node configurations allow setting the identifier of NodeId by specifying the [Id](#id) setting as a numeric, 
+string, or GUID value. Alternatively, you can use [BrowseName](#browsename) to set a node's browse name. If these fields are 
 not specified, the key's value from the model configuration map is used as the default.
 
 **Note that if the schedule, source, or channel name used in the JMESPath query contains non-alphanumeric characters, 
@@ -327,38 +327,28 @@ This configuration results in the model below.
 
 ## OpcuaTargetConfiguration
 
-[SFC Configuration](../core/sfc-configuration.md) > [Targets](../core/sfc-configuration#Targets) >  [Target](../core/target-configuration.md) 
+[SFC Configuration](../core/sfc-configuration.md) > [Targets](../core/sfc-configuration.md#targets) >  [Target](../core/target-configuration.md) 
 
 
 
 OpcuaTargetConfiguration extends the type [TargetConfiguration](../core/target-configuration.md) with specific configuration data for publishing the data through an OPC UA model. The Targets configuration element can contain entries of this type, the TargetType of these entries must be set to **"OPCUA-TARGET"**
 
-- [Schema](#OpcuaTargetConfiguration-Schema)
-- [Examples](#OpcuaTargetConfiguration-Examples)
+- [Schema](#opcuatargetconfiguration-schema)
+- [Examples](#opcuatargetconfiguration-examples)
 
 **Properties:**
 
-- [AutoCreate](#AutoCreate)
-
-- [CertificateValidation](#CertificateValidation)
-
-- [DataModels](#DataModels)
-
-- [InitValuesWithNull](#InitValuesWithNull)
-
-- [ServerAnonymousDiscoveryEndPoint](#ServerAnonymousDiscoveryEndPoint)
-
-- [ServerMessageSecurityModes](#ServerMessageSecurityModes)
-
-- [ServerNetworkInterfaces](#ServerNetworkInterfaces)
-
-- [ServerPath](#ServerPath)
-
-- [ServerSecurityPolicies](#ServerSecurityPolicies)
-
-- [ServerCertificate](#ServerCertificate)
-
-- [ServerTcpPort](#ServerTcpPort)
+- [AutoCreate](#autocreate)
+- [CertificateValidation](#certificatevalidation)
+- [DataModels](#datamodels)
+- [InitValuesWithNull](#initvalueswithnull)
+- [ServerAnonymousDiscoveryEndPoint](#serveranonymousdiscoveryendpoint)
+- [ServerMessageSecurityModes](#servermessagesecuritymodes)
+- [ServerNetworkInterfaces](#servernetworkinterfaces)
+- [ServerPath](#serverpath)
+- [ServerSecurityPolicies](#serversecuritypolicies)
+- [ServerCertificate](#servercertificate)
+- [ServerTcpPort](#servertcpport)
 
   
 
@@ -380,13 +370,13 @@ By setting this value to true, and not specifying any model, the data model is c
 ### CertificateValidation
 Certificate settings for the OPC UA server
 
-**Type**: [OpcuaCertificateValidationConfiguration](#OpcuaCertificateValidationConfiguration)
+**Type**: [OpcuaCertificateValidationConfiguration](#opcuacertificatevalidationconfiguration)
 
 ---
 ### DataModels
 OPC UA data model definitions
 
-**Type**: Map[String, [DataModelConfiguration](#DataModelConfiguration)]
+**Type**: Map[String, [DataModelConfiguration](#datamodelconfiguration)]
 
 One or more data models that will be exposed through the OPC UA server to which SFC target data can be mapped. If no models are specified then the
 target adapter will build a model based on the SFC target data and values it receives.
@@ -669,22 +659,21 @@ Configuration with data model
 
 ## DataModelConfiguration
 
-[OpcuaTargetConfiguration](#OpcuaTargetConfiguration) > [DataModels](#datamodels) 
+[OpcuaTargetConfiguration](#opcuatargetconfiguration) > [DataModels](#datamodels) 
 
 
 
-- [Schema](#DataModelConfiguration-Schema)
-- [Examples](#DataModelConfiguration-Examples)
+- [Schema](#datamodelconfiguration-schema)
+- [Examples](#datamodelconfiguration-examples)
 
 **Properties:**
-- [BrowseName](#BrowseName)
-- [Description](#Description)
-- [DisplayName](#DisplayName)
-- [Folders](#Folders)
-- [Id](#Id)
-
-- [Namespace](#Namespace)
-- [Variables](#Variables)
+- [BrowseName](#browsename)
+- [Description](#description)
+- [DisplayName](#displayname)
+- [Folders](#folders)
+- [Id](#id)
+- [Namespace](#namespace)
+- [Variables](#variables)
 
 ---
 ### BrowseName
@@ -860,21 +849,20 @@ Variable nodes to create at in this top level folder
 
 ## FolderNodeConfiguration
 
-[OpcuaTargetConfiguration](#OpcuaTargetConfiguration) > [DataModels](#datamodels) > [Model](#DatamodelConfiguration) > [Folders](#Folders)
+[OpcuaTargetConfiguration](#opcuatargetconfiguration) > [DataModels](#datamodels) > [Model](#datamodelconfiguration) > [Folders](#folders)
 
-\* > [Folder](#FolderNodeConfiguration) > [Folders](#Folders)
+\* > [Folder](#foldernodeconfiguration) > [Folders](#folders)
 
 
 
 **Properties:**
 
-- [BrowseName](#BrowseName)
-- [Description](#Description)
-- [DisplayName](#DisplayName)
-- [Folders](#Folders)
-- [Id](#Id)
-
-- [Variables](#Variables)
+- [BrowseName](#browsename)
+- [Description](#description)
+- [DisplayName](#displayname)
+- [Folders](#folders)
+- [Id](#id)
+- [Variables](#variables)
 
 ---
 ### BrowseName
@@ -902,7 +890,7 @@ Optional, if not specified then the value of the id will be used as the display 
 ### Folders
 Map with sub folder nodes to create in this folder
 
-**Type**: Map[String, [FolderNodeConfiguration](#FolderNodeConfiguration)]
+**Type**: Map[String, [FolderNodeConfiguration](#foldernodeconfiguration)]
 
 ---
 ### Id
@@ -1022,18 +1010,18 @@ Map with variable nodes to create at top level folder of model
 
 ## OpcuaCertificateValidationConfiguration
 
-[OpcuaTargetConfiguration](#OpcuaTargetConfiguration) > [CertificateValidation](#CertificateValidation)
+[OpcuaTargetConfiguration](#opcuatargetconfiguration) > [CertificateValidation](#certificatevalidation)
 
 
 
-- [Schema](#OpcuaCertificateValidationConfiguration-Schema)
-- [Examples](#OpcuaCertificateValidationConfiguration-Example)
+- [Schema](#opcuacertificatevalidationconfiguration-schema)
+- [Examples](#opcuacertificatevalidationconfiguration-example)
 
 **Properties:**
 
-- [Active](#Active)
-- [Directory](#Directory)
-- [ValidationOptions](#ValidationOptions)
+- [Active](#active)
+- [Directory](#directory)
+- [ValidationOptions](#validationoptions)
 
 ------
 
@@ -1061,7 +1049,7 @@ This directory must exist, subdirectories will be created by the adapter if they
 
 Configuration of op optional checks
 
-**Type**: [OpcuaCertificateValidationOptions](#OpcuaCertificateValidationOptions-type)
+**Type**: [OpcuaCertificateValidationOptions](#opcuacertificatevalidationoptions-type)
 
 When not set then all options are enabled
 
@@ -1123,20 +1111,20 @@ With validation options:
 
 ## OpcuaCertificateValidationOptions type
 
-[OpcuaTargetConfiguration](#OpcuaTargetConfiguration) > [CertificateValidation](#CertificateValidation) > [ValidationOptions](#ValidationOptions)
+[OpcuaTargetConfiguration](#opcuatargetconfiguration) > [CertificateValidation](#certificatevalidation) > [ValidationOptions](#validationoptions)
 
-- [Schema](#OpcuaCertificateValidationOptions-Type-Schema)
-- [Examples](#OpcuaCertificateValidationOptions-Type-Example)
+- [Schema](#opcuacertificatevalidationoptions-type-schema)
+- [Examples](#opcuacertificatevalidationoptions-type-example)
 
 **Properties:**
 
-- [ApplicationUri](#ApplicationUri)
-- [ExtKeyUsageEndEntity](#ExtKeyUsageEndEntity)
-- [HostOrIp](#HostOrIp)
-- [KeyUsageEndEntity](#KeyUsageEndEntity)
-- [KeyUsageIssuer](#KeyUsageIssuer)
-- [Revocation](#Revocation)
-- [Validity](#Validity)
+- [ApplicationUri](#applicationuri)
+- [ExtKeyUsageEndEntity](#extkeyusageendentity)
+- [HostOrIp](#hostorip)
+- [KeyUsageEndEntity](#keyusageendentity)
+- [KeyUsageIssuer](#keyusageissuer)
+- [Revocation](#revocation)
+- [Validity](#validity)
 
 ---
 
@@ -1279,29 +1267,28 @@ Default is true
 
 ## VariableNodeConfiguration
 
-[OpcuaTargetConfiguration](#OpcuaTargetConfiguration) > [DataModels](#datamodels) > [Model](#DatamodelConfiguration) > [Folders](#Folders) > [Folder](#FolderNodeConfiguration) > [Variables](#Variables)
+[OpcuaTargetConfiguration](#opcuatargetconfiguration) > [DataModels](#datamodels) > [Model](#datamodelconfiguration) > [Folders](#folders) > [Folder](#foldernodeconfiguration) > [Variables](#variables)
 
- \* > [Folder](#FolderNodeConfiguration) > [Variables](#Variables)
+ \* > [Folder](#foldernodeconfiguration) > [Variables](#variables)
 
 
 
-[Folder](#FolderNodeConfiguration) > [Folders](#Folders)
+[Folder](#foldernodeconfiguration) > [Folders](#folders)
 
-- [Schema](#VariableNodeConfiguration-Schema)
-- [Examples](#VariableNodeConfiguration-Examples)
+- [Schema](#variablenodeconfiguration-schema)
+- [Examples](#variablenodeconfiguration-examples)
 
 **Properties:**
-- [ArrayDimensions](#ArrayDimensions)
-- [BrowseName](#BrowseName)
-- [DataType](#DataType)
-- [Description](#Description)
-- [DisplayName](#DisplayName)
-- [Id](#Id)
-- [InitValue](#InitValue)
-
-- [TimestampQuery](#TimestampQuery)
-- [Transformation](#Transformation)
-- [ValueQuery](#ValueQuery)
+- [ArrayDimensions](#arraydimensions)
+- [BrowseName](#browsename)
+- [DataType](#datatype)
+- [Description](#description)
+- [DisplayName](#displayname)
+- [Id](#id)
+- [InitValue](#initvalue)
+- [TimestampQuery](#timestampquery)
+- [Transformation](#transformation)
+- [ValueQuery](#valuequery)
 
 ---
 ### ArrayDimensions

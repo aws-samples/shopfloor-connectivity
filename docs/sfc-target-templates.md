@@ -9,7 +9,7 @@
 # **Output Structure Transformation**
 
 For situations where the structure of the data needs to be converted, this can be another JSON format, XML, CSV etc.,
-targets can have a configurable [template](./core/target-configuration#Template). This template is the name of
+targets can have a configurable [template](./core/target-configuration#template). This template is the name of
 an [Apache Velocity template file](https://velocity.apache.org/engine/2.3/user-guide.html). Before the data istransmitted the actual destination of the target the template is applied to transform the data.
 
 The context of the input data contains 5 variables:

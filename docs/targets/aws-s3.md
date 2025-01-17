@@ -1,6 +1,6 @@
 # AWS S3 Target
 
-[SFC Configuration](../core/sfc-configuration.md) > [Targets](../core/sfc-configuration#Targets) >  [Target](../core/target-configuration.md) 
+[SFC Configuration](../core/sfc-configuration.md) > [Targets](../core/sfc-configuration.md#targets) >  [Target](../core/target-configuration.md) 
 
 
 
@@ -12,18 +12,18 @@ AwsS3TargetConfiguration extends the type  [TargetConfiguration](../core/target-
 
 Requires IAM permission `s3:putObject` to write to the configured bucket
 
-- [Schema](#Aws3TargetConfiguration-Schema)
-- [Examples](#Aws3TargetConfiguration-Examples)
+- [Schema](#aws3targetconfiguration-schema)
+- [Examples](#aws3targetconfiguration-examples)
 
 **Properties:**
-- [BucketName](#BucketName)
-- [BufferSize](#BufferSize)
-- [Compression](#Compression)
-- [ContentType](#ContentType)
-- [CredentialProviderClient](#CredentialProviderClient)
-- [Interval](#Interval)
-- [Prefix](#Prefix)
-- [Region](#Region)
+- [BucketName](#bucketname)
+- [BufferSize](#buffersize)
+- [Compression](#compression)
+- [ContentType](#contenttype)
+- [CredentialProviderClient](#credentialproviderclient)
+- [Interval](#interval)
+- [Prefix](#prefix)
+- [Region](#region)
 
 ---
 ### BucketName

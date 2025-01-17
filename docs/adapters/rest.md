@@ -10,10 +10,10 @@
 **Configuration**:
 
 - [REST Adapter Configuration](#rest-adapter-configuration)
-- [RestSourceConfiguration](#RestSourceConfiguration)
-- [RestChannelConfiguration](#RestChannelConfiguration)
-- [RestAdapterConfiguration](#RestAdapterConfiguration)
-- [RestServerConfiguration](#RestServerConfiguration)
+- [RestSourceConfiguration](#restsourceconfiguration)
+- [RestChannelConfiguration](#restchannelconfiguration)
+- [RestAdapterConfiguration](#restadapterconfiguration)
+- [RestServerConfiguration](#restserverconfiguration)
 
 
 
@@ -394,26 +394,26 @@ This results in a numbered channel being created for every object in the returne
 
 ## RestSourceConfiguration
 
-[SFC Configuration](../core/sfc-configuration.md) > [Sources](../core/sfc-configuration#Sources) >  [Source](../core/source-configuration.md) 
+[SFC Configuration](../core/sfc-configuration.md) > [Sources](../core/sfc-configuration.md#sources) >  [Source](../core/source-configuration.md) 
 
 
 
 Source configuration for the REST protocol adapter. This type extends the [SourceConfiguration](../core/source-configuration.md) type.
 
-- [Schema](#RestSourceConfiguration-Schema)
-- [Examples](#RestSourceConfiguration-Examples)
+- [Schema](#restsourceconfiguration-schema)
+- [Examples](#restsourceconfiguration-examples)
 
 **Properties:**
-- [Channels](#Channels)
-- [Request](#Request)
-- [RestServer](#RestServer)
+- [Channels](#channels)
+- [Request](#request)
+- [RestServer](#restserver)
 
 ---
 ### Channels
 The channels configuration for an REST source holds configuration data to read values from the result from a source REST query. 
 "Commented" out by adding a "#" at the beginning of the identifier of that channel.
 
-**Type**: Map[String,[RestChannelConfiguration](#RestChannelConfiguration)
+**Type**: Map[String,[RestChannelConfiguration](#restchannelconfiguration)
 
 At least 1 channel must be configured.
 
@@ -504,18 +504,18 @@ Must be an identifier of a server in the RestServers section of the REST adapter
 
 ## RestChannelConfiguration
 
-[SFC Configuration](../core/sfc-configuration.md) > [Sources](../core/sfc-configuration#Sources) > [Source](../core/source-configuration.md)  > [Channels](../core/source-configuration.md#Channels) > [Channel](../core/channel-configuration.md)
+[SFC Configuration](../core/sfc-configuration.md) > [Sources](../core/sfc-configuration.md#sources) > [Source](../core/source-configuration.md)  > [Channels](../core/source-configuration.md#channels) > [Channel](../core/channel-configuration.md)
 
 
 
 The RestChannelConfiguration type extends the [ChannelConfiguration](../core/channel-configuration.md) class with channel properties for the REST protocol adapter.
 
-- [Schema](#RestChannelConfiguration-Schema)
-- [Examples](#RestChannelConfiguration-Examples)
+- [Schema](#restchannelconfiguration-schema)
+- [Examples](#restchannelconfiguration-examples)
 
 **Properties:**
-- [Json](#Json)
-- [Selector](#Selector)
+- [Json](#json)
+- [Selector](#selector)
 
 ---
 ### Json
@@ -589,12 +589,12 @@ A Selector can only be used if "Json" is set to true (the default).
 
 RestAdapterConfiguration extension the [AdapterConfiguration](../core/protocol-adapter-configuration.md) with properties for the REST Protocol adapter.
 
-- [Schema](#RestAdapterConfiguration-Schema)
-- [Examples](#RestAdapterConfiguration-Examples)
+- [Schema](#restadapterconfiguration-schema)
+- [Examples](#restadapterconfiguration-examples)
 
 **Properties:**
 
-- [RestServers](#RestServers)
+- [RestServers](#restservers)
 
 
 
@@ -602,7 +602,7 @@ RestAdapterConfiguration extension the [AdapterConfiguration](../core/protocol-a
 ### RestServers
 REST servers configured for this adapter. The REST source using the adapter must refer to one of these servers with the RestServer attribute.
 
-**Type**: Map[String,[RestServerConfiguration](#RestServerConfiguration)]
+**Type**: Map[String,[RestServerConfiguration](#restserverconfiguration)]
 
 ### RestAdapterConfiguration Schema
 
@@ -713,23 +713,23 @@ Example 2 - Multiple servers configuration:
 
 ## RestServerConfiguration
 
-[RestAdapter](#RestAdapterConfiguration) > [RestServers](#RestServers)
+[RestAdapter](#restadapterconfiguration) > [RestServers](#restservers)
 
 
 
-- [Schema](#RestServerConfiguration-Schema)
-- [Examples](#RestServerConfiguration-Examples)
+- [Schema](#restserverconfiguration-schema)
+- [Examples](#restserverconfiguration-examples)
 
 **Properties:**
 
-- [Headers](#Headers)
-- [MaxRetries](#MaxRetries)
-- [Port](#Port)
-- [Proxy](#Proxy)
-- [RequestTimeout](#RequestTimeout)
-- [Server](#Server)
-- [WaitAfterReadError](#WaitAfterReadError)
-- [WaitBeforeRetry](#WaitBeforeRetry)
+- [Headers](#headers)
+- [MaxRetries](#maxretries)
+- [Port](#port)
+- [Proxy](#proxy)
+- [RequestTimeout](#requesttimeout)
+- [Server](#server)
+- [WaitAfterReadError](#waitafterreaderror)
+- [WaitBeforeRetry](#waitbeforeretry)
 
 ---
 ### Headers

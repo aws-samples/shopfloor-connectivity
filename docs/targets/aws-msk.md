@@ -1,6 +1,6 @@
 # AWS MSK Target
 
-[SFC Configuration](../core/sfc-configuration.md) > [Targets](../core/sfc-configuration#Targets) >  [Target](../core/target-configuration.md) 
+[SFC Configuration](../core/sfc-configuration.md) > [Targets](../core/sfc-configuration.md#targets) >  [Target](../core/target-configuration.md) 
 
 
 
@@ -12,22 +12,22 @@ AwsMskTargetConfiguration extends the type  [TargetConfiguration](../core/target
 
 Required IAM permissions are `kafka-cluster:WriteDataIdempotently`, `kafka-cluster:CreateTopic`, `kafka-cluster:DescribeTopic` `,kafka-cluster:Connect`, `kafka-cluster:WriteData,`
 
-- [Schema](#AwsMskTargetConfiguration-Schema)
-- [Examples](#AwsMskTargetConfiguration-Examples)
+- [Schema](#awsmsktargetconfiguration-schema)
+- [Examples](#awsmsktargetconfiguration-examples)
 
 **Properties:**
-- [Acknowledgements](#Acknowledgements)
-- [BatchSize](#BatchSize)
-- [BootstrapBrokers](#BootstrapBrokers)
-- [Compression](#Compression)
-- [CredentialProviderClient](#CredentialProviderClient)
-- [Headers](#Headers)
-- [Interval](#Interval)
-- [Key](#Key)
-- [Partition](#Partition)
-- [ProviderProperties](#ProviderProperties)
-- [Serialization](#Serialization)
-- [TopicName](#TopicName)
+- [Acknowledgements](#acknowledgements)
+- [BatchSize](#batchsize)
+- [BootstrapBrokers](#bootstrapbrokers)
+- [Compression](#compression)
+- [CredentialProviderClient](#credentialproviderclient)
+- [Headers](#headers)
+- [Interval](#interval)
+- [Key](#key)
+- [Partition](#partition)
+- [ProviderProperties](#providerproperties)
+- [Serialization](#serialization)
+- [TopicName](#topicname)
 
 ---
 ### Acknowledgements

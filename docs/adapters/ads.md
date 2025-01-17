@@ -1,32 +1,31 @@
 # ADS Protocol Configuration
 
-- [AdsSourceConfiguration](#AdsSourceConfiguration)
-- [AdsChannelConfiguration](#AdsChannelConfiguration)
-- [AdsAdapterConfiguration](#AdsAdapterConfiguration)
-- [AdsDeviceConfiguration](#AdsDeviceConfiguration)
+- [AdsSourceConfiguration](#adssourceconfiguration)
+- [AdsChannelConfiguration](#adschannelconfiguration)
+- [AdsAdapterConfiguration](#adsadapterconfiguration)
+- [AdsDeviceConfiguration](#adsdeviceconfiguration)
 
 ---
 
 ## AdsSourceConfiguration
 
-[SFC Configuration](../core/sfc-configuration.md) > [Sources](../core/sfc-configuration#Sources) >  [Source](../core/source-configuration.md) 
+[SFC Configuration](../core/sfc-configuration.md) > [Sources](../core/sfc-configuration.md#sources) >  [Source](../core/source-configuration.md) 
 
 
 
 Source configuration for the ADS protocol adapter. This type extends the [SourceConfiguration](../core/source-configuration.md) type. 
 
-- [Schema](#AdsSourceConfiguration-Schema)
-
-- [Examples](#AdsSourceConfiguration-example) 
+- [Schema](#adssourceconfiguration-schema)
+- [Examples](#adssourceconfiguration-example) 
 
 **Properties:**
 
-- [AdapterDevice](#AdapterDevice)
-- [Channels](#Channels)
-- [SourceAmsId](#SourceAmsId)
-- [SourceAmsPort](#SourceAmsPort)
-- [TargetAmsId](#TargetAmsId)
-- [TargetAmsPort](#TargetAmsPort)
+- [AdapterDevice](#adapterdevice)
+- [Channels](#channels)
+- [SourceAmsId](#sourceamsid)
+- [SourceAmsPort](#sourceamsport)
+- [TargetAmsId](#targetamsid)
+- [TargetAmsPort](#targetamsport)
 
 ---
 ### AdapterDevice
@@ -34,7 +33,7 @@ Device Identifier for the device to read from. This referenced device must be pr
 
 **Type**: String
 
-Must be an identifier of a server in the [Devices](#Devices) section of the [ADS adapter](#AdsAdapterConfiguration) used by the source.
+Must be an identifier of a server in the [Devices](#devices) section of the [ADS adapter](#adsadapterconfiguration) used by the source.
 
 ---
 ### Channels
@@ -42,7 +41,7 @@ The channels configuration for an ADS source holds configuration data to read va
 The element is a map indexed by the channel identifier.
 Channels can be "commented" out by adding a "#" at the beginning of the identifier of that channel.
 
-**Type**: Map[String,[AdsChannelConfiguration](#AdsChannelConfiguration)]
+**Type**: Map[String,[AdsChannelConfiguration](#adschannelconfiguration)]
 
 At least 1 channel must be configured.
 
@@ -181,7 +180,7 @@ This can be any value.
 
 ## AdsChannelConfiguration
 
-[SFC Configuration](../core/sfc-configuration.md) > [Sources](../core/sfc-configuration#Sources) > [Source](../core/source-configuration.md)  > [Channels](../core/source-configuration.md#Channels) > [Channel](../core/channel-configuration.md)
+[SFC Configuration](../core/sfc-configuration.md) > [Sources](../core/sfc-configuration.md#sources) > [Source](../core/source-configuration.md)  > [Channels](../core/source-configuration.md#channels) > [Channel](../core/channel-configuration.md)
 
 
 
@@ -189,12 +188,12 @@ The AdsChannelConfiguration type extends the [ChannelConfiguration](../core/chan
 
 
 
-- [Schema](#AdsChannelConfiguration-Schema)
-- [Example](#AdsChannelConfiguration-Example)
+- [Schema](#adschannelconfiguration-schema)
+- [Example](#adschannelconfiguration-example)
 
 **Properties:**
 
-- [SymbolName](#SymbolName)
+- [SymbolName](#symbolname)
 
 ---
 ### SymbolName
@@ -246,24 +245,24 @@ A string containing the name of the symbol to read from the device.
 
 ## AdsAdapterConfiguration
 
-[SFC Configuration](../core/sfc-configuration.md) > [ProtocolAdapters](../core/sfc-configuration#ProtocolAdapters) > [Adapter](../core/protocol-adapter-configuration.md) 
+[SFC Configuration](../core/sfc-configuration.md) > [ProtocolAdapters](../core/sfc-configuration.md#protocoladapters) > [Adapter](../core/protocol-adapter-configuration.md) 
 
 
 
 AdsAdapterConfiguration extension the [AdapterConfiguration](../core/protocol-adapter-configuration.md) with properties for the ADS Protocol adapter.
 
-- [Schema](#AdsAdapterConfiguration-Schema)
-- [Example](#AdsAdapterConfiguration-Example)
+- [Schema](#adsadapterconfiguration-schema)
+- [Example](#adsadapterconfiguration-example)
 
 **Properties:**
 
-- [Devices](#Devices)
+- [Devices](#devices)
 
 ---
 ### Devices
 Devices configured for this adapter. The ADS source using the adapter must have a reference to one of these in its AdapterDevice attribute.
 
-**Type**: Map[String,[AdsDeviceConfiguration](#AdsDeviceConfiguration)]
+**Type**: Map[String,[AdsDeviceConfiguration](#adsdeviceconfiguration)]
 
 [^top](#ads-protocol-configuration)
 
@@ -333,26 +332,25 @@ Devices configured for this adapter. The ADS source using the adapter must have 
 
 ## AdsDeviceConfiguration
 
-[AdsAdapterConfiguration](#AdsAdapterConfiguration) > [Devices](#Devices)
+[AdsAdapterConfiguration](#adsadapterconfiguration) > [Devices](#devices)
 
 
 
 Configuration for an ADS Device.
 
-\- [Schema](#AdsDeviceConfiguration-schema)
-
--[Example](#AdsDeviceConfiguration-example)
+- [Schema](#adsdeviceconfiguration-schema)
+-[Example](#adsdeviceconfiguration-example)
 
 
 **Properties:**
-- [Address](#Address)
-- [CommandTimeout](#CommandTimeout)
-- [ConnectTimeout](#ConnectTimeout)
-- [Port](#Port)
-- [ReadTimeout](#ReadTimeout)
-- [WaitAfterConnectError](#WaitAfterConnectError)
-- [WaitAfterReadError](#WaitAfterReadError)
-- [WaitAfterWriteError](#WaitAfterWriteError)
+- [Address](#address)
+- [CommandTimeout](#commandtimeout)
+- [ConnectTimeout](#connecttimeout)
+- [Port](#port)
+- [ReadTimeout](#readtimeout)
+- [WaitAfterConnectError](#waitafterconnecterror)
+- [WaitAfterReadError](#waitafterreaderror)
+- [WaitAfterWriteError](#waitafterwriteerror)
 
 ---
 ### Address

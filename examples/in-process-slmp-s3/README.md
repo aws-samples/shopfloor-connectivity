@@ -179,10 +179,8 @@ container and still use a GreenGrass configuration.
 }
 ```
 
-When the AWS service credentials are provided using one of the options
-in the AWS SDK credentials provider chain
-(<https://docs.aws.amazon.com/sdk-for-java/latest/developer-guide/credentials-chain.html>)
-AwsIotCredentialProviderClients and any references in the targets can be
+When the AWS service credentials are provided using one of the options in the AWS SDK credentials provider chain
+(<https://docs.aws.amazon.com/sdk-for-java/latest/developer-guide/credentials-chain.html>) AwsIotCredentialProviderClients and any references in the targets can be
 deleted. Using the temporary credentials provided through a configured
 AwsIotCredentialProviderClient for production environment is strongly
 recommended.

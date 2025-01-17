@@ -1,15 +1,14 @@
 ## ConditionFilterConfiguration
 
-[SFC Configuration](./sfc-configuration.md) > [ConditionFilters](./sfc-configuration#ConditionFilters)
+[SFC Configuration](./sfc-configuration.md) > [ConditionFilters](./sfc-configuration.md#conditionfilters)
 
-- [Schema](#Schema)
-- [Examples](#Examples)
+- [Schema](#schema)
+- [Examples](#examples)
 
 
 **Properties:**
-- [Operator](#Operator)
-
-- [Value](#Value)
+- [Operator](#operator)
+- [Value](#value)
 
   
 
@@ -44,7 +43,7 @@ If the operator is "and" ("&&") or "or" ("||")it is a nested list of Condition t
 
 Operand used by the filter operator, or a list of nested ConditionConfigurations if the operator is "and" ("&&") or "or" ("||"). If the operand for an operand is a channel name or a list of channel names, the name is the key of the channel in the channels table for a source. Valid JMESPath expressions van be used as well to specify channel names to match against.
 
-[^top](#ConditionFilterConfiguration)
+[^top](#conditionfilterconfiguration)
 
 
 
@@ -225,5 +224,5 @@ Combined conditions
 
 
 
-[^top](#ConditionFilterConfiguration)
+[^top](#conditionfilterconfiguration)
 

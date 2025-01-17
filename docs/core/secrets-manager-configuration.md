@@ -1,21 +1,21 @@
 ## SecretsManagerConfiguration
 
-[SFC Configuration](./sfc-configuration#Metrics) > [SecretsManager](./sfc-configuration#SecretsManager) 
+[SFC Configuration](./sfc-configuration.md#metrics) > [SecretsManager](./sfc-configuration.md#secretsmanager) 
 
-- [Schema](#Schema)
-- [Examples](#Examples)
+- [Schema](#schema)
+- [Examples](#examples)
 
 
 **Properties:**
-- [CertificatesAndKeysByFileReference](#CertificatesAndKeysByFileReference)
-- [CreatePrivateKeyIfNotExists](#CreatePrivateKeyIfNotExists)
-- [CredentialProviderClient](#CredentialProviderClient)
-- [GreenGrassDeploymentPath](#GreenGrassDeploymentPath)
-- [PrivateKeyFile](#PrivateKeyFile)
-- [Region](#Region)
-- [Secrets](#Secrets)
-- [StoredSecretsDir](#StoredSecretsDir)
-- [StoredSecretsFile](#StoredSecretsFile)
+- [CertificatesAndKeysByFileReference](#certificatesandkeysbyfilereference)
+- [CreatePrivateKeyIfNotExists](#createprivatekeyifnotexists)
+- [CredentialProviderClient](#credentialproviderclient)
+- [GreenGrassDeploymentPath](#greengrassdeploymentpath)
+- [PrivateKeyFile](#privatekeyfile)
+- [Region](#region)
+- [Secrets](#secrets)
+- [StoredSecretsDir](#storedsecretsdir)
+- [StoredSecretsFile](#storedsecretsfile)
 
 ---
 ### CertificatesAndKeysByFileReference
@@ -87,7 +87,7 @@ Name of the file used to store secrets.
 
 Default is " sfc-secrets-manager-secrets"
 
-[^top](#SecretsManagerConfiguration)
+[^top](#secretsmanagerconfiguration)
 
 
 

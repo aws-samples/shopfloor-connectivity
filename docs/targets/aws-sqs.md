@@ -1,6 +1,6 @@
 # AWS SQS Target
 
-[SFC Configuration](../core/sfc-configuration.md) > [Targets](../core/sfc-configuration#Targets) >  [Target](../core/target-configuration.md) 
+[SFC Configuration](../core/sfc-configuration.md) > [Targets](../core/sfc-configuration.md#targets) >  [Target](../core/target-configuration.md) 
 
 
 
@@ -10,18 +10,17 @@ AwsSqsTargetConfiguration extends the type [TargetConfiguration](../core/target-
 
 Requires IAM permission sqs:SendMessageBatch for the receiving queue.
 
-- [Schema](#AwsSqsTargetConfiguration-Schema)
-- [Examples](#AwsSqsTargetConfiguration-Examples)
+- [Schema](#awssqstargetconfiguration-schema)
+- [Examples](#awssqstargetconfiguration-examples)
 
 **Properties:**
 
-- [BatchSize](#BatchSize)
-- [Compression](#Compression)
-- [CredentialProviderClient](#CredentialProviderClient)
-- [Interval](#Interval)
-
-- [QueueUrl](#QueueUrl)
-- [Region](#Region)
+- [BatchSize](#batchsize)
+- [Compression](#compression)
+- [CredentialProviderClient](#credentialproviderclient)
+- [Interval](#interval)
+- [QueueUrl](#queueurl)
+- [Region](#region)
 
 ---
 ### BatchSize

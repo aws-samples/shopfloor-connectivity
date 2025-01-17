@@ -1,19 +1,18 @@
 ## MetricsSourceConfiguration
 
-[SFC Configuration](./sfc-configuration.md) > [Metrics](./sfc-configuration#Metrics)
+[SFC Configuration](./sfc-configuration.md) > [Metrics](./sfc-configuration.md#metrics)
 
-[SFC Configuration](./sfc-configuration.md) > [ProtocolAdapters](./sfc-configuration#ProtocolAdapters) > [ProtocolAdapter](./protocol-adapter-configuration.md) > [Metrics](./protocol-adapter-configuration.md#Metrics)
+[SFC Configuration](./sfc-configuration.md) > [ProtocolAdapters](./sfc-configuration.md#protocoladapters) > [ProtocolAdapter](./protocol-adapter-configuration.md) > [Metrics](./protocol-adapter-configuration.md#metrics)
 
-[SFC Configuration](./sfc-configuration.md) > [Targets](./sfc-configuration#Targets) > [TargetAdapter](./target-configuration.md) > [Metrics](./target-configuration.md#Metrics)
+[SFC Configuration](./sfc-configuration.md) > [Targets](./sfc-configuration.md#targets) > [TargetAdapter](./target-configuration.md) > [Metrics](./target-configuration.md#metrics)
 
-- [Schema](#Schema)
-- [Examples](#Schema)
+- [Schema](#schema)
+- [Examples](#schema)
 
 **Properties:**
 
-- [CommonDimensions](#CommonDimensions)
-
-- [Enabled](#Enabled)
+- [CommonDimensions](#commondimensions)
+- [Enabled](#enabled)
 
 
 ---
@@ -32,7 +31,7 @@ Collection enabled or disabled
 
 Default is true
 
-[^top](#MetricsSourceConfiguration)
+[^top](#metricssourceconfiguration)
 
 ## Schema
 
@@ -74,4 +73,4 @@ Examples
 }
 ```
 
-[^top](#MetricsSourceConfiguration)
+[^top](#metricssourceconfiguration)

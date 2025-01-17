@@ -1,26 +1,20 @@
 # CertificateConfiguration
 
-- [Schema](#CertificateConfiguration-Schema)
+- [Schema](#certificateconfiguration-schema)
 
-- [Examples](#CertificateConfiguration-Examples)
+- [Examples](#certificateconfiguration-examples)
 
 - 
 
   **Properties:**
 
-- [Alias](#Alias)
-
-- [CertificateFile](#CertificateFile)
-
-- [ExpirationWarningPeriod](#ExpirationWarningPeriod)
-
-- [Format](#Format)
-
-- [Password](#Password)
-
-- [PrivateKeyFile](#PrivateKeyFile)
-
-- [SelfSignedCertificate](#SelfSignedCertificate)
+- [Alias](#alias)
+- [CertificateFile](#certificatefile)
+- [ExpirationWarningPeriod](#expirationwarningperiod)
+- [Format](#format)
+- [Password](#password)
+- [PrivateKeyFile](#privatekeyfile)
+- [SelfSignedCertificate](#selfsignedcertificate)
 
 ---
 ### Alias
@@ -70,7 +64,7 @@ Self-signed certificate configuration used to generate a self-signed certificate
 
 **Type**: [SelfSignedCertificateConfiguration](./self-signed-certificate-configuration.md)
 
-[^top](#CertificateConfiguration)
+[^top](#certificateconfiguration)
 
 
 ### CertificateConfiguration Schema
@@ -166,7 +160,7 @@ Example 3 - Self-signed certificate configuration:
 ```
 
 
-[^top](#CertificateConfiguration)
+[^top](#certificateconfiguration)
 
 
 

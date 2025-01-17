@@ -9,13 +9,13 @@ Configuration types for the OPCUA protocol adapter and contains the extensions a
 **Configuration**
 
 
-- [OpcuaSourceConfiguration](#OpcuaSourceConfiguration)
-- [OpcuaNodeChannelConfiguration](#OpcuaNodeChannelConfiguration)
-- [OpcuaNodeChangeFilter](#OpcuaNodeChangeFilter)
-- [OpcuaAdapterConfiguration](#OpcuaAdapterConfiguration)
-- [OpcuaServerProfileConfiguration](#OpcuaServerProfileConfiguration)
-- [OpcuaEventTypeConfiguration](#OpcuaEventTypeConfiguration)
-- [OpcuaServerConfiguration](#OpcuaServerConfiguration)
+- [OpcuaSourceConfiguration](#opcuasourceconfiguration)
+- [OpcuaNodeChannelConfiguration](#opcuanodechannelconfiguration)
+- [OpcuaNodeChangeFilter](#opcuanodechangefilter)
+- [OpcuaAdapterConfiguration](#opcuaadapterconfiguration)
+- [OpcuaServerProfileConfiguration](#opcuaserverprofileconfiguration)
+- [OpcuaEventTypeConfiguration](#opcuaeventtypeconfiguration)
+- [OpcuaServerConfiguration](#opcuaserverconfiguration)
 
 
 
@@ -99,7 +99,7 @@ The collected data from the event and data nodes is shown below.
 }
 ```
 
-[^top](http://localhost:63343/markdownPreview/1372270094/markdown-preview-index-1014486343.html?_ijt=19b1vdj2824jmn7ov0l3i6ctg#quicklinks)
+[^top](#opcua-protocol-adapter)
 
 The snippet below shows the configuration of an OPCUA adapter with a profile named "CustomEventsProfile" that defines two additional event types, "CustomEventType1" and "CustomEventType2", each with two properties. CustomEventType1 inherits from the OPCUA defined BaseEventType type and will contain all properties from that class in addition to the two properties defined for the event. CustomEventType2 will inherit from and therefore contain all properties from CustomEventTYpe1 and the two properties defined for the event.
 
@@ -152,7 +152,7 @@ Sources are configured to read from adapter "OPCUA" and server "OPCUA-SERVER", w
 
 In order to secure the traffic between the OPCUA protocol adapter and the OPCUA Server it can be signed and encrypted using certificates.
 
-In the configuration for the OPCUA server in the adapter the security policies can be used by setting the [SecurityPolicy](#SecurityPolicy) of the server to any of the following policy names:
+In the configuration for the OPCUA server in the adapter the security policies can be used by setting the [SecurityPolicy](#securitypolicy) of the server to any of the following policy names:
 
 | Name                | Sign / Encrypt   | Security Policy                                                  |
 |---------------------|------------------|------------------------------------------------------------------|
@@ -250,22 +250,22 @@ Example of OPCUA server configuration using Basic256Sha256 security profile for 
 
 ## OpcuaSourceConfiguration
 
-[SFC Configuration](../core/sfc-configuration.md) > [Sources](../core/sfc-configuration#Sources) >  [Source](../core/source-configuration.md) 
+[SFC Configuration](../core/sfc-configuration.md) > [Sources](../core/sfc-configuration.md#sources) >  [Source](../core/source-configuration.md) 
 
 
 
 Source configuration for the OPCUA protocol adapter. This type extends the [SourceConfiguration](../core/source-configuration.md) type.
 
-- [Schema](#OpcuaSourceConfiguration-Schema)
-- [Examples](#OpcuaSourceConfiguration-Examples)
+- [Schema](#opcuasourceconfiguration-schema)
+- [Examples](#opcuasourceconfiguration-examples)
 
 **Properties:**
-- [AdapterOpcuaServer](#AdapterOpcuaServer)
-- [Channels](#Channels)
-- [EventQueueSize](#EventQueueSize)
-- [EventSamplingInterval](#EventSamplingInterval)
-- [SourceReadingMode](#SourceReadingMode)
-- [SubscribePublishingInterval](#SubscribePublishingInterval)
+- [AdapterOpcuaServer](#adapteropcuaserver)
+- [Channels](#channels)
+- [EventQueueSize](#eventqueuesize)
+- [EventSamplingInterval](#eventsamplinginterval)
+- [SourceReadingMode](#sourcereadingmode)
+- [SubscribePublishingInterval](#subscribepublishinginterval)
 
 ---
 ### AdapterOpcuaServer
@@ -404,23 +404,23 @@ Time in milliseconds that will be used as the SubscribePublishingInterval when c
 
 ## OpcuaNodeChannelConfiguration
 
-[SFC Configuration](../core/sfc-configuration.md) > [Sources](../core/sfc-configuration#Sources) > [Source](../core/source-configuration.md)  > [Channels](../core/source-configuration.md#Channels) > [Channel](../core/channel-configuration.md)
+[SFC Configuration](../core/sfc-configuration.md) > [Sources](../core/sfc-configuration.md#sources) > [Source](../core/source-configuration.md)  > [Channels](../core/source-configuration.md#channels) > [Channel](../core/channel-configuration.md)
 
 
 
 The OpcuaNodeChannelConfiguration type extends the [ChannelConfiguration](../core/channel-configuration.md) class with channel properties for the OPCUA protocol adapter.
 
-- [Schema](#OpcuaNodeChannelConfiguration-Schema)
-- [Examples](#OpcuaNodeChannelConfiguration-Examples)
+- [Schema](#opcuanodechannelconfiguration-schema)
+- [Examples](#opcuanodechannelconfiguration-examples)
 
 
 **Properties:**
-- [EventSamplingInterval](#EventSamplingInterval)
-- [EventType](#EventType)
-- [IndexRange](#IndexRange)
-- [NodeChangeFilter](#NodeChangeFilter)
-- [NodeId](#NodeId)
-- [Selector](#Selector)
+- [EventSamplingInterval](#eventsamplinginterval)
+- [EventType](#eventtype)
+- [IndexRange](#indexrange)
+- [NodeChangeFilter](#nodechangefilter)
+- [NodeId](#nodeid)
+- [Selector](#selector)
 
 ---
 ### EventSamplingInterval
@@ -455,7 +455,7 @@ If not set all values from an array are read. For syntax see https://reference.o
 ### NodeChangeFilter
 Change filter used in subscription for node that defines the conditions when a value change must be reported.
 
-**Type**: [OpcuaNodeChangeFilter](#OpcuaNodeChangeFilter)
+**Type**: [OpcuaNodeChangeFilter](#opcuanodechangefilter)
 
 Optional
 
@@ -597,17 +597,17 @@ Array element monitoring:
 
 ## OpcuaNodeChangeFilter
 
-[OpcuaNodeChannel](#OpcuaNodeChannelConfiguration) > [NodeChangeFilter](#NodeChangeFilter)
+[OpcuaNodeChannel](#opcuanodechannelconfiguration) > [NodeChangeFilter](#nodechangefilter)
 
 
 
-- [Schema](#OpcuaNodeChangeFilter-Schema)
-- [Examples](#OpcuaNodeChangeFilter-Examples)
+- [Schema](#opcuanodechangefilter-schema)
+- [Examples](#opcuanodechangefilter-examples)
 
 **Properties:**
 
-- [Type](#Type)
-- [Value](#Value)
+- [Type](#type)
+- [Value](#value)
 
 
 
@@ -687,31 +687,31 @@ Explicit absolute change filter:
 
 ## OpcuaAdapterConfiguration
 
-[SFC Configuration](../core/sfc-configuration.md) > [ProtocolAdapters](../core/sfc-configuration#ProtocolAdapters) > [Adapter](../core/protocol-adapter-configuration.md) 
+[SFC Configuration](../core/sfc-configuration.md) > [ProtocolAdapters](../core/sfc-configuration.md#protocoladapters) > [Adapter](../core/protocol-adapter-configuration.md) 
 
 
 
 OpcuaAdapterConfiguration extension the [AdapterConfiguration](../core/protocol-adapter-configuration.md) with properties for the OPCUA Protocol adapter.
 
-- [Schema](#OpcuaAdapterConfiguration-Schema)
-- [Examples](#OpcuaAdapterConfiguration-Examples)
+- [Schema](#opcuaadapterconfiguration-schema)
+- [Examples](#opcuaadapterconfiguration-examples)
 
 **Properties:**
 
-- [OpcuaServers](#OpcuaServers)
-- [ServerProfiles](#ServerProfiles)
+- [OpcuaServers](#opcuaservers)
+- [ServerProfiles](#serverprofiles)
 
 ---
 ### OpcuaServers
 Opcua servers configured for this adapter. The opcua source using the adapter must have a reference to one of these in its AdapterOpcuaServer attribute.
 
-**Type**: Map[String,[OpcuaServerConfiguration](#OpcuaServerConfiguration)]
+**Type**: Map[String,[OpcuaServerConfiguration](#opcuaserverconfiguration)]
 
 ---
 ### ServerProfiles
 Profiles configured for this adapter. Servers in this adapter can have a reference to one if its profiles in their ServerProfile attribute.
 
-**Type**: Map[String,[OpcuaServerProfileConfiguration](#OpcuaServerProfileConfiguration)]
+**Type**: Map[String,[OpcuaServerProfileConfiguration](#opcuaserverprofileconfiguration)]
 
 ### OpcuaAdapterConfiguration Schema
 
@@ -814,14 +814,14 @@ Profiles configured for this adapter. Servers in this adapter can have a referen
 
 ## OpcuaServerProfileConfiguration
 
-[OpcuaAdapter](#OpcuaAdapterConfiguration) > [Servers](#OpcuaServers) > [OpcuaServer](#OpcuaServerConfiguration) > [OpcuaServer](#OpcuaServerConfiguration) > [ServerProfile](#ServerProfile)
+[OpcuaAdapter](#opcuaadapterconfiguration) > [Servers](#opcuaservers) > [OpcuaServer](#opcuaserverconfiguration) > [OpcuaServer](#opcuaserverconfiguration) > [ServerProfile](#serverprofile)
 
-- [Schema](#OpcuaServerProfileConfiguration-Schema)
-- [Examples](#OpcuaServerProfileConfiguration-Examples)
+- [Schema](#opcuaserverprofileconfiguration-schema)
+- [Examples](#opcuaserverprofileconfiguration-examples)
 
 **Properties:**
 
-- [EventTypes](#EventTypes)
+- [EventTypes](#eventtypes)
 
   
 
@@ -884,17 +884,17 @@ Additional event types that can be used for a server,
 
 ## OpcuaEventTypeConfiguration
 
-[OpcuaAdapter](#OpcuaAdapterConfiguration) > [ServerProfiles](#ServerProfiles) > [EventTypes](#EventTypes)
+[OpcuaAdapter](#opcuaadapterconfiguration) > [ServerProfiles](#serverprofiles) > [EventTypes](#eventtypes)
 
 
 
-- [Schema](#OpcuaEventTypeConfiguration-Schema)
-- [Examples](#OpcuaEventTypeConfiguration-Examples)
+- [Schema](#opcuaeventtypeconfiguration-schema)
+- [Examples](#opcuaeventtypeconfiguration-examples)
 
 **Properties:**
-- [Inherits](#Inherits)
-- [NodeId](#NodeId)
-- [Properties](#Properties)
+- [Inherits](#inherits)
+- [NodeId](#nodeid)
+- [Properties](#properties)
 
 ---
 ### Inherits
@@ -983,30 +983,30 @@ Required, an at least one property must be defined.
 
 ## OpcuaServerConfiguration
 
-[OpcuaAdapter](#OpcuaAdapterConfiguration) > [OpcuaServers](#OpcuaServers)
+[OpcuaAdapter](#opcuaadapterconfiguration) > [OpcuaServers](#opcuaservers)
 
 
 
-- [Schema](#OpcuaServerConfiguration-Schema)
-- [Examples](#OpcuaServerConfiguration-Examples)
+- [Schema](#opcuaserverconfiguration-schema)
+- [Examples](#opcuaserverconfiguration-examples)
 
 **Properties:**
-- [Address](#Address)
-- [Certificate](#Certificate)
-- [CertificateValidation](#CertificateValidation)
-- [ConnectTimeout](#ConnectTimeout)
-- [ConnectionWatchdogInterval](#ConnectionWatchdogInterval)
-- [MaxChunkCount](#MaxChunkCount)
-- [MaxChunkSize](#MaxChunkSize)
-- [MaxMessageSize](#MaxMessageSize)
-- [Path](#Path)
-- [Port](#Port)
-- [ReadBatchSize](#ReadBatchSize)
-- [ReadTimeout](#ReadTimeout)
-- [SecurityPolicy](#SecurityPolicy)
-- [ServerProfile](#ServerProfile)
-- [WaitAfterConnectError](#WaitAfterConnectError)
-- [WaitAfterReadError](#WaitAfterReadError)
+- [Address](#address)
+- [Certificate](#certificate)
+- [CertificateValidation](#certificatevalidation)
+- [ConnectTimeout](#connecttimeout)
+- [ConnectionWatchdogInterval](#connectionwatchdoginterval)
+- [MaxChunkCount](#maxchunkcount)
+- [MaxChunkSize](#maxchunksize)
+- [MaxMessageSize](#maxmessagesize)
+- [Path](#path)
+- [Port](#port)
+- [ReadBatchSize](#readbatchsize)
+- [ReadTimeout](#readtimeout)
+- [SecurityPolicy](#securitypolicy)
+- [ServerProfile](#serverprofile)
+- [WaitAfterConnectError](#waitafterconnecterror)
+- [WaitAfterReadError](#waitafterreaderror)
 
 ---
 ### Address
@@ -1024,7 +1024,7 @@ Client certificate configuration
 ### CertificateValidation
 Certificate validation configuration
 
-**Type**: [CertificateValidationConfiguration](#OpcuaCertificateValidationConfiguration)
+**Type**: [CertificateValidationConfiguration](#opcuacertificatevalidationconfiguration)
 
 ---
 ### ConnectTimeout
@@ -1123,7 +1123,7 @@ Default is None
 
 ---
 ### ServerProfile
-Any of the profiles in the adapters [ServerProfiles](#ServerProfiles) section.
+Any of the profiles in the adapters [ServerProfiles](#serverprofiles) section.
 
 **Type**: String
 
@@ -1245,18 +1245,18 @@ Basic configuration:
 
 ## OpcuaCertificateValidationConfiguration
 
-[OpcuaAdapterConfiguration](#OpcuaAdapterConfiguration) >   [OpcuaServers](#OpcuaServers) > [OpcUaServer](#OpcuaServers) > [CertificateValidation](#CertificateValidation)
+[OpcuaAdapterConfiguration](#opcuaadapterconfiguration) >   [OpcuaServers](#opcuaservers) > [OpcUaServer](#opcuaservers) > [CertificateValidation](#certificatevalidation)
 
 
 
-- [Schema](#OpcuaCertificateValidationConfiguration-Schema)
-- [Examples](#OpcuaCertificateValidationConfiguration-Example)
+- [Schema](#opcuacertificatevalidationconfiguration-schema)
+- [Examples](#opcuacertificatevalidationconfiguration-example)
 
 **Properties:**
 
-- [Active](#Active)
-- [Directory](#Directory)
-- [ValidationOptions](#ValidationOptions)
+- [Active](#active)
+- [Directory](#directory)
+- [ValidationOptions](#validationoptions)
 
 ------
 
@@ -1274,7 +1274,7 @@ Default is true
 
 Pathname to base directory under which certificates and certificate revocation lists are stored
 
-**Type**: String
+**Type**: String~~~~
 
 This directory must exist, subdirectories will be created by the adapter if they do not exist.
 
@@ -1284,7 +1284,7 @@ This directory must exist, subdirectories will be created by the adapter if they
 
 Configuration of op optional checks
 
-**Type**: [OpcuaCertificateValidationOptions](#OpcuaCertificateValidationOptions-type)
+**Type**: OpcuaCertificateValidationOptions
 
 When not set then all options are enabled
 
@@ -1346,22 +1346,22 @@ With validation options:
 
 ## OpcuaCertificateValidationOptions type
 
-[OpcuaAdapterConfiguration](#OpcuaAdapterConfiguration) >   [OpcuaServers](#OpcuaServers) > [OpcUaServer](#OpcuaServers) > [CertificateValidation](#CertificateValidation) > [ValidationOptions](#ValidationOptions)
+[OpcuaAdapterConfiguration](#opcuaadapterconfiguration) >   [OpcuaServers](#opcuaservers) > [OpcUaServer](#opcuaservers) > [CertificateValidation](#certificatevalidation) > [ValidationOptions](#validationoptions)
 
 
 
-- [Schema](#OpcuaCertificateValidationOptions-Type-Schema)
-- [Examples](#OpcuaCertificateValidationOptions-Type-Example)
+- [Schema](#opcuacertificatevalidationoptions-type-schema)
+- [Examples](#opcuacertificatevalidationoptions-type-example)
 
 **Properties:**
 
-- [ApplicationUri](#ApplicationUri)
-- [ExtKeyUsageEndEntity](#ExtKeyUsageEndEntity)
-- [HostOrIp](#HostOrIp)
-- [KeyUsageEndEntity](#KeyUsageEndEntity)
-- [KeyUsageIssuer](#KeyUsageIssuer)
-- [Revocation](#Revocation)
-- [Validity](#Validity)
+- [ApplicationUri](#applicationuri)
+- [ExtKeyUsageEndEntity](#extkeyusageendentity)
+- [HostOrIp](#hostorip)
+- [KeyUsageEndEntity](#keyusageendentity)
+- [KeyUsageIssuer](#keyusageissuer)
+- [Revocation](#revocation)
+- [Validity](#validity)
 
 ---
 

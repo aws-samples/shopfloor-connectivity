@@ -1,6 +1,6 @@
 # AWS Kinesis Target
 
-[SFC Configuration](../core/sfc-configuration.md) > [Targets](../core/sfc-configuration#Targets) >  [Target](../core/target-configuration.md) 
+[SFC Configuration](../core/sfc-configuration.md) > [Targets](../core/sfc-configuration.md#targets) >  [Target](../core/target-configuration.md) 
 
 
 
@@ -11,17 +11,16 @@ AwsKinesisTargetConfiguration extends the type [TargetConfiguration](../core/tar
 
 Requires IAM permission `kinesis:PutRecords` for the stream the data is sent to.
 
-- [Schema](#AwsKinesisTargetConfiguration-Schema)
-- [Examples](#AwsKinesisTargetConfiguration-Examples)
+- [Schema](#awskinesistargetconfiguration-schema)
+- [Examples](#awskinesistargetconfiguration-examples)
 
 **Properties:**
-- [BatchSize](#BatchSize)
-- [Compression](#Compression)
-- [CredentialProviderClient](#CredentialProviderClient)
-- [Interval](#Interval)
-
-- [Region](#Region)
-- [StreamName](#StreamName)
+- [BatchSize](#batchsize)
+- [Compression](#compression)
+- [CredentialProviderClient](#credentialproviderclient)
+- [Interval](#interval)
+- [Region](#region)
+- [StreamName](#streamname)
 
 ---
 ### BatchSize

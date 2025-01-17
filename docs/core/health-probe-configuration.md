@@ -1,31 +1,24 @@
 # HealthProbeConfiguration
 
-[SFC Configuration](./sfc-configuration.md) > [HealthProbe](./sfc-configuration#healthprobe)
+[SFC Configuration](./sfc-configuration.md) > [HealthProbe](./sfc-configuration.md#healthprobe)
 
-[SFC Configuration](./sfc-configuration.md) > [TargetServers](./sfc-configuration#TargetServers) > [TargetServer](./server-configuration.md) > [HealthProbe](./server-configuration.md#healthprobe)
+[SFC Configuration](./sfc-configuration.md) > [TargetServers](./sfc-configuration.md#targetservers) > [TargetServer](./server-configuration.md) > [HealthProbe](./server-configuration.md#healthprobe)
 
-[SFC Configuration](./sfc-configuration.md) > [ProtocolAdapterServers](./sfc-configuration#ProtocolAdapterServers) > [AdapterServer](./server-configuration.md) > [HealthProbe](./server-configuration.md#healthprobe)
+[SFC Configuration](./sfc-configuration.md) > [ProtocolAdapterServers](./sfc-configuration.md#protocoladapterservers) > [AdapterServer](./server-configuration.md) > [HealthProbe](./server-configuration.md#healthprobe)
 
-- [Schema](#Schema)
-- [Examples](#Examples)
+- [Schema](#schema)
+- [Examples](#examples)
 
 **Properties:**
 
-- [AllowedIpAddresses](#AllowedIpAddresses)
-
-- [Interface](#Interface)
-
-- [Path](#Path)
-
-- [Port](#Port)
-
-- [RateLimit](#RateLimit)
-
-- [Response](#Response)
-
-- [RetainStatePeriod](#RetainStatePeriod)
-
-- [StopAfterUnhealthyPeriod](#StopAfterUnhealthyPeriod)
+- [AllowedIpAddresses](#allowedipaddresses)
+- [Interface](#interface)
+- [Path](#path)
+- [Port](#port)
+- [RateLimit](#ratelimit)
+- [Response](#response)
+- [RetainStatePeriod](#retainstateperiod)
+- [StopAfterUnhealthyPeriod](#stopafterunhealthyperiod)
 
   
 
@@ -96,7 +89,7 @@ Period in seconds after which repeated health probe requests did not return a po
 
 Must be explicitly set in order to stop the service after the period of not returning a healthy response to health probes. The use case for this element is when the mechanism used to manage the instances of the services only checks if the process of a services is running and does stop processes. An example of this is AWS Greengrass. 
 
-[^top](#HealthProbeConfiguration)
+[^top](#healthprobeconfiguration)
 
 
 
@@ -235,4 +228,4 @@ Disabled probe configuration:
 }
 ```
 
-[^top](#HealthProbeConfiguration)
+[^top](#healthprobeconfiguration)

@@ -3,7 +3,7 @@
 Elements used for generating a self-signed certificate
 
 - [Schema](#schema)
-- [Examples](#Examples)
+- [Examples](#examples)
 
 **Properties:**
 
@@ -91,7 +91,7 @@ Default is 1000
 
 ---
 
-[^Top](#SelfSignedCertificateConfig)
+[^Top](#selfsignedcertificateconfig)
 
 
 

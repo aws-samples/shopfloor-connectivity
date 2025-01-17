@@ -16,7 +16,7 @@ The network traffic between SFC components is not encrypted.
 The network traffic is encrypted using the private key of the service, the service is providing its X509 server
 certificate to the client to decrypt the traffic. The service process needs to be started using the -key and -cert
 parameters specifying the files containing servers private key and server certificate. The -connection type parameter
-must be set to ServerSideTLS. In the SFC configuration the [ConnectionType](../docs/core/server-configuration.md#ConnectionType) in the [ServiceConfiguration](../docs/core/server-configuration.md) for the server
+must be set to ServerSideTLS. In the SFC configuration the [ConnectionType](../docs/core/server-configuration.md#connectiontype) in the [ServiceConfiguration](../docs/core/server-configuration.md) for the server
 must be set to ServerSideTLS.
 
 The value used for the connection type parameter used for the service and the configured ConnectionType must match.

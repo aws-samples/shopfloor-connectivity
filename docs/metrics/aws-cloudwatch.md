@@ -1,32 +1,30 @@
-[SFC Configuration](../core/sfc-configuration.md) > [Metrics](../core/sfc-configuration#Metrics) 
+[SFC Configuration](../core/sfc-configuration.md) > [Metrics](../core/sfc-configuration.md#metrics) 
 
 # AWS CloudWatch Metrics
 
 
 ---
-- [AwsCloudWatchConfiguration](#AwsCloudWatchConfiguration)
+- [AwsCloudWatchConfiguration](#awscloudwatchconfiguration)
 
 
 
 ## AwsCloudWatchConfiguration
 
-[SFC Configuration](../core/sfc-configuration.md) > [Metrics](../core/sfc-configuration#Metrics) 
+[SFC Configuration](../core/sfc-configuration.md) > [Metrics](../core/sfc-configuration.md#metrics) 
 
 
 
-- [Schema](#Schema)
-- [Example](#Example)
+- [Schema](#schema)
+- [Example](#example)
 
 **Properties:**
-- [BatchSize](#BatchSize)
 
-- [CredentialProviderClient](#CredentialProviderClient)
+- [BatchSize](#batchsize)
+- [CredentialProviderClient](#credentialproviderclient)
+- [Interval](#interval)
+- [Region](#region)
 
-- [Interval](#Interval)
 
-- [Region](#Region)
-
-  
 
 ---
 ### BatchSize

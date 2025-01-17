@@ -6,11 +6,11 @@ Configuration for PCCC protocol adapter.
 
 **Configuration**
 
-- [PcccSourceConfiguration](#PcccSourceConfiguration)
-- [PcccChannelConfiguration](#PcccChannelConfiguration)
-- [PcccAdapterConfiguration](#PcccAdapterConfiguration)
-- [PcccControllerConfiguration](#PcccControllerConfiguration)
-- [PcccConnectPathConfiguration](#PcccConnectPathConfiguration)
+- [PcccSourceConfiguration](#pcccsourceconfiguration)
+- [PcccChannelConfiguration](#pcccchannelconfiguration)
+- [PcccAdapterConfiguration](#pcccadapterconfiguration)
+- [PcccControllerConfiguration](#pccccontrollerconfiguration)
+- [PcccConnectPathConfiguration](#pcccconnectpathconfiguration)
 
 
 
@@ -350,17 +350,17 @@ Syntax: `A<file number>:<element index>[/character offset]`
 
 ## PcccSourceConfiguration
 
-[SFC Configuration](../core/sfc-configuration.md) > [Sources](../core/sfc-configuration#Sources) >  [Source](../core/source-configuration.md) 
+[SFC Configuration](../core/sfc-configuration.md) > [Sources](../core/sfc-configuration.md#sources) >  [Source](../core/source-configuration.md) 
 
 Source configuration for the PCCC protocol adapter. This type extends the [SourceConfiguration](../core/source-configuration.md) type.
 
-- [Schema](#PcccSourceConfiguration-Schema)
-- [Examples](#PcccSourceConfiguration-Examples)
+- [Schema](#pcccsourceconfiguration-schema)
+- [Examples](#pcccsourceconfiguration-examples)
 
 **Properties:**
 
-- [AdapterController](#AdapterController)
-- [Channels](#Channels)
+- [AdapterController](#adaptercontroller)
+- [Channels](#channels)
 
 ---
 
@@ -380,7 +380,7 @@ The channels configuration for a PCCC source holds configuration data to read va
 The element is a map indexed by the channel identifier.
 Channels can be "commented" out by adding a "#" at the beginning of the identifier of that channel.
 
-**Type**: Map[String,[PcccChannelConfiguration](#PcccChannelConfiguration)]
+**Type**: Map[String,[PcccChannelConfiguration](#pcccchannelconfiguration)]
 
 At least 1 channel must be configured.
 
@@ -447,16 +447,16 @@ At least 1 channel must be configured.
 
 ## PcccChannelConfiguration
 
-[SFC Configuration](../core/sfc-configuration.md) > [Sources](../core/sfc-configuration#Sources) > [Source](../core/source-configuration.md)  > [Channels](../core/source-configuration.md#Channels) > [Channel](../core/channel-configuration.md)
+[SFC Configuration](../core/sfc-configuration.md) > [Sources](../core/sfc-configuration.md#sources) > [Source](../core/source-configuration.md)  > [Channels](../core/source-configuration.md#channels) > [Channel](../core/channel-configuration.md)
 
 The PcccChannelConfiguration type extends the [ChannelConfiguration](../core/channel-configuration.md) class with channel properties for the PCCC protocol adapter.
 
-- [Schema](#PcccChannelConfiguration-Schema)
-- [Examples](#PcccChannelConfiguration-Examples)
+- [Schema](#pcccchannelconfiguration-schema)
+- [Examples](#pcccchannelconfiguration-examples)
 
 **Properties:**
 
-- [Address](#Address)
+- [Address](#address)
 
 ---
 
@@ -563,18 +563,18 @@ Counter with bit:
 
 ## PcccAdapterConfiguration
 
-[SFC Configuration](../core/sfc-configuration.md) > [ProtocolAdapters](../core/sfc-configuration#ProtocolAdapters) > [Adapter](../core/protocol-adapter-configuration.md) 
+[SFC Configuration](../core/sfc-configuration.md) > [ProtocolAdapters](../core/sfc-configuration.md#protocoladapters) > [Adapter](../core/protocol-adapter-configuration.md) 
 
 
 
 PcccAdapterConfiguration extension the [AdapterConfiguration](../core/protocol-adapter-configuration.md) with properties for the PCCC Protocol adapter.
 
-- [Schema](#PcccAdapterConfiguration-Schema)
-- [Examples](#PcccAdapterConfiguration-Examples)
+- [Schema](#pcccadapterconfiguration-schema)
+- [Examples](#pcccadapterconfiguration-examples)
 
 **Properties:**
 
-- [Controllers](#Controllers)
+- [Controllers](#controllers)
 
 ---
 
@@ -582,7 +582,7 @@ PcccAdapterConfiguration extension the [AdapterConfiguration](../core/protocol-a
 
 PLCs servers configured for this adapter. The PCCC source using the adapter must have a reference to one of these in its AdapterController attribute.
 
-**Type**: Map[String,[PcccControllerConfiguration](#PcccControllerConfiguration)]
+**Type**: Map[String,[PcccControllerConfiguration](#pccccontrollerconfiguration)]
 
 ### PcccAdapterConfiguration Schema
 
@@ -639,25 +639,25 @@ PLCs servers configured for this adapter. The PCCC source using the adapter must
 
 ## PcccControllerConfiguration
 
-[PccAdapter](#PcccAdapterConfiguration) > [Controllers](#controllers)
+[PccAdapter](#pcccadapterconfiguration) > [Controllers](#controllers)
 
 
 
-- [Schema](#PcccControllerConfiguration-Schema)
-- [Examples](#PcccControllerConfiguration-Examples)
+- [Schema](#pccccontrollerconfiguration-schema)
+- [Examples](#pccccontrollerconfiguration-examples)
 
 **Properties:**
 
-- [Address](#Address)
-- [ConnectPath](#ConnectPath)
-- [ConnectTimeout](#ConnectTimeout)
-- [MaxReadGap](#MaxReadGap)
-- [OptimizeReads](#OptimizeReads)
-- [Port](#Port)
-- [ReadTimeout](#ReadTimeout)
-- [WaitAfterConnectError](#WaitAfterConnectError)
-- [WaitAfterReadError](#WaitAfterReadError)
-- [WaitAfterWriteError](#WaitAfterWriteError)
+- [Address](#address)
+- [ConnectPath](#connectpath)
+- [ConnectTimeout](#connecttimeout)
+- [MaxReadGap](#maxreadgap)
+- [OptimizeReads](#optimizereads)
+- [Port](#port)
+- [ReadTimeout](#readtimeout)
+- [WaitAfterConnectError](#waitafterconnecterror)
+- [WaitAfterReadError](#waitafterreaderror)
+- [WaitAfterWriteError](#waitafterwriteerror)
 
 ---
 
@@ -854,17 +854,17 @@ Default is 10000
 
 ## PcccConnectPathConfiguration
 
-[PccAdapter](#PcccAdapterConfiguration) > [Controllers](#controllers) > [PcccController](#PcccControllerConfiguration) > [ConnectPath](#ConnectPath)
+[PccAdapter](#pcccadapterconfiguration) > [Controllers](#controllers) > [PcccController](#pccccontrollerconfiguration) > [ConnectPath](#connectpath)
 
 
 
-- [Schema](#PcccConnectPathConfiguration-Schema)
-- [Examples](#PcccConnectPathConfiguration-Examples)
+- [Schema](#pcccconnectpathconfiguration-schema)
+- [Examples](#pcccconnectpathconfiguration-examples)
 
 **Properties:**
 
-- [Backplane](#Backplane)
-- [Slot](#Slot)
+- [Backplane](#backplane)
+- [Slot](#slot)
 
 ---
 

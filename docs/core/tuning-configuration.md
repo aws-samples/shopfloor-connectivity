@@ -1,32 +1,31 @@
 ## TuningConfiguration
 
-[SFC Configuration](./sfc-configuration.md) > [Tuning](./sfc-configuration#Tuning) 
+[SFC Configuration](./sfc-configuration.md) > [Tuning](./sfc-configuration.md#tuning) 
 
 [SFC tuning](../sfc-tuning.md) parameters. Tuning parameters can be set to adjust sizes of internal channels and timeouts. The SFC log output will output messages when internal channels start blocking when these are at their maximum capacity or when timeouts occur waiting for a channel to unblock.
 
-- [Schema](#Schema)
-
-- [Examples](#Examples)
+- [Schema](#schema)
+- [Examples](#examples)
 
 
 **Properties:**
 
-- [AggregatorChannelSize](#AggregatorChannelSize)
-- [AllSourcesReadTimeout](#AllSourcesReadTimeout)
-- [ChannelSizePerMetricsProvider](#ChannelSizePerMetricsProvider)
-- [MaxConcurrentSourceReaders](#MaxConcurrentSourceReaders)
-- [MetricsChannelTimeout](#MetricsChannelTimeout)
-- [ScheduleReaderResultsChannelSize](#ScheduleReaderResultsChannelSize)
-- [ScheduleReaderResultsChannelTimeout](#ScheduleReaderResultsChannelTimeout)
-- [ScheduleReaderResultsChannelTimeout](#ScheduleReaderResultsChannelTimeout)
-- [TargetForwardingChannelSize](#TargetForwardingChannelSize)
-- [TargetForwardingChannelTimeout](#TargetForwardingChannelTimeout)
-- [TargetResubmitChannelSize](#TargetResubmitChannelSize)
-- [TargetResubmitChannelTimeout](#TargetResubmitChannelTimeout)
-- [TargetResultsChannelSize](#TargetResultsChannelSize)
-- [TargetResultsChannelTimeout](#TargetResultsChannelTimeout)
-- [WriterInputChannelSize](#WriterInputChannelSize)
-- [WriterInputChannelSizeTimeout](#WriterInputChannelSizeTimeout)
+- [AggregatorChannelSize](#aggregatorchannelsize)
+- [AllSourcesReadTimeout](#allsourcesreadtimeout)
+- [ChannelSizePerMetricsProvider](#channelsizepermetricsprovider)
+- [MaxConcurrentSourceReaders](#maxconcurrentsourcereaders)
+- [MetricsChannelTimeout](#metricschanneltimeout)
+- [ScheduleReaderResultsChannelSize](#schedulereaderresultschannelsize)
+- [ScheduleReaderResultsChannelTimeout](#schedulereaderresultschanneltimeout)
+- [ScheduleReaderResultsChannelTimeout](#schedulereaderresultschanneltimeout)
+- [TargetForwardingChannelSize](#targetforwardingchannelsize)
+- [TargetForwardingChannelTimeout](#targetforwardingchanneltimeout)
+- [TargetResubmitChannelSize](#targetresubmitchannelsize)
+- [TargetResubmitChannelTimeout](#targetresubmitchanneltimeout)
+- [TargetResultsChannelSize](#targetresultschannelsize)
+- [TargetResultsChannelTimeout](#targetresultschanneltimeout)
+- [WriterInputChannelSize](#writerinputchannelsize)
+- [WriterInputChannelSizeTimeout](#writerinputchannelsizetimeout)
 
 ---
 ### AggregatorChannelSize
@@ -184,7 +183,7 @@ Default is 1000
 
 Increment when getting timeouts on writerInputChannel and available memory is limited
 
-[^top](#TuningConfiguration)
+[^top](#tuningconfiguration)
 
 
 

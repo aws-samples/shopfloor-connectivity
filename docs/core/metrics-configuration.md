@@ -1,22 +1,22 @@
 ## MetricsConfiguration
 
-[SFC Configuration](./sfc-configuration.md) > [Metrics](./sfc-configuration#Metrics)
+[SFC Configuration](./sfc-configuration.md) > [Metrics](./sfc-configuration.md#metrics)
 
-[SFC Configuration](./sfc-configuration.md) > [ProtocolAdapters](./sfc-configuration#ProtocolAdapters) > [ProtocolAdapter](./protocol-adapter-configuration.md) > [Metrics](./protocol-adapter-configuration.md#Metrics) 
+[SFC Configuration](./sfc-configuration.md) > [ProtocolAdapters](./sfc-configuration.md#protocoladapters) > [ProtocolAdapter](./protocol-adapter-configuration.md) > [Metrics](./protocol-adapter-configuration.md#metrics) 
 
-[SFC Configuration](./sfc-configuration.md) > [Targets](./sfc-configuration#Targets) > [TargetAdapter](./target-configuration.md) > [Metrics](./target-configuration.md#Metrics) 
+[SFC Configuration](./sfc-configuration.md) > [Targets](./sfc-configuration.md#targets) > [TargetAdapter](./target-configuration.md) > [Metrics](./target-configuration.md#metrics) 
 
-- [Schema](#Schema)
-- [Examples](#Schema)
+- [Schema](#schema)
+- [Examples](#schema)
 
 **Properties:**
 
-- [CollectCoreMetrics](#CollectCoreMetrics)
-- [CommonDimensions](#CommonDimensions)
-- [Enabled](#Enabled)
-- [Interval](#Interval)
-- [Namespace](#Namespace)
-- [Writer](#Writer)
+- [CollectCoreMetrics](#collectcoremetrics)
+- [CommonDimensions](#commondimensions)
+- [Enabled](#enabled)
+- [Interval](#interval)
+- [Namespace](#namespace)
+- [Writer](#writer)
 
 ---
 ### CollectCoreMetrics
@@ -64,7 +64,7 @@ Writer for writing collect metrics data
 
 **Type**: [MetricsWriterConfiguration](./metrics-writer-configuration)
 
-[^top](#MetricsConfiguration)
+[^top](#metricsconfiguration)
 
 ## Schema
 
@@ -159,6 +159,6 @@ In-process writer configuration:
 }
 ```
 
-[^top](#MetricsConfiguration)
+[^top](#metricsconfiguration)
 
 ## 

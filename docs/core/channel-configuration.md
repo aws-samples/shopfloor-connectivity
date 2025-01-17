@@ -1,30 +1,30 @@
 ## ChannelConfiguration
 
-[SFC Configuration](./sfc-configuration.md) > [Sources](./sfc-configuration#Sources) > [Channels](./source-configuration.md#channels)
+[SFC Configuration](./sfc-configuration.md) > [Sources](./sfc-configuration.md#sources) > [Channels](./source-configuration.md#channels)
 
-- [Schema](#Schema)
+- [Schema](#schema)
 
-- [Examples](#Examples)
+- [Examples](#examples)
 
 **Properties:**
 
-- [ChangeFilter](#ChangeFilter)
+- [ChangeFilter](#changefilter)
 
-- [ConditionFilter](#ConditionFilter)
+- [ConditionFilter](#conditionfilter)
 
-- [Decompose](#Decompose)
+- [Decompose](#decompose)
 
-- [Description](#Description)
+- [Description](#description)
 
-- [Metadata](#Metadata)
+- [Metadata](#metadata)
 
-- [Name](#Name)
+- [Name](#name)
 
-- [Spread](#Spread)
+- [Spread](#spread)
 
-- [Transformation](#Transformation)
+- [Transformation](#transformation)
 
-- [ValueFilter](#ValueFilter)
+- [ValueFilter](#valuefilter)
 
   
 
@@ -34,7 +34,7 @@
 
 **Type**: String
 
-Optional, if used it must refer to a configured filter in the [ChangeFilters](./sfc-configuration#ChangeFilters) element at the sec top level configuration.
+Optional, if used it must refer to a configured filter in the [ChangeFilters](./sfc-configuration.md#changefilters) element at the sec top level configuration.
 
 ---
 ### ConditionFilter
@@ -42,13 +42,13 @@ ConditionFilter to apply to this channel, see condition filters
 
 **Type**: String
 
-Optional, if used it must refer to a configured filter in the [ConditionFilters](./sfc-configuration#ConditionFilters) element  at the sec top level configuration.
+Optional, if used it must refer to a configured filter in the [ConditionFilters](./sfc-configuration.md#conditionfilters) element  at the sec top level configuration.
 
 ---
 ### Decompose
-If set to true and the value of the channel  is a structured value then the value is decomposed into a set of individual values for each (sub) element in  the structure. Decomposition can also be set for all channels for a source by setting its [Decompose](./source-configuration.md#Decompose) value to true. The value of the Decompose setting at channel level will override the setting at source level.
+If set to true and the value of the channel  is a structured value then the value is decomposed into a set of individual values for each (sub) element in  the structure. Decomposition can also be set for all channels for a source by setting its [Decompose](./source-configuration.md#decompose) value to true. The value of the Decompose setting at channel level will override the setting at source level.
 
-If the value is  list of structures and the value of the [Spread](#Spread) setting is true then each structure in the list is decomposed. 
+If the value is  list of structures and the value of the [Spread](#spread) setting is true then each structure in the list is decomposed. 
 
 **Type**: Boolean
 
@@ -69,7 +69,7 @@ User-defined description of the channel
 
 ### Metadata
 
-The optional [Metadata](../README.md#Metadata) element can be used to add additional data to the output at the channel level. If metadata is specified, which is a map of string indexed values, it will be added to the output at the channel level as an element that can be configured through the "Metadata" entry of the ElementNames configuration element.
+The optional [Metadata](../README.md#metadata) element can be used to add additional data to the output at the channel level. If metadata is specified, which is a map of string indexed values, it will be added to the output at the channel level as an element that can be configured through the "Metadata" entry of the ElementNames configuration element.
 
 **Type**: Map[String, String]
 
@@ -82,7 +82,7 @@ The optional [Metadata](../README.md#Metadata) element can be used to add additi
 ---
 ### Spread
 If set to true and the value of the channel the value is a list then for each element in the list a new individual value is created.
-The value of this setting overrules the setting of the [Spread](./source-configuration.md#Spread) setting at source level.
+The value of this setting overrules the setting of the [Spread](./source-configuration.md#spread) setting at source level.
 
 **Type**: Boolean
 
@@ -92,11 +92,11 @@ The names of the values for the fields in the structure start with the name of t
 
 ---
 ### Transformation
-[Transformation](./transformation-operator-configuration.md) to apply to this channel value, the name must be an existing entry in the [Transformations](./sfc-configuration#Transformations) element at the top level of the SFC configuration.
+[Transformation](./transformation-operator-configuration.md) to apply to this channel value, the name must be an existing entry in the [Transformations](./sfc-configuration.md#transformations) element at the top level of the SFC configuration.
 
 **Type**: String
 
-Optional, if used it must refer to a configured filter in the  [Transformations](./sfc-configuration#Transformations)  element in the SFC top level configuration.
+Optional, if used it must refer to a configured filter in the  [Transformations](./sfc-configuration.md#transformations)  element in the SFC top level configuration.
 
 ---
 ### ValueFilter
@@ -104,9 +104,9 @@ Optional, if used it must refer to a configured filter in the  [Transformations]
 
 **Type**: String
 
-Optional, if used it must refer to a configured filter in the [ValueFilters](./sfc-configuration#ValueFilters) element  at the sec top level configuration.
+Optional, if used it must refer to a configured filter in the [ValueFilters](./sfc-configuration.md#valuefilters) element  at the sec top level configuration.
 
-[^top](#ChannelConfiguration)
+[^top](#channelconfiguration)
 
 
 
@@ -317,4 +317,4 @@ Channel with filters and transformation:
 
 
 
-[^top](#ChannelConfiguration)
+[^top](#channelconfiguration)

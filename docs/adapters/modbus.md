@@ -2,30 +2,30 @@
 
 Configuration for Modbus TCP protocol adapter.
 
-- [ModbusSourceConfiguration](#ModbusSourceConfiguration)
-- [ModbusOptimization](#ModbusOptimization)
-- [ModbusChannelConfiguration](#ModbusChannelConfiguration)
-- [ModbusTcpAdapterConfiguration](#ModbusTcpAdapterConfiguration)
-- [ModbusTcpDeviceConfiguration](#ModbusTcpDeviceConfiguration)
+- [ModbusSourceConfiguration](#modbussourceconfiguration)
+- [ModbusOptimization](#modbusoptimization)
+- [ModbusChannelConfiguration](#modbuschannelconfiguration)
+- [ModbusTcpAdapterConfiguration](#modbustcpadapterconfiguration)
+- [ModbusTcpDeviceConfiguration](#modbustcpdeviceconfiguration)
 
 ---
 
 ## ModbusSourceConfiguration
 
-[SFC Configuration](../core/sfc-configuration.md) > [Sources](../core/sfc-configuration#Sources) >  [Source](../core/source-configuration.md) 
+[SFC Configuration](../core/sfc-configuration.md) > [Sources](../core/sfc-configuration.md#sources) >  [Source](../core/source-configuration.md) 
 
 
 
 Source configuration for the Modbus protocol adapter. This type extends the [SourceConfiguration](../core/source-configuration.md) type. 
 
-- [Schema](#ModbusSourceConfiguration-schema)
-- [Example](#ModbusSourceConfiguration-example)
+- [Schema](#modbussourceconfiguration-schema)
+- [Example](#modbussourceconfiguration-example)
 
 **Properties:**
-- [AdapterDevice](#AdapterDevice)
-- [Channels](#Channels)
-- [Optimization](#Optimization)
-- [ReadTimeout](#ReadTimeout)
+- [AdapterDevice](#adapterdevice)
+- [Channels](#channels)
+- [Optimization](#optimization)
+- [ReadTimeout](#readtimeout)
 
 ---
 
@@ -43,7 +43,7 @@ The channels hold configuration data to read values from the Modbus source devic
 The element is a map indexed by the channel identifier.
 Channels can be "commented" out by adding a "#" at the beginning of the identifier of that channel.
 
-**Type**: Map[String,[ModbusChannelConfiguration](#ModbusChannelConfiguration)
+**Type**: Map[String,[ModbusChannelConfiguration](#modbuschannelconfiguration)
 
 At least 1 channel must be configured.
 
@@ -53,7 +53,7 @@ Optimization for combining reading values from adjacent or near adjacent in a si
 
 **Type**: ModbusOptimization
 
-Default optimization is enabled with a [RegisterMaxGapSize](#RegisterMaxGapSize) of 8 and a [CoilMaxGapSize](#CoilMaxGapSize) of 16.
+Default optimization is enabled with a [RegisterMaxGapSize](#registermaxgapsize) of 8 and a [CoilMaxGapSize](#coilmaxgapsize) of 16.
 
 ---
 ### ReadTimeout
@@ -171,19 +171,18 @@ Full configuration:
 
 ## ModbusOptimization
 
-[ModbusSource](#ModbusSourceConfiguration) > [Optimization](#modbusoptimization)
+[ModbusSource](#modbussourceconfiguration) > [Optimization](#modbusoptimization)
 
 
 
-- [Schema](#ModbusOptimization-schema)
-
-- [Example](#ModbusOptimization-example)
+- [Schema](#modbusoptimization-schema)
+- [Example](#modbusoptimization-example)
 
 **Properties:**
 
-- [Active](#Active)
-- [RegisterMaxGapSize](#RegisterMaxGapSize)
-- [CoilMaxGapSize](#CoilMaxGapSize)
+- [Active](#active)
+- [RegisterMaxGapSize](#registermaxgapsize)
+- [CoilMaxGapSize](#coilmaxgapsize)
 
 ---
 ### Active
@@ -257,21 +256,20 @@ Default is 16
 
 ## ModbusChannelConfiguration
 
-[SFC Configuration](../core/sfc-configuration.md) > [Sources](../core/sfc-configuration#Sources) > [Source](../core/source-configuration.md)  > [Channels](../core/source-configuration.md#Channels) > [Channel](../core/channel-configuration.md)
+[SFC Configuration](../core/sfc-configuration.md) > [Sources](../core/sfc-configuration.md#sources) > [Source](../core/source-configuration.md)  > [Channels](../core/source-configuration.md#channels) > [Channel](../core/channel-configuration.md)
 
 
 
 The ModbusChannelConfiguration type extends the [ChannelConfiguration](../core/channel-configuration.md) class with channel properties for the Modbus TCP  protocol adapter.
 
-- [Schema](#ModbusChannelConfiguration-schema)
-
-- [Examples](#ModbusChannelConfiguration-examples)
+- [Schema](#modbuschannelconfiguration-schema)
+- [Examples](#modbuschannelconfiguration-examples)
 
 
 **Properties:**
-- [Address](#Address)
-- [Size](#Size)
-- [Type](#Type)
+- [Address](#address)
+- [Size](#size)
+- [Type](#type)
 
 ---
 ### Address
@@ -384,7 +382,7 @@ Modbus channel type to read from
 
 ## ModbusTcpAdapterConfiguration
 
-[SFC Configuration](../core/sfc-configuration.md) > [ProtocolAdapters](../core/sfc-configuration#ProtocolAdapters) > [Adapter](../core/protocol-adapter-configuration.md) 
+[SFC Configuration](../core/sfc-configuration.md) > [ProtocolAdapters](../core/sfc-configuration.md#protocoladapters) > [Adapter](../core/protocol-adapter-configuration.md) 
 
 
 
@@ -392,19 +390,18 @@ ModbusTcpAdapterConfiguration extension the [AdapterConfiguration](../core/proto
 
 AdsAdapterConfiguration 
 
-- [Schema](#ModbusTcpAdapterConfiguration-schema)
-
-- [Example](#ModbusTcpAdapterConfiguration-example)
+- [Schema](#modbustcpadapterconfiguration-schema)
+- [Example](#modbustcpadapterconfiguration-example)
 
 **Properties:**
 
-- [Devices](#Devices)
+- [Devices](#devices)
 
 ---
 ### Devices
 Modbus devices configured for this adapter. The modbus tcp source using the adapter must refer to one of these servers with the AdapterDevice attribute.
 
-**Type**: Map[String,[ModbusTcpDeviceConfiguration](#ModbusTcpDeviceConfiguration)]
+**Type**: Map[String,[ModbusTcpDeviceConfiguration](#modbustcpdeviceconfiguration)]
 
 
 
@@ -467,22 +464,21 @@ Modbus devices configured for this adapter. The modbus tcp source using the adap
 
 ## ModbusTcpDeviceConfiguration
 
-[ModbusTcpAdapter](#ModbusTcpAdapterConfiguration) > [Devices](#Devices)
+[ModbusTcpAdapter](#modbustcpadapterconfiguration) > [Devices](#devices)
 
 
 
-- [Schema](#ModbusTcpDeviceConfiguration-schema)
-
-- [Example](#ModbusTcpDeviceConfiguration-example)
+- [Schema](#modbustcpdeviceconfiguration-schema)
+- [Example](#modbustcpdeviceconfiguration-example)
 
 **Properties:**
 
-- [Address](#Address)
-- [ConnectTimeout](#ConnectTimeout)
-- [DeviceId](#DeviceId)
-- [Port](#Port)
-- [WaitAfterConnectError](#WaitAfterConnectError)
-- [WaitAfterReadError](#WaitAfterReadError)
+- [Address](#address)
+- [ConnectTimeout](#connecttimeout)
+- [DeviceId](#deviceid)
+- [Port](#port)
+- [WaitAfterConnectError](#waitafterconnecterror)
+- [WaitAfterReadError](#waitafterreaderror)
 
 ---
 ### Address

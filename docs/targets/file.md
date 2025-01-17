@@ -1,6 +1,6 @@
 # File Target
 
-[SFC Configuration](../core/sfc-configuration.md) > [Targets](../core/sfc-configuration#Targets) >  [Target](../core/target-configuration.md) 
+[SFC Configuration](../core/sfc-configuration.md) > [Targets](../core/sfc-configuration.md#targets) >  [Target](../core/target-configuration.md) 
 
 
 
@@ -8,18 +8,17 @@
 
 FileConfiguration extends the type  [TargetConfiguration](../core/target-configuration.md) with specific configuration data for writing data to the local file system. The Targets configuration element can contain entries of this type, the TargetType of these entries must be set to **"FILE-TARGET".**
 
-- [Schema](#FileConfiguration-Schema)
-- [Examples](#FileConfiguration-Examples)
+- [Schema](#fileconfiguration-schema)
+- [Examples](#fileconfiguration-examples)
 
 **Properties:**
-- [BufferSize](#BufferSize)
-- [Compression](#Compression)
-- [Directory](#Directory)
-- [Extension](#Extension)
-- [Interval](#Interval)
-- [Json](#Json)
-
-- [UtcTime](#UtcTime)
+- [BufferSize](#buffersize)
+- [Compression](#compression)
+- [Directory](#directory)
+- [Extension](#extension)
+- [Interval](#interval)
+- [Json](#json)
+- [UtcTime](#utctime)
 
 ---
 ### BufferSize

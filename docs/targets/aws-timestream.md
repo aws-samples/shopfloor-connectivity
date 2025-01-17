@@ -1,15 +1,15 @@
 # AWS Timestream Target
 
 
-- [AwsTimestreamTargetConfiguration](#AwsTimestreamTargetConfiguration)
-- [AwsTimestreamRecordConfiguration](#AwsTimestreamRecordConfiguration)
-- [AwsTimestreamDimensionConfiguration](#AwsTimestreamDimensionConfiguration)
+- [AwsTimestreamTargetConfiguration](#awstimestreamtargetconfiguration)
+- [AwsTimestreamRecordConfiguration](#awstimestreamrecordconfiguration)
+- [AwsTimestreamDimensionConfiguration](#awstimestreamdimensionconfiguration)
 
 ---
 
 ## AwsTimestreamTargetConfiguration
 
-[SFC Configuration](../core/sfc-configuration.md) > [Targets](../core/sfc-configuration#Targets) >  [Target](../core/target-configuration.md) 
+[SFC Configuration](../core/sfc-configuration.md) > [Targets](../core/sfc-configuration.md#targets) >  [Target](../core/target-configuration.md) 
 
 
 
@@ -17,17 +17,16 @@ AwsSTimestreamTargetConfiguration extends the type [TargetConfiguration](../core
 
 Requires IAM timestream:WriteRecords permission for the configures table as well timestream:DescribeEndpoints
 
-- [Schema](#AwsTimestreamTargetConfiguration-Schema)
-- [Examples](#AwsTimestreamTargetConfiguration-Examples)
+- [Schema](#awstimestreamtargetconfiguration-schema)
+- [Examples](#awstimestreamtargetconfiguration-examples)
 
 **Properties:**
-- [BatchSize](#BatchSize)
-- [CredentialProviderClient](#CredentialProviderClient)
-- [Database](#Database)
-- [Interval](#Interval)
-
-- [Records](#Records)
-- [TableName](#TableName)
+- [BatchSize](#batchsize)
+- [CredentialProviderClient](#credentialproviderclient)
+- [Database](#database)
+- [Interval](#interval)
+- [Records](#records)
+- [TableName](#tablename)
 
 ---
 ### BatchSize
@@ -67,7 +66,7 @@ Optional, if not set only BatchSize is used, minimum value is 10
 ### Records
 Records to write to table
 
-**Type**: List of [AwsTimestreamRecordConfiguration](#AwsTimestreamRecordConfiguration)
+**Type**: List of [AwsTimestreamRecordConfiguration](#awstimestreamrecordconfiguration)
 
 ---
 ### TableName
@@ -187,26 +186,27 @@ Timestream table
 
 ## AwsTimestreamRecordConfiguration
 
-[AwsTimstreamTarget](#AwsTimestreamTargetConfiguration) > [Records](#Records)
+[AwsTimestreamTarget](#awstimestreamtargetconfiguration) > [Records](#records)
 
 
 
-- [Schema](#AwsTimestreamRecordConfiguration-Schema)
-- [Examples](#AwsTimestreamRecordConfiguration-Examples)
+- [Schema](#awstimestreamrecordconfiguration-schema)
+- [Examples](#awstimestreamrecordconfiguration-examples)
 
 **Properties:**
-- [Dimensions](#Dimensions)
-- [MeasureName](#MeasureName)
-- [MeasureTimePath](#MeasureTimePath)
-- [MeasureValuePath](#MeasureValuePath)
-- [MeasureValueType](#MeasureValueType)
+
+- [Dimensions](#dimensions)
+- [MeasureName](#measurename)
+- [MeasureTimePath](#measuretimepath)
+- [MeasureValuePath](#measurevaluepath)
+- [MeasureValueType](#measurevaluetype)
 
 
 ---
 ### Dimensions
 Record dimensions
 
-**Type**: List of [AwsTimestreamDimensionConfiguration](#AwsTimestreamDimensionConfiguration)
+**Type**: List of [AwsTimestreamDimensionConfiguration](#awstimestreamdimensionconfiguration)
 
 ---
 ### MeasureName
@@ -314,17 +314,17 @@ Any of "DOUBLE", "BIGINT", "VARCHAR","BOOLEAN"
 
 ## AwsTimestreamDimensionConfiguration
 
-[AwsTimstreamTarget](#AwsTimestreamTargetConfiguration) > [Records](#Records) > [Record](#AwsTimestreamRecordConfiguration) > [Dimensions](#dimensions)
+[AwsTimstreamTarget](#awstimestreamtargetconfiguration) > [Records](#records) > [Record](#awstimestreamrecordconfiguration) > [Dimensions](#dimensions)
 
 
 
-- [Schema](#AwsTimestreamDimensionConfiguration-Schema)
-- [Examples](#AwsTimestreamDimensionConfiguration-Examples)
+- [Schema](#awstimestreamdimensionconfiguration-schema)
+- [Examples](#awstimestreamdimensionconfiguration-examples)
 
 **Properties:**
-- [DimensionName](#DimensionName)
-- [DimensionValue](#DimensionValue)
-- [DimensionValuePath](#DimensionValuePath)
+- [DimensionName](#dimensionname)
+- [DimensionValue](#dimensionvalue)
+- [DimensionValuePath](#dimensionvaluepath)
 
 
 ---

@@ -8,7 +8,7 @@
 
     ## Core Configuration types
 
-  - [AggregationConfiguration](./aggregation-configuration)
+  - [AggregationConfiguration](./aggregation-configuration.md)
   - [AwsIotCredentialProviderClientConfiguration](./aws-iot-credential-provider-configuration.md)
   - [AwsServiceConfig](./aws-service-configuration)
   - [BaseSourceConfiguration](./base-source-configuration.md)

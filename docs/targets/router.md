@@ -1,22 +1,22 @@
 # Router Target
 
-[SFC Configuration](../core/sfc-configuration.md) > [Targets](../core/sfc-configuration#Targets) >  [Target](../core/target-configuration.md) 
+[SFC Configuration](../core/sfc-configuration.md) > [Targets](../core/sfc-configuration.md#targets) >  [Target](../core/target-configuration.md) 
 
 
 
 
 ## RouterTargetConfiguration
 
-- [Schema](#RouterTargetConfiguration-Schema)
-- [Examples](#RouterTargetConfiguration-Examples)
+- [Schema](#routertargetconfiguration-schema)
+- [Examples](#routertargetconfiguration-examples)
 
 RouterTargetConfiguration extends the type  [TargetConfiguration](../core/target-configuration.md) with specific configuration data for routing target data to next (primary) targets and alternative and success targets for this these targets. The Targets configuration element can contain entries of this type, the TargetType of these entries must be set to **"ROUTER"**.
 
 
 **Properties:**
 
-- [ResultHandlerPolicy](#ResultHandlerPolicy)
-- [Routes](#Routes)
+- [ResultHandlerPolicy](#resulthandlerpolicy)
+- [Routes](#routes)
 
 
 ---
@@ -37,7 +37,7 @@ This map is indexed by the target IDs of primary targets to which data is routed
 Each entry can have an alternative route to which the data is routed if writing to the primary target fails.
 A success target can be specified to which data is routed if the data has been written successfully to the primary or alternative target.
 
-**Type**: Map[String, [RoutesConfiguration](#RoutesConfiguration)]
+**Type**: Map[String, [RoutesConfiguration](#routesconfiguration)]
 
 The targets must be targets that are configured either as in-process or IPC service targets in the same configuration.
 
@@ -96,17 +96,16 @@ The targets must be targets that are configured either as in-process or IPC serv
 
 ## RoutesConfiguration
 
-[RouterTarget](#RouterTargetConfiguration) > [Routes](#Routes)
+[RouterTarget](#routertargetconfiguration) > [Routes](#routes)
 
 
-
-- [Schema](#RoutesConfiguration-Schema)
-- [Examples](#RoutesConfiguration-Examples)
+- [Schema](#routesconfiguration-schema)
+- [Examples](#routesconfiguration-examples)
 
 **Properties:**
 
-- [Alternate](#Alternate)
-- [Success](#Success)
+- [Alternate](#alternate)
+- [Success](#success)
 
 ---
 

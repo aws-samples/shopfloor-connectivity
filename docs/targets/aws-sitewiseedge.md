@@ -5,7 +5,7 @@
 
 ## SiteWiseEdgeTargetConfiguration
 
-[SFC Configuration](../core/sfc-configuration.md) > [Targets](../core/sfc-configuration#Targets) >  [Target](../core/target-configuration.md) 
+[SFC Configuration](../core/sfc-configuration.md) > [Targets](../core/sfc-configuration.md#targets) >  [Target](../core/target-configuration.md) 
 
 
 
@@ -13,30 +13,30 @@ The `AWS-SITEWISEEDGE-TARGET` is a specific type of target configuration in SFC 
 This type extends the type  [TargetConfiguration](../core/target-configuration.md) with specific configuration data for this adapter.
 This target adapter follows the Time Quality Value (TQV) schema for ingesting data into SiteWise Edge. For a better understanding of the TQV schema, please refer to the [Ingest data using the AWS IoT SiteWise API](https://docs.aws.amazon.com/iot-sitewise/latest/userguide/ingest-api.html) documentation.
 
-- [Schema](#SiteWiseEdgeTargetConfiguration-Schema)
-- [Examples](#SiteWiseEdgeTargetConfiguration-Examples)
+- [Schema](#sitewiseedgetargetconfiguration-schema)
+- [Examples](#sitewiseedgetargetconfiguration-examples)
 
 
 **Properties:**
-- [BatchCount](#BatchCount)
-- [BatchInterval](#BatchInterval)
-- [BatchSize](#BatchSize)
-- [Certificate](#Certificate)
-- [ClientName](#ClientName)
-- [ConnectRetries](#ConnectRetries)
-- [Connection](#Connection)
-- [ConnectionTimeout](#ConnectionTimeout)
-- [EndPoint](#EndPoint)
-- [Password](#Password)
-- [Port](#Port)
-- [PrivateKey](#PrivateKey)
-- [PublishTimeout](#PublishTimeout)
-- [RootCA](#RootCA)
-- [SslServerCertificate](#SslServerCertificate)
-- [TopicName](#TopicName)
-- [Username](#Username)
-- [VerifyHostname](#VerifyHostname)
-- [WaitAfterConnectError](#WaitAfterConnectError)
+- [BatchCount](#batchcount)
+- [BatchInterval](#batchinterval)
+- [BatchSize](#batchsize)
+- [Certificate](#certificate)
+- [ClientName](#clientname)
+- [ConnectRetries](#connectretries)
+- [Connection](#connection)
+- [ConnectionTimeout](#connectiontimeout)
+- [EndPoint](#endpoint)
+- [Password](#password)
+- [Port](#port)
+- [PrivateKey](#privatekey)
+- [PublishTimeout](#publishtimeout)
+- [RootCA](#rootca)
+- [SslServerCertificate](#sslservercertificate)
+- [TopicName](#topicname)
+- [Username](#username)
+- [VerifyHostname](#verifyhostname)
+- [WaitAfterConnectError](#waitafterconnecterror)
 
 ---
 ### BatchCount

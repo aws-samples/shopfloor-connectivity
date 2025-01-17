@@ -3,28 +3,28 @@
 SNMP Protocol adapter configuration
 
 ---
-- [SnmpSourceConfiguration](#SnmpSourceConfiguration)
-- [SnmpChannelConfiguration](#SnmpChannelConfiguration)
-- [SnmpAdapterConfiguration](#SnmpAdapterConfiguration)
-- [SnmpDeviceConfiguration](#SnmpDeviceConfiguration)
+- [SnmpSourceConfiguration](#snmpsourceconfiguration)
+- [SnmpChannelConfiguration](#snmpchannelconfiguration)
+- [SnmpAdapterConfiguration](#snmpadapterconfiguration)
+- [SnmpDeviceConfiguration](#snmpdeviceconfiguration)
 
 ---
 
 ## SnmpSourceConfiguration
 
-[SFC Configuration](../core/sfc-configuration.md) > [Sources](../core/sfc-configuration#Sources) >  [Source](../core/source-configuration.md) 
+[SFC Configuration](../core/sfc-configuration.md) > [Sources](../core/sfc-configuration.md#sources) >  [Source](../core/source-configuration.md) 
 
 
 
 Source configuration for the SNMP protocol adapter. This type extends the [SourceConfiguration](../core/source-configuration.md) type.
 
-- [Schema](#SnmpSourceConfiguration-Schema)
-- [Examples](#SnmpSourceConfiguration-Examples)
+- [Schema](#snmpsourceconfiguration-schema)
+- [Examples](#snmpsourceconfiguration-examples)
 
 
 **Properties:**
-- [AdapterDevice](#AdapterDevice)
-- [Channels](#Channels)
+- [AdapterDevice](#adapterdevice)
+- [Channels](#channels)
 
 ---
 ### AdapterDevice
@@ -41,7 +41,7 @@ The channels hold configuration data to read values from the SNMP source devices
 The element is a map indexed by the channel identifier.
 Channels can be "commented" out by adding a "#" at the beginning of the identifier of that channel.
 
-**Type**: Map[String,[SnmpChannelConfiguration](#SnmpChannelConfiguration)]
+**Type**: Map[String,[SnmpChannelConfiguration](#snmpchannelconfiguration)]
 
 At least 1 channel must be configured.
 
@@ -113,18 +113,18 @@ At least 1 channel must be configured.
 
 ## SnmpChannelConfiguration
 
-[SFC Configuration](../core/sfc-configuration.md) > [Sources](../core/sfc-configuration#Sources) > [Source](../core/source-configuration.md)  > [Channels](../core/source-configuration.md#Channels) > [Channel](../core/channel-configuration.md)
+[SFC Configuration](../core/sfc-configuration.md) > [Sources](../core/sfc-configuration.md#sources) > [Source](../core/source-configuration.md)  > [Channels](../core/source-configuration.md#channels) > [Channel](../core/channel-configuration.md)
 
 
 
 The SnmpChannelConfiguration type extends the [ChannelConfiguration](../core/channel-configuration.md) class with channel properties for the SNMP protocol adapter.
 
-- [Schema](#SnmpChannelConfiguration-Schema)
-- [Examples](#SnmpChannelConfiguration-Examples)
+- [Schema](#snmpchannelconfiguration-schema)
+- [Examples](#snmpchannelconfiguration-examples)
 
 **Properties:**
 
-- [ObjectId](#ObjectId)
+- [ObjectId](#objectid)
 
 
 
@@ -178,24 +178,24 @@ Must be in valid dot format notation
 
 ## SnmpAdapterConfiguration
 
-[SFC Configuration](../core/sfc-configuration.md) > [ProtocolAdapters](../core/sfc-configuration#ProtocolAdapters) > [Adapter](../core/protocol-adapter-configuration.md) 
+[SFC Configuration](../core/sfc-configuration.md) > [ProtocolAdapters](../core/sfc-configuration.md#protocoladapters) > [Adapter](../core/protocol-adapter-configuration.md) 
 
 
 
 SnmpAdapterConfiguration extension the [AdapterConfiguration](../core/protocol-adapter-configuration.md) with properties for the SNMP Protocol adapter.
 
-- [Schema](#SnmpAdapterConfiguration-Schema)
-- [Examples](#SnmpAdapterConfiguration-Examples)
+- [Schema](#snmpadapterconfiguration-schema)
+- [Examples](#snmpadapterconfiguration-examples)
 
 **Properties:**
-- [Devices](#Devices)
+- [Devices](#devices)
 
 
 ---
 ### Devices
 Snmp devices configured for this adapter. The modbus tcp source using the adapter must refer to one of these servers with the AdapterDevice attribute.
 
-**Type**: Map[String,[SnmpDeviceConfiguration](#SnmpDeviceConfiguration)]
+**Type**: Map[String,[SnmpDeviceConfiguration](#snmpdeviceconfiguration)]
 
 ### SnmpAdapterConfiguration Schema
 
@@ -261,22 +261,22 @@ Snmp devices configured for this adapter. The modbus tcp source using the adapte
 
 ## SnmpDeviceConfiguration
 
-[SnmpAdapter](#SnmpAdapterConfiguration) > [Devices](#Devices)
+[SnmpAdapter](#snmpadapterconfiguration) > [Devices](#devices)
 
 
-- [Schema](#SnmpDeviceConfiguration-Schema)
-- [Examples](#SnmpDeviceConfiguration-Examples)
+- [Schema](#snmpdeviceconfiguration-schema)
+- [Examples](#snmpdeviceconfiguration-examples)
 
 
 **Properties:**
-- [Address](#Address)
-- [Community](#Community)
-- [NetworkProtocol](#NetworkProtocol)
-- [Port](#Port)
-- [ReadBatchSize](#ReadBatchSize)
-- [Retries](#Retries)
-- [SnmpVersion](#SnmpVersion)
-- [Timeout](#Timeout)
+- [Address](#address)
+- [Community](#community)
+- [NetworkProtocol](#networkprotocol)
+- [Port](#port)
+- [ReadBatchSize](#readbatchsize)
+- [Retries](#retries)
+- [SnmpVersion](#snmpversion)
+- [Timeout](#timeout)
 
 ---
 ### Address

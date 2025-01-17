@@ -1,6 +1,6 @@
 # MQTT Target
 
-[SFC Configuration](../core/sfc-configuration.md) > [Targets](../core/sfc-configuration#Targets) >  [Target](../core/target-configuration.md) 
+[SFC Configuration](../core/sfc-configuration.md) > [Targets](../core/sfc-configuration.md#targets) >  [Target](../core/target-configuration.md) 
 
 
 
@@ -8,33 +8,33 @@
 
 MqttTargetConfiguration extends the type TargetConfiguration with specific configuration data for connecting to and sending to MQTT topic. The Targets configuration element can contain entries of this type, the TargetType of these entries must be set to "MQTT-TARGET"
 
-- [Schema](#MqttTargetConfiguration-Schema)
-- [Examples](#MqttTargetConfiguration-Examples)
+- [Schema](#mqtttargetconfiguration-schema)
+- [Examples](#mqtttargetconfiguration-examples)
 
 **Properties:**
-- [AlternateTopicName](#AlternateTopicName)
-- [BatchCount](#BatchCount)
-- [BatchInterval](#BatchInterval)
-- [BatchSize](#BatchSize)
-- [Certificate](#Certificate)
-- [Compression](#Compression)
-- [ConnectRetries](#ConnectRetries)
-- [Connection](#Connection)
-- [ConnectionTimeout](#ConnectionTimeout)
-- [EndPoint](#EndPoint)
-- [MaxPayloadSize](#MaxPayloadSize)
-- [Password](#Password)
-- [Port](#Port)
-- [PrivateKey](#PrivateKey)
-- [PublishTimeout](#PublishTimeout)
-- [QoS](#QoS)
-- [Retain](#Retain)
-- [RootCA](#RootCA)
-- [SslServerCertificate](#SslServerCertificate)
-- [TopicName](#TopicName)
-- [Username](#Username)
-- [WaitAfterConnectError](#WaitAfterConnectError)
-- [WarnAlternateTopicName](#WarnAlternateTopicName)
+- [AlternateTopicName](#alternatetopicname)
+- [BatchCount](#batchcount)
+- [BatchInterval](#batchinterval)
+- [BatchSize](#batchsize)
+- [Certificate](#certificate)
+- [Compression](#compression)
+- [ConnectRetries](#connectretries)
+- [Connection](#connection)
+- [ConnectionTimeout](#connectiontimeout)
+- [EndPoint](#endpoint)
+- [MaxPayloadSize](#maxpayloadsize)
+- [Password](#password)
+- [Port](#port)
+- [PrivateKey](#privatekey)
+- [PublishTimeout](#publishtimeout)
+- [QoS](#qos)
+- [Retain](#retain)
+- [RootCA](#rootca)
+- [SslServerCertificate](#sslservercertificate)
+- [TopicName](#topicname)
+- [Username](#username)
+- [WaitAfterConnectError](#waitafterconnecterror)
+- [WarnAlternateTopicName](#warnalternatetopicname)
 
 ---
 ### AlternateTopicName

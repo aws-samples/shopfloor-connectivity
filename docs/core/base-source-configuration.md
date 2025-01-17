@@ -1,18 +1,17 @@
 # BaseSourceConfiguration
 
-[SFC Configuration](./sfc-configuration.md) > [Sources](./sfc-configuration#Sources)
+[SFC Configuration](./sfc-configuration.md) > [Sources](./sfc-configuration.md#sources)
 
 The BaseSourceConfiguration class contains the common properties for protocol adapter sources. Protocol adapters extend this class with specific properties for that adapter.
 
--[Schema](#Schema)
-
--[Example](#Example)
+-[Schema](#schema)
+-[Example](#example)
 
 **Properties:**
 
-- [Description](#Description)
-- [Name](#Name)
-- [ProtocolAdapter](#ProtocolAdapter)
+- [Description](#description)
+- [Name](#name)
+- [ProtocolAdapter](#protocoladapter)
 
 ---
 
@@ -26,17 +25,17 @@ Type: String
 
 ### Name
 
-Name of the source in the output data. This property only needs to be set if the sourcename in the output must be different from the key for the source in the SFC toplevel configuration [Sources](./sfc-configuration#Sources) property.
+Name of the source in the output data. This property only needs to be set if the sourcename in the output must be different from the key for the source in the SFC toplevel configuration [Sources](./sfc-configuration.md#sources) property.
 
 ---
 
 ### ProtocolAdapter
 
-Reference to the adapter for the source in the SFC toplevel configuration [Sources](./sfc-configuration#Sources) property.
+Reference to the adapter for the source in the SFC toplevel configuration [Sources](./sfc-configuration.md#sources) property.
 
 ---
 
-[^top](#BaseSourceConfiguration)
+[^top](#basesourceconfiguration)
 
 ## Schema
 
@@ -77,4 +76,4 @@ Reference to the adapter for the source in the SFC toplevel configuration [Sourc
 
 
 
-[^top](#BaseSourceConfiguration)
+[^top](#basesourceconfiguration)

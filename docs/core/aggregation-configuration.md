@@ -1,17 +1,17 @@
 ## Aggregation
 
-[SFC Configuration](./sfc-configuration.md) > [Sources](./sfc-configuration#Sources) > [Schedule](./schedule-configuration.md) > [Aggregation](./schedule-configuration.md#Aggregation)
+[SFC Configuration](./sfc-configuration.md) > [Sources](./sfc-configuration.md#sources) > [Schedule](./schedule-configuration.md) > [Aggregation](./schedule-configuration.md#aggregation)
 
 An optional aggregation can be used for a schedule to collect the results of multiple read values and combine these in a single output message, optimally applying functions to aggregate the output data.
 
-- [Schema](#Schema)
-- [Examples](#Examples)
+- [Schema](#schema)
+- [Examples](#examples)
 
 **Properties**
 
-- [Output](#Output)
-- [Size](#Size)
-- [Transformations](#Transformations)
+- [Output](#output)
+- [Size](#size)
+- [Transformations](#transformations)
 
 ---
 ###  Size
@@ -131,7 +131,7 @@ The values aggregation output value is a list of the input values used for the a
 
 Transformations applied to the aggregated data. 
 
-This element is similar to the Output element, but it has an additional map level for the name of the output on which a transformation will be applied.  Transformations element is a three-level map, where the first level contains is indexed by the source identifier. Each entry is another map that is indexed by the channel identifier.  Each entry of the channel map at that level contains a map indexed by the aggregation output e.g., "values", "avg". Each entry contains a single transformation identifier of the transformation that will be applied to the aggregated output value. This transformation identifier must exist in the [Transformations](./sfc-configuration#Transformations) section.   
+This element is similar to the Output element, but it has an additional map level for the name of the output on which a transformation will be applied.  Transformations element is a three-level map, where the first level contains is indexed by the source identifier. Each entry is another map that is indexed by the channel identifier.  Each entry of the channel map at that level contains a map indexed by the aggregation output e.g., "values", "avg". Each entry contains a single transformation identifier of the transformation that will be applied to the aggregated output value. This transformation identifier must exist in the [Transformations](./sfc-configuration.md#transformations) section.   
 
 Wildcards can be applied at each level of the map. The "\*" wildcard can be used at source identifier, channel identifier and/or output name. If wildcards are used are combined with more specific entries the best matching entry will be applied.  
 
@@ -180,7 +180,7 @@ transformation3" will be applied to the aggregated "sum" output for the values o
 
 Transformation "transformation4" will be applied to all aggregated values of "source1", "channel3".
 
-[^top](#Aggregation)
+[^top](#aggregation)
 
 
 
@@ -502,4 +502,4 @@ Complex example with multiple sources and channels:
 }
 ```
 
-[^top](#Aggregation)
+[^top](#aggregation)

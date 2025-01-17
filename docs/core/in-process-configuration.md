@@ -1,22 +1,22 @@
 ## InProcessConfiguration
 
-[SFC Configuration](./sfc-configuration.md) > [ProtocolAdapterTypes](./sfc-configuration#ProtocolAdapterTypes)
+[SFC Configuration](./sfc-configuration.md) > [ProtocolAdapterTypes](./sfc-configuration.md#protocoladaptertypes)
 
-[SFC Configuration](./sfc-configuration.md) > [TargetTypes](./sfc-configuration#TargetTypes) 
+[SFC Configuration](./sfc-configuration.md) > [TargetTypes](./sfc-configuration.md#targettypes) 
 
-[SFC Configuration](./sfc-configuration.md) > [Metrics](./sfc-configuration#Metrics) > [Writer](./metrics-writer-configuration#MetricsWriter)
+[SFC Configuration](./sfc-configuration.md) > [Metrics](./sfc-configuration.md#metrics) > [Writer](./metrics-writer-configuration#metricswriter)
 
-[SFC Configuration](./sfc-configuration.md) > [LogWriter](./sfc-configuration#LogWriter)
+[SFC Configuration](./sfc-configuration.md) > [LogWriter](./sfc-configuration.md#logwriter)
 
-[SFC Configuration](./sfc-configuration.md) > [ConfigProvider](./sfc-configuration#ConfigProvider)
+[SFC Configuration](./sfc-configuration.md) > [ConfigProvider](./sfc-configuration.md#configprovider)
 
-- [Schema](#Schema)
-- [Examples](#Examples)
+- [Schema](#schema)
+- [Examples](#examples)
 
 **Properties:**
 
-- [FactoryClassName](#FactoryClassName)
-- [JarFiles](#JarFiles)
+- [FactoryClassName](#factoryclassname)
+- [JarFiles](#jarfiles)
 
 ---
 ### FactoryClassName
@@ -43,7 +43,7 @@ These entries can either be path names to the jar files of to the directory in w
 
 **Type**: String[]
 
-[^top](#InProcessConfiguration)
+[^top](#inprocessconfiguration)
 
 
 
@@ -119,4 +119,4 @@ Multiple JARs configuration:
 
 
 
-[^top](#InProcessConfiguration)
+[^top](#inprocessconfiguration)

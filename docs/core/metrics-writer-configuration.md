@@ -1,18 +1,18 @@
 ## MetricsWriterConfiguration
 
-[SFC Configuration](./sfc-configuration#Metrics) > [Metrics](./sfc-configuration#Metrics) > [Writer](./metrics-writer-configuration#MetricsWriter)
+[SFC Configuration](./sfc-configuration.md) > [Metrics](./sfc-configuration.md#metrics) > [Writer](./metrics-writer-configuration#metricswriter)
 
-[SFC Configuration](./sfc-configuration.md) > [ProtocolAdapters](./sfc-configuration#ProtocolAdapters) > [ProtocolAdapter](./protocol-adapter-configuration.md) > [Metrics](./protocol-adapter-configuration.md#Metrics) > [Writer](./metrics-writer-configuration#MetricsWriter)
+[SFC Configuration](./sfc-configuration.md) > [ProtocolAdapters](./sfc-configuration.md#protocoladapters) > [ProtocolAdapter](./protocol-adapter-configuration.md) > [Metrics](./protocol-adapter-configuration.md#metrics) > [Writer](./metrics-writer-configuration#metricswriter)
 
-[SFC Configuration](./sfc-configuration.md) > [TargetAdapters](./sfc-configuration#Targets) > [Target](./target-configuration.md) > [Metrics](./target-configuration.md#Metrics) > [Writer](./metrics-writer-configuration#MetricsWriter)
+[SFC Configuration](./sfc-configuration.md) > [TargetAdapters](./sfc-configuration.md#targets) > [Target](./target-configuration.md) > [Metrics](./target-configuration.md#metrics) > [Writer](./metrics-writer-configuration#metricswriter)
 
-- [Schema](#Schema)
-- [Examples](#Examples)
+- [Schema](#schema)
+- [Examples](#examples)
 
 **Properties:**
 
-- [MetricsServer](#MetricsServer)
-- [MetricsWriter](#MetricsWriter)
+- [MetricsServer](#metricsserver)
+- [MetricsWriter](#metricswriter)
 
 ---
 ### MetricsServer
@@ -26,7 +26,7 @@ Jar files implementing the writer
 
 **Type**: [InProcessConfiguration](./in-process-configuration.md)
 
-[^top](#MetricsWriterConfiguration)
+[^top](#metricswriterconfiguration)
 
 
 
@@ -88,5 +88,5 @@ Using IPC MetricsServer:
 }
 ```
 
-[^top](#MetricsWriterConfiguration)
+[^top](#metricswriterconfiguration)
 

@@ -1,6 +1,6 @@
 # AWS Lambda Target
 
-[SFC Configuration](../core/sfc-configuration.md) > [Targets](../core/sfc-configuration#Targets) >  [Target](../core/target-configuration.md) 
+[SFC Configuration](../core/sfc-configuration.md) > [Targets](../core/sfc-configuration.md#targets) >  [Target](../core/target-configuration.md) 
 
 
 
@@ -12,18 +12,18 @@ AwsLambdaFunctionConfiguration extends the type  [TargetConfiguration](../core/t
 
 Requires IAM permission `lambda:InvokeFunction` for the lambda function that is called.
 
-- [Schema](#AwsLambdaTargetConfiguration-Schema)
-- [Examples](#AwsLambdaTargetConfiguration-Examples)
+- [Schema](#awslambdatargetconfiguration-schema)
+- [Examples](#awslambdatargetconfiguration-examples)
 
 **Properties:**
 
-- [BatchSize](#BatchSize)
-- [Compression](#Compression)
-- [CredentialProviderClient](#CredentialProviderClient)
-- [FunctionName](#FunctionName)
-- [Interval](#Interval)
-- [Qualifier](#Qualifier)
-- [Region](#Region)
+- [BatchSize](#batchsize)
+- [Compression](#compression)
+- [CredentialProviderClient](#credentialproviderclient)
+- [FunctionName](#functionname)
+- [Interval](#interval)
+- [Qualifier](#qualifier)
+- [Region](#region)
 
 ---
 ### BatchSize

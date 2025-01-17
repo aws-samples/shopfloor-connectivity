@@ -1,15 +1,14 @@
 ## ValueFilterConfiguration
 
-[SFC Configuration](./sfc-configuration.md) > [ValueFilters](./sfc-configuration#ValueFilters)
+[SFC Configuration](./sfc-configuration.md) > [ValueFilters](./sfc-configuration.md#valuefilters)
 
-- [Schema](#Schema)
-
-- [Example](#Examples)
+- [Schema](#schema)
+- [Example](#examples)
 
 **Properties:**
 
-- [Operator](#Operator)
-- [Value](#Value)
+- [Operator](#operator)
+- [Value](#value)
 
 ---
 ### Operator
@@ -38,7 +37,7 @@ If the operator is "and" ("&&") or "or" ("||")it is a nested list of ValueFilter
 
 
 
-[^top](#ValueFilterConfiguration)
+[^top](#valuefilterconfiguration)
 
 ## Schema
 

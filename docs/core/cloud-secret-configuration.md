@@ -1,19 +1,17 @@
 ## CloudSecretConfiguration
 
-[SFC Configuration](./sfc-configuration.md) > [SecretsManager](./sfc-configuration#SecretsManager) > [Secrets](./secrets-manager-configuration.md#Secrets)
+[SFC Configuration](./sfc-configuration.md) > [SecretsManager](./sfc-configuration.md#secretsmanager) > [Secrets](./secrets-manager-configuration.md#secrets)
 
 Configuration for a secret obtained from AWS Secrets manager
 
-- [Schema](#Schema)
-- [Examples](#Examples)
+- [Schema](#schema)
+- [Examples](#examples)
 
 **Properties:**
 
-- [Alias](#Alias)
-
-- [Labels](#Labels)
-
-- [SecretId](#SecretId)
+- [Alias](#alias)
+- [Labels](#labels)
+- [SecretId](#secretid)
 
   
 
@@ -41,7 +39,7 @@ Name or ARN of the secret
 
  If the ARN of a secret is used, both the ARN or the name of the read secret can be used as a reference in the placeholder.
 
-[^top](#CloudSecretConfiguration)
+[^top](#cloudsecretconfiguration)
 
 
 
@@ -124,4 +122,4 @@ Secret by ARN with alias
 }
 ```
 
-[^top](#CloudSecretConfiguration)
+[^top](#cloudsecretconfiguration)

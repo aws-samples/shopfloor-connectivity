@@ -2,12 +2,12 @@
 
 ## AwsIotAnalyticsTargetConfiguration
 
-[SFC Configuration](../core/sfc-configuration.md) > [Targets](../core/sfc-configuration#Targets) >  [Target](../core/target-configuration.md) 
+[SFC Configuration](../core/sfc-configuration.md) > [Targets](../core/sfc-configuration.md#targets) >  [Target](../core/target-configuration.md) 
 
 
 
-- [Schema](#AwsIotAnalyticsTargetConfiguration-Schema)
-- [Examples](#AwsIotAnalyticsTargetConfiguration-Examples)
+- [Schema](#awsiotanalyticstargetconfiguration-schema)
+- [Examples](#awsiotanalyticstargetconfiguration-examples)
 
 AwsIotAnalyticsTargetConfiguration extends the types [TargetConfiguration](../core/target-configuration.md) with specific configuration data for sending data to an IoT Analytics channel. The Targets configuration element can contain entries of this type, the TargetType of these entries must be set to **"AWS-IOT-ANALYTICS"**
 
@@ -15,10 +15,10 @@ Requires IAM permission `iotanalytics:BatchPutMessage` to write to the configure
 
 **Properties:**
 
-- [BatchSize](#BatchSize)
-- [ChannelName](#ChannelName)
-- [CredentialProviderClient](#CredentialProviderClient)
-- [Region](#Region)
+- [BatchSize](#batchsize)
+- [ChannelName](#channelname)
+- [CredentialProviderClient](#credentialproviderclient)
+- [Region](#region)
 
 ---
 ### BatchSize
@@ -37,7 +37,7 @@ Name of the IoT Analytics channel
 ---
 ### CredentialProviderClient
 
-Name of the AWS credential provider client defined in the SFC top level configuration section [AwsIotCredentialProviderClients](../core/sfc-configuration#AwsIotCredentialProviderClients) obtaining credentials using X509 certificates from the [AWS IoT credentials provider](../sfc-aws-service-credentials.md).
+Name of the AWS credential provider client defined in the SFC top level configuration section [AwsIotCredentialProviderClients](../core/sfc-configuration.md#awsiotcredentialproviderclients) obtaining credentials using X509 certificates from the [AWS IoT credentials provider](../sfc-aws-service-credentials.md).
 
 If no CredentialProviderClient is configured the [AWS Java SDK credential provider chain is used](https://docs.aws.amazon.com/sdk-for-java/latest/developer-guide/credentials.html#credentials-chain)
 

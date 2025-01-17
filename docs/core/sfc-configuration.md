@@ -2,41 +2,40 @@
 
 SFC top level configuration structure	
 
-- [Schema](#Schema)
-
-- [Examples](#Examples)
+- [Schema](#schema)
+- [Examples](#examples)
 
 
 **Properties:**
 
-- [AWSVersion](#AWSVersion)
-- [AwsIotCredentialProviderClients](#AwsIotCredentialProviderClients)
-- [ChangeFilters](#ChangeFilters)
-- [ConditionFilters](#ConditionFilters)
-- [ConfigProvider](#ConfigProvider)
-- [Description](#Description)
-- [ElementNames](#ElementNames)
-- [HealthProbe](#HealthProbe)
-- [LogLevel](#LogLevel)
-- [LogWriter](#LogWriter)
-- [Metadata](#Metadata)
-- [Metrics](#Metrics)
-- [MonitorIncludedConfigContentInterval](#MonitorIncludedConfigContentInterval)
-- [MonitorIncludedConfigFiles](#MonitorIncludedConfigFiles)
-- [ProtocolAdapterServers](#ProtocolAdapterServers)
-- [ProtocolAdapterTypes](#ProtocolAdapterTypes)
-- [ProtocolAdapters](#ProtocolAdapters)
-- [Schedules](#Schedules)
-- [SecretsManager](#SecretsManager)
-- [Sources](#Sources)
-- [TargetServers](#TargetServers)
-- [TargetTypes](#TargetTypes)
-- [Targets](#Targets)
-- [Templates](#Templates)
-- [Transformations](#Transformations)
-- [Tuning](#Tuning)
-- [ValueFilters](#ValueFilters)
-- [Version](#Version)
+- [AWSVersion](#awsversion)
+- [AwsIotCredentialProviderClients](#awsiotcredentialproviderclients)
+- [ChangeFilters](#changefilters)
+- [ConditionFilters](#conditionfilters)
+- [ConfigProvider](#configprovider)
+- [Description](#description)
+- [ElementNames](#elementnames)
+- [HealthProbe](#healthprobe)
+- [LogLevel](#loglevel)
+- [LogWriter](#logwriter)
+- [Metadata](#metadata)
+- [Metrics](#metrics)
+- [MonitorIncludedConfigContentInterval](#monitorincludedconfigcontentinterval)
+- [MonitorIncludedConfigFiles](#monitorincludedconfigfiles)
+- [ProtocolAdapterServers](#protocoladapterservers)
+- [ProtocolAdapterTypes](#protocoladaptertypes)
+- [ProtocolAdapters](#protocoladapters)
+- [Schedules](#schedules)
+- [SecretsManager](#secretsmanager)
+- [Sources](#sources)
+- [TargetServers](#targetservers)
+- [TargetTypes](#targettypes)
+- [Targets](#targets)
+- [Templates](#templates)
+- [Transformations](#transformations)
+- [Tuning](#tuning)
+- [ValueFilters](#valuefilters)
+- [Version](#version)
 
 ---
 ### AWSVersion
@@ -169,7 +168,7 @@ Default built-in writer logs to console
 
 ### Metadata
 
-The optional [Metadata](../README.md#Metadata) element can be used to add additional data to the output at the top level which is combined with the metadata of each schedule. If metadata is specified, which is a map of string indexed values, it will be added to the output at the source level as an element that can be configured through the "Metadata" entry of the ElementNames configuration element.
+The optional [Metadata](../README.md#metadata) element can be used to add additional data to the output at the top level which is combined with the metadata of each schedule. If metadata is specified, which is a map of string indexed values, it will be added to the output at the source level as an element that can be configured through the "Metadata" entry of the ElementNames configuration element.
 
 **Type**: Map[String, String]
 
