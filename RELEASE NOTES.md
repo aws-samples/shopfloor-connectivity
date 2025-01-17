@@ -1,6 +1,6 @@
 # Release Notes:
 
-## Version 1.7.4 & 1,7,5  17 January 2025
+## Version 1.7.4 & `1,7,5  17 January 2025
 
 - Documentation restructure.
 

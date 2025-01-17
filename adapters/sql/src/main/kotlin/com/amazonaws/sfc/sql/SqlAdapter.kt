@@ -4,7 +4,6 @@
 
 package com.amazonaws.sfc.sql
 
-
 import com.amazonaws.sfc.config.ConfigReader
 import com.amazonaws.sfc.data.*
 import com.amazonaws.sfc.log.Logger
