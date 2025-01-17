@@ -1,10 +1,10 @@
 ## MetricsWriterConfiguration
 
-[SFC Configuration](./sfc-configuration.md) > [Metrics](./sfc-configuration.md#metrics) > [Writer](./metrics-writer-configuration#metricswriter)
+[SFC Configuration](./sfc-configuration.md) > [Metrics](./sfc-configuration.md#metrics) > [Writer](./metrics-writer-configuration.md#metricswriter)
 
-[SFC Configuration](./sfc-configuration.md) > [ProtocolAdapters](./sfc-configuration.md#protocoladapters) > [ProtocolAdapter](./protocol-adapter-configuration.md) > [Metrics](./protocol-adapter-configuration.md#metrics) > [Writer](./metrics-writer-configuration#metricswriter)
+[SFC Configuration](./sfc-configuration.md) > [ProtocolAdapters](./sfc-configuration.md#protocoladapters) > [ProtocolAdapter](./protocol-adapter-configuration.md) > [Metrics](./protocol-adapter-configuration.md#metrics) > [Writer](./metrics-writer-configuration.md#metricswriter)
 
-[SFC Configuration](./sfc-configuration.md) > [TargetAdapters](./sfc-configuration.md#targets) > [Target](./target-configuration.md) > [Metrics](./target-configuration.md#metrics) > [Writer](./metrics-writer-configuration#metricswriter)
+[SFC Configuration](./sfc-configuration.md) > [TargetAdapters](./sfc-configuration.md#targets) > [Target](./target-configuration.md) > [Metrics](./target-configuration.md#metrics) > [Writer](./metrics-writer-configuration.md#metricswriter)
 
 - [Schema](#schema)
 - [Examples](#examples)

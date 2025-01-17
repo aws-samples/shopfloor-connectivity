@@ -62,7 +62,7 @@ Default is "SFC"
 ### Writer
 Writer for writing collect metrics data
 
-**Type**: [MetricsWriterConfiguration](./metrics-writer-configuration)
+**Type**: [MetricsWriterConfiguration](./metrics-writer-configuration.md)
 
 [^top](#metricsconfiguration)
 

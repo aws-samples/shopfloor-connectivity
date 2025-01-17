@@ -1306,7 +1306,7 @@ When not set then all options are enabled
       "description": "Directory path for certificate storage and validation"
     },
     "ValidationOptions": {
-      "$ref": "#/definitions/ValidationOptions",tificate-vatificate-validation-configuration
+      "$ref": "#/definitions/ValidationOptions",
       "description": "Options for certificate validation"
     }
   }

@@ -4,7 +4,7 @@
 
 [SFC Configuration](./sfc-configuration.md) > [TargetTypes](./sfc-configuration.md#targettypes) 
 
-[SFC Configuration](./sfc-configuration.md) > [Metrics](./sfc-configuration.md#metrics) > [Writer](./metrics-writer-configuration#metricswriter)
+[SFC Configuration](./sfc-configuration.md) > [Metrics](./sfc-configuration.md#metrics) > [Writer](./metrics-writer-configuration.md#metricswriter)
 
 [SFC Configuration](./sfc-configuration.md) > [LogWriter](./sfc-configuration.md#logwriter)
 

@@ -201,7 +201,7 @@ in order to provide additional functionality which is discussed in this document
 
 Configuring data collection with SFC involves defining one or more collection [schedules](./core/sfc-configuration.md#schedules) that 
 specify the interval and sources of data collection, as well as the targets for sending the collected data. These [sources](./core/sfc-configuration.md#sources) 
-can include multiple [protocol adapter](./core/sfc-configuration.md#protocoladapters) types, and individual data items can be transformed, filtered, or [aggregated](./core/schedule-configuration#aggregation) when needed. 
+can include multiple [protocol adapter](./core/sfc-configuration.md#protocoladapters) types, and individual data items can be transformed, filtered, or [aggregated](./core/schedule-configuration.md#aggregation) when needed. 
 SFC is designed as an active data collector handling all steps defined in the schedules automatically, without requiring 
 additional coding.
 
@@ -417,7 +417,7 @@ The data can be enriched with additional information before it is sent to the ta
 In the configuration information at schedule-level, source and channel level maps of (string) data can be configured
 that will be added to the output data.
 
-Configuration [top-level](./core/sfc-configuration.md#metadata) metadata will be merged with the data at [schedule-level](./core/schedule-configuration#metadata) and added to the target data under the
+Configuration [top-level](./core/sfc-configuration.md#metadata) metadata will be merged with the data at [schedule-level](./core/schedule-configuration.md#metadata) and added to the target data under the
 metadata node at top-level. If a value is defined at both top-level and schedule-level, the schedule-level value is
 used (allowing the overwriting of top-level values at schedule-level).
 
