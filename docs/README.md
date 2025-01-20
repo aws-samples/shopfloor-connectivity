@@ -49,8 +49,8 @@ Shop Floor Connectivity (SFC) is a data ingestion technology for collecting indu
 - [Introduction](#introduction)
   
   - [SFC Components](#sfc-components)
-    - [Protocol Adapters](#protocol-adapters)
     - [SFC Core](#sfc-core)
+    - [Protocol Adapters](#protocol-adapters)
     - [Target Adapters](#target-adapters)
   - [Terminology and concepts](#terminology-and-concepts)
   - [SFC data collection](#sfc-data-collection)
@@ -198,7 +198,7 @@ in order to provide additional functionality which is discussed in this document
 
 SFC data collection is based on the following concepts
 
-- The SFC Core process runs one or more configured [**schedules**](./core/schedule-configuration).
+- The SFC Core process runs one or more configured [**schedules**](./core/schedule-configuration.md).
 
 - A schedule defines from which **sources** the data is read, to **targets** the data is sent and the **interval** at
   which this happens.
@@ -226,7 +226,7 @@ relative or absolute values changes since the last time a value was read, of bas
   for the specific adapter as well as common configuration items as buffer size, compression, applied transformation
   parameters, credentials providers etc.
 
-- A [**schedule**](./core/schedule-configuration) can send data to one or more [**targets**](./core/target-configuration.md) of different types.
+- A [**schedule**](./core/schedule-configuration.md) can send data to one or more [**targets**](./core/target-configuration.md) of different types.
 
 
 ## SFC data collection

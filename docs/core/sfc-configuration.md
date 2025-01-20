@@ -235,7 +235,7 @@ Protocol adapters are the sources to read data from and abstract the actual prot
 ### Schedules
 List of one or more schedules that define how data is collected from their sources, processed, and send to the targets
 
-**Type**: [[Schedule](./schedule-configuration)]
+**Type**: [[Schedule](./schedule-configuration.md)]
 
 At least one active schedule needs to be present
 

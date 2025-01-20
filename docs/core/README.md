@@ -10,7 +10,7 @@
 
   - [AggregationConfiguration](./aggregation-configuration.md)
   - [AwsIotCredentialProviderClientConfiguration](./aws-iot-credential-provider-configuration.md)
-  - [AwsServiceConfig](./aws-service-configuration)
+  - [AwsServiceConfig](./aws-service-configuration.md)
   - [BaseSourceConfiguration](./base-source-configuration.md)
   - [ChangeFilterConfiguration](./change-filter-configuration.md)
   - [ChannelConfiguration](./channel-configuration.md)
@@ -24,7 +24,7 @@
   - [MetricsSourceConfiguration](./metrics-source-configuration.md)
   - [MetricsWriterConfiguration](./metrics-writer-configuration.md)
   - [ProtocolAdapterConfiguration](./protocol-adapter-configuration.md)
-  - [Schedule](./schedule-configuration)
+  - [Schedule](./schedule-configuration.md)
   - [SecretsManagerConfiguration](secrets-manager-configuration.md)
   - [SelfSignedCertificateConfiguration](./self-signed-certificate-configuration.md)
   - [ServerConfiguration](server-configuration.md)
