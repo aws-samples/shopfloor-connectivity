@@ -6,11 +6,11 @@ The documentation provides a comprehensive overview of SFC's architecture, capab
 
 ## **Summary **
 
-SFC (Shop Floor Connectivity) is a data ingestion technology for collecting industrial data and delivering it to AWS services.
+Shop Floor Connectivity (SFC) is a data ingestion technology for collecting industrial data and delivering it to AWS services.
 
 - Main components:
   - [Protocol Adapters](#protocol-adapters) - Read data from industrial devices
-  - [SFC Core](#core) - Handles configuration, scheduling, data processing
+  - [SFC Core](#sfc-core) - Handles configuration, scheduling, data processing
   - [Target Adapters](#target-adapters) - Send data to AWS/local services
   
 - Key features:
@@ -41,7 +41,7 @@ SFC (Shop Floor Connectivity) is a data ingestion technology for collecting indu
 
 
 
-## Table of content
+## Table of contents
 
 
 
@@ -49,11 +49,11 @@ SFC (Shop Floor Connectivity) is a data ingestion technology for collecting indu
 - [Introduction](#introduction)
   
   - [SFC Components](#sfc-components)
-  - [Protocol Adapters](#protocol-adapters)
-  - [Core](#core)
-  - [Target Adapters](#target-adapters)
-  - [SFC data collection](#sfc-data-collection)
+    - [Protocol Adapters](#protocol-adapters)
+    - [SFC Core](#sfc-core)
+    - [Target Adapters](#target-adapters)
   - [Terminology and concepts](#terminology-and-concepts)
+  - [SFC data collection](#sfc-data-collection)
   - [Execution environments](#execution-environments)
   
 - [High level design overview and tenets](#high-level-design-overview-and-tenets)
@@ -148,23 +148,13 @@ on licenses for additional connectivity products.
 
 There are three main type of components that make up SFC.
 
+- [SFC Core](#sfc-core)
 - [Protocol Adapters](./adapters/README.md)
-- SFC Core
 - [Target Adapters](./targets/README.md)
 
-<p align="center">
-  <img src="img/fig01.png" width="75%"/>
+![](img/fig01.png)
 
-
-
-## Protocol Adapters
-
-An [SFC protocol adapter](./adapters/README.md) is used to read data from one or more industrial devices. This adapter 
-interface abstracts the used protocol from and delivers the data with additional metadata in a common format to the SFC Core. The interface is
-designed so that AWS, 3rd parties, or customers can [easily extend SFC](./sfc-extending.md) with new protocol adapters without any
-modifications to the rest of the framework.
-
-## Core
+## SFC Core
 
 The SFC-Core component is the controller of the SFC Framework. It handles configuration and scheduling of the data
 collection through the protocol adapters. It can optionally transform each received data value using a combination of
@@ -182,6 +172,13 @@ In order to adapt to customer environments, logging, (dynamic) configuration and
 configurable. Default implementations are provided, but can be replaced by custom ones by implementing a minimal
 interface, and adding the implementation (JAR file) to the configuration.
 
+## Protocol Adapters
+
+An [SFC protocol adapter](./adapters/README.md) is used to read data from one or more industrial devices. This adapter 
+interface abstracts the used protocol from and delivers the data with additional metadata in a common format to the SFC Core. The interface is
+designed so that AWS, 3rd parties, or customers can [easily extend SFC](./sfc-extending.md) with new protocol adapters without any
+modifications to the rest of the framework.
+
 
 ## Target Adapters
 
@@ -196,14 +193,6 @@ infrastructure and makes it easier to develop new target types for additional AW
 in order to provide additional functionality which is discussed in this document.
 
 
-
-## SFC data collection
-
-Configuring data collection with SFC involves defining one or more collection [schedules](./core/sfc-configuration.md#schedules) that 
-specify the interval and sources of data collection, as well as the targets for sending the collected data. These [sources](./core/sfc-configuration.md#sources) 
-can include multiple [protocol adapter](./core/sfc-configuration.md#protocoladapters) types, and individual data items can be transformed, filtered, or [aggregated](./core/schedule-configuration.md#aggregation) when needed. 
-SFC is designed as an active data collector handling all steps defined in the schedules automatically, without requiring 
-additional coding.
 
 ## Terminology and concepts
 
@@ -239,7 +228,14 @@ relative or absolute values changes since the last time a value was read, of bas
 
 - A [**schedule**](./core/schedule-configuration) can send data to one or more [**targets**](./core/target-configuration.md) of different types.
 
-  
+
+## SFC data collection
+
+Configuring data collection with SFC involves defining one or more collection [schedules](./core/sfc-configuration.md#schedules) that
+specify the interval and sources of data collection, as well as the targets for sending the collected data. These [sources](./core/sfc-configuration.md#sources)
+can include multiple [protocol adapter](./core/sfc-configuration.md#protocoladapters) types, and individual data items can be transformed, filtered, or [aggregated](./core/schedule-configuration.md#aggregation) when needed.
+SFC is designed as an active data collector handling all steps defined in the schedules automatically, without requiring
+additional coding.
 
 ## Execution environments
 
@@ -332,16 +328,13 @@ SFC is designed so that protocol adapters, the SFC Core and target adapters can 
 different networking or cloud environments. The diagrams below show some of the possible deployment scenarios.
 
 
-
-<p align="center">
-<img src="img/fig02.png" width="75%" align="center"/>
-
+![](img/fig02.png)
 
 
 
 SFC components running as microservices can explicitly specify which network interface to use for network connections to (OT) data sources and other components. By specifying the network interface, microservices can ensure that their network traffic flows through the desired network path, which can be important for optimizing network performance and ensuring network security.
 
-By [configuring](./sfc-securing-component-traffic.md) the required X509 certificates all network traffic can be secured using server side or mutual TLS.
+By [configuring](./sfc-securing-component-traffic.md) the required X.509 certificates all network traffic can be secured using server side or mutual TLS.
 
 See also:
 
@@ -425,8 +418,10 @@ Metadata at source-level will be added under a metadata node at [source-level](.
 
 Metadata at channel-level will be added to the values under a metadata-level node at [channel-level](./core/channel-configuration.md#metadata).
 
-<p align="center">
-<img src="img/fig06.png" width="75%"/>
+
+
+![](img/fig06.png)
+
 
 
 

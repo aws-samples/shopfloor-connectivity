@@ -9,7 +9,7 @@ contain channels, the channels for the discovered nodes are added to the existin
 
 The auto discovery configuration provider uses the OPCUA server configurations of the OPCUA servers used by the sources for which auto 
 discovery is configured to connect to the OPCUA servers. This includes the settings as the configured security policy and
-X509 certificates which are used for that policy.
+X.509 certificates which are used for that policy.
 
 Auto discovery for a source is considered as failed if no nodes where discovered, due to errors connecting to the server or 
 browsing or misconfigured auto discovery for that source. The provider can be configured to periodically retry the discovery with a configurable

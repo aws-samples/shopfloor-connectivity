@@ -756,7 +756,7 @@ S7 data to (debug) terminal  and OPCUA targets, in-process configuration
 
 
 
-Example with OPCUA source and AWS IoT Core target with metadata, filtering and transformations, in process configuration. Using a credentials client to obtain credentials using X509 certificates required to make IoT Core service calls
+Example with OPCUA source and AWS IoT Core target with metadata, filtering and transformations, in process configuration. Using a credentials client to obtain credentials using X.509 certificates required to make IoT Core service calls
 
 ```json
 {

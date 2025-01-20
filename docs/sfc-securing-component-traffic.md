@@ -13,7 +13,7 @@ The network traffic between SFC components is not encrypted.
 
 ## ServerSideTLS
 
-The network traffic is encrypted using the private key of the service, the service is providing its X509 server
+The network traffic is encrypted using the private key of the service, the service is providing its X.509 server
 certificate to the client to decrypt the traffic. The service process needs to be started using the -key and -cert
 parameters specifying the files containing servers private key and server certificate. The -connection type parameter
 must be set to ServerSideTLS. In the SFC configuration the [ConnectionType](../docs/core/server-configuration.md#connectiontype) in the [ServiceConfiguration](../docs/core/server-configuration.md) for the server
@@ -27,7 +27,7 @@ one of the Alternative Subject Names in the server certificate.
 ## MutualTLS
 
 The network traffic is encrypted using the private key of the service and the private key of the client, the service and
-service provide their X509 certificates to each other to decrypt the traffic. The service process needs to be started
+service provide their X.509 certificates to each other to decrypt the traffic. The service process needs to be started
 using the -key, -cert and -ca parameters specifying the files containing servers private key and server and CA
 certificates. The -connection type parameter must be set to MutualTLS. In the SFC configuration the ConnectionType in
 the ServiceConfiguration for the server must be set to MutualTLS. The ClientPrivateKey, ClientCertificate and

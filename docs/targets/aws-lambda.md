@@ -56,7 +56,7 @@ When using compression for the lambda payload verify if actual compression out w
 ### CredentialProviderClient
 
 Name of the AWS credential provider client defined in the SFC top level configuration section [AwsIotCredentialProviderClients]
-(../core/sfc-top-level-config.md#AwsIotCredentialProviderClients) obtaining credentials using X509 certificates from the [AWS IoT credentials provider](../sfc-aws-service-credentials.md).
+(../core/sfc-top-level-config.md#AwsIotCredentialProviderClients) obtaining credentials using X.509 certificates from the [AWS IoT credentials provider](../sfc-aws-service-credentials.md).
 
 If no CredentialProviderClient is configured the [AWS Java SDK credential provider chain is used](https://docs.aws.amazon.com/sdk-for-java/latest/developer-guide/credentials.html#credentials-chain)
 
