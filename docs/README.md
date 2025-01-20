@@ -347,7 +347,6 @@ See also:
 
 
 
-
 ## Scalability
 
 As protocol and target adapters can run as standalone services, multiple instances can be instantiated on the same
