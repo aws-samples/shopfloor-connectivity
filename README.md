@@ -45,6 +45,8 @@ SFC extends and unifies data collection capabilities additionally to our existin
 
 **SFC Docs:** [`/docs/README.md`](./docs/README.md)
 
+**SFC Configuration:** [`docs/core/sfc-configuration.md`](./docs/core/sfc-configuration.md)
+
 &nbsp;
 
 ### SFC Components
