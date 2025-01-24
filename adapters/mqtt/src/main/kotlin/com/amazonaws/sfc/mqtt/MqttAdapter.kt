@@ -36,6 +36,7 @@ import org.eclipse.paho.client.mqttv3.MqttMessage
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence
 import java.time.Instant
 import java.util.*
+import java.util.concurrent.ConcurrentHashMap
 import kotlin.time.Duration
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration
@@ -67,9 +68,13 @@ class MqttAdapter(private val adapterID: String, private val configuration: Mqtt
         logger.getCtxInfoLog(className, "")(BuildConfig.toString())
     }
 
+    private val sourcesWaitUntil = ConcurrentHashMap<String, Instant>()
+
     private val clientCache = LookupCacheHandler<String, MqttClient?, String>(
         supplier = { sourceName ->
             createMqttClient(sourceName)
+        }, isValid = { client ->
+            client != null && client.isConnected
         }
     )
     private val adapterMetricDimensions = mapOf(MetricsCollector.METRICS_DIMENSION_TYPE to className)
@@ -149,6 +154,20 @@ class MqttAdapter(private val adapterID: String, private val configuration: Mqtt
      */
     override suspend fun read(sourceID: String, channels: List<String>?): SourceReadResult {
 
+        val log = logger.getCtxLoggers(className, "read")
+
+        val waitUntilForSource = sourcesWaitUntil[sourceID]
+        if (waitUntilForSource != null) {
+            if (waitUntilForSource.isAfter(DateTime.systemDateTime())) {
+                log.trace("Waiting until $waitUntilForSource for reading from source $sourceID")
+                return SourceReadSuccess(emptyMap())
+            } else {
+                log.trace("Reading from source $sourceID continued")
+                sourcesWaitUntil.remove(sourceID)
+            }
+        }
+
+
         // Retrieve the client to set it up at first call
         val sourceConfiguration = sources[sourceID] ?: return SourceReadError("Source \"$sourceID\" does not exist, available sources are ${sources.keys}")
         val protocolAdapterID = sourceConfiguration.protocolAdapterID
@@ -163,9 +182,10 @@ class MqttAdapter(private val adapterID: String, private val configuration: Mqtt
                     ?: return SourceReadError("Broker \"${sourceConfiguration.sourceAdapterBrokerID}\" Adapter \"$protocolAdapterID\" for  Source \"$sourceID\" does not exist, available brokers are ${adapterConfiguration.brokers}")
 
             // Wait for next read and return read error
-            val error = SourceReadError("Can not connect to broker at ${brokerConfiguration.endPoint}", DateTime.systemDateTime())
-            delay(brokerConfiguration.waitAfterConnectError.inWholeMilliseconds)
-            return error
+            val nextRead = Instant.ofEpochMilli(DateTime.systemDateTime().toEpochMilli() + brokerConfiguration.waitAfterConnectError.inWholeMilliseconds)
+            sourcesWaitUntil[sourceID] = nextRead
+            log.error("Reading for source $sourceID paused for ${brokerConfiguration.waitAfterConnectError} until $nextRead")
+            return SourceReadError("Can not connect to broker at ${brokerConfiguration.endPoint}", DateTime.systemDateTime())
         }
 
         // Get the store where received values for this source are stored
@@ -277,6 +297,7 @@ class MqttAdapter(private val adapterID: String, private val configuration: Mqtt
         metricDimensions: Map<String, String>
     ): MqttClient? {
 
+
         val client = clientCache.getItemAsync(sourceID, sourceID).await()
 
         metrics?.put(adapterID, if (client != null) METRICS_CONNECTIONS else METRICS_CONNECTION_ERRORS, 1.0, MetricUnits.COUNT, metricDimensions)
@@ -315,7 +336,7 @@ class MqttAdapter(private val adapterID: String, private val configuration: Mqtt
         val client = try {
             MqttHelper(brokerConfiguration, logger).buildClient(id, MemoryPersistence())
         } catch (e: Exception) {
-            log.errorEx("Error connecting to ${brokerConfiguration.endPoint} for source \"$sourceID\"", e)
+            log.error("Error connecting to ${brokerConfiguration.endPoint} for source \"$sourceID\", $e")
             return null
         }
 
@@ -325,7 +346,7 @@ class MqttAdapter(private val adapterID: String, private val configuration: Mqtt
             setupSourceSubscriptions(sourceID, sourceConfiguration, client)
             client
         } catch (e: Exception) {
-            log.errorEx("Error setting up subscription ${brokerConfiguration.endPoint} for source \"$sourceID\"", e)
+            log.error("Error setting up subscription ${brokerConfiguration.endPoint} for source \"$sourceID\", $e")
             null
         }
     }

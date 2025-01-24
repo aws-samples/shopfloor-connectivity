@@ -211,7 +211,7 @@ The must be at least one topic in the list of topics.
 ```json
 {
   "Topics": [
-    "Topics" :[ "sensors/temperature"/#"]
+    "Topics" :[ "sensors/temperature/#"]
   ],
   "TopicNameMappingConfiguration":{
     "Mappings": {
@@ -237,7 +237,7 @@ Example:
 Channel subscription is:
 
 ```json
-	"Topics" :[ "test"/#"]
+	"Topics" :[ "test/#"]
 ```
 
 

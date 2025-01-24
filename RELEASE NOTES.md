@@ -1,5 +1,12 @@
 # Release Notes:
 
+## Version 1.7.6, 24 January 2025
+
+- Improved connection management for MQTT protocol adapter
+
+---
+
+
 ## Version 1.7.4 & 1.7.5  17 January 2025
 
 - Documentation restructure.

@@ -160,7 +160,7 @@ class MqttHelper(private val mqttConnectionConfig: MqttConnectionOptions, privat
             client.connect(options)
             return client
         } catch (e: Exception) {
-            logger.getCtxErrorLogEx(className, "client")("Error building MQTT client", e)
+            logger.getCtxErrorLog(className, "client")("Error building MQTT client, $e")
             throw e
         }
     }
