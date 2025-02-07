@@ -37,9 +37,7 @@ Must be an identifier of a server in the [Devices](#devices) section of the [ADS
 
 ---
 ### Channels
-The channels configuration for an ADS source holds configuration data to read values from fields on the source device.
-The element is a map indexed by the channel identifier.
-Channels can be "commented" out by adding a "#" at the beginning of the identifier of that channel.
+The configuration of channels for an ADS source holds data to read values from the source device's fields. This data is structured as a map, indexed by the channel identifier.You can comment out a channel by prefixing its identifier with a "#".
 
 **Type**: Map[String,[AdsChannelConfiguration](#adschannelconfiguration)]
 

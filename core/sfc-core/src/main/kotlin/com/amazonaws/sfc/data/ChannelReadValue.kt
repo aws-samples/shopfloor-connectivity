@@ -81,6 +81,8 @@ class ChannelReadValue(value: Any?, var timestamp: Instant? = null) {
     // type name as a string for single values
     private fun typeStrSingle(a: Any?): String = "${if (a != null) a::class.simpleName else "null"}"
 
+    val valueCount = if (isArrayValue) (_value as List<*>).size else 1
+
     // type name as a string for array values
     fun typeStr(a: Any?): String =
         if (isArrayValue)

@@ -39,11 +39,20 @@ class MqttAdapterConfiguration : ProtocolAdapterConfiguration(), Validate {
     val readMode: ReadMode
         get() = _readMode
 
+    @SerializedName(CONFIG_MAX_RETAIN_SIZE)
+    private var _maxRetainSize : Int = DEFAULT_MAX_RETAIN_SIZE
+    val maxRetainSize : Int
+        get() = _maxRetainSize
+
+    @SerializedName(CONFIG_MAX_RETAIN_PERIOD)
+    private var _maxRetainPeriod : Int = DEFAULT_MAX_RETAIN_PERIOD
+    val maxRetainPeriod : Int
+        get() = _maxRetainPeriod
+
     @Throws(ConfigurationException::class)
     override fun validate() {
 
         if (validated) return
-        super.validate()
         super.validate()
         brokers.values.forEach { it.validate() }
         validated = true
@@ -56,9 +65,13 @@ class MqttAdapterConfiguration : ProtocolAdapterConfiguration(), Validate {
         const val CONFIG_RECEIVED_DATA_CHANNEL_TIMEOUT = "ReceivedDataChannelTimeout"
 
         const val CONFIG_READ_MODE = "ReadMode"
+        const val CONFIG_MAX_RETAIN_SIZE ="MaxRetainSize"
+        const val CONFIG_MAX_RETAIN_PERIOD ="MaxRetainPeriod"
 
         const val DEFAULT_RECEIVED_DATA_CHANNEL_SIZE = 1000
         const val DEFAULT_RECEIVED_DATA_CHANNEL_TIMEOUT = 1000
+        const val DEFAULT_MAX_RETAIN_PERIOD = 1000 * 60 * 60
+        const val DEFAULT_MAX_RETAIN_SIZE = 10000
 
         private val default = MqttAdapterConfiguration()
 
@@ -66,6 +79,8 @@ class MqttAdapterConfiguration : ProtocolAdapterConfiguration(), Validate {
                    description: String = default._description,
                    metrics: MetricsSourceConfiguration? = default._metrics,
                    readMode: ReadMode = default._readMode,
+                   maxRetainSize : Int = default._maxRetainSize,
+                   maxRetainPeriod : Int = default._maxRetainPeriod,
                    adapterServer: String? = default._protocolAdapterServer): MqttAdapterConfiguration {
 
             val instance = createAdapterConfiguration<MqttAdapterConfiguration>(
@@ -77,6 +92,8 @@ class MqttAdapterConfiguration : ProtocolAdapterConfiguration(), Validate {
             with(instance) {
                 _brokers = brokers
                 _readMode = readMode
+                _maxRetainSize = maxRetainSize
+                _maxRetainPeriod = maxRetainPeriod
             }
             return instance
         }

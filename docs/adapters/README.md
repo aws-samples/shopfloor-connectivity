@@ -1,6 +1,7 @@
 # Protocol Adapters
 
 - [ADS Protocol Configuration (Beckhoff)](./ads.md)
+- [J1939 Protocol Configuration](./j1939.md)
 - [MQTT Protocol Configuration](./mqtt.md)
 - [Modbus TCP Protocol Configuration](./modbus.md)
 - [NATS Adapter Configuration](./nats.md)

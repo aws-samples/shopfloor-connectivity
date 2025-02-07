@@ -363,12 +363,47 @@ NatsAdapterConfiguration extension the [AdapterConfiguration](../core/protocol-a
 
 **Properties:**
 
+
+
+- [MaxRetainSize](#maxretainsize)
+- [MaxRetainPeriod](#maxretainperiod)
+
 - [ReadMode](#readmode)
 - [ReceivedDataChannelSize](#receiveddatachannelsize)
 - [ReceivedDataChannelTimeout](#receiveddatachanneltimeout)
 - [Servers](#servers)
 
 
+
+---
+
+### MaxRetainPeriod
+
+When [ReadMode](#readmode) is `KeepAll` this parameter can be used to restrict the maximum number of stored values.
+
+**Type**: Integer
+
+The default value is 3600000 (1 hour). If set to 0 there is no maximum period.
+
+---
+
+### MaxRetainSize
+
+When [ReadMode](#readmode) is `KeepAll` this parameter can be used to restrict the period in milliseconds for which values are stored.
+
+**Type**: Integer
+
+The default value is 10000 If set to 0 there is no maximum number of values.
+
+---
+
+### MaxRetainPeriod
+
+When [ReadMode](#readmode) is `KeepAll` this parameter can be used to restrict the maximum number of stored values.
+
+**Type**: Integer
+
+The default value is 3600000 (1 hour). If set to 0 there is no maximum period.
 
 ---
 ### ReadMode
@@ -438,7 +473,26 @@ AdapterServer attribute.
             "$ref": "#/definitions/NatsServerConfiguration"
           },
           "minProperties": 1
-        }
+        },
+        "MaxRetainPeriod" :{
+          "type" : "integer",
+          "description": "Max value retain period",
+          "default" : 0
+        },
+        "MaxRetainSize" :{
+          "type" : "integer",
+          "description": "Max value retain size",
+          "default" : 0
+        },
+        "ReadMode": {
+          "type": "string",
+          "description": "Mode for reading MQTT messages",
+          "enum": [
+            "KeepLast",
+            "KeepAll"
+          ],
+          "default": "KeepLast"
+        },
       },
       "required": [
         "Servers"

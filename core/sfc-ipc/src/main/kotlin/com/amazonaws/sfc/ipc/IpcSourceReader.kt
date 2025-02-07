@@ -79,9 +79,7 @@ class IpcSourceReader(
      */
     override suspend fun read(consumer: ReadResultConsumer) = coroutineScope {
 
-        val reader: Job?
-
-        reader = launch(context = Dispatchers.IO, name = "IPC Source Reader") {
+        val reader = launch(context = Dispatchers.IO, name = "IPC Source Reader") {
             readerTask(serverConfig, consumer, this)
         }
         reader.join()
@@ -136,7 +134,8 @@ class IpcSourceReader(
                         s += if (e is StatusException) "${e.cause?.message ?: e.message}" else e.message
                         log.error(s)
                     }
-                    resetIpcClient()
+                    if (e.message != "UNKNOWN")
+                        resetIpcClient()
                     delay(WAIT_AFTER_ERROR)
                 }
             } finally {

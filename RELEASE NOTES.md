@@ -1,5 +1,14 @@
 # Release Notes:
 
+## Version 1.8.0, 7 February 2025
+
+- New [J1939](./docs/adapters/j1939.md)  protocol adapter
+
+- [MQTT](./docs/adapters/mqtt.md) adapter properties [MaxRetainSize](./docs/adapters/mqtt.md#maxretainsize) and [maxRetainPeriod](./docs/adapters/mqtt.md#maxretainperiod) to restrict the number of stored values when [ReadMode](./docs/adapters/mqtt.md#readmode) is KeepAll. 
+- [NATS](./docs/adapters/nats.md) adapter properties [MaxRetainSize](./docs/adapters/nats.md#maxretainsize) and [maxRetainPeriod](./docs/adapters/nats.md#maxretainperiod) to restrict the number of stored values when [ReadMode](./docs/adapters/nats.md#readmode) is KeepAll.
+- [OPCUA](./docs/adapters/opcua.md) adapter properties [MaxEventRetainSize](./docs/adapters/opcua.md#maxeventretainsize) and [maxEventRetainPeriod](./docs/adapters/opcua.md#maxeventretainperiod) to restrict the number of stored events during a reading interval.
+
+
 ## Version 1.7.6, 24 January 2025
 
 - Improved connection management for MQTT protocol adapter

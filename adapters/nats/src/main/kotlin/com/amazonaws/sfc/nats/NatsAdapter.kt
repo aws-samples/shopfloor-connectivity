@@ -19,6 +19,8 @@ import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_CONNECTION_E
 import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_DIMENSION_SOURCE
 import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_DIMENSION_SOURCE_CATEGORY_ADAPTER
 import com.amazonaws.sfc.nats.config.*
+import com.amazonaws.sfc.nats.config.NatsAdapterConfiguration.Companion.CONFIG_MAX_RETAIN_PERIOD
+import com.amazonaws.sfc.nats.config.NatsAdapterConfiguration.Companion.CONFIG_MAX_RETAIN_SIZE
 import com.amazonaws.sfc.nats.config.NatsAdapterConfiguration.Companion.DEFAULT_RECEIVED_DATA_CHANNEL_SIZE
 import com.amazonaws.sfc.nats.config.NatsAdapterConfiguration.Companion.DEFAULT_RECEIVED_DATA_CHANNEL_TIMEOUT
 import com.amazonaws.sfc.nats.config.NatsServerConfiguration.Companion.CONFIG_CREDENTIALS_FILE
@@ -54,6 +56,7 @@ class NatsAdapter(private val adapterID: String, private val configuration: Nats
 
     // mao indexed by the source has an instant which is set after a read error until when reading for a source is paused
     private var waitUntil = ConcurrentHashMap<String, Long>()
+
     // map indexed by the subscriptions has the source and channel data for each subscription
     private var subscriptionMap = ConcurrentHashMap<Subscription, Subscriber>()
 
@@ -89,11 +92,11 @@ class NatsAdapter(private val adapterID: String, private val configuration: Nats
                         setupSourceSubscriptions(connection, sourceID)
                     }
                     connection
-                } else{
-                    val log = logger.getCtxLoggers(className, "connectionCacheSupplier")
-                    log.error("Configuration: $error")
-                    null
-                }
+                } else {
+                val log = logger.getCtxLoggers(className, "connectionCacheSupplier")
+                log.error("Configuration: $error")
+                null
+            }
         }
     )
 
@@ -165,14 +168,27 @@ class NatsAdapter(private val adapterID: String, private val configuration: Nats
         } else null
 
 
-
-
     // Store received data
-    private val sourceDataStores: Map<String, SourceDataStore<ChannelReadValue>> = sources.keys.associate { sourceID ->
+    private val channelValueStores: Map<String, SourceDataStore<ChannelReadValue>> = sources.keys.associate { sourceID ->
         sourceID to if (adapterConfiguration?.readMode == ReadMode.KEEP_LAST)
             SourceDataValuesStore()
         else
-            SourceDataMultiValuesStore<ChannelReadValue>()
+            SourceDataMultiValuesStore<ChannelReadValue>(adapterConfiguration?.maxRetainSize ?: 0, adapterConfiguration?.maxRetainPeriod ?: 0)
+            { channel, duration, size, full ->
+                if (full) {
+                    val ctxWarningLog = logger.getCtxWarningLog(className, "sourceDataStores")
+                    if (size != null)
+                        ctxWarningLog("Source \"$sourceID\", channel \"$channel\" number of kept values reached maximum of $size values, oldest values are dropped, consider a larger $CONFIG_MAX_RETAIN_SIZE for adapter or a faster reading interval.")
+                    else
+                        ctxWarningLog("Source \"$sourceID\", channel \"$channel\" expired items older than configured $CONFIG_MAX_RETAIN_PERIOD $duration are being dropped, consider a larger a faster reading interval.")
+                } else {
+                    val ctxInfoLog = logger.getCtxInfoLog(className, "sourceDataStores")
+                    if (size != null)
+                        ctxInfoLog("Source \"$sourceID\", channel \"$channel\" number of kept values is now again below maximum of $size values.")
+                    else
+                        ctxInfoLog("Source \"$sourceID\", channel \"$channel\" no more expired values older than $duration are being dropped.")
+                }
+            }
     }
 
 
@@ -230,7 +246,7 @@ class NatsAdapter(private val adapterID: String, private val configuration: Nats
         }
 
         // Get the store where received values for this source are stored
-        val store = sourceDataStores[sourceID]
+        val store = channelValueStores[sourceID]
 
         val start = DateTime.systemDateTime().toEpochMilli()
 
@@ -301,19 +317,21 @@ class NatsAdapter(private val adapterID: String, private val configuration: Nats
 
 
         withTimeoutOrNull(timeout) {
-            subscriptionMap.keys.forEach{ subscription ->
+            subscriptionMap.keys.forEach { subscription ->
                 try {
                     subscription.unsubscribe()
-                }catch (_ : Exception){}
+                } catch (_: Exception) {
+                }
             }
 
             connectionCache.items.forEach { connection ->
                 try {
                     connection?.close()
-                }  catch (_ : Exception){}
+                } catch (_: Exception) {
+                }
             }
             // clear data stores
-            sourceDataStores.forEach {
+            channelValueStores.forEach {
                 it.value.clear()
             }
         }
@@ -343,7 +361,7 @@ class NatsAdapter(private val adapterID: String, private val configuration: Nats
             }
             if (_natsConnection == null) {
                 retries += 1
-                if (retries < serverConfig.connectRetries){
+                if (retries < serverConfig.connectRetries) {
                     log.info("Waiting ${serverConfig.waitAfterConnectError} before trying to create NATS connection, number of retries is $retries")
                     delay(serverConfig.waitAfterConnectError)
                 }
@@ -353,7 +371,7 @@ class NatsAdapter(private val adapterID: String, private val configuration: Nats
     }
 
     private fun buildConnectionOptions(connectionName: String,
-                        serverConfig: NatsServerConfiguration): Options? {
+                                       serverConfig: NatsServerConfiguration): Options? {
 
         val log = logger.getCtxLoggers(className, "buildConnectionOptions")
 
@@ -407,7 +425,7 @@ class NatsAdapter(private val adapterID: String, private val configuration: Nats
         if (name != null) {
             val value = dataValue(subscriber, message)
             if (value != null) {
-                val store = sourceDataStores[subscriber.sourceID]
+                val store = channelValueStores[subscriber.sourceID]
                 store?.add("${subscriber.channelID}$CHANNEL_SEPARATOR$name", value)
             }
         } else {

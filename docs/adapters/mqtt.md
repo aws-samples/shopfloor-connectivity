@@ -133,7 +133,7 @@ Default is true
 Evaluate a JMESpath query against the value of a structured data type and returns the result.
 The selector can be used to restructure or select values from structured data types.
 
-**Type**: Datatype: String
+**Type**:  String
 
 **Parameter**: JMESPath expression, see https://jmespath.org/
 
@@ -405,6 +405,8 @@ The MqttAdapterConfiguration type extends the [ChannelConfiguration](../core/cha
 
 **Properties:**
 - [Brokers](#brokers)
+- [MaxRetainPeriod](#maxretainperiod)
+- [MaxRetainSize](#maxretainsize)
 - [ReadMode](#readmode)
 - [ReceivedDataChannelSize](#receiveddatachannelsize)
 - [ReceivedDataChannelTimeout](#receiveddatachanneltimeout)
@@ -416,15 +418,38 @@ Brokers configured for this adapter. The mqtt source using the adapter must refe
 **Type**: Map[String,[MqttBrokerConfiguration](#mqttbrokerconfiguration)]
 
 ---
+
+### MaxRetainPeriod
+
+When [ReadMode](#readmode) is `KeepAll` this parameter can be used to restrict the period in milliseconds for which values are stored.
+
+**Type**: Integer
+
+The default value is 3.600.00 (1 hour). If set to 0 there is no maximum period.
+
+---
+
+### MaxRetainSize
+
+When [ReadMode](#readmode) is `KeepAll` this parameter can be used to restrict the maximum number of stored values.
+
+**Type**: Integer
+
+The default value is 10000,.
+If set to 0 there is no maximum number of values.
+
+---
+
 ### ReadMode
+
 Read mode of the adapter. Set to "KeepAll" to collect all messages on subscribed topics during a read interval.
 Set to "KeepLast", which is the default, to keep only the last received message.
 
 **Type**: String
 
 
-- "KeepLast" to collect last message received in read interval (Default)
-- "KeepAll" to collect all messages received in read interval
+- `KeepLast` to collect last values received in read interval (Default)
+- `KeepAll` to collect  values received in read interval up to the maximum specified by [MaxRetainSize](#maxretainsize) values of not older than specified by [MaxRetainPeriod](#maxretainperiod)
 
 
 ---
@@ -466,6 +491,16 @@ Default is 1000
             "$ref": "#/definitions/MqttBrokerConfiguration"
           },
           "minProperties": 1
+        },
+        "MaxRetainPeriod" :{
+          "type" : "integer",
+          "description": "Max value retain period",
+          "default" : 0
+        },
+        "MaxRetainSize" :{
+          "type" : "integer",
+          "description": "Max value retain size",
+          "default" : 0
         },
         "ReadMode": {
           "type": "string",
@@ -510,7 +545,7 @@ Minimal configuration:
 }
 ```
 
-Multiple brokers with KeepAll mode:
+Multiple brokers with KeepAll mode with a restriction of 100 values other than 60 seconds:
 
 ```json
 {
@@ -524,6 +559,8 @@ Multiple brokers with KeepAll mode:
     }
   },
   "ReadMode": "KeepAll",
+  "MaxRetainSize" : 100,
+  "MaxRetainPeriod" : 60000,
   "ReceivedDataChannelSize": 5000,
   "ReceivedDataChannelTimeout": 10000
 }

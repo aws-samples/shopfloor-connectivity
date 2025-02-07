@@ -155,16 +155,15 @@ class IpcAdapterService(
                         if (logger.level == LogLevel.TRACE) {
                             it.forEach { source, result ->
                                 when (result) {
-                                    is SourceReadSuccess -> log.trace("Source \"$source\": ${result.values.size} values read")
+                                    is SourceReadSuccess -> log.trace("Source \"$source\": ${result.numberOfValues} values read")
                                     is SourceReadError -> log.error("$source returned error ${result.error} ")
                                 }
                             }
                         } else if (logger.level == LogLevel.INFO) {
-                            val valueCount =
-                                (it.values.filterIsInstance<SourceReadSuccess>()).sumOf { v -> v.values.values.count() }
+                            val valueCount = it.values.filterIsInstance<SourceReadSuccess>().sumOf { it.numberOfValues }
                             if (valueCount != 0) {
                                 val sourceCount = it.values.size
-                                log.info("Read $valueCount values from $sourceCount sources")
+                                log.info("Read $valueCount values from $sourceCount source${if (sourceCount>1)"s" else ""}")
                             }
                         }
 
@@ -275,7 +274,7 @@ class IpcAdapterService(
         val serviceConfiguration = configReader.getConfig<ServiceConfiguration>()
         val protocolAdapter = serviceConfiguration.protocolAdapters[adapter]
         val serverConfiguration = getProtocolServerConfiguration(serviceConfiguration, protocolAdapter)
-        return serverConfiguration?.compression ?: false
+        return serverConfiguration?.compression == true
     }
 
     private fun isHealthy(): Boolean {

@@ -1,4 +1,3 @@
-
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: MIT-0
 
@@ -37,6 +36,19 @@ class SourceReadSuccess(val values: Map<String, ChannelReadValue>, timestamp: In
     val valuesMap
         get() = values.map { it.key to it.value.value }.toMap()
 
+    val numberOfValues: Int
+        get() =
+            values.map {
+                if (it.value.isArrayValue) {
+                    try {
+                        (it.value.value as List<*>).size
+                    } catch (_: Exception) {
+                        values.size
+                    }
+                } else {
+                    1
+                }
+            }.sum()
 
 }
 

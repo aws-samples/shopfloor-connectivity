@@ -39,6 +39,7 @@ listOf("core", "metrics", "adapters", "targets", "examples").forEach { p ->
     }
 }
 
+include(":adapters:canbus")
 
 
 

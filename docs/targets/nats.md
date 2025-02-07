@@ -125,7 +125,7 @@ Template examples:
 - plant1-**%line%**   : Values from all sources will be grouped by the value of the %line% metadata and published to a subject for that value
 
 In case a placeholder is not resolved, when a value for a used placeholder is part of the data,
-then an alternative subject name can be configured by setting the name of that subject to the **"AlternateTopiName"** setting.
+then an alternative subject name can be configured by setting the name of that subject to the **"AlternateSubjectName"** setting.
 
 Note that the use of placeholders to send data to specific subjects will result in additional publish calls to the server.
 

@@ -10,6 +10,7 @@ SFC extends and unifies data collection capabilities additionally to our existin
 [**Supported protocols:**](./docs/adapters/README.md)
 
 - [Beckhoff ADS](./docs/adapters/ads.md)
+- [J1939](./docs/adapters/j1939.md)
 - [MQTT](./docs/adapters/mqtt.md)
 - [Mitsubishi/Melsec SLMP](./docs/adapters/slmp.md)-
 - [Modbus-TCP](./docs/adapters/modbus.md)

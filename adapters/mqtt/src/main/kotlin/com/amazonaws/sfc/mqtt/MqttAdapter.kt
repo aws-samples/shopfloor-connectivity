@@ -17,6 +17,8 @@ import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_CONNECTION_E
 import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_DIMENSION_SOURCE
 import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_DIMENSION_SOURCE_CATEGORY_ADAPTER
 import com.amazonaws.sfc.mqtt.config.*
+import com.amazonaws.sfc.mqtt.config.MqttAdapterConfiguration.Companion.CONFIG_MAX_RETAIN_PERIOD
+import com.amazonaws.sfc.mqtt.config.MqttAdapterConfiguration.Companion.CONFIG_MAX_RETAIN_SIZE
 import com.amazonaws.sfc.mqtt.config.MqttAdapterConfiguration.Companion.DEFAULT_RECEIVED_DATA_CHANNEL_SIZE
 import com.amazonaws.sfc.mqtt.config.MqttAdapterConfiguration.Companion.DEFAULT_RECEIVED_DATA_CHANNEL_TIMEOUT
 import com.amazonaws.sfc.system.DateTime
@@ -117,11 +119,26 @@ class MqttAdapter(private val adapterID: String, private val configuration: Mqtt
     private val scope = buildScope("MQTT Protocol Handler")
 
     // Store received data
-    private val sourceDataStores: Map<String, SourceDataStore<ChannelReadValue>> = sources.keys.map { sourceID ->
+    private val channelValueStores: Map<String, SourceDataStore<ChannelReadValue>> = sources.keys.map { sourceID ->
         sourceID to if (adapterConfiguration?.readMode == ReadMode.KEEP_LAST)
             SourceDataValuesStore()
         else
-            SourceDataMultiValuesStore<ChannelReadValue>()
+            SourceDataMultiValuesStore<ChannelReadValue>(adapterConfiguration?.maxRetainSize ?: 0, adapterConfiguration?.maxRetainPeriod ?: 0)
+            { channel, duration, size, full ->
+                if (full) {
+                    val ctxWarningLog = logger.getCtxWarningLog(className, "sourceDataStores")
+                    if (size != null)
+                        ctxWarningLog("Source \"$sourceID\", channel \"$channel\" number of kept values reached maximum of $size values, oldest values are dropped, consider a larger $CONFIG_MAX_RETAIN_SIZE for adapter or a faster reading interval.")
+                    else
+                        ctxWarningLog("Source \"$sourceID\", channel \"$channel\" expired items older than configured $CONFIG_MAX_RETAIN_PERIOD $duration are being dropped, consider a larger a faster reading interval.")
+                } else {
+                    val ctxInfoLog = logger.getCtxInfoLog(className, "sourceDataStores")
+                    if (size != null)
+                        ctxInfoLog("Source \"$sourceID\", channel \"$channel\" number of kept values is now again below maximum of $size values.")
+                    else
+                        ctxInfoLog("Source \"$sourceID\", channel \"$channel\" no more expired values older than $duration are being dropped.")
+                }
+            }
     }.toMap()
 
 
@@ -189,7 +206,7 @@ class MqttAdapter(private val adapterID: String, private val configuration: Mqtt
         }
 
         // Get the store where received values for this source are stored
-        val store = sourceDataStores[sourceID]
+        val store = channelValueStores[sourceID]
 
         val start = DateTime.systemDateTime().toEpochMilli()
 
@@ -279,7 +296,7 @@ class MqttAdapter(private val adapterID: String, private val configuration: Mqtt
             }
 
             // clear data stores
-            sourceDataStores.forEach {
+            channelValueStores.forEach {
                 it.value.clear()
             }
         }
@@ -409,7 +426,7 @@ class MqttAdapter(private val adapterID: String, private val configuration: Mqtt
             if (name != null) {
                 val value = dataValue(receivedData)
                 if (value != null) {
-                    val store = sourceDataStores[sourceID]
+                    val store = channelValueStores[sourceID]
                     store?.add("$channelID$CHANNEL_SEPARATOR$name", value)
                 }
             } else {

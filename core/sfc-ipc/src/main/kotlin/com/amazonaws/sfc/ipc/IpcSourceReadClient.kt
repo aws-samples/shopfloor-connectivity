@@ -41,11 +41,16 @@ class IpcSourceReadClient(internal val channel: ManagedChannel, usedSecrets: Map
                     val logger = initializeData?.third
                     val log = logger?.getCtxLoggers("IpcSourceReadClient", "initializeStatus")
                     log?.trace?.invoke("Sending configuration $\"$adapterConfigStr\" to protocol adapter service")
-                    initializeAdapter(adapterConfigStr, usedSecrets)
-                    log?.info?.invoke("IPC source service adapter for server ${server?.addressStr} initialized")
+                    try {
+                        initializeAdapter(adapterConfigStr, usedSecrets)
+                        _isInitialized = true
+                        log?.info?.invoke("IPC source service adapter for server ${server?.addressStr} initialized")
+                        true
+                    }catch ( e: Exception){
+                        log?.error?.invoke("Failed to initialize IPC source service adapter for server ${server?.addressStr} with error ${e.message}")
+                        false
+                    }
                 }
-                _isInitialized = true
-                true
             }
         }
     )

@@ -132,7 +132,7 @@ Template examples:
 - plant1-%line%   : Values from all sources will be grouped by the value of the %line% metadata and published to a topic for that value
 
 In case a placeholder is not resolved, when a value for a used placeholder is part of the data,
-then an alternative topic name can be configured by setting the name of that topic to the [AlternateTopiName](#alternatetopicname) setting.
+then an alternative topic name can be configured by setting the name of that topic to the [AlternateTopicName](#alternatetopicname) setting.
 
 Note that the use of placeholders to send data to specific topics will result in additional publish calls and may result in throttling. Enabling buffering
 can be used to reduce the chance of throttling.
@@ -143,7 +143,7 @@ For AWS IoTCore the maximum number of topic levels is 8.
 
 ---
 ### WarnAlternateTopicName
-Generate warning if data is published to [AlternateTopiName](#alternatetopicname).
+Generate warning if data is published to [AlternateTopicName](#alternatetopicname).
 
 **Type**: Boolean
 

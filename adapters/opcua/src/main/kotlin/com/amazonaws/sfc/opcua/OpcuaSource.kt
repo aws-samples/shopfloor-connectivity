@@ -16,6 +16,8 @@ import com.amazonaws.sfc.metrics.MetricsCollector
 import com.amazonaws.sfc.opcua.FilterHelper.Companion.DEFAULT_EVENT_TYPE
 import com.amazonaws.sfc.opcua.FilterHelper.Companion.UNKNOWN_EVENT_TYPE
 import com.amazonaws.sfc.opcua.config.*
+import com.amazonaws.sfc.opcua.config.OpcuaAdapterConfiguration.Companion.CONFIG_EVENT_MAX_RETAIN_PERIOD
+import com.amazonaws.sfc.opcua.config.OpcuaAdapterConfiguration.Companion.CONFIG_EVENT_MAX_RETAIN_SIZE
 import com.amazonaws.sfc.system.DateTime
 import com.amazonaws.sfc.system.DateTime.add
 import com.amazonaws.sfc.system.DateTime.systemDateTime
@@ -206,7 +208,8 @@ open class OpcuaSource(
             } else {
                 if (_opcuaClient?.subscriptionManager?.subscriptions?.isNotEmpty() == true) {
                     _opcuaClient!!.subscriptionManager.addSubscriptionListener(
-                        SubscriptionListener(logger,
+                        SubscriptionListener(
+                            logger,
                             fnOnPublishFailure = { ex ->
                                 if (ex?.statusCode?.value == StatusCodes.Bad_ConnectionClosed) (resetClient(0))
                             },
@@ -332,8 +335,23 @@ open class OpcuaSource(
     // *** Event Subscriptions ***
 
     // store for received event data for monitored event nodes
-    private val eventStore = if (anyEventNodes) SourceDataMultiValuesStore<Map<String, Any>>() else null
-
+    private val eventStore = if (anyEventNodes) {
+        SourceDataMultiValuesStore<Any>(opcuaAdapterConfiguration.maxEventRetainSize, opcuaAdapterConfiguration.maxEventRetainPeriod) { channel, duration, size, full ->
+            if (full) {
+                val ctxWarningLog = logger.getCtxWarningLog(className, "sourceDataStores")
+                if (size != null)
+                    ctxWarningLog("Source \"$sourceID\", channel \"$channel\" number of kept events reached maximum of $size values, oldest events are dropped, consider a larger $CONFIG_EVENT_MAX_RETAIN_SIZE for adapter or a faster reading interval.")
+                else
+                    ctxWarningLog("Source \"$sourceID\", channel \"$channel\" expired events older than configured $CONFIG_EVENT_MAX_RETAIN_PERIOD $duration are being dropped, consider a larger a faster reading interval.")
+            } else {
+                val ctxInfoLog = logger.getCtxInfoLog(className, "sourceDataStores")
+                if (size != null)
+                    ctxInfoLog("Source \"$sourceID\", channel \"$channel\" number of kept events is now again below maximum of $size values.")
+                else
+                    ctxInfoLog("Source \"$sourceID\", channel \"$channel\" no more expired events older than ${duration}are being dropped.")
+            }
+        }
+    } else null
 
     // creates the client to communicate with the server the source is reading from
     private fun createOpcuaClient(): OpcUaClient? {
@@ -764,7 +782,7 @@ open class OpcuaSource(
                             }
 
                         } else {
-                            val nodeChannelID =  "unknown channel"
+                            val nodeChannelID = "unknown channel"
                             val errorLog = logger.getCtxErrorLog(className, "onMonitoredEventReceived")
                             errorLog("Error status on monitored event item for source \"$sourceID\", node \"$nodeChannelID\" (${item.readValueId}), ${item.statusCode}")
                         }

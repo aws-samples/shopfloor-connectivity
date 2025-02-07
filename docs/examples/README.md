@@ -29,6 +29,7 @@ Configuration
 - [Configuration Signing](../../examples/sign-sfc-config)
 - [Custom Config Provider Template](../../examples/custom-config-provider/README.md)
 - [Custom User Interface and API Config Provider](../../examples/custom-api-ui-config-provider/README.md)
+- [J1939 DBC file](../../examples/j1939dbc/README.md)
 - [MQTT Config provider](../../examples/mqtt-config-provider/README.md)
 - [OPCUA Auto Discovery Configuration provider](../../examples/opcua-auto-discovery/README.md)
 - [YAML Custom Configuration Provider](../../examples/yaml-custom-config-provider/README.md)

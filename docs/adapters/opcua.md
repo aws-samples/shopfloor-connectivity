@@ -698,8 +698,43 @@ OpcuaAdapterConfiguration extension the [AdapterConfiguration](../core/protocol-
 
 **Properties:**
 
+- [MaxEventeventRetainSize](#maxeventretainsize)
+- [MaxEventRetainPeriod](#maxeventretainperiod)
+
 - [OpcuaServers](#opcuaservers)
 - [ServerProfiles](#serverprofiles)
+
+
+
+---
+
+### MaxEventRetainPeriod
+
+This parameter can be used to restrict the period  in milliseconds for which events are stored in between adapter reads
+
+**Type**: Integer
+
+The default value is 3.600.000 (1 hour). If set to 0 there is no maximum period.
+
+---
+
+### MaxEventRetainSize
+
+This parameter can be used to restrict the maximum number of stored events in between adapter reads.
+
+**Type**: Integer
+
+The default value is 10000. If set to 0 there is no maximum number of values.
+
+---
+
+### MaxEventRetainPeriod
+
+This parameter can be used to restrict the period  in milliseconds for which events are stored in between adapter reads
+
+**Type**: Integer
+
+The default value is 1 hour. If set to 0 there is no maximum period.
 
 ---
 ### OpcuaServers
@@ -735,6 +770,16 @@ Profiles configured for this adapter. Servers in this adapter can have a referen
             "$ref": "#/definitions/OpcuaServerConfiguration"
           },
           "minProperties": 1
+        },
+        "MaRetainEventsPeriod" :{
+          "type" : "integer",
+          "description": "Max events retain period",
+          "default" : 0
+        },
+        "MaxEventsRetainSize" :{
+          "type" : "integer",
+          "description": "Max events retain size",
+          "default" : 0
         },
         "ServerProfiles": {
           "type": "object",

@@ -237,7 +237,7 @@ Template examples:
 - plant1-**%line%**   : Values from all sources will be grouped by the value of the %line% metadata and published to a topic for that value
 
 In case a placeholder is not resolved, when a value for a used placeholder is part of the data,
-then an alternative topic name can be configured by setting the name of that topic to the **"AlternateTopiName"** setting.
+then an alternative topic name can be configured by setting the name of that topic to the **"AlternateTopicName"** setting.
 
 Note that the use of placeholders to send data to specific topics will result in additional publish calls to the broker.
 
