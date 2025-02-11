@@ -45,26 +45,26 @@ class J1939Adapter(
     private val className = this::class.simpleName.toString()
 
     class Frame(val canId: Int, val data: ByteArray, val timestamp: Instant) {
-         override fun toString(): String {
+        override fun toString(): String {
             return "CanID ${canId.asHexString()}, Data [${data.asHexString()}] $timestamp"
         }
     }
 
     init {
         logger.getCtxInfoLog(className, "")(BuildConfig.toString())
-        if (!SystemUtils.IS_OS_UNIX){
+        if (!SystemUtils.IS_OS_UNIX) {
             logger.getCtxErrorLog(className, "init")("Unsupported OS: This J1939 Adapter requires POSIX compliant OS implementing SocketCan")
             exitProcess(1)
         }
     }
 
     private val adapterConfiguration by lazy {
-         val config = configuration.j1939ProtocolAdapters [adapterID]
-             if (config == null){
-                 logger.getCtxErrorLog(className, "adapterConfiguration")("\"$adapterID\" is not a valid adapter, configured adapters are ${configuration.j1939ProtocolAdapters.keys}")
-             }
+        val config = configuration.j1939ProtocolAdapters[adapterID]
+        if (config == null) {
+            logger.getCtxErrorLog(className, "adapterConfiguration")("\"$adapterID\" is not a valid adapter, configured adapters are ${configuration.j1939ProtocolAdapters.keys}")
+        }
         config
-   }
+    }
 
     // channel to send data changes to the coroutine that is handling these changes
     private val receivedData = Channel<Frame>(
@@ -82,7 +82,7 @@ class J1939Adapter(
 
     private fun addressAsString(address: UByte): String = "${address}(0x${address.asHexString()})"
 
-    private val j1939Dbc: J1939Dbc? by lazy {
+    private val j1939Dbc: J1939Dbc? =
         if (adapterConfiguration?.dbcFile != null) {
             try {
                 J1939Dbc(adapterConfiguration!!.dbcFile!!, logger).load()
@@ -91,10 +91,10 @@ class J1939Adapter(
                 null
             }
         } else null
-    }
+
 
     // Map indexed by PGN with entries containing the sources with channels for this PGN
-    private val pgnSourcesMap: Map<UInt, Map<String, J1939SourceConfiguration>>  by lazy {
+    private val pgnSourcesMap: Map<UInt, Map<String, J1939SourceConfiguration>> =
         configuration.sources.flatMap { (sourceId, sourceConfig) ->
             sequence {
                 sourceConfig.channels.map { (channelId, channelConfig) ->
@@ -103,10 +103,10 @@ class J1939Adapter(
                 }
             }
         }.groupBy { it.first }.map { it.key to it.value.associate { it.second } }.toMap()
-    }
 
-   // Map containing the SPNs indexed by source/channel
-    private val channelSpnMap: Map<String, Map<String, List<J1939Signal>>>  = sources.map { (sourceId, sourceConfig) ->
+
+    // Map containing the SPNs indexed by source/channel
+    private val channelSpnMap: Map<String, Map<String, List<J1939Signal>>> = sources.map { (sourceId, sourceConfig) ->
         sourceId to sourceConfig.channels.map { (channelId, channelConfig) ->
             channelId to signalsForChannel(channelId, channelConfig)
         }.toMap()
@@ -144,7 +144,7 @@ class J1939Adapter(
                         metricsCollector?.put(adapterID, dataPoints)
                     }
                 } catch (e: java.lang.Exception) {
-                    logger.getCtxErrorLogEx( className, "collectMetricsFromLogger")("Error collecting metrics from logger", e)
+                    logger.getCtxErrorLogEx(className, "collectMetricsFromLogger")("Error collecting metrics from logger", e)
                 }
             }
         } else null
@@ -176,12 +176,12 @@ class J1939Adapter(
             }
     }
 
-    private val canbusReader = if (adapterConfiguration!= null) scope.launch {
+    private val canbusReader = if (adapterConfiguration != null) scope.launch {
 
         val log = logger.getCtxLoggers(className, "canbusReader")
         val adapterConfig = adapterConfiguration
 
-        var socket : RawCanSocket? = null
+        var socket: RawCanSocket? = null
         while (isActive && adapterConfig != null) {
             try {
 
@@ -371,7 +371,7 @@ class J1939Adapter(
 
     private fun sourcesUsingPgnFromAddress(pgnId: UInt, sourceAddress: UByte): Map<String, J1939SourceConfiguration> {
         return pgnSourcesMap[pgnId]?.filter { it.value.sourceAddress == sourceAddress || it.value.sourceAddress == null }
-            ?: emptyMap()
+                ?: emptyMap()
     }
 
     private fun handleSingleFrameData(canFrameIdentifier: CanFrameIdentifier, frame: Frame) {
@@ -436,7 +436,10 @@ class J1939Adapter(
             } else {
                 bam.skip = true
                 log.trace(
-                    "Dropping transport protocol connection management frame, as there is no source configured to read this PGN ${ pgnAsString(bam.pgnId)} from source address ${addressAsString(canFrameIdentifier.sourceAddress)}")
+                    "Dropping transport protocol connection management frame, as there is no source configured to read this PGN ${pgnAsString(bam.pgnId)} from source address ${
+                        addressAsString(
+                            canFrameIdentifier.sourceAddress)
+                    }")
             }
             sourceBroadCastData[canFrameIdentifier.sourceAddress] = bam
 
@@ -525,8 +528,10 @@ class J1939Adapter(
         val errLog = logger.getCtxErrorLog(className, "pgnForChannel")
         val png = try {
             if (isNumeric(channel.pgn)) {
-                val n = getUInt(channel.pgn)
-                if (n != null) j1939Dbc?.pgnByPgnId(n) else null
+                val n = getUInt(channel.pgn.split(".").first())
+                if (n != null)
+                    j1939Dbc?.pgnByPgnId(n)
+                else null
             } else {
                 j1939Dbc?.pgnByName(channel.pgn)
             }
@@ -535,7 +540,7 @@ class J1939Adapter(
             return null
         }
         if (png == null) {
-            errLog("PGN not found for channel \"$channelName\"")
+            errLog("PGN \"${channel.pgn}\"  not found for channel \"$channelName\" in DBC file")
         }
         return png
     }
@@ -555,11 +560,11 @@ class J1939Adapter(
             channel.spnList!!.map {
                 try {
                     if (isNumeric(it)) {
-                        val id = getUInt(it)
+                        val id = getUInt(it.split(".").first())
                         if (id != null) {
                             val spn = j1939Dbc?.spnById(pgn.pngId, id)
                             if (spn == null) {
-                                errLog("SPN \"$it\" not found for channel \"$channelName\"")
+                                errLog("SPN \"$it\" not found for channel \"$channelName\" in DBC file")
                             } else {
                                 val signal = pgn.signals.find { it.name == spn.name }
                                 if (signal == null) {
@@ -630,7 +635,7 @@ class J1939Adapter(
             val schedule = config.schedules.firstOrNull { it.name == scheduleName }
             val sourcesForAdapter =
                 schedule?.sources?.filter { (config.sources[it.key]?.protocolAdapterID ?: "") == adapterID }
-                    ?: return null
+                        ?: return null
 
             return if (adapter != null) InProcessSourcesReader.createInProcessSourcesReader(
                 schedule = schedule,

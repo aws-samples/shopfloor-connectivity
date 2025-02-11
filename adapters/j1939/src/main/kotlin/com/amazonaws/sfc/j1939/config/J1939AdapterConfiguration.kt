@@ -79,17 +79,6 @@ class J1939AdapterConfiguration : ProtocolAdapterConfiguration(), Validate {
             CONFIG_DBC_FILE,
             this)
 
-        ConfigurationException.check(
-            File(_dbcFile!!).exists(),
-            "$CONFIG_DBC_FILE must be a valid file",
-            CONFIG_DBC_FILE,
-            this)
-
-        ConfigurationException.check(
-            dbcFile!!.canRead(),
-            "$CONFIG_DBC_FILE can not be read",
-            CONFIG_DBC_FILE,
-            this)
     }
 
     private fun validateCanSocketName() {

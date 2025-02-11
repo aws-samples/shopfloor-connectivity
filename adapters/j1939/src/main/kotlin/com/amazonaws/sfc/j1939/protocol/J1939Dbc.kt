@@ -54,7 +54,7 @@ class J1939Dbc(private val dbcFile : File, private val logger: Logger) {
 
         pgnByPgnMap.clear()
         pgnToCanIdIdMap.clear()
-        spnMap .clear()
+        spnMap.clear()
 
 
         try {

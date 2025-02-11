@@ -36,7 +36,7 @@ fun isNumeric(s: String?): Boolean {
     if (s.isNullOrEmpty()) {
         return false
     }
-    if (s.toCharArray().all { it.isDigit() }) return true
+    if (s.toCharArray().all { it.isDigit() || it == '.'}) return true
     val lowerCase = s.lowercase()
     return lowerCase.startsWith("0x") && s.length > 2 && lowerCase.substring(2, s.length).toCharArray().all { it.isDigit() || it in "abcdef" }
 }

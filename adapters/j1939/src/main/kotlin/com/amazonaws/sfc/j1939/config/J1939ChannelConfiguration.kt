@@ -7,6 +7,7 @@ package com.amazonaws.sfc.j1939.config
 import com.amazonaws.sfc.config.ChannelConfiguration
 import com.amazonaws.sfc.config.ConfigurationClass
 import com.amazonaws.sfc.config.ConfigurationException
+import com.amazonaws.sfc.j1939.protocol.isNumeric
 import com.google.gson.annotations.SerializedName
 
 
@@ -14,16 +15,16 @@ import com.google.gson.annotations.SerializedName
 class J1939ChannelConfiguration : ChannelConfiguration() {
 
     @SerializedName(value = CONFIG_PGN, alternate = [CONFIG_PGN_UPPERCASE])
-    private var _pgn: String? = null
+    private var _pgn: String = ""
 
     val pgn: String
-        get() = _pgn ?: ""
+        get() = if (isNumeric(_pgn))_pgn.split('.').first() else _pgn
 
     @SerializedName(value = CONFIG_SPN, alternate = [CONFIG_SPN_UPPERCASE])
     private var _spnList: String? = null
 
     val spnList: List<String>?
-        get() = _spnList?.split(',')?.map { it.trim() }
+        get() = _spnList?.split(',')?.map { it.trim() }?.map{if (isNumeric(it))it.split('.').first() else it}
 
     override fun validate() {
         if (validated) return
@@ -51,7 +52,7 @@ class J1939ChannelConfiguration : ChannelConfiguration() {
 
         private val default = J1939ChannelConfiguration()
 
-        fun create(pgn: String? = default._pgn,
+        fun create(pgn: String = default._pgn,
                    spn: String? = default._spnList,
                    name: String? = default._name,
                    description: String = default._description,
