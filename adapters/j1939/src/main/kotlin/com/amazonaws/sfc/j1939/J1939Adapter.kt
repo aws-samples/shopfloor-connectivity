@@ -105,8 +105,8 @@ class J1939Adapter(
         }.groupBy { it.first }.map { it.key to it.value.associate { it.second } }.toMap()
     }
 
-   // Map containing the PSNs indexed by source/channel
-    private val channelPsnMap: Map<String, Map<String, List<J1939Signal>>>  = sources.map { (sourceId, sourceConfig) ->
+   // Map containing the SPNs indexed by source/channel
+    private val channelSpnMap: Map<String, Map<String, List<J1939Signal>>>  = sources.map { (sourceId, sourceConfig) ->
         sourceId to sourceConfig.channels.map { (channelId, channelConfig) ->
             channelId to signalsForChannel(channelId, channelConfig)
         }.toMap()
@@ -400,7 +400,7 @@ class J1939Adapter(
 
         sourcesUsingPgnFromAddress(pgnId, sourceAddress).keys.forEach { sourceId ->
 
-            channelPsnMap[sourceId]?.forEach { (channelId, channelSignals) ->
+            channelSpnMap[sourceId]?.forEach { (channelId, channelSignals) ->
                 val pgnData = sequence {
                     channelSignals.forEach { signal ->
                         if (pgn.signals.contains(signal)) {
@@ -557,13 +557,13 @@ class J1939Adapter(
                     if (isNumeric(it)) {
                         val id = getUInt(it)
                         if (id != null) {
-                            val spn = j1939Dbc?.psbById(pgn.pngId, id)
+                            val spn = j1939Dbc?.spnById(pgn.pngId, id)
                             if (spn == null) {
                                 errLog("SPN \"$it\" not found for channel \"$channelName\"")
                             } else {
                                 val signal = pgn.signals.find { it.name == spn.name }
                                 if (signal == null) {
-                                    errLog("SPN \"$it\" not found in PNG \"${pgn.name}\" (${pgn.canId}) for channel \"$channelName\", available channels are ${j1939Dbc?.psnListForPgn(pgn.canId)}")
+                                    errLog("SPN \"$it\" not found in PNG \"${pgn.name}\" (${pgn.canId}) for channel \"$channelName\", available channels are ${j1939Dbc?.spnListForPgn(pgn.canId)}")
                                 } else yield(signal)
                             }
                         } else null

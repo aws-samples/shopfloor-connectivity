@@ -1,7 +1,7 @@
 
 # OPCDA Protocol Configuration
 
-Configuration for OPCDA protocol adapter.
+The OPC Data Access (DA) adapter for SFC enables integration with legacy industrial automation systems by connecting to OPC DA servers. It allows reading and writing of real-time process data from devices and systems that support the classic OPC DA specification, commonly found in manufacturing and process control environments. The adapter supports browsing of available tags, synchronous and asynchronous data access, and handles data type conversions between OPC DA and SFC's internal format
 
 ---
 - [OpcdaSourceConfiguration](#opcdasourceconfiguration)
@@ -15,7 +15,7 @@ Configuration for OPCDA protocol adapter.
 
 [SFC Configuration](../core/sfc-configuration.md) > [Sources](../core/sfc-configuration.md#sources) >  [Source](../core/source-configuration.md)
 
-
+Configuration class that defines settings for connecting to and reading data from an OPC DA server source. It specifies server connection details, tag browsing parameters, and data collection settings for retrieving real-time process values from OPC DA-compliant devices and systems
 
 Source configuration for the OPCDA protocol adapter. This type extends the [SourceConfiguration](../core/source-configuration.md) type.
 
@@ -29,7 +29,7 @@ Source configuration for the OPCDA protocol adapter. This type extends the [Sour
 
 ---
 ### AdapterOpcdaServer
-Server Identifier for the OPCDA server to read from. This referenced server must be present in the dServers section of the adapter referred to by the ProtocolAdapter attribute of the source.
+Identifier that references a specific OPC DA server configuration defined in the adapter's Servers section, linking the source to its corresponding server connection settings.
 
 **Type**: String
 
@@ -37,9 +37,7 @@ Must be an identifier of a server in the OpcdaServers section of the OPCDA adapt
 
 ---
 ### Channels
-The channels configuration for an OPCDA source holds configuration data to read values from items on the source OPCDA server.
-The element is a map indexed by the channel identifier.
-Channels can be "commented" out by adding a "#" at the beginning of the identifier of that channel.
+Map of data channels defined for this source, where each channel is identified by a unique key. Channels can be temporarily disabled by prefixing their identifier with '#'.
 
 **Type**: Map[String,[OpcdaChannelConfiguration](#opcdachannelconfiguration)]
 
@@ -47,10 +45,11 @@ At least 1 channel must be configured.
 
 ---
 ### SourceReadingMode
-Mode for reading values from OPCDA server.
+- Defines the data collection process from the OPC DA server, offering two modes: "Subscription" and "Polling."
 
-- "Subscription": connector will create a subscription and will monitor the items configured in the channels for the source. When reading from the adapter in this mode, only items that have been changed in the schedule interval period will be returned, except for the initial read that will return all monitored items.
-- "Polling", the connector will batch-read all items configured in the channels for the source with the interval defined in the schedule.
+  **Subscription Mode:** In this mode, the connector establishes a subscription to monitor changes in the configured items in the source channels. Upon reading from the adapter, only items that have been modified within the specified schedule interval period are returned. The initial read returns all monitored items.
+
+  **Polling Mode:** In this mode, the connector performs batch-reading of all items configured in the source channels at the interval defined in the schedule.
 
 
 **Type**: String 
@@ -174,7 +173,7 @@ Copy
 
 [SFC Configuration](../core/sfc-configuration.md) > [Sources](../core/sfc-configuration.md#sources) > [Source](../core/source-configuration.md)  > [Channels](../core/source-configuration.md#channels) > [Channel](../core/channel-configuration.md)
 
-
+Configuration class that defines settings for an individual OPC DA channel, specifying how to read and process data from a specific item or tag on the OPC DA server
 
 The OpcdaChannelConfiguration type extends the [ChannelConfiguration](../core/channel-configuration.md) class with channel properties for the OPCDA protocol adapter.
 
@@ -186,7 +185,7 @@ The OpcdaChannelConfiguration type extends the [ChannelConfiguration](../core/ch
 
 ---
 ### Item
-A string containing the name of the item to read the value from or to monitor.
+The name or identifier of the OPC DA item (tag) from which values will be read or monitored on the server
 
 **Type**: String
 
@@ -246,7 +245,7 @@ Temperature sensor:
 
 [SFC Configuration](../core/sfc-configuration.md) > [ProtocolAdapters](../core/sfc-configuration.md#protocoladapters) > [Adapter](../core/protocol-adapter-configuration.md) 
 
-
+Configuration class that defines the overall settings for the OPC DA adapter, including server connections, security settings, and communication parameters for interacting with OPC DA data sources
 
 OpcdaAdapterConfiguration extension the [AdapterConfiguration](../core/protocol-adapter-configuration.md) with properties for the OPCDA Protocol adapter.
 
@@ -259,7 +258,7 @@ OpcdaAdapterConfiguration extension the [AdapterConfiguration](../core/protocol-
 
 ---
 ### OpcdaServers
-Opcda servers configured for this adapter. The Opcda source using the adapter must refer to one of these servers with the AdapterOpcdaServer attribute.
+Collection of OPC DA server configurations available to the adapter, each identified by a unique key that sources can reference through their AdapterOpcdaServer property.
 
 **Type**: Map[String,[OpcdaServerConfiguration](#opcdaserverconfiguration)]
 
@@ -315,7 +314,7 @@ Opcda servers configured for this adapter. The Opcda source using the adapter mu
 
 [OpcdaAdapter](#opcdaadapterconfiguration)> [OpcdaServers](#opcdaservers)
 
-
+Configuration class that defines connection parameters for a specific OPC DA server, including server identification, connection settings, and authentication details. Each server configuration can be referenced by OPC DA sources to establish connections and access data from the specified server
 
 - [Schema](#opcdaserverconfiguration-schema)
 - [Examples](#opcdaserverconfiguration-examples)
@@ -333,8 +332,7 @@ Opcda servers configured for this adapter. The Opcda source using the adapter mu
 
 ---
 ### ConnectTimeout
-Timeout in milliseconds connecting to the server/td>
-Integer
+Maximum time in milliseconds allowed for establishing a connection to the OPC DA server.
 
 **Type**: Integer
 
@@ -344,7 +342,7 @@ Default is 10000, the minimum value is 1000
 
 ---
 ### ReadBatchSize
-Max number of items to read in a single batch read from the server
+Maximum number of items that can be requested in a single batch read operation from the OPC DA server.
 
 **Type**: Integer
 
@@ -352,7 +350,7 @@ If not specified all configured items are read in a single read
 
 ---
 ### ReadTimeout
-Timeout in milliseconds reading from the server
+Maximum time in milliseconds to wait for a response when reading data from the OPC DA server.
 
 **Type**: Integer
 
@@ -360,7 +358,7 @@ Default is 10000
 
 ---
 ### SamplingRate
-Time in milliseconds for sampling items in subscription mode.
+Interval in milliseconds between consecutive samples when monitoring items in subscription mode.
 
 **Type**: Integer
 
@@ -368,7 +366,7 @@ If not specified then the shorted interval will be used from all active schedule
 
 ---
 ### Url
-Url	Address of the OPCDA server
+Network address or connection endpoint of the OPC DA server.
 
 **Type**: String
 
@@ -376,7 +374,7 @@ e.g., "opcda://192.168.1.145/Simulation"
 
 ---
 ### WaitAfterConnectError
-Time in milliseconds to wait to reconnect after a connection error
+Delay in milliseconds before attempting to reconnect following a failed connection attempt.
 
 **Type**: Integer
 

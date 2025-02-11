@@ -19,7 +19,7 @@ class J1939Dbc(private val dbcFile : File, private val logger: Logger) {
     // Lookup table from PGN Id to its Can ID
     val pgnToCanIdIdMap = mutableMapOf<UInt, UInt>()
     // Lookup table from SPN Id to its J1939SPN
-    val psnMap = mutableMapOf<UInt, MutableMap<UInt, J1939SPN>>()
+    val spnMap = mutableMapOf<UInt, MutableMap<UInt, J1939SPN>>()
 
     fun pgnByCanId(canId: UInt): J1939PGN? {
         val pgn = CanFrameIdentifier.extractPgn(canId)
@@ -34,14 +34,14 @@ class J1939Dbc(private val dbcFile : File, private val logger: Logger) {
         return pgnByPgnMap.values.find { it.name == name }
     }
 
-    fun psbById(pgn: UInt, spnId: UInt): J1939SPN? {
+    fun spnById(pgn: UInt, spnId: UInt): J1939SPN? {
         val messageId = pgnToCanIdIdMap[pgn] ?: return null
-        return psnMap[messageId]?.get(spnId)
+        return spnMap[messageId]?.get(spnId)
     }
 
-    fun psnListForPgn(pgn: UInt): Map<UInt, J1939SPN>? {
+    fun spnListForPgn(pgn: UInt): Map<UInt, J1939SPN>? {
         val messageId = pgnToCanIdIdMap[pgn] ?: return null
-        return psnMap[messageId]
+        return spnMap[messageId]
     }
 
     fun load() : J1939Dbc {
@@ -54,7 +54,7 @@ class J1939Dbc(private val dbcFile : File, private val logger: Logger) {
 
         pgnByPgnMap.clear()
         pgnToCanIdIdMap.clear()
-        psnMap .clear()
+        spnMap .clear()
 
 
         try {
@@ -79,14 +79,14 @@ class J1939Dbc(private val dbcFile : File, private val logger: Logger) {
                     PgnParseState.READ_PNG_SIGNALS -> {
 
                         if (line.startsWith(PNG_SIGNAL_PREFIX)) {
-                            // Signal  line for PGN found, if it could be parsed continue reading PSNs for this PGN or else start looking for next PGN
+                            // Signal  line for PGN found, if it could be parsed continue reading SPNs for this PGN or else start looking for next PGN
                             parsingState = if (parseDbcPgnSignal(line, currentPgn) != null) PgnParseState.READ_PNG_SIGNALS else PgnParseState.READ_PNG
                         } else {
                             // Line was not a Signal, start looking for next PGN
                             parsingState = PgnParseState.READ_PNG
                         }
 
-                        // Switched from READ_PSN to READ_PGN state, process PGN and its PSNs
+                        // Switched from READ_SPN to READ_PGN state, process PGN and its SPNs
                         if (parsingState == PgnParseState.READ_PNG) {
                             if (currentPgn != null) {
                                 val pgnFromCanId = CanFrameIdentifier.extractPgn(currentPgn.canId)
@@ -98,19 +98,19 @@ class J1939Dbc(private val dbcFile : File, private val logger: Logger) {
                     }
                 }
 
-                // Looking for PSN Lines
-                if (line.startsWith(PSN_PREFIX)) {
+                // Looking for SPN Lines
+                if (line.startsWith(SPN_PREFIX)) {
                     parsingState = if (parseDbcSpn(line) != null) PgnParseState.READ_PNG_SIGNALS else PgnParseState.READ_PNG
                     val spn = parseDbcSpn(line)
 
-                    // build a map with an entry for the PGN the PSN is a part of, the entry value is a map containing all Signals for the PGN
+                    // build a map with an entry for the PGN the SPN is a part of, the entry value is a map containing all Signals for the PGN
                     if (spn != null) {
-                        var psnForPgnMap = psnMap[spn.messageId]
-                        if (psnForPgnMap == null) {
-                            psnForPgnMap = mutableMapOf()
-                            psnMap[spn.messageId] = psnForPgnMap
+                        var spnForPgnMap = spnMap[spn.messageId]
+                        if (spnForPgnMap == null) {
+                            spnForPgnMap = mutableMapOf()
+                            spnMap[spn.messageId] = spnForPgnMap
                         }
-                        psnForPgnMap[spn.id] = spn
+                        spnForPgnMap[spn.id] = spn
                     }
                 }
 
@@ -123,13 +123,13 @@ class J1939Dbc(private val dbcFile : File, private val logger: Logger) {
             fileReader.close()
         }
 
-        log.info("Loaded ${pgnByPgnMap.size} PGN and ${psnMap.values.sumOf { it.size }} PSN items from ${dbcFile.name}")
+        log.info("Loaded ${pgnByPgnMap.size} PGN and ${spnMap.values.sumOf { it.size }} SPN items from ${dbcFile.name}")
 
         return this
     }
 
     private fun parseDbcSpn(line: String): J1939SPN? {
-        val match = psnPattern.find(line)
+        val match = spnPattern.find(line)
         if (match == null) return null
         return try {
             J1939SPN(
@@ -138,7 +138,7 @@ class J1939Dbc(private val dbcFile : File, private val logger: Logger) {
                 id = match.groupValues[3].toUInt()
             )
         } catch (e: Exception) {
-            logger.getCtxLoggers(className, "parseDbcSpn").error("Error parsing PSN from line \"line\", $e")
+            logger.getCtxLoggers(className, "parseDbcSpn").error("Error parsing SPN from line \"line\", $e")
             null
         }
     }
@@ -232,8 +232,8 @@ class J1939Dbc(private val dbcFile : File, private val logger: Logger) {
         \s*
         (\S.*)    # Receivers """.trimIndent().toRegex(RegexOption.COMMENTS)
 
-        const val PSN_PREFIX = "BA_ \"SPN\" SG_"
-        private val psnPattern = """
+        const val SPN_PREFIX = "BA_ \"SPN\" SG_"
+        private val spnPattern = """
         BA_\s"SPN"\sSG_\s
         (\d+)   # message ID
         \s

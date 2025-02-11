@@ -1,5 +1,7 @@
 # OPCUA Protocol adapter
 
+The SFC OPC UA protocol adapter provides read-only access to OPC UA servers, supporting both synchronous data reads and asynchronous monitoring through subscriptions. The adapter can be configured to either poll data points on demand or subscribe to data changes and events, enabling efficient real-time data acquisition from industrial automation systems.
+
 Configuration types for the OPCUA protocol adapter and contains the extensions and specific configuration types.
 
 - [OPCUA Alarm and Events types](#opcua-alarm-and-event-types)

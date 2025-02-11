@@ -19,7 +19,7 @@ class J1939ChannelConfiguration : ChannelConfiguration() {
     val pgn: String
         get() = _pgn ?: ""
 
-    @SerializedName(value = CONFIG_SPN, alternate = [CONFIG_PSN_UPPERCASE])
+    @SerializedName(value = CONFIG_SPN, alternate = [CONFIG_SPN_UPPERCASE])
     private var _spnList: String? = null
 
     val spnList: List<String>?
@@ -46,8 +46,8 @@ class J1939ChannelConfiguration : ChannelConfiguration() {
         private const val CONFIG_PGN = "Pgn"
         private const val CONFIG_PGN_UPPERCASE = "PGN"
 
-        private const val CONFIG_SPN = "Psn"
-        private const val CONFIG_PSN_UPPERCASE = "PSN"
+        private const val CONFIG_SPN = "Spn"
+        private const val CONFIG_SPN_UPPERCASE = "SPN"
 
         private val default = J1939ChannelConfiguration()
 
