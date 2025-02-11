@@ -207,9 +207,9 @@ class J1939Adapter(
                     }
                 }
             } catch (e: Exception) {
-                if (e.isJobCancellationException) {
+                if (!e.isJobCancellationException) {
                     waitUntil = Instant.ofEpochMilli(systemDateTime().toEpochMilli() + adapterConfiguration!!.waitAfterErrors.toLong(DurationUnit.MILLISECONDS))
-                    log.error("Error reading CAN socket ${adapterConfiguration!!.canSocketName}, $e ")
+                    log.error("Error reading CAN socket ${adapterConfiguration!!.canSocketName}, paused reading for ${adapterConfiguration!!.waitAfterErrors} until $waitUntil, $e ")
                     delay(waitUntil.toEpochMilli() - systemDateTime().toEpochMilli())
                 }
             } finally {
