@@ -6,6 +6,8 @@
 
 [SFC Configuration](./sfc-configuration.md) > [Targets](./sfc-configuration.md#targets) > [TargetAdapter](./target-configuration.md) > [Metrics](./target-configuration.md#metrics)
 
+Configuration for individual metrics sources within SFC, controlling collection at the source level. Includes an enable/disable flag and the ability to add custom dimensions specific to the source. Provides granular control over metrics collection for protocol adapters, targets, and other components.
+
 - [Schema](#schema)
 - [Examples](#schema)
 
@@ -17,7 +19,7 @@
 
 ---
 ### CommonDimensions
-Set of extra dimensions added to every datapoint
+Defines source-specific key-value pairs that are automatically added to every metric from this particular source. These dimensions help identify and categorize metrics from individual components or data sources within the system.
 
 **Type**: Map(String,String)
 
@@ -25,7 +27,7 @@ Optional
 
 ---
 ### Enabled
-Collection enabled or disabled
+Controls whether metrics collection is active for this specific source. When true (default), metrics are collected from this source. When false, metrics collection is disabled for this source only, without affecting other sources in the system.
 
 **Type**: Boolean
 

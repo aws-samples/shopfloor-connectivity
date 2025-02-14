@@ -2,7 +2,7 @@
 
 [SFC Configuration](./sfc-configuration.md) > [AwsIotCredentialProviderClientConfiguration](./sfc-configuration.md#awsiotcredentialproviderclients)
 
-An AWS IoT Credentials Provider Client configuration is used  to obtain temporary credentials used when AWS service API calls using X.509 certificates. When used by AWS service targets the name of the configuration is specified as the value for the CredentialProviderClient in the configuration for that target.
+An AWS IoT Credentials Provider Client configuration is used  to obtain temporary credentials used when AWS service API calls using X.509 certificates. When used by AWS service targets, the name of the configuration is specified as the value for the CredentialProviderClient in the configuration for that target. If  AWS IoT  Greengrass  is deployed on the system,  alternatively this [configuration](https://docs.aws.amazon.com/greengrass/v2/developerguide/device-auth.html) can be referenced even when SFC is not deployed as a Greengrass component.
 
 For more info see [Session credentials for targets accessing AWS Service](../sfc-aws-service-credentials.md)
 
@@ -25,13 +25,13 @@ For more info see [Session credentials for targets accessing AWS Service](../sfc
 
 ---
 ### CertificateFile
-The pathname of the device certificate file
+The CertificateFile property specifies the file system path to the X.509 device certificate file. This certificate is used to authenticate the device with AWS IoT Core services. The certificate must be registered with AWS IoT Core and associated with appropriate policies for authentication and authorization.
 
 **Type**: String
 
 ---
 ### CertificatesByFileReference
-Option to pass credential provider-client certificate and key file by filename (true) or by content (false).
+The CertificatesByFileReference property controls how certificates and keys are passed to SFC components running as IPC (Inter-Process Communication) services. When true, files are referenced by their filenames, allowing certificates to exist on a different system than where the service runs. When false, the actual certificate and key contents are passed directly. This enables flexible credential management across distributed systems.
 
 **Type**: Boolean
 
@@ -39,19 +39,21 @@ Default is false
 
 ---
 ### ExpiryClockSkewSeconds
-Seconds that will be added to the system time when checking the expiration of the credentials. New credentials will be retrieved when the clock time of the system plus these number of seconds is beyond the credentials expiration time. This value can be set to avoid using expired credentials when the system clock runs slightly behinds
+The ExpiryClockSkewSeconds property defines a buffer time (in seconds) added to the system clock when checking credential expiration. This helps prevent using expired credentials when system clocks are slightly out of sync. The credential provider will proactively fetch new credentials when the current time plus this skew value exceeds the credential expiration time. For example, with the default value of 300 seconds (5 minutes), new credentials will be requested 5 minutes before actual expiration.
 
 **Type**: Int
 
-Default = 300
+Default = 300 seconds
 
 ---
 ### GreenGrassDeploymentPath
-Pathname for the root of Greengrass deployment. If set then the ClientProxyConfiguration IotCredentialEndpoint, RoleAlias, ThingName, Certificate, PrivateKey, RootCA, and Proxy will be read from the GreenGrass configuration file. If any of these is specified then it will override the setting read from the configuration file.
-
-**Type**: String
+The GreengrassDeploymentPath property specifies the root directory path of an AWS IoT Greengrass V2 deployment. When set, the credential provider will read configuration settings ( [IotCredentialEndpoint](#iotcredentialendpoint), [RoleAlias](#rolealias), [ThingName](#thingname), [CertificateFile](#certificatefile), [PrivateKeyFile](#privatekeyfile), [RootCA](#rootca), and [Proxy](#proxy))from the Greengrass configuration file. Individual settings specified elsewhere will override those from the Greengrass configuration.
 
 The typical root directory for Greengrass 2 deployment is /greengrass/v2. The process running the core or target must have access to the file effectiveConfig.yaml in subdirectory config. Note that these directories and files have restricted access.
+
+Note: This configuration can be used even when SFC is not deployed as a Greengrass component.
+
+**Type**: String
 
 ---
 ### IotCredentialEndpoint
@@ -64,11 +66,11 @@ Can be obtained by CLI command
 ```console
 aws iot describe-endpoint --endpoint-type iot:CredentialProvider
 ```
-Format is <your_aws_account_specific_prefix>.credentials.<region>.amazonaws.com
+Format is `your_aws_account_specific_prefix`.credentials.`region`.amazonaws.com
 
 ---
 ### PrivateKeyFile
-Path to the private key file for the device
+The PrivateKeyFile property specifies the file system path to the private key file associated with the device certificate. This private key is used in conjunction with the device certificate for authentication with AWS IoT Core services and must be kept secure. The private key file must correspond to the public key in the device certificate.
 
 **Type**: String
 
@@ -76,25 +78,25 @@ Path to the private key file for the device
 ### Proxy
 Proxy configuration if the client is using a proxy server to access the internet.
 
-**Type**: 
+**Type**: [ClientProxyConfiguration](./client-proxy-configuration.md)
 
 Optional
 
 ---
 ### RoleAlias
-Alias pointing to an IAM role. The credentials provider request must include a role alias name to indicate which IAM role to assume for obtaining a security token from AWS
+The RoleAlias property specifies an alias that points to an IAM role. When requesting temporary credentials, this alias must be included to indicate which IAM role should be assumed. The AWS IoT credentials provider uses this role alias to obtain temporary security tokens from AWS Security Token Service (STS) that grant the permissions defined in the referenced IAM role.
 
 **Type**: String
 
 ---
 ### RootCA
-The pathname of the root CA certificate file
+The RootCA property specifies the file system path to the root Certificate Authority (CA) certificate file. This certificate is used to verify the authenticity of the AWS IoT Core endpoint during TLS handshake. The root CA certificate establishes the chain of trust for secure communications with AWS IoT services
 
 **Type**: String
 
 ---
 ### SkipCredentialsExpiryCheck
-For systems that don't have a reliable clock time, this setting can be set to true to skip the expiry date of the credentials. This may result in failing API Service calls due to expired session credentials, which must be handled in the target implementation.
+The SkipCredentialsExpiryCheck property allows bypassing the credential expiration verification on systems with unreliable clock time. When set to true, the credential provider will not validate the expiration time of credentials. This can be useful in environments where system time may be incorrect, but it comes with risks - API service calls may fail if the credentials have actually expired. The target implementation must handle such failures appropriately.
 
 **Type**: Boolean
 
@@ -102,7 +104,7 @@ Default = false
 
 ---
 ### ThingName
-AWS IoT thing name using the device certificate
+The ThingName property specifies the AWS IoT thing name associated with the device certificate. This is the unique identifier for the device in AWS IoT Core that corresponds to the device certificate being used for authentication. The thing name is used to identify the device when requesting credentials from the AWS IoT credentials provider service.
 
 **Type**: String
 

@@ -1,8 +1,6 @@
-
-
-
-
 # AWS SiteWise Target
+
+The AWS IoT [SiteWise](https://aws.amazon.com/iot-sitewise/) target adapter enables Shop Floor Connectivity's uninterrupted streaming of industrial device data directly to AWS IoT SiteWise assets and measurements. This adapter facilitates the mapping of device data to SiteWise asset properties, with the option of automatically creating the necessary SiteWise assets. Additionally, it handles data types and timestamps. 
 
 
 ---
@@ -17,12 +15,8 @@
 
 [SFC Configuration](../core/sfc-configuration.md) > [Targets](../core/sfc-configuration.md#targets) >  [Target](../core/target-configuration.md) 
 
-
-
 AwsSitewiseTargetConfiguration extends the type  [TargetConfiguration](../core/target-configuration.md) with specific configuration data for sending data to SiteWise assets. The Targets configuration element can contain entries of this type, the TargetType of 
 these entries must be set to **"AWS-SITEWISE"**
-
-
 
 Required IAM permissions:
 
@@ -57,36 +51,73 @@ Required IAM permissions:
 
 ---
 ### AssetCreation
-Settings for AssetModels and Assets automatically created by the adapter.
+Controls the automatic creation of AWS IoT SiteWise asset models and assets by the adapter. When this configuration is present, the adapter will automatically create the necessary asset models and assets based on the incoming device data structure. 
+
+- Automatically generates asset models from device data schemas
+- Creates corresponding assets from the generated models
+- Handles property definitions and hierarchies
+- Supports asset naming conventions and property configurations
+
+The configuration can be empty to use default settings, or can be customized to control:
+
+- Asset and model naming patterns
+- Property configurations
+- Hierarchy definitions
+- Model versioning behavior
+
+When this property is absent, even if it's not set to an empty  [AwsSiteWiseAssetCreationConfiguration](#awssitewiseassetcreationconfiguration) value, automatic asset and model creation is disabled. In such cases, existing assets must be explicitly referenced in the configuration.
 
 **Type**:  [AwsSiteWiseAssetCreationConfiguration](#awssitewiseassetcreationconfiguration)
 
-When present automatic creation of AssetModels and Assets is enabled, can be empty when using the default settings.
-
 ---
 ### Assets
-Assets to write to
+Defines the mapping configuration for writing data to existing AWS IoT SiteWise assets. This setting allows you to specify how source data should be mapped to asset properties in your IoT SiteWise asset hierarchy.
+
+Each asset configuration in the list specifies:
+
+- The target asset identifier
+- Property mappings for measurements, attributes, or transforms
+- Data type conversions and transformations
+- Timestamp handling
+
+This configuration can be used alongside automatically created assets (defined in AssetModelCreation), providing flexibility to:
+
+- Write to existing asset structures
+- Combine with dynamically created assets
+- Support hybrid deployment scenarios
+
+Required if writing to existing assets. Optional if using only automatically created assets through AssetModelCreation.
 
 **Type**: List of [AwsSiteWiseAssetConfiguration](#awssitewiseassetconfiguration)
 
-This setting is used to map data to existing assets and asset properties. It is possible to combine these with assets 
- which are automatically created by the target adapter using the 
-AssetCreation setting. 
+
 
 
 ---
 ### BatchSize
-Batch size for writing asset data
+Specifies the maximum number of property values to include in a single BatchPutAssetPropertyValue request to AWS IoT SiteWise. This setting helps optimize data ingestion performance and manage API quotas.
+
+Constraints:
+
+- Maximum allowed value: 10 (AWS IoT SiteWise service limit)
+- Each batch entry can contain up to 10 property values
+- Timestamps must be within 7 days in the past and 10 minutes in the future
+
+The batch size setting helps:
+
+- Optimize network utilization
+- Reduce API calls
+- Balance throughput and latency
+- Manage service quotas efficiently
+
+Optional. If not specified, the default value of 10 will be used.
 
 **Type**: Integer
-
-Default is 10
 
 ---
 ### CredentialProviderClient
 
-Name of the AWS credential provider client defined in the SFC top level configuration section [AwsIotCredentialProviderClients]
-(../core/sfc-top-level-config.md#AwsIotCredentialProviderClients) obtaining credentials using X.509 certificates from the [AWS IoT credentials provider](../sfc-aws-service-credentials.md).
+The CredentialProviderClient property specifies which AWS credential provider client to use for authentication. It references a client defined in the SFC's top-level configuration under [AwsIotCredentialProviderClients](../core/sfc-configuration.md#awsiotcredentialproviderclients) section. This client uses X.509 certificates to obtain temporary AWS credentials through the  [AWS IoT credentials provider](../sfc-aws-service-credentials.md).
 
 If no CredentialProviderClient is configured the [AWS Java SDK credential provider chain is used](https://docs.aws.amazon.com/sdk-for-java/latest/developer-guide/credentials.html#credentials-chain)
 
@@ -96,16 +127,38 @@ If no CredentialProviderClient is configured the [AWS Java SDK credential provid
 
 ### Interval
 
-Interval in milliseconds after which data is sent to stream even if the buffer is not full
+Specifies a time-based trigger for sending data to AWS IoT SiteWise, ensuring data is sent even when the [BatchSize](#batchsize) threshold is not met. This helps maintain data freshness during periods of low data volume.
+
+- Triggers data transmission after specified milliseconds
+- Works in conjunction with BatchSize
+- Ensures timely data delivery regardless of buffer fullness
+- Helps optimize real-time monitoring scenarios
+
+Optional. When not specified, data transmission is controlled solely by BatchSize, which may lead to increased latency during low-volume periods.
 
 **Type**: Integer
 
-Optional, if not set only BatchSize is used, minimum value is 10
+Optional, if not set only [BatchSize](#batchsize) is used, minimum value is 10
 
 
 ---
 ### Region
-AWS Region for SiteWise service
+Specifies the AWS Region where the IoT SiteWise service is deployed. The Region must be one where AWS IoT SiteWise is available and supported. [[1\]](https://docs.aws.amazon.com/govcloud-us/latest/UserGuide/govcloud-iotsitewise.html)
+
+Examples:
+
+- "us-east-1" (US East - N. Virginia)
+- "eu-west-1" (Europe - Ireland)
+- "ap-southeast-2" (Asia Pacific - Sydney)
+
+Important considerations:
+
+- Must match the region where your assets are defined
+- Affects data residency and compliance
+- Impacts latency between data source and SiteWise service
+- Should align with your organization's AWS infrastructure
+
+Required. The adapter will connect to the AWS IoT SiteWise endpoint in the specified region.
 
 **Type**: String
 
@@ -305,10 +358,9 @@ Copy
 
 [AwsSitewiseTarget](#awssitewisetargetconfiguration) > [AssetCreation](#assetcreation)
 
+Configuration for automatic creation and management of AWS IoT SiteWise asset models and assets. Defines how the adapter generates and maintains asset hierarchies, property definitions, and model relationships based on incoming device data structure. When enabled, the adapter automatically creates and updates the necessary SiteWise resources while following specified naming conventions and configuration patterns.
 
 
-The SiteWise target adapter can automatically create and update AssetModels and Assets using the target data received by the adapter.
-Each source in the target  data will be mapped to a SiteWise AssetModel and Asset using configurable naming templates.
 
 - [Schema](#awssitewiseassetcreationconfiguration-schema)
 - [Examples](#awssitewiseassetcreationconfiguration-examples)
@@ -331,204 +383,217 @@ Each source in the target  data will be mapped to a SiteWise AssetModel and Asse
 
 ---
 ### AssetDescription
-Template for description of created assets.
+Defines the template used to generate descriptions for automatically created assets. The template supports dynamic content through placeholders and metadata values.
+
+Available placeholders:
+
+- %schedule% - Schedule identifier
+- %target% - Target identifier
+- %source% - Source identifier
+- %datetime% - Current date/time
+- ${name} - Environment variables
+- %metadataName% - Source/target metadata values
+
+Default: "Asset for target %target%, schedule %schedule%, source %source%"
+
+Optional. When not specified, the default template is used. The description helps identify and organize assets within AWS IoT SiteWise
 
 **Type**: String
-
-
-The value is as template used tro create the name for a created asset.
-In template, besides placeholders for environment variables (${name}) the following placeholders are
-available:
-
-- %schedule%
-- %target%
-- %source%
-- %datetime%
-
-To use the values of metadata at the top or source level of the target data, the name af the metadata value can be used with a '%' prefix and postfix.
-
-The default value is "Asset for target %target%, schedule %schedule%, source %source%"
 
 
 ---
 ### AssetExternalId
-Template for external ID  of created or updated assets.
+Defines the template used to generate external IDs for assets. External IDs provide a way to link SiteWise assets with external systems and maintain consistent identification across platforms.
+
+Available placeholders:
+
+- %schedule% - Schedule identifier
+- %target% - Target identifier
+- %source% - Source identifier
+- ${name} - Environment variables
+- %metadataName% - Source/target metadata values
+
+Pattern requirements:
+
+- Must start with a letter or number
+- Can contain letters, numbers, hyphens, underscores
+- Must be 2-128 characters long
+- Must end with a letter or number
+
+Optional. If not specified, no external ID will be assigned to the asset.
 
 **Type**: String
-
-
-The value is as template used to create the external ID for the created or updated asset.
-In template, besides placeholders for environment variables (${name}) the following placeholders are
-available:
-
-- %schedule%
-- %target%
-- %source%
-
-To use the values of metadata at the top or source level of the target data, the name af the metadata value can be used with a '%' prefix and postfix.
-
-If this setting is not used then no external ID will be created for the asset.
 
 
 ---
 ### AssetModelDescription
-Template for description of created asset models.
+Defines the template used to generate descriptions for automatically created asset models. The template supports dynamic content through placeholders and metadata values to provide context about the model's purpose and origin.
+
+Available placeholders:
+
+- %schedule% - Schedule identifier
+- %target% - Target identifier
+- %source% - Source identifier
+- %datetime% - Current date/time
+- ${name} - Environment variables
+- %metadataName% - Source/target metadata values
+
+Default: "Asset model for target %target%, schedule %schedule%, source %source%"
+
+Optional. When not specified, the default template is used. The description helps identify and document asset models within AWS IoT SiteWise.
 
 **Type**: String
-
-
-The value is as template used tro create the name for a created asset model.
-In template, besides placeholders for environment variables (${name}) the following placeholders are
-available:
-
-- %schedule%
-- %target%
-- %source%
-- %datetime%
-
-To use the values of metadata at the top or source level of the target data, the name af the metadata value can be used with a '%' prefix and postfix.
-
-
-The default value is "Asset model for target %target%, schedule %schedule%, source %source%"
 
 
 ---
 ### AssetModelExternalId
-Template for external ID  of created or updated asset models.
+Template for external ID of created or updated asset models.
+
+**Type** : String
+
+Defines the template used to generate external IDs for asset models. External IDs enable integration with external systems by providing a consistent identifier across different platforms and systems. External IDs help maintain referential integrity when synchronizing with external systems.
+
+Available placeholders:
+
+- %schedule% - Schedule identifier
+- %target% - Target identifier
+- %source% - Source identifier
+- ${name} - Environment variables
+- %metadataName% - Source/target metadata values
+
+Optional. If not specified, no external ID will be assigned to the asset model. 
+
+Pattern requirements:
+
+- Must be unique within your AWS account
+- Must follow AWS IoT SiteWise naming conventions
+- Case-sensitive
 
 **Type**: String
-
-
-The value is as template used to create the external ID for the created or updated asset model.
-In template, besides placeholders for environment variables (${name}) the following placeholders are
-available:
-
-- %schedule%
-- %target%
-- %source%
-
-To use the values of metadata at the top or source level of the target data, the name af the metadata value can be used with a '%' prefix and postfix.
-
-If this setting is not used then no external ID will be created for the asset model.
 
 
 ---
 ### AssetModelName
-Template for name of created or updated asset models.
+Defines the template used to generate names for asset models. The template supports dynamic content through placeholders and metadata values to create unique and meaningful model names.
+
+Available placeholders:
+
+- %schedule% - Schedule identifier
+- %target% - Target identifier
+- %source% - Source identifier
+- ${name} - Environment variables
+- %metadataName% - Source/target metadata values
+
+Default: "%target%-%schedule%-%source%-model"
+
+Required. Must follow AWS IoT SiteWise naming constraints: [[2\]](https://docs.aws.amazon.com/iot-sitewise/latest/userguide/update-asset-models.html)
+
+- Maximum length of 256 characters
+- Cannot contain control characters or certain special characters
+- Must be unique within your AWS account
 
 **Type**: String
-
-
-The value is as template used tro create the name for the created or updated asset model.
-In template, besides placeholders for environment variables (${name}) the following placeholders are
-available:
-
-- %schedule%
-- %target%
-- %source%
-
-To use the values of metadata at the top or source level of the target data, the name af the metadata value can be used with a '%' prefix and postfix.
-
-The default value is "%target%-%schedule%-%source%-model"
 
 
 ---
 ### AssetModelTags
-Map containing the names and value templates to add to an AssetModel when it is created by the adapter.
+Defines key-value pairs of tags to be applied to created asset models. Tag values support dynamic content through templates, allowing for automated and consistent tagging based on context.
+
+Available placeholders in value templates:
+
+- %schedule% - Schedule identifier
+- %target% - Target identifier
+- %source% - Source identifier
+- ${name} - Environment variables
+- %metadataName% - Source/target metadata values
+
+Optional. When specified, these tags are automatically applied during asset model creation, enabling better resource organization and management in AWS IoT SiteWise.
 
 **Type**: Map[String,String]
 
-
-Optional
-
-The value is as template used tro create the tag values for the created measurement asset models,
-In template, besides placeholders for environment variables (${name}) the following placeholders are
-available:
-
-- %schedule%
-- %target%
-- %source%
-
-To use the values of metadata at the top or source level of the target data, the name af the metadata value can be used with a '%' prefix and postfix.
-
-
-
 ---
 ### AssetName
-Template for name of created or updated assets.
+Defines the template used to generate names for assets. The template supports dynamic content through placeholders and metadata values to create unique and meaningful asset names.
+
+Available placeholders:
+
+- %schedule% - Schedule identifier
+- %target% - Target identifier
+- %source% - Source identifier
+- ${name} - Environment variables
+- %metadataName% - Source/target metadata values
+
+Default: "%target%-%schedule%-%source%"
+
+Required. Must follow AWS IoT SiteWise naming constraints:
+
+- Maximum length of 256 characters
+- Must be unique within your asset hierarchy
+- Cannot contain control characters or certain special characters
 
 **Type**: String
-
-
-The value is as template used to create the name for the created or updated asset.
-In template, besides placeholders for environment variables (${name}) the following placeholders are
-available:
-
-- %schedule%
-- %target%
-- %source%
-
-To use the values of metadata at the top or source level of the target data, the name af the metadata value can be used with a '%' prefix and postfix.
-
-The default value is "%target%-%schedule%-%source%"
 
 
 ---
 ### AssetPropertyAlias
-Template for alias  of created or updated asset properties.
+Defines the template used to generate aliases for asset properties. 
+
+Available placeholders:
+
+- %schedule% - Schedule identifier
+- %target% - Target identifier
+- %source% - Source identifier
+- %channel% - Channel identifier
+- %uuid% - Random UUID
+- %assetid% - ID of the asset containing the property
+- ${name} - Environment variables
+- %metadataName% - Source/target metadata values
+
+Optional. If not specified, no alias will be created for the asset property.
+
+Constraints:
+
+- Minimum length of 1 character 
+- Maximum length of 1000 characters
+- Cannot contain control characters
+- Must follow AWS IoT SiteWise alias naming conventions
 
 **Type**: String
-
-
-The value is as template used to create the external ID for the created asset property.
-In template, besides placeholders for environment variables (${name}) the following placeholders are
-available:
-
-- %schedule%
-- %target%
-- %source%
-- %channel%
-- %uuid% (random uuid)
-- %assetid% (ID of the asset of the property)
-
-To use the values of metadata at the top or source level of the target data, the name af the metadata value can be used with a '%' prefix and postfix.
-
-If this setting is not used then no alias will be created for the asset property.
 
 
 ---
 ### AssetPropertyName
-Template for name of created measurement asset properties.
+Defines the template used to generate names for measurement asset properties. The template supports dynamic content through placeholders and metadata values to create descriptive and unique property names.
+
+Available placeholders:
+
+- %schedule% - Schedule identifier
+- %target% - Target identifier
+- %source% - Source identifier
+- %channel% - Channel identifier
+- ${name} - Environment variables
+- %metadataName% - Metadata values from top, source, or channel level
+
+Default: "%target%-%schedule%-%source%-%channel%"
+
+Required. Must follow AWS IoT SiteWise naming constraints:
+
+- Maximum length of 256 characters
+- Must be unique within the asset
+- Cannot contain control characters or certain special characters
 
 **Type**: String
 
 
-The value is as template used tro create the name for the created measurement asset properties,
-In template, besides placeholders for environment variables (${name}) the following placeholders are
-available:
-
-- %schedule%
-- %target%
-- %source%
-- %channel%
-
-To use the values of metadata at the top, source or channel level of the target data, the name af the metadata value can be used with a '%' prefix and postfix.
-
-The default value is "%target%-%schedule%-%source%-%channel%"
 
 
 ---
 ### AssetPropertyTimestamp
 Specified which value to use for the timestamp of the measurement values written to the asset properties.
 
-**Type**: String
-
-
-
 The value specifies the starting point in the target output data from where a timestamp is searched for. The following values
-can be used. If no timestamp is available at the level in the output data the next level up is tried. Depending on configuration
-and availability at the source it can happen that a timestamp is not available at source or channel level. The Schedule timestamp, which is at the top level of the
-target output data, is always available as it is added by the SFC core.
+can be used. If no timestamp is available at the level in the output data, the next level up is tried. Depending on configuration
+and availability at the source, it can happen that a timestamp is not available at source or channel level. The Schedule timestamp, which is at the top level of the target output data, is always available as it is added by the SFC core.
 
 - "Channel" : Value timestamp, Source timestamp, Schedule timestamp
 - "Source" : Source timestamp, Schedule timestamp
@@ -538,29 +603,23 @@ target output data, is always available as it is added by the SFC core.
 
 Default value is "Channel"
 
-
+**Type**: String
 
 ---
 ### AssetTags
-Map containing the names and value templates to add to an Asset when it is created by the adapter.
+Defines key-value pairs of tags to be applied to created assets. Tag values can be dynamically generated using templates, allowing for consistent and automated asset tagging.
+
+Available placeholders in value templates:
+
+- %schedule% - Schedule identifier
+- %target% - Target identifier
+- %source% - Source identifier
+- ${name} - Environment variables
+- %metadataName% - Source/target metadata values
+
+Optional. When specified, these tags are automatically applied during asset creation, enabling better resource organization and management in AWS IoT SiteWise.
 
 **Type**: Map[String,String]
-
-
-Optional
-
-The value is as template used tro create the tag values for the created measurement assets,
-In template, besides placeholders for environment variables (${name}) the following placeholders are
-available:
-
-- %schedule%
-- %target%
-- %source%
-
-To use the values of metadata at the top or source level of the target data, the name af the metadata value can be used with a '%' prefix and postfix.
-
-
-**Type**: Map[String.String]
 
 
 
@@ -691,6 +750,8 @@ Setting all possible values and adding tags for assetmodel and asset
 
 [AwsSitewiseTarget](#awssitewisetargetconfiguration) > [Assets](#assets) 
 
+Configuration class that defines how data should be mapped to AWS IoT SiteWise assets and their properties.
+
 
 - [Schema](#awssitewiseassetconfiguration-schema)
 - [Examples](#awssitewiseassetconfiguration-examples)
@@ -704,35 +765,27 @@ Setting all possible values and adding tags for assetmodel and asset
 
 ---
 ### AssetExternalId
-External id of the asset
+Identifies an existing AWS IoT SiteWise asset using its external ID. This is an alternative to using the asset's UUID or name. The asset's id, name or external id must be specified, not both. If all properties for the asset use the property alias then ExternalId must NOT be specified.
 
 **Type**: String
-
-The asset's id, name or external id must be specified, not both. If all properties for the asset use the property alias then ExternalId must NOT be specified.
 
 ---
 ### AssetId
-ID of the asset
+Identifies an existing AWS IoT SiteWise asset using its ID. Either the asset's id, name, or external id must be specified. If all properties for the asset use the property alias, then AssetId must NOT be specified.
 
 **Type**: String
-
-Either the asset's id, name or external id must be specified. If all properties for the asset use the property alias then AssetId must NOT be specified.
 
 ---
 ### AssetName
-Name of the asset
+Identifies an existing AWS IoT SiteWise asset using its name. The asset's id, name OR external id must be specified, not both. If all properties for the asset use the property alias, then AssetName must NOT be specified.
 
 **Type**: String
 
-The asset's id, name OR external id must be specified, not both. If all properties for the asset use the property alias then AssetName must NOT be specified.
-
 ---
 ### Properties
-Properties to write to the asset
+Defines the list of property configurations that map data to AWS IoT SiteWise asset properties.
 
 **Type**: List of [AwsSiteWiseAssetPropertyConfiguration](#awssitewiseassetpropertyconfiguration)
-
-Either property id or alias must be specified, but not both
 
 ### AwsSiteWiseAssetConfiguration Schema
 
@@ -822,7 +875,7 @@ Either property id or alias must be specified, but not both
 
 [AwsSitewiseTarget](#awssitewisetargetconfiguration) > [Assets](#assets) > [Asset](#awssitewiseassetconfiguration) > [Properties](#properties)
 
-
+Configuration class that defines how data values should be mapped to a specific AWS IoT SiteWise asset property. Specifies how to identify the target property (using ID or alias) and defines the mapping rules for data values and their timestamps.
 
 - [Schema](#awssitewiseassetpropertyconfiguration-schema)
 - [Examples](#awssitewiseassetpropertyconfiguration-examples)
@@ -840,74 +893,94 @@ Either property id or alias must be specified, but not both
 
 ---
 ### DataPath
-JMES path that selects the value to write to the property from the data received by the target writer
+[JMES](https://jmespath.org/) path expression that selects the value to write to the AWS IoT SiteWise asset property from the received data structure.
+
+A path typically has the format 
+
+`"sources.< source name >.values< value name>.value"` 
+
+`"sourcename.valuename.value".`
+
+Important notes:
+
+- Special characters (like '-') must be enclosed in quotes
+- Path must follow JMESPath syntax rules
+- Must resolve to a single value in the data structure
+- Case-sensitive
 
 **Type**: String
-
-https://jmespath.org/
-A path typically has the format "sources.< source name >.values< value name >.value or sourcename.valuename.value"
-Note that JMESPath syntax treats characters like '-' as special characters and therefore the element in the path must be in quotes,
 
 ---
 ### DataType
-SiteWise data type
+Specifies the AWS IoT SiteWise data type for the property value.
 
-**Type**: string, integer, double, boolean
+Possible values:
+
+- "string"
+
+- "integer"
+
+- "double"
+
+- "boolean"
 
 If no type is specified the type of the value is used to determine type that is used
 
----
-### PropertyAlias
-Alias of the asset property
-
 **Type**: String
 
-Only one of the property id, name, external id or alias must be specified
-If PropertyAlias is used for all properties of an asset then the AssetId, AssetName and AssetExternalId must not be configured for that asset.
+---
+### PropertyAlias
+Alias that identifies the AWS IoT SiteWise asset property.
+
+Only one of the property id, name, external id or alias must be specified.
+If PropertyAlias is used for all properties of an asset, then the AssetID, AssetName, and AssetExternalID must not be configured for that asset.
+
+**Type**: String
 
 ---
 ### PropertyExternalId
-External id of the asset property
+External ID of the AWS IoT SiteWise asset property.
+
+Only one of the property id, name, external id or alias must be specified.
 
 **Type**: String
-
-Only one of the property id, name, external id or alias must be specified
 
 ---
 ### PropertyId
-Id of the asset property
+ID of the AWS IoT SiteWise asset property. 
+
+Only one of the property id, name, external id or alias must be specified.
 
 **Type**: String
-
-Only one of the property id, name, external id or alias must be specified
 
 ---
 ### PropertyName
-Name of the asset property
+Name of the AWS IoT SiteWise asset property.
+
+Only one of the property id, name, external id or alias must be specified.
 
 **Type**: String
 
-Only one of the property id, name, external id or alias must be specified
-
 ---
 ### TimestampPath
-JMES path that selects the timestamp to use with to the property value from the data received by the target writer.
-String
+Defines the path to extract timestamp information using JMESPath syntax.
 
-**Type**: https://jmespath.org/
+A path typically has the format 
 
-A path typically has the format "sources.< source name >.values< value name >.timestamp"
-If not specified the adapter will look for a timestamp in the order, value level, source level, root level.
-Note that JMESPath syntax treats characters like '-' as special characters and therefore the element in the path must be in quotes,
+`"sources.< source name >.values< value name >.timestamp"`
+
+If not specified, the adapter will look for a timestamp in the order: value level, source level, root level.
+Note that JMESPath syntax treats characters like '-' as special characters, and therefore the element in the path must be in quotes.
+
+**Type**: String
 
 
 ---
 ### WarnIfNotPresent
-A warning is generated if the data path does not return a value for the data being handled by the adapter. This warning can be disabled for 
-fields that are not always present by setting this setting to false.
-Boolean
+Controls whether a warning is generated when the specified data path doesn't return a value.
 
-**Type**: 
+**Type**: Boolean
+
 Default is true
 
 ### AwsSiteWiseAssetPropertyConfiguration Schema

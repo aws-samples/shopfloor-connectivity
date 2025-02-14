@@ -2,11 +2,11 @@
 
 [SFC Configuration](../core/sfc-configuration.md) > [Targets](../core/sfc-configuration.md#targets) >  [Target](../core/target-configuration.md) 
 
-
+The SFC MQTT target adapter enables publishing collected data to MQTT brokers using configurable topic patterns. Topics can be dynamically constructed using target data and  metadata from the source readings. The adapter supports various MQTT protocol configurations, authentication methods, and quality of service (QoS) levels for reliable message delivery. 
 
 ## MqttTargetConfiguration
 
-MqttTargetConfiguration extends the type TargetConfiguration with specific configuration data for connecting to and sending to MQTT topic. The Targets configuration element can contain entries of this type, the TargetType of these entries must be set to "MQTT-TARGET"
+MqttTargetConfiguration extends the type TargetConfiguration with specific configuration data for connecting to and sending to MQTT topics. The Targets configuration element can contain entries of this type; the TargetType of these entries must be set to **"MQTT-TARGET"**.
 
 - [Schema](#mqtttargetconfiguration-schema)
 - [Examples](#mqtttargetconfiguration-examples)
@@ -38,58 +38,57 @@ MqttTargetConfiguration extends the type TargetConfiguration with specific confi
 
 ---
 ### AlternateTopicName
-Name or name template of the topic values are published in case there are unmapped template placeholders in the TopicName
+An alternative topic name or template to use when the primary [TopicName](#topicname) contains unmapped placeholder variables that cannot be resolved. This serves as a fallback publishing destination when dynamic topic name construction fails.
 
 **Type**: String
 
 ---
 ### BatchCount
-Number of messages to buffer before sending data as a batch to a topic.
+The maximum number of messages to accumulate in the buffer before triggering a batch publish to the MQTT topic. When this count is reached, all buffered messages are sent as an array in a single MQTT message.
+
+Batching is triggered when any configured threshold (BatchCount, [BatchSize](#batchsize), or [BatchInterval](#batchinterval)) is reached
 
 **Type**: Int
-
-Batching is enabled by setting a value for one or more of BatchSize, BatchCount and BatchInterval.
-Whenever the number of messages, total message size or an interval is reached the buffered data is sent as an array of messages to the topic.
 
 ---
 ### BatchInterval
-Interval in milliseconds after which a batch of messages is sent to the topic, even when the BatchSize or BatchCount limit is not reached.
+The maximum time in milliseconds to hold messages in the buffer before publishing them as a batch to the MQTT topic, regardless of whether [BatchSize](#batchcount) or [BatchCount](#batchcount) limits have been reached.
+
+Batching is triggered when any configured threshold ([BatchCount](#batchcount), [BatchSize](#batchsize), or BatchInterval) is reached
 
 **Type**: Int
-
-Batching is enabled by setting a value for one or more of BatchSize, BatchCount and BatchInterval.
-Whenever the number of messages, total message size or an interval is reached the buffered data is sent as an array of messages to the topic.
 
 ---
 ### BatchSize
-Payload size in KB of messages to batch before sending data as a batch to a topic.
+The maximum total size in kilobytes of uncompressed message payloads to accumulate before triggering a batch publish to the MQTT topic. When this size threshold is reached, all buffered messages are sent as an array in a single MQTT message.
+
+Batching is triggered when any configured threshold ([BatchCount](#batchcount), BatchSize, or [BatchInterval](#batchinterval)) is reached
 
 **Type**: Int
 
-Batching is enabled by setting a value for one or more of BatchSize, BatchCount and BatchInterval.
-Whenever the number of messages, total message size or an interval is reached the buffered data is sent as an array of messages to the topic.
-The size is calculated on the uncompressed payload of the messages.
-
 ---
 ### Certificate
-Path to client certificate file. Used if broker used certificate authentication
+The file system path to the client certificate file used for authentication with the MQTT broker when certificate-based authentication is enabled.
+
+ Only when using certificate-based authentication
 
 **Type**: String
 
 ---
 ### Compression
-Compression method for MQTT message payloads.
+The compression algorithm to apply to MQTT message payloads before publishing to the broker. Compressing messages can reduce bandwidth usage and transmission time.
 
-**Values:**
+**Type:** String
+
+Possible values:
+
 - "None" (Default)
 - "Zip"
 - "GZip"
 
-**Type**: String
-
 ---
 ### ConnectRetries
-Number of retries to connect to MQTT broker
+The maximum number of attempts to establish a connection with the MQTT broker when the initial connection fails.
 
 **Type**: Int
 
@@ -97,18 +96,18 @@ Default is 10
 
 ---
 ### Connection
-Connection type
+Specifies the type of connection security to use when connecting to the MQTT broker. 
 
-**Values:**
-- "PlainText" (Default)
-- "ServerSideTLS"
-- "MutualTLS"
+Possible values:
+- "PlainText": Unencrypted connection, this is the default
+- "ServerSideTLS": TLS encryption with server certificate validation
+- "MutualTLS": TLS encryption with both server and client certificate validation
 
 **Type**: String
 
 ---
 ### ConnectionTimeout
-Timeout for connecting to the broker in seconds
+The maximum time in seconds to wait for establishing a connection with the MQTT broker before timing out.
 
 **Type**: Int
 
@@ -116,40 +115,44 @@ Default is 10 seconds
 
 ---
 ### EndPoint
-Broker endpoint address
+The network address of the MQTT broker to connect to.
 
 **Type**: String
 
-Optionally with training port number (see Port)
+- Port number is optional in the endpoint string (see [Port](#port) property)
+- If protocol scheme is omitted, it will be automatically added based on Connection type:
+  - PlainText: "tcp://" prefix
+  - ServerSideTLS or MutualTLS: "ssl://" prefix
 
-If no scheme is specified in the address, then it will be added based on the Connection type.
-("tcp://" for PlainText or "ssl://" for ServerSideTLS or MutualTLS)
-To get the ATS endpoint for an account use the AWS CLI command
+For AWS IoT Core, use the ATS endpoint for your account To get the ATS endpoint for an account use the AWS CLI command
+```console
 aws iot describe-endpoint --endpoint-type iot:Data-ATS
+```
 https://awscli.amazonaws.com/v2/documentation/api/latest/reference/iot/describe-endpoint.html
 
 
 ---
 ### MaxPayloadSize
-Max payload size in KB for MQTT messages.
+The maximum size in kilobytes allowed for a single MQTT message payload.
+
+- When compression is enabled, the original uncompressed payload size may exceed this limit
+- For batched messages without compression, reaching this size limit will trigger sending the batch
+- Used as a threshold for batch publishing when batching is enabled
 
 **Type**: Int
-
-Note if compression is enabled the payload size of a single target data message, or a batch of messages can be larger, than this value. When batching of messages is enabled, without compression a batch
-of messages will be sent to the topic when this size is reached.
 
 
 ---
 ### Password
-Password if broker is using username and password authentication
+The password credential for authenticating with the MQTT broker when using username/password authentication.
+
+[Username](#username) and password should not be included as clear text in the configuration. It is strongly recommended to use placeholders and use the SFC integration with the [AWS secrets manager](../core/secrets-manager-configuration.md).
 
 **Type**: String
 
-Username and password should not be included as clear text in the configuration. It is strongly recommended to use placeholders and use the SFC integration with the AWS secrets manager.
-
 ---
 ### Port
-Port on MQTT broker
+The TCP port number used to connect to the MQTT broker. 
 
 **Type**: Integer
 
@@ -160,17 +163,19 @@ Commonly port numbers are
 - 8884 for MutualTLS.
 - 443 for AWS IoT Core endpoints
 
-In no port number is specified then the EndPoint address is searched for a training port number.
+If no port number is specified, then the [EndPoint](#endpoint) address is searched for a training port number.
 
 ---
 ### PrivateKey
-Path to client private key file
+The file system path to the private key file used for client authentication when using certificate-based authentication with the MQTT broker. 
+
+Only when using certificate-based authentication (MutualTLS)
 
 **Type**: String
 
 ---
 ### PublishTimeout
-Timeout in seconds for publishing
+The maximum time in seconds to wait for a message to be published to the MQTT broker before timing out.
 
 **Type**: Long
 
@@ -178,19 +183,21 @@ Default is 10 seconds
 
 ---
 ### QoS
-Quality of service
+The MQTT Quality of Service (QoS) level for message delivery. 
+
+- 0: At most once (Fire and forget), the default.
+- 1: At least once (Guaranteed delivery, but possible duplicates)
+- 2: Exactly once (Guaranteed delivery exactly one time)
 
 **Type**: Integer
 
-Default is 0
 
-0 = At most once
-1 = At least once
-2 = Exactly once
 
 ---
 ### Retain
-Set to true to store a single message per a given MQTT topic for delivery to any current and future topic subscribers.
+Controls whether messages should be retained by the MQTT broker. 
+
+When set to true, the broker will store the last message published to each topic. New subscribers to these topics will immediately receive the most recent retained message, even if it was published before they subscribed.
 
 **Type**: Boolean
 
@@ -198,38 +205,37 @@ Default is false
 
 ---
 ### RootCA
-Path to root certificate file. The Root CA file in an MQTT client is used for server certificate verification when establishing a secure connection with the broker (using TLS/SSL)
+The file system path to the Root Certificate Authority (CA) certificate file.
+
+When using secure connections (TLS/SSL) to validate the broker's identity.
 
 **Type**: String
 
 ---
 ### SslServerCertificate
-Path to server certificate file to verify the identity of the broker.
+The file system path to the server certificate file used to verify the MQTT broker's identity for ServerSideTLS and MutualTLS connection types.
+
+Used to authenticate and verify the identity of the MQTT broker during secure connections.
 
 **Type**: String
-
-If no certificate file is specified it is obtained from the server.
-Used for connections of type ServerSideTLS and MutualTLS
 
 ---
 ### TopicName
-Name or name template of the topic
+The MQTT topic name or topic name template for publishing messages.
 
 **Type**: String
 
-
 A template can be used for the topicName to render the actual topic name using placeholders. In this template, 
-besides placeholders for environment variables (${name}) the following placeholders are available:
+besides placeholders for environment variables (${name}), the following placeholders are available:
 
 - %schedule%
 - %target%
 - %source%
 - %channel%
 
-To use the values of **metadata** at the top, source or channel level of the target data, the name af the metadata value can 
-be used with a '%' prefix and postfix.
+To utilize the metadata values at the source or channel level of the target data, the name of the metadata value can be utilized with a '%' prefix and postfix.
 
-Value placeholders can be used to add additional topic levels or grouping values to a specific topic.
+Value placeholders can be employed to incorporate additional topic levels or grouping values to a specific topic.
 
 Template examples:
 
@@ -237,7 +243,7 @@ Template examples:
 - plant1-**%line%**   : Values from all sources will be grouped by the value of the %line% metadata and published to a topic for that value
 
 In case a placeholder is not resolved, when a value for a used placeholder is part of the data,
-then an alternative topic name can be configured by setting the name of that topic to the **"AlternateTopicName"** setting.
+then an alternative topic name can be configured by setting the name of that topic to the [AlternateTopicName](#alternatetopicname) setting.
 
 Note that the use of placeholders to send data to specific topics will result in additional publish calls to the broker.
 
@@ -245,15 +251,15 @@ Note that the use of placeholders to send data to specific topics will result in
 
 ---
 ### Username
-Username if broker is using username and password authentication
+The username credential for authenticating with the MQTT broker when using username/password authentication
+
+Username and [password](#password) should not be included as clear text in the configuration. It is strongly recommended to use placeholders and use the SFC integration with the [AWS secrets manager](../core/secrets-manager-configuration.md).
 
 **Type**: String
 
-Username and password should not be included as clear text in the configuration. It is strongly recommended to use placeholders and use the SFC integration with the AWS secrets manager.
-
 ---
 ### WaitAfterConnectError
-Period in seconds to wait before trying to connect after a connection failure
+The delay period in seconds before attempting to reconnect after a failed connection to the MQTT broker.
 
 **Type**: Int
 
@@ -261,12 +267,15 @@ Default is 60 seconds
 
 ---
 ### WarnAlternateTopicName
-Generate warning if data is published to AlternateTopicName
+Controls whether a warning message should be generated when data is published to the alternate topic name.
+
+When enabled, logs a warning message if the system falls back to using the [AlternateTopicName](#alternatetopicname) due to unresolved placeholders in the main topic name
 
 **Type**: Boolean
 
-
 Default is tue
+
+
 
 ### MqttTargetConfiguration Schema
 
@@ -284,8 +293,7 @@ Default is tue
       "properties": {
         "AlternateTopicName": {
           "type": "string",
-          "description": "Alternate topic name when dynamic propery has unresolved placeholders
-          "
+          "description": "Alternate topic name when dynamic propery has unresolved placeholders"
         },
         "BatchCount": {
           "type": "integer",

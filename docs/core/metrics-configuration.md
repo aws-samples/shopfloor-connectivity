@@ -6,6 +6,8 @@
 
 [SFC Configuration](./sfc-configuration.md) > [Targets](./sfc-configuration.md#targets) > [TargetAdapter](./target-configuration.md) > [Metrics](./target-configuration.md#metrics) 
 
+Configuration section for metrics collection and management in SFC, controlling how operational metrics are gathered and output. Settings include collection intervals, core metrics toggle, custom dimensions, and namespace organization. Supports both IPC and in-process writer implementations through a required Writer configuration that determines how metrics data is processed and stored.
+
 - [Schema](#schema)
 - [Examples](#schema)
 
@@ -20,7 +22,7 @@
 
 ---
 ### CollectCoreMetrics
-Collection of core detailed metrics enabled or disabled
+Controls whether detailed core system metrics are collected. When enabled (default), gathers fundamental performance and operational metrics from the SFC core components.
 
 **Type**: Boolean
 
@@ -28,7 +30,7 @@ Default is true
 
 ---
 ### CommonDimensions
-Set of extra dimensions added to every datapoint
+Defines additional contextual key-value pairs that are automatically attached to every metric datapoint collected. These dimensions help categorize and filter metrics, such as environment, location, or deployment identifiers.
 
 **Type**: Map(String,String)
 
@@ -36,7 +38,7 @@ Optional
 
 ---
 ### Enabled
-Collection enabled or disabled
+Master switch for the entire metrics collection system. When true (default), the metrics collection system is active and gathering data. When false, all metrics collection is disabled regardless of other settings.
 
 **Type**: Boolean
 
@@ -44,7 +46,7 @@ Default is true
 
 ---
 ### Interval
-Interval in seconds for reading metrics from adapters, targets and core
+Specifies how frequently (in seconds) the system collects metrics from all sources - adapters, targets, and core components. Default value is 10 seconds, with a minimum allowed value of 10 seconds to prevent excessive system load.
 
 **Type**: Integer
 
@@ -52,7 +54,7 @@ Default is 10
 
 ---
 ### Namespace
-Namespace for collected metrics
+Defines the organizational container name that groups all collected metrics. Default value is "SFC". The namespace helps isolate and identify metrics from different applications or components within the monitoring system.
 
 **Type**: String
 
@@ -60,7 +62,7 @@ Default is "SFC"
 
 ---
 ### Writer
-Writer for writing collect metrics data
+Specifies the configuration for the component responsible for outputting collected metrics data. This required property determines how and where metrics are written, supporting both IPC and in-process implementations for metrics storage or transmission.
 
 **Type**: [MetricsWriterConfiguration](./metrics-writer-configuration.md)
 
@@ -152,7 +154,7 @@ In-process writer configuration:
     "MetricsWriter": {
       "FactoryClassName": "com.amazonaws.sfc.metrics.CloudWatchMetricsWriter",
       "JarFiles": [
-        "./aws-cloudwatch-metrics/libs
+        "./aws-cloudwatch-metrics/libs"
       ]
     }
   }

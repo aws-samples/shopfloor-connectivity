@@ -12,7 +12,7 @@ import com.google.gson.annotations.SerializedName
 import kotlin.Throws
 
 /**
- * Base class with minimum set of attributes for an SFC input source
+ * Base class with minimum set of attributes for an SFC input sourceService
  */
 @ConfigurationClass
 open class BaseSourceConfiguration : Validate {
@@ -106,7 +106,6 @@ open class BaseSourceConfiguration : Validate {
             assert(parameterLessConstructor != null)
             val instance = parameterLessConstructor!!.newInstance() as T
 
-            @Suppress("DuplicatedCode")
             with(instance) {
                 _name = name
                 _description = description

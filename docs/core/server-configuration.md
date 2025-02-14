@@ -6,6 +6,8 @@
 
 [SFC Configuration](./sfc-configuration.md) > [Metrics](./sfc-configuration.md#metrics) > [Writer](./metrics-writer-configuration.md#metricswriter) > [MetricsServer](./metrics-writer-configuration.md#metricsserver)
 
+Defines network connection settings for SFC servers including target, adapter, and metrics servers. Specifies essential parameters like address, port, security options (PlainText/TLS), and performance settings. Supports flexible configuration of connection security through different TLS modes and certificate management. Includes health monitoring capabilities for service availability tracking.
+
 - [Schema](#schema)
 - [Examples](#examples)
 
@@ -25,39 +27,31 @@
 
 ---
 ### Address
-IP address or host name
+Specifies the network address where the server can be reached, either as an IP address (e.g., "192.168.1.100") or hostname (e.g., "server.example.com"). When set to the default value "localhost", the system automatically resolves to the machine's local IP address for proper network connectivity. 
 
 **Type**: String
-
-The default address is "localhost". If this address is used the IP4 address is resolved to use the local IP address.
 
 ---
 ### CaCertificate
-The pathname of the file containing the CA certificate used by the client to encrypt network traffic. This parameter only needs to be set when the communication type is MutualTLS.
+Specifies the file path to the Certificate Authority (CA) certificate that the client uses to verify the server's identity in MutualTLS connections. This certificate is essential for establishing trust in MutualTLS mode, where both client and server authenticate each other. Only required when ConnectionType is set to "MutualTLS".
 
 **Type**: String
-
-Only required when MutualTLS is used to secure network traffic between SFC core and protocols adapter or target services
 
 ---
 ### ClientCertificate
-The pathname of the file containing the certificate used by the client to encrypt network traffic. This parameter only needs to be set when the communication type is MutualTLS.
+Specifies the file path to the client's certificate used to identify itself to the server in MutualTLS connections. This certificate proves the client's identity to the server and is required only when ConnectionType is set to "MutualTLS". The certificate must be signed by the CA trusted by the server.
 
 **Type**: String
-
-Only required when MutualTLS is used to secure network traffic between SFC core and protocols adapter or target services
 
 ---
 ### ClientPrivateKey
-The pathname of the file containing the private key used by the client to encrypt network traffic. This parameter only needs to be set when the communication type is MutualTLS.
+Specifies the file path to the client's private key that pairs with the ClientCertificate for MutualTLS authentication. This private key is used to establish secure connections and must be kept secure. Only required when ConnectionType is set to "MutualTLS" and must correspond to the provided ClientCertificate.
 
 **Type**: String
 
-Only required when MutualTLS is used to secure network traffic between SFC core and protocols adapter or target services
-
 ---
 ### Compression
-Enable or disable compression of data exchanged between services. Use this option to reduce the volume of the data exchanged between the services at the cost of CPU load to compress and decompress the data.
+Controls data compression for network traffic between services. When enabled (true), it reduces data volume, potentially improving network performance, especially for bandwidth-constrained connections. However, it increases CPU usage for compression/decompression. Disabled by default (false) to prioritize CPU efficiency over bandwidth savings.
 
 **Type**: Boolean
 
@@ -65,7 +59,7 @@ Default is false
 
 ---
 ### ConnectionType
-Connection (security) type
+Defines the security level for network communications between SFC components.
 
 - PlainText : No encryption of network traffic between SFC core and protocol adapter or target server
 - ServerSideTLS: Encryption of network traffic between SFC core and protocol adapter or target server. Server provides its certificate to client. Requires servers to be started with parameters
@@ -79,7 +73,7 @@ Default is "PlainText"
 
 ---
 ### ExpirationWarningPeriod
-Period in days in which SFC will generate a daily warning and metrics value before a used certificate expires.
+Defines the advance notification period (in days) for certificate expiration warnings. By default, generates daily warnings and metrics starting 30 days before any certificate expires. Can be disabled by setting to 0. Helps prevent unexpected service disruptions due to expired certificates.
 
 **Type**: Integer
 
@@ -87,7 +81,7 @@ Default is 30, set to 0 to disable.
 
 ---
 ### HealthProbe
-Configures the health probe endpoint when the address is used for an SFC service process.
+Configures health monitoring settings for the server endpoint, allowing the system to track service availability and health status. Uses HealthProbeConfiguration to define how health checks are performed, including check frequency, thresholds, and response criteria for determining service health state.
 
 **Type**: [HealthProbeConfiguration](./health-probe-configuration.md)
 
@@ -95,13 +89,13 @@ Configures the health probe endpoint when the address is used for an SFC service
 
 ---
 ### Port
-Port number
+Specifies the network port number where the server listens for incoming connections. This integer value identifies the specific communication endpoint on the server, allowing clients to establish connections to the service. Must be within valid port range (0-65535).
 
 **Type**: Integer
 
 ---
 ### ServerResultsChannelSize
-Size of internal buffer used by IPC servers to send results to the SFC core
+Defines the size of the internal buffer used for Inter-Process Communication (IPC) when sending results from protocol adapters or target servers back to the SFC core. The default value of 1000 determines how many results can be queued before backpressure is applied. Increasing this value allows for more results to be buffered but consumes more memory.
 
 **Type**: Int
 
@@ -109,7 +103,7 @@ Default is 1000
 
 ---
 ### ServerResultsChannelTimeout
-Timeout in milliseconds to send data to internal results buffer
+Specifies the maximum time (in milliseconds) allowed for sending data to the internal results buffer. If the buffer cannot accept new data within this timeout period (default 10000ms or 10 seconds), the operation will fail. This timeout prevents indefinite blocking when the buffer is full and helps manage backpressure scenarios.
 
 **Type**: Int
 

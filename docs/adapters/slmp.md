@@ -1,14 +1,10 @@
 # SLMP Protocol Configuration
 
-SLMP Protocol adapter configuration.
+The SFC SLMP protocol adapter enables communication with Mitsubishi/Melsec PLCs using the SLMP (Seamless Message Protocol) protocol. It allows reading data from Mitsubishi Q series, L series, and iQ-R series controllers over Ethernet.
 
-This section describes the configuration types for the SLMP protocol adapter and contains the extensions and specific configuration types.
+**IMPORTANT** : SLMP controllers only supports a single concurrent session with the controller. When reading data by multiple schedules or adapters instances, or from another SLMP client, from the same controller, timeout and broken TCP pipe errors will occur.
 
-IMPORTANT : SLMP controllers only supports a single concurrent session with the controller. When reading data by multiple schedules or adapters instances, or from another SLMP client, from the same controller, timeout and broken TCP pipe errors will occur.
-
-### SLMP channel reading optimization
-
-In order to reduce the number of interactions between the adapter and the controller read action for single BIT, WORD and DOUBLEWORD elements are combined in batches of maximum 192 values using the SLMP Read Random request. For reading arrays of multiple values, STRING values and values of custom structured types a per channel SLMP Read request is used.
+In order to reduce the number of interactions between the adapter and the controller read action for single BIT, WORD and DOUBLEWORD elements are combined in batches of maximum 192 values using the SLMP Read Random request. For reading arrays of multiple values, STRING values and values of custom structured types a per configured channel SLMP Read request is used.
 
 
 ---
@@ -26,30 +22,25 @@ In order to reduce the number of interactions between the adapter and the contro
 
 [SFC Configuration](../core/sfc-configuration.md) > [Sources](../core/sfc-configuration.md#sources) >  [Source](../core/source-configuration.md) 
 
-
-
-Source configuration for the SLMP protocol adapter. This type extends the [SourceConfiguration](../core/source-configuration.md) type.
+The SlmpSourceConfiguration class extends [SourceConfiguration](../core/source-configuration.md)  and defines the configuration for reading data from a Mitsubishi/Melsec PLC using SLMP protocol. It specifies the controller [AdapterController](#adaptercontroller) to use and the channels (values) to read from the PLC
 
 - [Schema](#slmpsourceconfiguration-schema)
 - [Examples](#slmpsourceconfiguration-examples)
 
 **Properties:**
+
 - [AdapterController](#adaptercontroller)
 - [Channels](#channels)
 
 ---
 ### AdapterController
-Controller Identifier for the controller to read from. This referenced server must be present in the Devices section of the adapter referred to by the ProtocolAdapter attribute of the source.
+The AdapterController property specifies the identifier of the SLMP controller to read data from. This identifier must match a controller defined in the Controllers section of the SLMP adapter configuration that is referenced by the source's ProtocolAdapter attribute.
 
 **Type**: String
 
-Must be an identifier of a server in the Controllers section of the SLMP adapter used by the source.
-
 ---
 ### Channels
-The channels configuration for an SLMP source holds configuration data to read values from fields on the source controller.
-The element is a map indexed by the channel identifier.
-Channels can be "commented" out by adding a "#" at the beginning of the identifier of that channel.
+The Channels property is a map of channel configurations for an SLMP source, where each entry is keyed by a unique channel identifier. It defines how to read specific values from the SLMP controller. Individual channels can be disabled by prefixing their identifier with "#" in the configuration
 
 **Type**: Map[String,[SlmpChannelConfiguration](#slmpchannelconfiguration)]
 
@@ -122,7 +113,7 @@ At least 1 channel must be configured.
 
 [SFC Configuration](../core/sfc-configuration.md) > [Sources](../core/sfc-configuration.md#sources) > [Source](../core/source-configuration.md)  > [Channels](../core/source-configuration.md#channels) > [Channel](../core/channel-configuration.md)
 
-
+The SlmpChannelConfiguration class defines the configuration for reading a specific data point (channel) from a Mitsubishi/Melsec PLC using SLMP protocol. It specifies the device address to read from.
 
 The SlmpChannelConfiguration type extends the [ChannelConfiguration](../core/channel-configuration.md) class with channel properties for the SLMP protocol adapter.
 
@@ -136,14 +127,14 @@ The SlmpChannelConfiguration type extends the [ChannelConfiguration](../core/cha
 
 ---
 ### AccessPoint
-A string containing the access point for the value to read from the device.
+The AccessPoint property defines the device address to read from in the Mitsubishi/Melsec PLC. It specifies the memory area and address using the standard SLMP addressing format (see below).
 
 **Type**: String
 
 
 Access points consists of a device code and a decimal device number, e.g. "D200" for Data register 200, "X0" for Input 0 and "Y0" for output 0.
 
-Valid devices codes and their data types are listed below.
+Valid devices codes and their data types are:
 
 
 - "B"                Link relay (BIT)
@@ -185,9 +176,9 @@ Valid devices codes and their data types are listed below.
 
 ---
 ### DataType
-The type of data to read from the device. If no type is specified then a single value of the default type of the device is read.
+The DataType property specifies the format of data to be read from the device address. If not specified, it reads a single value of the device's default type.
 
-**Type**: String
+
 
 
 Valid data types are:
@@ -209,11 +200,11 @@ E.g.
 - "WORD[8]" reads 16 word values and returns an array of 8 16-bit integers.
 - "STRING(16)[2]" reads and array of 16 characters
 
- 
+**Type**: String 
 
 ---
 ### Size
-The number of values to read starting from the access point.
+The Size property defines how many consecutive values to read starting from the specified access point.
 
 **Type**: Integer
 
@@ -275,7 +266,7 @@ The number of items to read can be specified as well in the DataType of the chan
 
 [SFC Configuration](../core/sfc-configuration.md) > [ProtocolAdapters](../core/sfc-configuration.md#protocoladapters) > [Adapter](../core/protocol-adapter-configuration.md) 
 
-
+The SlmpAdapterConfiguration class extends ProtocolAdapterConfiguration and defines the configuration for the SLMP protocol adapter. It includes settings for SLMP controllers (devices) to communicate with and optional custom data structure definitions that can be used when reading data from the controllers
 
 SlmpAdapterConfiguration extension the [AdapterConfiguration](../core/protocol-adapter-configuration.md) with properties for the SLMP Protocol adapter.
 
@@ -291,7 +282,7 @@ SlmpAdapterConfiguration extension the [AdapterConfiguration](../core/protocol-a
 
 ---
 ### Controllers
-Controllers configured for this adapter. The SLMP source using the adapter must have a reference to one of these in its AdapterController attribute.
+The Controllers property is a map of SLMP controller configurations, where each entry is keyed by a controller identifier. Each source using this SLMP adapter must reference one of these configured controllers through its [AdapterController](#adaptercontroller) attribute. These controllers represent the Mitsubishi/Melsec PLCs that the adapter can communicate with.
 
 **Type**: Map[String,[SlmpControllerConfiguration](#slmpcontrollerconfiguration)]
 
@@ -299,7 +290,7 @@ Controllers configured for this adapter. The SLMP source using the adapter must 
 
 ---
 ### Structures
-Custom data structures configured for this adapter. Structured defined in this section can be uses as custom structured data types for channel values. If a structure has a field which is of a custom structure type, then this type must be defined first.
+The Structures property is a map of custom data structure definitions that can be used as data types for channel values in the SLMP adapter. Each structure can contain fields of basic data types (BIT, WORD, etc.) or other custom structures (which must be defined before they can be referenced). These structures allow reading complex data types from the PLC in a single operation
 
 **Type**: Map[String,Map{String,String]]
 
@@ -413,7 +404,7 @@ A SLMP channel can now use both type "STRUCT1" as "STRUCT2" as a DataType. The d
 
 [SlmpAdapter](#slmpadapterconfiguration) > [Controllers](#controllers)
 
-
+The SlmpControllerConfiguration class defines the configuration settings for connecting to and communicating with a specific Mitsubishi/Melsec PLC using the SLMP protocol. It includes network connection parameters, timing settings, and other communication-specific configurations needed to establish and maintain communication with the PLC.
 
 - [Schema](#slmpcontrollerconfiguration-schema)
 - [Examples](#slmpcontrollerconfiguration-examples)
@@ -435,11 +426,14 @@ A SLMP channel can now use both type "STRUCT1" as "STRUCT2" as a DataType. The d
 
 ---
 ### Address
-IP Address of the device
+The Address property specifies the network location of the SLMP controller (PLC) that the adapter will communicate with. It can be set using either:
+
+- An IPv4 address in dotted decimal format (e.g., "192.168.1.100") 
+- A hostname (e.g., "plc-controller-1")
+
+This address is used to establish the network connection with the PLC.
 
 **Type**: String
-
-IP address in format aaa.bbb.ccc.ddd or a hostname
 
 ---
 ### CommandTimeout
@@ -451,15 +445,17 @@ Default is 10000 milliseconds
 
 ---
 ### ConnectTimeout
-Timeout for connecting to the device in milliseconds
+The ConnectTimeout property specifies how long the adapter will wait when attempting to establish a connection with the SLMP controller (PLC) before timing out. It is measured in milliseconds, with a default value of 10000 (10 seconds). If the connection cannot be established within this time period, the connection attempt will fail
 
 **Type**: Integer
 
-Default is 10000
-
 ---
 ### ModuleNumber
-Request module number
+The ModuleNumber property specifies the module number used in SLMP protocol communications. It is an integer value that defaults to 1023 (0x03FF).
+
+In SLMP protocol, the module number is used to identify specific modules within a PLC system. The value 0x03FF (1023) is commonly used for built-in Ethernet ports on PLCs. This number helps route communications to the correct module when multiple modules are present in the PLC system.
+
+The module number is part of the SLMP frame header and is used in conjunction with other addressing parameters to ensure messages are properly routed within the PLC system.
 
 **Type**: Integer
 
@@ -467,8 +463,15 @@ Default is 1023 (0x03FF)
 
 ---
 ### MonitoringTimer
-Timer to set the waiting time until the access destination send back a response after the SLMP compatible device
-which received a request message from the external device requests a processing to the destination in units of 250ms
+The MonitoringTimer property sets a timeout value for waiting for a response from the SLMP device after it receives a request message. 
+
+- The value is specified in units of 250ms (e.g., a value of 4 equals 1 second)
+- Default value is 0, which means it will wait indefinitely for a response
+- This timer starts after the device receives the request and begins processing
+- It controls how long the adapter will wait for the PLC to complete processing and send back a response
+- If the timer expires before receiving a response, the request will be considered failed
+
+This is different from the ConnectTimeout as it specifically deals with the processing time of requests rather than the initial connection establishment.
 
 **Type**: Integer
 
@@ -476,7 +479,17 @@ Default is 0 (unlimited wait)
 
 ---
 ### MultiDropStationNumber
-Request multidrop station number
+The MultiDropStationNumber property specifies the station number in a multi-drop network configuration for SLMP communications.
+
+Key points about MultiDropStationNumber:
+
+- It's an integer value that defaults to 0 (0x00)
+- Used in networks where multiple SLMP devices are connected in a multi-drop configuration
+- Helps identify and address specific devices/stations in the network
+- Each device in the multi-drop network must have a unique station number
+- Station number 0 typically represents direct connection or the local station
+
+This parameter is important when communicating with PLCs in a network where multiple devices are connected in a daisy-chain or multi-drop configuration, as it ensures messages are routed to the correct device
 
 **Type**: Integer
 
@@ -486,7 +499,17 @@ Default is 0 (0x00)
 
 ---
 ### NetworkNumber
-Request destination network number
+The NetworkNumber property specifies the destination network number in SLMP communications.
+
+Key points about NetworkNumber:
+
+- It's an integer value that defaults to 0 (0x00)
+- Used to identify different networks in a multi-network SLMP system
+- Part of the routing information in SLMP frames
+- Network number 0 typically represents the local network
+- Required for routing messages when communicating across different networks in a complex PLC system setup
+
+This parameter is particularly important in larger PLC systems where multiple networks are interconnected, as it helps route messages to devices on the correct network segment. When communicating with a device on the same network, the default value of 0 is typically used.
 
 **Type**: Integer
 
@@ -494,7 +517,15 @@ Default is 0 (0x00)
 
 ---
 ### Port
-Port number
+The PortNumber property specifies the TCP port number used for SLMP communications with the PLC.
+
+- Default value is 48898, which is the standard port for SLMP protocol [[1\]](https://leki-hub.hashnode.dev/port-number)
+- It's a 16-bit unsigned integer value (valid range 1-65535)
+- Can be customized if the PLC is configured to use a different port
+- Port 0 is reserved and cannot be used
+- Ports below 1024 typically require administrative privileges on many operating systems
+
+This setting must match the port number configured on the target PLC device for successful communication. If you modify this from the default, ensure that the PLC's network settings are configured to match.
 
 **Type**: Integer
 
@@ -502,7 +533,15 @@ Default is 48898
 
 ---
 ### ReadTimeout
-Timeout for reading response packets from the controller in milliseconds
+The ReadTimeout property defines how long the adapter will wait for a response packet from the SLMP controller (PLC) after sending a read request.
+
+- Specified in milliseconds
+- Default value is 50000 (50 seconds)
+- Determines maximum time to wait for response data
+- If no response is received within this time, the read operation will fail
+- Different from ConnectTimeout (initial connection) and MonitoringTimer (processing time)
+
+This timeout is important for preventing the adapter from hanging indefinitely when there are communication issues or when the PLC fails to respond. If you're experiencing timeout errors, you might need to increase this value, especially in networks with high latency or when reading large amounts of data
 
 **Type**: Integer
 
@@ -510,7 +549,22 @@ Default is 50000
 
 ---
 ### StationNumber
-Request station number
+The StationNumber property specifies the station number for SLMP communications.
+
+- Default value is 255 (0xFF)
+- Used to identify specific PLC stations in a network
+- Part of the SLMP frame addressing information
+- Value 255 (0xFF) typically represents the local station or host
+- Different from MultiDropStationNumber which is used in multi-drop configurations
+
+This parameter is used to:
+
+- Address specific PLC stations in a network
+- Route messages to the correct device
+- Identify the target station for SLMP commands
+- Enable communication with specific PLCs in a multi-station setup
+
+The station number must match the configuration of the target PLC for successful communication. In simple point-to-point connections, the default value of 255 is commonly used
 
 **Type**: Integer
 
@@ -518,7 +572,9 @@ Default is 255 (0xFF)
 
 ---
 ### WaitAfterConnectError
-Time to wait before (re)connecting after a connection error in milliseconds
+The WaitAfterConnectError property specifies the delay time in milliseconds before attempting to reconnect after a connection failure.
+
+If you're experiencing frequent connection issues, you might want to adjust this value based on your network conditions and operational requirements. A longer wait time might be appropriate in unstable network conditions, while a shorter time might be suitable in environments where quick recovery is critical.
 
 **Type**: Integer
 
@@ -526,7 +582,7 @@ Default is 10000
 
 ---
 ### WaitAfterReadError
-Time to wait before reading values from the controller after a read error in milliseconds
+The WaitAfterReadError property specifies how long the adapter will pause before attempting another read operation after encountering a read error. The default value is 10000 milliseconds (10 seconds).
 
 **Type**: Integer
 
@@ -534,7 +590,7 @@ Default is 10000
 
 ---
 ### WaitAfterWriteError
-Time to wait after an error writing request packets to the controller in milliseconds
+The WaitAfterWriteError property defines the pause duration after encountering an error while writing request packets to the PLC controller. The default value is 10000 milliseconds (10 seconds). 
 
 **Type**: Integer
 

@@ -580,7 +580,7 @@ Default is 10000, the minimum value is 1000
 
 ```json
 {
-  "Address": ""192.168.1.100",
+  "Address": "192.168.1.100",
   "ConnectTimeout": 10000,
   "DeviceId": 1,
   "Port": 502,

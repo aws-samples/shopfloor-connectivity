@@ -2,7 +2,7 @@
 
 [SFC Configuration](./sfc-configuration.md#metrics) > [ProtocolAdapters](./sfc-configuration.md#protocoladapters) 
 
-ProtocolAdapterConfiguration which is extended by the implementation of a protocol adapter with specific properties for that adapter.
+Defines the base configuration structure for protocol adapters in SFC, specifying how adapters operate either in-process or as separate services. Includes essential settings for adapter type, server configuration, metrics collection, and custom descriptions. Serves as the foundation for protocol-specific adapter implementations.
 
 - [Schema](#schema)
 - [Examples](#examples)
@@ -16,16 +16,13 @@ ProtocolAdapterConfiguration which is extended by the implementation of a protoc
 
 ---
 ### AdapterServer
-If the adapter runs as a service in a separate process, then this attribute must refer to an entry for that server in the [ProtocolAdapterServers](./sfc-configuration.md#protocoladapterservers) section.
+Specifies the server reference for running the protocol adapter as a separate service. When set, it must match an entry in the [ProtocolAdapterServers](./sfc-configuration.md#protocoladapterservers)  section, enabling IPC-based communication between the SFC core and the adapter service. If not set, the adapter runs in-process within the SFC core. This property is mutually exclusive with [AdapterType](#adaptertype).
 
 **Type**: String
 
- If this attribute is not set then the SFC core will load and execute the protocol adapter in the SFC core process. If set then and IPC client will be used to communicate with the service that runs the protocol adapter. If an adapter server is specified, then the [AdapterType](#adaptertype) setting is not used.
-
 ---
 ### AdapterType
-Type of the adapter. These types are predefined for each adapter type (e.g., OPCUA, MQTT,MODBUS-TCP, SNMP, S7, ADS ).
-If the adapter is running in the same process as the SFC core module, then it must refer to an entry in the [ProtocolAdapterTypes](./sfc-configuration.md#protocoladaptertypes) section. 
+Defines the protocol adapter type for in-process execution, referencing a predefined type (like OPCUA, MQTT, MODBUS-TCP, SNMP, S7, ADS) from the [ProtocolAdapterTypes](./sfc-configuration.md#protocoladaptertypes) section. This property is used when the adapter runs within the SFC core process and is mutually exclusive with AdapterServer
 
 **Type**: String
 
@@ -33,17 +30,15 @@ If the adapter is running in the same process as the SFC core module, then it mu
 
 ### Description
 
-User defined description of the adapter
+An optional free-form text field that allows users to provide a human-readable description of the protocol adapter, helping to document its purpose or specific configuration details.
 
 **Type**: String
-
-Optional
 
 ---
 
 ### Metrics
 
-Metrics configuration for the protocol adapter
+Defines the metrics collection configuration for the protocol adapter, specifying how performance and operational metrics should be gathered and processed from this adapter source.
 
 Type: [MetricsSourceConfiguration](./metrics-source-configuration.md)
 

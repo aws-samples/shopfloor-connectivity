@@ -1,6 +1,6 @@
 # SQL Adapter Configuration
 
-SQL Protocol adapter configuration
+The SQL adapter for AWS IoT SiteWise Connector (SFC) enables data ingestion from SQL databases using JDBC connections. It allows you to execute custom SQL queries to retrieve data from various SQL databases like MySQL, PostgreSQL, Microsoft SQL Server, and Oracle. 
 
 ---
 - [SqlSourceConfiguration](#sqlsourceconfiguration)
@@ -14,9 +14,9 @@ SQL Protocol adapter configuration
 
 [SFC Configuration](../core/sfc-configuration.md) > [Sources](../core/sfc-configuration.md#sources) >  [Source](../core/source-configuration.md) 
 
+SqlSourceConfiguration defines the mapping between SQL query results and IoT channels, specifying which database server to use (referenced from the configured database servers in the adapter) and how to read data from it. It contains the configuration parameters needed to execute queries.
 
-
-Source configuration for the SQL protocol adapter. This type extends the [SourceConfiguration](../core/source-configuration.md) type.
+ This type extends the [SourceConfiguration](../core/source-configuration.md) type.
 
 - [Schema](#sqlsourceconfiguration-schema)
 - [Examples](#sqlsourceconfiguration-examples)
@@ -30,25 +30,21 @@ Source configuration for the SQL protocol adapter. This type extends the [Source
 
 ---
 ### AdapterDbServer
-Database Server Identifier for the Database server to read from. This referenced server must be present in the DbServers section of the adapter referred to by the ProtocolAdapter attribute of the source.
+The Database Server Identifier property specifies which database server configuration to use from the DbServers section defined in the SQL adapter configuration. This identifier must match exactly with one of the database server configurations defined in the adapter's [DbServers](#dbservers) section, creating a link between the source and its specific database connection parameters.
 
 **Type**: String
 
-Must be an identifier of a database in the DbServers section of the SQL adapter used by the source.
-
 ---
 ### Channels
-The channels configuration for an SQL source holds configuration data to read values through SQL statements. "commented" out by adding a "#" at the beginning of the identifier of that channel.
+The Channels property defines the mapping between SQL query results and IoT channels. Each channel specifies how to retrieve data from the results of SQL statements. Channels can be selectively disabled by prefixing their identifier with a "#" character, enabling temporary removal of specific channels without deleting their configuration.
 
 **Type**: Map[String,[SqlChannelConfiguration](#sqlchannelconfiguration)]
 
 At least 1 channel must be configured.
 
-
-
 ---
 ### SingleRow
-Set to true to only return the first retrieved record by the SqlReadStatement. As the selects statement potentially will return multiple records, the values for each channel, will be of an array of values, even if only a single row is read. By setting this value to true it is guaranteed to only return the first row of the result set and the value of a channel is a single value e, not an array.
+The SingleRow property, when set to true, ensures that only the first record from the SQL query result set is processed and returned. This simplifies channel value handling by returning single values instead of arrays - particularly useful when you know your query will (or should) only return one row. If false, the adapter will process all returned rows and the channel values will be arrays containing all retrieved values.
 
 **Type**: Boolean
 
@@ -56,7 +52,7 @@ Default is false.
 
 ---
 ### SqlReadParameters
-List of parameters that for SqlReadStatement.
+The SqlReadStatement parameters property accepts a list of values that will be substituted for the "?" placeholders in the SQL query statement. The number of parameters in this list must exactly match the number of placeholders in the query, and the values will be applied in order. 
 
 **Type**: List[Any]
 
@@ -64,11 +60,11 @@ The number of items in the list must match the number of "?" placeholders in the
 
 ---
 ### SqlReadStatement
-This is the SQL statement that is executed to retrieve the values from the database. It can either be a SELECT statement selecting data from a table or a stored procedure
+The SqlReadStatement property defines the SQL query or stored procedure call that will be executed to retrieve data from the database. This can be either a SELECT statement or a stored procedure name. The statement is responsible for implementing the appropriate data retrieval strategy, such as marking processed records or implementing a mechanism to prevent duplicate reads. For example, the query might include logic to only select unprocessed records and update their status after reading, or delete records once they've been processed.
 
 **Type**: String
 
-The logic of the statement or is responsible that records are only read once or any other reading strategy. For example, the procedure can mark or delete the read records when returning the read records.
+
 
 ### SqlSourceConfiguration Schema
 
@@ -160,7 +156,7 @@ The logic of the statement or is responsible that records are only read once or 
 
 [SFC Configuration](../core/sfc-configuration.md) > [Sources](../core/sfc-configuration.md#sources) > [Source](../core/source-configuration.md)  > [Channels](../core/source-configuration.md#channels) > [Channel](../core/channel-configuration.md)
 
-
+SqlChannelConfiguration extends ChannelConfiguration to provide SQL-specific channel mapping functionality, inheriting base channel properties like data type handling, validation, and transformation settings. This class adds SQL-specific configurations to define how values should be extracted from database query results  and how to process these values.
 
 The SqlChannelConfiguration type extends the [ChannelConfiguration](../core/channel-configuration.md) class with channel properties for the SQL protocol adapter.
 
@@ -173,11 +169,14 @@ The SqlChannelConfiguration type extends the [ChannelConfiguration](../core/chan
 
 ---
 ### ColumnNames
-List of column names to include in the value of the channel. A single value of  will retrieve all columns returned in the result set of the executed SqlReadStatement.
 
-If the list contains a single column name, the value of the channel will be the native value retrieved from the column.
+The ColumnNames property specifies which columns from the SQL query result set should be included in the channel value. It accepts either a list of specific column names or  *  to include all columns.
 
-If multiple column names are specified, or "*" is used, then the value will be a map. The keys of the entries will be the name of the column and the value will be the native value retrieved for that column from the result set.
+ When a single column is specified, the channel value will be the direct value from that column. When multiple columns or  * is specified, the channel value becomes a map where keys are column names and values are the corresponding data from those columns. 
+
+The default value  *  includes all columns from the result set
+
+
 
 **Type**: String[]
 
@@ -237,9 +236,7 @@ Default value is ["*"]
 
 [SFC Configuration](../core/sfc-configuration.md) > [ProtocolAdapters](../core/sfc-configuration.md#protocoladapters) > [Adapter](../core/protocol-adapter-configuration.md) 
 
-
-
-SqlAdapterConfiguration extension the [AdapterConfiguration](../core/protocol-adapter-configuration.md) with properties for the SQL Protocol adapter.
+SqlAdapterConfiguration defines the configuration for the SQL adapter, including database server configurations (DbServers) and protocol-specific settings for connecting to and reading from SQL databases. It extends the class  [ProtocolAdapterConfiguration](../core/protocol-adapter-configuration.md)  class to include SQL-specific functionality.
 
 - [Schema](#sqladapterconfiguration-schema)
 - [Examples](#sqladapterconfiguration-examples)
@@ -250,7 +247,7 @@ SqlAdapterConfiguration extension the [AdapterConfiguration](../core/protocol-ad
 
 ---
 ### DbServers
-Database servers configured for this adapter. The sql source using the adapter must refer to one of these servers with the AdapterDbServer attribute.
+The DbServers property defines a collection of database server configurations that can be used by SQL sources in the adapter. Each source must reference one of these predefined server configurations using its [AdapterDbServer](#adapterdbserver) attribute, allowing for centralized configuration of database connection settings and reuse across multiple sources.
 
 **Type**: Map[String,[DbServerConfiguration](#dbserverconfiguration)]
 
@@ -349,7 +346,7 @@ Example 2 - Multi-database configuration:
 
 [SqlAdapter](#sqladapterconfiguration) > [DbServers](#dbservers)
 
-
+DbServerConfiguration defines the connection settings and authentication details needed to connect to a specific database server, including the server address, port, credentials, and database type. It supports various database types and connection parameters required for establishing database connections.
 
 - [Schema](#dbserverconfiguration-schema)
 - [Examples](#dbserverconfiguration-examples)
@@ -367,78 +364,70 @@ Example 2 - Multi-database configuration:
 
 ---
 ### ConnectTimeout
-Timeout in milliseconds to connect to the database server.
+The ConnectTimeout property specifies how long (in milliseconds) the adapter will wait while attempting to establish a connection to the database server before timing out. It must be at least 1000 milliseconds (1 second), with a default value of 10000 milliseconds (10 seconds).
 
 **Type**: Integer
 
-Minimum is 1000, default is 10000
-
 ---
 ### DatabaseName
-Name of the database, or SID for Oracle databases
+The DatabaseName property specifies the name of the database to connect to, or in the case of Oracle databases, it represents the System Identifier (SID). For Oracle, the SID uniquely identifies the database instance and its memory and processes, while for other database types like MySQL, PostgreSQL, or SQL Server, it's simply the name of the database to be accessed.
 
 **Type**: String
 
 ---
 ### DatabaseType
-Type of the JDBC driver used to connect to the database. Possible values are:
+The DatabaseType property specifies which JDBC driver should be used to connect to the database, with supported options being: 
 
-postgresql
-mariadb
-sqlserver
-mysql
-oracle
+- "postgresql"
+- "mariadb"
+- "sqlserver"
+- "mysql"
+- "oracle"
+
+ This setting determines which database-specific driver and connection protocol will be used for establishing the database connection. 
 
 
 **Type**: String
 
 ---
 ### Host
-Database server host
+The Host property specifies the hostname or IP address of the database server to connect to. 
 
 **Type**: String
 
 ---
 ### InitScript
-Pathname of a script file executed when a connection is made to the database.
+The InitScript property specifies the path to a SQL script file that will be executed automatically when a new database connection is established. This script runs before any other database operations, but it cannot contain placeholders for secrets or environment variables. Note that if both InitScript and [InitSql](#initsql) properties are defined, the InitSql property will take precedence.
 
 **Type**: String
-
-If both InitScript and InitSql are specified, Init SQL takes precedence.
-The content of the InitScript file can not contain placeholders for secrets or environment placeholders
 
 ---
 ### InitSql
-Text of a script executed when a connection is made to the database.
+The InitSql property allows you to specify SQL commands that will be executed immediately after establishing a database connection. Unlike InitScript, InitSql accepts the SQL commands directly as text rather than from a file, and it supports placeholders for secrets and environment variables. If both InitSql and [InitScript](#initscript) are configured, the InitSql commands will be executed instead of the InitScript.
 
 **Type**: String
-
-If both InitScript and InitSql are specified, Init SQL takes precedence.
-Placeholders for secrets and environment variables are supported for IniSql.
-
-
 
 ---
 ### Password
-Database password
+The Password property specifies the authentication password used to connect to the database server. For security best practices, it is strongly recommended to not store this password directly in the configuration, but instead use a placeholder that references a password stored in [AWS Secrets manager](../core/secrets-manager-configuration.md), which provides secure, encrypted storage and management of database credentials.
 
 **Type**: String
 
-**For this value it is strongly recommended to use a placeholder for a value stored in [AWS Secrets manager](../core/secrets-manager-configuration.md).**
-
 ---
 ### Port
-Database server port number
+The Port property specifies the TCP port number where the database server is listening for connections. 
+
+Port number for supported database servers are 3306 for MySQL/MariaDB, 1433 for SQL Server, 5432 for PostgreSQL, or 1521 for Oracle.
 
 **Type**: Integer
 
 ---
 ### UserName
-Database username
+The UserName property specifies the database user account used to authenticate with the database server. For security best practices, it is strongly recommended to not store this username directly in the configuration, but instead use a placeholder that references a value stored in  [AWS Secrets manager](../core/secrets-manager-configuration.md), which provides secure, encrypted storage and management of database credentials.
 
 **Type**: String
 
-**For this value it is strongly recommended to use a placeholder for a value stored in [AWS Secrets manager](../core/secrets-manager-configuration.md).**
+
 
 ### DbServerConfiguration Schema
 

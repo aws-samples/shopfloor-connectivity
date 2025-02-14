@@ -1,5 +1,11 @@
 # NATS Target
 
+
+
+The NATS target adapter enables the AWS IoT SiteWise Connector (SFC) to publish data to subjects on a [NATS](https://nats.io/) server.The adapter provides configurable options for connection management, subject naming, and message delivery guarantees
+
+
+
 - [NatsTargetConfiguration](#natstargetconfiguration)
 - [NatsServerConfiguration](#natsserverconfiguration)
 
@@ -9,9 +15,7 @@
 
 [SFC Configuration](../core/sfc-configuration.md) > [Targets](../core/sfc-configuration.md#targets) >  [Target](../core/target-configuration.md) 
 
-
-
-NatsTargetConfiguration extends the type  [TargetConfiguration](../core/target-configuration.md) with specific configuration data for connecting to and sending to a NATS subject. The Targets configuration element can contain entries of this type, the TargetType of these entries must be set to **"NATS-TARGET"**
+NatsTargetConfiguration extends the type  TargetConfiguration with specific configuration data for connecting to and sending to a NATS subject. The Targets configuration element can contain entries of this type; the TargetType of these entries must be set to **"NATS-TARGET"**.
 
 - [Schema](#natstargetconfiguration-schema)
 - [Examples](#natstargetconfiguration-examples)
@@ -29,71 +33,77 @@ NatsTargetConfiguration extends the type  [TargetConfiguration](../core/target-c
 
 ---
 ### AlternateSubjectName
-Name or name template of the subject values are published in case there are unmapped template placeholders in the SubjectName
-
-**Type**: Boolean
-
----
-### BatchCount
-Number of messages to buffer before sending data as a batch to a subject.
-
-**Type**: Int
-
-Batching is enabled by setting a value for one or more of BatchSize, BatchCount and BatchInterval.
-Whenever the number of messages, total message size or an interval is reached the buffered data is sent as an array of messages to the subject.
-
----
-### BatchInterval
-Interval in milliseconds after which a batch of messages is sent to the subject, even when the BatchSize or BatchCount limit is not reached.
-
-**Type**: Int
-
-Batching is enabled by setting a value for one or more of BatchSize, BatchCount and BatchInterval.
-Whenever the number of messages, total message size or an interval is reached the buffered data is sent as an array of messages to the subject.
-
-
----
-### BatchSize
-Payload size in KB of messages to batch before sending data as a batch to a subject.
-
-**Type**: Int
-
-Batching is enabled by setting a value for one or more of BatchSize, BatchCount and BatchInterval.
-Whenever the number of messages, total message size or an interval is reached the buffered data is sent as an array of messages to the subject.
-The size is calculated on the uncompressed payload of the messages.
-
----
-### Compression
-Compression method for NATS message payloads.
-
-**Values:**
-- "None" (Default)
-- "Zip"
-- "GZip"
+An alternative subject name or template to use when the primary [SubjectName](#subjectname) contains unmapped placeholder variables that cannot be resolved. This serves as a fallback publishing destination when dynamic topic name construction fails. The same placeholders are available for this template as for the [SubjectName](#subjectname)
 
 **Type**: String
 
 ---
-### MaxPayloadSize
-Max payload size in KB for messages.
+### BatchCount
+The maximum number of messages to accumulate in the buffer before triggering a batch publish to the NATS subject. When this count is reached, all buffered messages are sent as an array in a single NATS message.
+
+Batching is triggered when any configured threshold (BatchCount, [BatchSize](#batchsize), or [BatchInterval](#batchinterval)) is reached
 
 **Type**: Int
 
-Note if compression is enabled the payload size of a single target data message, or a batch of messages can be larger, than this value. When batching of messages is enabled, without compression a batch
-of messages will be sent to the subject when this size is reached.
+---
+### BatchInterval
+
+The maximum time in milliseconds to hold messages in the buffer before publishing them as a batch to the NATS subject, regardless of whether [BatchSize](#batchcount) or [BatchCount](#batchcount) limits have been reached.
+
+Batching is triggered when any configured threshold ([BatchCount](#batchcount), [BatchSize](#batchsize), or BatchInterval) is reached
+
+**Type**: Int
+
+---
+
+### BatchSize
+
+The maximum total size in kilobytes of uncompressed message payloads to accumulate before triggering a batch publish to the NATS subject. When this size threshold is reached, all buffered messages are sent as an array in a single NATS message.
+
+Batching is triggered when any configured threshold ([BatchCount](#batchcount), BatchSize, or [BatchInterval](#batchinterval)) is reached
+
+**Type**: Int
+
+---
+### Compression
+The compression algorithm to be applied to NATS message payloads before publishing.
+
+Compressing messages can reduce bandwidth usage and transmission time.
+
+**Type:** String
+
+Possible values:
+
+- "None" (Default)
+- "Zip"
+- "GZip"
+
+---
+### MaxPayloadSize
+
+The maximum size in kilobytes allowed for a single NATS message payload.
+
+- When compression is enabled, the original uncompressed payload size may exceed this limit
+- For batched messages without compression, reaching this size limit will trigger sending the batch
+- Used as a threshold for batch publishing when batching is enabled
+
+**Type**: Int
 
 
 ---
 ### NatsServer
-Nats target server for publishing data
+Configuration settings for the NATS server connection.
+
+Defines the connection parameters and settings for the NATS server where data will be published.
 
 **Type**: [NatsServerConfiguration](#natsserverconfiguration)
 
-Comments
+
 
 ---
 ### PublishTimeout
-Timeout in seconds for publishing
+
+The maximum time in seconds to wait for a message to be published to the NATS server before timing out.
 
 **Type**: Long
 
@@ -101,23 +111,21 @@ Default is 10 seconds
 
 ---
 ### SubjectName
-Name or name template of the subject
+The primary NATS subject name or subject name template for publishing messages.
 
 **Type**: String
 
-
-A template can be used for the subjectName to render the actual subject name using placeholders. In this template, 
-besides placeholders for environment variables (${name}) the following placeholders are available:
+A template can be used for the subject name to render the actual topic name using placeholders. In this template, 
+besides placeholders for environment variables (${name}), the following placeholders are available:
 
 - %schedule%
 - %target%
 - %source%
 - %channel%
 
-To use the values of **metadata** at the top, source or channel level of the target data, the name af the metadata value can 
-be used with a '%' prefix and postfix.
+To utilize the metadata values at the source or channel level of the target data, the name of the metadata value can be utilized with a '%' prefix and postfix.
 
-Value placeholders can be used to add additional subject levels or grouping values to a specific subject.
+Value placeholders can be employed to incorporate additional topic levels or grouping values to a specific subject.
 
 Template examples:
 
@@ -125,9 +133,11 @@ Template examples:
 - plant1-**%line%**   : Values from all sources will be grouped by the value of the %line% metadata and published to a subject for that value
 
 In case a placeholder is not resolved, when a value for a used placeholder is part of the data,
-then an alternative subject name can be configured by setting the name of that subject to the **"AlternateSubjectName"** setting.
+then an alternative topic name can be configured by setting the name of that topic to the [AlternateSubjectName](#alternatesubjectname) setting.
 
-Note that the use of placeholders to send data to specific subjects will result in additional publish calls to the server.
+Note that the use of placeholders to send data to specific topics will result in additional publish calls to the server.
+
+
 
 ### NatsTargetConfiguration Schema
 
@@ -250,6 +260,8 @@ Dynamic subject names based on target- and metadata values
 
 [NatsTarget](#natstargetconfiguration) > [NatsServer](#natsserver)
 
+Configuration class that defines the connection parameters for a NATS server, including server URL, authentication credentials, and connection settings. It provides the necessary settings to establish and maintain a connection to a NATS message server.
+
 
 - [Schema](#natsserverconfiguration-schema)
 - [Examples](#natsserverconfiguration-examples)
@@ -267,7 +279,7 @@ Dynamic subject names based on target- and metadata values
 
 ---
 ### ConnectRetries
-Maximum number of retries connecting to the server.
+The maximum number of connection attempts to make when trying to establish a connection with the NATS server.
 
 **Type**: Integer
 
@@ -277,10 +289,7 @@ Default = 3
 
 ---
 ### CredentialsFile
-Pathname of a file containing credentials.
-
-NATS credentials files contain a user JWT token and an NKey private seed,
-used together for secure client authentication and authorization.
+Specifies the location of a credentials file containing a user JWT token and NKey private seed for secure authentication, used to authenticate and authorize client connections to the NATS server.
 
 
 **Type**: String
@@ -291,12 +300,8 @@ https://docs.nats.io/using-nats/developer/connecting/creds
 
 ---
 ### NKeyFile
-Pathname of a file containing the NKEY.
-
-NATS NKeys are a public-key signature system based on Ed25519 that provides strong authentication
-and identity management. They allow secure authentication between NATS clients and servers using
-public/private key pairs.
-
+Specifies the location of a file containing an Ed25519-based NKey for secure authentication.
+Enables public-key-based authentication between the client and NATS server using the NKey system.
 
 **Type**: String
 
@@ -307,31 +312,23 @@ https://docs.nats.io/using-nats/developer/connecting/nkey
 
 ---
 ### Password
-Password to authenticate with the server.
+The password credential for authenticating with the NATS server when using username/password authentication.
 
-It is strongly recommended to configure the password is used not to configured as clear text in the configuration, but instead use a
-placeholder for a secret stored in and retrieved from the
-AWS Secrets Manager service.
-
-
+[Username](#username) and password should not be included as clear text in the configuration. It is strongly recommended to use placeholders and use the SFC integration with the [AWS secrets manager](../core/secrets-manager-configuration.md).
 
 **Type**: String
 
 
 https://docs.nats.io/using-nats/developer/connecting/userpass
 
-If a Password is configured then the Username must be configured as well.
+If a Password is configured then the [Username](#username) must be configured as well.
 
 
 ---
 ### Tls
-While authentication limits which clients can connect, TLS can be used to encrypt 
-traffic between client/server and check the server’s identity. Additionally - in the most 
-secure version of TLS with NATS - the server can be configured to verify the client's identity, 
-thus authenticating it. When started in TLS mode, a nats-server will require all clients to 
-connect with TLS. 
-Moreover, if configured to connect with TLS, client libraries will fail to connect to a 
-server without TLS.
+TLS configuration settings for secure communication with the NATS server.
+
+While authentication limits which clients can connect, TLS can be used to encrypt traffic between client/server and check the server's identity. Additionally - in the most secure version of TLS with NATS - the server can be configured to verify the client's identity, thus authenticating it. When started in TLS mode, a nats-server will require all clients to connect with TLS. Moreover, if configured to connect with TLS, client libraries will fail to connect to a server without TLS.
 
 **Type**: [TlsConfiguration](../core/transformation-operator-configuration.md)
 
@@ -341,14 +338,11 @@ https://docs.nats.io/using-nats/developer/connecting/tls
 
 ---
 ### Token
-Random token authentication works like passwords for simple setups, but 
-larger systems should use more secure authentication methods since tokens rely on solely 
-on secrecy.
-In  case a token is used not to configured as clear text in the configuration, instead use a 
-placeholder for a secret stored in and retrieved from the 
-AWS Secrets Manager service.
+Token for basic NATS authentication.
 
+Random token authentication functions like a password for simple setups. However, for larger systems, more secure authentication methods should be used since tokens rely solely on secrecy. 
 
+Tokens should not be included as clear text in the configuration. It is strongly recommended to use placeholders and use the SFC integration with the [AWS secrets manager](../core/secrets-manager-configuration.md).
 
 **Type**: String
 
@@ -358,28 +352,27 @@ https://docs.nats.io/using-nats/developer/connecting/token
 
 ---
 ### Url
-Server url
+Server URL(s) for connecting to the NATS server.
+
+Supports "nats://", "tls://" schemes. When using "tls://" scheme, the Tls property must be configured with required certificates and keys.
+**Usage** : Can specify multiple server URLs as a comma-separated list for connecting to multiple known servers.
+
+
+
+**Type**: String
+
+---
+### Username
+The username credential for authenticating with the NATS server when using username/password authentication.
+
+Username and [password](#password) should not be included as clear text in the configuration. It is strongly recommended to use placeholders and use the SFC integration with the [AWS secrets manager](../core/secrets-manager-configuration.md).
 
 **Type**: String
 
 
+https://docs.nats.io/using-nats/developer/connecting/userpass
 
-The schema for the url can be "nats://", "tls://"  or "tls://". If the scheme is "tls:" then
-the "Tls" property for the serer must be set to specify the required key and certificates.
-
-Multiple urls can be configured for known all known servers as a comma separated list.
-
-
-
----
-### Username
-Username to authenticate with the server.
-
-It is strongly recommended to configure the username as clear text in the configuration, instead use a
-placeholder for a secret stored in and retrieved from the
-AWS Secrets Manager service.
-
-
+If a Username is configured then the [Password](#password) must be configured as well.
 
 **Type**: String
 
@@ -391,7 +384,7 @@ If a Username is configured then the Password must be configured as well.
 
 ---
 ### WaitAfterConnectError
-Number of seconds to wait after connecting to the sever failed.
+Time delay in seconds before retrying after a failed connection attempt to the NATS server.
 
 **Type**: Integer
 

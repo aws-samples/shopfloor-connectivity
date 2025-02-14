@@ -6,6 +6,8 @@
 
 [SFC Configuration](./sfc-configuration.md) > [ProtocolAdapterServers](./sfc-configuration.md#protocoladapterservers) > [AdapterServer](./server-configuration.md) > [HealthProbe](./server-configuration.md#healthprobe)
 
+The HealthProbeConfiguration class defines settings for a health monitoring endpoint that allows external systems to check the operational status of a service. It specifies network settings (port, interface, allowed IPs), response behavior, and automatic shutdown conditions when a service remains unhealthy for a specified period.
+
 - [Schema](#schema)
 - [Examples](#examples)
 
@@ -24,70 +26,52 @@
 
 ---
 ### AllowedIpAddresses
-List of IP addresses that are allowed to make calls to the endpoint
+The AllowedIpAddresses property defines a list of IP addresses permitted to access the health probe endpoint. This optional string array supports wildcard patterns (e.g., 10.10.10*) and defaults to an empty list allowing access from any IP. Requests from unauthorized IPs receive a 403 HTTP error response.
 
 **Type**: [String]
 
-Default is an empty list, meaning requests can be made from any address.
-
-IP addresses may contain wildcard sections, e.g., 10.10.10*
-HTTP error 403 is returned if the ip address from where the request us made is not in this list.
-
 ---
 ### Interface
-Name of the network interface used for the endpoint (e.g., en0) which could be an alternative port as used for communicating with the source devices or other SFC components.
+The Interface property specifies which network interface the health probe endpoint should use (e.g., en0). This optional string property allows using an alternative interface than the one used for device communication. If not specified, the default IPv4 network interface is used.
 
 **Type**: Sting
 
-Default is empty, default IP4 network interface is used
-
 ---
 ### Path
-Path for endpoint URL
+The Path property defines the URL path where the health probe endpoint will be accessible. This string property specifies the route that will be used for health check requests.
 
 **Type**: String
 
 ---
 ### Port
-Port used for the endpoint
+The Port property specifies the network port number for the health probe endpoint. This required integer value must be explicitly configured and must be unique - it cannot conflict with ports used by other endpoints on the same system or network interface.
 
 **Type**: Int
-
-Must be explicitly set and may not be the same as the port use for other endpoints on the same system/network interface
 
 ---
 ### RateLimit
-Maximum number of requests that can be made to the endpoint.
+The RateLimit property defines the maximum number of health probe requests allowed to the endpoint. This integer property defaults to 10 requests. When the rate limit is exceeded, the endpoint returns an HTTP 503 error response.
 
 **Type**: Int
-
-Default is 10
-If this number is exceeded an HTTP 503 error is returned
 
 ---
 ### Response
-Response used to as a response to a service probe request if the service is healthy
+The Response property defines the string value returned by the health probe endpoint when the service is healthy (defaults to "OK"), while no response is provided when the service is unhealthy
 
 **Type**: String
 
-Default is OK
-Nothing is returned if the service is not healthy.
 
 ---
 ### RetainStatePeriod
-Time in milliseconds to retain last evaluated service status
+The RetainStatePeriod property specifies how long (in milliseconds) the service should cache and reuse the last evaluated health status before performing a new health check. This integer property defaults to 1000 milliseconds.
 
 **Type**: Int
-
-Default is 1000
 
 ---
 ### StopAfterUnhealthyPeriod
-Period in seconds after which repeated health probe requests did not return a positive result the process will be stopped. This option can be used if the environment which is controlling the instances does not try to stop the unhealthy service instances itself before a new instance is started.
+The StopAfterUnhealthyPeriod property defines the duration (in seconds) after which the service will stop itself if it consistently fails health checks. This integer property must be explicitly set to enable auto-shutdown behavior. It's particularly useful in environments like AWS Greengrass where the service manager only monitors process status but does not handle unhealthy service termination.
 
 **Type**: Int
-
-Must be explicitly set in order to stop the service after the period of not returning a healthy response to health probes. The use case for this element is when the mechanism used to manage the instances of the services only checks if the process of a services is running and does stop processes. An example of this is AWS Greengrass. 
 
 [^top](#healthprobeconfiguration)
 

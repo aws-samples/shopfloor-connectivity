@@ -3,16 +3,14 @@
 # AWS CloudWatch Metrics
 
 
----
-- [AwsCloudWatchConfiguration](#awscloudwatchconfiguration)
 
-
+The [Amazon CloudWatch Metrics](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/working_with_metrics.html) Writer is a target component for Shop Floor Connectivity (SFC) that publishes metrics data collected by SFC components to Amazon CloudWatch Metrics. This enables monitoring and analysis of industrial device and SFC operational data through CloudWatch's visualization, alerting, and analytics capabilities. The writer supports publishing both standard and high-resolution metrics, with configurable namespaces, dimensions, and units. 
 
 ## AwsCloudWatchConfiguration
 
 [SFC Configuration](../core/sfc-configuration.md) > [Metrics](../core/sfc-configuration.md#metrics) 
 
-
+The AwsCloudWatchConfiguration class defines the configuration settings for the AWS CloudWatch Metrics Writer target component. It specifies how metrics data should be published to CloudWatch, including the namespace for metrics, dimensions, storage resolution, batch size, and publishing interval. The configuration also includes AWS connectivity settings and credentials needed to authenticate with the CloudWatch service.
 
 - [Schema](#schema)
 - [Example](#example)
@@ -28,7 +26,7 @@
 
 ---
 ### BatchSize
-Number of data points to buffer to write as a batch to CloudWatch service
+The BatchSize property determines how many data points are collected in a buffer before being written as a single batch to the CloudWatch service. This batching helps optimize API calls and improve throughput. The maximum allowed value is 1000 data points, which is also the default value if not specified.
 
 **Type**: Int
 
@@ -36,28 +34,25 @@ Default and max value is 1000
 
 ---
 ### CredentialProviderClient
-Name of configured credentials client that will be used to read secrets stored in the AWS Secrets Manager service.
+The CredentialProviderClient property specifies which AWS credential provider client to use for authentication. It references a client defined in the SFC's top-level configuration under [AwsIotCredentialProviderClients](../core/sfc-configuration.md#awsiotcredentialproviderclients) section. This client uses X.509 certificates to obtain temporary AWS credentials through the  [AWS IoT credentials provider](../sfc-aws-service-credentials.md).
 
-**Type**: String
+If no CredentialProviderClient is configured the [AWS Java SDK credential provider chain is used](https://docs.aws.amazon.com/sdk-for-java/latest/developer-guide/credentials.html#credentials-chain)
 
-If not set the AWS SDK credential provider chain is used.
+**Type:** String
 
 ---
 ### Interval
-Interval in seconds in which metrics are written to the service (or earlier if buffer size is reached)
-Integer
+The Interval property defines the time period (in seconds) between writes to the CloudWatch service. Buffered metrics will be published when this interval expires, or earlier if the buffer reaches the configured [BatchSize](#batchsize). This helps optimize the frequency of API calls while ensuring timely delivery of metrics. If not specified, the default interval is 60 seconds.
 
 **Type**: Integer
 
-Default is 60
-
 ---
 ### Region
-AWS CloudWatch service region
+The Region property specifies the AWS Region where the CloudWatch metrics will be published. This should be set to the AWS Region identifier where you want your metrics to be stored and accessed (e.g., "us-east-1", "eu-west-1"). If not specified, the writer will use the default region configured in the AWS SDK through environment variables, configuration files, or instance metadata.
 
 **Type**: String
 
-Default is region setup for AWS SDK
+
 
 [^top](#aws-cloudwatch-metrics)
 

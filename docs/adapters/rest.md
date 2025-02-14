@@ -1,6 +1,8 @@
 # REST Protocol Adapter
 
-- [REST Adapter data mapping](#rest-adapter-data-mapping)
+The REST protocol adapter in SFC enables polling data from HTTP endpoints using GET requests, where the adapter periodically fetches data from configured REST APIs and transforms the JSON responses into the SFC's internal data format. The adapter supports query parameters and authentication for secure API access.
+
+- [**REST Adapter data mapping**](#rest-adapter-data-mapping)
   - [All object properties  a single channel value](#all-object-properties--a-single-channel-value)
   - [Object properties as separate channel values](#object-properties-as-separate-channel-values)
   - [Selecting object properties](#selecting-object-properties)
@@ -19,7 +21,7 @@
 
 ## REST Adapter data mapping
 
-The REST adapter fetches data from a service using GET requests.
+The REST adapter retrieves data from a service via GET requests.
 
 A source within the adapter, configured to interact with the "PumpDataServer," utilizes the "pumps/1" request. 
 This adapter uses a GET request to the URL "https://api.pumpserver.com/pumps/1" to retrieve the desired object which returns 
@@ -220,13 +222,13 @@ used with a single channel named "Objects".
       "Name": "RestSource",
       "ProtocolAdapter": "REST",
       "RestServer": "PumpDataServer",
-      "Request": "pumps,
+      "Request": "pumps",
       "Channels": {
         "Pumps": {
         }
       }
     }
-  }
+  
 ```
 
 The output is:
@@ -390,13 +392,13 @@ This results in a numbered channel being created for every object in the returne
 
 ## REST Adapter Configuration
 
-
+The REST adapter configuration defines the HTTP endpoints, authentication methods, polling intervals, and response mapping required to fetch data from REST APIs. Below are the configuration parameters needed to set up the REST adapter for data collection.
 
 ## RestSourceConfiguration
 
 [SFC Configuration](../core/sfc-configuration.md) > [Sources](../core/sfc-configuration.md#sources) >  [Source](../core/source-configuration.md) 
 
-
+The RestSourceConfiguration class extends [SourceConfiguration](../core/source-configuration.md), inheriting all base configuration properties while adding REST-specific fields
 
 Source configuration for the REST protocol adapter. This type extends the [SourceConfiguration](../core/source-configuration.md) type.
 
@@ -410,31 +412,27 @@ Source configuration for the REST protocol adapter. This type extends the [Sourc
 
 ---
 ### Channels
-The channels configuration for an REST source holds configuration data to read values from the result from a source REST query. 
-"Commented" out by adding a "#" at the beginning of the identifier of that channel.
+The channels property defines a list of data points to be extracted from REST query responses, where each channel maps to a specific value in the REST response. Channels can be temporarily disabled by prefixing their identifier with a "#" character, allowing for easy testing and troubleshooting without removing the channel configuration.
 
 **Type**: Map[String,[RestChannelConfiguration](#restchannelconfiguration)
 
 At least 1 channel must be configured.
 
-
-
 ---
 ### Request
-This is the REST query that is executed to retrieve the values from the server.
+The request property specifies the REST endpoint path to query, excluding the base URL (which is defined in the server configuration). It's a String value representing the relative path of the REST API endpoint. 
+
+For instance, if you intend to access "https://api.restful-api.dev/objects/7", you would only specify "objects/7" in the request property, as the base URL is configured in the server section referred by the [RestServer](#restserver) property.
 
 **Type**: String
 
-To retrieve an object from "https://api.restful-api.dev/objects/7", this would be "objects/7"
+
 
 ---
 ### RestServer
-Rest Server Identifier for the REST server to read from. This referenced server must be present in the RestServers section 
-of the adapter referred to by the ProtocolAdapter attribute of the source.
+The RestServer property specifies the identifier of the REST server configuration to use, which must match an existing server definition in the RestServers section of the REST adapter configuration. This String value links the source to its server configuration containing connection details like base URL and authentication parameters. The referenced server identifier must exist in the adapter configuration specified by the ProtocolAdapter attribute.
 
 **Type**: String
-
-Must be an identifier of a server in the RestServers section of the REST adapter used by the source.
 
 ### RestSourceConfiguration Schema
 
@@ -506,9 +504,7 @@ Must be an identifier of a server in the RestServers section of the REST adapter
 
 [SFC Configuration](../core/sfc-configuration.md) > [Sources](../core/sfc-configuration.md#sources) > [Source](../core/source-configuration.md)  > [Channels](../core/source-configuration.md#channels) > [Channel](../core/channel-configuration.md)
 
-
-
-The RestChannelConfiguration type extends the [ChannelConfiguration](../core/channel-configuration.md) class with channel properties for the REST protocol adapter.
+The RestChannelConfiguration class extends  [ChannelConfiguration](../core/channel-configuration.md) , inheriting all base channel properties while adding REST-specific configuration to specify which elements to extract from the REST response. It defines how to map and transform specific data elements from the REST API response into SFC channel values, using the base ChannelConfiguration properties along with REST response parsing parameters.
 
 - [Schema](#restchannelconfiguration-schema)
 - [Examples](#restchannelconfiguration-examples)
@@ -519,7 +515,7 @@ The RestChannelConfiguration type extends the [ChannelConfiguration](../core/cha
 
 ---
 ### Json
-Indicates if the payload returned by the REST request is in Json format
+The Json property determines whether the REST response payload should be parsed as JSON format. It's a Boolean value that defaults to true, indicating that the response will be treated as JSON. Set this to false if the response is in a different format.
 
 
 **Type**: Boolean
@@ -529,8 +525,9 @@ Default is true
 
 ---
 ### Selector
-A JMESpath query for selecting data from the returned payload of the REST request.
-The selector can be used to select values from structured or list data types returned in the payload of the REST request.
+The Selector property defines a JMESPath expression to extract specific data from the JSON response payload. This String value allows you to navigate and filter complex JSON structures to retrieve the exact data point needed for the channel. If no Selector is specified, the entire response payload will be used as the channel value. The Selector can only be used when Json is true (default).
+
+ For example, to extract a nested value like "data.readings.temperature" from a JSON response, you would specify this path as the Selector. This is particularly useful when dealing with complex JSON responses or when you need to extract specific elements from arrays or nested objects.
 
 **Type**: String
 
@@ -587,6 +584,8 @@ A Selector can only be used if "Json" is set to true (the default).
 
 ## RestAdapterConfiguration
 
+The RestAdapterConfiguration defines the configuration settings for REST servers that can be referenced by a source.  These server configurations contain the necessary connection details, authentication parameters, and other REST-specific settings that RestSources can use to connect to and retrieve data from REST endpoints
+
 RestAdapterConfiguration extension the [AdapterConfiguration](../core/protocol-adapter-configuration.md) with properties for the REST Protocol adapter.
 
 - [Schema](#restadapterconfiguration-schema)
@@ -600,7 +599,7 @@ RestAdapterConfiguration extension the [AdapterConfiguration](../core/protocol-a
 
 ---
 ### RestServers
-REST servers configured for this adapter. The REST source using the adapter must refer to one of these servers with the RestServer attribute.
+The RestServers property contains a collection of REST server configurations that can be used by REST sources. Each server configuration in this collection can be referenced by a [RestSource](#restsourceconfiguration) using the [RestServer](#restserver) attribute.
 
 **Type**: Map[String,[RestServerConfiguration](#restserverconfiguration)]
 
@@ -715,7 +714,9 @@ Example 2 - Multiple servers configuration:
 
 [RestAdapter](#restadapterconfiguration) > [RestServers](#restservers)
 
+The RestServerConfiguration class defines the configuration parameters for a single REST server connection. It contains all the necessary settings to establish and maintain a connection to a REST endpoint.
 
+This configuration can be referenced by multiple RestSources, allowing for reuse of common server settings across different data collection points.
 
 - [Schema](#restserverconfiguration-schema)
 - [Examples](#restserverconfiguration-examples)
@@ -733,7 +734,15 @@ Example 2 - Multiple servers configuration:
 
 ---
 ### Headers
-Headers for server requests.
+The Headers property defines a collection of HTTP headers that will be included in every request sent to the REST server. These headers can specify things like: 
+
+- Content type (e.g., "Content-Type: application/json")
+- Authentication tokens (e.g., "Authorization: Bearer token123")
+- Custom headers required by the API
+- Accept types
+- API keys
+
+These headers are automatically added to each request made to the server, ensuring consistent header information across all communications with the REST endpoint.
 
 **Type**: Map[String,String]
 
@@ -743,21 +752,21 @@ The header "Accept" is by default set to application/json.
 ---
 ### MaxRetries
 
+The MaxRetries property specifies the maximum number of times the system will attempt to retry a failed REST request before giving up. This helps handle temporary network issues or brief server unavailability.
+
 **Type**: Integer
 
-Maximum number of retries for reading from the REST server.
+Default value is 3.
 
 ---
 ### Port
-REST server port number
+The Port property specifies the port number that the REST server is listening on. It's an optional Integer value - if not specified, the system will use the default port number associated with the protocol being used (typically port 80 for HTTP or port 443 for HTTPS). This allows you to configure non-standard port numbers when needed, such as when the REST server is running on a custom port.
 
 **Type**: Integer
 
-Optional, if not specified then the port number for the used protocol is used.
-
 ---
 ### Proxy
-Client Proxy configuration if the client is using a proxy server to access the REST server.
+The Proxy property allows you to configure proxy server settings when the client needs to access the REST server through a proxy. This is useful in environments where direct access to the REST server is not possible or when network security policies require traffic to go through a proxy server.
 
 **Type**: [ClientProxyConfiguration](../core/client-proxy-configuration.md)
 
@@ -765,7 +774,7 @@ Optional
 
 ---
 ### RequestTimeout
-Timeout in milliseconds for the server to return a result.
+The RequestTimeout property specifies the maximum amount of time (in milliseconds) that the client will wait for a response from the REST server before timing out the request. If the server doesn't respond within this time period, the request will be considered failed and may trigger a retry (depending on the [MaxRetries](#maxretries) setting)
 
 **Type**: Integer
 
@@ -773,27 +782,34 @@ Default is 5000
 
 ---
 ### Server
-REST server host
+The Server property defines the base URL or host address of the REST server as a String. It represents the root endpoint of the REST API that will be used for all requests.
+
+- It should contain the base URL without specific endpoints or resource paths
+- If the URL doesn't start with "http://" or "https://", the system automatically prepends "https://"
+- It can include the domain and any base path that's common to all API endpoints
+
+To retrieve an objects using requests as "https://api.restful-api.dev/objects/7", this would be "https://api.restful-api.dev"
 
 **Type**: String
 
 
-
-To retrieve an objects using requests as "https://api.restful-api.dev/objects/7", this would be "https://api.restful-api.dev"
-If the server does not start with a  "http://" or "https:" protocol specification "https://" is used as default.
-
-
 ---
 ### WaitAfterReadError
-Period in milliseconds to pause reading from the server after an error reading from that server.
+The WaitAfterReadError property specifies the time duration (in milliseconds) that the system should wait before attempting another request after encountering a read error (a situation where all retry attempts have failed). This delay helps prevent overwhelming the server during error conditions and implements a basic back-off strategy.
 
-**Type**: Integer
+**Type** : Integer
 
-Default is 10000
+Default value is 1000.
 
 ---
 ### WaitBeforeRetry
-Period in milliseconds to wait in between retires reading from the server.
+The WaitBeforeRetry property defines the delay period (in milliseconds) between individual retry attempts when a request fails. This is different from [WaitAfterReadError](#waitafterreaderror), which specifies the wait time after all retries have failed (a read error).
+
+Key aspects:
+
+- Specifies how long to pause between each retry attempt
+- Helps prevent overwhelming the server with rapid retry requests
+- Works in conjunction with MaxRetries to control retry behavior
 
 **Type**: Integer
 

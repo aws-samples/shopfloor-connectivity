@@ -2,13 +2,13 @@
 
 [SFC Configuration](../core/sfc-configuration.md) > [Targets](../core/sfc-configuration.md#targets) >  [Target](../core/target-configuration.md) 
 
-
+The [AWS IoT Core](https://aws.amazon.com/iot-core/) target adapter facilitates secure transmission of industrial data to the AWS IoT Core service via service API calls. It obtains temporary credentials using X.509 certificates or configured AWS credentials for authenticating service publish calls. The adapter supports batching of messages for efficient transmission, data compression to reduce bandwidth, payload transformation using templates, and dynamic topic names generated from target configuration and source metadata.
 
 ## AwsIotCoreTargetConfiguration
 
-AwsIotCoreTargetConfiguration extends the type  [TargetConfiguration](../core/target-configuration.md) with specific configuration data for connecting to and sending to AWS IoT core topic using HTTP dataplane API. The Targets configuration element can contain entries of this type, the TargetType of these entries must be set to **"AWS-IOT-CORE"**
+The AwsIotCoreTargetConfiguration class extends  [TargetConfiguration](../core/target-configuration.md) with specific settings for publishing data to AWS IoT Core topics using the HTTP dataplane API. When used in the [Targets](../core/sfc-configuration.md#targets) configuration, entries must specify the TargetType as **"AWS-IOT-CORE"**. 
 
-Requires IAM permissions `iot:Connect`, `iot:DescribeEndpoint`, `iot:Publish` for the topic the data is published to and `iot:RetainPublish` if the Retain option is used.
+Requires IAM permissions `iot:Connect`, `iot:DescribeEndpoint`, `iot:Publish` for the topic the data is published to and `iot:RetainPublish` if the [Retain](#retain) option is used.
 
 - [Schema](#awsiotcoretargetconfiguration-schema)
 - [Examples](#awsiotcoretargetconfiguration-examples)
@@ -28,43 +28,33 @@ Requires IAM permissions `iot:Connect`, `iot:DescribeEndpoint`, `iot:Publish` fo
 
 ---
 ### AlternateTopicName
-Name or name template of the topic values are published in case there are unmapped template placeholders in the TopicName
+The AlternateTopicName property specifies a fallback topic name or template that is used when the [TopicName](#topicname) contains template placeholders that cannot be resolved from the source metadata. This ensures messages are still published even when dynamic topic name generation fails
 
 **Type**: String
 
 
 ---
 ### BatchCount
-Number of messages to buffer before sending data as a batch to a topic.
+The BatchCount property specifies the maximum number of messages to accumulate before triggering a batch publish to AWS IoT Core. When this count is reached, all buffered messages are sent as a single array. This property works in conjunction with [BatchSize](#batchsize) and [BatchInterval](#batchinterval) - whichever threshold (message count, total size, or time interval) is reached first will trigger the batch transmission.
 
 **Type**: Int
-
-Batching is enabled by setting a value for one or more of BatchSize, BatchCount and BatchInterval.
-Whenever the number of messages, total message size or an interval is reached the buffered data is sent as an array of messages to the topic.
 
 ---
 ### BatchInterval
-Interval in milliseconds after which a batch of messages is sent to a topic, even when the BatchSize or BatchCount limit is not reached.
+The BatchInterval property defines the maximum time in milliseconds that messages can be buffered before being published to AWS IoT Core, regardless of whether [BatchSize](#batchsize) or [BatchCount](#batchcount) limits have been reached. This ensures messages are sent even during periods of low message volume, maintaining data freshness. When the interval elapses, all currently buffered messages are published as a batch.
 
 **Type**: Int
-
-Batching is enabled by setting a value for one or more of BatchSize, BatchCount and BatchInterval.
-Whenever the number of messages, total message size or an interval is reached the buffered data is sent as an array of messages to the topic.
 
 
 ---
 ### BatchSize
-Payload size in KB of messages to batch before sending data as a batch to a topic.
+The BatchSize property defines the maximum total payload size in kilobytes (KB) of buffered messages before triggering a batch publish to AWS IoT Core. This size is calculated based on the uncompressed message payloads. When the cumulative size of buffered messages reaches this limit, all messages are sent as a single batch. The property works alongside [BatchCount](#batchcount)  and [BatchInterval](#batchinterval)  - the first threshold reached (size, count, or time) triggers the batch transmission. 
 
 **Type**: Int
 
-Batching is enabled by setting a value for one or more of BatchSize, BatchCount and BatchInterval.
-Whenever the number of messages, total message size or an interval is reached the buffered data is sent as an array of messages to the topic.
-The size is calculated on the uncompressed payload of the messages.
-
 ---
 ### Compression
-Compression method for MQTT message payloads.
+The Compression property specifies the compression algorithm to be applied to message payloads before publishing to AWS IoT Core. Supported compression methods are "None" (default, no compression), "Zip", or "GZip". Compression can help reduce bandwidth usage and costs when transmitting large payloads.
 
 **Values:**
 
@@ -78,7 +68,7 @@ Compression method for MQTT message payloads.
 ---
 ### CredentialProviderClient
 
-Name of the AWS credential provider client defined in the SFC top level configuration section [AwsIotCredentialProviderClients](../core/sfc-configuration.md#awsiotcredentialproviderclients) obtaining credentials using X.509 certificates from the [AWS IoT credentials provider](../sfc-aws-service-credentials.md).
+The CredentialProviderClient property specifies which AWS credential provider client to use for authentication. It references a client defined in the SFC's top-level configuration under [AwsIotCredentialProviderClients](../core/sfc-configuration.md#awsiotcredentialproviderclients) section. This client uses X.509 certificates to obtain temporary AWS credentials through the  [AWS IoT credentials provider](../sfc-aws-service-credentials.md).
 
 If no CredentialProviderClient is configured the [AWS Java SDK credential provider chain is used](https://docs.aws.amazon.com/sdk-for-java/latest/developer-guide/credentials.html#credentials-chain)
 
@@ -87,63 +77,60 @@ If no CredentialProviderClient is configured the [AWS Java SDK credential provid
 ---
 
 ### Region
-AWS Region for IoT Core service
+The Region property specifies the AWS Region identifier where the AWS IoT Core service endpoint is located (e.g., "us-east-1", "eu-west-1"). This setting determines which regional endpoint will be used for publishing messages. The region must be one where AWS IoT Core service is available and the AWS account has access.
 
 **Type**: String
 
 ---
 ### Retain
-Set to true to store a single message per a given MQTT topic for delivery to any current and future topic subscribers.
+The Retain property determines whether messages should be stored by AWS IoT Core as retained messages. When set to true (default is false), AWS IoT Core will store the most recent message for each topic and automatically deliver it to new subscribers when they subscribe to that topic. Due to lower service limits for retained messages, it's recommended to enable message buffering using BatchSize, BatchCount, or BatchInterval. 
+
+The `iot:RetainPublish` IAM permission is required when this feature is enabled.
 
 **Type**: Boolean
 
 
 Default is false
 
-As service limits for publishing retained messages are lower than publishing non-retained messages consider to enable buffering
-using, BatchSize, BatchCount or BatchInterval.
 
-Publishing messages with retain option requires the iot:RetainPublish permission
 
 
 ---
 ### TopicName
+The TopicName property defines the MQTT topic name or topic name template where messages will be published. It supports both static names and dynamic templates using placeholders. The available placeholders include:
+
+- Environment variables: ${name}
+
+- Built-in variables:
+
+  - `%schedule%`
+
+  - `%target%`
+
+  - `%source%`
+
+  - `%channel%`
+
+- Metadata values:  Metadata values can be referenced using the name of metadata value, e.g.  `%metadata name%`
+
+Example templates:
+
+- `plant1-%source%` - Creates separate topics for each source
+- `plant1-%line%` \- Groups messages by the line metadata value
+
+Important considerations:
+
+- If a placeholder cannot be resolved, the [AlternateTopicName](#alternatetopicname) will be used as fallback
+- Using dynamic topics may increase publish calls and risk throttling - consider using message buffering
+- AWS IoT Core has a limit of 8 topic levels (separated by forward slashes)
+
 Name or name template of the topic
 
 **Type**: String
 
-
-A template can be used for the topicName to render the actual topic name using placeholders. In this template, 
-besides placeholders for environment variables (${name}) the following placeholders are available:
-
-- %schedule%
-- %target%
-- %source%
-- %channel%
-
-To use the values of **metadata** at the top, source or channel level of the target data, the name af the metadata value can
-be used with a '%' prefix and postfix.
-
-Value placeholders can be used to add additional topic levels or grouping values to a specific topic.
-
-Template examples:
-
-- plant1-%source% : Values from each source will be published to a topic for that source
-- plant1-%line%   : Values from all sources will be grouped by the value of the %line% metadata and published to a topic for that value
-
-In case a placeholder is not resolved, when a value for a used placeholder is part of the data,
-then an alternative topic name can be configured by setting the name of that topic to the [AlternateTopicName](#alternatetopicname) setting.
-
-Note that the use of placeholders to send data to specific topics will result in additional publish calls and may result in throttling. Enabling buffering
-can be used to reduce the chance of throttling.
-
-For AWS IoTCore the maximum number of topic levels is 8.
-
-
-
 ---
 ### WarnAlternateTopicName
-Generate warning if data is published to [AlternateTopicName](#alternatetopicname).
+The WarnAlternateTopicName property is a boolean flag that controls whether a warning should be generated when messages are published to the [AlternateTopicName](#alternatetopicname) instead of the primary TopicName. When set to true, the system will log a warning whenever a message falls back to using the alternate topic, which typically occurs when placeholders in the primary TopicName template cannot be resolved
 
 **Type**: Boolean
 

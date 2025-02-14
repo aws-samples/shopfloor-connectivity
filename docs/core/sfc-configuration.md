@@ -1,6 +1,6 @@
-## SFC top level configuration
+## SFC configuration
 
-SFC top level configuration structure	
+The SFC (Shopfloor Connectivity Framework) top-level configuration defines the core structure and behavior of a system designed for industrial data collection and connectivity. It provides a framework for connecting manufacturing shopfloor devices and systems to AWS services, with features for protocol adaptation, data filtering, scheduling, and secure data transmission. The configuration manages everything from source connections to target destinations, including security credentials, health monitoring, logging, and data transformation capabilities, enabling consistent data collection from diverse industrial equipment.
 
 - [Schema](#schema)
 - [Examples](#examples)
@@ -39,21 +39,21 @@ SFC top level configuration structure
 
 ---
 ### AWSVersion
-Software version must be set to "2022-04-02"
+Specifies the AWS compatibility version for the Shopfloor Connectivity Framework. Must be set to "2022-04-02" to ensure proper functionality and compatibility with AWS services. This string value is used to maintain version control and manage future updates and extensions to the framework.
 
 **Type**: String
 
-Used for compatibility with future extensions and updates
+
 
 ---
 ### AwsIotCredentialProviderClients
-Configuration for clients using the AWS IoT Credential Provider Service to obtain session credentials.
+Defines a map of configurations for clients that use AWS IoT Core's credential provider service to obtain temporary security credentials. Each entry in the map consists of a client identifier (String) paired with its corresponding credential provider configuration. This allows devices to authenticate using X.509 certificates instead of storing long-term AWS credentials, enhancing security by providing temporary, limited-privilege session [credentials for accessing AWS services](../sfc-aws-service-credentials.md).
 
 **Type**: Map[String,[AwsIotCredentialProviderClientConfiguration](./aws-iot-credential-provider-configuration.md)]
 
 ---
 ### ChangeFilters
-Filters that can be applied at source or channel value level to let pass values only if they have changed at all or an absolute or percentage from the previously passed value, or since a time interval.
+[ChangeFilters](../sfc-data-processing-filtering.md#data-change-filters) that control when data values pass through based on detected changes. Values only transmit when they meet specified change criteria: either an absolute difference, a percentage change from the previous value, or after a minimum time interval has elapsed. These filters can be applied at both source and individual channel levels to optimize data transmission by filtering out insignificant changes.
 
 **Type**: Map[String,[ChangeFilterConfiguration](./change-filter-configuration.md)
 
@@ -80,14 +80,14 @@ Example:
 
 ---
 ### ConditionFilters
-Filters that can be applied at channel values level. Values are passed if the value matches the filter expression
+[ConditionFilters](../sfc-data-processing-filtering.md#condition-filters) defines rules that evaluate whether specific channels have been read from a source, regardless of their actual values. This configuration checks for the presence or absence of channels in the data stream, rather than examining the data values within those channels. For example, it can verify if certain channels were successfully read, if they're missing, or create logical combinations of channel presence/absence 
 
 **Type**: Map[String,[ConditionFilterConfiguration](./condition-filter-configuration.md)]
 
 
 ---
 ### ConfigProvider
-Configuration for custom configuration handler
+Specifies the configuration for a [custom configuration handler](../sfc-extending.md#custom-configuration-handlers) that runs in-process with the main application. This allows for customized handling and processing of configuration data, enabling users to implement their own configuration management logic beyond the default functionality provided by the framework.
 
 **Type**: [InProcessConfiguration](./in-process-configuration.md)
 
@@ -95,92 +95,81 @@ Configuration for custom configuration handler
 
 ### Description
 
-User-defined description of the configuration
+A free-form text field that allows users to provide a descriptive explanation of the configuration's purpose, contents, or any other relevant information. This helps document and identify the configuration's intended use. 
 
 **Type**: String
 
 ---
 ### ElementNames
 
-Names of the output elements. This is a map containing the following entries:
+Defines custom names for output elements in the data structure. This map allows customization of key element names in the output, with each entry specifying an alternative name for a standard element. The configurable elements include:
 
-- Metadata: Name of metadata added at source level as configured in the optional "Metadata" configured for a schedule, source or channel
-- Schedule: Name of the root element for the schedule.
-- Sources: Name the of the element that contains the sources in the output of a schedule
-- Timestamp: Name of the timestamp elements.
-- Value: Name of the elements that contains a value.
-- Values:  Name of the element in a source that contains the map of channel values for a source.
-- Serial : Name of the element that contains a unique serial number for target data transmitted to the targets.
+- Metadata: Element containing source-level metadata (default: "metadata")
+- Schedule: Root element for the schedule (default: "schedule")
+- Sources: Container element for sources (default: "sources")
+- Timestamp: Timestamp elements (default: "timestamp")
+- Value: Value-containing elements (default: "value")
+- Values: Map of channel values within a source (default: "values")
+- Serial: Unique serial number for target data (default: "serial")
 
-**Type**: 
-Map(String, String)
-indexed by name of the element
-
-Optional, default values for missing element are:
-
-- Metadata -> "metadata"
-
-- Schedule -> "schedule"
-
-- Sources -> "sources"
-
-- Timestamp -> "timestamp"
-
-- Value -> "value"
-
-- Values -> "values"
-
-- Serial -> "serial"
-
-  
+All entries are optional, and any omitted elements will use their default names.
 
 
 ---
 ### HealthProbe
-Configuration for main process health probe endpoint
+Specifies the configuration for the [health probe endpoint](../sfc-health-endpoints.md) that monitors the main process's health status. This configuration determines how the system's health is monitored and reported, allowing external systems to check the operational status of the application.
+
+The health probe helps in:
+
+- Monitoring system availability
+- Performing health checks
+- Determining if the process is functioning correctly
+
+This configuration is optional and can be customized through the HealthProbeConfiguration settings.
 
 **Type**: [HealthProbeConfiguration](./health-probe-configuration.md)
 
 ---
 ### LogLevel
-Detail of logged output information
+Specifies the verbosity level of [logged output](../sfc-logging-metrics.md#logging)  information. There are four available logging levels, in order of decreasing detail:
+
+- "Trace": Most detailed level, includes all messages and detailed trace information
+- "Info": Standard level showing informational, warning, and error messages
+- "Warning": Shows only warning and error messages
+- "Error": Most restrictive level, shows only error messages
+
+The default setting is "Info" if not specified. This setting can be overridden at runtime using command-line parameters:
+
+- -trace for trace level
+- -info for info level
+- -warning for warning level
+- -error for error level
 
 **Type**: String, 
 
-Any of 
-
-- "Trace"
-- "Info"
-- "Warning"
-- "Error"
-
-Default value is "Info"
-
 ---
 ### LogWriter
-Configuration for custom log writer
+Specifies the configuration for a [custom log writer](../sfc-extending.md#custom-logging) that determines how log messages are output. By default, the [ConsoleLogWriter](../sfc-logging-metrics.md#logging)   writes messages to the console, but this configuration allows for implementing custom logging behavior to write logs to different destinations (like files, databases, or other logging systems) by providing your own log writer implementation that runs in-process with the main application.
 
 **Type**: [InProcessConfiguration](./in-process-configuration.md)
-
-Default built-in writer logs to console
 
 ---
 
 ### Metadata
 
-The optional [Metadata](../README.md#metadata) element can be used to add additional data to the output at the top level which is combined with the metadata of each schedule. If metadata is specified, which is a map of string indexed values, it will be added to the output at the source level as an element that can be configured through the "Metadata" entry of the ElementNames configuration element.
+The optional [Metadata](../README.md#metadata) element can be used to add additional data to the output at the top level. If metadata is specified, which is a map of string indexed values, it will be added to the output at the channel level as an element that can be configured through the "Metadata" entry of the [ElementNames](./sfc-configuration.md#elementnames) configuration element.
 
 **Type**: Map[String, String]
 
 ---
 ### Metrics
-Metrics collection configuration
+Defines the configuration settings for [metrics collection](../sfc-logging-metrics.md#metrics-collection) within the system. This configuration determines how performance metrics, operational statistics, and other measurable data points are gathered, processed, and reported. It allows for customization of metrics collection behavior through the MetricsConfiguration settings.
 
 **Type**: [MetricsConfiguration](metrics-configuration.md)
 
 ---
 ### MonitorIncludedConfigContentInterval
-Set the interval in seconds of checking the content from external configuration sources loaded by configured urls, see Including configuration sections
+Controls how often (in seconds) the system checks for changes in [external configuration content](../sfc-configuration.md#including-configuration-sections). When configuration is loaded from external URLs, this setting determines the frequency of checking if those external sources have been updated. The default checking interval is 60 seconds, and you can disable this monitoring completely by setting the value to 0.
 
 **Type**: Integer
 
@@ -188,15 +177,13 @@ Default is 60, set to 0 to disable
 
 ---
 ### MonitorIncludedConfigFiles
-Controls the monitoring of included configuration files see Including configuration sections
+Determines whether the system actively monitors [included configuration files](../sfc-configuration.md#including-configuration-sections). for changes. When enabled (default is true), the system will detect modifications to included configuration files and automatically reload them. Setting this to false disables the monitoring, requiring manual intervention or system restart to pick up changes in included configuration files.
 
 **Type**: Boolean
 
-Default value is true, set the value false to disable monitoring
-
 ---
 ### Name
-User-defined name of the configuration
+A custom identifier that can be assigned to the configuration. This optional string value allows you to give the configuration a meaningful name for easier identification and reference purposes.
 
 **Type**: String
 
@@ -205,23 +192,16 @@ Optional
 ---
 ### ProtocolAdapterServers
 
-Servers that run protocol adapter instances as separate processes. The SFC core will read the data from these servers using a streaming IPC protocol(gRPC) This section is a map indexed by the protocol adapter server identifier. The entries contain the address information that the SFC Core will use to connect and communicate with the IPC service.
-The protocol-servers can be referenced by their identifier from the ProtocolAdapters section of the configuration.
+Defines a mapping of [protocol adapter servers](../sfc-running-adapters.md#running-the-jvm-protocol-adapters-as-an-ipc-service) that operate as independent processes. Each server is identified by a unique string key and contains connection details for the SFC Core to communicate with it. The SFC Core uses gRPC streaming for efficient inter-process communication with these servers. These server configurations can be referenced by their identifiers within the ProtocolAdapters section, allowing for flexible deployment architectures where protocol adapters run separately from the main SFC Core process.
 
 **Type**: Map[String,[ServerConfiguration](./server-configuration.md)]
 
 ---
 ### ProtocolAdapterTypes
 
-This section includes the information for each protocol adapter type that is used by the SFC core to create instances of that adapter type if that adapter runs in the same process as the SFC core.
+Defines configuration for in-process protocol adapters [running within the SFC core's JVM](../sfc-running-adapters.md#running-protocol-adapters-in-process). Maps adapter types (like OPCUA, MODBUS) to their implementation details, including JAR files and factory classes. The SFC core uses this configuration to dynamically load and create adapter instances, enabling new protocol types without core modifications. Only required for in-process adapters (not IPC-based ones) and limited to JVM implementations.
 
-The element is a map indexed by the adapter type (e.g., OPCUA, MODBUS). Each entry contains information on which jar files, that contain the protocol adapter implementation, to load and the factory class to create the instances.
-
-The SFC core itself is not aware of the actual target implementations and only uses this configuration data to explicitly load the jar files to create and use the adapter instances. This makes it possible to add new protocol adapter types without modifications to the SFC core.
-
-Only types that run in the same process as the SFC core need to be configured. If the core uses IPC to send the data to a target that runs in its process, the type does not have to be defined in the ProtocolAdapterTypes section.
-
-Only JVM implementations of protocol adapters can be used to run in the same process as the SFC core.
+A protocol adapter type only needs to be included when it's running within the SFC Core JVM; it can be omitted when the adapter is running as an [IPC service](#protocoladapterservers).
 
 **Type**: Map[String,[InProcessConfiguration](./in-process-configuration.md)]
 
@@ -233,7 +213,7 @@ Protocol adapters are the sources to read data from and abstract the actual prot
 
 ---
 ### Schedules
-List of one or more schedules that define how data is collected from their sources, processed, and send to the targets
+Defines a collection of schedules that control data collection, processing, and transmission timing. Each schedule specifies when and how data moves from sources to targets. At least one active schedule must be configured for the system to operate.
 
 **Type**: [[Schedule](./schedule-configuration.md)]
 
@@ -241,76 +221,49 @@ At least one active schedule needs to be present
 
 ---
 ### SecretsManager
-Configuration to obtain secrets stored in AWS secrets manager which are used to replace placeholders in the configuration
+Configuration to obtain secrets stored in AWS secrets manager which are used to replace placeholders in the configurationSpecifies how to retrieve sensitive information from AWS Secrets Manager to replace configuration placeholders. This allows secure storage and management of confidential data like credentials or connection strings that are referenced in the configuration.
 
 **Type**: [SecretsManagerConfiguration](./secrets-manager-configuration.md)
 
 ---
 ### Sources
 
-Input sources to read data from. This element is a map indexed by the source identifiers of the sources.
-
-For controlling the schedule and processing the data from the source, the SFC core uses a set of generic configuration attributes which are common for all protocol implementations.
-
-Implementations of input protocols will define their specific source configurations with additional specific attributes required for that protocol additionally to the common attributes (See SourceConfiguration type)
-
-The entries of this Sources element will contain protocol-specific entries for the used protocol implementation. The protocol implementation is responsible for reading and handling the protocol-specific attributes.
-
+Defines a mapping of input sources where data is collected from, identified by unique source identifiers. Each source combines common configuration attributes used by the SFC core for scheduling and data processing, along with protocol-specific settings. Protocol implementations handle their specific attributes while adhering to the common SourceConfiguration framework. The configuration requires at least one source to be defined
 
 **Type**: Map[String, [SourceConfiguration](./source-configuration.md)]
-
-At least 1 source must be configured.
 
 ---
 ### TargetServers
 
-Servers that run target instances as separate processes. The SFC core will send the data to these targets using IPC (gRPC) This section is a map indexed by the target server identifier. The entries contain the address information that the SFC Core will use to connect and communicate with the IPC service.
-The targets-servers can be referenced by their identifier from the Targets section of the configuration.
-
+Defines a mapping of target servers that operate as separate processes from the SFC core. Each server is identified by a unique string key and contains connection details for communication. The SFC Core uses gRPC for inter-process communication to send data to these targets. These server configurations can be referenced by their [identifiers](./target-configuration.md#targetserver) in the [Targets](#targets) section, enabling distributed processing where targets run independently of the main SFC Core.
 
 **Type**: Map[String,[ServerConfiguration](./server-configuration.md)]
 
 ---
 ### TargetTypes
 
-The TargetTypes section includes the information for each target type that is used by the SFC core to create instances of that target if that target runs in the same process as the SFC core.
-
-The element is a map indexed by the TargetType (e.g., AWS-SQS). Each entry contains information on which jar files, that contain the target implementation, to load and the factory class to create the instances.
-
-The SFC core itself is not aware of the actual target implementations and only uses this configuration data to explicitly load the jar files to create and use the target instances. This makes it possible to add new target types without modifications to the SFC core.
-
-Note Only types that run in the same process as the SFC core need to be included in the configuration. If the core uses IPC to send the data to a target that runs in its process, the type does not have to be defined in the TargetTypes section.
-
-Only JVM implementations of targets can be used to run in the same process as the SFC core.
+Defines configuration for in-process targets running within the SFC core's JVM. Maps target types (like AWS-SQS) to their implementation details, including JAR files and factory classes. The SFC core uses this to dynamically load and create target instances, enabling extensibility without core modifications. Only needed for in-process targets (not IPC-based ones) and limited to JVM implementations.
 
 **Type**: Map[String,[InProcessConfiguration](./in-process-configuration.md)]
 
 ---
 ### Targets
 
-Targets are the destinations for data collected and processed by the SFC. Targets defined in this section can be referred to by the target identifier in schedules as their output destinations.
-The element is a map, indexed by the target identifier. The entries contain the target configuration data.
-Targets can be of different types that have specific configuration attributes. Target implementations define their specific configuration types containing the attributes required for communicating with the target.
-For sending the data to the targets the SFC core only uses a subset of attributes that are common between all target types.
+Defines a mapping of data destinations (targets) identified by unique target identifiers. Each target combines common attributes used by the SFC core for data transmission, along with type-specific configuration settings. Target implementations handle their specific attributes while adhering to the common TargetConfiguration framework. These targets can be referenced as output destinations within schedules, allowing flexible routing of processed data
 
 
 **Type**: Map[String,[TargetConfiguration](./target-configuration.md)]
 
 ---
 ### Templates
-Configuration Templates
+Defines a mapping of named [configuration templates](../sfc-configuration.md#configuration-templates), where each template name is associated with a JSON object. These templates can be reused across the SFC configuration to maintain consistency and reduce duplication in configuration settings.
 
 **Type**: Map[String,String]
-
-Map indexed by template names containing JSON objects used as [SFC configuration templates](../sfc-configuration.md#configuration-templates)
 
 ---
 ### Transformations
 
-Transformations are a sequence of one or more transformation operators that can be applied to values read from input channels and/or aggregated output values.
-This element is a map indexed by transformation identifiers which can be referred to in case a transformation needs to be applied to the data.
-Each entry is a list of one or more transformation operators. An operator consists of the name of the operator and operator-specific parameters. The operators are applied in the order in which they are listed. The output type of the operator must be compatible with the input type of the next operator in the list.
-If a value the transformation is applied to is an array of values, the transformation will be applied to each value in the array.
+Defines a mapping of transformation sequences identified by unique identifiers. Each sequence contains ordered operators that modify data values from input channels or aggregated outputs. Operators have specific parameters and must maintain type compatibility between steps. Transformations can process both single values and arrays, applying the same operations to each array element. These transformations can be referenced elsewhere in the configuration to modify data during processing.
 
 **Type**: Map[String,[TransformationOperator](./transformation-operator-configuration.md)[]]
 
@@ -342,13 +295,13 @@ The transformation with identifier DivBy2Add1Round above Divides the input value
 
 ---
 ### Tuning
-SFC tuning parameters
+Defines system-level performance tuning parameters for the SFC, allowing optimization of resource usage and operational behavior through configurable settings.
 
 **Type**: [TuningConfiguration](./tuning-configuration.md)
 
 ---
 ### ValueFilters
-Filters that can be applied at channel values level. Values are passed if the value matches the filter expression
+Defines a mapping of [value filters](../sfc-data-processing-filtering.md#value-filters) that can be applied to individual channel values. Each filter is identified by a unique name and contains filter expressions that determine whether values should be included or excluded from processing. Values are only passed through if they satisfy the specified filter conditions
 
 **Type**: Map[String,[ValueFilterConfiguration](./value-filter-configuration.md)
 
@@ -385,13 +338,13 @@ Example:
 
 ---
 ### Version
-User-defined version
+Specifies an optional user-defined version number for the configuration as an integer value. This allows users to track and manage different versions of their SFC configuration.
 
 **Type**: Integer
 
 Optional
 
-[^top](#sfc-top-level-configuration)
+[^top](#sfc-configuration)
 
 ## Schema
 
@@ -1037,4 +990,4 @@ Configuration is using Templates for repeating channel sections and region value
 }
 ```
 
-[^top](#sfc-top-level-configuration)
+[^top](#sfc-configuration)

@@ -2,7 +2,7 @@
 
 [SFC Configuration](./sfc-configuration.md) > [SecretsManager](./sfc-configuration.md#secretsmanager) > [Secrets](./secrets-manager-configuration.md#secrets)
 
-Configuration for a secret obtained from AWS Secrets manager
+The CloudSecretConfiguration class defines how to retrieve and reference secrets from AWS Secrets Manager. It specifies the secret's identifier (name or ARN), an optional alias for local reference, and version labels for accessing specific secret values. This configuration enables secure access to sensitive information stored in AWS Secrets Manager.
 
 - [Schema](#schema)
 - [Examples](#examples)
@@ -17,27 +17,23 @@ Configuration for a secret obtained from AWS Secrets manager
 
 ---
 ### Alias
-Alias for the secret
+The Alias property provides an alternative local name for referencing the secret within configuration placeholders. This optional string property allows you to use a simpler or more context-appropriate name when referring to the secret instead of using its actual SecretId or ARN.
 
 **Type**: String
-
-Optional. Alternative local name to reference a secret from a placeholder in the configuration.
 
 ---
 ### Labels
- Labels to specify specific value to read for the secret. 
+The Labels property specifies which version of the secret to retrieve using AWS Secrets Manager staging labels. This string property defaults to "AWSCURRENT" to fetch the current version of the secret, but can be set to other staging labels to access different versions.
 
 **Type**: String
-
-Default is AWSCURRENT which is the current value of a secret
 
 ---
 ### SecretId
-Name or ARN of the secret
-
-**Type**: String
+The SecretId property identifies the AWS Secrets Manager secret using either its name or Amazon Resource Name (ARN). This required string property allows referencing the secret in configuration placeholders using either format, providing flexibility in how the secret is identified and accessed.
 
  If the ARN of a secret is used, both the ARN or the name of the read secret can be used as a reference in the placeholder.
+
+**Type**: String
 
 [^top](#cloudsecretconfiguration)
 

@@ -1,24 +1,32 @@
 # CertificateConfiguration
 
+The CertificateConfiguration class manages SSL/TLS certificate settings and validation. It handles certificate paths, private keys, and certificate formats (PEM or PKCS12). The class supports both standard certificates and self-signed certificates, with configuration options for certificate aliases, passwords, and expiration warning periods. It includes validation logic to ensure proper certificate format and required key files are specified. 
+
 - [Schema](#certificateconfiguration-schema)
 
 - [Examples](#certificateconfiguration-examples)
 
-- 
+  
 
   **Properties:**
 
 - [Alias](#alias)
+
 - [CertificateFile](#certificatefile)
+
 - [ExpirationWarningPeriod](#expirationwarningperiod)
+
 - [Format](#format)
+
 - [Password](#password)
+
 - [PrivateKeyFile](#privatekeyfile)
+
 - [SelfSignedCertificate](#selfsignedcertificate)
 
 ---
 ### Alias
-Alias to use for pkcs12 certificate files
+The Alias property specifies the name used to identify the certificate entry within a PKCS12 format certificate file. It defaults to "alias" if not explicitly set. This alias is used when accessing the certificate and private key entries stored in the PKCS12 keystore.
 
 **Type**: String
 
@@ -26,13 +34,13 @@ Default is "alias"
 
 ---
 ### CertificateFile
-Pathname to pem or pkcs12 certificate file
+The CertificateFile property specifies the file system path to the certificate file, which can be in either PEM or PKCS12 format. This path indicates where the certificate is stored on the system and will be used to load the certificate for SSL/TLS operations.
 
 **Type**: String
 
 ---
 ### ExpirationWarningPeriod
-Period in days in which the adapter will generate a daily warning and metrics value before the client certificate expires.
+The ExpirationWarningPeriod property defines the number of days before a certificate's expiration when the adapter should start generating daily warnings and metrics. By default, it's set to 30 days, giving administrators time to take action before the certificate expires. Setting this value to 0 will disable the expiration warnings. This helps prevent unexpected certificate expiration issues by providing advance notification.
 
 **Type**: Integer
 
@@ -40,7 +48,7 @@ Default is 30, set to 0 to disable.
 
 ---
 ### Format
-Format of the certificate file, can either be "Pem" or "Pkcs12".
+The Format property specifies the encoding format of the certificate file, accepting either "Pem" or "Pkcs12" as valid values. If this property is not explicitly set, the adapter will try to automatically determine the format based on the certificate file's extension. PEM files typically use extensions like .pem, while PKCS12 files commonly use extension  .pfx.
 
 **Type**: String
 
@@ -48,19 +56,19 @@ If not specified the adapter will attempt to determine the type from the filenam
 
 ---
 ### Password
-Password for pkcs12 certificate files
+The Password property specifies the password required to access and decrypt a PKCS12 format certificate file. This password is used to protect the private key and certificate information stored within the PKCS12 keystore.
 
 **Type**: String
 
 ---
 ### PrivateKeyFile
-Path name to pem private key file (optional for pkcs12, required for pem)
+The PrivateKeyFile property specifies the file system path to the private key file. For PEM format certificates, this property is required as the private key is stored in a separate file. For PKCS12 format certificates, this property is optional since the private key is typically stored within the PKCS12 file itself along with the certificate.
 
 **Type**: String
 
 ---
 ### SelfSignedCertificate
-Self-signed certificate configuration used to generate a self-signed certificate. If  this property is set, and the certificate file does not exist a self-signed certificate will be created.
+The SelfSignedCertificate property contains configuration settings for generating a self-signed certificate. If this property is configured and the specified certificate file doesn't exist, the adapter will automatically create a new self-signed certificate using these settings. This property accepts a SelfSignedCertificateConfiguration object that defines parameters like the certificate's subject, validity period, and other attributes needed for certificate generation.
 
 **Type**: [SelfSignedCertificateConfiguration](./self-signed-certificate-configuration.md)
 

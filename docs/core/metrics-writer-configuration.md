@@ -6,6 +6,8 @@
 
 [SFC Configuration](./sfc-configuration.md) > [TargetAdapters](./sfc-configuration.md#targets) > [Target](./target-configuration.md) > [Metrics](./target-configuration.md#metrics) > [Writer](./metrics-writer-configuration.md#metricswriter)
 
+Defines how metrics data is written and transmitted, supporting two modes: in-process writer for direct metrics handling within the application, or IPC-based server configuration for writing metrics through a separate process. This configuration determines the mechanism used to output collected metrics data.
+
 - [Schema](#schema)
 - [Examples](#examples)
 
@@ -16,13 +18,13 @@
 
 ---
 ### MetricsServer
-Server providing the metrics writer service
+Specifies the configuration for an external metrics server that handles metrics data through IPC (Inter-Process Communication). This property defines the connection details (like address and port) for the remote metrics writing service.
 
 **Type**: [ServerConfiguration](./server-configuration.md )
 
 ---
 ### MetricsWriter
-Jar files implementing the writer
+Defines the in-process metrics writer implementation configuration, specifying the factory class and JAR files containing the metrics writer code. This configuration enables direct metrics handling within the same process as the application.
 
 **Type**: [InProcessConfiguration](./in-process-configuration.md)
 

@@ -15,6 +15,7 @@ and `bin/<adaptertype>.bat`) to launch the applications, and all required librar
 | Protocol   | Application name | Main Class                                     |
 |------------|------------------|------------------------------------------------|
 | ADS        | ads              | com.amazonaws.sfc.ads.AdsProtocolService       |
+| J1939      | J1939            | com.amazonaws.sfc.j1939.J1939ProtocolService   |
 | MQTT       | mqtt             | com.amazonaws.sfc.mqtt.MqttProtocolService     |
 | Modbus TCP | modbus-tcp       | com.amazonaws.sfc.tcp.ModbusTcpProtocolService |
 | NATS       | nats             | com.amazonaws.sfc.nats.NatsProtocolService     |
@@ -101,14 +102,21 @@ Used environment variable :
 - SFC_DEPLOYMENT_DIR: Directory in which deployment packed is deployed, with the subdirectory for the adapter.
 
 ```json
- 
 
+
+{
   "AdapterTypes": {
     "ADS": {
       "JarFiles": [
         "${SFC_DEPLOYMENT_DIR}/ads/lib"
       ],
       "FactoryClassName": "com.amazonaws.sfc.ads.AdsAdapter"
+    },
+    "J1939": {
+      "JarFiles": [
+        "${SFC_DEPLOYMENT_DIR}/j1939/lib/"
+      ],
+      "FactoryClassName": "com.amazonaws.sfc.modbus.j1939.J1939Adapter"
     },
     "MODBUS-TCP": {
       "JarFiles": [
@@ -171,6 +179,7 @@ Used environment variable :
       "FactoryClassName": "com.amazonaws.sfc.s7.S7Adapter"
     }
   }
+}
 
 
 ```

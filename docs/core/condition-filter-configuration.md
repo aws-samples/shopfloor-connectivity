@@ -2,11 +2,13 @@
 
 [SFC Configuration](./sfc-configuration.md) > [ConditionFilters](./sfc-configuration.md#conditionfilters)
 
+The ConditionFilterConfiguration defines rules that evaluate whether specific channels have been read from a source, regardless of their actual values. This configuration checks for the presence or absence of channels in the data stream, rather than examining the data values within those channels. For example, it can verify if certain channels were successfully read, if they're missing, or create logical combinations of channel presence/absence conditions.
+
 - [Schema](#schema)
 - [Examples](#examples)
 
-
 **Properties:**
+
 - [Operator](#operator)
 - [Value](#value)
 

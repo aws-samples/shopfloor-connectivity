@@ -4,7 +4,7 @@
 
 [SFC Configuration](./sfc-configuration.md) > [AwsIotCredentialProviderClients](./sfc-configuration.md#awsiotcredentialproviderclients) > [Proxy](./aws-iot-credential-provider-configuration.md#proxy)
 
-Configuration for a client level proxy
+The ClientProxyConfiguration class defines settings for client-level proxy connections, including the proxy server URL, optional authentication credentials (username/password), and addresses that can bypass the proxy (NoProxyAddresses). It provides a structured way to configure how client connections are routed through a proxy server in the SFC system.
 
 - [Schema](#schema)
 - [Examples](#examples)
@@ -20,15 +20,13 @@ Configuration for a client level proxy
 
 ---
 ### NoProxyAddresses
-Comma-separated list of addresses for which can be accessed without using the proxy
+The NoProxyAddresses property accepts a comma-separated list of addresses that should bypass the proxy server. These addresses will be accessed directly without going through the configured proxy. This optional string property allows you to specify exceptions to proxy routing, such as local or internal network addresses.
 
 **Type**: String
 
-Optional
-
 ---
 ### ProxyPassword
-Proxy server password
+The ProxyPassword property specifies the password for proxy server authentication. This optional string property should be used in conjunction with ProxyUsername when the proxy server requires authentication credentials.
 
 **Type**: String
 
@@ -36,13 +34,13 @@ Optional
 
 ---
 ### ProxyUrl
-Url of the proxy server to use 
+The ProxyUrl property specifies the URL address of the proxy server that will handle client connections. This required string property defines the endpoint where proxy requests should be directed.
 
 **Type**: String
 
 ---
 ### ProxyUsername
-Proxy server username
+The ProxyUsername property specifies the username for proxy server authentication. This optional string property should be used together with ProxyPassword when the proxy server requires authentication credentials.
 
 **Type**: String
 

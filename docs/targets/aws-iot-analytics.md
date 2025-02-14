@@ -1,17 +1,25 @@
 # AWS IoT Analytics Target
 
+The Shop Floor Connectivity for  [AWS IoT Analytics](https://aws.amazon.com/iot-analytics/) Target adapter enables you to send industrial device data directly to AWS IoT Analytics. This adapter receives data from the SFC Core and forwards it to AWS IoT Analytics channels, where the data can be processed, stored, and analyzed using AWS IoT Analytics' capabilities for IoT data analytics, machine learning, and visualization. 
+
+**AWS IoT Analytics will no longer accept new customers starting July 25, 2024. While existing customers can continue using this service .**
+
+https://aws.amazon.com/blogs/iot/unlocking-scalable-iot-analytics-on-aws/
+
+
+
 ## AwsIotAnalyticsTargetConfiguration
 
 [SFC Configuration](../core/sfc-configuration.md) > [Targets](../core/sfc-configuration.md#targets) >  [Target](../core/target-configuration.md) 
 
+AwsIotAnalyticsTargetConfiguration is a configuration class for the AWS IoT Analytics target adapter that defines settings for connecting to and sending data to AWS IoT Analytics channels. AwsIotAnalyticsTargetConfiguration extends the types [TargetConfiguration](../core/target-configuration.md) with specific configuration data for sending data to an IoT Analytics channel. 
 
+The [Targets](../core/sfc-configuration.md#targets) configuration element contain entries of this type, the TargetType of these entries must be set to **"AWS-IOT-ANALYTICS"**
+
+Requires IAM permission `iotanalytics:BatchPutMessage` to write to the configured channel
 
 - [Schema](#awsiotanalyticstargetconfiguration-schema)
 - [Examples](#awsiotanalyticstargetconfiguration-examples)
-
-AwsIotAnalyticsTargetConfiguration extends the types [TargetConfiguration](../core/target-configuration.md) with specific configuration data for sending data to an IoT Analytics channel. The Targets configuration element can contain entries of this type, the TargetType of these entries must be set to **"AWS-IOT-ANALYTICS"**
-
-Requires IAM permission `iotanalytics:BatchPutMessage` to write to the configured channel
 
 **Properties:**
 
@@ -22,7 +30,7 @@ Requires IAM permission `iotanalytics:BatchPutMessage` to write to the configure
 
 ---
 ### BatchSize
-Number of output messages to combine in a single BatchPutMessage API call.
+The BatchSize property specifies how many output messages should be combined into a single BatchPutMessage API call to AWS IoT Analytics. It can be set from 1 to 10 messages, with a default value of 10. Batching messages can improve throughput and reduce API calls.
 
 **Type**: Integer
 
@@ -30,14 +38,14 @@ Default is 10
 
 ---
 ### ChannelName
-Name of the IoT Analytics channel
+The ChannelName property specifies the name of the AWS IoT Analytics channel where the data will be sent. This must be the name of an existing channel in your AWS IoT Analytics configuration. The channel serves as the entry point for your IoT data, collecting and archiving the raw, unprocessed messages before they are published to a pipeline for further processing.
 
 **Type**: String
 
 ---
 ### CredentialProviderClient
 
-Name of the AWS credential provider client defined in the SFC top level configuration section [AwsIotCredentialProviderClients](../core/sfc-configuration.md#awsiotcredentialproviderclients) obtaining credentials using X.509 certificates from the [AWS IoT credentials provider](../sfc-aws-service-credentials.md).
+The CredentialProviderClient property specifies which AWS credential provider client to use for authentication. It references a client defined in the SFC's top-level configuration under [AwsIotCredentialProviderClients](../core/sfc-configuration.md#awsiotcredentialproviderclients) section. This client uses X.509 certificates to obtain temporary AWS credentials through the  [AWS IoT credentials provider](../sfc-aws-service-credentials.md).
 
 If no CredentialProviderClient is configured the [AWS Java SDK credential provider chain is used](https://docs.aws.amazon.com/sdk-for-java/latest/developer-guide/credentials.html#credentials-chain)
 
@@ -49,7 +57,7 @@ If no CredentialProviderClient is configured the [AWS Java SDK credential provid
 
 ### Region
 
-AWS Region for channel
+The Region property specifies the AWS region where the IoT Analytics channel is located (e.g., us-east-1, eu-west-1). This must match the region where your IoT Analytics channel was created, as IoT Analytics resources are region-specific. If not specified, the adapter will use the default region from your AWS configuration.
 
 **Type**: String
 

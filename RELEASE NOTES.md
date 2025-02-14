@@ -1,6 +1,13 @@
 # Release Notes:
 
-## Version 1.8.0, 7 February 2025
+## Version 1.8.1, 14 February 2025
+
+- Updated logic for validating S3 target adapter [bucket name](./docs/targets/aws-s3.md#bucketname)
+- Updated logic for validating Lambda target adapter [function name](./docs/targets/aws-lambda.md#functionname)
+- Documentation update
+- 
+
+## Version 1.8.0, 11 February 2025
 
 - New [J1939](./docs/adapters/j1939.md)  protocol adapter
 

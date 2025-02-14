@@ -1,5 +1,7 @@
 # AWS Timestream Target
 
+The SFC target adapter for Amazon [Timestream](https://aws.amazon.com/timestream/) enables storing industrial device data in AWS's purpose-built time series database service. It supports efficient ingestion of time series data with configurable timestamp handling, dimension mapping, and measure value formatting. The adapter automatically handles data batching and can stream device measurements directly into Timestream tables for real-time analytics and historical data analysis.
+
 
 - [AwsTimestreamTargetConfiguration](#awstimestreamtargetconfiguration)
 - [AwsTimestreamRecordConfiguration](#awstimestreamrecordconfiguration)
@@ -11,16 +13,15 @@
 
 [SFC Configuration](../core/sfc-configuration.md) > [Targets](../core/sfc-configuration.md#targets) >  [Target](../core/target-configuration.md) 
 
+AwsTimestreamTargetConfiguration extends the type TargetConfiguration with specific configuration data for sending data to a Timestream table. The Targets configuration element can contain entries of this type; the TargetType of these entries must be set to **"AWS-TIMESTREAM"**.
 
-
-AwsSTimestreamTargetConfiguration extends the type [TargetConfiguration](../core/target-configuration.md) with specific configuration data for sending data to a Timestream table. The Targets configuration element can contain entries of this type, the TargetType of these entries must be set to **"AWS-TIMESTREAM"**
-
-Requires IAM timestream:WriteRecords permission for the configures table as well timestream:DescribeEndpoints
+Requires IAM `timestream:WriteRecords` permission for the configures table as well `timestream:DescribeEndpoints`.
 
 - [Schema](#awstimestreamtargetconfiguration-schema)
 - [Examples](#awstimestreamtargetconfiguration-examples)
 
 **Properties:**
+
 - [BatchSize](#batchsize)
 - [CredentialProviderClient](#credentialproviderclient)
 - [Database](#database)
@@ -30,7 +31,7 @@ Requires IAM timestream:WriteRecords permission for the configures table as well
 
 ---
 ### BatchSize
-Batch size for writing records to table
+The number of records to accumulate before writing them as a batch to the Timestream table. Batching records optimizes write operations and reduces API calls to the service.
 
 **Type**: Integer
 
@@ -39,8 +40,7 @@ Default is 10
 ---
 ### CredentialProviderClient
 
-Name of the AWS credential provider client defined in the SFC top level configuration section [AwsIotCredentialProviderClients]
-(../core/sfc-top-level-config.md#AwsIotCredentialProviderClients) obtaining credentials using X.509 certificates from the [AWS IoT credentials provider](../sfc-aws-service-credentials.md).
+The CredentialProviderClient property specifies which AWS credential provider client to use for authentication. It references a client defined in the SFC's top-level configuration under [AwsIotCredentialProviderClients](../core/sfc-configuration.md#awsiotcredentialproviderclients) section. This client uses X.509 certificates to obtain temporary AWS credentials through the  [AWS IoT credentials provider](../sfc-aws-service-credentials.md).
 
 If no CredentialProviderClient is configured the [AWS Java SDK credential provider chain is used](https://docs.aws.amazon.com/sdk-for-java/latest/developer-guide/credentials.html#credentials-chain)
 
@@ -49,28 +49,28 @@ If no CredentialProviderClient is configured the [AWS Java SDK credential provid
 ---
 
 ### Database
-Timestream database
+The name of the Amazon Timestream database where the time series data will be stored. This database must exist before writing records. 
 
 **Type**: String
 
 ---
 ### Interval
-Interval in milliseconds after which data is written even if the buffer is not full
+The time interval in milliseconds that triggers writing buffered records to Timestream, even if the [batch size](#batchsize) hasn't been reached. If not specified, records are only written when the [batch size](#batchsize) is reached. The interval cannot be less than 10 milliseconds.
 
 **Type**: Integer
 
-Optional, if not set only BatchSize is used, minimum value is 10
+Optional, if not set only [BatchSize](#batchsize)#batchsize is used.
 
 
 ---
 ### Records
-Records to write to table
+A list of record configurations that define how source data is mapped to Timestream records. Each record configuration specifies the dimensions, measure names, and measure values to be written to the Timestream table.
 
 **Type**: List of [AwsTimestreamRecordConfiguration](#awstimestreamrecordconfiguration)
 
 ---
 ### TableName
-Timestream table
+The name of the table within the specified Timestream database where the time series records will be written. This table must exist in the database before writing records.
 
 **Type**: String
 
@@ -314,7 +314,7 @@ Any of "DOUBLE", "BIGINT", "VARCHAR","BOOLEAN"
 
 ## AwsTimestreamDimensionConfiguration
 
-[AwsTimstreamTarget](#awstimestreamtargetconfiguration) > [Records](#records) > [Record](#awstimestreamrecordconfiguration) > [Dimensions](#dimensions)
+[AwsTimestreamTarget](#awstimestreamtargetconfiguration) > [Records](#records) > [Record](#awstimestreamrecordconfiguration) > [Dimensions](#dimensions)
 
 
 

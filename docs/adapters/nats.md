@@ -253,7 +253,7 @@ Controls whether to include messages from subjects that don't match any mapping 
 }
 ```
 
-In this example, a message from "sensors.room1.temperature" would be mapped to "temp", while a message from "sensors.room1.humidity" would keep its original subject name since it's unmapped and IncludeUnmappedSubjects is true. If IncludeUnmappedSubjects would be set to false the message would be dropped.
+In this example, a message from "sensors.room1.temperature" would be mapped to "temp", while a message from "sensors.room1.humidity" would keep its original subject name since it's unmapped and IncludeUnmappedSubjects is true. If IncludeUnmappedSubjects is set to false the message would be dropped.
 
 
 
@@ -353,7 +353,7 @@ Multiple mappings with unmapped topics included:
   "Mappings": {
     "device\\.(\\w+)\\.temperature": "sensors/temp/{1}",
     "device\\.(\\w+)\\.humidity": "sensors/humid/{1}",
-    "factory\\.line-(\w+)": "production/line-{1}"
+    "factory\\.line-(\\w+)": "production/line-{1}"
   }
 }
 ```
@@ -421,7 +421,7 @@ This setting is particularly useful for preventing memory issues in systems that
 
 **Type**: Integer
 
-The default value is 10000,.
+The default value is 10000.
 If set to 0 there is no maximum number of values.
 
 ---

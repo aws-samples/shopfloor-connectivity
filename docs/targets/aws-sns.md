@@ -2,9 +2,11 @@
 
 [SFC Configuration](../core/sfc-configuration.md) > [Targets](../core/sfc-configuration.md#targets) >  [Target](../core/target-configuration.md) 
 
-
+The SFC target adapter for [Amazon Simple Notification Service](https://aws.amazon.com/sns/) (SNS) enables publishing collected data as messages to SNS topics.
 
 ## AwsSnsTargetConfiguration
+
+A configuration class that defines how industrial data should be published to Amazon SNS topics. It specifies the target SNS topic ARN, message format, and data transformation settings. 
 
 AwsSnsTargetConfiguration extends the type  [TargetConfiguration](../core/target-configuration.md) with specific configuration data for sending data to an SNS topic queue. The Targets configuration element can contain entries of this type, the TargetType of these entries must be set to **"AWS-SNS"**
 
@@ -28,7 +30,7 @@ Requires IAM permission sqs:putMessage for the receiving topic.
 
 ---
 ### BatchSize
-Number of output messages to combine in a publishBatch call. The data will be written to the queue before the batch size is reached if the maximum payload size will be exceeded.
+Number of output messages to combine in a single PublishBatch API call. The data will be written to the SNS topic before reaching the specified batch size if the maximum payload size (256 KB) would be exceeded.
 
 **Type**: Integer
 
@@ -36,21 +38,22 @@ Default is 10, maximum is 10
 
 ---
 ### Compression
-Compression used to compress message.
-The data in the messages is wrapped in structure with the following fields:
-- "compression" : Used compression
-- "payload": Compressed data as a base64 encoded string.
-When using compression for the message verify if actual compression out weights the overhead of the base64 encoded of the compressed data.
+Specifies the compression algorithm used for message payloads.  Consider the overhead of base64 encoding when choosing compression, as it may offset compression benefits for smaller payloads.
 
-**Type**: "None" | "GZip" | "Zip"
+**Type**: String
 
-Default is "None"
+Possible valuesL
+
+- "None" (Default)
+- "GZip"
+- "Zip"
 
 ---
 ### CredentialProviderClient
 
-Name of the AWS credential provider client defined in the SFC top level configuration section [AwsIotCredentialProviderClients]
-(../core/sfc-top-level-config.md#AwsIotCredentialProviderClients) obtaining credentials using X.509 certificates from the [AWS IoT credentials provider](../sfc-aws-service-credentials.md).
+
+
+The CredentialProviderClient property specifies which AWS credential provider client to use for authentication. It references a client defined in the SFC's top-level configuration under [AwsIotCredentialProviderClients](../core/sfc-configuration.md#awsiotcredentialproviderclients) section. This client uses X.509 certificates to obtain temporary AWS credentials through the  [AWS IoT credentials provider](../sfc-aws-service-credentials.md).
 
 If no CredentialProviderClient is configured the [AWS Java SDK credential provider chain is used](https://docs.aws.amazon.com/sdk-for-java/latest/developer-guide/credentials.html#credentials-chain)
 
@@ -59,16 +62,15 @@ If no CredentialProviderClient is configured the [AWS Java SDK credential provid
 ---
 
 ### Interval
-Interval in milliseconds after which data is sent to stream even if the buffer is not full
+Time interval in milliseconds that triggers sending buffered data to SNS, even if the [batch size](#batchsize) hasn't been reached. When specified, messages will be sent after either this interval elapses or the batch size is reached, whichever occurs first.
 
 **Type**: Integer
 
-Optional, if not set only BatchSize is used
+Optional, if not set only [BatchSize](#batchsize) is used
 
 ---
 ### MessageGroupId
-This parameter applies only to FIFO (first-in-first-out) topics.
-The tag that specifies that a message belongs to a specific message group
+A tag that identifies a specific message group for FIFO (first-in-first-out) topics only. Messages within the same message group are processed in strict order, while messages in different groups may be processed in parallel. 
 
 **Type**: String
 
@@ -76,29 +78,25 @@ Optional
 
 ---
 ### Region
-AWS Region for SNS service
+The AWS Region code where the SNS topic is located (for example, us-east-1, eu-west-1). This must match the region where your SNS topic is created. 
 
 **Type**: String
 
 ---
 ### SerialAsMessageDeduplicationId
-Used the unique serial number of the SFC MessageDeduplicationId, if set to false ContentBasedDeduplication is used
+Controls how message deduplication is handled for FIFO topics. When true, uses the unique serial number from SFC as the MessageDeduplicationId. When false, enables ContentBasedDeduplication where SNS generates the deduplication ID based on message content.
 
 **Type**: Boolean
 
-true
-
 ---
 ### Subject
-Topic message subject
+Optional subject for the SNS messages. 
 
 **Type**: String
 
-Optional
-
 ---
 ### TopicArn
-Arn of the receiving topic
+The Amazon Resource Name (ARN) that uniquely identifies the SNS topic where messages will be published. Must be a valid SNS topic ARN in the format "arn:aws:sns:region:account-id:topic-name".
 
 **Type**: String
 

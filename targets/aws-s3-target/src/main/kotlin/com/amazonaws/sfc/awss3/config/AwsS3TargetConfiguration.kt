@@ -5,6 +5,7 @@
 
 package com.amazonaws.sfc.awss3.config
 
+import com.amazonaws.sfc.awss3.config.AwsS3TargetConfiguration.Companion.CONFIG_BUCKET_NAME
 import com.amazonaws.sfc.awss3.config.AwsS3WriterConfiguration.Companion.AWS_S3
 import com.amazonaws.sfc.config.AwsServiceConfig
 import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_INTERVAL
@@ -101,21 +102,11 @@ class AwsS3TargetConfiguration : AwsServiceConfig, TargetConfiguration() {
 
     // validates bucket name
     private fun validateBucket() {
-        ConfigurationException.check(
-            (_bucketName != null && _bucketName!!.length in 3..63),
-            "Name of S3 bucket must be specified and must be between 3 and 63 characters long",
-            CONFIG_BUCKET_NAME,
-            this
-        )
 
-        ConfigurationException.check(
-            (_bucketName!!.all { it in "abcdefghijklmnopqrstuvwxyxz.0123456789-" } &&
-             (_bucketName!![0] !in "-.0123456789") &&
-             (_bucketName!![_bucketName!!.length - 1] !in "-.")),
-            "Name of S3 bucket is invalid",
-            CONFIG_BUCKET_NAME,
-            this
-        )
+       val (bucketIsValid, reason) = validateS3BucketName(_bucketName)
+        if (! bucketIsValid){
+            throw ConfigurationException(reason, CONFIG_BUCKET_NAME, this)
+        }
     }
 
     // validates buffering interval
@@ -194,7 +185,64 @@ class AwsS3TargetConfiguration : AwsServiceConfig, TargetConfiguration() {
             }
             return instance
         }
-
-
     }
+
+    fun validateS3BucketName(bucketName: String?): Pair<Boolean, String> {
+        // Check if bucket name is null or empty
+        if (bucketName.isNullOrEmpty()) {
+            return Pair(false, "$CONFIG_BUCKET_NAME cannot be empty")
+        }
+
+        // Check length (3-63 characters)
+        if (bucketName.length < 3 || bucketName.length > 63) {
+            return Pair(false, "$CONFIG_BUCKET_NAME must be between 3 and 63 characters long")
+        }
+
+        // Check for valid characters
+        val validCharacters = bucketName.all { it.isLowerCase() || it.isDigit() || it == '.' || it == '-' }
+        if (!validCharacters) {
+            return Pair(false, "$CONFIG_BUCKET_NAME can only contain lowercase letters, numbers, periods (.), and hyphens (-)")
+        }
+
+        // Check if starts with letter or number
+        if (!bucketName[0].isLetterOrDigit()) {
+            return Pair(false, "$CONFIG_BUCKET_NAME must begin with a letter or number")
+        }
+
+        // Check if ends with letter or number
+        if (!bucketName.last().isLetterOrDigit()) {
+            return Pair(false, "$CONFIG_BUCKET_NAME must end with a letter or number")
+        }
+
+        // Check for consecutive periods
+        if (bucketName.contains("..")) {
+            return Pair(false, "$CONFIG_BUCKET_NAME must not contain two adjacent periods")
+        }
+
+        // Check if formatted as IP address
+        val ipAddressPattern = "^\\d+\\.\\d+\\.\\d+\\.\\d+$".toRegex()
+        if (bucketName.matches(ipAddressPattern)) {
+            return Pair(false, "$CONFIG_BUCKET_NAME must not be formatted as an IP address")
+        }
+
+        // Check forbidden prefixes
+        val forbiddenPrefixes = listOf("xn--", "sthree-", "amzn-s3-demo-")
+        forbiddenPrefixes.forEach { prefix ->
+            if (bucketName.startsWith(prefix)) {
+                return Pair(false, "$CONFIG_BUCKET_NAME must not start with the prefix '$prefix'")
+            }
+        }
+
+        // Check forbidden suffixes
+        val forbiddenSuffixes = listOf("-s3alias", "--ol-s3", ".mrap", "--x-s3")
+        forbiddenSuffixes.forEach { suffix ->
+            if (bucketName.endsWith(suffix)) {
+                return Pair(false, "$CONFIG_BUCKET_NAME must not end with the suffix '$suffix'")
+            }
+        }
+
+        return Pair(true, "")
+    }
+
+
 }

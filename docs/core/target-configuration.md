@@ -2,7 +2,7 @@
 
 [SFC Configuration](./sfc-configuration.md) > [Targets](./sfc-configuration.md#targets) 
 
-Target Configuration defines common properties for [SFC target adapters](./sfc-configuration.md#targets). Target adapter implementations extend this type with their specific additional properties.
+Defines core configuration settings for [SFC target adapters](./sfc-configuration.md#targets) that specify how data should be published or written to destinations. Target adapters extend this base configuration with protocol-specific properties to handle different output requirements and destinations.
 
 - [Schema](#schema)
 - [Examples](#examples)
@@ -23,36 +23,31 @@ Target Configuration defines common properties for [SFC target adapters](./sfc-c
 
 ---
 ### Active
-Output to a target can be suspended by setting the Active element to false.
+Controls whether the target is actively processing and outputting data. When set to false, the target suspends its output operations. This allows for temporary disabling of specific targets without removing their configuration. Defaults to true if not specified
 
 **Type**: Boolean
-
-Default is true
 
 ---
 ### AsArrayWhenBuffered
-Set to value false to strip '[' prefix and ']' postfix and  ',' separator from buffered data for targets that output data as JSON or a transformed list of values.
+Controls JSON array formatting for buffered data output. When true (default), data is wrapped in array brackets with comma separators. Setting to false removes array notation, reducing output size by eliminating brackets and separators. Warning: keep true if output contains numeric-only key names to maintain valid JSON structure.
 
 **Type**: Boolean
 
 Default is true
 
-This setting can reduce the size of the output by stripping redundant double quotes.
-
-Do not set this flag to true if there are any key names in the output that consist of numbers only.
-
 ---
 ### CredentialProviderClient
-The client is used by the target to obtain session credentials from the AWS IoT Credential provider service.
 
-**Type**: String
+The CredentialProviderClient property specifies which AWS credential provider client to use for authentication. It references a client defined in the SFC's top-level configuration under [AwsIotCredentialProviderClients](../core/sfc-configuration.md#awsiotcredentialproviderclients) section. This client uses X.509 certificates to obtain temporary AWS credentials through the  [AWS IoT credentials provider](../sfc-aws-service-credentials.md).
 
-Must refer to an existing client configuration in [AwsIotCredentialProviderClients](./sfc-configuration.md#awsiotcredentialproviderclients) section.
+If no CredentialProviderClient is configured the [AWS Java SDK credential provider chain is used](https://docs.aws.amazon.com/sdk-for-java/latest/developer-guide/credentials.html#credentials-chain)
+
+**Type:** String
 
 ---
 ### Description
 
-Description of the target
+Provides a free-form text field where users can add descriptive information about the target to document its purpose or characteristics.
 
 Type: String
 
@@ -60,7 +55,7 @@ Type: String
 
 ### Metrics
 
-Metrics configuration for the protocol adapter
+Defines the configuration settings for collecting and reporting metrics from the protocol adapter. This allows monitoring and measurement of the target adapter's performance and behavior using the specified metrics configuration parameters.
 
 Type: [MetricsSourceConfiguration](./metrics-source-configuration.md)
 
@@ -68,29 +63,26 @@ Type: [MetricsSourceConfiguration](./metrics-source-configuration.md)
 
 ### TargetServer
 
-Target server identifier of the server that is running the target as an IPC service in its process. The identifier must exist in the TargetServers section of the configuration.
-
-If a server is used then no in-process instance of the target is created in the SFC core process and the target type does not have to be configured in the TargetTypes section.
-
-The IPC server must implement the (gRPC) ProtocolAdapterService.
+Specifies the identifier of a remote server running the target as an IPC service. When configured, the target operates as an external service rather than within the SFC core process, communicating via gRPC. The server must be defined in the [TargetServers](./sfc-configuration.md#targetservers) configuration section and implement the ProtocolAdapterService interface. This enables distributed deployment of targets across different processes or machines.
 
 **Type**: String
 
-Set to a configured target server in the [TargetServers](./sfc-configuration.md#targetservers) section of the top level configuration to use IPC to send data to a target running as an external IPC service.
-
 ---
 ### TargetChannelSize
-Size of channel used by target to process and write items. For more information see [SFC Tuning](../sfc-tuning.md).
+
+Defines the capacity of the internal channel buffer used by the target for processing and writing data items. This setting affects how many items can be queued for processing before backpressure is applied. The default value is 1000 items. Adjusting this value can help optimize performance and memory usage based on your specific use case and system resources
+
+For more information see [SFC Tuning](../sfc-tuning.md).
 
 **Type**: Int
 
 Default is 1000,
 
-
-
 ---
 ### TargetChannelTimeout
-Timeout in milliseconds for writing to internal target channel if it has reached it capacity. For more information see [SFC Tuning](../sfc-tuning.md)
+Specifies the maximum time (in milliseconds) that the system will wait when attempting to write to the target's internal channel if it is at capacity. After this timeout period expires, the write operation will fail. The default timeout is 1000 milliseconds (1 second). This setting helps prevent indefinite blocking when the target channel becomes full.
+
+ For more information see [SFC Tuning](../sfc-tuning.md)
 
 **Type**: Int
 
@@ -98,42 +90,45 @@ Default is 1000
 
 ---
 ### TargetType
-TargetType is a code that identifies the type of the target (e.g., "AWS-SQS", "AWS-KINESIS").
-If a target runs in the same process as the SFC core then this type must be defined in the [TargetTypes](./sfc-configuration.md#targettypes) section of the configuration. The SFC core requires the information from that section to create instances of the target type.
-
-Target implementations will typically define the target name, and use it to select and verify the configuration data that is passed to their instances.
+Identifies the specific type of target adapter to be used through a unique code (like "AWS-SQS" or "AWS-KINESIS"). For targets running in the SFC core process, this type must be registered in the [TargetTypes](./sfc-configuration.md#targettypes) configuration section. The type code helps the system instantiate the correct target implementation and validate its configuration parameters.
 
 **Type**: String
 
 ---
 ### Template
+Specifies the file path to an [Apache velocity](https://velocity.apache.org/)  template used for  [transforming the output data](../sfc-target-templates.md) target output data. This optional setting enables custom formatting of data before it is sent to the target. Available context variables include:
+
+- $schedule
+- $sources
+- $metadata
+- $serial
+- $timestamp
+- names specified in ElementNames configuration
+- $tab (for inserting tab characters)
+
 Pathname to file containing an [Apache velocity](https://velocity.apache.org/) template that can be applied to [transform the output data](../sfc-target-templates.md) of the target
 
 **Type**: String
 
-Optional
-
-Context variables for template:
-
-- $schedule
-- $sources, 
-- $metadata, 
-- $serial, 
-- $timestamp
-- names specified in ElementNames configuration
-- $tab can be used as a context variable to insert a '\t' character in the transformation output, as putting this character directly in a Velocity template is not supported.
-
 ---
 ### UnquoteNumericJsonValues
-Set to true to strip double quotes from numeric values in JSON output.
+Controls whether numeric values in JSON output should have their surrounding double quotes removed. When set to true, numeric values will be output without quotes, potentially reducing the output size. Default is false. This setting can reduce the size of the output by stripping redundant double quotes. Important: Do not set this flag to true if any key names in the output consist of numbers only, as this could result in invalid JSON.
 
 **Type**: Boolean 
 
 Default is false
 
-This setting can reduce the size of the output by stripping redundant double quotes.
+Example effect when true:
 
-Do not set this flag to true if there are any key names in the output that consist of numbers only.
+Before (UnquoteNumericJsonValues: false)
+```json
+{"temperature": "75.2", "humidity": "45"}
+```
+
+/After (UnquoteNumericJsonValues: true)
+```json
+{"temperature": 75.2, "humidity": 45}
+```
 
 
 

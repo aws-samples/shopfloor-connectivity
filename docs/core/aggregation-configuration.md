@@ -2,7 +2,7 @@
 
 [SFC Configuration](./sfc-configuration.md) > [Sources](./sfc-configuration.md#sources) > [Schedule](./schedule-configuration.md) > [Aggregation](./schedule-configuration.md#aggregation)
 
-An optional aggregation can be used for a schedule to collect the results of multiple read values and combine these in a single output message, optimally applying functions to aggregate the output data.
+Aggregation  defines how multiple read values from a schedule are combined into a single output message. It enables statistical processing of collected data points by applying aggregation functions (such as average, sum, minimum, maximum, or count) to the values before they are published. This helps reduce data volume and provide meaningful summaries of the collected measurements over the specified aggregation period.
 
 - [Schema](#schema)
 - [Examples](#examples)
@@ -16,11 +16,9 @@ An optional aggregation can be used for a schedule to collect the results of mul
 ---
 ###  Size
 
-The number of values to aggregate before applying the aggregation and sending output to the targets.
+The Count property specifies the number of values that must be collected before applying the aggregation functions and publishing the results to the targets. This determines how many data points will be combined into a single aggregated output message. The value must be 1 or higher, with a default value of 1 if not specified.
 
 **Type**: Integer
-
-Default value  is 1,value must be 1 or higher
 
 ---
 ###  Output
@@ -69,13 +67,12 @@ Possible output elements are:
 
 - "*":	All output values
 
-  
 
-For numeric values the following aggregations can be applied:  "avg" "count" "max" "median" "min" "mode" "stddev" "sum" "values"    
+For numeric values, the following aggregations can be applied:  "avg", "count", "max", "median", "min", "mode", "stddev", "sum", "values".    
 
-For timestamps values the following aggregations can be applied:  "first" "last"  
+For timestamps values, the following aggregations can be applied:  "first", "last".  
 
-For other data types the following aggregations can be applied:  "count" "mode" "values"    
+For other data types, the following aggregations can be applied:  "count", "mode", "values".    
 
 Besides aggregation of the collected data, reducing the volume of data sent to the targets, aggregation can also be used to reduce the number of calls to the targets by setting the size and just using the "values" aggregation.
 

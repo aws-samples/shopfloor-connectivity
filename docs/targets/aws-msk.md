@@ -2,13 +2,11 @@
 
 [SFC Configuration](../core/sfc-configuration.md) > [Targets](../core/sfc-configuration.md#targets) >  [Target](../core/target-configuration.md) 
 
-
+The AWS [MSK](https://aws.amazon.com/msk/) (Amazon Managed Streaming for Apache Kafka) target adapter for Shop Floor Connectivity enables data streaming from industrial devices directly to Amazon MSK clusters. This adapter transforms collected device data into the required format and publishes it to specified Kafka topics in your MSK cluster. The adapter supports configurable batching, compression,data transformations using Apache Velocity templates and handles the authentication and connection management to your MSK clusters.
 
 ## AwsMskTargetConfiguration
 
 AwsMskTargetConfiguration extends the type  [TargetConfiguration](../core/target-configuration.md) with specific configuration data for connecting to and sending to an AWS MSK topic. The Targets configuration element can contain entries of this type, the TargetType of these entries must be set to **"AWS-MSK"**
-
-
 
 Required IAM permissions are `kafka-cluster:WriteDataIdempotently`, `kafka-cluster:CreateTopic`, `kafka-cluster:DescribeTopic` `,kafka-cluster:Connect`, `kafka-cluster:WriteData,`
 
@@ -31,19 +29,21 @@ Required IAM permissions are `kafka-cluster:WriteDataIdempotently`, `kafka-clust
 
 ---
 ### Acknowledgements
-Acknowledgements (acks)
+Acknowledgements (acks) controls the durability and reliability of message delivery to the Kafka cluster.
 
-**Type**: String
+**Type** : String
 
-- "None" = 0
-- "leader" = 1 (default)
-- "all" = -1
+- "None" = 0: No acknowledgement required - fastest but may lose data
+- "leader" = 1 (default): Leader acknowledgement only - balanced between durability and performance
+- "all" = -1: All replicas must acknowledge - highest durability but slower performance
 
 
 
 ---
 ### BatchSize
 Batch size (batch.size)
+
+Number of records to accumulate before sending to MSK cluster. Larger batch sizes can improve throughput and reduce network overhead, but increase latency and memory usage.
 
 **Type**: Integer
 
@@ -66,23 +66,24 @@ See also
 ### Compression
 Compression type (compression.type)
 
-**Type**: String
+Specifies the compression algorithm used for data sent to the MSK cluster. Compression reduces network bandwidth usage and storage at the cost of some CPU overhead.
 
 Possible values:
 
-- none (default)
-- snappy
-- lz4
-- gzip
-- zstd
+- "none" (default): No compression
+- "snappy" : Fast compression/decompression with good compression ratio
+- "lz4" : Very fast compression/decompression
+- "gzip" : High compression ratio but more CPU intensive
+- "zstd" : High compression ratio with good performance
+
+**Type**: String
 
 
 
 ---
 ### CredentialProviderClient
 
-Name of the AWS credential provider client defined in the SFC top level configuration section [AwsIotCredentialProviderClients]
-(../core/sfc-top-level-config.md#AwsIotCredentialProviderClients) obtaining credentials using X.509 certificates from the [AWS IoT credentials provider](../sfc-aws-service-credentials.md).
+The CredentialProviderClient property specifies which AWS credential provider client to use for authentication. It references a client defined in the SFC's top-level configuration under [AwsIotCredentialProviderClients](../core/sfc-configuration.md#awsiotcredentialproviderclients) section. This client uses X.509 certificates to obtain temporary AWS credentials through the  [AWS IoT credentials provider](../sfc-aws-service-credentials.md).
 
 If no CredentialProviderClient is configured the [AWS Java SDK credential provider chain is used](https://docs.aws.amazon.com/sdk-for-java/latest/developer-guide/credentials.html#credentials-chain)
 
@@ -91,7 +92,9 @@ If no CredentialProviderClient is configured the [AWS Java SDK credential provid
 ---
 
 ### Headers
-Map of headers set for written records
+Map of headers set for written records.
+
+Allows setting custom key-value pairs as Kafka message headers. These headers are metadata that will be attached to each record written to the MSK cluster. Headers can be used for message filtering, routing, or carrying additional metadata alongside the message payload.
 
 **Type**: Map[String,String]
 
@@ -101,19 +104,23 @@ Default = empty map
 ### Interval
 Interval in milliseconds in which adapter will flush the producer even when the batch size is not reached.
 
+Controls how long the producer will wait to accumulate messages before sending them to MSK, even if the [batch size](#batchsize) has not been reached. This ensures messages are sent within a reasonable timeframe during periods of low message volume. A lower interval reduces latency but may decrease throughput.
+
 **Type**: Integer
 
 ---
 ### Key
-Key used for the written records
+Optional key used for the written records.
+
+Specifies the key that will be attached to all messages written to MSK. The key is used by Kafka for message partitioning and maintaining message order within partitions. When not specified, messages will be distributed across partitions in a round-robin manner.
 
 **Type**: String
-
-Optional
 
 ---
 ### Partition
 Optional partition key
+
+Specifies the target partition number in the Kafka topic where messages will be written. When specified, all messages will be sent to this specific partition. If not specified, Kafka will distribute messages across available partitions based on the message key (if provided) or using its default partitioning strategy.
 
 **Type**: Integer
 
@@ -121,12 +128,13 @@ Optional partition key
 ### ProviderProperties
 Map of provider properties used to create the Kafka producer
 
+Additional configuration properties for the Kafka producer client. These properties will be passed directly to the underlying Kafka producer instance.
+
 **Type**: Map[String,String]
 
 Default is an empty map
 
-A description af producer options can be found in the 
-Kafka documentation
+A description af producer options can be found in the Kafka documentation
 
 The following properties are set by the adapter
 
@@ -142,23 +150,28 @@ The following properties are set by the adapter
 - sasl.mechanism = "AWS_MSK_IAM"
 - batch.size from `BatchSize`
 
+Any additional valid Kafka producer properties can be specified in this map to customize the producer behavior.
+
 
 
 ---
 ### Serialization
 Serialization (value.serializer)
 
+Specifies the format used to serialize message values before sending them to MSK.
+
+Supported values:
+
+- "json" (default): Messages are serialized as JSON format
+- "protobuf": Messages are serialized using Protocol Buffers format. When using this option, the message structure must conform to the protobuf schema defined in the [TargetAdapterService schema](../../core/sfc-ipc/src/main/proto/TargetAdapterService.proto) 
+
+If a Template is specified to transform the data for this target then this setting is not used and the transformation output is written as a string to the topic.
+
 **Type**: String
-
-- "json" (default)
-- "protobuf", see protobuf TargetAdapterService schema
-
-If a Template is specified to transform the data for this target then this setting is not used
-and the transformation output is written as a string to the topic.
 
 ---
 ### TopicName
-Name of the MSK topic
+Specifies the name of the Kafka topic in the MSK cluster where messages will be written. The topic must exist in the MSK cluster before messages can be written to it. Topic names must be between 1 and 255 characters in length and can contain alphanumeric characters, dots (.), underscores (_), and hyphens (-).
 
 **Type**: String
 

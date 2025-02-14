@@ -2,7 +2,7 @@
 
 [SFC Configuration](./sfc-configuration.md) > [ChangeFilters](./sfc-configuration.md#changefilters)
 
-Change filter to apply to a channel value.
+The ChangeFilterConfiguration defines settings for filtering data based on value changes. It allows configuration of how and when data should be filtered by comparing changes in values. The class includes validation logic to ensure proper configuration of filter parameters. It contains properties for the filter value threshold, filter type, and minimum time interval between changes. This configuration is used to determine when data should be passed through or filtered out based on how its value changes over time
 
 For more information see [DataFiltering](../sfc-data-processing-filtering.md#data-filtering)
 
@@ -17,30 +17,30 @@ For more information see [DataFiltering](../sfc-data-processing-filtering.md#dat
 
 ---
 ### AtLeast
-Time interval in milliseconds in which at least a value is passed even the value has not changed or not beyond the specified value
+The AtLeast property specifies a minimum time interval in milliseconds during which at least one value will be passed through the filter, regardless of whether the value has changed or met the filter value threshold. This ensures that data is reported at a minimum frequency even when values remain stable. For example, if set to 60000 (1 minute), it guarantees that at least one value will be passed through every minute, even if no significant changes have occurred
 
 **Type**: Long
 
 ---
 ### Type
-Type of the change filter
+The Type property defines how changes in values are evaluated by the filter. It accepts three possible values:
 
-**Type**: String, value must be any of these:
+- "Absolute": Filters based on the absolute numerical difference between values
+- "Percent": Filters based on the relative percentage change between values
+- "Always": Passes through any change in value, regardless of magnitude
 
-- "Absolute" (absolute change)
-- "Percent" (relative change)
-- "Always" (any change)
+If not specified, it defaults to "Always". This property determines the method used to compare current and previous values when deciding whether to pass or filter the data
 
-
-Default = "Always"
+**Type**: String
 
 ---
 ### Value
-Change amount value
+- The Value property specifies the threshold amount that determines when a change should be filtered. Its interpretation depends on the Type setting:
+  - For "Absolute" type: Represents the minimum absolute numerical difference required between values
+  - For "Percent" type: Represents the minimum percentage change required between values
+  - For "Always" type: This value is ignored as any change will be passed through
 
-- Absolute value if type is "Absolute"
-- Relative value in percent if type is "Percent"
-- Ignored if type is always
+The default value is 0.0. The value must be greater than or equal to 0
 
 **Type**: Double
 

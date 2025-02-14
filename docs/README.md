@@ -359,7 +359,7 @@ approach also enables better resource utilization and fault tolerance.
 ## Store and forward
 
 For targets that require network access to send the collected data to their destinations, it is possible to use
-intermediate [store and forward targets](sfc-targets-chaining.md#store-and-forward-target). Intermediate targets can be
+intermediate [store and forward targets](sfc-targets-chaining.md#store-and-forward). Intermediate targets can be
 configured in between the SFC Core and one or more target adapters by using target daisy-chaining. If the end target loses 
 connectivity the intermediate target will store the data, optionally encrypted, for a [configured](./targets/store-and-forward-target.md) amount of time, data 
 volume or number of messages, and will resubmit the data when the target regains network connectivity, in either FIFO or LIFO mode.

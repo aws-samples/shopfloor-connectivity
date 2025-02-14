@@ -2,13 +2,13 @@
 
 [SFC Configuration](../core/sfc-configuration.md) > [Targets](../core/sfc-configuration.md#targets) >  [Target](../core/target-configuration.md) 
 
-
+The SFC target adapter for Amazon [Simple Queue Service](https://aws.amazon.com/sqs/) (SQS) enables sending collected data to SQS queues.
 
 ## AwsSqsTargetConfiguration
 
-AwsSqsTargetConfiguration extends the type [TargetConfiguration](../core/target-configuration.md) with specific configuration data for sending data to an SQS queue. The Targets configuration element can contain entries of this type, the TargetType of these entries must be set to **"AWS-SQS"**
+AwsSqsTargetConfiguration extends the type [TargetConfiguration](../core/target-configuration.md) with specific configuration data for sending data to an SQS queue. The Targets configuration element can contain entries of this type; the TargetType of these entries must be set to **"AWS-SQS"**.
 
-Requires IAM permission sqs:SendMessageBatch for the receiving queue.
+Requires IAM permission `sqs:SendMessageBatch` for the receiving queue.
 
 - [Schema](#awssqstargetconfiguration-schema)
 - [Examples](#awssqstargetconfiguration-examples)
@@ -24,7 +24,7 @@ Requires IAM permission sqs:SendMessageBatch for the receiving queue.
 
 ---
 ### BatchSize
-Number of output messages to combine in a sendMessageBatch. The data will be written to the queue before the batch size is reached if the maximum payload size will be exceeded.
+Number of output messages to combine in a single SendMessageBatch API call. The data will be written to the SQS queue before reaching the specified batch size if the maximum payload size (256 KB) would be exceeded. 
 
 **Type**: Integer
 
@@ -32,21 +32,20 @@ Default is 10, maximum is 10
 
 ---
 ### Compression
-Compression used to compress message payload.
-The data in the messages is wrapped in structure with the following fields:
-- "compression" : Used compression
-- "payload": Compressed data as a base64 encoded string.
-When using compression for the message verify if actual compression out weights the overhead of the base64 encoded of the compressed data.
+Specifies the compression algorithm used for message payloads.  Consider the overhead of base64 encoding when choosing compression, as it may offset compression benefits for small payloads.
 
-**Type**: "None" | "GZip" | "Zip"
+**Type**:  String
 
-Default is "None"
+Possible valuesL
+
+- "None" (Default)
+- "GZip"
+- "Zip"
 
 ---
 ### CredentialProviderClient
 
-Name of the AWS credential provider client defined in the SFC top level configuration section [AwsIotCredentialProviderClients]
-(../core/sfc-top-level-config.md#AwsIotCredentialProviderClients) obtaining credentials using X.509 certificates from the [AWS IoT credentials provider](../sfc-aws-service-credentials.md).
+The CredentialProviderClient property specifies which AWS credential provider client to use for authentication. It references a client defined in the SFC's top-level configuration under [AwsIotCredentialProviderClients](../core/sfc-configuration.md#awsiotcredentialproviderclients) section. This client uses X.509 certificates to obtain temporary AWS credentials through the  [AWS IoT credentials provider](../sfc-aws-service-credentials.md).
 
 If no CredentialProviderClient is configured the [AWS Java SDK credential provider chain is used](https://docs.aws.amazon.com/sdk-for-java/latest/developer-guide/credentials.html#credentials-chain)
 
@@ -55,22 +54,22 @@ If no CredentialProviderClient is configured the [AWS Java SDK credential provid
 ---
 
 ### Interval
-Interval in milliseconds after which data is sent to queue even if the buffer is not full
+The time interval in milliseconds that triggers sending buffered messages to the SQS queue, even if the [batch size](#batchsize) hasn't been reached. When not specified, messages are only sent when the batch size limit is reached.
 
 **Type**: Integer
 
-Optional, if not set only BatchSize is used
+Optional, if not set only [BatchSize](#batchsize) is used
 
 
 ---
 ### QueueUrl
-Url of the receiving queue
+The URL of the Amazon SQS queue where messages will be sent. This is the unique identifier for the queue, provided by AWS when the queue is created, in the format "https://sqs.{region}.amazonaws.com/{account-id}/{queue-name}".
 
 **Type**: String
 
 ---
 ### Region
-AWS Region for SQS service
+The AWS Region identifier where the SQS queue is located, such as "us-east-1" or "eu-west-2". Specifies which regional endpoint to use when sending messages to the queue.
 
 **Type**: String
 

@@ -3,11 +3,11 @@
 
 [SFC Configuration](../core/sfc-configuration.md) > [Targets](../core/sfc-configuration.md#targets) >  [Target](../core/target-configuration.md) 
 
-
+The Amazon [Kinesis Firehose](https://aws.amazon.com/firehose/) Target adapter for Shop Floor Connectivity facilitates data streaming from industrial devices to Amazon Kinesis Data Firehose. This adapter collects and transmits data to Kinesis Firehose delivery streams. The adapter supports batching and template-based transformations.
 
 ## AwsKinesisFirehoseTargetConfiguration
 
-AwsKinesisFirehoseTargetConfiguration extends the type [TargetConfiguration](../core/target-configuration.md) with specific configuration data for sending to a delivery stream for the AWS Kinesis Firehose service. The Targets configuration element can contain entries of this type, the TargetType of these entries must be set to **"AWS-FIREHOSE"**
+AwsKinesisFirehoseTargetConfiguration extends the type [TargetConfiguration](../core/target-configuration.md) with specific configuration data for sending to a delivery stream for the AWS Kinesis Firehose service. The [Targets](../core/sfc-configuration.md#targets) configuration element can contain entries of this type, the TargetType of these entries must be set to **"AWS-FIREHOSE"**
 
 Requires IAM permission `firehose:PutRecordBatch` for the delivery stream the data is sent to.
 
@@ -22,8 +22,7 @@ Requires IAM permission `firehose:PutRecordBatch` for the delivery stream the da
 
 ---
 ### BatchSize
-Number of output messages to combine in a single putRecordBatch API call.
-The target will send buffered data before the batch size is reached if the entire size of the message will exceed the maximum size for a single request.
+The BatchSize property specifies the maximum number of messages to accumulate before sending them in a single putRecordBatch API call to Kinesis Firehose. The default value is 10 messages per batch. If adding another message would cause the batch to exceed Firehose's maximum request size limit, the adapter will automatically send the current batch before the BatchSize limit is reached. This batching mechanism helps optimize network usage and reduce API calls while ensuring compliance with Firehose's size constraints
 
 **Type**: Integer
 
@@ -32,8 +31,7 @@ Default is 10
 ---
 ### CredentialProviderClient
 
-Name of the AWS credential provider client defined in the SFC top level configuration section [AwsIotCredentialProviderClients]
-(../core/sfc-top-level-config.md#AwsIotCredentialProviderClients) obtaining credentials using X.509 certificates from the [AWS IoT credentials provider](../sfc-aws-service-credentials.md).
+The CredentialProviderClient property specifies which AWS credential provider client to use for authentication. It references a client defined in the SFC's top-level configuration under [AwsIotCredentialProviderClients](../core/sfc-configuration.md#awsiotcredentialproviderclients) section. This client uses X.509 certificates to obtain temporary AWS credentials through the  [AWS IoT credentials provider](../sfc-aws-service-credentials.md).
 
 If no CredentialProviderClient is configured the [AWS Java SDK credential provider chain is used](https://docs.aws.amazon.com/sdk-for-java/latest/developer-guide/credentials.html#credentials-chain)
 
@@ -42,13 +40,13 @@ If no CredentialProviderClient is configured the [AWS Java SDK credential provid
 ---
 
 ### Region
-AWS Region for Kinesis Firehose service
+The Region property specifies the AWS Region identifier where the Kinesis Firehose delivery stream is located (e.g., "us-east-1", "eu-west-1", "ca-west-1"). This setting determines which regional endpoint will be used for sending data to your Firehose delivery stream. The region must be one where Kinesis Firehose service is available and your AWS account has access.
 
 **Type**: String
 
 ---
 ### StreamName
-Name of the delivery stream
+The StreamName property specifies the name of the Kinesis Firehose delivery stream where data will be sent. This is the unique identifier of an existing Firehose delivery stream in your AWS account that will receive and process the data. The stream name must match an active delivery stream that has been previously created in the specified AWS Region.
 
 **Type**: String
 

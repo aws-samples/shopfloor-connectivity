@@ -2,7 +2,7 @@
 
 [SFC Configuration](../core/sfc-configuration.md) > [Targets](../core/sfc-configuration.md#targets) >  [Target](../core/target-configuration.md) 
 
-
+The AWS [Lambda](https://aws.amazon.com/lambda/) target adapter for Shop Floor Connectivity  enables direct integration with AWS Lambda functions from industrial data sources. This adapter receives collected data from the SFC Core component and invokes specified Lambda functions, allowing for serverless processing of industrial device data. The adapter supports batching, compression and data transformations using Apache Velocity templates to format the payload before invoking the Lambda functions.
 
 
 ## AwsLambdaTargetConfiguration
@@ -27,7 +27,7 @@ Requires IAM permission `lambda:InvokeFunction` for the lambda function that is 
 
 ---
 ### BatchSize
-Number of output messages to combine in a single invoke request for the lambda function. If BatchSize is greater than 1, then the output records are combined in a JSON array. The function will be called before the batch size is reached if the maximum payload size will be exceeded.
+This configuration property allows control over message batching when invoking Lambda functions. When BatchSize is set greater than 1, multiple messages are combined into a single array before invoking the Lambda function, which can improve efficiency by reducing the number of function invocations. The batching process will trigger an invocation either when the batch size is reached or when adding another message would exceed Lambda's payload size limits.
 
 **Type**: Integer
 
@@ -35,9 +35,11 @@ Default is 10
 
 ---
 ### Compression
-Compression used to compress invocation payload.
+This configuration property controls payload compression for Lambda function invocations. When compression is enabled, the payload is compressed using the specified algorithm, encoded in base64, and wrapped in a JSON structure containing both the compression type and the encoded payload. It's important to note that while compression can reduce data transfer size for large payloads, the base64 encoding adds approximately 33% overhead to the compressed data size, so compression should be used selectively based on payload characteristics.
+
 As this payload needs to be valid JSON.
 The data is wrapped in structure with the following fields:
+
 - "compression" : Used compression
 - "payload": Compressed data as a base64 encoded string.
 When using compression for the lambda payload verify if actual compression out weights the overhead of the base64 encoded of the compressed data.
@@ -55,8 +57,7 @@ When using compression for the lambda payload verify if actual compression out w
 
 ### CredentialProviderClient
 
-Name of the AWS credential provider client defined in the SFC top level configuration section [AwsIotCredentialProviderClients]
-(../core/sfc-top-level-config.md#AwsIotCredentialProviderClients) obtaining credentials using X.509 certificates from the [AWS IoT credentials provider](../sfc-aws-service-credentials.md).
+The CredentialProviderClient property specifies which AWS credential provider client to use for authentication. It references a client defined in the SFC's top-level configuration under [AwsIotCredentialProviderClients](../core/sfc-configuration.md#awsiotcredentialproviderclients) section. This client uses X.509 certificates to obtain temporary AWS credentials through the  [AWS IoT credentials provider](../sfc-aws-service-credentials.md).
 
 If no CredentialProviderClient is configured the [AWS Java SDK credential provider chain is used](https://docs.aws.amazon.com/sdk-for-java/latest/developer-guide/credentials.html#credentials-chain)
 
@@ -66,29 +67,48 @@ If no CredentialProviderClient is configured the [AWS Java SDK credential provid
 ### FunctionName
 Name of the Lambda function
 
+The function name must comply to the following constraints:
+
+- Minimum length: 1 character
+
+- Maximum length: 64 characters
+
+- Allowed characters:
+
+  - Letters (a-z, A-Z)
+
+  - Numbers (0-9)
+
+  - Hyphens (-)
+
+  - Underscores (_)
+
+- Must start with a letter or number
+- Cannot end with a hyphen
+
 **Type**: String
 
 ---
 ### Interval
 Interval in milliseconds after which data is sent to stream even if the buffer is not full
 
-**Type**: Integer
+**Type** : Integer
 
-Optional, if not set only BatchSize is used, minimum value is 10
+Optional, if not set only [BatchSize](#batchsize) is used, minimum value is 10
 
 ---
 ### Qualifier
-AWS Region for Lambda service
+Version or alias of the Lambda function to invoke
 
-**Type**: String
+**Type** : String
 
-Default is latest
+Default is "latest"
 
 ---
 ### Region
 AWS Region for Lambda service
 
-**Type**: String
+**Type** : String
 
 ### AwsLambdaTargetConfiguration Schema
 
@@ -169,7 +189,7 @@ Configuration using CredentialProviderClient,
 {
   "TargetType" : "AWS-LAMBDA",    
   "FunctionName": "process-data-function",
-  "Region": "us-east-1,
+  "Region": "us-east-1",
   "BatchSize": 50,
   "Interval": 1000
 }

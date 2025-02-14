@@ -1,6 +1,6 @@
 # PCCC Protocol Configuration
 
-Configuration for PCCC protocol adapter.
+Configuration for PCCC protocol adapter, used script to read data from Allen Bradley/Rockwell PLCs using the PCCC (Programmable Controller Communication Commands) protocol.
 
 - [PCCC Addressing](#pccc-addressing)
 
@@ -16,7 +16,11 @@ Configuration for PCCC protocol adapter.
 
 ## PCCC Addressing
 
-The following datatype with their addresses can be used as the value of “Address” in a PcccChannel.
+The following data types, along with their respective addresses, can be used as the value for the "Address" field in a PCCCChannel.
+
+PCCC addressing formats differ based on the data type and memory area. Each data type necessitates a specific addressing format to accurately access the PLC memory.
+
+
 
 Datatype OUTPUT, Prefix O
 
@@ -352,7 +356,9 @@ Syntax: `A<file number>:<element index>[/character offset]`
 
 [SFC Configuration](../core/sfc-configuration.md) > [Sources](../core/sfc-configuration.md#sources) >  [Source](../core/source-configuration.md) 
 
-Source configuration for the PCCC protocol adapter. This type extends the [SourceConfiguration](../core/source-configuration.md) type.
+The PcccSourceConfiguration class defines which values (channels) to read from a PLC and references the controller configuration specified in the [Controllers](#controllers)  section through the AdapterController property. 
+
+ This type extends the [SourceConfiguration](../core/source-configuration.md) type.
 
 - [Schema](#pcccsourceconfiguration-schema)
 - [Examples](#pcccsourceconfiguration-examples)
@@ -366,19 +372,17 @@ Source configuration for the PCCC protocol adapter. This type extends the [Sourc
 
 ### AdapterController
 
-Server Identifier for the controller to read from. This referenced server must be present in the Controllers section of the adapter referred to by the ProtocolAdapter attribute of the source.
+The AdapterController property specifies the server identifier for the PLC controller to read from. This identifier must match a controller defined in the Controllers section of the PCCC adapter configuration referenced by the source's [ProtocolAdapter](../core/source-configuration#protocoladapter) attribute.
 
-**Type**: String
+**Type** : String
 
-Must be an identifier of a server in the Controllers section of the PCCC adapter used by the source.
+The value must correspond to an existing controller identifier in the PCCC [adapter's](#pcccadapterconfiguration)  [Controllers](#controllers) section.
 
 ---
 
 ### Channels
 
-The channels configuration for a PCCC source holds configuration data to read values from fields on the source controller.
-The element is a map indexed by the channel identifier.
-Channels can be "commented" out by adding a "#" at the beginning of the identifier of that channel.
+The Channels property defines a map of data points to be read from the PLC, where each entry is indexed by a unique channel identifier. Each channel specifies what value to read from the controller. Channels can be disabled by prefixing their identifier with "#".
 
 **Type**: Map[String,[PcccChannelConfiguration](#pcccchannelconfiguration)]
 
@@ -449,7 +453,7 @@ At least 1 channel must be configured.
 
 [SFC Configuration](../core/sfc-configuration.md) > [Sources](../core/sfc-configuration.md#sources) > [Source](../core/source-configuration.md)  > [Channels](../core/source-configuration.md#channels) > [Channel](../core/channel-configuration.md)
 
-The PcccChannelConfiguration type extends the [ChannelConfiguration](../core/channel-configuration.md) class with channel properties for the PCCC protocol adapter.
+The PcccChannelConfiguration class extends  [ChannelConfiguration](../core/channel-configuration.md) , inheriting all its base properties, while adding PCCC-specific properties such as Address to define the PLC memory location to read from.
 
 - [Schema](#pcccchannelconfiguration-schema)
 - [Examples](#pcccchannelconfiguration-examples)
@@ -462,7 +466,7 @@ The PcccChannelConfiguration type extends the [ChannelConfiguration](../core/cha
 
 ### Address
 
-A string containing the address of the field to read from the controller.
+The Address property specifies the memory location in the PLC from which to read data. It must be formatted according to PCCC addressing conventions for the specific data type being accessed.
 
 **Type**: String
 
@@ -565,9 +569,7 @@ Counter with bit:
 
 [SFC Configuration](../core/sfc-configuration.md) > [ProtocolAdapters](../core/sfc-configuration.md#protocoladapters) > [Adapter](../core/protocol-adapter-configuration.md) 
 
-
-
-PcccAdapterConfiguration extension the [AdapterConfiguration](../core/protocol-adapter-configuration.md) with properties for the PCCC Protocol adapter.
+The PcccAdapterConfiguration class extends  [AdapterConfiguration](../core/protocol-adapter-configuration.md) to provide PCCC protocol-specific adapter settings. It includes a collection of controller configurations that define connection details for PCCC-capable PLCs.
 
 - [Schema](#pcccadapterconfiguration-schema)
 - [Examples](#pcccadapterconfiguration-examples)
@@ -580,7 +582,7 @@ PcccAdapterConfiguration extension the [AdapterConfiguration](../core/protocol-a
 
 ### Controllers
 
-PLCs servers configured for this adapter. The PCCC source using the adapter must have a reference to one of these in its AdapterController attribute.
+PLCs servers configured for this adapter. The PCCC source using the adapter must have a reference to one of these in its [AdapterController](#adaptercontroller) attribute.
 
 **Type**: Map[String,[PcccControllerConfiguration](#pccccontrollerconfiguration)]
 
@@ -643,6 +645,10 @@ PLCs servers configured for this adapter. The PCCC source using the adapter must
 
 
 
+The PcccControllerConfiguration class defines the connection parameters and settings required to communicate with a specific PCCC-capable PLC controller. It contains properties that specify how to establish and maintain a connection to the PLC.
+
+
+
 - [Schema](#pccccontrollerconfiguration-schema)
 - [Examples](#pccccontrollerconfiguration-examples)
 
@@ -663,7 +669,7 @@ PLCs servers configured for this adapter. The PCCC source using the adapter must
 
 ### Address
 
-IP Address of the controller
+The Address property specifies the IP address of the PLC controller that the adapter will connect to.
 
 **Type**: String
 
@@ -673,7 +679,7 @@ IP address in format aaa.bbb.ccc.ddd
 
 ### ConnectPath
 
-Connect path for controller
+The ConnectPath property defines the routing path configuration used to establish a connection to the PLC controller. This property specifies how to route the communication through the network to reach the target PLC, which may include going through intermediate devices or network segments.
 
 **Type**: PcccConnectPathConfiguration
 
@@ -683,7 +689,7 @@ Optional
 
 ### ConnectTimeout
 
-Timeout for connecting to the controller in milliseconds
+The ConnectTimeout property specifies the maximum amount of time (in milliseconds) that the adapter will wait when attempting to establish a connection with the PLC controller before timing out. If the connection cannot be established within this time period, the connection attempt will fail and an error will be raised. 
 
 **Type**: Integer
 
@@ -695,37 +701,48 @@ Default is 10000
 
 When optimization is used this specified the max number of bytes between near adjacent fields that may be combined in a single read.
 
+When reading multiple fields that are close to each other in the PLC's memory, the adapter can optimize performance by combining them into a single read operation instead of performing multiple individual reads. This property controls how far apart fields can be while still being considered for combination:
+
+- If two fields are separated by fewer bytes than MaxReadGap, they may be combined
+- If the gap between fields exceeds MaxReadGap, they will be read separately
+
+This optimization can improve performance by reducing the number of individual read operations, but setting the value too high might result in reading unnecessary data between the fields of interest
+
 **Type**: Integer
 
 Default is 32
 
 ---
 
-### Name
-
-Description
-
-**Type**: Type
-
-Comments
-
----
-
 ### OptimizeReads
 
-Optimized the reading of data from the controller by combining the reads for (near) adjacent fields in a single read request.
+The OptimizeReads property determines whether the adapter should attempt to optimize read operations by combining multiple read requests for adjacent or nearby fields into a single read operation.
 
-**Type**: Boolean
+**Type** : Boolean
 
-Default is true
+**Default** : true
 
-Optimization reduces the calls made to the controller to read data. When troubleshooting optimization it can be disabled to find specific fields that make the (combined) reads to fail.
+When enabled (true):
+
+- The adapter will attempt to combine multiple read requests for fields that are close together in memory
+- The maximum gap between fields that can be combined is controlled by the MaxReadGap property
+- This can significantly reduce the number of communications with the PLC
+- Results in better performance and reduced network traffic
+
+When disabled (false):
+
+- Each field will be read individually
+- Useful for troubleshooting when combined reads are failing
+- Helps identify specific problematic fields
+- May result in slower performance due to increased number of individual read operations
 
 ---
 
 ### Port
 
-Port number
+The Port property specifies the TCP port number used to communicate with the PLC controller.
+
+This is the network port where the PLC controller listens for incoming PCCC communications. In most cases, the default port (44818) should be used unless your network configuration requires a different port number.
 
 **Type**: Integer
 
@@ -735,7 +752,7 @@ Default is 44818
 
 ### ReadTimeout
 
-Timeout for reading response packets from the controller in milliseconds
+The ReadTimeout property specifies the maximum amount of time (in milliseconds) that the adapter will wait for a response from the PLC controller after sending a read request.
 
 **Type**: Integer
 
@@ -745,7 +762,7 @@ Default is 10000
 
 ### WaitAfterConnectError
 
-Time to wait before (re)connecting after a connection error in milliseconds
+The WaitAfterConnectError property specifies the delay time (in milliseconds) that the adapter should wait before attempting to (re)connect after experiencing a connection error with the PLC controller.
 
 **Type**: Integer
 
@@ -755,7 +772,7 @@ Default is 10000
 
 ### WaitAfterReadError
 
-Time to wait before reading values from the controller after a read error in milliseconds
+The WaitAfterReadError property specifies the delay time (in milliseconds) that the adapter should wait before attempting another read operation after encountering a read error from the PLC controller.
 
 **Type**: Integer
 
@@ -765,7 +782,7 @@ Default is 10000
 
 ### WaitAfterWriteError
 
-Time to wait after an error writing request packets to the controller in milliseconds
+The WaitAfterWriteError property specifies the delay time (in milliseconds) that the adapter should wait before attempting another write operation after encountering a write error to the PLC controller.
 
 **Type**: Integer
 
@@ -856,7 +873,7 @@ Default is 10000
 
 [PccAdapter](#pcccadapterconfiguration) > [Controllers](#controllers) > [PcccController](#pccccontrollerconfiguration) > [ConnectPath](#connectpath)
 
-
+The PcccConnectPathConfiguration class defines the connection path configuration for establishing communication with a PLC using the PCCC (Programmable Controller Communication Commands) protocol.
 
 - [Schema](#pcccconnectpathconfiguration-schema)
 - [Examples](#pcccconnectpathconfiguration-examples)
@@ -870,27 +887,32 @@ Default is 10000
 
 ### Backplane
 
-Backplane number
+The Backplane property specifies the backplane number in the PCCC connection path configuration.
+
+This property is used to identify the backplane connection in the PLC chassis system. The backplane is the physical communication bus that connects different modules within a PLC rack.
+
+- Used in routing communications through the PLC system
+- Typically remains at the default value of 1 for most configurations
+- Part of the overall connection path specification
+- Important when communicating through ControlLogix gateways or similar systems
 
 **Type**: Integer
 
 Default is 1
 
----
 
-### Name
-
-Description
-
-**Type**: Type
-
-Comments
 
 ---
 
 ### Slot
 
-Slot number
+The Slot property specifies the slot number where the target PLC module is installed in the chassis backplane.
+
+This property identifies:
+
+- The physical location of the PLC module in the rack
+- Which slot the processor or communication module occupies
+- The target destination for PCCC messages
 
 **Type**: Integer
 

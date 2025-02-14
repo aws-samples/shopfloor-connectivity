@@ -6,6 +6,19 @@
 
 - [Examples](#examples)
 
+The ChannelConfiguration serves as a base that defines common attributes for protocol adapter channels. It provides an abstraction for input addresses in a data source. Protocol-specific adapters extend this class to add their own specific properties.
+
+This base configuration includes core properties for channel configuration including:
+
+- Channel naming and description
+- Value transformation settings
+- Metadata handling
+- Various filtering capabilities (change, value, and condition filters)
+- Value decomposition and spreading options
+- Configuration validation
+
+The configuration  is designed to be extended by specific protocol implementations to add protocol-specific channel configuration properties while maintaining a consistent base set of functionality across different adapter types.
+
 **Properties:**
 
 - [ChangeFilter](#changefilter)
@@ -30,23 +43,29 @@
 
 ---
 ### ChangeFilter
-[ChangeFilter](./change-filter-configuration.md)  to apply to this channel value. (Overwrites change filter at source level if any)
+The ChangeFilter property specifies a reference to a [change filter](./change-filter-configuration.md) that should be applied to the channel's values. If set, it overrides any change filter that might be configured at the source level. The value should be a string that matches the ID of a filter defined in the ChangeFilters section of the top-level SFC configuration. This filter determines when values should be processed based on how they change over time. The property is optional - if not specified, no change filtering will be applied to the channel (unless a source-level filter is active).
 
 **Type**: String
-
-Optional, if used it must refer to a configured filter in the [ChangeFilters](./sfc-configuration.md#changefilters) element at the sec top level configuration.
 
 ---
 ### ConditionFilter
-ConditionFilter to apply to this channel, see condition filters
+The ConditionFilter property specifies a reference to a [condition filter](./condition-filter-configuration) that should be applied to the channel's values. It accepts a string value that must match an ID of a filter defined in the [ConditionFilters](./sfc-configuration.md#conditionfilters)  section of the top-level SFC configuration. This filter evaluates whether values should be processed based on specified conditions. The property is optional - if not specified, no condition filtering will be applied to the channel. This allows for selective processing of values based on defined conditions.
 
 **Type**: String
 
-Optional, if used it must refer to a configured filter in the [ConditionFilters](./sfc-configuration.md#conditionfilters) element  at the sec top level configuration.
-
 ---
 ### Decompose
-If set to true and the value of the channel  is a structured value then the value is decomposed into a set of individual values for each (sub) element in  the structure. Decomposition can also be set for all channels for a source by setting its [Decompose](./source-configuration.md#decompose) value to true. The value of the Decompose setting at channel level will override the setting at source level.
+
+The Decompose property controls whether structured values from the channel should be broken down into individual elements. When set to true:
+
+- A structured value will be split into separate values for each sub-element
+- Each decomposed value is named using the pattern "originalName.subElementName"
+- The original structured value is removed after decomposition
+- For lists of structures (when Spread is true), each structure is decomposed with names following the pattern "elementName.index.subElementName"
+
+This property can be set at both channel and [source levels](./source-configuration.md#decompose), with the channel-level setting taking precedence over the source-level setting. The default value is false.
+
+This feature is particularly useful when working with complex data structures that need to be broken down into simpler individual values for processing or analysis
 
 If the value is  list of structures and the value of the [Spread](#spread) setting is true then each structure in the list is decomposed. 
 
@@ -54,22 +73,17 @@ If the value is  list of structures and the value of the [Spread](#spread) setti
 
 Default is false
 
-The names of the values for the fields in the structure start with the name of the value appended by the names of the sub elements, separated by a ".". 
-After decomposing the structured value into individual values, it is removed from the dataset. If the structure was an element in a list of structures the name is the name of the element, followed by a zero indexed order number of the element in the list and the name of the sub element, all separated by a ".".
-
 ---
 ### Description
-User-defined description of the channel
+The Description property allows users to provide a human-readable text description of the channel. It accepts a string value that can be used to document the purpose, function, or any other relevant information about the channel. This property helps in maintaining clear documentation and understanding of the channel's role within the configuration.
 
 **Type**: String
-
-
 
 ---
 
 ### Metadata
 
-The optional [Metadata](../README.md#metadata) element can be used to add additional data to the output at the channel level. If metadata is specified, which is a map of string indexed values, it will be added to the output at the channel level as an element that can be configured through the "Metadata" entry of the ElementNames configuration element.
+The optional [Metadata](../README.md#metadata) element can be used to add additional data to the output at the channel level. If metadata is specified, which is a map of string indexed values, it will be added to the output at the channel level as an element that can be configured through the "Metadata" entry of the [ElementNames](./sfc-configuration.md#elementnames) configuration element.
 
 **Type**: Map[String, String]
 
@@ -81,30 +95,34 @@ The optional [Metadata](../README.md#metadata) element can be used to add additi
 
 ---
 ### Spread
-If set to true and the value of the channel the value is a list then for each element in the list a new individual value is created.
-The value of this setting overrules the setting of the [Spread](./source-configuration.md#spread) setting at source level.
+
+The Spread property determines how list values from the channel are handled. When set to true:
+
+- Each element in a list value will be converted into a separate individual value
+- The new values are named using the pattern "originalName.index" where index is a sequence number
+- The original list value is removed from the dataset after spreading
+- This setting overrides any [Spread](./source-configuration.md#spread)  setting configured at the source level
+
+The default value is false. This feature is useful when you need to process list elements as individual values rather than handling them as a single list structure.
 
 **Type**: Boolean
 
 Default is false
 
-The names of the values for the fields in the structure start with the name of the value element with a sequence number, separated by a ".". After splitting the list value into individual values, it is removed from the dataset.
-
 ---
 ### Transformation
-[Transformation](./transformation-operator-configuration.md) to apply to this channel value, the name must be an existing entry in the [Transformations](./sfc-configuration.md#transformations) element at the top level of the SFC configuration.
+
+The Transformation property specifies a reference to a [transformation](./transformation-operator-configuration.md)  that should be applied to the channel's values. It accepts a string value that must match the name of a transformation defined in the  [Transformations](./sfc-configuration.md#transformations)  section of the top-level SFC configuration. This property allows values to be modified or converted before further processing. The property is optional - if not specified, no transformation will be applied to the channel's values. The transformation is applied to the raw channel value before any other processing like filtering or spreading occurs
 
 **Type**: String
-
-Optional, if used it must refer to a configured filter in the  [Transformations](./sfc-configuration.md#transformations)  element in the SFC top level configuration.
 
 ---
 ### ValueFilter
-[ValueFilter](./value-filter-configuration.md) to apply to this channel value.
+The [ValueFilter](./value-filter-configuration.md) property specifies a reference to a value filter that should be applied to the channel's values. It accepts a string value that must match an ID of a filter defined in the [ValueFilters](./sfc-configuration.md#valuefilters)  section of the top-level SFC configuration. This filter determines whether values should be processed based on their actual content or value. The property is optional - if not specified, no value filtering will be applied to the channel. Value filters can use operators like ==, !=, >, >=, <, <= for numeric values, and == and != for non-numeric values to determine if a value should be processed
 
 **Type**: String
 
-Optional, if used it must refer to a configured filter in the [ValueFilters](./sfc-configuration.md#valuefilters) element  at the sec top level configuration.
+
 
 [^top](#channelconfiguration)
 

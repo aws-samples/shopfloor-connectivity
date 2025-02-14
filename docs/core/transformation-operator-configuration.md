@@ -96,7 +96,7 @@ A transformation, defined in the Transformations section of the SFC top level tr
 
 ---
 ### Abs
-Calculates absolute value.
+Calculates the absolute value of a number.
 
 **Type**: Datatype: Numeric
 
@@ -126,7 +126,7 @@ Bitwise and of value and parameter.
 
 ---
 ### Arc
-Computes the arc; the returned value is an angle in the range from 0.0 to PI radians.
+Computes the arc length, returning an angle in the range from 0.0 to π radians.
 
 **Type**: Datatype: Numeric
 
@@ -142,7 +142,7 @@ Computes the arc; the returned value is an angle in the range from 0.0 to PI rad
 
 ---
 ### Asin
-Computes the arc; the returned value is an angle in the range from -PI/2 to PI/2 radians
+Computes the arc, returning an angle in the range from -π/2 to π/2 radians.
 
 **Type**: Datatype: Numeric
 
@@ -174,7 +174,7 @@ Returns item from an array at the specified index.
 
 ---
 ### Atan
-Computes the arc; the returned value is an angle in the range from -PI/2 to PI/2 radians
+Computes the arc; the returned value is an angle in the range from - π/2 to  π/2 radians.
 
 **Type**: Datatype: Numeric
 
@@ -244,7 +244,7 @@ Converts array of 4 bytes to a float value (Big-Endian)
 
 ---
 ### BytesToFloatLE
-Converts array of 4 bytes to a float value (Little-Endian)
+Converts an array of four bytes into a float value (Little-Endian format).
 
 **Type**: Datatype: byte[4]
 
@@ -272,7 +272,7 @@ Converts array of two bytes to a 16-bit integer (Big-Endian)
 
 ---
 ### Ceil
-Rounds value up to the next largest integer.
+Rounds the value up to the next highest integer.
 
 **Type**: Datatypes: Numeric
 
@@ -410,7 +410,7 @@ Obtains a DateTime using seconds from the epoch of 1970-01-01T00:00:00Z.
 
 ---
 ### Equals
-Compares two numbers. To compare unsigned numbers convert number to a signed number using ToSigned operator.
+To compare two numbers, convert the unsigned number to a signed number using the ToSigned operator.
 
 **Type**: Datatype: Number
 
@@ -425,7 +425,7 @@ Compares two numbers. To compare unsigned numbers convert number to a signed num
 
 ---
 ### Exp
-Computes Euler's number e raised to the power of the value
+Calculates the value of e raised to the power of the input value.
 
 **Type**: Datatypes: Numeric
 
@@ -453,7 +453,7 @@ Converts Celsius temperature to Fahrenheit.
 
 ---
 ### Flatten
-Flattens multi-dimensional array values into a single dimensional array value 
+Flatten multi-dimensional array values into a single-dimensional array value. 
 
 **Type**: Datatypes: Any
 
@@ -495,7 +495,7 @@ Converts a 16-bit value in an array of 2 8-bit values.
 
 ---
 ### Int16sToInt32
-Converts an array of two 16-bit values to a single 32-bit value.
+Converts an array of two 16-bit values into a single 32-bit value.
 
 **Type**: Datatypes: int16[2]
 
@@ -555,7 +555,7 @@ The string must represent a valid instant in UTC
 
 ---
 ### IsoTimeStrToMilliSeconds
-Converts a string in ISO-8601 duration format into milliseconds
+Converts a string representing a duration in ISO-8601 format into milliseconds.
 
 **Type**: Datatype : String
 
@@ -569,7 +569,7 @@ Converts a string in ISO-8601 duration format into milliseconds
 
 ---
 ### IsoTimeStrToNanoSeconds
-Converts a string in ISO-8601 duration format into nanoseconds
+Converts a string representing a duration in ISO-8601 format into nanoseconds.
 
 **Type**: Datatype : String
 
@@ -597,7 +597,7 @@ Converts a string in ISO-8601 duration format into seconds
 
 ---
 ### Ln
-Computes the natural logarithm (base E)
+Calculates the natural logarithm (base E).
 
 **Type**: Datatypes: Numeric
 
@@ -639,7 +639,7 @@ Converts string to lowercase.
 
 ---
 ### MapRange
-Maps numeric ranges.
+Maps numerical ranges.
 
 **Type**: Datatype: Numeric
 
@@ -720,7 +720,7 @@ Return smallest of value or parameter value.
 ---
 ### Minus
 alias is "-"
-Subtracts parameter value from value.
+Subtracts the parameter value from the actual value.
 
 **Type**: Datatype: Numeric
 
@@ -743,7 +743,7 @@ Subtracts parameter value from value.
 ---
 ### Mod
 alias is "%"
-Calculates the remainder of dividing value by parameter value.
+Calculates the remainder when a value is divided by a parameter value.
 
 **Type**: Datatype: Numeric
 
@@ -787,7 +787,7 @@ Multiplies value by parameter value.
 ---
 ### Not
 alias is "!"
-Inverts a Boolean value
+Inverts the value of a Boolean variable.
 
 **Type**: Datatype : Boolean
 
@@ -805,7 +805,7 @@ Inverts a Boolean value
 ### NumbersToFloatBE
 Takes a list of two numbers and converts the individual bytes of these numbers into a float value using Big Endian encoding.
 
-**Type**: Datatype : List of size 2 containing 2 numeric values. These values are first converted into 16 bit words from which the float value is decoded. 
+**Type**: Datatype :Type: Datatype : List of size 2 containing 2 numeric values. These values are first converted into 16-bit words from which the float value is decoded. 
 
 **Operand**: None
 
@@ -849,7 +849,7 @@ Bitwise or of value and parameter.
 
 ---
 ### OutsideRangeExclusive
-Test if a value is outside an exclusive range
+
 
 **Type**: Datatype: Numeric
 
@@ -869,7 +869,7 @@ Test if a value is outside an exclusive range
 
 ---
 ### OutsideRangeInclusive
-Datatype: Numeric
+Determine if a value falls inside an inclusive range.
 
 **Type**: Datatype: Numeric
 
@@ -888,7 +888,7 @@ Datatype: Numeric
 
 ---
 ### ParseInt
-Parses string value as an integer number. The string must be a valid representation of a number.
+Parses a string value as an integer number, ensure that the string represents a valid numerical value.
 
 **Type**: Datatype: String
 
@@ -902,9 +902,9 @@ Parses string value as an integer number. The string must be a valid representat
 
 ---
 ### ParseNumber
-Parses string value as a double number. The string must be a valid representation of a number.
+Parses a string value as a double number. The string must be a valid representation of a number.
 
-**Type**: Datatype: String
+**Type**: Datatype: String\
 
 **Operand**: None
 
@@ -917,7 +917,7 @@ Parses string value as a double number. The string must be a valid representatio
 ---
 ### Plus
 alias is "+" or "Add"
-Adds the value of the parameter to value.
+Adds the value of the parameter to the value.
 
 **Type**: Datatype: Numeric
 
@@ -954,7 +954,7 @@ Operand: JMESPath expression, see https://jmespath.org/
 
 ---
 ### ReverseList
-Reverses the elements in a list value.
+Reverses the order of elements in a list.
 
 **Type**: Datatype: Lists
 
@@ -1064,7 +1064,7 @@ Computes the hyperbolic sine of the value
 
 ---
 ### Sqrt
-Computes the positive square root
+Calculates the positive square root of a number.
 
 **Type**: Datatype: Numeric
 
@@ -1110,13 +1110,13 @@ Compares string value with a string parameter.
 ---
 ### SubString
 Returns the substring of string value starting at the start and ending right before the end.
-Start and End are zero based indexes when positive and automatically limited to the max length of the input string.
+Start and End are zero-based indexes when positive and automatically limited to the max length of the input string.
 
-When using negative values, it is the offset from end of the input string (-1 is last character)
+When using negative values, it is the offset from the end of the input string (-1 is the last character).
 
-If Start is omitted its default value is 0, for the beginning of the string.
+If Start is omitted, its default value is 0, for the beginning of the string.
 
-If End is omitted the default value is the end of the input string (length + 1)
+If End is omitted, the default value is the end of the input string (length + 1).
 
 **Type**: Datatype: String
 
@@ -1149,7 +1149,7 @@ Computes the tangent of the angle given in radians
 
 ---
 ### Tanh
-Computes the hyperbolic tangent of the value
+Calculates the hyperbolic tangent of the input value.
 
 **Type**: Datatype: Numeric
 
@@ -1177,7 +1177,7 @@ Converts a datetime value  to the number of milliseconds from the epoch of 1970-
 
 ---
 ### TimestampToEpocSeconds
-Converts a datetime value  to the number of seconds from the epoch of 1970-01-01T00:00:00Z.
+Converts a datetime value into the number of seconds since the epoch of January 1, 1970, at 00:00:00 UTC.
 
 **Type**: Datatype: DateTime/Timestamp
 
@@ -1193,7 +1193,7 @@ Converts a datetime value  to the number of seconds from the epoch of 1970-01-01
 
 ---
 ### ToByte
-Converts numeric value to a byte value
+Converts a numeric value into a byte value.
 
 **Type**: Datatype: Numeric
 
@@ -1223,7 +1223,7 @@ Converts numeric value to a double value
 
 ---
 ### ToFloat
-Converts numeric value to a float value
+Converts a numeric value into a floating-point number.
 
 **Type**: Datatype: Numeric
 
@@ -1237,7 +1237,7 @@ Converts numeric value to a float value
 
 ---
 ### ToInt
-Converts numeric value to an int value
+Converts a numeric value into an integer value.
 
 **Type**: Datatype: Numeric
 
@@ -1251,7 +1251,7 @@ Converts numeric value to an int value
 
 ---
 ### ToLong
-Converts numeric value to a long 64 bits value
+Converts a numeric value into a long 64-bit value.
 
 **Type**: Datatype: Numeric
 
@@ -1265,7 +1265,7 @@ Converts numeric value to a long 64 bits value
 
 ---
 ### ToShort
-Converts numeric value to a short 16 bits value
+Converts a numeric value into a short 16-bit value.
 
 **Type**: Datatype: Numeric
 
@@ -1279,7 +1279,7 @@ Converts numeric value to a short 16 bits value
 
 ---
 ### ToSigned
-Converts numeric value to a signed value
+Converts a numeric value into a signed value.
 
 **Type**: Datatype: Numeric
 
@@ -1293,7 +1293,7 @@ Converts numeric value to a signed value
 
 ---
 ### ToUnsigned
-Converts numeric value to an unsigned value
+Converts a numeric value to an unsigned integer.
 
 **Type**: Datatype: Numeric
 
@@ -1307,7 +1307,7 @@ Converts numeric value to an unsigned value
 
 ---
 ### Trunc
-Rounds the given value to an integer towards zero.
+Truncates a number to an integer by removing the fractional part of the number.
 
 **Type**: Datatype: Numeric
 
@@ -1321,7 +1321,7 @@ Rounds the given value to an integer towards zero.
 
 ---
 ### TruncAt
-Rounds the given value to a value with a specified number of decimals.
+Rounds the given value to a value with a specified number of decimal places.
 
 **Type**: Datatype: Numeric
 
@@ -1338,7 +1338,7 @@ Rounds the given value to a value with a specified number of decimals.
 
 ---
 ### UpperCase
-Converts a string value to uppercase.
+Converts a string to uppercase.
 
 **Type**: Datatype: String
 
@@ -1354,7 +1354,7 @@ Converts a string value to uppercase.
 
 ---
 ### WithinRangeExclusive
-Datatype: Numeric
+Tests if values fall within the exclusive range.
 
 **Type**: Datatype : Numeric
 
@@ -1374,7 +1374,7 @@ Datatype: Numeric
 
 ---
 ### WithinRangeInclusive
-Datatype: Numeric
+Tests if values fall within the inclusive range.
 
 **Type**: Datatype: Numeric
 

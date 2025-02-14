@@ -2,6 +2,8 @@
 
 [SFC Configuration](./sfc-configuration.md#metrics) > [SecretsManager](./sfc-configuration.md#secretsmanager) 
 
+Manages secure storage and access of secrets using AWS Secrets Manager and local encryption. Supports AWS credentials from IoT credentials provider or SDK credential chain, with options for local secret storage using Greengrass V2 deployment keys or custom encryption keys.
+
 - [Schema](#schema)
 - [Examples](#examples)
 
@@ -19,7 +21,7 @@
 
 ---
 ### CertificatesAndKeysByFileReference
-Can be set to true to transmit private key by filename to external IPC services. The file name must exist and be accessible in the environment running the service
+Controls whether private keys are passed by filename reference to external IPC services. When true, ensures the referenced key files exist and are accessible in the service's runtime environment. Defaults to false
 
 **Type**: Boolean
 
@@ -27,7 +29,7 @@ Default is false
 
 ---
 ### CreatePrivateKeyIfNotExists
-If set the file containing a secret key that will be used to encrypt locally stored secrets will be created if it does not exist.
+Determines whether to automatically generate a new private key file for encrypting local secrets if one doesn't exist. When true (default), creates the key file automatically; when false, requires manual key file creation.
 
 **Type**: Boolean
 
@@ -35,53 +37,46 @@ Default is true
 
 ---
 ### CredentialProviderClient
-Name of configured credentials client that will be used to read secrets stored in the AWS Secrets Manager service. The name must refer to a client defined in the  "AwsIotCredentialProviderClients" section at the top level SFC configuration file (https://aws.amazon.com/blogs/security/how-to-eliminate-the-need-for-hardcoded-aws-credentials-in-devices-by-using-the-aws-iot-credentials-provider/)
 
-**Type**: String
+The CredentialProviderClient property specifies which AWS credential provider client to use for authentication. It references a client defined in the SFC's top-level configuration under [AwsIotCredentialProviderClients](../core/sfc-configuration.md#awsiotcredentialproviderclients) section. This client uses X.509 certificates to obtain temporary AWS credentials through the  [AWS IoT credentials provider](../sfc-aws-service-credentials.md).
 
-If not set the AWS SDK credential provider chain is used. (https://docs.aws.amazon.com/sdk-for-java/latest/developer-guide/credentials-chain.html)
+If no CredentialProviderClient is configured the [AWS Java SDK credential provider chain is used](https://docs.aws.amazon.com/sdk-for-java/latest/developer-guide/credentials.html#credentials-chain)
+
+**Type:** String
 
 ---
 ### GreenGrassDeploymentPath
-Path to an existing and accessible GreenGrass V2 deployment. If set then the private key used in that deployment is used to encrypt local secrets.
+Specifies the path to a Greengrass V2 deployment whose private key will be used for local secret encryption. Typically, /greengrass/v2, requires access to effectiveConfig.yaml in the config subdirectory. The running process must have proper permissions to access these restricted files.
 
 **Type**: String
-
-Optional
-
-The typical root directory for Greengrass 2 deployment is /greengrass/v2. The process running the core or target must have access to the file effectiveConfig.yaml in subdirectory config. Note that these directories and files have restricted access.
 
 ---
 ### PrivateKeyFile
-Name of file containing the private key used to encrypt locally stores secrets
+Specifies the filename for the private key used to encrypt locally stored secrets. If not specified, defaults to "sfc-secrets-manager-private-key.pem".
 
 **Type**: String
 
-Default is "sfc-secrets-manager-private-key.pem"
-
 ---
 ### Region
-Region of the used AWS Secrets Manager Service
+Specifies the AWS region where the Secrets Manager service is located (e.g., "us-east-1", "eu-west-1"). 
 
 **Type**: String
 
 ---
 ### Secrets
-Configured secrets obtained by this secrets manager configuration
+Defines the secrets to be retrieved from AWS Secrets Manager using this configuration. 
 
 **Type**: [CloudSecretConfiguration](./cloud-secret-configuration.md)
 
 ---
 ### StoredSecretsDir
-Name of the directory where stored secrets file and optionally also the private key file are created,
+Specifies the directory path where secret files and private key files are stored. If not set, defaults to the home directory of the user running the process.
 
 **Type**: String
 
-Default is home directory of user running the process
-
 ---
 ### StoredSecretsFile
-Name of the file used to store secrets.
+Specifies the filename for storing encrypted secrets. If not set, defaults to "sfc-secrets-manager-secrets".
 
 **Type**: String
 

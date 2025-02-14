@@ -1,4 +1,3 @@
-
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: MIT-0
 
@@ -95,13 +94,12 @@ class AwsLambdaTargetConfiguration : AwsServiceConfig, TargetConfiguration() {
     }
 
     // validates lambda name
-    private fun validateLambda() =
-        ConfigurationException.check(
-            (_functionName != null),
-            "Name of Lambda function must be specified",
-            CONFIG_FUNCTION_NAME,
-            this
-        )
+    private fun validateLambda(){
+        val (valid, message) = validateLambdaFunctionName(_functionName?:"")
+        if (!valid){
+            ConfigurationException(message, CONFIG_FUNCTION_NAME, this)
+        }
+    }
 
     // validates AWS region
     private fun validateServiceRegion(_region: String?) {
@@ -164,6 +162,33 @@ class AwsLambdaTargetConfiguration : AwsServiceConfig, TargetConfiguration() {
         }
 
 
+        fun validateLambdaFunctionName(name: String): Pair<Boolean, String> {
+            // Check length constraints
+            if (name.isEmpty()) {
+                return Pair(false, "$CONFIG_FUNCTION_NAME cannot be empty")
+            }
+            if (name.length > 64) {
+                return Pair(false, "$CONFIG_FUNCTION_NAME cannot exceed 64 characters")
+            }
+
+            // Check if starts with letter or number
+            if (!name[0].isLetterOrDigit()) {
+                return Pair(false, "$CONFIG_FUNCTION_NAME must start with a letter or number")
+            }
+
+            // Check if ends with hyphen
+            if (name.endsWith('-')) {
+                return Pair(false, "$CONFIG_FUNCTION_NAME cannot end with a hyphen")
+            }
+
+            // Check for valid characters
+            val validCharacterPattern = Regex("^[a-zA-Z0-9-_]+$")
+            if (!validCharacterPattern.matches(name)) {
+                return Pair(false, "$CONFIG_FUNCTION_NAME can only contain letters, numbers, hyphens (-), and underscores (_)")
+            }
+
+            return Pair(true, "")
+        }
     }
 
 }

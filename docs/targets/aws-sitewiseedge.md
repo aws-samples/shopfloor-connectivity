@@ -1,13 +1,11 @@
 
 # AWS SiteWise Edge Target
 
-
+The AWS IoT [SiteWise Edge](https://aws.amazon.com/iot-sitewise/sitewise-edge/) target adapter for Shop Floor Connectivity (SFC) enables data transfer from industrial equipment to AWS IoT SiteWise Edge gateways running on-premises.
 
 ## SiteWiseEdgeTargetConfiguration
 
 [SFC Configuration](../core/sfc-configuration.md) > [Targets](../core/sfc-configuration.md#targets) >  [Target](../core/target-configuration.md) 
-
-
 
 The `AWS-SITEWISEEDGE-TARGET` is a specific type of target configuration in SFC that allows you to connect and send data to an MQTT topic consumed by the AWS IoT SiteWise Edge service. The `Targets` configuration element can contain entries of this type, and the `TargetType` of these entries must be set to `"AWS-SITEWISEEDGE-TARGET"`.
 This type extends the type  [TargetConfiguration](../core/target-configuration.md) with specific configuration data for this adapter.
@@ -151,8 +149,6 @@ Commonly port numbers are
 - 443 for AWS IoT Core endpoints
 
 In no port number is specified then the EndPoint address is searched for a training port number.
-
-
 
 ---
 ### PrivateKey

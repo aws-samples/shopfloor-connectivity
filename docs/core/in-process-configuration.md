@@ -10,6 +10,8 @@
 
 [SFC Configuration](./sfc-configuration.md) > [ConfigProvider](./sfc-configuration.md#configprovider)
 
+The InProcessConfiguration class defines settings for loading and instantiating Java components (like protocol adapters or targets) that run within the SFC process. It specifies the factory class responsible for creating component instances and the locations of required JAR files, supporting both individual JAR files and directories containing multiple JARs.
+
 - [Schema](#schema)
 - [Examples](#examples)
 
@@ -20,26 +22,18 @@
 
 ---
 ### FactoryClassName
-Name of the factory class used to create instances of a source protocol adapter of a target.
-For target instances, this class must have a static method named "newInstance".
-The signature of the method for protocol adapters have 3 parameters:
-
-- ConfigReader, the reader that can be used by the newly created instance to read its configuration data.
-- Schedule name for protocol adapters instances or  the target identifier for the target instances.
-
-- Logger, logger for output of the newly created instance
-
-The newInstance method for targets has an additional parameter: 
-
-- TargetResultHandler, an instance of an object that implements this interface can be passed to let the target return the result of delivering the target data to their destinations. It can be used ACK, NACK and ERROR the serial numbers or full message by using the interface handleResult method. The method returnedData can be called to query what data the result handler expects to be returned. (serial or full message for each of these types).
-
+The FactoryClassName property specifies the fully qualified name of the factory class responsible for creating instances of protocol adapters or targets. 
 
 **Type**: String
 
 ---
 ### JarFiles
-List of path names to JarFiles, that implement a target type, that needs to be loaded by the SFC core.
-These entries can either be path names to the jar files of to the directory in which these reside. If the entry is a directory it will expand to a list of all jar files in that directory,
+The JarFiles property is an array of strings that specifies the locations of JAR files containing target type implementations that the SFC core needs to load. The property accepts two types of path entries:
+
+1. Direct JAR file paths - Paths pointing to specific JAR files
+2. Directory paths - Paths to directories containing JAR files. When a directory is specified, the system will automatically include all JAR files found in that directory.
+
+This property is required and allows for flexible JAR file organization, whether you prefer specifying individual JAR files or grouping them in directories.
 
 **Type**: String[]
 
@@ -98,7 +92,7 @@ Basic configuration, single jar file
 {
   "FactoryClassName": "com.amazonaws.sfc.AdapterNameClassFacory",
   "JarFiles": [
-     "./adapters/adapter-jar.jar,
+     "./adapters/adapter-jar.jar",
   ]
 }
 ```
@@ -111,8 +105,8 @@ Multiple JARs configuration:
 {
   "FactoryClassName": "com.amazonaws.sfc.AdapterNameClassFacory",
   "JarFiles": [
-    "./adapters/adapter-jar1.jar,
-    "./adapters/adapter-jar2.jar,
+    "./adapters/adapter-jar1.jar",
+    "./adapters/adapter-jar2.jar",
   ]
 }
 ```

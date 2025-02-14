@@ -490,7 +490,7 @@ This setting is particularly useful for preventing memory issues in systems that
 
 **Type**: Integer
 
-The default value is 10000,.
+The default value is 10000.
 If set to 0 there is no maximum number of values.
 
 ---

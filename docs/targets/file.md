@@ -2,11 +2,11 @@
 
 [SFC Configuration](../core/sfc-configuration.md) > [Targets](../core/sfc-configuration.md#targets) >  [Target](../core/target-configuration.md) 
 
-
+The SFC File target adapter enables writing collected data to files in the local file system.
 
 ## FileConfiguration
 
-FileConfiguration extends the type  [TargetConfiguration](../core/target-configuration.md) with specific configuration data for writing data to the local file system. The Targets configuration element can contain entries of this type, the TargetType of these entries must be set to **"FILE-TARGET".**
+FileConfiguration extends the type  TargetConfiguration with specific configuration data for writing data to the local file system. The Targets configuration element can contain entries of this type; the TargetType of these entries must be set to **"FILE_TARGET"**
 
 - [Schema](#fileconfiguration-schema)
 - [Examples](#fileconfiguration-examples)
@@ -22,7 +22,7 @@ FileConfiguration extends the type  [TargetConfiguration](../core/target-configu
 
 ---
 ### BufferSize
-Size in KB after which the internal buffer is written to an output file
+The size of the internal write buffer in kilobytes (KB) that determines when buffered data is flushed to the output file. When the buffer reaches this size, its contents are written to disk.
 
 **Type**: Int
 
@@ -30,31 +30,33 @@ Must be in range 1-1024KB, default is 16KB
 
 ---
 ### Compression
-Compression used to compress the data in the file
+The type of compression algorithm used to compress data written to the output file. 
 
-**Type**: "None" | "GZip" | "Zip"
+**Type**: String
 
-Default is "None"
+Possible values are:
+
+- "None" (Default)
+- "GZip"
+- "Zip"
 
 ---
 ### Directory
-Directory where the output files are created.
+The filesystem path where output files will be stored. Files are automatically organized in a hierarchical directory structure based on timestamp (year/month/day/hour/minute) with a unique UUID filename and appropriate extension.
 
 **Type**: String
 
-The name of the output files in the directory will be yyyy/mm/dd/hh/mn/uuid.<extension>
+The name of the output files in the directory will be yyyy/mm/dd/hh/mn/uuid.[extension](#extension)
 
 ---
 ### Extension
-Extension used for the output files
+The file extension to be used for output files. If no extension is specified, but the file is compressed, then the corresponding extension for the compression method is used. For compression types that support entry names (e.g., zip), the extension of the entry will be set to ".json" if the [Json](#json) field is true.
 
 **Type**: String
 
-If no extension is specified, but the file is compressed then the corresponding extension for the compression method is used. For compression types that support entry names (e.g., zip) the extension of the entry will be set to ".json" if the Json field is true,
-
 ---
 ### Interval
-Interval in seconds after which the internal buffer is written to an output file.
+The time interval in seconds that determines how often the internal buffer is flushed and written to the output file, regardless of  [buffer size](#buffersize).
 
 **Type**: Int
 
@@ -62,8 +64,7 @@ Must be in range 60-900 seconds, default is 60 seconds
 
 ---
 ### Json
-Flag to indicate if the lines in the output file must form a valid JSON document. The target does this by wrapping the output in an '[' and ']' character and separating each line by a ',' character, making the output a JSON array.
-If not set the output may be processed as JSONP or text file.
+Determines whether the output file should be formatted as a valid JSON array document. When enabled, the target wraps all output lines with square brackets and separates entries with commas. When disabled, the output can be processed as JSONP or plain text with individual JSON lines.
 
 **Type**: Boolean
 
@@ -72,7 +73,7 @@ Default is true
 
 ---
 ### UtcTime
-If set to true then UTC time is used to build the name of the output file, otherwise the local date and time of the system running the adapter is used.
+Controls whether UTC or local system time is used when generating the timestamp-based directory structure and filenames. When true, UTC time is used; when false, the local time of the system running the adapter is used. 
 
 **Type**: Boolean
 

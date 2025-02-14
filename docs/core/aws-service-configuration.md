@@ -1,6 +1,6 @@
-# AWSServiceConfig
+# AwsServiceConfiguration
 
-The BaseSourceConfiguration class contains the common properties for protocol adapter sources. Protocol adapters extend this class with specific properties for that adapter.
+The AwsServiceConfig class contains common properties and settings used across different AWS service configurations. It serves as a base configuration for AWS service integrations.
 
 -[Schema](#awsserviceconfig-schema)
 
@@ -15,11 +15,9 @@ The BaseSourceConfiguration class contains the common properties for protocol ad
 
 ### CredentialProviderClient
 
-Name of the AWS credential provider client defined in the SFC top level configuration section [AwsIotCredentialProviderClients](../core/sfc-configuration.md#awsiotcredentialproviderclients) obtaining credentials using X.509 certificates from the [AWS IoT credentials provider](../sfc-aws-service-credentials.md).
+The CredentialProviderClient property specifies which AWS credential provider client to use for authentication. It references a client defined in the SFC's top-level configuration under [AwsIotCredentialProviderClients](../core/sfc-configuration.md#awsiotcredentialproviderclients) section. This client uses X.509 certificates to obtain temporary AWS credentials through the  [AWS IoT credentials provider](../sfc-aws-service-credentials.md).
 
-If no CredentialProviderClient is configured
-the [AWS Java SDK credential provider chain is used](https://docs.aws.amazon.com/sdk-for-java/latest/developer-guide/credentials.html#credentials-chain)
-
+If no CredentialProviderClient is configured the [AWS Java SDK credential provider chain is used](https://docs.aws.amazon.com/sdk-for-java/latest/developer-guide/credentials.html#credentials-chain)
 
 **Type:** String
 
@@ -27,11 +25,11 @@ the [AWS Java SDK credential provider chain is used](https://docs.aws.amazon.com
 
 ### Region
 
-Name of a valid AWS service region
+The Region property specifies the name of a valid AWS service region where the service will be accessed (e.g., us-east-1, eu-west-1). This determines the geographical AWS region endpoint that will be used for service requests.
 
 **Type :** String
 
-[^top](#awsserviceconfig)
+[^top](#awsserviceconfiguration)
 
 ### AWSServiceConfig Schema
 
@@ -64,4 +62,4 @@ Name of a valid AWS service region
 
 ```
 
-[^top](#awsserviceconfig)
+[^top](#awsserviceconfiguration)

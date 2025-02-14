@@ -8,7 +8,7 @@
 - [Data Filtering](#data-filtering)
     - [Data Change Filters](#data-change-filters)
     
-    - [Value Change Filters](#value-change-filters)
+    - [Value Change Filters](#data-change-filters)
     
     - [Condition Filters](#condition-filters)
     
@@ -117,7 +117,7 @@ also possible to specify a time interval in which at least a value will pass the
 applied on single numeric values.
 
 
-## Value Change Filters
+## Value Filters
 
 A [value change filter](./core/value-filter-configuration.md) will pass a value if it matches a filter expression. A filter expression can consist of one or
 more operators like `==`,`!=`,`>`,`>=`,`<`,`<=`, combined in `&&` and `||` groups. For non-numeric values, only the ==
