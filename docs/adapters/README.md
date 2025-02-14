@@ -7,6 +7,7 @@ Protocol adapters in SFC (Shop Floor Connectivity) are interfaces that abstract 
   ADS (Automation Device Specification) protocol adapter enables reading data from Beckhoff PLCs and controllers using their native TwinCAT communication protocol.
 
 - [**J1939 Protocol Configuration**](./j1939.md)
+- 
   J1939 protocol adapter enables reading data from heavy-duty vehicle networks and equipment using the SAE J1939 standard over CAN bus
 
 - [**MQTT Protocol Configuration**](./mqtt.md)

@@ -3,6 +3,7 @@
 Shop Floor Connectivity target connectors enable data transmission from industrial devices to various destinations. These connectors handle the delivery of collected data, applying optional transformations using Apache Velocity templates. The following list details the available target connectors that can be configured to send your industrial data to different services and endpoints.
 
 ## Service targets
+
 - [**AWS IoT Analytics Target**](./aws-iot-analytics.md)
 
   AWS IoT Analytics is a fully managed service that automates the collection, processing, enrichment, and analysis of IoT device data at scale.
@@ -44,6 +45,7 @@ Shop Floor Connectivity target connectors enable data transmission from industri
   Amazon Timestream is a managed time-series database service for IoT and operational data.
 
 ## Local targets
+
 - **[AWS SiteWise Edge Target](./aws-sitewiseedge.md)**
 
   AWS IoT SiteWise Edge enables local data collection and processing for industrial equipment. 
@@ -70,6 +72,7 @@ Shop Floor Connectivity target connectors enable data transmission from industri
 
 
 ## Intermediate adapters
+
 - **[Router Target](./router.md)**
 
   Routing target redirects data to alternate targets based on primary target delivery success or failure.

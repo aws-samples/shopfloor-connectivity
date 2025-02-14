@@ -21,8 +21,8 @@
     Configuration for AWS IoT Core credential provider client that uses X.509 certificates to obtain temporary AWS credentials.
 
   - [AwsServiceConfiguration](./aws-service-configuration.md)
-
-​       Base configuration settings for AWS services
+ 
+     Base configuration settings for AWS services
 
   - [BaseSourceConfiguration](./base-source-configuration.md)
 
