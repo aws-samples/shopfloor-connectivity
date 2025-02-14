@@ -52,3 +52,5 @@ Protocol adapters in SFC (Shop Floor Connectivity) are interfaces that abstract 
 - **[SQL Adapter Configuration](./sql.md)**
 
   SQL protocol adapter enables reading data from relational databases (like MySQL, PostgreSQL, Oracle, SQL Server) through JDBC connections using SQL queries.
+
+
