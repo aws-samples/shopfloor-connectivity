@@ -9,37 +9,28 @@ The documentation provides a comprehensive overview of SFC's architecture, capab
 Shop Floor Connectivity (SFC) is a data ingestion technology for collecting industrial data and delivering it to AWS services.
 
 - Main components:
-  - [Protocol Adapters](#protocol-adapters) - Read data from industrial devices
-  - [SFC Core](#sfc-core) - Handles configuration, scheduling, data processing
-  - [Target Adapters](#target-adapters) - Send data to AWS/local services
-  
+  - [Protocol Adapters](#protocol-adapters), read data from industrial devices
+  - [SFC Core](#sfc-core) handles configuration, scheduling, data processing
+  - [Target Adapters](#target-adapters) , send data to AWS/local services
+
 - Key features:
-  - [Extensible](#extensibility) - Can add new protocol/target adapters
-  - [Flexible deployment](./sfc-deployment.md) - Standalone, containers, Greengrass
-  - [Data transformations and filtering](./sfc-data-processing-filtering.md)
-  - Aggregation and buffering
+  - [Extensible](#extensibility) . SFC  can be extended to include new protocol and target adapters.
+  - [Flexible deployment options](./sfc-deployment.md), include standalone, containers, and Greengrass.
+  - [Data transformations and filtering](./sfc-data-processing-filtering.md), processes, transforms, and filters data between sources and targets using configurable operators and rules
   - [Secure communication](./sfc-securing-component-traffic.md) between components
   - [Integration](./sfc-configuration.md#configuration-secrets) with AWS Secrets Manager
-  
-- [Concepts](#terminology-and-concepts):
-  
-  - Schedules define data collection and delivery
-  - Sources specify protocol adapters and channels to read from
-  - Targets specify where to send data
-  - Transformations, filters, aggregations can be applied
-  
-- Design principles:
-  - [Platform independence](#execution-environments)
-  - [Extensibility](#extensibility)
-  - [Network flexibility](#networking) (OT/IT separation)
-  - [Scalability](#scalability)
-  - [High availability](#high-availability)
-  - [Data type fidelity](#data-types-and-formats)
-  - [Metadata enrichment](#metadata)
-  
-  
 
+- [Terminology and Concepts](#terminology-and-concepts):
 
+  - [Execution Environments](#execution-environments) where SFC components can be deployed and operated.
+  - [Extensibility](#extensibility) Ability to extend SFC with custom protocol and target adapters and custom configuration.
+  - [Network flexibility](#networking), OT/IT separation
+  - [Scalability](#scalability)  to handle increased data loads by scaling SFC components horizontally.
+  - [High availability](#high-availability) and continuous operation through redundant pods across multiple availability zones in Kubernetes clusters
+  - [Data type fidelity](#data-types-and-formats), preserves and maintains accuracy of source data types throughout processing.
+  - [Metadata enrichment](#metadata), enhances data with additional contextual information and attributes during ingestion.
+
+  
 
 ## Table of contents
 
