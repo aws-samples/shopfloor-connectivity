@@ -49,7 +49,7 @@ The ChangeFilter property specifies a reference to a [change filter](./change-fi
 
 ---
 ### ConditionFilter
-The ConditionFilter property specifies a reference to a [condition filter](./condition-filter-configuration) that should be applied to the channel's values. It accepts a string value that must match an ID of a filter defined in the [ConditionFilters](./sfc-configuration.md#conditionfilters)  section of the top-level SFC configuration. This filter evaluates whether values should be processed based on specified conditions. The property is optional - if not specified, no condition filtering will be applied to the channel. This allows for selective processing of values based on defined conditions.
+The ConditionFilter property specifies a reference to a [condition filter](./condition-filter-configuration.md) that should be applied to the channel's values. It accepts a string value that must match an ID of a filter defined in the [ConditionFilters](./sfc-configuration.md#conditionfilters)  section of the top-level SFC configuration. This filter evaluates whether values should be processed based on specified conditions. The property is optional - if not specified, no condition filtering will be applied to the channel. This allows for selective processing of values based on defined conditions.
 
 **Type**: String
 

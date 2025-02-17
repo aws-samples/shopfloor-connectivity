@@ -25,7 +25,7 @@ A real-world use case for this setup is to create a snapshot of certain OPC-UA t
 This can be used in scenarios where the tags hold final processing data like torque moments to be captured when a part's processing is finished on a machine.
 
 ## How to set up and run the example?
-The setup of the scenario is similar to the steps in the [Quickstart example](../../README.md) of this repo with small modifications.  
+The setup of the scenario is similar to the steps in the [Quickstart example](../../README.md#quickstart-example) of this repo with small modifications.  
 Please note that sending data to AWS IoT Core might incur a cost when exceeding the free tier limit.
 
 >**Requirements**: Java runtime, aws cli [Credentials Configuration](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html#configure-precedence). 

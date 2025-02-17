@@ -362,7 +362,7 @@ described above, for target data without changes to the actual end targets.
 ## High availability
 
 All SFC components that can run as microservices in their own processes can be configured to have an endpoint for
-handling [health endpoints](./sfc-health-endpoints). Mechanisms used to manage the service instances, (e.g., Docker Compose, Kubernetes) can use
+handling [health endpoints](./sfc-health-endpoints.md). Mechanisms used to manage the service instances, (e.g., Docker Compose, Kubernetes) can use
 these endpoints in their configuration to check the status of a service and recycle instances failing to respond to the
 health probe requests. This approach can help ensure the reliability and availability of microservices-based systems.
 

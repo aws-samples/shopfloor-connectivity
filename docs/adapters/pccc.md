@@ -372,7 +372,7 @@ The PcccSourceConfiguration class defines which values (channels) to read from a
 
 ### AdapterController
 
-The AdapterController property specifies the server identifier for the PLC controller to read from. This identifier must match a controller defined in the Controllers section of the PCCC adapter configuration referenced by the source's [ProtocolAdapter](../core/source-configuration#protocoladapter) attribute.
+The AdapterController property specifies the server identifier for the PLC controller to read from. This identifier must match a controller defined in the Controllers section of the PCCC adapter configuration referenced by the source's [ProtocolAdapter](../core/source-configuration.md#protocoladapter) attribute.
 
 **Type** : String
 

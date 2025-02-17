@@ -52,7 +52,7 @@ Default is 1000
 
 ### Metadata
 
-Optional key-value pairs that add contextual information to the schedule's output data. When specified, these metadata values are included at the schedule level and can be customized using the [ElementNames](sfc-configuration#elementnames) configuration's Metadata entry
+Optional key-value pairs that add contextual information to the schedule's output data. When specified, these metadata values are included at the schedule level and can be customized using the [ElementNames](./sfc-configuration.md#elementnames) configuration's Metadata entry
 
 **Type**: Map[String, String]
 

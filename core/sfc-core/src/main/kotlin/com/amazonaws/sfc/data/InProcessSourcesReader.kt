@@ -93,8 +93,8 @@ class InProcessSourcesReader(
     }
 
     companion object {
-        /**A
-         * Creates a in process reader from configuration data
+        /**
+         * Creates an in process reader from configuration data
          * @param schedule ScheduleConfiguration schedule
          * @param adapter ProtocolAdapter
          * @param sources Mapping<String, ArrayList<String>> sources with channels to read

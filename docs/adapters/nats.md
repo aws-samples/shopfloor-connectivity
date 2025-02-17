@@ -638,7 +638,7 @@ If a Password is configured then the Username must be configured as well.
 While authentication restricts the number of clients that can connect, TLS can be employed to encrypt traffic between the client and server, verifying the server's identity. Furthermore, in the most secure version of TLS (NATS), the server can be configured to verify the client's identity, thereby authenticating it. Upon initiating TLS mode, a nats-server will mandate that all clients connect using TLS.
 Additionally, if configured to utilize TLS, client libraries will fail to establish connections to servers without TLS.
 
-**Type**: [CertificateConfiguration](../core/certificate-configuration)
+**Type**: [CertificateConfiguration](../core/certificate-configuration.md)
 
 
 https://docs.nats.io/using-nats/developer/connecting/tls

@@ -77,7 +77,7 @@ aws greengrassv2 get-component \
 ```
 >Note! <br> This permission set is too open for production and should be reduced. It is used here only for simplicity!
 
-5. Furthermore we assume you have the ability to run the following docker container for testing the setup in your Greengrass environment:
+5. Furthermore, we assume you have the ability to run the following docker container for testing the setup in your Greengrass environment:
 
 ```sh
 docker run -d -p 4840:4840 ghcr.io/umati/sample-server:main
@@ -96,7 +96,7 @@ The complete setup will create components for the SFC modules:
 - aws-iot-mqtt-target
 - opcua
 
-**The setup will configure all modules to be started in SFC's [`in-process mode`](../README.md#in-process-and-ipc-deployment-models)**. That means that all SFC modules run inside the sfc-main process on a single host.
+**The setup will configure all modules to be started in SFC's [`in-process mode`](../../docs/sfc-running-adapters.md#running-protocol-adapters-in-process)**. That means that all SFC modules run inside the sfc-main process on a single host.
 
 >Note! <br>
 If you have previously installed the modules in SFC's IPC mode   you must remove the components from IOT CORE and from your Greengrass deployment! 
@@ -139,7 +139,7 @@ You should see now the following directory structure:
 ![Working directory structure with downloaded modules](img/directory_structure1.png "working directory structure with downloaded modules")
 
 
-## Step 3: Creating Greengrass recipes 
+## Step 3: Creating Greengrass recipes
 Now we create the recipes for the sfc modules. Execute the following command:
 
 ```sh
@@ -197,7 +197,7 @@ Now copy the following content into the file **~/environment/GreengrassSFC/recip
 
 ``` 
 
->Note! <br> Replace the placeholder ***[REPLACE WITH YOUR S3 BUCKET]*** with an S3 bucket name where you want later to store your Greengrass components artifacts and recepies! 
+>Note! <br> Replace the placeholder ***[REPLACE WITH YOUR S3 BUCKET]*** with an S3 bucket name where you want later to store your Greengrass components artifacts and recepes! 
 
 
 Now copy the following content into the file **~/environment/GreengrassSFC/recipes/com.amazon.sfc.aws-s3-target-1.0.0.json**:
@@ -245,7 +245,7 @@ Now copy the following content into the file **~/environment/GreengrassSFC/recip
 
 ```
 
->Note! <br> Replace the placeholder ***[REPLACE WITH YOUR S3 BUCKET]*** with an S3 bucket name where you want later to store your Greengrass components artifacts and recepies! 
+>Note! <br> Replace the placeholder ***[REPLACE WITH YOUR S3 BUCKET]*** with an S3 bucket name where you want later to store your Greengrass components artifacts and recepes! 
 
 Now copy the following content into the file **~/environment/GreengrassSFC/recipes/com.amazon.sfc.debug-target-1.0.0.json**:
 ```json
@@ -291,7 +291,7 @@ Now copy the following content into the file **~/environment/GreengrassSFC/recip
 }
 
 ```
->Note! <br> Replace the placeholder ***[REPLACE WITH YOUR S3 BUCKET]*** with an S3 bucket name where you want later to store your Greengrass components artifacts and recepies! 
+>Note! <br> Replace the placeholder ***[REPLACE WITH YOUR S3 BUCKET]*** with an S3 bucket name where you want later to store your Greengrass components artifacts and recepes! 
 
 Now copy the following content into the file **~/environment/GreengrassSFC/recipes/com.amazon.sfc.opcua-1.0.0.json**:
 ```json
@@ -337,7 +337,7 @@ Now copy the following content into the file **~/environment/GreengrassSFC/recip
 }
 
 ```
->Note! <br> Replace the placeholder ***[REPLACE WITH YOUR S3 BUCKET]*** with an S3 bucket name where you want later to store your Greengrass components artifacts and recepies! 
+>Note! <br> Replace the placeholder ***[REPLACE WITH YOUR S3 BUCKET]*** with an S3 bucket name where you want later to store your Greengrass components artifacts and recepes! 
 
 Now copy the following content into the file **~/environment/GreengrassSFC/recipes/com.amazon.sfc.sfc-main-1.0.0.json**:
 
@@ -568,7 +568,7 @@ Now copy the following content into the file **~/environment/GreengrassSFC/recip
 ```
 >Note! <br>
  1. Make sure that after copying the script into the file that the line with the **"Script": "printf '{configuration:/SFC_CONFIG_JSON}' > {artifacts:path}/conf.json && {artifacts:path}/sfc-main/bin/sfc-main -config {artifacts:path}/conf.json""** has the ticks (') and not the less than character (**<**) as some markup viewer replace the (**'**) with (**<**).  
- 2. Replace the placeholder ***[REPLACE WITH YOUR S3 BUCKET]*** with an S3 bucket name where you want later to store your Greengrass components artifacts and recepies!
+ 2. Replace the placeholder ***[REPLACE WITH YOUR S3 BUCKET]*** with an S3 bucket name where you want later to store your Greengrass components artifacts and recepes!
  
  3. Replace the placeholder ***[REPLACE WITH YOUR S3 BUCKET FOR OPCUA DATA]*** with an S3 bucket name and ***[AWS BUCKET REGION]*** with the AWS region where you want to store the data collected from the OPCUA server!
 
@@ -632,7 +632,7 @@ Component Name: com.amazon.sfc.sfc-main
 ```
 
 >Notice: <br>
-Because we use [`in process model`](../../docs#in-process-and-ipc-deployment-models) the components on which sfc-main depends only unpack the the modules during deployment and do not start a process. So they report State: *Finished*. <br>
+Because we use [`in process model`](../../docs/sfc-running-adapters.md#running-protocol-adapters-in-process) the components on which sfc-main depends only unpack the modules during deployment and do not start a process. So they report State: *Finished*. <br>
 The component sfc-main is the only component which actually start a process and keeps running.
 
 >Note! <br>
@@ -647,11 +647,11 @@ sudo /greengrass/v2/bin/greengrass-cli deployment create --remove "com.amazon.sf
 
 >Note! <br>
 If you had not started the OPCUA test docker container before deploying the sfc-main component you will see in the **/greengrass/v2/logscom.amazon.sfc.sfc-main.log** the following error code which you can ignore: <br>
-*ERROR - Error creating client for for source "OPCUA-SOURCE" at  opc.tcp://localhost:4840//, Connection refused: localhost/127.0.0.1:4840*. 
+*ERROR - Error creating client for source "OPCUA-SOURCE" at  opc.tcp://localhost:4840//, Connection refused: localhost/127.0.0.1:4840*. 
 
 
 ## Step 5: Testing the deployment
-To test the deployment we have to start the docker container with the test OPCUA server. Do do this use the following command:
+To test the deployment we have to start the docker container with the test OPCUA server. Do this use the following command:
 
 ```bash
 docker run -d -p 4840:4840 ghcr.io/umati/sample-server:main
@@ -705,7 +705,7 @@ For that open the **IOT Core web console** and select **MQTT test client**.
 
 ![](img/MQTT_test_client.png "AWS IOT Core MQTT Test Client")
 
-You should be able to see messages beeing received.
+You should be able to see messages being received.
 
 ## Step 6: Remove the local deployment
 After successful testing we remove the deployment which was done locally with the following command:
@@ -716,7 +716,7 @@ sudo /greengrass/v2/bin/greengrass-cli deployment create --remove "com.amazon.sf
 
 
 ## Step 7: Publish the components
-To publish these these components make one more time sure that you have replaced the ***[REPLACE WITH YOUR S3 BUCKET]*** placeholder with the S3 bucket where you want to upload the components in all recipes!
+To publish these components make one more time sure that you have replaced the ***[REPLACE WITH YOUR S3 BUCKET]*** placeholder with the S3 bucket where you want to upload the components in all recipes!
 
 Upload all artifacts and recipies to S3 with the following command:
 
@@ -817,7 +817,7 @@ Because we used SFC's `in-process` model all components which deploy the depende
 # Removing components from deployment and deleting components
 ## Remove SFC components from deployment
 
-To remove the components from the Greengrass environemnt do the following steps:
+To remove the components from the Greengrass environment do the following steps:
 
 1. Go to the AWS IoT Core web console and select **Greengrass devices** then select **Deployments** then check the box before your deployment then select **Revise** 
 
@@ -866,7 +866,7 @@ To delete the components from IOT Core do the following steps:
 - com.amazon.sfc.opcua
 - com.amazon.sfc.aws-s3-target
 - com.amazon.sfc.aws-iot-mqtt-target
-- com-amazon.svf.debug-tagret
+- com-amazon.svf.debug-target
 
 
 [Examples](../../docs/examples/README.md)
