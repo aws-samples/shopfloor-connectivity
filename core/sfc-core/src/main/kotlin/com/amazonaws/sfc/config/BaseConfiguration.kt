@@ -298,6 +298,8 @@ open class BaseConfiguration : Validate, HasSecretsManager {
         const val CONFIG_TOKEN = "Token"
         const val CONFIG_MONITOR_INCLUDED_CONFIG_FILES = "MonitorIncludedConfigFiles"
         const val CONFIG_MONITOR_INCLUDED_CONFIG_CONTENT_INTERVAL = "MonitorIncludedConfigContentInterval"
+        const val CONFIG_CACHE_URL_CONFIG_CACHE_RESULTS = "CacheUrlConfigResults"
+        const val CONFIG_CACHE_URL_CONFIG_CACHE_DIRECTORY = "CacheUrlConfigDirectory"
 
         const val DEFAULT_MONITOR_INCLUDED_CONFIG_FILES = true
         const val DEFAULT_MONITOR_INCLUDED_CONFIG_CONTENT_INTERVAL = 60

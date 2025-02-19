@@ -66,7 +66,7 @@ Syntax: `0<filenumber>:<element index>[/bit offset][,arraylen]`
 
 Default file number 1
 
-Syntax: `0<file number>:<element index>[/bit offset][,array len]`
+Syntax: `I<file number>:<element index>[/bit offset][,array len]`
 
 
 

@@ -235,10 +235,10 @@ Required. The adapter will connect to the AWS IoT SiteWise endpoint in the speci
   "TargetType" : "AWS-SITEWISE",     
   "Region": "us-east-1",
   "AssetCreation": {
-    "AssetName": "Production Line %source%",
-    "AssetDescription": "Main production line %source%",
-    "AssetModelName": "ProductionLineModel  %source%",
-    "AssetPropertyName": "Temperature",
+    "AssetName": "Production %line% %source%",
+    "AssetDescription": "Production line %source%",
+    "AssetModelName": "Production %line%  %source%",
+    "AssetPropertyName": "%source%-%channel%",
     "AssetTags": {
       "Location": "%plant%",
       "Department": "Production"

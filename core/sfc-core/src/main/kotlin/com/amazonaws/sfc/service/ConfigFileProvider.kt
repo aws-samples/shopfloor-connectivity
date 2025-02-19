@@ -11,6 +11,7 @@ import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_MONITOR_INCLU
 import com.amazonaws.sfc.config.BaseConfiguration.Companion.DEFAULT_MONITOR_INCLUDED_CONFIG_CONTENT_INTERVAL
 import com.amazonaws.sfc.config.BaseConfiguration.Companion.DEFAULT_MONITOR_INCLUDED_CONFIG_FILES
 import com.amazonaws.sfc.config.InProcessConfiguration.Companion.getCustomConfig
+import com.amazonaws.sfc.config.IncludeResolver.IncludeResolverException
 import com.amazonaws.sfc.config.IncludeResolver.urlRegex
 import com.amazonaws.sfc.data.JsonHelper.Companion.fromJsonExtended
 import com.amazonaws.sfc.log.Logger
@@ -140,7 +141,7 @@ class ConfigFileProvider(private val configFile: File, private val configVerific
                     }
                 } catch (e: Exception) {
                     if ((e !is JsonSyntaxException) && (e !is ConfigurationException) ) {
-                        loggers.errorEx("Error in configuration provider", e)
+                        if (e is IncludeResolverException) loggers.error("Error resolving configuration, $e") else loggers.errorEx("Error in configuration provider", e)
                     }
                 }
             }

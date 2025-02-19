@@ -1,11 +1,18 @@
 # Release Notes:
 
+## Version 1.8.2 ....
+
+- Fallback caching options for http calls executed to obtain [external configuration data](./docs/sfc-configuration.md#including-configuration-sections), [CacheUrlConfigResults](./docs/core/sfc-configuration.md#cacheurlconfigresults) and [CacheUrlConfigDirectory](./docs/core/sfc-configuration.md#cacheurlconfigdirectory) 
+
+  ---
+
 ## Version 1.8.1, 14 February 2025
 
 - Updated logic for validating S3 target adapter [bucket name](./docs/targets/aws-s3.md#bucketname)
 - Updated logic for validating Lambda target adapter [function name](./docs/targets/aws-lambda.md#functionname)
 - Documentation update
-- 
+
+---
 
 ## Version 1.8.0, 11 February 2025
 

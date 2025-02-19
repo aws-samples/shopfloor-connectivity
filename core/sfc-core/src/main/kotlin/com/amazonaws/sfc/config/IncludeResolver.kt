@@ -14,16 +14,21 @@ import java.io.File
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration
 
-object IncludeResolver {
+object  IncludeResolver {
 
     class IncludeResolverException(message: String) : Exception(message)
+
+    var cacheResults : Boolean = false
+    var cacheDirectory: String? = null
 
 
     private val urlCache: UrlReaderCache by lazy {
         UrlReaderCache(
             cachePeriod = 60.toDuration(DurationUnit.SECONDS),
             maxRetries = 5,
-            waitBetweenReties = 1.toDuration(DurationUnit.SECONDS)
+            waitBetweenReties = 1.toDuration(DurationUnit.SECONDS),
+            cacheDirectory = cacheDirectory,
+            cacheResults = cacheResults
         )
     }
 
@@ -81,7 +86,7 @@ object IncludeResolver {
                         val hint = if ("^[a-zA-B0-9_]".toRegex()
                                 .containsMatchIn(selector.toString())
                         ) ", selector may contain restricted characters, see https://jmespath.org/specification.html for more info" else ""
-                        throw IncludeResolverException("Selector \"$selector\" in \"$node\" is invalid or returns no selected dat$hint")
+                        throw IncludeResolverException("Selector \"$selector\" in \"$node\" is invalid or returns no selected data $hint")
                     }
                     base to search
                 }

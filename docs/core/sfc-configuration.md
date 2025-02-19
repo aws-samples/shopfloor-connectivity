@@ -10,6 +10,8 @@ The SFC (Shopfloor Connectivity Framework) top-level configuration defines the c
 
 - [AWSVersion](#awsversion)
 - [AwsIotCredentialProviderClients](#awsiotcredentialproviderclients)
+- [CacheUrlConfigResults](#cacheurlconfigresuts)
+- [CacheUrlConfigDirectory](#cacheurlconfigdirectory)
 - [ChangeFilters](#changefilters)
 - [ConditionFilters](#conditionfilters)
 - [ConfigProvider](#configprovider)
@@ -42,8 +44,6 @@ The SFC (Shopfloor Connectivity Framework) top-level configuration defines the c
 Specifies the AWS compatibility version for the Shopfloor Connectivity Framework. Must be set to "2022-04-02" to ensure proper functionality and compatibility with AWS services. This string value is used to maintain version control and manage future updates and extensions to the framework.
 
 **Type**: String
-
-
 
 ---
 ### AwsIotCredentialProviderClients
@@ -79,7 +79,24 @@ Example:
 
 
 ---
+### CacheUrlConfigResults
+
+When enabled, configuration data retrieved from [external HTTP sources](../sfc-configuration.md#including-configuration-sections) will be cached in local files. If subsequent HTTP calls to fetch configuration data fail, the cached data will be used as a fallback. The location where these cached configuration files are stored is specified by the [CacheUrlConfigDirectory](#cacheurlconfigdirectory)  property. Default value is false.
+
+**Type** : Boolean
+
+---
+
+### CacheUrlConfigDirectory
+
+Directory where configuration data from [external HTTP sources](../sfc-configuration.md#including-configuration-sections) is cached when [CacheUrlConfigResults](#cacheurlconfigresults) is enabled. If subsequent HTTP calls to fetch configuration data fail, the cached files from this directory will be used as a fallback. The default value is the home directory of the process running the SFC core process.
+
+**Type**: String
+
+---
+
 ### ConditionFilters
+
 [ConditionFilters](../sfc-data-processing-filtering.md#condition-filters) defines rules that evaluate whether specific channels have been read from a source, regardless of their actual values. This configuration checks for the presence or absence of channels in the data stream, rather than examining the data values within those channels. For example, it can verify if certain channels were successfully read, if they're missing, or create logical combinations of channel presence/absence 
 
 **Type**: Map[String,[ConditionFilterConfiguration](./condition-filter-configuration.md)]

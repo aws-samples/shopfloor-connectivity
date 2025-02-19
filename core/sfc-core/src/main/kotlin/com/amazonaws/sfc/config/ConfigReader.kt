@@ -4,6 +4,8 @@
 
 package com.amazonaws.sfc.config
 
+import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_CACHE_URL_CONFIG_CACHE_DIRECTORY
+import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_CACHE_URL_CONFIG_CACHE_RESULTS
 import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_TEMPLATES
 import com.amazonaws.sfc.data.JsonHelper.Companion.extendedJsonException
 import com.amazonaws.sfc.data.JsonHelper.Companion.fromJsonExtended
@@ -12,6 +14,7 @@ import com.amazonaws.sfc.filters.*
 import com.amazonaws.sfc.secrets.SecretsManager
 import com.amazonaws.sfc.transformations.TransformationOperator
 import com.amazonaws.sfc.transformations.TransformationsDeserializer
+import com.amazonaws.sfc.util.currentDirectory
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonSyntaxException
@@ -36,7 +39,7 @@ open class ConfigReader(val config: String, val allowUnresolved: Boolean = false
     inline fun <reified T : Validate> getConfig(validate: Boolean = true): T {
 
         return try {
-            val config = fromJsonExtended(jsonConfigReader,jsonConfig, T::class.java)
+            val config = fromJsonExtended(jsonConfigReader, jsonConfig, T::class.java)
             if (validate) {
                 config.validate()
             }
@@ -62,8 +65,20 @@ open class ConfigReader(val config: String, val allowUnresolved: Boolean = false
     // replaces environment variable placeholders in configuration
     @Suppress("UNCHECKED_CAST")
     private fun processConfig(): String {
-        val configMap = fromJsonExtended(config, Map::class.java) as Map<String,Any>
-        val included = IncludeResolver.resolve(configMap) as Map<String,Any>
+        val configMap = fromJsonExtended(config, Map::class.java) as Map<String, Any>
+        val useCachedResults = try {
+            (configMap[CONFIG_CACHE_URL_CONFIG_CACHE_RESULTS] as Boolean?) == true
+        } catch (_: Throwable) {
+            false
+        }
+        val cacheDirectory = try {
+            (configMap[CONFIG_CACHE_URL_CONFIG_CACHE_DIRECTORY] as String?)
+        } catch (_: Throwable) {
+            currentDirectory()
+        }
+        IncludeResolver.cacheResults  = useCachedResults
+        IncludeResolver.cacheDirectory = cacheDirectory
+        val included = IncludeResolver.resolve(configMap) as Map<String, Any>
         val resolved = TemplateResolver(CONFIG_TEMPLATES).resolve(included)
         val configStr = gsonPretty().toJson(resolved)
         return setPlaceholders(configStr)
@@ -93,13 +108,12 @@ open class ConfigReader(val config: String, val allowUnresolved: Boolean = false
     }
 
 
-
     private fun setSecretValues(config: String): String {
         if (secretsManager == null) return config
         var configOut = config
         getPlaceHolders(config).forEach {
             val secretIdOrAlias = it.groups[1]?.value
-            if (!secretIdOrAlias.isNullOrEmpty() && (secretsManager.secrets.containsKey(secretIdOrAlias)|| secretsManager.secrets.containsValue(secretIdOrAlias))) {
+            if (!secretIdOrAlias.isNullOrEmpty() && (secretsManager.secrets.containsKey(secretIdOrAlias) || secretsManager.secrets.containsValue(secretIdOrAlias))) {
                 val secretValue = secretsManager.getSecret(secretIdOrAlias).secretString().trim('\'', '\"')
                 configOut = configOut.replace(it.groups[0]!!.value, secretValue)
                 usedSecrets[secretIdOrAlias] = secretValue
@@ -179,10 +193,10 @@ open class ConfigReader(val config: String, val allowUnresolved: Boolean = false
             return parsePlaceHolders(configAsMap)
         }
 
-        fun getIncludedItems(configString : String): List<String> {
+        fun getIncludedItems(configString: String): List<String> {
             var includedItems = emptyList<String>()
             val configMap = fromJsonExtended(configString, Map::class.java)
-            IncludeResolver.resolve(configMap, fnResolved = { l -> includedItems = l} )
+            IncludeResolver.resolve(configMap, fnResolved = { l -> includedItems = l })
             return includedItems
         }
     }
