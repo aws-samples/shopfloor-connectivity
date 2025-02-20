@@ -11,11 +11,8 @@ val sfcRelease = rootProject.extra.get("sfc_release")!!
 val module = "opcuatarget"
 val kotlinCoroutinesVersion = "1.6.2"
 val kotlinVersion = "1.9.0"
-val reflectionVersion = "1.6.0"
 val sfcCoreVersion = sfcRelease
 val sfcIpcVersion = sfcRelease
-val log4jVersion = "2.17.2"
-val pahoVersion = "1.2.4"
 val miloVersion = "0.6.14"
 val gsonVersion = "2.9.0"
 
