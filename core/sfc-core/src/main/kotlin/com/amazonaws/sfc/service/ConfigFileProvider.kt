@@ -140,9 +140,10 @@ class ConfigFileProvider(private val configFile: File, private val configVerific
                         }
                     }
                 } catch (e: Exception) {
-                    if ((e !is JsonSyntaxException) && (e !is ConfigurationException) ) {
-                        if (e is IncludeResolverException) loggers.error("Error resolving configuration, $e") else loggers.errorEx("Error in configuration provider", e)
-                    }
+                    if (e is IncludeResolverException)
+                        loggers.error("Error resolving configuration, $e")
+                    else
+                        loggers.error("Error in configuration , $e")
                 }
             }
         }
