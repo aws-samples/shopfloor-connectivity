@@ -161,22 +161,23 @@ class ModbusTcpAdapter(private val adapterID: String, private val configuration:
         val errorLog = logger.getCtxErrorLog(className, "initializeSourceDevices")
 
         return configuration.activeSources.mapNotNull { source ->
-            val modbusDevice = modbusDevices[source.value.protocolAdapterID]?.get(source.value.sourceAdapterDevice)
+            val adapterDeviceID = source.value.sourceAdapterDevice
+            val modbusDevice = modbusDevices[source.value.protocolAdapterID]?.get(adapterDeviceID)
             if (modbusDevice == null) null
             else {
 
                 val adapterConfig = configuration.modbusTcpAdapters[source.value.protocolAdapterID]
                 if (adapterConfig == null) {
-                    errorLog("No MQTT adapter \"${source.value.protocolAdapterID}\" found for source \"${source.key}\", available MQTT adapters are ${configuration.modbusTcpAdapters.keys}")
+                    errorLog("No Modbus adapter \"${source.value.protocolAdapterID}\" found for source \"${source.key}\", available MQTT adapters are ${configuration.modbusTcpAdapters.keys}")
                     return@mapNotNull null
                 }
-                val adapterDevice = adapterConfig.devices[source.value.sourceAdapterDevice]
+                val adapterDevice = adapterConfig.devices[adapterDeviceID]
                 if (adapterDevice == null) {
-                    errorLog("No device \"${source.value.sourceAdapterDevice}\" found in MQTT adapter \"${source.value.protocolAdapterID}\" for source ${source.key}\", available devices are ${adapterConfig.devices.keys}")
+                    errorLog("No device \"$adapterDeviceID\" found in Modbus adapter \"${source.value.protocolAdapterID}\" for source ${source.key}\", available devices are ${adapterConfig.devices.keys}")
                     return@mapNotNull null
                 }
                 // Create modbus protocol handler
-                val modbusHandler = ModbusTCP(modbusDevice, Modbus.READ_TIMEOUT, logger)
+                val modbusHandler = ModbusTCP(adapterDeviceID, modbusDevice, Modbus.READ_TIMEOUT, logger)
                 // Create the modbus device
                 source.key to ModbusDevice(sourceID = source.key, configuration = source.value, modbus = modbusHandler, ownerAdapter = this, deviceID = adapterDevice.deviceID)
             }

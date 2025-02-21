@@ -99,7 +99,7 @@ class SourcesValuesAsFlow(
                             val start = systemDateTime().toEpochMilli()
                             val result = adapter.read(sourceID, channels)
                             val sourceReadDuration = (systemDateTime().toEpochMilli() - start)
-                            taskLogger.trace("Finished reading from source \"$sourceID\", read ${if (result is SourceReadSuccess) "succeeded" else "failed and took $sourceReadDuration"} milliseconds")
+                            taskLogger.trace("Finished reading from source \"$sourceID\", read ${if (result is SourceReadSuccess) "succeeded" else "failed"} and took $sourceReadDuration milliseconds")
                             if (!initialRead && sourceReadDuration > interval.inWholeMilliseconds) {
                                 log.warning("Reading from source \"$sourceID\" took ${sourceReadDuration.toDuration(DurationUnit.MILLISECONDS)}, " +
                                         "which is more than the read interval of $interval${if (schedule != null)" for schedule \"$schedule\"" else ""}")

@@ -16,7 +16,6 @@ import com.amazonaws.sfc.metrics.MetricsSourceConfiguration
 import com.amazonaws.sfc.slmp.config.SlmpConfiguration.Companion.SLMP_ADAPTER
 import com.amazonaws.sfc.slmp.protocol.SlmpStructureType
 import com.google.gson.annotations.SerializedName
-import kotlin.Throws
 
 @ConfigurationClass
 class SlmpAdapterConfiguration : ProtocolAdapterConfiguration(), Validate {

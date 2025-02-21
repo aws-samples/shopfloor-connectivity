@@ -54,7 +54,23 @@ open class ModbusTcpConfiguration : ModbusConfiguration() {
         sources.forEach {
             validateSource(it)
         }
+
+        checkForDevicesReadByMultipleSources()
+
         validated = true
+    }
+
+    private fun checkForDevicesReadByMultipleSources() {
+        val s = sources.map { source ->
+            Pair(source.value.protocolAdapterID, source.value.sourceAdapterDevice) to source.key
+        }.groupBy { it.first }.filter { it.value.size > 1 }.entries.firstOrNull()
+        if (s != null) {
+            throw ConfigurationException(
+                "Sources ${s.value.map { it.second }} have the same protocol adapter \"${s.key.first}\" and adapter device \"${s.key.second}\", when sharing the same adapter a device must be configured for each source.",
+                CONFIG_SOURCES,
+                sources
+            )
+        }
     }
 
     private fun validateAtLeastOneSource() {

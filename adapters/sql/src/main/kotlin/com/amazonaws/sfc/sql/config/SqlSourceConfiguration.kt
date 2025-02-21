@@ -11,7 +11,6 @@ import com.amazonaws.sfc.config.BaseSourceConfiguration
 import com.amazonaws.sfc.config.ConfigurationClass
 import com.amazonaws.sfc.config.ConfigurationException
 import com.google.gson.annotations.SerializedName
-import kotlin.Throws
 
 @ConfigurationClass
 class SqlSourceConfiguration : BaseSourceConfiguration() {

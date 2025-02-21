@@ -39,7 +39,7 @@ listOf("core", "metrics", "adapters", "targets", "examples").forEach { p ->
     }
 }
 
-include(":adapters:canbus")
+include(":targets:opcua-write-target")
 
 
 

@@ -5,9 +5,13 @@
 
 package com.amazonaws.sfc.modbus.tcp.protocol
 
+import com.amazonaws.sfc.log.Logger
 import com.amazonaws.sfc.modbus.protocol.*
-import com.amazonaws.sfc.modbus.protocol.Modbus.asHex
+import com.amazonaws.sfc.util.asHexString
+import kotlin.math.max
 import kotlin.time.Duration
+import kotlin.time.DurationUnit
+import kotlin.time.toDuration
 
 /**
  * Implements Modbus TCP MBAP header
@@ -38,45 +42,52 @@ class MBAPHeader {
     val unitID
         get() = _unitID
 
-    /**
-     * Reads Modbus TCP  MBAP header transaction ID
-     * @param transport ModbusTransport Transport to read from
-     * @param readTimeout Duration Timeout for reading the ID
-     * @param transactionIDHigh UByte High bytes already read for transaction ID
-     */
-    private suspend fun readTransactionId(transport: ModbusTransport, readTimeout: Duration, transactionIDHigh: UByte) {
-        val transactionIdLow = ResponseBase.readResponseBytes(transport, n = 1, timeout = readTimeout)
-                               ?: throw Modbus.ModbusException("timeout reading MBAP transaction ID LOW")
-        _transactionID = (transactionIDHigh.toInt() shl 8).toTransactionID() or transactionIdLow[0].toTransactionID()
-    }
+    private suspend fun readTransactionIdAndProtocolID(deviceID : String, transport: ModbusTransport, readTimeout: Duration, transactionIDHigh: UByte, logger : Logger) {
 
-    /**
-     * Reads Modbus TCP MBAP header protocol ID
-     * @param transport ModbusTransport Transport to read from
-     * @param readTimeout Duration Timeout for reading the protocol ID
-     */
-    private suspend fun readProtocolId(transport: ModbusTransport, readTimeout: Duration) {
-        val id = ResponseBase.readResponseBytes(transport, n = 2, timeout = readTimeout)
-                 ?: throw Modbus.ModbusException("timeout MBAP reading protocol ID")
+        val trace = logger.getCtxTraceLog("MBAPHeader", "readTransactionIdAndProtocolID")
 
-        if (!(id contentEquals ModbusTcpProtocolID)) {
-            val received = "${asHex(id[0])} ${asHex(id[1])}"
-            val expected = "${asHex(ModbusTcpProtocolID[0])} ${
-                asHex(ModbusTcpProtocolID[1])
-            }"
-            throw Modbus.ModbusException("$received is not the expected protocol ID $expected")
+        trace("Start reading MBAP transaction ID and protocol ID from adapter device \"$deviceID\"")
+
+        val timeoutMoment = System.currentTimeMillis() + readTimeout.inWholeMilliseconds
+
+        // transaction ID bytes
+        var transactionHigh = transactionIDHigh
+        val bytes: UByteArray = ResponseBase.readResponseBytes(transport, n = 3, timeout = readTimeout) ?:  throw Modbus.ModbusException("timeout MBAP reading transactionID and protocol ID")
+        var transactionIdLow = bytes[0]
+
+        // protocol ID bytes
+        var protocolIDHigh = bytes[1]
+        var protocolIDLow = bytes[2]
+
+        // Read until the expected protocol ID is read
+        while (!( arrayOf(protocolIDHigh, protocolIDLow).toUByteArray() contentEquals ModbusTcpProtocolID)){
+            val timeRemaining = max(timeoutMoment - System.currentTimeMillis().toInt(), 0)
+            trace("Received protocol ID bytes ${protocolIDHigh.asHexString()}${protocolIDLow.asHexString()} which are not the expected protocol bytes ${ModbusTcpProtocolID.map { it.asHexString() }}, reading next byte, remaining time is $timeRemaining ms")
+            if (timeRemaining == 0L) {
+                throw Modbus.ModbusException("timeout MBAP reading transactionID and protocol ID from adapter device \"$deviceID\"")
+            }
+            transactionHigh = transactionIdLow
+            transactionIdLow = protocolIDHigh
+            protocolIDHigh = protocolIDLow
+
+            // read the next byte which could be the low byte of the protocol ID
+            protocolIDLow  = ResponseBase.readResponseBytes(transport, n = 1, timeout = timeRemaining.toDuration(DurationUnit.MILLISECONDS))?.firstOrNull() ?: throw Modbus.ModbusException("timeout MBAP reading transactionID and protocol ID")
         }
+
+        // now with a valid protocol ID we know the previous 2 bytes dir contain the transaction ID
+        _transactionID = (transactionHigh.toInt() shl 8).toTransactionID() or transactionIdLow.toTransactionID()
+        trace("Read MBAP transaction ID $_transactionID and protocol ID ${protocolIDHigh.asHexString()}${protocolIDLow.asHexString()} from device \"$deviceID\"")
     }
 
-    /**
-     * Reads Modbus TCP MBAP header response length
-     * @param transport ModbusTransport Transport to read from
-     * @param readTimeout Duration Timeout for reading the protocol ID
-     */
-    private suspend fun readResponseLength(transport: ModbusTransport, readTimeout: Duration) {
+
+    private suspend fun readResponseLength(deviceID: String, transport: ModbusTransport, readTimeout: Duration, logger : Logger) {
+        val trace = logger.getCtxTraceLog("MBAPHeader", "readResponseLength")
+        trace("Start reading MBAP header length from adapter device \"$deviceID\"")
         val l = ResponseBase.readResponseBytes(transport, n = 2, timeout = readTimeout)
                 ?: throw Modbus.ModbusException("timeout reading MBAP length")
+
         _length = (l[0].toInt() shl 8).toUShort() or l[1].toUShort()
+        trace("Read MBAP header length $_length from adapter device \"$deviceID\"")
     }
 
     /**
@@ -84,19 +95,20 @@ class MBAPHeader {
      * @param transport ModbusTransport Transport to read from
      * @param readTimeout Duration Timeout for reading the unit ID
      */
-    private suspend fun readUnitID(transport: ModbusTransport, readTimeout: Duration) {
+    private suspend fun readUnitID(deviceID : String, transport: ModbusTransport, readTimeout: Duration, logger : Logger) {
 
+        val trace = logger.getCtxTraceLog("MBAPHeader", "readUnitID")
+        trace("Start reading MBAP header unit ID from adapter device \"$deviceID\"")
         val unitID = ResponseBase.readResponseBytes(transport, n = 1, timeout = readTimeout)
                      ?: throw Modbus.ModbusException("timeout reading MBAP unit ID")
         _unitID = unitID[0]
+        trace("Read MBAP header unit ID $_unitID from adapter device \"$deviceID\"")
     }
 
-    // Reads byte from the transport
-    internal suspend fun read(transport: ModbusTransport, readTimeout: Duration, transactionIDHigh: UByte) {
-        readTransactionId(transport, readTimeout = readTimeout, transactionIDHigh = transactionIDHigh)
-        readProtocolId(transport, readTimeout = readTimeout)
-        readResponseLength(transport, readTimeout = readTimeout)
-        readUnitID(transport, readTimeout = readTimeout)
+    internal suspend fun read(deviceID : String, transport: ModbusTransport, readTimeout: Duration, transactionIDHigh: UByte, logger : Logger) {
+        readTransactionIdAndProtocolID(deviceID, transport, readTimeout = readTimeout, transactionIDHigh = transactionIDHigh, logger)
+        readResponseLength( deviceID, transport, readTimeout = readTimeout, logger)
+        readUnitID(deviceID, transport, readTimeout = readTimeout, logger = logger)
     }
 
     internal fun init(request: Request) {
@@ -121,24 +133,14 @@ class MBAPHeader {
          */
         val ModbusTcpProtocolID = ubyteArrayOf(0u, 0u)
 
-        /**
-         * Reads a MBAP header
-         * @param device ModbusTransport Transport to read from
-         * @param readTimeout Duration Timeout for reading the header
-         * @param transactionIDHigh UByte High byte already read for the header
-         * @return MBAPHeader Read MBAP header
-         */
-        internal suspend fun read(device: ModbusTransport, readTimeout: Duration, transactionIDHigh: UByte): MBAPHeader {
+
+        internal suspend fun read(deviceID : String,device: ModbusTransport, readTimeout: Duration, transactionIDHigh: UByte, logger : Logger): MBAPHeader {
             val header = MBAPHeader()
-            header.read(device, readTimeout = readTimeout, transactionIDHigh = transactionIDHigh)
+            header.read(deviceID =deviceID, transport =device, readTimeout = readTimeout, transactionIDHigh = transactionIDHigh, logger = logger)
             return header
         }
 
-        /**
-         * Creates a MBAP header for a request
-         * @param request Request
-         * @return MBAPHeader
-         */
+
         internal fun create(request: Request): MBAPHeader {
             val header = MBAPHeader()
             header.init(request)

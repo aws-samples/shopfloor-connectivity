@@ -185,7 +185,7 @@ class IpcSourceReader(
             val sources = schedule.sources.filter {
                 val sourceConfig = config.sources[it.key]
                 val adapterConfig = config.protocolAdapters[sourceConfig?.protocolAdapterID]
-                adapterConfig?.protocolAdapterType == adapterType
+                adapterConfig?.protocolAdapterType == adapterType && sourceConfig?.protocolAdapterID == adapterID
             }
 
             return IpcSourceReader(adapterID, configReader, serverConfig, sources, adapterType, schedule, logger)
@@ -203,7 +203,7 @@ class IpcSourceReader(
         val adapter = ((configRaw[CONFIG_PROTOCOL_ADAPTERS] as Map<*, *>)[adapterID] as Map<*, *>)
 
 
-        val adapterSources = scheduleSourcesForAdapter(configRaw)
+        val adapterSources = scheduleSourcesForAdapter(configRaw).filter { s -> (s.value as Map<*,*>)[CONFIG_SOURCE_PROTOCOL_ADAPTER] == adapterID }
         val adapterConfig = mutableMapOf<String, Any?>(
             CONFIG_SOURCES to adapterSources,
             CONFIG_PROTOCOL_ADAPTERS to mapOf(adapterID to adapter)
