@@ -30,6 +30,8 @@ Source configuration for the Modbus TCP protocol adapter. This type extends the 
 ### AdapterDevice
 The identifier that references a specific Modbus TCP device defined in the Devices section of the adapter configuration. This identifier must match a DeviceId in the adapter's Devices section and is used to establish which physical Modbus device to communicate with. Note that this is not the Modbus Unit ID (slave address), but rather the logical device identifier used within the SFC configuration.
 
+**When multiple sources read from the same device, by using the same IP address, then a device for each source must be configured for each source to use.**
+
 **Type**: String
 
 ---
@@ -400,6 +402,8 @@ AdsAdapterConfiguration
 ---
 ### Devices
 A collection of Modbus TCP device configurations that defines all the available Modbus servers this adapter can communicate with. Each device configuration specifies connection details like IP address and port number. When setting up a Modbus TCP source in the SFC system, the AdapterDevice property must reference one of these configured devices by name to establish which specific Modbus server to connect to for data collection.
+
+NOTE: When multiple sources read from the same device by using the same IP address, then for each source, a device must be configured in the adapter.
 
 **Type**: Map[String,[ModbusTcpDeviceConfiguration](#modbustcpdeviceconfiguration)]
 
