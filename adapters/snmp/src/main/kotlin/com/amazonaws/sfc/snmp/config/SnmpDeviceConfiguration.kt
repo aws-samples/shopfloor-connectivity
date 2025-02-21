@@ -13,7 +13,6 @@ import org.snmp4j.mp.SnmpConstants
 import org.snmp4j.smi.TcpAddress
 import org.snmp4j.smi.TransportIpAddress
 import org.snmp4j.smi.UdpAddress
-import kotlin.Throws
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration
 

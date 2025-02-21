@@ -25,7 +25,6 @@ import org.snmp4j.smi.*
 import org.snmp4j.transport.DefaultTcpTransportMapping
 import org.snmp4j.transport.DefaultUdpTransportMapping
 import java.io.IOException
-import kotlin.Throws
 
 class SnmpDevice(
     private val sourceID: String,

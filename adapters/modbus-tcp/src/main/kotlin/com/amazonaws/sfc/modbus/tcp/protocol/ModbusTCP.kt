@@ -20,6 +20,7 @@ import kotlin.time.Duration
  * Handler for Modbus TCP protocol
  */
 class ModbusTCP(
+    private val deviceID : String,
     override val modbusDevice: ModbusTransport,
     private val readTimeout: Duration,
     private val logger: Logger) : ModbusHandler {
@@ -87,7 +88,8 @@ class ModbusTCP(
                 state = when (state) {
 
                     ReadResponseState.ReadMBAPHeaderState -> {
-                        header = MBAPHeader.read(device = modbusDevice, readTimeout = readTimeout, transactionIDHigh = b)
+                        header = MBAPHeader.
+                        read(deviceID = deviceID, device = modbusDevice, readTimeout = readTimeout, transactionIDHigh = b, logger = logger)
                         ReadResponseState.ReadFunctionResponseState
                     }
 

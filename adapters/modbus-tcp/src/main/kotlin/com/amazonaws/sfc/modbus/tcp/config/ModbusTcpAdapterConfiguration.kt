@@ -32,6 +32,7 @@ class ModbusTcpAdapterConfiguration : ProtocolAdapterConfiguration(), Validate {
         if (validated) return
 
         devices.values.forEach { it.validate() }
+
         validated = true
 
     }

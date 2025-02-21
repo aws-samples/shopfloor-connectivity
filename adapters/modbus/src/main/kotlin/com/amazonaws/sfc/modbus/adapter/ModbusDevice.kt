@@ -198,25 +198,6 @@ class ModbusDevice(
     // adapter using the device (weak ref to avoid circular dependencies between device and adapter)
     private val adapter = WeakReference(ownerAdapter)
 
-    // transaction id with lock for requests
-    private var _transactionID = AtomicInteger()
-
-    // generate next transaction id
-    private fun nextTransactionID(): UShort? {
-
-        if (requestDepth == 0) {
-            return null
-        }
-
-        if (_transactionID.get() == 0xFFFF) {
-            _transactionID.set(0)
-        }
-
-        _transactionID.incrementAndGet()
-        return _transactionID.incrementAndGet().toTransactionID()
-
-    }
-
     // Combine sets of channels (addresses) to be read for a channel type into larger sets, so they can be read by a single read request
     private fun optimizedAddressRangesForChannelType(
         source: ModbusSourceConfiguration,
@@ -389,7 +370,7 @@ class ModbusDevice(
 
             // lower requests semaphore for this device
             requestSlots.release()
-            log?.trace?.invoke("Released request slot ${if (resp.transactionID == 0.toTransactionID()) "" else " with transaction ID ${resp.transactionID}"}")
+            log?.trace?.invoke("Released request slot ${if (resp.transactionID == 0.toTransactionID()) "" else " for device \"${configuration.sourceAdapterDevice}\" on adapter \"${configuration.protocolAdapterID}\" for source \"${configuration.name}\" transaction ID ${resp.transactionID}"}, available permits are ${requestSlots.availablePermits}")
             receivedResponses += 1
         }
         resultChannel.send(SourceReadSuccess(mapToChannelValues(channels, responseData)))
@@ -404,9 +385,9 @@ class ModbusDevice(
             // transaction id, required to map responses to the requests
             val s = if (r.transactionID == 0.toTransactionID()) "" else " with transaction ID ${r.transactionID}"
             // send requests taking in account the max number of requests that can be sent before getting a response from the device
-            logTrace?.invoke("Acquiring request slot on device ${configuration.sourceAdapterDevice}\" on adapter \"${configuration.protocolAdapterID}\" for source \"${configuration.name}\" to send request $s")
+            logTrace?.invoke("Acquiring request slot on device \"${configuration.sourceAdapterDevice}\" on adapter \"${configuration.protocolAdapterID}\" for source \"${configuration.name}\" to send request $s, available permits are ${requestSlots.availablePermits}")
             requestSlots.acquire()
-            logTrace?.invoke("Request Slot acquired for request$s")
+            logTrace?.invoke("Request slot acquired for device \"${configuration.sourceAdapterDevice}\" on adapter \"${configuration.protocolAdapterID}\" for source \" ${configuration.name}\"request$s, available permits are ${requestSlots.availablePermits}")
             modbus.send(r)
         }
     }
@@ -469,28 +450,28 @@ class ModbusDevice(
                 address = address,
                 quantity = size,
                 deviceID = deviceID?.toUByte() ?: DEFAULT_DEVICE_ID,
-                transactionID = nextTransactionID()
+                transactionID = nextTransactionID(requestDepth)
             )
 
             ModbusChannelType.DISCRETE_INPUT -> ReadDiscreteInputsRequest(
                 address = address,
                 quantity = size,
                 deviceID = deviceID?.toUByte() ?: DEFAULT_DEVICE_ID,
-                transactionID = nextTransactionID()
+                transactionID = nextTransactionID(requestDepth)
             )
 
             ModbusChannelType.INPUT_REGISTER -> ReadInputRegistersRequest(
                 address = address,
                 quantity = size,
                 deviceID = deviceID?.toUByte() ?: DEFAULT_DEVICE_ID,
-                transactionID = nextTransactionID()
+                transactionID = nextTransactionID(requestDepth)
             )
 
             ModbusChannelType.HOLDING_REGISTER -> ReadHoldingRegistersRequest(
                 address = address,
                 quantity = size,
                 deviceID = deviceID?.toUByte() ?: DEFAULT_DEVICE_ID,
-                transactionID = nextTransactionID()
+                transactionID = nextTransactionID(requestDepth)
             )
         }
     }
@@ -498,5 +479,24 @@ class ModbusDevice(
 
     companion object {
         val DEFAULT_DEVICE_ID = 1.toUByte()
+
+        // transaction id with lock for requests
+        private var _transactionID = AtomicInteger()
+
+        // generate next transaction id
+        private fun nextTransactionID(requestDepth: Int): UShort? {
+
+            if (requestDepth == 0) {
+                return null
+            }
+
+            if (_transactionID.get() == 0xFFFF) {
+                _transactionID.set(0)
+            }
+
+            return _transactionID.incrementAndGet().toTransactionID()
+
+        }
+
     }
 }

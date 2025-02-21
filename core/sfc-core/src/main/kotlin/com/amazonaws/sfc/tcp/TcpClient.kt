@@ -311,7 +311,7 @@ open class TcpClient(private val config: TcpConfiguration, readBufferSize : Int 
         trace(
             "Sending ${bytes.size} bytes ${
                 bytes.joinToString(prefix = "[", postfix = "]", separator = ",") { "0x%02X".format(it) }
-            }")
+            } to ${config.address}:${config.port}")
     }
 
     // logs received bytes to the logger trace
@@ -327,7 +327,7 @@ open class TcpClient(private val config: TcpConfiguration, readBufferSize : Int 
                     postfix = "]",
                     separator = ","
                 ) { "0x%02X".format(it) }
-            }"
+            } from ${config.address}:${config.port}"
         )
     }
 
