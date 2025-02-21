@@ -119,7 +119,7 @@ configuration file.</u>*
       "JarFiles": [
         "${SFC_DEPLOYMENT_DIR}/aws-iot-core-target/lib"
       ],
-      "FactoryClassName": "com.amazonaws.sfc.awsiocore.AwsIotCoreTargetWriter"
+      "FactoryClassName": "com.amazonaws.sfc.awsiotcore.AwsIotCoreTargetWriter"
     },
     "MQTT-TARGET": {
       "JarFiles": [
