@@ -216,7 +216,7 @@
         },
         "LONG-FIRST-VALUE": {
           "Address": "L10:0",
-          "Description": "First  long value, CREATE DATAFILE L10  ON CONTROLLER"
+          "Description": "First long value, CREATE DATAFILE L10  ON CONTROLLER"
         },
         "LONG-SECOND-VALUE": {
           "Address": "L10:1",
@@ -228,7 +228,7 @@
         },
         "ASCII-FIRST-TWO-CHARS-VALUE": {
           "Address": "A11:0",
-          "Description": "First  ascii value containing two characters, CREATE DATAFILE A11  ON CONTROLLER"
+          "Description": "First ascii value containing two characters, CREATE DATAFILE A11  ON CONTROLLER"
         },
         "ASCII-SECONDS-TWO-CHARS-VALUE": {
           "Address": "A11:1",

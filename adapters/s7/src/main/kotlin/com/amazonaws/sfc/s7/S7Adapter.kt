@@ -185,7 +185,7 @@ class S7Adapter(private val adapterID: String, private val configuration: S7Conf
         val controllerConfiguration = adapterConfiguration.controllers[sourceConfiguration.sourceAdapterControllerID]
         if (controllerConfiguration == null) {
             log.error("Device \"${sourceConfiguration.sourceAdapterControllerID}\" Adapter \"${sourceConfiguration.protocolAdapterID}\" " +
-                      "for  Source \"$sourceID\" does not exist, available devices are ${adapterConfiguration.controllers.keys}")
+                      "for Source \"$sourceID\" does not exist, available devices are ${adapterConfiguration.controllers.keys}")
             return null
         }
 

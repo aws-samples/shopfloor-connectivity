@@ -364,7 +364,7 @@ class SecretsManager(
                 } else {
                     val msg =
                         "Configured file $filename does exist, set $CONFIG_CREATE_PRIVATE_KEY_IF_NO_EXIST to true in configuration, create is manually " +
-                        "using  \"openssl genrsa -out $filename 2048\" or set $CONFIG_GREENGRASS_DEPLOYMENT_PATH to use a Greengrass deployed private key"
+                        "using \"openssl genrsa -out $filename 2048\" or set $CONFIG_GREENGRASS_DEPLOYMENT_PATH to use a Greengrass deployed private key"
                     log.error(msg)
                     throw SecretManagerException(msg)
                 }

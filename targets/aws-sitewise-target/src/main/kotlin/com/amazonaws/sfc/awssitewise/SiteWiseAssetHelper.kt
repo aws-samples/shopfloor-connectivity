@@ -244,7 +244,7 @@ class SiteWiseAssetHelper(private val client: AwsSiteWiseClient,
 
                     val assetProperty = asset!!.assetProperties().find { it.name() == assetModelProperty.name() }
                     if (assetProperty != null) {
-                        log.info("Setting  alias \"$alias\" for assetModelProperty ${assetModelProperty.name()} (${assetModelProperty.id()}) \"$alias\" of asset ${asset?.assetName()} (${asset?.assetId()} for channel \"$channelName\"")
+                        log.info("Setting alias \"$alias\" for assetModelProperty ${assetModelProperty.name()} (${assetModelProperty.id()}) \"$alias\" of asset ${asset?.assetName()} (${asset?.assetId()} for channel \"$channelName\"")
                         try {
                             setAssetPropertyAlias(asset!!, assetProperty, alias)
                         } catch (e: Exception) {

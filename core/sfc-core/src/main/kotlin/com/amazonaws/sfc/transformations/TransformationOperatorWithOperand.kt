@@ -14,7 +14,7 @@ abstract class TransformationOperatorWithOperand {
 
         inline fun <reified R : TransformationOperator, reified P> fromJson(o: JsonObject, fn: (jsonObject: JsonElement) -> Any): TransformationOperator {
             val operand = o.get(TransformationsDeserializer.CONFIG_TRANSFORMATION_OPERAND)
-                          ?: throw TransformationException(R::class.java.simpleName, "Transformation  ${TransformationsDeserializer.CONFIG_TRANSFORMATION_OPERAND} can not be null")
+                          ?: throw TransformationException(R::class.java.simpleName, "Transformation ${TransformationsDeserializer.CONFIG_TRANSFORMATION_OPERAND} can not be null")
             return createInstance<R, P>(operand, fn)
         }
 

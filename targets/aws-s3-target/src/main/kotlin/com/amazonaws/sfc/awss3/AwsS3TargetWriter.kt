@@ -202,7 +202,7 @@ class AwsS3TargetWriter(
                 }
             }
 
-            log.trace("S3  putObject result is ${resp.sdkHttpResponse()?.statusCode()}")
+            log.trace("S3 putObject result is ${resp.sdkHttpResponse()?.statusCode()}")
 
         } catch (e: Exception) {
             log.errorEx("Error writing to bucket \"$bucketName\" for target \"$targetID\"", e)

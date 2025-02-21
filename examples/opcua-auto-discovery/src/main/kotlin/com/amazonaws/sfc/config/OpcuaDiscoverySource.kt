@@ -123,7 +123,7 @@ class OpcuaDiscoverySource(
             acquireClientRead()
             client.addressSpace?.browseNodes(nodeID, browseOptions)
         } catch (e: Exception) {
-            log.error("Error  browsing node ${nodeID.toParseableString()}, $e")
+            log.error("Error browsing node ${nodeID.toParseableString()}, $e")
             return emptyList()
         }
 
