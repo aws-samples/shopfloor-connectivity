@@ -4,7 +4,7 @@
 
 [SFC Configuration](./sfc-configuration.md) > [TargetServers](./sfc-configuration.md#targetservers) > [TargetServer](./server-configuration.md) > [HealthProbe](./server-configuration.md#healthprobe)
 
-[SFC Configuration](./sfc-configuration.md) > [ProtocolAdapterServers](./sfc-configuration.md#protocoladapterservers) > [AdapterServer](./server-configuration.md) > [HealthProbe](./server-configuration.md#healthprobe)
+[SFC Configuration](./sfc-configuration.md) > [AdapterServers](./sfc-configuration.md#adapterservers) > [AdapterServer](./server-configuration.md) > [HealthProbe](./server-configuration.md#healthprobe)
 
 The HealthProbeConfiguration class defines settings for a health monitoring endpoint that allows external systems to check the operational status of a service. It specifies network settings (port, interface, allowed IPs), response behavior, and automatic shutdown conditions when a service remains unhealthy for a specified period.
 

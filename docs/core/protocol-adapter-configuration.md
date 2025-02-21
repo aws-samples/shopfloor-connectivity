@@ -16,13 +16,13 @@ Defines the base configuration structure for protocol adapters in SFC, specifyin
 
 ---
 ### AdapterServer
-Specifies the server reference for running the protocol adapter as a separate service. When set, it must match an entry in the [ProtocolAdapterServers](./sfc-configuration.md#protocoladapterservers)  section, enabling IPC-based communication between the SFC core and the adapter service. If not set, the adapter runs in-process within the SFC core. This property is mutually exclusive with [AdapterType](#adaptertype).
+Specifies the server reference for running the protocol adapter as a separate service. When set, it must match an entry in the [AdapterServers](./sfc-configuration.md#adapterservers)  section, enabling IPC-based communication between the SFC core and the adapter service. If not set, the adapter runs in-process within the SFC core. This property is mutually exclusive with [AdapterType](#adaptertype).
 
 **Type**: String
 
 ---
 ### AdapterType
-Defines the protocol adapter type for in-process execution, referencing a predefined type (like OPCUA, MQTT, MODBUS-TCP, SNMP, S7, ADS) from the [ProtocolAdapterTypes](./sfc-configuration.md#protocoladaptertypes) section. This property is used when the adapter runs within the SFC core process and is mutually exclusive with AdapterServer
+Defines the protocol adapter type for in-process execution, referencing a predefined type (like OPCUA, MQTT, MODBUS-TCP, SNMP, S7, ADS) from the [AdapterTypes](./sfc-configuration#adaptertypes) section. This property is used when the adapter runs within the SFC core process and is mutually exclusive with AdapterServer
 
 **Type**: String
 

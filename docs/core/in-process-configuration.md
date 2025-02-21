@@ -1,6 +1,6 @@
 ## InProcessConfiguration
 
-[SFC Configuration](./sfc-configuration.md) > [ProtocolAdapterTypes](./sfc-configuration.md#protocoladaptertypes)
+[SFC Configuration](./sfc-configuration.md) > [AdapterTypes](./sfc-configuration.md#adaptertypes)
 
 [SFC Configuration](./sfc-configuration.md) > [TargetTypes](./sfc-configuration.md#targettypes) 
 

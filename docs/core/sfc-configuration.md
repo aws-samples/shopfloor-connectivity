@@ -9,8 +9,10 @@ The SFC (Shopfloor Connectivity Framework) top-level configuration defines the c
 **Properties:**
 
 - [AWSVersion](#awsversion)
+- [AdapterServers](#adapterservers)
+- [AdapterTypes](#adaptertypes)
 - [AwsIotCredentialProviderClients](#awsiotcredentialproviderclients)
-- [CacheUrlConfigResults](#cacheurlconfigresuts)
+- [CacheUrlConfigResults](#cacheurlconfigresults)
 - [CacheUrlConfigDirectory](#cacheurlconfigdirectory)
 - [ChangeFilters](#changefilters)
 - [ConditionFilters](#conditionfilters)
@@ -24,8 +26,6 @@ The SFC (Shopfloor Connectivity Framework) top-level configuration defines the c
 - [Metrics](#metrics)
 - [MonitorIncludedConfigContentInterval](#monitorincludedconfigcontentinterval)
 - [MonitorIncludedConfigFiles](#monitorincludedconfigfiles)
-- [ProtocolAdapterServers](#protocoladapterservers)
-- [ProtocolAdapterTypes](#protocoladaptertypes)
 - [ProtocolAdapters](#protocoladapters)
 - [Schedules](#schedules)
 - [SecretsManager](#secretsmanager)
@@ -46,6 +46,24 @@ Specifies the AWS compatibility version for the Shopfloor Connectivity Framework
 **Type**: String
 
 ---
+
+### AdapterServers
+
+Defines a mapping of [protocol adapter servers](../sfc-running-adapters.md#running-the-jvm-protocol-adapters-as-an-ipc-service) that operate as independent processes. Each server is identified by a unique string key and contains connection details for the SFC Core to communicate with it. The SFC Core uses gRPC streaming for efficient inter-process communication with these servers. These server configurations can be referenced by their identifiers within the ProtocolAdapters section, allowing for flexible deployment architectures where protocol adapters run separately from the main SFC Core process.
+
+**Type**: Map[String,[ServerConfiguration](./server-configuration.md)]
+
+---
+### AdapterTypes
+
+Defines configuration for in-process protocol adapters [running within the SFC core's JVM](../sfc-running-adapters.md#running-protocol-adapters-in-process). Maps adapter types (like OPCUA, MODBUS) to their implementation details, including JAR files and factory classes. The SFC core uses this configuration to dynamically load and create adapter instances, enabling new protocol types without core modifications. Only required for in-process adapters (not IPC-based ones) and limited to JVM implementations.
+
+A protocol adapter type only needs to be included when it's running within the SFC Core JVM; it can be omitted when the adapter is running as an [IPC service](#adapterservers).
+
+**Type**: Map[String,[InProcessConfiguration](./in-process-configuration.md)]
+
+---
+
 ### AwsIotCredentialProviderClients
 Defines a map of configurations for clients that use AWS IoT Core's credential provider service to obtain temporary security credentials. Each entry in the map consists of a client identifier (String) paired with its corresponding credential provider configuration. This allows devices to authenticate using X.509 certificates instead of storing long-term AWS credentials, enhancing security by providing temporary, limited-privilege session [credentials for accessing AWS services](../sfc-aws-service-credentials.md).
 
@@ -207,23 +225,8 @@ A custom identifier that can be assigned to the configuration. This optional str
 Optional
 
 ---
-### ProtocolAdapterServers
 
-Defines a mapping of [protocol adapter servers](../sfc-running-adapters.md#running-the-jvm-protocol-adapters-as-an-ipc-service) that operate as independent processes. Each server is identified by a unique string key and contains connection details for the SFC Core to communicate with it. The SFC Core uses gRPC streaming for efficient inter-process communication with these servers. These server configurations can be referenced by their identifiers within the ProtocolAdapters section, allowing for flexible deployment architectures where protocol adapters run separately from the main SFC Core process.
-
-**Type**: Map[String,[ServerConfiguration](./server-configuration.md)]
-
----
-### ProtocolAdapterTypes
-
-Defines configuration for in-process protocol adapters [running within the SFC core's JVM](../sfc-running-adapters.md#running-protocol-adapters-in-process). Maps adapter types (like OPCUA, MODBUS) to their implementation details, including JAR files and factory classes. The SFC core uses this configuration to dynamically load and create adapter instances, enabling new protocol types without core modifications. Only required for in-process adapters (not IPC-based ones) and limited to JVM implementations.
-
-A protocol adapter type only needs to be included when it's running within the SFC Core JVM; it can be omitted when the adapter is running as an [IPC service](#protocoladapterservers).
-
-**Type**: Map[String,[InProcessConfiguration](./in-process-configuration.md)]
-
----
-### 	ProtocolAdapters
+### ProtocolAdapters
 Protocol adapters are the sources to read data from and abstract the actual protocol that is us used to read the data. Each source used in a schedule must have a reference to a protocol adapter. As protocol adapters can be of different types, each inherited type has additional specific attributes for the protocol.
 
 **Type**: Map[String, [ProtocolAdapterConfiguration](./protocol-adapter-configuration.md)]
@@ -490,7 +493,7 @@ Optional
       "default": true
     },
     "Name": "string",
-    "ProtocolAdapterServers": {
+    "AdapterServers": {
       "type": "object",
       "patternProperties": {
         "^.*$": {
@@ -498,7 +501,7 @@ Optional
         }
       }
     },
-    "ProtocolAdapterTypes": {
+    "AdapterTypes": {
       "type": "object",
       "patternProperties": {
         "^.*$": {
@@ -598,20 +601,20 @@ Optional
       "anyOf": [
         {
           "required": [
-            "ProtocolAdapterTypes"
+            "AdapterTypes"
           ],
           "properties": {
-            "ProtocolAdapterTypes": {
+            "AdapterTypes": {
               "minProperties": 1
             }
           }
         },
         {
           "required": [
-            "ProtocolAdapterServers"
+            "AdapterServers"
           ],
           "properties": {
-            "ProtocolAdapterServers": {
+            "AdapterServers": {
               "minProperties": 1
             }
           }

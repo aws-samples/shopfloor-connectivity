@@ -2,7 +2,7 @@
 
 [SFC Configuration](./sfc-configuration.md) > [TargetServers](./sfc-configuration.md#targetservers) > [TargetServer](./server-configuration.md) 
 
-[SFC Configuration](./sfc-configuration.md) > [AdapterServers](./sfc-configuration.md#protocoladapterservers) > [AdapterServer](./server-configuration.md) 
+[SFC Configuration](./sfc-configuration.md) > [AdapterServers](./sfc-configuration.md#adapterservers) > [AdapterServer](./server-configuration.md) 
 
 [SFC Configuration](./sfc-configuration.md) > [Metrics](./sfc-configuration.md#metrics) > [Writer](./metrics-writer-configuration.md#metricswriter) > [MetricsServer](./metrics-writer-configuration.md#metricsserver)
 
