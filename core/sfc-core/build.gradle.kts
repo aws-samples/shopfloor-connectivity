@@ -25,6 +25,7 @@ val gsonVersion = "2.9.0"
 val jmesPathVersion = "0.5.1"
 val log4jVersion = "2.17.2"
 val velocityVersion = "2.3"
+val velocityToolsVersion = "3.1"
 val mockkVersion = "1.12.0"
 val kotlinCoroutinesVersion = "1.6.2"
 val kotlinReflectionVersion = "1.6.0"
@@ -53,6 +54,7 @@ dependencies {
     implementation("io.ktor:ktor-client-cio:$ktorVersion")
     api("io.burt:jmespath-core:$jmesPathVersion")
     api("org.apache.velocity:velocity-engine-core:$velocityVersion")
+    implementation("org.apache.velocity.tools:velocity-tools-generic:$velocityToolsVersion")
     api("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:$fasterXmlVersion")
     api("org.eclipse.paho:org.eclipse.paho.client.mqttv3:$pahoVersion")
     api("org.apache.logging.log4j:log4j-api:$log4jVersion")

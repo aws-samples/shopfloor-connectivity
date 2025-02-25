@@ -1,6 +1,12 @@
 # Release Notes:
 
-## Version 1.8.2 ....
+## Version 1.8.3, 25 February 2025
+
+- Epoch [timestamp](./docs/core/target-configuration.md#templateepochtimestamp) data for target template transformations
+- Documentation updates
+
+  ---
+## Version 1.8.2, 21 February 2025
 
 - Fallback caching options for http calls executed to obtain [external configuration data](./docs/sfc-configuration.md#including-configuration-sections), [CacheUrlConfigResults](./docs/core/sfc-configuration.md#cacheurlconfigresults) and [CacheUrlConfigDirectory](./docs/core/sfc-configuration.md#cacheurlconfigdirectory) 
 

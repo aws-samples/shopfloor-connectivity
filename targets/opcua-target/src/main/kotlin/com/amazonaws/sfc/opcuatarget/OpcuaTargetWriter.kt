@@ -105,12 +105,6 @@ class OpcuaTargetWriter(
                         MetricsCollector.METRICS_VALUES_READ,
                         readCount.get().toDouble(),
                         MetricUnits.COUNT
-                    ),
-                    metricsCollector?.buildValueDataPoint(
-                        targetID,
-                        MetricsCollector.METRICS_VALUES_WRITTEN,
-                        readCount.get().toDouble(),
-                        MetricUnits.COUNT
                     ))
             }
             readCount.set(0)

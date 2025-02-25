@@ -70,7 +70,7 @@ class DebugTargetWriter(
         if (transformation == null)
             targetData.toJson(config.elementNames, targetConfig.unquoteNumericJsonValues)
         else
-            transformation!!.transform(targetData, config.elementNames) ?: ""
+            transformation!!.transform(targetData, config.elementNames, targetConfig.templateEpochTimestamp) ?: ""
 
     private val metricsCollector: MetricsCollector? by lazy {
         val metricsConfiguration = config.targets[targetID]?.metrics ?: MetricsSourceConfiguration()

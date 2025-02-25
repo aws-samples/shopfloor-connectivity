@@ -434,7 +434,7 @@ class AwsSiteWiseTargetWriter(private val targetID: String, private val configRe
 
         // No data for this property
         if (propertyValue == null) {
-            if (prop.warnIfNotPresent && logger.level != LogLevel.TRACE) {
+            if ((prop.warnIfNotPresent && logger.level != LogLevel.TRACE) || (logger.level == LogLevel.TRACE)) {
                 log.warning("No value found for target \"$targetID\", asset \"${asset.asString}\", property \"${prop.asString}\" for dataPath \"${prop.dataPathStr}\"")
             }
             return null

@@ -118,6 +118,10 @@ open class TargetConfiguration : Validate {
     val arrayWhenBuffered
         get() = _arrayWhenBuffered
 
+    @SerializedName(CONFIG_TEMPLATE_EPOC_TIMESTAMP)
+    protected var _templateEpochTimestamp = false
+    val templateEpochTimestamp
+        get() = _templateEpochTimestamp
 
     private var _validated = false
     override var validated
@@ -162,6 +166,8 @@ open class TargetConfiguration : Validate {
         const val CONFIG_TARGET_ARRAY_WHEN_BUFFERED = "AsArrayWhenBuffered"
         const val DEFAULT_TARGET_ARRAY_WHEN_BUFFERED = true
 
+        const val CONFIG_TEMPLATE_EPOC_TIMESTAMP = "TemplateEpochTimestamp"
+
         const val CONFIG_TARGET_SERVER = "TargetServer"
         fun create(description: String = "",
                    active: Boolean = true,
@@ -190,6 +196,7 @@ open class TargetConfiguration : Validate {
                                                                                          active: Boolean = true,
                                                                                          targetType: String? = null,
                                                                                          template: String? = null,
+                                                                                         templateEpochTimestamp : Boolean = false,
                                                                                          targetServer: String? = null,
                                                                                          credentialProviderClient: String? = null,
                                                                                          metrics: MetricsSourceConfiguration = MetricsSourceConfiguration(),
@@ -204,6 +211,7 @@ open class TargetConfiguration : Validate {
                 _description = description
                 _active = active
                 _targetType = targetType
+                _templateEpochTimestamp = templateEpochTimestamp
                 _template = template
                 _server = targetServer
                 _credentialProvideClient = credentialProviderClient

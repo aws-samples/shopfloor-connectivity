@@ -19,6 +19,7 @@ Defines core configuration settings for [SFC target adapters](./sfc-configuratio
 - [TargetChannelTimeout](#targetchanneltimeout)
 - [TargetType](#targettype)
 - [Template](#template)
+- [TemplateEpochTimestamp](#templateepochtimestamp)
 - [UnquoteNumericJsonValues](#unquotenumericjsonvalues)
 
 ---
@@ -106,9 +107,32 @@ Specifies the file path to an [Apache velocity](https://velocity.apache.org/)  t
 - names specified in ElementNames configuration
 - $tab (for inserting tab characters)
 
-Pathname to file containing an [Apache velocity](https://velocity.apache.org/) template that can be applied to [transform the output data](../sfc-target-templates.md) of the target
+Pathname to file containing an [Apache velocity](https://velocity.apache.org/) template that can be applied to [transform the output data](../sfc-target-templates.md) of the target.
+
+The following Velocity tools van be used in the transformation template:
+
+- datetool
+- collection
+- context
+- math
+- number
+
+Additional epoch timestamp values can be added to the data used for the transformation by setting the [TemplateEpochTimestamp](#templateepochtimestamp) property to true,
 
 **Type**: String
+
+---
+
+### TemplateEpochTimestamp
+
+Controls whether the target data used for a [template](#template) transformation should have additional epoch seconds and epoch nanoseconds offset values for each timestamp in the data.
+
+These values are added at the same level as the timestamp in the output data and have the name of the [timestamp](./sfc-configuration.md#elementnames) element, which defaults to "timestamp", with an "\__epoch_sec" and "\__epoch_offset_nanosec" postfix. So with the default names for timestamp these fields will be named "timestamp_epoch_sec" and "timestamp_epoch_offset_nanosec".
+
+Type : Boolean
+
+Defaulf is false
+
 
 ---
 ### UnquoteNumericJsonValues

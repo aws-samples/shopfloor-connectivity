@@ -7,12 +7,14 @@
 
 - [Data Filtering](#data-filtering)
     - [Data Change Filters](#data-change-filters)
-    
+
     - [Value Change Filters](#data-change-filters)
-    
+
     - [Condition Filters](#condition-filters)
+
+- [Template transformations](#template-transformations)
+
     
-      
 
 ## SFC dataflow
 
@@ -247,3 +249,12 @@ Condition filters use JMESPath syntax (https://jmespath.org/) to match the names
 If a field name, or part of it, contains non-alphanumeric characters, it must be enclosed in double quotes, e.g., "System-Status", "System-Status".state, "System.Status".state.
 
 Condition filters are defined as a map in the 'ConditionFilters' section of the configuration. The name of an entry defining a filter can be used as the value of the 'ConditionFilter' for a channel to apply that filter to the channel.
+
+
+
+# Template Transformations
+
+A subset of the SFC targets, can apply a transformation using a [velocity](https://velocity.apache.org/) template by setting the name for the [template](file:///Applications/Typora.app/Contents/Resources/TypeMark/core/target-configuration.md#template) in the configuration for the adapter. In the template, the following Velocity tools can be used:
+
+
+
