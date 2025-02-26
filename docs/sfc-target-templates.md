@@ -20,6 +20,14 @@ The context of the input data contains 5 variables:
 - "$serial" : Output data message serial number
 - "$timestamp" : : Output data message serial timestamp
 
+The following [Velocity tools](https://velocity.apache.org/tools/3.1/tools-summary.html) can be used in the transformation template:
+
+- $datetool
+- $collection
+- $context
+- $math
+- $number
+
 Below are examples of templates that transform the data (not-aggregated) into different formats.
 
 ## CSV output
