@@ -39,6 +39,7 @@ SFC extends and unifies data collection capabilities additionally to our existin
 [**Supported  edge  targets:** ](./docs/targets/README.md)
 
 - [OPCUA](./docs/targets/opcua.md)
+- [OPCUA Writer](./docs/targets/opcua-writer.md)
 - [Debug Terminal](./docs/targets/debug.md)
 - [File system](./docs/targets/file.md)
 - [MQTT](./docs/targets/mqtt.md)

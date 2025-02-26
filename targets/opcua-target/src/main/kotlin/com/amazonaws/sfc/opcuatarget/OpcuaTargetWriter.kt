@@ -39,7 +39,9 @@ import org.eclipse.milo.opcua.stack.core.AttributeId
 import org.eclipse.milo.opcua.stack.core.types.builtin.DataValue
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.time.Duration
+import kotlin.time.DurationUnit
 import kotlin.time.measureTime
+import kotlin.time.toDuration
 
 class OpcuaTargetWriter(
     private val targetID: String,
@@ -89,12 +91,12 @@ class OpcuaTargetWriter(
     private val writerTask = targetWriterScope.launch(context = Dispatchers.IO, name = "Writer") { writer() }
 
 
-    private suspend fun CoroutineScope.monitor() {
+    private fun CoroutineScope.monitor() {
 
         while (isActive) {
 
-            delay(1000 * 60)
-            logger.getCtxInfoLog(className, "monitor")("OPCUA server: ${readCount.get()} reads and  ${writeCount.get()} writes over the last minute")
+           val interval = 60.toDuration(DurationUnit.SECONDS)
+            logger.getCtxInfoLog(className, "monitor")("OPCUA server: ${readCount.get()} reads and  ${writeCount.get()} writes over the last $interval")
 
 
             if (metricsCollector != null) {

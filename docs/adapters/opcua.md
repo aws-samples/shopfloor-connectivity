@@ -753,7 +753,7 @@ The ServerProfiles property defines the profiles configured for this adapter. OP
   "description": "Configuration for OPC UA adapter",
   "allOf": [
     {
-      "$ref": "#/definitions/AdapterConfiguration"
+      "$ref": "#/definitions/TargetAdapterConfiguration"
     },
     {
       "type": "object",
@@ -798,7 +798,7 @@ The ServerProfiles property defines the profiles configured for this adapter. OP
 
 ```json
 {
-  "AdapterType" : "OpcuaAdapterType",
+  "AdapterType" : "OPCUA-TARGET",
   "OpcuaServers": {
     "Server1": {
       "Address": "site1.company.com",
@@ -1056,7 +1056,7 @@ The Address property specifies the network address or endpoint URL of the OPC UA
 The Certificate property specifies the client certificate configuration used to establish a secure connection with the OPC UA server. Client certificates are an essential part of OPC UA security that:
 
 1. Authenticate the client to the server
-2. Enable secure communication through message signing and encryption [[2\]](https://stackoverflow.com/questions/46411925)
+2. Enable secure communication through message signing and encryption
 3. Establish trust between the client and server
 
 When connecting to an OPC UA server that requires security, the client must present a valid certificate. The server validates this certificate to:

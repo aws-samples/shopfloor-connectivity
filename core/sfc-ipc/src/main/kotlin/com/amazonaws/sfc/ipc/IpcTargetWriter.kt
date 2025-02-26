@@ -173,6 +173,13 @@ class IpcTargetWriter(private val targetID: String,
                 ((k as String) == CONFIG_TRANSFORMATION && v != null && v is String) ->
                     transformations.add(v)
 
+                (v is List<*>) ->{
+                    transformations.addAll(targetTransformations(v.mapIndexed { i, j ->
+                        i.toString() to j
+                    }.toMap()))
+
+                }
+
                 else -> if (v is Map<*, *>) {
                     transformations.addAll(targetTransformations( v))
                 }
@@ -216,7 +223,6 @@ class IpcTargetWriter(private val targetID: String,
              if (targetTransformations.isNotEmpty()) outputConfig[CONFIG_TRANSFORMATIONS] = allTransformations.filter { it.key in targetTransformations }
              targetId  to target
         }.toMap()
-
 
 
         // Build map for all targets types configured as in process targets
@@ -379,7 +385,7 @@ class IpcTargetWriter(private val targetID: String,
     }
 
     override val isInitialized: Boolean
-        get() = client?.isInitialized ?: false
+        get() = client?.isInitialized == true
 
 
     override suspend fun close() {

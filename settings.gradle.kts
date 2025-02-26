@@ -39,8 +39,6 @@ listOf("core", "metrics", "adapters", "targets", "examples").forEach { p ->
     }
 }
 
-include(":targets:opcua-write-target")
-
 
 
 

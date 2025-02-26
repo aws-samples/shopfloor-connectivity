@@ -70,6 +70,10 @@ Shop Floor Connectivity target connectors enable data transmission from industri
 
   OPC UA server target exposes collected industrial data through a target-hosted OPC UA server for client access.
 
+- [**OPCUA Writer Target**](./opcua-writer.md)
+
+  OPCUA target writing data to nodes of an external OPCUA server.
+
 
 ## Intermediate adapters
 

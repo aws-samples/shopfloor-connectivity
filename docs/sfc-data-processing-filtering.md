@@ -254,7 +254,7 @@ Condition filters are defined as a map in the 'ConditionFilters' section of the 
 
 # Template Transformations
 
-A subset of the SFC targets, can apply a transformation using a [velocity](https://velocity.apache.org/) template by setting the name for the [template](file:///Applications/Typora.app/Contents/Resources/TypeMark/core/target-configuration.md#template) in the configuration for the adapter. In the template, the following Velocity tools can be used:
+A subset of the SFC targets, can apply a transformation using a [velocity](https://velocity.apache.org/) template by setting the name for the [template](./core/target-configuration.md#template) in the configuration for the adapter. In the template, the following Velocity tools can be used:
 
 
 

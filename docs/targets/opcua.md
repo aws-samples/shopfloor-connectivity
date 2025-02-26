@@ -2,15 +2,13 @@
 
 
 
-The OPC UA target adapter for SFC implements an OPC UA server that exposes source data to OPC UA clients. It can operate in two modes: automatically generating a dynamic data model based on the incoming target data structure, or mapping the data to a custom-configured OPC UA data model. 
+The OPC UA target adapter for SFC implements an OPC UA server that exposes source data to OPC UA clients. It can operate in two modes: automatically generating a dynamic data model based on the incoming target data structure, or mapping the data to a custom-configured OPC UA data model.  
 
-
+An alternative OPC UA target to this adapter is the [OPCUA Writer](./opcua-writer.md) target adapter, which does not host the OPCUA UA server within the target, but writes the data to an external server.
 
 - [OPC UA target adapter data models and mapping](#opc-ua-target-adapter-data-models-and-mapping)
   - [Automatic model mapping](#automatic-model-mapping)
   - [Query mapping](#query-mapping)
-
-
 
 **Configuration:**
 

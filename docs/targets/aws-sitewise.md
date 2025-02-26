@@ -899,8 +899,6 @@ A path typically has the format
 
 `"sources.< source name >.values< value name>.value"` 
 
-`"sourcename.valuename.value".`
-
 Important notes:
 
 - Special characters (like '-') must be enclosed in quotes

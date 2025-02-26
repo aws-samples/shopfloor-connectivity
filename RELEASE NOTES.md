@@ -1,5 +1,9 @@
 # Release Notes:
+## Version 1.8.4, 26 February 2025
 
+- New [OPCUA Writer](./docs/targets/opcua-writer.md) Target
+
+---
 ## Version 1.8.3, 25 February 2025
 
 - Epoch [timestamp](./docs/core/target-configuration.md#templateepochtimestamp) data for target template transformations
