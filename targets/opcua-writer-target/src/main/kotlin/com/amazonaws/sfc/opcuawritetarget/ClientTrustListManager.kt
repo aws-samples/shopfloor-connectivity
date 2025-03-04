@@ -20,7 +20,6 @@ import org.eclipse.milo.opcua.stack.core.types.builtin.ByteString
 import org.eclipse.milo.opcua.stack.core.util.DigestUtil
 import java.io.Closeable
 import java.io.FileWriter
-import java.lang.Exception
 import java.net.URLEncoder
 import java.nio.file.Path
 import java.security.cert.X509CRL

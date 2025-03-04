@@ -6,10 +6,10 @@ package com.amazonaws.sfc.opcuatarget
 
 
 import com.amazonaws.sfc.data.JsonHelper
-import com.amazonaws.sfc.opcuatarget.OpcuaServerDataTypes.entries
 import org.eclipse.milo.opcua.stack.core.Identifiers
 import org.eclipse.milo.opcua.stack.core.types.builtin.*
 import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UInteger
+import kotlin.math.truncate
 
 enum class OpcuaServerDataTypes {
 
@@ -229,8 +229,17 @@ enum class OpcuaServerDataTypes {
                             v
                         }
                     }
+                } else{
+                    return when(v){
+                        is UByte -> v.toShort()
+                        is UShort -> v.toInt()
+                        is UInt -> v.toLong()
+                        is ULong -> truncate(v.toDouble())
+                        else -> v
+                    }
+
                 }
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 return null
             }
             return v

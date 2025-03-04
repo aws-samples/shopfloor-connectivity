@@ -20,7 +20,9 @@ import com.amazonaws.sfc.system.DateTime.systemDateTime
 import com.amazonaws.sfc.system.DateTime.systemDateUTC
 import com.amazonaws.sfc.util.buildScope
 import com.amazonaws.sfc.util.launch
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import org.eclipse.milo.opcua.sdk.client.OpcUaClient
@@ -29,10 +31,13 @@ import org.eclipse.milo.opcua.stack.client.security.DefaultClientCertificateVali
 import org.eclipse.milo.opcua.stack.core.StatusCodes
 import org.eclipse.milo.opcua.stack.core.UaException
 import org.eclipse.milo.opcua.stack.core.channel.MessageLimits
-import org.eclipse.milo.opcua.stack.core.types.builtin.*
+import org.eclipse.milo.opcua.stack.core.types.builtin.LocalizedText
+import org.eclipse.milo.opcua.stack.core.types.builtin.StatusCode
 import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UInteger
-import org.eclipse.milo.opcua.stack.core.types.enumerated.*
-import org.eclipse.milo.opcua.stack.core.types.structured.*
+import org.eclipse.milo.opcua.stack.core.types.enumerated.UserTokenType
+import org.eclipse.milo.opcua.stack.core.types.structured.EndpointDescription
+import org.eclipse.milo.opcua.stack.core.types.structured.ServiceFault
+import org.eclipse.milo.opcua.stack.core.types.structured.UserTokenPolicy
 import org.eclipse.milo.opcua.stack.core.util.EndpointUtil
 import sun.security.x509.X509CertImpl
 import java.net.URI

@@ -6,10 +6,19 @@ The MQTT source protocol adapter enables SFC to collect data from MQTT brokers b
 
 This adapter is particularly useful in IoT scenarios where devices and sensors publish their data to MQTT topics, allowing SFC to integrate seamlessly with existing MQTT-based infrastructure. It supports features like QoS levels, SSL/TLS security, and client authentication to ensure reliable and secure data collection from MQTT sources.
 
-MQTT Protocol adapter configuration.
+In order to use this adapter as in [in-process](../sfc-running-adapters.md#running-protocol-adapters-in-process) type adapter the type must be added to the [AdapterTypes](../core/sfc-configuration.md#AdapterTypes) section in the [SFC configuration file](../core/sfc-configuration.md).
 
+```json
+"AdapterTypes" :{
+  "MQTT" : {
+    "JarFiles" : ["<location of deployment>/mqtt/lib"]
+  },
+  "FactoryClassName" : "com.amazonaws.sfc.mqtt.MqttAdapter"
+}
+```
 
----
+**Configuration:**
+
 - [MqttSourceConfiguration](#mqttsourceconfiguration)
 - [MqttChannelConfiguration](#mqttchannelconfiguration)
 - [TopicNameMapping](#topicnamemapping)

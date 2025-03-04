@@ -3,6 +3,19 @@
 
 The AWS IoT [SiteWise Edge](https://aws.amazon.com/iot-sitewise/sitewise-edge/) target adapter for Shop Floor Connectivity (SFC) enables data transfer from industrial equipment to AWS IoT SiteWise Edge gateways running on-premises.
 
+In order to use this target as in [in-process](../sfc-running-targets.md#running-targets-in-process) type target the type must be added to the [TargetTypes](../core/sfc-configuration.md#TargetTypes) section in the [SFC configuration file](../core/sfc-configuration.md).
+
+```json
+"TargetTypes" :{
+   "AWS-SITEWISEEDGE-TARGET": {
+      "JarFiles" : ["<location of deployment>/aws-sitewiseedge-target/lib"],
+      "FactoryClassName": "com.amazonaws.sfc.awssitewiseedge.SiteWiseEdgeTargetWriter"
+   }
+}
+```
+
+
+
 ## SiteWiseEdgeTargetConfiguration
 
 [SFC Configuration](../core/sfc-configuration.md) > [Targets](../core/sfc-configuration.md#targets) >  [Target](../core/target-configuration.md) 

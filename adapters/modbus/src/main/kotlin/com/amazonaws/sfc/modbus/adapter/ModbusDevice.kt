@@ -63,14 +63,7 @@ class ModbusDevice(
 
         val reader = launch("Reader") {
 
-            val logTrace = logger.get()?.getCtxTraceLog(ModbusDevice::class.java.simpleName, "reader")
-
             try {
-
-                // get exclusive access to the device
-                logTrace?.invoke("Acquiring lock on device \"${configuration.sourceAdapterDevice}\" on adapter \"${configuration.protocolAdapterID}\" to read data for source \"$sourceID\"")
-                modbus.modbusDevice.lock()
-                logTrace?.invoke("Acquired lock on device \"${configuration.sourceAdapterDevice}\"  on adapter \"${configuration.protocolAdapterID}\" for source \"${configuration.name}\"")
 
                 // number of requests that can be sent to a without a response received for it, guarded by this semaphore
                 val requestSlots = Semaphore(permits = adapter.get()?.requestDepth(configuration)?.toInt() ?: 1)
@@ -127,9 +120,6 @@ class ModbusDevice(
             } catch (e: Exception) {
                 readResult = SourceReadError(e.toString())
 
-            } finally {
-                modbus.modbusDevice.unlock()
-                logTrace?.invoke("Released lock on device\"${configuration.sourceAdapterDevice}\" on adapter \"${configuration.protocolAdapterID}\"")
             }
         }
 

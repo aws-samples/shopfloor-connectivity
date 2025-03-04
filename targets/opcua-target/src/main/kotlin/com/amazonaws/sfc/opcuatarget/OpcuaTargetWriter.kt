@@ -91,11 +91,12 @@ class OpcuaTargetWriter(
     private val writerTask = targetWriterScope.launch(context = Dispatchers.IO, name = "Writer") { writer() }
 
 
-    private fun CoroutineScope.monitor() {
+    private suspend fun CoroutineScope.monitor() {
 
         while (isActive) {
 
            val interval = 60.toDuration(DurationUnit.SECONDS)
+            delay(interval)
             logger.getCtxInfoLog(className, "monitor")("OPCUA server: ${readCount.get()} reads and  ${writeCount.get()} writes over the last $interval")
 
 

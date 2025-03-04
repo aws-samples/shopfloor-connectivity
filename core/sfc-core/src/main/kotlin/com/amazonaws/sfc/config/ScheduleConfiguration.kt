@@ -13,7 +13,6 @@ import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_META_DATA
 import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_NAME
 import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_TARGETS
 import com.google.gson.annotations.SerializedName
-import kotlin.Throws
 import kotlin.time.Duration
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration

@@ -60,6 +60,8 @@ class FileTargetWriter(
         get() = config.targets[targetID]
             ?: throw TargetException("Configuration for type $FILE_TARGET for target with ID \"$targetID\" does not exist, existing targets are ${config.targets.keys}")
 
+    private val transformation by lazy { if (targetConfig.template != null) OutputTransformation(targetConfig.template!!, logger) else null }
+
     private val targetDataChannel = TargetDataChannel.create(targetConfig, "$className:targetDataChannel")
 
     private val buffer = TargetDataBuffer(storeFullMessage = false)
@@ -112,7 +114,10 @@ class FileTargetWriter(
                 select {
                     targetDataChannel.onReceive { targetData ->
 
-                        val content = targetData.toJson(config.elementNames,targetConfig.unquoteNumericJsonValues)
+                        val content = if (transformation == null)
+                            targetData.toJson(config.elementNames, targetConfig.unquoteNumericJsonValues)
+                        else
+                            transformation!!.transform(targetData, config.elementNames, targetConfig.templateEpochTimestamp) ?: ""
 
                         buffer.add(targetData, content)
 
@@ -143,7 +148,7 @@ class FileTargetWriter(
     private fun CoroutineScope.timerJob() = launch("Timeout Timer") {
         try {
             delay(targetConfig.interval.toLong())
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             // No harm done, time s just used to check for timeouts
         }
     }
@@ -244,24 +249,25 @@ class FileTargetWriter(
         )
 
         outputStream.use { f ->
-            if (tc.json) {
+            val jsonFormatted = tc.json && transformation == null
+            if (jsonFormatted) {
                 f.write("[")
             }
             buffer.payloads.forEach { line ->
                 if (!firstLine) {
-                    if (tc.json) {
+                    if (jsonFormatted) {
                         f.write(",")
                     }
-                    f.newLine()
+                    if (jsonFormatted) f.newLine()
                 } else {
                     firstLine = false
                 }
                 f.write(line)
             }
-            if (tc.json) {
+            if (jsonFormatted) {
                 f.write("]")
             }
-            f.newLine()
+            if (transformation==null) f.newLine()
         }
     }
 

@@ -8,6 +8,21 @@ Configuration types for the OPCUA protocol adapter and contains the extensions a
 - [OPCUA security profiles and certificates](#opcua-security-profiles-and-certificates)
 
 
+
+In order to use this adapter as in [in-process](../sfc-running-adapters.md#running-protocol-adapters-in-process) type adapter the type must be added to the [AdapterTypes](../core/sfc-configuration.md#AdapterTypes) section in the [SFC configuration file](../core/sfc-configuration.md).
+
+```json
+"AdapterTypes" :{
+  "OPCUA" : {
+    "JarFiles" : ["<location of deployment>/opcua/lib"]
+  },
+  "FactoryClassName" : "com.amazonaws.sfc.opcua.OpcuaAdapter"
+}
+```
+
+
+
+
 **Configuration**
 
 
@@ -260,7 +275,6 @@ Example of OPCUA server configuration using Basic256Sha256 security profile for 
 ```
 
 
----
 
 ## OpcuaSourceConfiguration
 
@@ -877,7 +891,6 @@ The EventTypes property defines additional event types (from companion specifica
 ### OpcuaServerProfileConfiguration Schema
 
 ```json
-
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "type": "object",

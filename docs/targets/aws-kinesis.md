@@ -4,6 +4,19 @@
 
 The Amazon [Kinesis](https://aws.amazon.com/kinesis/) target connector for Shop Floor Connectivity (SFC) enables streaming of industrial device data directly to Amazon Kinesis Data Streams. It provides configurable compression, batching , template based data transformations and delivery of device data to Kinesis streams for real-time processing and analytics.
 
+In order to use this target as in [in-process](../sfc-running-targets.md#running-targets-in-process) type target the type must be added to the [TargetTypes](../core/sfc-configuration.md#TargetTypes) section in the [SFC configuration file](../core/sfc-configuration.md).
+
+```json
+"TargetTypes" :{
+   "AWS-KINESIS": {
+      "JarFiles" : ["<location of deployment>/aws-kinesis-target/lib"],
+      "FactoryClassName": "com.amazonaws.sfc.awskinesis.AwsKinesisTargetWriter"
+   }
+}
+```
+
+
+
 ## AwsKinesisTargetConfiguration
 
 AwsKinesisTargetConfiguration extends the type [TargetConfiguration](../core/target-configuration.md) with specific configuration data for sending to a stream for the AWS Kinesis service. The [Targets](../core/sfc-configuration.md#targets) configuration element can contain entries of this type, the TargetType of these entries must be set to **"AWS-KINESIS"**

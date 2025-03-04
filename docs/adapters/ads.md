@@ -13,12 +13,30 @@ Key configuration points:
 
 The adapter supports reading from various Beckhoff PLC data types and handles the protocol-specific details of ADS communication, making it straightforward to integrate Beckhoff data into your existing SFC data collection infrastructure.
 
+In order to use this adapter as in [in-process](../sfc-running-adapters.md#running-protocol-adapters-in-process) type adapter the type must be added to the [AdapterTypes](../core/sfc-configuration.md#AdapterTypes) section in the [SFC configuration file](../core/sfc-configuration.md).
 
+```json
+"AdapterTypes" :{
+  "ADS" : {
+    "JarFiles" : ["<location of deployment>/ads/lib"]
+  },
+  "FactoryClassName" : "com.amazonaws.sfc.ads.AdsAdapter"
+}
+```
+
+
+
+**Configuration:**
 
 - [AdsSourceConfiguration](#adssourceconfiguration)
+
 - [AdsChannelConfiguration](#adschannelconfiguration)
+
 - [AdsAdapterConfiguration](#adsadapterconfiguration)
+
 - [AdsDeviceConfiguration](#adsdeviceconfiguration)
+
+  
 
 ---
 

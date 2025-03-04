@@ -4,6 +4,23 @@
 
 The [AWS IoT Core](https://aws.amazon.com/iot-core/) target adapter facilitates secure transmission of industrial data to the AWS IoT Core service via service API calls. It obtains temporary credentials using X.509 certificates or configured AWS credentials for authenticating service publish calls. The adapter supports batching of messages for efficient transmission, data compression to reduce bandwidth, payload transformation using templates, and dynamic topic names generated from target configuration and source metadata.
 
+
+
+In order to use this target as in [in-process](../sfc-running-targets.md#running-targets-in-process) type target the type must be added to the [TargetTypes](../core/sfc-configuration.md#TargetTypes) section in the [SFC configuration file](../core/sfc-configuration.md).
+
+```json
+"TargetTypes" :{
+   "AWS-IOT-CORE": {
+      "JarFiles" : ["<location of deployment>/aws-iot-core-target/lib"],
+      "FactoryClassName": "com.amazonaws.sfc.awsiotcore.AwsIotCoreTargetWriter"
+   }
+}
+```
+
+
+
+## 
+
 ## AwsIotCoreTargetConfiguration
 
 The AwsIotCoreTargetConfiguration class extends  [TargetConfiguration](../core/target-configuration.md) with specific settings for publishing data to AWS IoT Core topics using the HTTP dataplane API. When used in the [Targets](../core/sfc-configuration.md#targets) configuration, entries must specify the TargetType as **"AWS-IOT-CORE"**. 

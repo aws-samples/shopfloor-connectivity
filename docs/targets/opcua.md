@@ -6,6 +6,23 @@ The OPC UA target adapter for SFC implements an OPC UA server that exposes sourc
 
 An alternative OPC UA target to this adapter is the [OPCUA Writer](./opcua-writer.md) target adapter, which does not host the OPCUA UA server within the target, but writes the data to an external server.
 
+In order to use this target as in [in-process](../sfc-running-targets.md#running-targets-in-process) type target the type must be added to the [TargetTypes](../core/sfc-configuration.md#TargetTypes) section in the [SFC configuration file](../core/sfc-configuration.md).
+
+```json
+"TargetTypes" :{
+   "OPCUA-TARGET": {
+      "JarFiles" : ["<location of deployment>/opcua-target/lib"],
+      "FactoryClassName": "com.amazonaws.sfc.opcuatarget.OpcuaTargetWriter"
+   }
+}
+```
+
+
+
+**Configuration:**
+
+
+
 - [OPC UA target adapter data models and mapping](#opc-ua-target-adapter-data-models-and-mapping)
   - [Automatic model mapping](#automatic-model-mapping)
   - [Query mapping](#query-mapping)

@@ -2,8 +2,21 @@
 
 The AWS IoT [SiteWise](https://aws.amazon.com/iot-sitewise/) target adapter enables Shop Floor Connectivity's uninterrupted streaming of industrial device data directly to AWS IoT SiteWise assets and measurements. This adapter facilitates the mapping of device data to SiteWise asset properties, with the option of automatically creating the necessary SiteWise assets. Additionally, it handles data types and timestamps. 
 
+In order to use this target as in [in-process](../sfc-running-targets.md#running-targets-in-process) type target the type must be added to the [TargetTypes](../core/sfc-configuration.md#TargetTypes) section in the [SFC configuration file](../core/sfc-configuration.md).
 
----
+```json
+"TargetTypes" :{
+   "AWS-SITEWISE": {
+      "JarFiles" : ["<location of deployment>/aws-sitewise-target/lib"],
+      "FactoryClassName": "com.amazonaws.sfc.awssitewise.AwsSiteWiseTargetWriter"
+   }
+}
+```
+
+
+
+**Configuration:**
+
 - [AwsSitewiseTargetConfiguration](#awssitewisetargetconfiguration)
 - [AwsSiteWiseAssetCreationConfiguration](#awssitewiseassetcreationconfiguration)
 - [AwsSiteWiseAssetConfiguration](#awssitewiseassetconfiguration)

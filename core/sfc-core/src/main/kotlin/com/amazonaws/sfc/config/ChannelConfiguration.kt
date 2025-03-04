@@ -12,7 +12,6 @@ import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_NAME
 import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_SPREAD_CHANNEL_VALUE
 import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_VALUE_FILTER
 import com.google.gson.annotations.SerializedName
-import kotlin.Throws
 
 /**
  * Base class with minimum set of attributes for a channel of a source.

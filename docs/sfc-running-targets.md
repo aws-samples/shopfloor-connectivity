@@ -73,20 +73,6 @@ that contain the classes that implement the target need to be explicitly configu
 instance of the target, it loads the configured jar files and uses a static factory method to create the actual
 instance. The name of the factory class, which could be the actual target class itself, needs to be configured as well.
 
-The signature if the function is:
-
-```kotlin
-fun newInstance(vararg createParameters: Any?): TargetWriter? {}
-```
-
-The core passes values to the function through the createParameters parameter.
-
-- **configReader**: ConfigReader, the reader used by the target to read its configuration
-- **targetID**: String, the target identifier
-- **logger**: Logger, the logger for output of the newly created target instance
-- **resultHandler**: TargetResultHandler?, a handler passed to the writer to pass the result of delivering the data by
-  the data back to a previous target in a target chain.
-
 The jar files are part of the target deployment and can be found in the lib directory of the deployment package. To
 specify the path to the jar files it is recommended to use a placeholder, instead of hard-coding, the directory where
 the adapter, and targets, are deployed and set an environment variable for this directory.
@@ -95,25 +81,16 @@ the adapter, and targets, are deployed and set an environment variable for this 
 
 - Used environment variable is `SFC_DEPLOYMENT_DIR`: Directory in which deployment packed is deployed, with a
   subdirectory for each target.
+- Configuration is using the debug, MQTT and OPCUA targets
 
-*<u>Note that only target types which are used, and run in-process with the SFC core need to be included in the
-configuration file.</u>*
 
 ```json
-
-
-  "TargetTypes": {
+    "TargetTypes": {
     "DEBUG-TARGET": {
       "JarFiles": [
         "${SFC_DEPLOYMENT_DIR}/debug-target/lib"
       ],
       "FactoryClassName": "com.amazonaws.sfc.debugtarget.DebugTargetWriter"
-    },
-    "AWS-FIREHOSE": {
-      "JarFiles": [
-        "${SFC_DEPLOYMENT_DIR}/aws-kinesis-firehose-target/lib"
-      ],
-      "FactoryClassName": "com.amazonaws.sfc.awsfirehose.AwsFirehoseTargetWriter"
     },
     "AWS-IOT-CORE": {
       "JarFiles": [
@@ -126,98 +103,6 @@ configuration file.</u>*
         "${SFC_DEPLOYMENT_DIR}/mqtt-target/lib/"
       ],
       "FactoryClassName": "com.amazonaws.sfc.awsiot.mqtt.MqttTargetWriter"
-    },
-    "AWS-MSK": {
-      "JarFiles": [
-        "${SFC_DEPLOYMENT_DIR}/aws-msk-target/lib/"
-      ],
-      "FactoryClassName": "com.amazonaws.sfc.awsiot.msk.AwsMskTargetWriter"
-    },
-    "AWS-KINESIS": {
-      "JarFiles": [
-        "${SFC_DEPLOYMENT_DIR}/aws-kinesis-target/lib"
-      ],
-      "FactoryClassName": "com.amazonaws.sfc.awskinesis.AwsKinesisTargetWriter"
-    },
-    "AWS-LAMBDA": {
-      "JarFiles": [
-        "${SFC_DEPLOYMENT_DIR}/aws-lambda-target/lib"
-      ],
-      "FactoryClassName": "com.amazonaws.sfc.awslambda.AwsLambdaTargetWriter"
-    },
-    "AWS-SQS": {
-      "JarFiles": [
-        "${SFC_DEPLOYMENT_DIR}/aws-sqs-target/lib"
-      ],
-      "FactoryClassName": "com.amazonaws.sfc.awssqs.AwsSqsTargetWriter"
-    },
-    "NATS-TARGET": {
-       "JarFiles": [
-          "${SFC_DEPLOYMENT_DIR}/nats-target/lib"
-       ],
-       "FactoryClassName": "com.amazonaws.sfc.natstarget,NatsTargetWriter"
-  },
-    "OPCUA-TARGET": {
-      "JarFiles": [
-         "${SFC_DEPLOYMENT_DIR}/opcua-target/lib"
-    ],
-    "FactoryClassName": "com.amazonaws.sfc.opcuatarget,OpcuaTargetWriter"
-    },
-    "AWS-IOT-ANALYTICS": {
-      "JarFiles": [
-        "${SFC_DEPLOYMENT_DIR}/debug-target/lib"
-      ],
-      "FactoryClassName": "com.amazonaws.sfc.awsiota.AwsIotAnalyticsTargetWriter"
-    },
-    "AWS-S3": {
-      "JarFiles": [
-        "${SFC_DEPLOYMENT_DIR}/aws-s3-target/lib"
-      ],
-      "FactoryClassName": "com.amazonaws.sfc.awsfirehose.AwsS3TargetWriter"
-    },
-    "AWS-SITEWISE": {
-      "JarFiles": [
-        "${SFC_DEPLOYMENT_DIR}/aws-sitewise-target/lib"
-      ],
-      "FactoryClassName": "com.amazonaws.sfc.awssitewise.AwsSiteWiseTargetWriter"
-    },
-    "AWS-SITEWISEEDGE-TARGET": {
-       "JarFiles": [
-       "${SFC_DEPLOYMENT_DIR}/aws-sitewiseedge-target/lib"
-   ],
-  "FactoryClassName": "com.amazonaws.sfc.awssitewiseedge.SiteWiseEdgeTargetWriter"
-  },
-    "AWS-SNS": {
-      "JarFiles": [
-        "${SFC_DEPLOYMENT_DIR}/aws-sns-target/lib/"
-      ],
-      "FactoryClassName": "com.amazonaws.sfc.awssns.AwsSnsTargetWriter"
-    },
-    "AWS-TIMESTREAM": {
-      "JarFiles": [
-        "${SFC_DEPLOYMENT_DIR}/aws-timestream-target/lib"
-      ],
-      "FactoryClassName": "com.amazonaws.sfc.awstimestream.AwsTimestreamTargetWriter"
-    },
-    "FILE-TARGET": {
-      "JarFiles": [
-        "${SFC_DEPLOYMENT_DIR}/aws-file-target/lib"
-      ],
-      "FactoryClassName": "com.amazonaws.sfc.filetarget.FileTargetWriter"
-    },
-    "ROUTER": {
-      "JarFiles": [
-        "${SFC_DEPLOYMENT_DIR}/router-target/lib"
-      ],
-      "FactoryClassName": "com.amazonaws.sfc.router.RouterTargetWriter"
-    },
-    "STORE-FORWARD": {
-      "JarFiles": [
-        "${SFC_DEPLOYMENT_DIR}/store-forward-target/lib"
-      ],
-      "FactoryClassName": "com.amazonaws.sfc.storeforward.StoreForwardTargetWriter"
     }
   }
-
-
 ```

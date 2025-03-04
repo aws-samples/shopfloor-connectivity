@@ -2,7 +2,19 @@
 
 The SQL adapter for AWS IoT SiteWise Connector (SFC) enables data ingestion from SQL databases using JDBC connections. It allows you to execute custom SQL queries to retrieve data from various SQL databases like MySQL, PostgreSQL, Microsoft SQL Server, and Oracle. 
 
----
+In order to use this adapter as in [in-process](../sfc-running-adapters.md#running-protocol-adapters-in-process) type adapter the type must be added to the [AdapterTypes](../core/sfc-configuration.md#AdapterTypes) section in the [SFC configuration file](../core/sfc-configuration.md).
+
+```json
+"AdapterTypes" :{
+  "SQL" : {
+    "JarFiles" : ["<location of deployment>/sql/lib"]
+  },
+  "FactoryClassName" : "com.amazonaws.sfc.sql.SqlAdapter"
+}
+```
+
+**Configuration:**
+
 - [SqlSourceConfiguration](#sqlsourceconfiguration)
 - [SqlChannelConfiguration](#sqlchannelconfiguration)
 - [SqlAdapterConfiguration](#sqladapterconfiguration)

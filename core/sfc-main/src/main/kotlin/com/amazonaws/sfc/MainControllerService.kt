@@ -118,7 +118,7 @@ class MainControllerService(
                     stopScheduleControllers(),
                 ).joinAll()
             }
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             logger.getCtxWarningLog(className, "stop")("Timeout stopping service")
         }
 
@@ -348,15 +348,22 @@ class MainControllerService(
     }
 
     private fun buildSourceValuesReader(schedule: ScheduleConfiguration, sourceID: String, adapterID: String): SourceValuesReader? {
-
+        val log = logger.getCtxLoggers(className, "buildSourceValuesReader")
         val protocolConfiguration = configuration.protocolAdapters[adapterID]
-        val protocolServerConfiguration = configuration.protocolAdapterServers[protocolConfiguration?.protocolAdapterServer]
+        val protocolAdapterServer = protocolConfiguration?.protocolAdapterServer
+        val protocolServerConfiguration = if (protocolAdapterServer!= null) {
+            if (!configuration.protocolAdapterServers.keys.contains(protocolAdapterServer)){
+                log.error("Protocol adapter server \"$protocolAdapterServer\" for protocol \"$adapterID\" does not exist, valid servers are ${configuration.protocolAdapterServers.keys}")
+                null
+            }else{
+                configuration.protocolAdapterServers[protocolAdapterServer]
+            }
+        } else null
 
         return if (protocolServerConfiguration != null) {
             createIpcReader(configReader, configuration, adapterID, schedule, logger) as SourceValuesReader
         } else {
             if (protocolConfiguration?.protocolAdapterType !in configuration.protocolAdapterTypes) {
-                val log = logger.getCtxLoggers(className, "buildSourceValuesReader")
                 log.error(
                     "Protocol type ${protocolConfiguration?.protocolAdapterType} for protocol \"$adapterID\" used in source \"Source \"$sourceID\" does not exist, " +
                             "valid types are ${configuration.protocolAdapterTypes.keys}"

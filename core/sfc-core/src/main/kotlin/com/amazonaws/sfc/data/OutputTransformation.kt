@@ -14,11 +14,7 @@ import org.apache.velocity.app.Velocity
 import org.apache.velocity.app.VelocityEngine
 import org.apache.velocity.runtime.resource.loader.StringResourceLoader
 import org.apache.velocity.runtime.resource.util.StringResourceRepository
-import org.apache.velocity.tools.generic.CollectionTool
-import org.apache.velocity.tools.generic.ContextTool
-import org.apache.velocity.tools.generic.DateTool
-import org.apache.velocity.tools.generic.MathTool
-import org.apache.velocity.tools.generic.NumberTool
+import org.apache.velocity.tools.generic.*
 import java.io.File
 import java.io.StringWriter
 import java.nio.file.Files

@@ -5,7 +5,6 @@
     #foreach($valueName in $sources[$sourceName]["values"].keySet())
         ## get the node for the value, contains the actual value and the timestamp
         #set( $value = $sources[$sourceName]["values"][$valueName])
-    "$sourceName","$valueName",$value["value"],"$value["timestamp"]"
+    "$sourceName","$valueName","$value["value"]","$value["timestamp"]"
     #end
 #end
-

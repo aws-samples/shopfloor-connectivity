@@ -7,13 +7,8 @@ package com.amazonaws.sfc.opcuawritetarget
 
 import com.amazonaws.sfc.config.ConfigReader
 import com.amazonaws.sfc.config.ElementNamesConfiguration
-import com.amazonaws.sfc.data.ChannelOutputData
-import com.amazonaws.sfc.data.JsonHelper
+import com.amazonaws.sfc.data.*
 import com.amazonaws.sfc.data.JsonHelper.Companion.extendedJsonException
-import com.amazonaws.sfc.data.TargetData
-import com.amazonaws.sfc.data.TargetResultHandler
-import com.amazonaws.sfc.data.TargetResultHelper
-import com.amazonaws.sfc.data.TargetWriter
 import com.amazonaws.sfc.log.LogLevel
 import com.amazonaws.sfc.log.Logger
 import com.amazonaws.sfc.metrics.*
@@ -26,9 +21,9 @@ import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_WRITE_ERRORS
 import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_WRITE_SUCCESS
 import com.amazonaws.sfc.opcuawritetarget.OpcuaDataType.Companion.toVariant
 import com.amazonaws.sfc.opcuawritetarget.config.OpcuaNodeConfiguration
-import com.amazonaws.sfc.opcuawritetarget.config.OpcuaWriterTargetConfiguration
 import com.amazonaws.sfc.opcuawritetarget.config.OpcuaWriterConfiguration
 import com.amazonaws.sfc.opcuawritetarget.config.OpcuaWriterConfiguration.Companion.OPCUA_WRITER_TARGET
+import com.amazonaws.sfc.opcuawritetarget.config.OpcuaWriterTargetConfiguration
 import com.amazonaws.sfc.targets.TargetDataChannel
 import com.amazonaws.sfc.targets.TargetException
 import com.amazonaws.sfc.transformations.invoke

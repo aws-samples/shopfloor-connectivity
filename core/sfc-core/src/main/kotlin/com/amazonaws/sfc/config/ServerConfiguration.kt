@@ -10,7 +10,6 @@ import com.amazonaws.sfc.crypto.CertificateConfiguration.Companion.CONFIG_CERT_E
 import com.amazonaws.sfc.service.ServerConnectionType
 import com.google.gson.annotations.SerializedName
 import java.io.File
-import kotlin.Throws
 import kotlin.time.Duration
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration

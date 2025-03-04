@@ -4,6 +4,19 @@
 
 The SFC target adapter for Amazon [Simple Queue Service](https://aws.amazon.com/sqs/) (SQS) enables sending collected data to SQS queues.
 
+In order to use this target as in [in-process](../sfc-running-targets.md#running-targets-in-process) type target the type must be added to the [TargetTypes](../core/sfc-configuration.md#TargetTypes) section in the [SFC configuration file](../core/sfc-configuration.md).
+
+```json
+"TargetTypes" :{
+   "AWS-SQS": {
+      "JarFiles" : ["<location of deployment>/aws-sqs-target/lib"],
+      "FactoryClassName": "com.amazonaws.sfc.sqs.AwsSqsTargetWriter"
+   }
+}
+```
+
+## 
+
 ## AwsSqsTargetConfiguration
 
 AwsSqsTargetConfiguration extends the type [TargetConfiguration](../core/target-configuration.md) with specific configuration data for sending data to an SQS queue. The Targets configuration element can contain entries of this type; the TargetType of these entries must be set to **"AWS-SQS"**.

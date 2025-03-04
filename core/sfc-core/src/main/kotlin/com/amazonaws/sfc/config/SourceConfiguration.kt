@@ -12,7 +12,6 @@ import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_META_DATA
 import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_NAME
 import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_SPREAD_CHANNEL_VALUE
 import com.google.gson.annotations.SerializedName
-import kotlin.Throws
 
 /**
  * Source configuration with attributes for a source as used by the SFC core controller

@@ -84,10 +84,15 @@ class IpcAdapterService(
 
         val log = logger.getCtxLoggers(className, "start")
 
-        grpcServer.start()
-        val addressAndPort = grpcServer.listenSockets.first() as InetSocketAddress
-        val addressAndPortStr = "${addressAndPort.address.hostAddress}:${addressAndPort.port}"
-        log.info("IPC protocol service started, listening on $addressAndPortStr, connection type is ${serverConfig.serverConnectionType}")
+        try {
+            grpcServer.start()
+            val addressAndPort = grpcServer.listenSockets.first() as InetSocketAddress
+            val addressAndPortStr = "${addressAndPort.address.hostAddress}:${addressAndPort.port}"
+            log.info("IPC protocol service started, listening on $addressAndPortStr, connection type is ${serverConfig.serverConnectionType}")
+        }catch (e: Exception) {
+            log.error("Failed to start server, $e")
+            exitProcess(1)
+        }
 
         Runtime.getRuntime().addShutdownHook(
             Thread {
@@ -321,7 +326,7 @@ class IpcAdapterService(
                     service.restartIfInactive()
                 }
                 service
-            } catch (e: Exception) {
+            } catch ( _ : Exception) {
                 null
             }
         healthProbeService?.start()

@@ -4,6 +4,19 @@
 
 The AWS [S3](https://aws.amazon.com/s3/) (Simple Storage Service) target adapter facilitates direct writing of industrial device data to Amazon S3 buckets via Shop Floor Connectivity. This adapter supports template-based transformations, configurable file prefixes, compression, and batching capabilities. 
 
+In order to use this target as in [in-process](../sfc-running-targets.md#running-targets-in-process) type target the type must be added to the [TargetTypes](../core/sfc-configuration.md#TargetTypes) section in the [SFC configuration file](../core/sfc-configuration.md).
+
+```json
+"TargetTypes" :{
+   "AWS-S3": {
+      "JarFiles" : ["<location of deployment>/aws-s3-target/lib"],
+      "FactoryClassName": "com.amazonaws.sfc.s3.AwsS3TargetWriter"
+   }
+}
+```
+
+
+
 
 ## Aws3TargetConfiguration
 

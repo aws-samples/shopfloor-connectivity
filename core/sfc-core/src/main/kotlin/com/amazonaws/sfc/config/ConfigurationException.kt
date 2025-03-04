@@ -7,7 +7,6 @@ package com.amazonaws.sfc.config
 
 import com.amazonaws.sfc.data.JsonHelper
 import com.amazonaws.sfc.data.JsonHelper.Companion.gsonExtended
-import kotlin.Throws
 
 interface Validate {
     @Throws(ConfigurationException::class)

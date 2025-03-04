@@ -298,7 +298,7 @@ class IpcSourceReader(
     private fun adaptersToServerMap(configRaw: Map<*, *>) = allAdaptersForType(configRaw).map {
         val adapter = it.value as Map<*, *>
         val adapterID = it.key as String
-        val serverID = adapter[CONFIG_PROTOCOL_ADAPTER_SERVER] as String
+        val serverID = adapter[CONFIG_PROTOCOL_ADAPTER_SERVER] as String?
         adapterID to serverID
     }.toMap()
 

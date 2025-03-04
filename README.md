@@ -91,7 +91,7 @@ At first, we have to download and extract the SFC bundles. These are precompiled
 
 ```shell
 # Define sfc version and directory
-export VERSION=$(git describe --tags --abbrev=0)
+export VERSION=$(curl -s "https://api.github.com/repos/aws-samples/shopfloor-connectivity/tags" | jq -r '.[0].name')
 export SFC_DEPLOYMENT_DIR="./sfc"
 ```
 

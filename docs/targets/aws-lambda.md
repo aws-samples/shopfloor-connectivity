@@ -4,6 +4,19 @@
 
 The AWS [Lambda](https://aws.amazon.com/lambda/) target adapter for Shop Floor Connectivity  enables direct integration with AWS Lambda functions from industrial data sources. This adapter receives collected data from the SFC Core component and invokes specified Lambda functions, allowing for serverless processing of industrial device data. The adapter supports batching, compression and data transformations using Apache Velocity templates to format the payload before invoking the Lambda functions.
 
+In order to use this target as in [in-process](../sfc-running-targets.md#running-targets-in-process) type target the type must be added to the [TargetTypes](../core/sfc-configuration.md#TargetTypes) section in the [SFC configuration file](../core/sfc-configuration.md).
+
+```json
+"TargetTypes" :{
+   "AWSLAMBDA": {
+      "JarFiles" : ["<location of deployment>/aws-lambda-target/lib"],
+      "FactoryClassName": "com.amazonaws.sfc.awslambda.AwsLambdaTargetWriter"
+   }
+}
+```
+
+
+
 
 ## AwsLambdaTargetConfiguration
 

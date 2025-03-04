@@ -2,11 +2,26 @@
 
 The REST protocol adapter in SFC enables polling data from HTTP endpoints using GET requests, where the adapter periodically fetches data from configured REST APIs and transforms the JSON responses into the SFC's internal data format. The adapter supports query parameters and authentication for secure API access.
 
-- [**REST Adapter data mapping**](#rest-adapter-data-mapping)
-  - [All object properties  a single channel value](#all-object-properties--a-single-channel-value)
-  - [Object properties as separate channel values](#object-properties-as-separate-channel-values)
-  - [Selecting object properties](#selecting-object-properties)
-  - [Objects lists](#objects-lists)
+In order to use this adapter as in [in-process](../sfc-running-adapters.md#running-protocol-adapters-in-process) type adapter the type must be added to the [AdapterTypes](../core/sfc-configuration.md#AdapterTypes) section in the [SFC configuration file](../core/sfc-configuration.md).
+
+```json
+"AdapterTypes" :{
+  "REST" : {
+    "JarFiles" : ["<location of deployment>/rest/lib"]
+  },
+  "FactoryClassName" : "com.amazonaws.sfc.rest.RestAdapter"
+}
+```
+
+
+
+[**REST Adapter data mapping**](#rest-adapter-data-mapping)
+
+- [All object properties  a single channel value](#all-object-properties--a-single-channel-value)
+- [Object properties as separate channel values](#object-properties-as-separate-channel-values)
+- [Selecting object properties](#selecting-object-properties)
+- [Objects lists](#objects-lists)
+
 
 
 **Configuration**:

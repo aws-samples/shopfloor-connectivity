@@ -4,7 +4,20 @@
 
 The NATS target adapter enables the AWS IoT SiteWise Connector (SFC) to publish data to subjects on a [NATS](https://nats.io/) server.The adapter provides configurable options for connection management, subject naming, and message delivery guarantees
 
+In order to use this target as in [in-process](../sfc-running-targets.md#running-targets-in-process) type target the type must be added to the [TargetTypes](../core/sfc-configuration.md#TargetTypes) section in the [SFC configuration file](../core/sfc-configuration.md).
 
+```json
+"TargetTypes" :{
+   "NATS-TARGET": {
+      "JarFiles" : ["<location of deployment>/nats-target/lib"],
+      "FactoryClassName": "com.amazonaws.sfc.natstarget.NatsTargetWriter"
+   }
+}
+```
+
+
+
+**Configuration:**
 
 - [NatsTargetConfiguration](#natstargetconfiguration)
 - [NatsServerConfiguration](#natsserverconfiguration)

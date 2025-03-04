@@ -4,7 +4,18 @@ Configuration for PCCC protocol adapter, used script to read data from Allen Bra
 
 - [PCCC Addressing](#pccc-addressing)
 
-**Configuration**
+In order to use this adapter as in [in-process](../sfc-running-adapters.md#running-protocol-adapters-in-process) type adapter the type must be added to the [AdapterTypes](../core/sfc-configuration.md#AdapterTypes) section in the [SFC configuration file](../core/sfc-configuration.md).
+
+```json
+"AdapterTypes" :{
+  "PCCC" : {
+    "JarFiles" : ["<location of deployment>/pccc/lib"]
+  },
+  "FactoryClassName" : "com.amazonaws.sfc.pccc.PcccAdapter"
+}
+```
+
+**Configuration:**
 
 - [PcccSourceConfiguration](#pcccsourceconfiguration)
 - [PcccChannelConfiguration](#pcccchannelconfiguration)

@@ -1,4 +1,13 @@
 # Release Notes:
+## Version 1.8.5, 4 march February 2025
+
+- Documentation updates
+- OPCUA Target monitor output fix
+- Support for [templates](./docs/core/target-configuration.md#template) in File Target adapter 
+- Modbus TCP configuration validation update
+- OPCUA Target handling of unsigned datatypes
+- Fix in quickstart documentation
+
 ## Version 1.8.4, 26 February 2025
 
 - New [OPCUA Writer](./docs/targets/opcua-writer.md) Target

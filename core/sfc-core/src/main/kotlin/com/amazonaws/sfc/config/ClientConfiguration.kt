@@ -11,7 +11,6 @@ import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_CERTIFICATE
 import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_PRIVATE_KEY
 import com.google.gson.annotations.SerializedName
 import java.io.File
-import kotlin.Throws
 
 @ConfigurationClass
 open class ClientConfiguration : Validate {

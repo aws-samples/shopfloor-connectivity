@@ -68,12 +68,7 @@ the core. To make it possible to add new adapters without making changes to the 
 to the libraries that implement the adapters. In the configuration of an in-process adapter type, the pathnames of the
 jar files that contain the classes that implement the adapter need to be explicitly configured. When the SFC core
 creates an instance of the adapter, it loads the configured jar files and uses a static factory method to create the
-actual instance. The name of the factory class, which could be the actual adapter class itself, needs to be configured
-as well. The name of the factory method is "newInstance" and has 3 parameters:
-
-- **configReader**: ConfigReader, the reader used by the adapter to read its configuration
-- **scheduleName**: String, the schedule name that is using the adapter
-- **logger**: Logger, the logger for output of the newly created adapter instance
+actual instance. 
 
 The jar files are part of the adapter deployment and can be found in the lib directory of the deployment package. To
 specify the path to the jar files it is recommended to use a placeholder, instead of hard-coding, the directory where
@@ -93,92 +88,28 @@ SFC_DEPLOYMENT_DIR=/sfc
 
 In the configuration, the values for the jar files are "${SFC_DEPLOYMENT_DIR}/mqtt/lib".
 
-Example AdapterTypes section, including all in-process protocol configuration with environment variable placeholders.
-Each adapter is in a subdirectory with the name of the adapter in the deployment directory. It is not required to
-include all adapter type, the ones that are not needed can be removed from this section.
+Example AdapterTypes section, including the mqtt and opcua in-process protocol configuration with environment variable placeholders.
+Each adapter is in a subdirectory with the name of the adapter in the deployment directory.
 
 Used environment variable :
 
-- SFC_DEPLOYMENT_DIR: Directory in which deployment packed is deployed, with the subdirectory for the adapter.
 
 ```json
-
-
 {
   "AdapterTypes": {
-    "ADS": {
-      "JarFiles": [
-        "${SFC_DEPLOYMENT_DIR}/ads/lib"
-      ],
-      "FactoryClassName": "com.amazonaws.sfc.ads.AdsAdapter"
-    },
-    "J1939": {
-      "JarFiles": [
-        "${SFC_DEPLOYMENT_DIR}/j1939/lib/"
-      ],
-      "FactoryClassName": "com.amazonaws.sfc.modbus.j1939.J1939Adapter"
-    },
-    "MODBUS-TCP": {
-      "JarFiles": [
-        "${SFC_DEPLOYMENT_DIR}/modbus-tcp/lib/"
-      ],
-      "FactoryClassName": "com.amazonaws.sfc.modbus.tcp.ModbusTcpAdapter"
-    },
+
     "MQTT": {
       "JarFiles": [
         "${SFC_DEPLOYMENT_DIR}/mqtt/lib"
       ],
       "FactoryClassName": "com.amazonaws.sfc.mqtt.MqttAdapter"
     },
-    "NATS": {
-      "JarFiles": [
-        "${SFC_DEPLOYMENT_DIR}/nats/lib"
-      ],
-      "FactoryClassName": "com.amazonaws.sfc.nats.NatsAdapter"
-    },
     "OPCUA": {
       "JarFiles": [
         "${SFC_DEPLOYMENT_DIR}/opcua/lib"
       ],
       "FactoryClassName": "com.amazonaws.sfc.opcua.OpcuaAdapter"
-    },
-    "PCCC": {
-      "JarFiles": [
-        "${SFC_DEPLOYMENT_DIR}/pccc/lib"
-      ],
-      "FactoryClassName": "com.amazonaws.sfc.pccc.PcccAdapter"
-    },
-    "REST": {
-      "JarFiles": [
-        "${SFC_DEPLOYMENT_DIR}/rest/lib"
-      ],
-      "FactoryClassName": "com.amazonaws.sfc.rest.RestAdapter"
-    },
-    "SMLP": {
-      "JarFiles": [
-        "${SFC_DEPLOYMENT_DIR}/slmp/lib"
-      ],
-      "FactoryClassName": "com.amazonaws.sfc.slmp.SlmpAdapter"
-    },
-    "SNMP": {
-      "JarFiles": [
-        "${SFC_DEPLOYMENT_DIR}/snmp/lib"
-      ],
-      "FactoryClassName": "com.amazonaws.sfc.snmp.SnmpAdapter"
-    },
-    "SQL": {
-      "JarFiles": [
-        "${SFC_DEPLOYMENT_DIR}/sql/lib"
-      ],
-      "FactoryClassName": "com.amazonaws.sfc.sql.SqlAdapter"
-    },
-    "S7": {
-      "JarFiles": [
-        "${SFC_DEPLOYMENT_DIR}/s7/lib"
-      ],
-      "FactoryClassName": "com.amazonaws.sfc.s7.S7Adapter"
     }
-  }
 }
 
 

@@ -4,6 +4,19 @@
 
 The SFC File target adapter enables writing collected data to files in the local file system.
 
+In order to use this adapter as in [in-process](../sfc-running-targets.md#running-targets-in-process) type adapter the type must be added to the [TargetTypes](../core/sfc-configuration.md#TargetTypes) section in the [SFC configuration file](../core/sfc-configuration.md).
+
+```json
+"TargetTypes" :{
+   "FILE-TARGET": {
+      "JarFiles" : ["<location of deployment>/file-target/lib"],
+      "FactoryClassName": "com.amazonaws.sfc.filetarget.FileTargetWriter"
+   }
+}
+```
+
+
+
 ## FileConfiguration
 
 FileConfiguration extends the type  TargetConfiguration with specific configuration data for writing data to the local file system. The Targets configuration element can contain entries of this type; the TargetType of these entries must be set to **"FILE_TARGET"**

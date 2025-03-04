@@ -4,6 +4,17 @@
 
 The SFC target adapter for [Amazon Simple Notification Service](https://aws.amazon.com/sns/) (SNS) enables publishing collected data as messages to SNS topics.
 
+In order to use this target as in [in-process](../sfc-running-targets.md#running-targets-in-process) type target the type must be added to the [TargetTypes](../core/sfc-configuration.md#TargetTypes) section in the [SFC configuration file](../core/sfc-configuration.md).
+
+```json
+"TargetTypes" :{
+   "AWS-SNS": {
+      "JarFiles" : ["<location of deployment>/aws-sns-target/lib"],
+      "FactoryClassName": "com.amazonaws.sfc.sns.AwsSnsTargetWriter"
+   }
+}
+```
+
 ## AwsSnsTargetConfiguration
 
 A configuration class that defines how industrial data should be published to Amazon SNS topics. It specifies the target SNS topic ARN, message format, and data transformation settings. 

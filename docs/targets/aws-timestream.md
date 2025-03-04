@@ -2,6 +2,19 @@
 
 The SFC target adapter for Amazon [Timestream](https://aws.amazon.com/timestream/) enables storing industrial device data in AWS's purpose-built time series database service. It supports efficient ingestion of time series data with configurable timestamp handling, dimension mapping, and measure value formatting. The adapter automatically handles data batching and can stream device measurements directly into Timestream tables for real-time analytics and historical data analysis.
 
+In order to use this target as in [in-process](../sfc-running-targets.md#running-targets-in-process) type target the type must be added to the [TargetTypes](../core/sfc-configuration.md#TargetTypes) section in the [SFC configuration file](../core/sfc-configuration.md).
+
+```json
+"TargetTypes" :{
+   "AWS-TIMESTREAM": {
+      "JarFiles" : ["<location of deployment>/aws-timestream-target/lib"],
+      "FactoryClassName": "com.amazonaws.sfc.timestream.AwsTimestreamTargetWriter"
+   }
+}
+```
+
+**Configuration:**
+
 
 - [AwsTimestreamTargetConfiguration](#awstimestreamtargetconfiguration)
 - [AwsTimestreamRecordConfiguration](#awstimestreamrecordconfiguration)

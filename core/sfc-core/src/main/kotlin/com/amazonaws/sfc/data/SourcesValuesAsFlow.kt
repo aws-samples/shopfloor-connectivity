@@ -134,6 +134,7 @@ class SourcesValuesAsFlow(
                 if (!initialRead && duration > interval) {
                     log.warning("Read cycle took ${duration.inWholeMilliseconds.toDuration(DurationUnit.MILLISECONDS)}, " +
                             "which is more than read interval of $interval ${if (schedule != null)" for schedule \"$schedule\"" else ""}")
+
                 } else {
                     log.trace("Read cycle took $duration")
                     runBlocking {

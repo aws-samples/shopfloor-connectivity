@@ -1,4 +1,8 @@
-import os, stat, argparse, shutil, json
+import argparse
+import json
+import os
+import shutil
+import stat
 
 # cli arg definitions...
 parser = argparse.ArgumentParser()

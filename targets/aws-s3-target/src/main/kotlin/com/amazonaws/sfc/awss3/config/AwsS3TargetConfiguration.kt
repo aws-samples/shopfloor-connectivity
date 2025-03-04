@@ -5,7 +5,6 @@
 
 package com.amazonaws.sfc.awss3.config
 
-import com.amazonaws.sfc.awss3.config.AwsS3TargetConfiguration.Companion.CONFIG_BUCKET_NAME
 import com.amazonaws.sfc.awss3.config.AwsS3WriterConfiguration.Companion.AWS_S3
 import com.amazonaws.sfc.config.AwsServiceConfig
 import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_INTERVAL

@@ -31,7 +31,6 @@ This strategy allows for the addition of new functionalities in data delivery to
 <p align="center">
     <em>Fig. 3. Example of target daisy-chaining</em>
 
-
 ## Store and forward
 
 The [Store and forwarding](file:///Applications/Typora.app/Contents/Resources/TypeMark/targets/store-and-forward-target.md) target for SFC targets is implemented as an intermediate adapter. This target serves two primary purposes:

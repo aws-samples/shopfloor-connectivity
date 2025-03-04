@@ -6,10 +6,18 @@ The SFC SLMP protocol adapter enables communication with Mitsubishi/Melsec PLCs 
 
 In order to reduce the number of interactions between the adapter and the controller read action for single BIT, WORD and DOUBLEWORD elements are combined in batches of maximum 192 values using the SLMP Read Random request. For reading arrays of multiple values, STRING values and values of custom structured types a per configured channel SLMP Read request is used.
 
+In order to use this adapter as in [in-process](../sfc-running-adapters.md#running-protocol-adapters-in-process) type adapter the type must be added to the [AdapterTypes](../core/sfc-configuration.md#AdapterTypes) section in the [SFC configuration file](../core/sfc-configuration.md).
 
----
+```json
+"AdapterTypes" :{
+  "SLMP" : {
+    "JarFiles" : ["<location of deployment>/slmp/lib"]
+  },
+  "FactoryClassName" : "com.amazonaws.sfc.slmp.SlmpAdapter"
+}
+```
 
-## Configuration
+**Configuration:**
 
 - [SlmpSourceConfiguration](#slmpsourceconfiguration)
 - [SlmpChannelConfiguration](#slmpchannelconfiguration)

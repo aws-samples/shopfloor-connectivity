@@ -4,6 +4,19 @@
 
 The AWS [MSK](https://aws.amazon.com/msk/) (Amazon Managed Streaming for Apache Kafka) target adapter for Shop Floor Connectivity enables data streaming from industrial devices directly to Amazon MSK clusters. This adapter transforms collected device data into the required format and publishes it to specified Kafka topics in your MSK cluster. The adapter supports configurable batching, compression,data transformations using Apache Velocity templates and handles the authentication and connection management to your MSK clusters.
 
+In order to use this target as in [in-process](../sfc-running-targets.md#running-targets-in-process) type target the type must be added to the [TargetTypes](../core/sfc-configuration.md#TargetTypes) section in the [SFC configuration file](../core/sfc-configuration.md).
+
+```json
+"TargetTypes" :{
+   "AWS-MSK": {
+      "JarFiles" : ["<location of deployment>/aws-msk-target/lib"],
+      "FactoryClassName": "com.amazonaws.sfc.msk.AwsMskTargetWriter"
+   }
+}
+```
+
+
+
 ## AwsMskTargetConfiguration
 
 AwsMskTargetConfiguration extends the type  [TargetConfiguration](../core/target-configuration.md) with specific configuration data for connecting to and sending to an AWS MSK topic. The Targets configuration element can contain entries of this type, the TargetType of these entries must be set to **"AWS-MSK"**

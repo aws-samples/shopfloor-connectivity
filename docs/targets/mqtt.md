@@ -4,6 +4,17 @@
 
 The SFC MQTT target adapter enables publishing collected data to MQTT brokers using configurable topic patterns. Topics can be dynamically constructed using target data and  metadata from the source readings. The adapter supports various MQTT protocol configurations, authentication methods, and quality of service (QoS) levels for reliable message delivery. 
 
+In order to use this target as in [in-process](../sfc-running-targets.md#running-targets-in-process) type target the type must be added to the [TargetTypes](../core/sfc-configuration.md#TargetTypes) section in the [SFC configuration file](../core/sfc-configuration.md).
+
+```json
+"TargetTypes" :{
+   "MQTT_TARGET": {
+      "JarFiles" : ["<location of deployment>/mqtt-target/lib"],
+      "FactoryClassName": "com.amazonaws.sfc.mqtt.MqttTargetWriter"
+   }
+}
+```
+
 ## MqttTargetConfiguration
 
 MqttTargetConfiguration extends the type TargetConfiguration with specific configuration data for connecting to and sending to MQTT topics. The Targets configuration element can contain entries of this type; the TargetType of these entries must be set to **"MQTT-TARGET"**.

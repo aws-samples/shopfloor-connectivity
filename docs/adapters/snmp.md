@@ -2,11 +2,28 @@
 
 The SFC SNMP Protocol Adapter enables communication with devices using Simple Network Management Protocol (SNMP) versions 1 and 2. The adapter collects data from SNMP-enabled network devices, sensors, and equipment by polling OIDs.
 
----
+In order to use this adapter as in [in-process](../sfc-running-adapters.md#running-protocol-adapters-in-process) type adapter the type must be added to the [AdapterTypes](../core/sfc-configuration.md#AdapterTypes) section in the [SFC configuration file](../core/sfc-configuration.md).
+
+```json
+"AdapterTypes" :{
+  "SNMP" : {
+    "JarFiles" : ["<location of deployment>/snmp/lib"]
+  },
+  "FactoryClassName" : "com.amazonaws.sfc.snmp.SnmpAdapter"
+}
+```
+
+**Configuration:**
+
 - [SnmpSourceConfiguration](#snmpsourceconfiguration)
+
 - [SnmpChannelConfiguration](#snmpchannelconfiguration)
+
 - [SnmpAdapterConfiguration](#snmpadapterconfiguration)
+
 - [SnmpDeviceConfiguration](#snmpdeviceconfiguration)
+
+  
 
 ---
 

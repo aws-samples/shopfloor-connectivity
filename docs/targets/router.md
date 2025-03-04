@@ -2,14 +2,29 @@
 
 [SFC Configuration](../core/sfc-configuration.md) > [Targets](../core/sfc-configuration.md#targets) >  [Target](../core/target-configuration.md) 
 
-The SFC Router Target provides intelligent data routing capabilities by redirecting messages to alternate targets based on the delivery outcome of a primary target. When the primary target successfully processes data, the router can forward to a "success" target. Conversely, if the primary target fails, data can be redirected to a "failure" target. This enables flexible data flow control and reliable message handling through configurable routing paths
+The SFC Router Target provides intelligent data routing capabilities by redirecting messages to alternate targets based on the delivery outcome of a primary target. When the primary target successfully processes data, the router can forward to a "success" target. Conversely, if the primary target fails, data can be redirected to a "failure" target. This enables flexible data flow control and reliable message handling through configurable routing paths.
+
+In order to use this target as in [in-process](../sfc-running-targets.md#running-targets-in-process) type target the type must be added to the [TargetTypes](../core/sfc-configuration.md#TargetTypes) section in the [SFC configuration file](../core/sfc-configuration.md).
+
+```json
+"TargetTypes" :{
+   "ROUTER": {
+      "JarFiles" : ["<location of deployment>/router-target/lib"],
+      "FactoryClassName": "com.amazonaws.sfc.router.RouterTargetWriter"
+   }
+}
+```
+
+
+
+**Configuration:**
 
 The router target can be used to forward data to one or more targets in a [target chain](../sfc-targets-chaining.md). For each target an alternative
 target can be configured to which the data is routed if that data cannot be written to its primary target.
 
 Each primary target can also have a target configured to which the data is routed if it has been written successfully to its primary target or the alternative target of its primary target,
 
-Used cases for the router target are:
+Use cases for the router target are:
 
 - *Bundling* of (compressed) message data over a network to a system on which a group of targets, running as external
   services, are hosted.
