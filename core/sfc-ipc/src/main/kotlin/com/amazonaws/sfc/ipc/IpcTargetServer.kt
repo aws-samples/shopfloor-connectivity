@@ -85,14 +85,14 @@ class IpcTargetServer(
 
         val log = logger.getCtxLoggers(className, "start")
 
-        try{
-        grpcServer.start()
-        val addressAndPort = grpcServer.listenSockets.first() as InetSocketAddress
-        val addressAndPortStr = "${addressAndPort.address.hostAddress}:${addressAndPort.port}"
-        log.info("Target IPC service started, listening on  $addressAndPortStr, connection type is ${serverConfig.serverConnectionType}")
+        try {
+            grpcServer.start()
+            val addressAndPort = grpcServer.listenSockets.first() as InetSocketAddress
+            val addressAndPortStr = "${addressAndPort.address.hostAddress}:${addressAndPort.port}"
+            log.info("Target IPC service started, listening on  $addressAndPortStr, connection type is ${serverConfig.serverConnectionType}")
 
-        Runtime.getRuntime().addShutdownHook(shutdownTask(log))}
-        catch (e: Exception) {
+            Runtime.getRuntime().addShutdownHook(shutdownTask(log))
+        } catch (e: Exception) {
             log.errorEx("Error starting server", e)
             exitProcess(1)
         }
@@ -171,7 +171,8 @@ class IpcTargetServer(
                     val response = buildTargetResultResponse(results, useCompressionForReplies)
                     emit(response)
                 } catch (e: Exception) {
-                    logger.getCtxErrorLog(className, "writeValues")
+                    if (!e.isJobCancellationException)
+                        logger.getCtxErrorLog(className, "writeValues")(e.toString())
                 }
             }
         }
@@ -191,7 +192,8 @@ class IpcTargetServer(
                         send(metricData.grpcMetricsDataMessage)
                     }
                 } catch (e: Exception) {
-                    logger.getCtxErrorLog(className, "readMetrics")
+                    if (!e.isJobCancellationException)
+                       logger.getCtxErrorLog(className, "readMetrics")(e.toString())
                 }
                 true
             }
@@ -348,7 +350,7 @@ class IpcTargetServer(
 
                 }
                 service
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 null
             }
         healthProbeService?.start()
