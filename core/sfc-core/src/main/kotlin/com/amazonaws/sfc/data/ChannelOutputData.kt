@@ -1,4 +1,3 @@
-
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: MIT-0
 
@@ -37,7 +36,10 @@ class ChannelOutputData(val value: Any?, val timestamp: Instant? = null, val met
                         it.key to (it.value as ChannelOutputData).toMap(elementNames)
                     }?.toMap()) as Any
                 else
-                    value
+                    if (value is Map<*, *> && value["_value"] != null) {
+                        value["_value"]!!
+                    } else
+                        value
         }
 
         if (timestamp != null) {

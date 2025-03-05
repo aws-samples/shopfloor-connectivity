@@ -1,4 +1,11 @@
 # Release Notes:
+
+## Version 1.8.6, 5 march February 2025
+
+- Optimization of structured output data for OPCUA writer target
+
+---
+
 ## Version 1.8.5, 4 march February 2025
 
 - Documentation updates
