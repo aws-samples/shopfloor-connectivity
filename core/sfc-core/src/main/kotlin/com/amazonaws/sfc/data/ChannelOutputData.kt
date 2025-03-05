@@ -53,4 +53,5 @@ class ChannelOutputData(val value: Any?, val timestamp: Instant? = null, val met
         return map
     }
 
+
 }

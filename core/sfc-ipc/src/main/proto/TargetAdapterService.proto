@@ -74,6 +74,7 @@ message WriteValuesRequest{
   bytes compressed = 100;
 }
 
+
 // Values to write
 message SourceValues{
   oneof value {
@@ -84,7 +85,6 @@ message SourceValues{
   }
   Metadata metadata = 3;
   google.protobuf.Timestamp source_timestamp = 4;
-
 }
 
 // Map of channel values

@@ -88,7 +88,7 @@ object GrpcTargetValueFromNativeExt {
         return this
     }
 
-    private fun addAggregatedSourceData(sourceData: SourceOutputData, sourceDataBuilder: SourceValues.Builder) {
+    internal fun addAggregatedSourceData(sourceData: SourceOutputData, sourceDataBuilder: SourceValues.Builder) {
         // for every channel (each channel has a map of aggregated values)
         sourceData.channels.forEach { (channelName, channelValue) ->
             val aggregatedChannelValues = channelValue.value as Map<*, *>
@@ -114,7 +114,7 @@ object GrpcTargetValueFromNativeExt {
         sourceDataBuilder.aggregatedValuesBuilder.build()
     }
 
-    private fun addSourceData(sourceData: SourceOutputData, sourceDataBuilder: SourceValues.Builder) {
+    internal fun addSourceData(sourceData: SourceOutputData, sourceDataBuilder: SourceValues.Builder) {
         // build a map for values
         val channelValuesMapBuilder = TargetChannelValuesMap.newBuilder()
         // add all values to the map

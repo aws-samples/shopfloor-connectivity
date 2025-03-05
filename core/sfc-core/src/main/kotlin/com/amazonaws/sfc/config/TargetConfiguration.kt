@@ -10,6 +10,7 @@ import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_CREDENTIAL_PR
 import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_DESCRIPTION
 import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_TARGETS
 import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_UNQUOTE_NUMERIC_JSON_VALUES
+import com.amazonaws.sfc.data.DataOutputType
 import com.amazonaws.sfc.metrics.MetricsConfiguration
 import com.amazonaws.sfc.metrics.MetricsSourceConfiguration
 import com.google.gson.annotations.SerializedName
@@ -64,23 +65,21 @@ open class TargetConfiguration : Validate {
     @Suppress("PropertyName")
     protected var _server: String? = null
 
+    val server: String?
+        get() = _server
+
     @SerializedName(CONFIG_UNQUOTE_NUMERIC_JSON_VALUES)
     protected var _unquoteNumericJsonValues = false
 
-    /**
-     * If true, unquote numeric values in JSON output
-     */
     val unquoteNumericJsonValues : Boolean
         get() {
             return _unquoteNumericJsonValues
         }
 
-
-    /**
-     * Target server for IPC target server
-     */
-    val server: String?
-        get() = _server
+    @SerializedName(CONFIG_TARGET_OUTPUT_TYPE)
+    protected var _outputType : DataOutputType = DataOutputType.JSON
+    val outputType : DataOutputType
+        get() = _outputType
 
     @SerializedName(CONFIG_CREDENTIAL_PROVIDER_CLIENT)
     @Suppress("PropertyName")
@@ -167,6 +166,8 @@ open class TargetConfiguration : Validate {
         const val DEFAULT_TARGET_ARRAY_WHEN_BUFFERED = true
 
         const val CONFIG_TEMPLATE_EPOC_TIMESTAMP = "TemplateEpochTimestamp"
+
+        const val CONFIG_TARGET_OUTPUT_TYPE = "OutputType"
 
         const val CONFIG_TARGET_SERVER = "TargetServer"
         fun create(description: String = "",

@@ -10,7 +10,7 @@ import com.amazonaws.sfc.awssns.config.AwsSnsWriterConfiguration
 import com.amazonaws.sfc.awssns.config.AwsSnsWriterConfiguration.Companion.AWS_SNS
 import com.amazonaws.sfc.config.ConfigReader
 import com.amazonaws.sfc.data.*
-import com.amazonaws.sfc.data.TargetDataBuffer.Companion.newTargetDataBuffer
+import com.amazonaws.sfc.data.TargetDataStringBuffer.Companion.newTargetDataStringBuffer
 import com.amazonaws.sfc.log.Logger
 import com.amazonaws.sfc.metrics.*
 import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_DIMENSION_SOURCE
@@ -134,7 +134,7 @@ class AwsSnsTargetWriter(
     private val targetDataChannel =TargetDataChannel.create(targetConfig, "$className:targetDataChannel")
 
     // buffer for message batches
-    private val buffer = newTargetDataBuffer(resultHandler)
+    private val buffer = newTargetDataStringBuffer(resultHandler)
 
     // coroutine that writes messages to queue
     private val writer = scope.launch("Writer") {

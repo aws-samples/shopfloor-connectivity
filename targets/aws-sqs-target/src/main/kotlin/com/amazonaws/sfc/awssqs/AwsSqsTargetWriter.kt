@@ -10,7 +10,7 @@ import com.amazonaws.sfc.awssqs.config.AwsSqsWriterConfiguration
 import com.amazonaws.sfc.awssqs.config.AwsSqsWriterConfiguration.Companion.AWS_SQS
 import com.amazonaws.sfc.config.ConfigReader
 import com.amazonaws.sfc.data.*
-import com.amazonaws.sfc.data.TargetDataBuffer.Companion.newTargetDataBuffer
+import com.amazonaws.sfc.data.TargetDataStringBuffer.Companion.newTargetDataStringBuffer
 import com.amazonaws.sfc.log.Logger
 import com.amazonaws.sfc.metrics.*
 import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_DIMENSION_SOURCE
@@ -133,7 +133,7 @@ class AwsSqsTargetWriter(
 
 
     private val buffer by lazy {
-        newTargetDataBuffer(resultHandler)
+        newTargetDataStringBuffer(resultHandler)
     }
 
 

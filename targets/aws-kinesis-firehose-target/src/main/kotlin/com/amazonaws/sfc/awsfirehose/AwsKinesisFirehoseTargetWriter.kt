@@ -10,7 +10,7 @@ import com.amazonaws.sfc.awsfirehose.config.AwsFirehoseWriterConfiguration.Compa
 import com.amazonaws.sfc.awsfirehose.config.AwsKinesisFirehoseTargetConfiguration
 import com.amazonaws.sfc.config.ConfigReader
 import com.amazonaws.sfc.data.*
-import com.amazonaws.sfc.data.TargetDataBuffer.Companion.newTargetDataBuffer
+import com.amazonaws.sfc.data.TargetDataStringBuffer.Companion.newTargetDataStringBuffer
 import com.amazonaws.sfc.log.Logger
 import com.amazonaws.sfc.metrics.*
 import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_DIMENSION_SOURCE
@@ -101,7 +101,7 @@ class AwsKinesisFirehoseTargetWriter(
     private val targetDataChannel = TargetDataChannel.create(targetConfig, "$className:targetDataChannel")
 
     // Message buffer
-    private val buffer = newTargetDataBuffer(resultHandler)
+    private val buffer = newTargetDataStringBuffer(resultHandler)
 
 
     // Coroutine that sends the messages to the stream

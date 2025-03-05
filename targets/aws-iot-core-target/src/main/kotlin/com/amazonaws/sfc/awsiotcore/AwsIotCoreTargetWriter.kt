@@ -81,7 +81,7 @@ class AwsIotCoreTargetWriter(
     private val targetConfig: AwsIotCoreTargetConfiguration by lazy {
         clientHelper.targetConfig(config, targetID, AWS_IOT_CORE_TARGET)
     }
-    private val buffers = ConcurrentHashMap<String, TargetDataBuffer>()// TargetDataBuffer(storeFullMessage = false)
+    private val buffers = ConcurrentHashMap<String, TargetDataStringBuffer>()
     private val timers = ConcurrentHashMap<String, Job>()
     private val timerChannel = Channel<String>(capacity = 100)
 
@@ -199,7 +199,7 @@ class AwsIotCoreTargetWriter(
 
 
                             topicMessages.forEach { (topic, topicTargetData) ->
-                                val topicBuffer = buffers.computeIfAbsent(topic) { TargetDataBuffer(storeFullMessage = false) }
+                                val topicBuffer = buffers.computeIfAbsent(topic) { TargetDataStringBuffer(storeFullMessage = false) }
                                 val timer = timers.computeIfAbsent(topic) { createTimer(topic) }
 
                                 val messagePayload = buildPayload(topicTargetData)
@@ -267,7 +267,7 @@ class AwsIotCoreTargetWriter(
         } else true
     }
 
-    private fun exceedBufferOrMaxPayloadWhenBufferingMessage(buffer: TargetDataBuffer, payload: String): Boolean {
+    private fun exceedBufferOrMaxPayloadWhenBufferingMessage(buffer: TargetDataStringBuffer, payload: String): Boolean {
         if (usesCompression) return false
         val bufferedPayloadSizeWhenAddingMessage = payload.length + (2 + (buffer.size - 1)) + buffer.payloadSize
         val bufferSizeExceededWhenAddingMessage = (targetConfig.batchSize > 0) && (bufferedPayloadSizeWhenAddingMessage > targetConfig.batchSize)
@@ -276,7 +276,7 @@ class AwsIotCoreTargetWriter(
         return reachedMaxSizeWhenAddingToBuffer
     }
 
-    private fun bufferReachedMaxSizeOrMessages(buffer : TargetDataBuffer, topic : String,log: Logger.ContextLogger): Boolean {
+    private fun bufferReachedMaxSizeOrMessages(buffer : TargetDataStringBuffer, topic : String,log: Logger.ContextLogger): Boolean {
 
         val reachedBufferCount = if (targetConfig.batchCount > 0) buffer.size >= targetConfig.batchCount else false
         if (reachedBufferCount) log.trace("${targetConfig.batchCount} batch count for topic $topic reached")
@@ -303,7 +303,7 @@ class AwsIotCoreTargetWriter(
     private fun buildPayload(targetData: TargetData): String =
         if (transformation == null) targetData.toJson(config.elementNames, targetConfig.unquoteNumericJsonValues) else transformation!!.transform(targetData, config.elementNames, targetConfig.templateEpochTimestamp) ?: ""
 
-    private fun writeBufferedMessages(buffer: TargetDataBuffer, topic : String, timer: Job) : Job {
+    private fun writeBufferedMessages(buffer: TargetDataStringBuffer, topic : String, timer: Job) : Job {
         if (timer.isActive) timer.cancel()
 
         val log = logger.getCtxLoggers(className, "writeBufferedMessages")
@@ -356,7 +356,7 @@ class AwsIotCoreTargetWriter(
         }
     }
 
-    private fun buildRequest(buffer : TargetDataBuffer, topic : String): Pair<PublishRequest, Int> {
+    private fun buildRequest(buffer : TargetDataStringBuffer, topic : String): Pair<PublishRequest, Int> {
 
         val builder = PublishRequest.builder()
         builder.topic(topic)

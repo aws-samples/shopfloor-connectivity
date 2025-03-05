@@ -77,7 +77,7 @@ class AwsS3TargetWriter(
 
     private val scope = buildScope("S3 Target")
     private val targetResults = if (resultHandler != null) TargetResultBufferedHelper(targetID, resultHandler, logger) else null
-    private val buffer = TargetDataBuffer(storeFullMessage = false)
+    private val buffer = TargetDataStringBuffer(storeFullMessage = false)
 
     private val config: AwsS3WriterConfiguration
         get() {

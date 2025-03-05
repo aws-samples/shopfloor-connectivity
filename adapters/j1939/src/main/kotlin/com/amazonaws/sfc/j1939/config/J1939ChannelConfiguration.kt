@@ -26,6 +26,11 @@ class J1939ChannelConfiguration : ChannelConfiguration() {
     val spnList: List<String>?
         get() = _spnList?.split(',')?.map { it.trim() }?.map{if (isNumeric(it))it.split('.').first() else it}
 
+    @SerializedName(CONFIG_DATA_TYPE)
+    private var _dataType: String? = null
+    val dataType: String?
+        get() = _dataType
+
     override fun validate() {
         if (validated) return
         super.validate()
@@ -49,6 +54,8 @@ class J1939ChannelConfiguration : ChannelConfiguration() {
 
         private const val CONFIG_SPN = "Spn"
         private const val CONFIG_SPN_UPPERCASE = "SPN"
+
+        private const val CONFIG_DATA_TYPE = "Datatype"
 
         private val default = J1939ChannelConfiguration()
 

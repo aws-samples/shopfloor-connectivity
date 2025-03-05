@@ -394,6 +394,7 @@ class J1939Adapter(
 
     }
 
+
     private fun processPgnData(pgnId: UInt, sourceAddress: UByte, data: ByteArray) {
 
         val pgn = j1939Dbc?.pgnByPgnId(pgnId) ?: return
@@ -401,10 +402,25 @@ class J1939Adapter(
         sourcesUsingPgnFromAddress(pgnId, sourceAddress).keys.forEach { sourceId ->
 
             channelSpnMap[sourceId]?.forEach { (channelId, channelSignals) ->
+
                 val pgnData = sequence {
                     channelSignals.forEach { signal ->
                         if (pgn.signals.contains(signal)) {
                             val value = J1939Decoder.decode(signal, data)
+                            val dataType: String? = configuration.sources[sourceId]?.channels?.get(channelId)?.dataType
+
+                            if (dataType != null){
+                                when (dataType){
+                                    "UBYTE" ->{}
+                                    "BYTE" -> {}
+                                    "USHORT" -> {}
+                                    "SHORT" -> {}
+                                    "UINT" -> {}
+                                    "INT" -> {}
+                                    "FLOAT" -> {}
+                                }
+                            }
+
                             if (value != null) yield(signal.name to value)
                         }
                     }
@@ -484,11 +500,11 @@ class J1939Adapter(
         sourceTransportProtocolData.receivedPackets += 1
 
         if (sourceTransportProtocolData.receivedPackets >= sourceTransportProtocolData.packets) {
-            handleCompletedTransportProrocolDataTrenasfer(canFrameIdentifier, sourceTransportProtocolData)
+            handleCompletedTransportProtocolDataTrenasfer(canFrameIdentifier, sourceTransportProtocolData)
         }
     }
 
-    private fun handleCompletedTransportProrocolDataTrenasfer(
+    private fun handleCompletedTransportProtocolDataTrenasfer(
         canFrameIdentifier: CanFrameIdentifier,
         sourceTransportProtocolData: ProtocolDataTransfer
     ) {

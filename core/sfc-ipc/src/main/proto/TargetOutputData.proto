@@ -1,0 +1,21 @@
+
+syntax = "proto3";
+
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+import "Types.proto";
+import "TargetAdapterService.proto";
+
+package com.amazonaws.sfc.ipc;
+
+message TargetOutputData{
+   repeated TargetOutputDataItem items = 1;
+}
+message TargetOutputDataItem{
+  string schedule = 1;
+  map<string, SourceValues> values = 2;
+  Metadata metadata = 3;
+  string serial = 4;
+  google.protobuf.Timestamp timestamp = 5;
+}
+

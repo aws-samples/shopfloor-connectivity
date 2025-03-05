@@ -64,7 +64,10 @@ class FileTargetWriter(
 
     private val targetDataChannel = TargetDataChannel.create(targetConfig, "$className:targetDataChannel")
 
-    private val buffer = TargetDataBuffer(storeFullMessage = false)
+    private val buffer : TargetDataBufferImpl<*> = when (targetConfig.outputType) {
+        DataOutputType.PROTOBUF -> TargetDataBufferImpl<ByteArray>(storeFullMessage = true)
+        else -> TargetDataStringBuffer(storeFullMessage = false)
+    }
     private val targetResults = if (resultHandler != null) TargetResultBufferedHelper(targetID, resultHandler, logger) else null
 
     private val metricsCollector: MetricsCollector? by lazy {
@@ -119,7 +122,7 @@ class FileTargetWriter(
                         else
                             transformation!!.transform(targetData, config.elementNames, targetConfig.templateEpochTimestamp) ?: ""
 
-                        buffer.add(targetData, content)
+                        buffer.add(targetData, content, content.length)
 
                         log.trace("Received message, buffered items is ${buffer.size} with a total size of ${buffer.payloadSize.byteCountString}")
 
@@ -262,7 +265,7 @@ class FileTargetWriter(
                 } else {
                     firstLine = false
                 }
-                f.write(line)
+                f.write(line as String)
             }
             if (jsonFormatted) {
                 f.write("]")

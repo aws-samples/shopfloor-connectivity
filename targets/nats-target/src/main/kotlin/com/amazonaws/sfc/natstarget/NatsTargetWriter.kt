@@ -73,7 +73,7 @@ class NatsTargetWriter(
 
     val targetContext = buildContext("NATS-TARGET")
 
-    private val buffers = ConcurrentHashMap<String, TargetDataBuffer>()// TargetDataBuffer(storeFullMessage = false)
+    private val buffers = ConcurrentHashMap<String, TargetDataStringBuffer>()
     private val timers = ConcurrentHashMap<String, Job>()
     private val timerChannel = Channel<String>(capacity = 100)
 
@@ -195,7 +195,7 @@ class NatsTargetWriter(
 
                             subjectMessages.forEach { (subject, subjectTargetData) ->
 
-                                val subjectBuffer = buffers.computeIfAbsent(subject) { TargetDataBuffer(storeFullMessage = false) }
+                                val subjectBuffer = buffers.computeIfAbsent(subject) { TargetDataStringBuffer(storeFullMessage = false) }
                                 val timer = timers.computeIfAbsent(subject) { createTimer(subject) }
 
                                 val messagePayload = buildPayload(subjectTargetData)
@@ -262,7 +262,7 @@ class NatsTargetWriter(
         }
     }
 
-    private fun bufferReachedMaxSizeOrMessages(buffer: TargetDataBuffer, subject: String, log: Logger.ContextLogger): Boolean {
+    private fun bufferReachedMaxSizeOrMessages(buffer: TargetDataStringBuffer, subject: String, log: Logger.ContextLogger): Boolean {
         val reachedBufferCount = if (targetConfig.batchCount > 0) (buffer.size >= targetConfig.batchCount) else false
         if (reachedBufferCount) log.trace("${targetConfig.batchCount} batch count reached")
 
@@ -283,7 +283,7 @@ class NatsTargetWriter(
         } else true
     }
 
-    private fun exceedBufferOrMaxPayloadWhenBufferingMessage(buffer: TargetDataBuffer, payload: String): Boolean {
+    private fun exceedBufferOrMaxPayloadWhenBufferingMessage(buffer: TargetDataStringBuffer, payload: String): Boolean {
         if (usesCompression) return false
         val bufferedPayloadSizeWhenAddingMessage = payload.length + (2 + (buffer.size - 1)) + buffer.payloadSize
         val bufferSizeExceededWhenAddingMessage = (targetConfig.batchSize > 0) && (bufferedPayloadSizeWhenAddingMessage > targetConfig.batchSize)
@@ -294,7 +294,7 @@ class NatsTargetWriter(
     }
 
 
-    private fun buildNatsMessage(buffer: TargetDataBuffer): ByteArray {
+    private fun buildNatsMessage(buffer: TargetDataStringBuffer): ByteArray {
 
         val payload = if (doesBatching)
             if (targetConfig.arrayWhenBuffered)
@@ -323,7 +323,7 @@ class NatsTargetWriter(
         return compressedData
     }
 
-    private suspend fun writeBufferedMessages(buffer: TargetDataBuffer, subject: String, timer: Job): Job {
+    private suspend fun writeBufferedMessages(buffer: TargetDataStringBuffer, subject: String, timer: Job): Job {
 
         if (timer.isActive) timer.cancel()
 
@@ -420,7 +420,7 @@ class NatsTargetWriter(
     private fun createMetrics(
         adapterID: String,
         metricDimensions: MetricDimensions,
-        buffer: TargetDataBuffer,
+        buffer: TargetDataStringBuffer,
         payloadSize: Int,
         duration: Duration
     ) {

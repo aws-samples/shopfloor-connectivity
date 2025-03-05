@@ -178,7 +178,7 @@ object GrpcTargetValueAsNativeExt {
      * @receiver SourceValues Source values with optional metadata
      * @return SourceOutputData Received source data as a native structure
      */
-    private fun SourceValues.asDataChannelOutputData(): SourceOutputData {
+    internal fun SourceValues.asDataChannelOutputData(): SourceOutputData {
         // Data can be stored as "just the value"
 
         val isAggregatedData = this.hasAggregatedValues()

@@ -10,7 +10,7 @@ import com.amazonaws.sfc.awskinesis.config.AwsKinesisWriterConfiguration
 import com.amazonaws.sfc.awskinesis.config.AwsKinesisWriterConfiguration.Companion.AWS_KINESIS_TARGET
 import com.amazonaws.sfc.config.ConfigReader
 import com.amazonaws.sfc.data.*
-import com.amazonaws.sfc.data.TargetDataBuffer.Companion.newTargetDataBuffer
+import com.amazonaws.sfc.data.TargetDataStringBuffer.Companion.newTargetDataStringBuffer
 import com.amazonaws.sfc.log.Logger
 import com.amazonaws.sfc.metrics.*
 import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_DIMENSION_SOURCE
@@ -140,7 +140,7 @@ class AwsKinesisTargetWriter(
     private val targetDataChannel = TargetDataChannel.create(targetConfig, "$className:targetDataChannel")
 
     // buffer for batching messages
-    private val buffer = newTargetDataBuffer(resultHandler)
+    private val buffer = newTargetDataStringBuffer(resultHandler)
 
 
     // coroutine writing messages to stream
