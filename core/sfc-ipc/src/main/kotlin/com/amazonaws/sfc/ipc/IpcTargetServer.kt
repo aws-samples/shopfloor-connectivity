@@ -85,12 +85,17 @@ class IpcTargetServer(
 
         val log = logger.getCtxLoggers(className, "start")
 
+        try{
         grpcServer.start()
         val addressAndPort = grpcServer.listenSockets.first() as InetSocketAddress
         val addressAndPortStr = "${addressAndPort.address.hostAddress}:${addressAndPort.port}"
         log.info("Target IPC service started, listening on  $addressAndPortStr, connection type is ${serverConfig.serverConnectionType}")
 
-        Runtime.getRuntime().addShutdownHook(shutdownTask(log))
+        Runtime.getRuntime().addShutdownHook(shutdownTask(log))}
+        catch (e: Exception) {
+            log.errorEx("Error starting server", e)
+            exitProcess(1)
+        }
     }
 
     /**
