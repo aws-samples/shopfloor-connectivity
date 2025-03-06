@@ -196,7 +196,6 @@ include a setting "Name" for the channel.
 ```json
   "ProtocolAdapters":{
       "ADS":{
-          "AdapterType":"ADS",
           "AdapterServer":"AdsAdapterServer",
           "Devices":{
               "CX8190":{
