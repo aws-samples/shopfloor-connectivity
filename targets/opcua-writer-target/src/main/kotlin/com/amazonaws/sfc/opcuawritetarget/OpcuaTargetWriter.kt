@@ -146,79 +146,76 @@ class OpcuaTargetWriter(
                         var duration: Duration
                         var writtenValues = 0
                         var writes = 0
-                        try {
-                            duration = measureTime {
-                                val nodesAndValuesToWrite = sequence {
-                                    targetConfig.nodes.forEach { node ->
-                                        val valueAndTimestamp = getNodeValueAndTimeStamp(data, node, log)
-                                        if (valueAndTimestamp?.first != null) {
-                                            val value = if (!node.transformationID.isNullOrEmpty()) {
-                                                applyTransformation(valueAndTimestamp.first, node.nodeId?.toParseableString() ?: "", node.transformationID!!)
-                                            } else valueAndTimestamp.first
-                                            if (value != null) {
-                                                val dataValue = buildValue(node, value, valueAndTimestamp.second)
-                                                yield(node.nodeId to dataValue)
-                                            }
+
+                        duration = measureTime {
+
+                            // Create list of nodes and values to write
+                            val nodesAndValuesToWrite = sequence {
+                                targetConfig.nodes.forEach { node ->
+                                    val valueAndTimestamp = getNodeValueAndTimeStamp(data, node, log)
+                                    if (valueAndTimestamp?.first != null) {
+                                        val value = if (!node.transformationID.isNullOrEmpty()) {
+                                            applyTransformation(valueAndTimestamp.first, node.nodeId?.toParseableString() ?: "", node.transformationID!!)
+                                        } else valueAndTimestamp.first
+                                        if (value != null) {
+                                            val dataValue = buildValue(node, value, valueAndTimestamp.second)
+                                            yield(node.nodeId to dataValue)
                                         }
                                     }
-                                }.toList()
-
-                                val results = nodesAndValuesToWrite.chunked(targetConfig.writeBatchSize).map { batch ->
-                                    val nodeIds = batch.map { it.first }
-                                    val values = batch.map { it.second }
-                                    var status = client.writeValues(nodeIds, values)
-                                    writes += 1
-                                    writeCount.addAndGet(1)
-                                    Triple(nodeIds, values, status)
                                 }
+                            }.toList()
 
-                                results.forEach { result ->
-                                    try {
-                                        result.third?.get()?.forEachIndexed { i, statusCode ->
-                                            val v = result.second[i].value.value
-                                            val valueWithType = "${
-                                                if ((v is Array<*>)) v.toList().joinToString(prefix = "[", postfix = "]") else v
-                                            }:${OpcuaDataType.fromIdentifier((result.second[i].value.dataType).get())}"
-                                            if (statusCode == StatusCode.GOOD) {
-                                                if (logger.level == LogLevel.TRACE) log.trace("Written value  $valueWithType to node ${result.first[i]?.toParseableString()}")
-                                                writtenValues += 1
-                                                valuesCount.addAndGet(1)
-                                            } else {
-                                                val errorDescription = " ${StatusCodes.lookup(statusCode.value).get().joinToString()}"
-                                                val statusCodeHex = "0x${statusCode.value.toString(16)}"
-                                                log.error("Error writing value $valueWithType to node ${result.first[i]?.toParseableString()}, status code is $statusCodeHex :$errorDescription ")
-                                                targetResults?.error(targetData)
-                                            }
+                            // Write data to the nodes
+                            val results = nodesAndValuesToWrite.chunked(targetConfig.writeBatchSize).map { batch ->
+                                val nodeIds = batch.map { it.first }
+                                val values = batch.map { it.second }
+                                var status = client.writeValues(nodeIds, values)
+                                writes += 1
+                                writeCount.addAndGet(1)
+                                Triple(nodeIds, values, status)
+                            }
+
+                            // Process write results
+                            results.forEach { result ->
+                                try {
+                                    result.third?.get()?.forEachIndexed { i, statusCode ->
+
+                                        val value = result.second[i].value.value
+                                        val dataTypeStr = OpcuaDataType.fromIdentifier((result.second[i].value.dataType).get())
+                                        val valueWithType = "${if ((value is Array<*>)) value.toList().joinToString(prefix = "[", postfix = "]") else value}:$dataTypeStr"
+
+                                        if (statusCode == StatusCode.GOOD) {
+                                            if (logger.level == LogLevel.TRACE) log.trace("Written value  $valueWithType to node ${result.first[i]?.toParseableString()}")
+                                            writtenValues += 1
+                                            valuesCount.addAndGet(1)
+                                        } else {
+                                            val errorDescription = " ${StatusCodes.lookup(statusCode.value).get().joinToString()}"
+                                            val statusCodeHex = "0x${statusCode.value.toString(16)}"
+                                            log.error("Error writing value $valueWithType to node ${result.first[i]?.toParseableString()}, status code is $statusCodeHex :$errorDescription ")
+                                            targetResults?.error(targetData)
                                         }
-
-                                    } catch (e: Exception) {
-                                        if (e is ExecutionException && e.message?.contains("UaSerializationException") != false)
-                                            log.error("Error writing data to server because of datatype error, set nodes $CONFIG_DATA_TYPE, and $CONFIG_DIMENSIONS for array data, to exactly match the type and dimensions of the data, $e")
-                                        else
-                                            log.error("Error writing value to server, $e")
-                                        targetResults?.error(targetData)
                                     }
+
+                                    // ack the result as the actual writes were successful despite some nodes that may not have been written
+                                    targetResults?.ack(targetData)
+
+                                } catch (e: Exception) {
+                                    if (e is ExecutionException && e.message?.contains("UaSerializationException") != false)
+                                        log.error("Error writing data to server because of datatype error, set nodes $CONFIG_DATA_TYPE, and $CONFIG_DIMENSIONS for array data, to exactly match the type and dimensions of the data, $e")
+                                    else
+                                        log.error("Error writing value to server, $e")
+                                    targetResults?.error(targetData)
+                                    runBlocking { metricsCollector?.put(targetID, METRICS_WRITE_ERRORS, 1.0, MetricUnits.COUNT, metricDimensions) }
                                 }
                             }
-
-                            createMetrics(targetID, metricDimensions, writes, writtenValues, duration)
-                            // ack the result as the actual writes were successful despite some nodes that may not have been written
-                            targetResults?.ack(targetData)
-
-                        } catch (e: Exception) {
-                            runBlocking { metricsCollector?.put(targetID, METRICS_WRITE_ERRORS, 1.0, MetricUnits.COUNT, metricDimensions) }
-                            if (logger.level == LogLevel.TRACE) {
-                                log.traceEx("Error writing target data", e)
-                            } else {
-                                log.error("Error writing target data, $e")
-                            }
-                            targetResults?.error(targetData)
                         }
+                        createMetrics(targetID, metricDimensions, writes, writtenValues, duration)
                     }
                 }
+            // outer level catch to keep writing task
             } catch (e: Exception) {
                 if (!e.isJobCancellationException)
-                    log.errorEx("Error in writer", e)
+                    log.errorEx("Error writing values", e)
             }
         }
     }
