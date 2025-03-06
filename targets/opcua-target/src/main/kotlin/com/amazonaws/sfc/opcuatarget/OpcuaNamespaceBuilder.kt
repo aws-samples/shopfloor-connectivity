@@ -84,7 +84,7 @@ class OpcuaNamespaceBuilder(server: OpcUaServer,
 
             override fun shutdown() {
                 try {
-                } catch (ignored: InterruptedException) {
+                } catch (_: InterruptedException) {
                 }
             }
         })
@@ -153,11 +153,11 @@ class OpcuaNamespaceBuilder(server: OpcUaServer,
 
         if (nodeConfig.initValue != null ) {
             log.trace("Setting configured initial value for ${nodeConfig.nodeID} to ${nodeConfig.initValue}")
-            variableNode.value = DataValue(nodeConfig.initValue.toVariant(nodeConfig.dataTypeIdentifier, nodeConfig.arrayDimensions))
+            variableNode.value = DataValue(nodeConfig.initValue.toVariant(nodeConfig.dataTypeIdentifier, nodeConfig.arrayDimensions, logger))
         } else {
             if (initializeValuesWithNull) {
                 log.trace("Setting initial value for ${nodeConfig.nodeID} to null")
-                variableNode.value = DataValue(null.toVariant(nodeConfig.dataTypeIdentifier, nodeConfig.arrayDimensions))
+                variableNode.value = DataValue(null.toVariant(nodeConfig.dataTypeIdentifier, nodeConfig.arrayDimensions, logger))
             }
         }
 

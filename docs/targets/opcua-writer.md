@@ -364,7 +364,7 @@ e.g.
 [3] : Value array of 3 elements
 [3,2] : Value array of 3 by 2 elements
 
-**
+
 
 **Type**: [Int]
 
@@ -393,7 +393,7 @@ Important notes:
 
 ### DataType
 
-Specifies the OPC UA data type for the property value. If no type is specified, the type of the value is used to determine the data type used for the value that is written to the node. The DataType can be used to specify a specific data type that matches the data type of the node.
+Specifies the OPC UA data type for the property value. If no type is specified, the type of the value is used to determine the data type used for the value that is written to the node. The DataType is used to specify a specific data type that matches the data type of the node.
 
 Possible values:
 
@@ -404,15 +404,13 @@ Possible values:
 - `DOUBLE`
 - `EXPANDED_NODE_ID`
 - `FLOAT`
-- `GUID`
 - `INT16`
 - `INT32`
 - `INT64`
-- `LOCALIZED_TEXT`
 - `NODE_ID`
-- `QUALIFIED_NAME`
 - `SBYTE`
 - `STRING`
+- `STRUCT`
 - `UINT16`
 - `UINT32`
 - `UINT64`

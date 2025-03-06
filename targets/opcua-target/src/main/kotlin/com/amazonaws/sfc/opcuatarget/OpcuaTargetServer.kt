@@ -60,7 +60,8 @@ import java.util.*
 class OpcuaTargetServer(private val targetConfiguration: OpcuaTargetConfiguration,
                         private val transformations: Map<String,Transformation>,
                         private val attributeFilter: AttributeFilter?,
-                        private val elementNames: ElementNamesConfiguration, private val logger: Logger) {
+                        private val elementNames: ElementNamesConfiguration,
+                        private val logger: Logger) {
 
     private val className = this::class.java.simpleName
 
@@ -539,7 +540,7 @@ class OpcuaTargetServer(private val targetConfiguration: OpcuaTargetConfiguratio
 
     private fun searchData(queryString: String, query: Expression<Any>?, data: Map<String, Any>): Any? = try {
         query?.search(data)
-    } catch (e: NullPointerException) {
+    } catch (_: NullPointerException) {
         null
     } catch (e: Exception) {
         val log = logger.getCtxErrorLogEx(className, "searchData")
@@ -558,7 +559,7 @@ class OpcuaTargetServer(private val targetConfiguration: OpcuaTargetConfiguratio
             log.trace("Result of transformation \"$transformationID\" is ${transformedValue}${if (transformedValue != null) ":${transformedValue::class.java.simpleName}" else ""}")
             transformedValue
         } catch (e: Exception) {
-            logger.getCtxErrorLog(className, "applyTransformation")("Error applying transformation $transformationID to name \"$name\", e")
+            logger.getCtxErrorLog(className, "applyTransformation")("Error applying transformation $transformationID to name \"$name\", $e")
             null
         }
     }
@@ -594,10 +595,10 @@ class OpcuaTargetServer(private val targetConfiguration: OpcuaTargetConfiguratio
             value is Map<*, *> -> Variant(JsonHelper.gsonExtended().toJson(value))
             value is List<*> && value.isNotEmpty() && value.first() is ChannelOutputData -> {
                 val l = (value as List<ChannelOutputData>).map { it.value }
-                l.toVariant(dimensions = valueVariable?.arrayDimensions?.map { it.toInt() }, dataTypeIdentifier = valueVariable?.dataType)
+                l.toVariant(dimensions = valueVariable?.arrayDimensions?.map { it.toInt() }, dataTypeIdentifier = valueVariable?.dataType, logger = logger)
             }
 
-            else -> value.toVariant(dimensions = valueVariable?.arrayDimensions?.map { it.toInt() }, dataTypeIdentifier = valueVariable?.dataType)
+            else -> value.toVariant(dimensions = valueVariable?.arrayDimensions?.map { it.toInt() }, dataTypeIdentifier = valueVariable?.dataType, logger = logger)
         }
         return DataValue(variant, StatusCode.GOOD, DateTime(sourceTimeStamp), DateTime.now())
     }

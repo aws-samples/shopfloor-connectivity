@@ -1,12 +1,19 @@
 # Release Notes:
 
-## Version 1.8.6, 5 march February 2025
+## Version 1.8.6, 10 March 2025
+
+- Extended datatype and conversions for OPCUA and OPCUA-Writer targets
+- Fixed serialization of structured datatpes in MQTT Adapter
+
+---
+
+## Version 1.8.6, 5 March 2025
 
 - Optimization of structured output data for OPCUA writer target
 
 ---
 
-## Version 1.8.5, 4 march February 2025
+## Version 1.8.5, 4 March 2025
 
 - Documentation updates
 - OPCUA Target monitor output fix
