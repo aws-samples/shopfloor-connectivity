@@ -22,6 +22,7 @@ import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_WRITE_SUCCES
 import com.amazonaws.sfc.opcuawritetarget.OpcuaDataType.Companion.toVariant
 import com.amazonaws.sfc.opcuawritetarget.config.OpcuaNodeConfiguration
 import com.amazonaws.sfc.opcuawritetarget.config.OpcuaNodeConfiguration.Companion.CONFIG_DATA_TYPE
+import com.amazonaws.sfc.opcuawritetarget.config.OpcuaNodeConfiguration.Companion.CONFIG_DIMENSIONS
 import com.amazonaws.sfc.opcuawritetarget.config.OpcuaWriterConfiguration
 import com.amazonaws.sfc.opcuawritetarget.config.OpcuaWriterConfiguration.Companion.OPCUA_WRITER_TARGET
 import com.amazonaws.sfc.opcuawritetarget.config.OpcuaWriterTargetConfiguration
@@ -192,7 +193,7 @@ class OpcuaTargetWriter(
 
                                     } catch (e: Exception) {
                                         if (e is ExecutionException && e.message?.contains("UaSerializationException") != false)
-                                            log.error("Error writing data to server because of datatype error, set nodes $CONFIG_DATA_TYPE to explicitly specify the data type, $e")
+                                            log.error("Error writing data to server because of datatype error, set nodes $CONFIG_DATA_TYPE, and $CONFIG_DIMENSIONS for array data, to exactly match the type and dimensions of the data, $e")
                                         else
                                             log.error("Error writing value to server, $e")
                                     }
