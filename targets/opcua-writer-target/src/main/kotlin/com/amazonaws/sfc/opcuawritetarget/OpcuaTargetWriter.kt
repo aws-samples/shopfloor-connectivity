@@ -196,6 +196,7 @@ class OpcuaTargetWriter(
                                             log.error("Error writing data to server because of datatype error, set nodes $CONFIG_DATA_TYPE, and $CONFIG_DIMENSIONS for array data, to exactly match the type and dimensions of the data, $e")
                                         else
                                             log.error("Error writing value to server, $e")
+                                        targetResults?.error(targetData)
                                     }
                                 }
                             }
