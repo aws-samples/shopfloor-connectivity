@@ -21,6 +21,7 @@ import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_WRITE_ERRORS
 import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_WRITE_SUCCESS
 import com.amazonaws.sfc.opcuawritetarget.OpcuaDataType.Companion.toVariant
 import com.amazonaws.sfc.opcuawritetarget.config.OpcuaNodeConfiguration
+import com.amazonaws.sfc.opcuawritetarget.config.OpcuaNodeConfiguration.Companion.CONFIG_DATA_TYPE
 import com.amazonaws.sfc.opcuawritetarget.config.OpcuaWriterConfiguration
 import com.amazonaws.sfc.opcuawritetarget.config.OpcuaWriterConfiguration.Companion.OPCUA_WRITER_TARGET
 import com.amazonaws.sfc.opcuawritetarget.config.OpcuaWriterTargetConfiguration
@@ -41,6 +42,7 @@ import org.eclipse.milo.opcua.stack.core.types.builtin.DateTime
 import org.eclipse.milo.opcua.stack.core.types.builtin.StatusCode
 import org.eclipse.milo.opcua.stack.core.types.builtin.Variant
 import java.time.Instant
+import java.util.concurrent.ExecutionException
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.time.Duration
 import kotlin.time.DurationUnit
@@ -141,10 +143,10 @@ class OpcuaTargetWriter(
 
                         val data = targetData.toMap(config.elementNames, jmesPathCompatibleKeys = true)
                         var duration: Duration
-                        var writtenValues  = 0
-                        var writes  = 0
+                        var writtenValues = 0
+                        var writes = 0
                         try {
-                            duration  = measureTime {
+                            duration = measureTime {
                                 val nodesAndValuesToWrite = sequence {
                                     targetConfig.nodes.forEach { node ->
                                         val valueAndTimestamp = getNodeValueAndTimeStamp(data, node, log)
@@ -163,32 +165,41 @@ class OpcuaTargetWriter(
                                 val results = nodesAndValuesToWrite.chunked(targetConfig.writeBatchSize).map { batch ->
                                     val nodeIds = batch.map { it.first }
                                     val values = batch.map { it.second }
-                                    var status  = client.writeValues(nodeIds, values)
+                                    var status = client.writeValues(nodeIds, values)
                                     writes += 1
                                     writeCount.addAndGet(1)
-                                    Triple(nodeIds, values,status)
+                                    Triple(nodeIds, values, status)
                                 }
 
                                 results.forEach { result ->
-                                    result.third?.get()?.forEachIndexed { i, statusCode ->
-                                        val valueWithType = "${result.second[i].value.value}:${OpcuaDataType.fromIdentifier((result.second[i].value.dataType).get())}"
-                                        if (statusCode == StatusCode.GOOD) {
-                                            if (logger.level == LogLevel.TRACE){
-                                                log.trace("Written value  $valueWithType to node ${result.first[i]?.toParseableString()}")
+                                    try {
+                                        result.third?.get()?.forEachIndexed { i, statusCode ->
+                                            val v = result.second[i].value.value
+                                            val valueWithType = "${
+                                                if ((v is Array<*>)) v.toList().joinToString(prefix = "[", postfix = "]") else v
+                                            }:${OpcuaDataType.fromIdentifier((result.second[i].value.dataType).get())}"
+                                            if (statusCode == StatusCode.GOOD) {
+                                                if (logger.level == LogLevel.TRACE) log.trace("Written value  $valueWithType to node ${result.first[i]?.toParseableString()}")
+                                                writtenValues += 1
+                                                valuesCount.addAndGet(1)
+                                            } else {
+                                                val errorDescription = " ${StatusCodes.lookup(statusCode.value).get().joinToString()}"
+                                                val statusCodeHex = "0x${statusCode.value.toString(16)}"
+                                                log.error("Error writing value $valueWithType to node ${result.first[i]?.toParseableString()}, status code is $statusCodeHex :$errorDescription ")
+                                                targetResults?.error(targetData)
                                             }
-                                            writtenValues += 1
-                                            valuesCount.addAndGet(1)
-                                        } else{
-                                            val errorDescription  = " ${StatusCodes.lookup(statusCode.value).get().joinToString()}"
-                                            val statusCodeHex = "0x${statusCode.value.toString(16)}"
-                                            log.error("Error writing value $valueWithType to node ${result.first[i]?.toParseableString()}, status code is $statusCodeHex :$errorDescription ")
-                                            targetResults?.error(targetData)
                                         }
+
+                                    } catch (e: Exception) {
+                                        if (e is ExecutionException && e.message?.contains("UaSerializationException") != false)
+                                            log.error("Error writing data to server because of datatype error, set nodes $CONFIG_DATA_TYPE to explicitly specify the data type, $e")
+                                        else
+                                            log.error("Error writing value to server, $e")
                                     }
                                 }
                             }
 
-                            createMetrics(targetID, metricDimensions, writes, writtenValues, duration )
+                            createMetrics(targetID, metricDimensions, writes, writtenValues, duration)
                             // ack the result as the actual writes were successful despite some nodes that may not have been written
                             targetResults?.ack(targetData)
 
@@ -209,8 +220,6 @@ class OpcuaTargetWriter(
             }
         }
     }
-
-
 
     private suspend fun CoroutineScope.monitor() {
 
@@ -234,12 +243,15 @@ class OpcuaTargetWriter(
     private fun buildValue(node: OpcuaNodeConfiguration, value: Any, sourceTimeStamp: Instant): DataValue {
         val variant = when {
             value is Map<*, *> -> Variant(JsonHelper.gsonExtended().toJson(value))
-            value is List<*> && value.isNotEmpty() && value.first() is ChannelOutputData -> {
-                val l = (value as List<ChannelOutputData>).map { it.value }
-                l.toVariant(node.dataType?.identifier, node.dimensions)
+            value is List<*> && value.isNotEmpty() -> {
+                if (value.first() is ChannelOutputData) {
+                    (value as List<ChannelOutputData>).map { it.value }.toVariant(node.dataType?.identifier, node.dimensions, logger)
+                } else {
+                    value.toVariant(node.dataType?.identifier, node.dimensions, logger)
+                }
             }
 
-            else -> value.toVariant(dimensions = node.dimensions.map { it.toInt() }, dataTypeIdentifier = node.dataType?.identifier)
+            else -> value.toVariant(dimensions = node.dimensions.map { it.toInt() }, dataTypeIdentifier = node.dataType?.identifier, logger = logger)
         }
         return DataValue(variant, StatusCode.GOOD, DateTime(sourceTimeStamp), DateTime.now())
     }
@@ -359,14 +371,16 @@ class OpcuaTargetWriter(
     private fun createMetrics(
         adapterID: String,
         metricDimensions: MetricDimensions,
-        writes : Int,
+        writes: Int,
         values: Int,
         duration: Duration
     ) {
 
         runBlocking {
             metricsCollector?.put(
-                adapterID, metricsCollector?.buildValueDataPoint(adapterID, MetricsCollector.METRICS_MEMORY,
+                adapterID,
+                metricsCollector?.buildValueDataPoint(
+                    adapterID, MetricsCollector.METRICS_MEMORY,
                     MemoryMonitor.getUsedMemoryMB().toDouble(),
                     MetricUnits.MEGABYTES
                 ),
@@ -376,7 +390,8 @@ class OpcuaTargetWriter(
                     MemoryMonitor.getUsedMemoryMB().toDouble(),
                     MetricUnits.MEGABYTES
                 ),
-                metricsCollector?.buildValueDataPoint(adapterID,
+                metricsCollector?.buildValueDataPoint(
+                    adapterID,
                     METRICS_WRITES,
                     writes.toDouble(),
                     MetricUnits.COUNT,

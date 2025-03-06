@@ -6,6 +6,7 @@ package com.amazonaws.sfc.opcuawritetarget
 
 
 import com.amazonaws.sfc.data.JsonHelper
+import com.amazonaws.sfc.log.Logger
 import org.eclipse.milo.opcua.stack.core.Identifiers
 import org.eclipse.milo.opcua.stack.core.types.builtin.*
 import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UByte
@@ -152,16 +153,23 @@ enum class OpcuaDataType {
     abstract val identifier: NodeId
 
     companion object {
+
+        val className = this::class.simpleName.toString()
+
         fun fromString(value: String): OpcuaDataType {
             val s = value.uppercase().trim().replace("_", "")
             return entries.find { it.name == s } ?: UNDEFINED
         }
 
-        fun fromIdentifier(value: ExpandedNodeId?): OpcuaDataType {
-            return entries.find { it.identifier.identifier == value?.identifier && it.identifier.namespaceIndex == value?.namespaceIndex} ?: UNDEFINED
+        fun fromIdentifier(value: ExpandedNodeId): OpcuaDataType {
+            return entries.find { it.identifier.identifier == value.identifier && it.identifier.namespaceIndex == value.namespaceIndex} ?: UNDEFINED
         }
 
-        private fun convert(value: Any?, dataTypeIdentifier: NodeId?, dimensions: List<Int>?): Any? {
+        fun fromIdentifier(value: NodeId): OpcuaDataType {
+            return entries.find { it.identifier.identifier == value.identifier && it.identifier.namespaceIndex == value.namespaceIndex} ?: UNDEFINED
+        }
+
+        private fun convert(value: Any?, dataTypeIdentifier: NodeId?, dimensions: List<Int>?, logger : Logger): Any? {
             var v = value
             try {
                 if (v is List<*> && dimensions != null) {
@@ -235,7 +243,8 @@ enum class OpcuaDataType {
                         }
                     }
                 }
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                logger.getCtxErrorLog(className, "convert")("Error converting value $value:${value!!::class.simpleName} to OPCUA data type ${fromIdentifier(dataTypeIdentifier!!)}")
                 return null
             }
             return v
@@ -277,7 +286,7 @@ enum class OpcuaDataType {
             }
         }
 
-        fun Any?.toVariant(dataTypeIdentifier: NodeId?, dimensions: List<Int>?): Variant = Variant(convert(this, dataTypeIdentifier, dimensions))
+        fun Any?.toVariant(dataTypeIdentifier: NodeId?, dimensions: List<Int>?, logger : Logger): Variant = Variant(convert(this, dataTypeIdentifier, dimensions, logger))
     }
 
 }
