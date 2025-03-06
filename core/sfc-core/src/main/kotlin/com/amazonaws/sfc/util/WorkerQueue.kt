@@ -54,15 +54,6 @@ class WorkerQueue<T, R>(
         jobs++
     }
 
-    private fun createTimer(timeout: Duration): Job {
-        return scope.launch {
-            try {
-                delay(timeout)
-            } catch (e: Exception) {
-                // no harm done, timer is just used to guard for timeouts
-            }
-        }
-    }
 
     suspend fun await(): MutableList<R?> {
         val results = mutableListOf<R?>()

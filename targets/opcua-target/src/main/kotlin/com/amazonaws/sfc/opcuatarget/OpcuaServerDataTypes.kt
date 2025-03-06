@@ -159,7 +159,7 @@ enum class OpcuaServerDataTypes {
         private fun convert(value: Any?, dataTypeIdentifier: NodeId?, dimensions: List<Int>?): Any? {
             var v = value
             try {
-                if (v is List<*> && dimensions != null) {
+                if (v is List<*> ) {
 
                     v = when (dataTypeIdentifier) {
 
@@ -245,11 +245,11 @@ enum class OpcuaServerDataTypes {
             return v
         }
 
-        private inline fun <reified T> deepCast(dimensions: List<Int>, value: Any?, fn: (Any) -> T): Any? {
+        private inline fun <reified T> deepCast(dimensions: List<Int>?, value: Any?, fn: (Any) -> T): Any? {
 
             return when (value) {
                 null -> null
-                is List<*> -> when (dimensions.size) {
+                is List<*> -> when (dimensions?.size) {
 
                     1 -> Array(dimensions[0]) { i0 -> value[i0]?.let { fn(it) } }
 

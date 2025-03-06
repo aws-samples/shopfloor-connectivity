@@ -165,7 +165,7 @@ class IpcTargetWriter(private val targetID: String,
     }
 
 
-    private fun targetTransformations(map: Map<*, *>): Set<String> {
+    private fun getTargetTransformations(map: Map<*, *>): Set<String> {
 
         val transformations = mutableSetOf<String>()
         map.forEach { (k, v) ->
@@ -174,14 +174,14 @@ class IpcTargetWriter(private val targetID: String,
                     transformations.add(v)
 
                 (v is List<*>) ->{
-                    transformations.addAll(targetTransformations(v.mapIndexed { i, j ->
+                    transformations.addAll(getTargetTransformations(v.mapIndexed { i, j ->
                         i.toString() to j
                     }.toMap()))
 
                 }
 
                 else -> if (v is Map<*, *>) {
-                    transformations.addAll(targetTransformations( v))
+                    transformations.addAll(getTargetTransformations( v))
                 }
             }
         }
@@ -219,7 +219,7 @@ class IpcTargetWriter(private val targetID: String,
             // include transformations used in target
              @Suppress("UNCHECKED_CAST")
              val target = targetsMap[targetId] as MutableMap<String,Any>
-             val targetTransformations = targetTransformations(configurationMap[CONFIG_TARGETS] as Map<*,*>).filter { allTransformations.keys.contains(it) }
+             val targetTransformations = getTargetTransformations(configurationMap[CONFIG_TARGETS] as Map<*,*>).filter { allTransformations.keys.contains(it) }
              if (targetTransformations.isNotEmpty()) outputConfig[CONFIG_TRANSFORMATIONS] = allTransformations.filter { it.key in targetTransformations }
              targetId  to target
         }.toMap()

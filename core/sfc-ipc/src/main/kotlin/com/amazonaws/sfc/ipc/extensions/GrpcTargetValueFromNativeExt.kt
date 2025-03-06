@@ -456,14 +456,14 @@ object GrpcTargetValueFromNativeExt {
         TargetChannelValue.newBuilder().setCustomArray(gson.toJson(value))
 
     // Adds an array of structured values type encoded as JSON
-    private fun builderForValue(value: LinkedHashMap<*, *>): TargetChannelValue.Builder {
+    private fun builderForValue(value: Map<*, *>): TargetChannelValue.Builder {
 
         return TargetChannelValue.newBuilder()
             .setTypedHashMap(targetValueTypedMap(value))
 
     }
 
-    private fun targetValueTypedMap(value: LinkedHashMap<*, *>): TypedTargetChannelValueMap.Builder? =
+    private fun targetValueTypedMap(value: Map<*, *>): TypedTargetChannelValueMap.Builder? =
         TypedTargetChannelValueMap.newBuilder()
             .putAllEntries(
                 sequence {
@@ -475,7 +475,7 @@ object GrpcTargetValueFromNativeExt {
 
 
     // Adds an array of arrays of structured values type encoded as JSON
-    private fun builderForValue(value: ArrayList<LinkedHashMap<*, *>>): TargetChannelValue.Builder {
+    private fun builderForValue(value: ArrayList<Map<*, *>>): TargetChannelValue.Builder {
 
         val valuesList = sequence {
             value.forEach {
@@ -548,7 +548,7 @@ object GrpcTargetValueFromNativeExt {
             is String -> builderForValue(valueAsArray as ArrayList<String>)
             is Instant -> builderForValue(valueAsArray as ArrayList<Instant>)
             is ChannelOutputData -> builderForValue(valueAsArray as ArrayList<ChannelOutputData>)
-            is LinkedHashMap<*, *> -> builderForValue((valueAsArray as ArrayList<LinkedHashMap<*, *>>))
+            is Map<*, *> -> builderForValue((valueAsArray as ArrayList<Map<*, *>>))
             is Iterable<*> -> builderForNestedArray(valueAsArray as ArrayList<ArrayList<*>>)
             else -> addCustomValueList(valueAsArray)
         }
@@ -589,7 +589,7 @@ object GrpcTargetValueFromNativeExt {
             is Double -> builderForValue(channelOutput.value as Double)
             is String -> builderForValue(channelOutput.value as String)
             is Instant -> builderForValue(channelOutput.value as Instant)
-            is LinkedHashMap<*, *> -> builderForValue(channelOutput.value as LinkedHashMap<*, *>)
+            is Map<*, *> -> builderForValue(channelOutput.value as Map<*, *>)
             else -> addCustomValue(channelOutput.value!!)
         }
         return builder

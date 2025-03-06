@@ -5,6 +5,7 @@
 package com.amazonaws.sfc.opcuawritetarget
 
 
+import com.amazonaws.sfc.config.ChannelConfiguration.Companion.CONFIG_TRANSFORMATION
 import com.amazonaws.sfc.data.JsonHelper
 import com.amazonaws.sfc.log.Logger
 import org.eclipse.milo.opcua.stack.core.Identifiers
@@ -176,75 +177,51 @@ enum class OpcuaDataType {
 
                     v = when (dataTypeIdentifier) {
 
-                        Identifiers.Boolean ->
-                            deepCast<Boolean>(dimensions, v) { it as Boolean }
-
-                        Identifiers.SByte ->
-                            deepCast<Byte>(dimensions, v) { it as Byte }
-
-                        Identifiers.ByteString ->
-                            deepCast<ByteString>(dimensions, v) {
-                                ByteString.of(it.toString().encodeToByteArray())
-                            }
-
-                        Identifiers.String ->
-                            deepCast<String>(dimensions, v) { it as String }
-
-                        Identifiers.Structure ->
-                            deepCast<String>(dimensions, v) { JsonHelper.gsonExtended().toJson(it) }
-
-                        Identifiers.DateTime ->
-                            deepCast<DateTime>(dimensions, v) { it as DateTime }
-
-                        Identifiers.Double ->
-                            deepCast<Double>(dimensions, v) { it as Double }
-
-                        Identifiers.ExpandedNodeId ->
-                            deepCast<ExpandedNodeId>(dimensions, v) { it as ExpandedNodeId }
-
-                        Identifiers.Float ->
-                            deepCast<Float>(dimensions, v) { it as Float }
-
-                        Identifiers.Int16 ->
-                            deepCast<Short>(dimensions, v) { it as Short }
-
-                        Identifiers.Int32 ->
-                            deepCast<Int>(dimensions, v) { it as Int }
-
-                        Identifiers.Int64 ->
-                            deepCast<Long>(dimensions, v) { it as Long }
-
-                        Identifiers.Byte ->
-                            deepCast<UByte>(
-                                dimensions,
-                                v) { UByte.valueOf(it as Byte) }
-
-                        Identifiers.UInt16 ->
-                            deepCast<UShort>(
-                                dimensions,
-                                v) { UShort.valueOf(it as Short) }
-
-                        Identifiers.UInt32 ->
-                            deepCast<UInteger>(dimensions, v) { UInteger.valueOf(it as Int) }
-
-                        Identifiers.UInt64 ->
-                            deepCast<ULong>(
-                                dimensions,
-                                v) { ULong.valueOf(it as Long) }
-
-                        Identifiers.NodeId ->
-                            deepCast<NodeId>(dimensions, v) { it as NodeId }
-
-                        Identifiers.XmlElement ->
-                            deepCast<XmlElement>(dimensions, v) { XmlElement(it.toString()) }
-
-                        else -> {
-                            v
-                        }
+                        Identifiers.Boolean -> deepCast<Boolean>(dimensions, v) { it as Boolean }
+                        Identifiers.SByte -> deepCast<Byte>(dimensions, v) { it as Byte }
+                        Identifiers.ByteString -> deepCast<ByteString>(dimensions, v) { ByteString.of(it.toString().encodeToByteArray()) }
+                        Identifiers.String -> deepCast<String>(dimensions, v) { it as String }
+                        Identifiers.Structure -> deepCast<String>(dimensions, v) { JsonHelper.gsonExtended().toJson(it) }
+                        Identifiers.DateTime -> deepCast<DateTime>(dimensions, v) { it as DateTime }
+                        Identifiers.Double -> deepCast<Double>(dimensions, v) { it as Double }
+                        Identifiers.ExpandedNodeId -> deepCast<ExpandedNodeId>(dimensions, v) { it as ExpandedNodeId }
+                        Identifiers.Float -> deepCast<Float>(dimensions, v) { it as Float }
+                        Identifiers.Int16 -> deepCast<Short>(dimensions, v) { it as Short }
+                        Identifiers.Int32 -> deepCast<Int>(dimensions, v) { it as Int }
+                        Identifiers.Int64 -> deepCast<Long>(dimensions, v) { it as Long }
+                        Identifiers.Byte -> deepCast<UByte>(dimensions, v) { UByte.valueOf(it as Byte) }
+                        Identifiers.UInt16 -> deepCast<UShort>(dimensions, v) { UShort.valueOf(it as Short) }
+                        Identifiers.UInt32 -> deepCast<UInteger>(dimensions, v) { UInteger.valueOf(it as Int) }
+                        Identifiers.UInt64 -> deepCast<ULong>(dimensions, v) { ULong.valueOf(it as Long) }
+                        Identifiers.NodeId -> deepCast<NodeId>(dimensions, v) { it as NodeId }
+                        Identifiers.XmlElement -> deepCast<XmlElement>(dimensions, v) { XmlElement(it.toString()) }
+                        else ->  v
+                    }
+                }else{
+                    v = when (dataTypeIdentifier) {
+                        Identifiers.Boolean -> v as Boolean
+                        Identifiers.SByte -> v as Byte
+                        Identifiers.ByteString -> ByteString.of(v.toString().encodeToByteArray())
+                        Identifiers.String -> v as String
+                        Identifiers.Structure -> JsonHelper.gsonExtended().toJson(v)
+                        Identifiers.DateTime -> v as DateTime
+                        Identifiers.Double -> v as Double
+                        Identifiers.ExpandedNodeId -> v as ExpandedNodeId
+                        Identifiers.Float -> v as Float
+                        Identifiers.Int16 -> v as Short
+                        Identifiers.Int32 -> v as Int
+                        Identifiers.Int64 -> v as Long
+                        Identifiers.Byte -> UByte.valueOf(v as Byte)
+                        Identifiers.UInt16 -> UShort.valueOf(v as Short)
+                        Identifiers.UInt32 -> UInteger.valueOf(v as Int)
+                        Identifiers.UInt64 -> ULong.valueOf(v as Long)
+                        Identifiers.NodeId -> v as NodeId
+                        Identifiers.XmlElement -> XmlElement(v.toString())
+                        else -> v
                     }
                 }
-            } catch (e: Exception) {
-                logger.getCtxErrorLog(className, "convert")("Error converting value $value:${value!!::class.simpleName} to OPCUA data type ${fromIdentifier(dataTypeIdentifier!!)}")
+            } catch (_: Exception) {
+                logger.getCtxErrorLog(className, "convert")("Error converting value $value:${value!!::class.simpleName} to OPCUA data type ${fromIdentifier(dataTypeIdentifier!!)}, set the $CONFIG_TRANSFORMATION property of the node configuration to convert to the required type")
                 return null
             }
             return v

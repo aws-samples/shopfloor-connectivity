@@ -383,7 +383,7 @@ object GrpcValueFromNativeExt {
             .build()
     }
 
-    fun channelValue(value: Any, ts: Instant?): ChannelValue? {
+    fun channelValue(value: Any?, ts: Instant?): ChannelValue? {
         val a = when (value) {
             is Boolean -> channelValue(value, ts)
             is Byte -> channelValue(value, ts)
@@ -391,7 +391,7 @@ object GrpcValueFromNativeExt {
             is Float -> channelValue(value, ts)
             is Instant -> channelValue(value, ts)
             is Int -> channelValue(value, ts)
-            is LinkedHashMap<*, *> -> channelValue(value, ts)
+            is Map<*,*> -> channelValue(value, ts)
             is Long -> channelValue(value, ts)
             is Short -> channelValue(value, ts)
             is String -> channelValue(value, ts)
@@ -418,7 +418,7 @@ object GrpcValueFromNativeExt {
             is Float -> channelValue(arrayListOf(*value.map { it as Float }.toTypedArray<Float>()), ts)
             is Instant -> channelValue(arrayListOf(*value.map { it as Instant }.toTypedArray<Instant>()), ts)
             is Int -> channelValue(arrayListOf(*value.map { it as Int }.toTypedArray<Int>()), ts)
-            is LinkedHashMap<*, *> -> channelValue(arrayListOf(*value.map { it as LinkedHashMap<*, *> }.toTypedArray<LinkedHashMap<*, *>>()), ts)
+            is Map<*, *> -> channelValue(arrayListOf(*value.map { it as LinkedHashMap<*, *> }.toTypedArray<LinkedHashMap<*, *>>()), ts)
             is Long -> channelValue(arrayListOf(*value.map { it as Long }.toTypedArray<Long>()), ts)
             is Short -> channelValue(arrayListOf(*value.map { it as Short }.toTypedArray<Short>()), ts)
             is String -> channelValue(arrayListOf(*value.map { it as String }.toTypedArray<String>()), ts)
@@ -431,30 +431,21 @@ object GrpcValueFromNativeExt {
             else -> channelValue(ArrayList<String>(value.size).addAll(value.map { it.toString() }), ts)
         }
 
-    /**
-     * Builds a new channel value from a map of values
-     * @param value LinkedHashMap<*, *>
-     * @param ts Instant?
-     * @return ChannelValue?
-     */
-    fun channelValue(value: LinkedHashMap<*, *>, ts: Instant?): ChannelValue? {
+
+    fun channelValue(value: Map<*, *>, ts: Instant?): ChannelValue? {
         return ChannelValue.newBuilder()
             .setTypedHashMap(typedMap(value))
             .setValueTimestamp(ts)
             .build()
     }
 
-    private fun typedMap(value: LinkedHashMap<*, *>): TypedMap? =
+    private fun typedMap(value: Map<*, *>): TypedMap? =
         TypedMap.newBuilder().putAllEntries(value.filter { it.value != null }.map { (k, v) -> k.toString() to channelValue(v, null) }.toMap()).build()
 
-    /**
-     * Builds a new channel value from an array of map values
-     * @param value ArrayList<LinkedHashMap<*, *>>
-     * @param ts Instant?
-     * @return ChannelValue?
-     */
+
+
     @JvmName("addMapList")
-    fun channelValue(value: ArrayList<LinkedHashMap<*, *>>, ts: Instant?): ChannelValue? {
+    fun channelValue(value: ArrayList<Map<*, *>>, ts: Instant?): ChannelValue? {
         return ChannelValue.newBuilder()
             .setTypedHasMapArray(TypedMapArray.newBuilder()
                 .addAllItems(value.map { typedMap(it) })

@@ -16,12 +16,18 @@ abstract class CommandLine(val args: Array<String>) {
 
     private fun commandLine(args: Array<String>): CommandLine {
 
-        val cmd = DefaultParser().parse(options(), args)
-        if (cmd.hasOption(OPTION_HELP)) {
+        try {
+            val cmd = DefaultParser().parse(options(), args)
+            if (cmd.hasOption(OPTION_HELP)) {
+                printHelp()
+                exitProcess(0)
+            }
+            return cmd
+        }catch ( e : Exception){
+            println( "Command line error, $e\n")
             printHelp()
-            exitProcess(0)
+            exitProcess(1)
         }
-        return cmd
     }
 
     open fun options(): Options = commonOptions()

@@ -584,29 +584,15 @@ object GrpcSourceValueFromNativeExt {
         return this
     }
 
-    /**
-     * Adds a map value to a response encode as json to a response builder
-     * @receiver SourceReadValuesReply.Builder
-     * @param name String Name of the value
-     * @param value LinkedHashMap<*,*> Channel value
-     * @param ts Instant? Timestamp for the value
-     * @return SourceReadValuesReply.Builder
-     */
-    private fun SourceReadValuesReply.Builder.addValue(name: String, value: LinkedHashMap<*, *>, ts: Instant? = null): SourceReadValuesReply.Builder {
+
+    private fun SourceReadValuesReply.Builder.addValue(name: String, value: Map<*, *>, ts: Instant? = null): SourceReadValuesReply.Builder {
         this.putValues(name, channelValue(value, ts))
         return this
     }
 
-    /**
-     * Adds a list of map values to a response encoded as json to a response builder
-     * @receiver SourceReadValuesReply.Builder
-     * @param name String Name of the value
-     * @param value ArrayList<LinkedHashMap<*, *>> Channel value
-     * @param ts Instant? Timestamp for the value
-     * @return SourceReadValuesReply.Builder
-     */
+
     @JvmName("addMapList")
-    fun SourceReadValuesReply.Builder.addValue(name: String, value: ArrayList<LinkedHashMap<*, *>>, ts: Instant? = null): SourceReadValuesReply.Builder {
+    fun SourceReadValuesReply.Builder.addValue(name: String, value: ArrayList<Map<*, *>>, ts: Instant? = null): SourceReadValuesReply.Builder {
         this.putValues(name, channelValue(value, ts))
         return this
     }
@@ -685,7 +671,7 @@ object GrpcSourceValueFromNativeExt {
             is UInt -> this.addValue(name, value, ts)
             is UShort -> this.addValue(name, value.toUShort(), ts)
             is ULong -> this.addValue(name, value, ts)
-            is LinkedHashMap<*, *> -> this.addValue(name, value, ts)
+            is Map<*, *> -> this.addValue(name, value, ts)
             is ChannelReadValue -> this.addValue(name, value, ts)
             else -> if (value != null) this.addCustomValue(name, value, ts) else this
         }
@@ -721,7 +707,7 @@ object GrpcSourceValueFromNativeExt {
             is UInt -> this.addValue(name, (valueAsList as ArrayList<UInt>), ts)
             is ULong -> this.addValue(name, (valueAsList as ArrayList<ULong>), ts)
             is UShort -> this.addValue(name, (valueAsList as ArrayList<UShort>), ts)
-            is LinkedHashMap<*, *> -> this.addValue(name, valueAsList as ArrayList<LinkedHashMap<*, *>>, ts)
+            is Map<*, *> -> this.addValue(name, valueAsList as ArrayList<Map<*, *>>, ts)
             is ChannelReadValue -> this.addChannelValueList(name, valueAsList as ArrayList<ChannelReadValue>, ts)
             else -> addCustomValueList(name, valueAsList.filterNotNull(), ts)
         }

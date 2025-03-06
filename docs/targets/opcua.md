@@ -446,7 +446,7 @@ Specifies which network interfaces can be used to access the OPC UA server.
 
 Lists the names of network interfaces, e.g. en0,  that will be bound to the OPC UA server. If not specified, the server will bind to all available network interfaces by default.
 
-Type:** Array of Strings
+**Type:** Array of Strings
 
 ---
 ### ServerPath
