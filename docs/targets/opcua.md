@@ -720,7 +720,7 @@ Defines a map of sub-folders to be created within the main folder structure.
 
 Allows organizing data into a hierarchical folder structure within the data model.
 
-**Type**: Map[String, FolderNodeConfiguration]
+**Type**: Map[String, [FolderNodeConfiguration](#foldernodeconfiguration)]
 
 ---
 ### Id
@@ -757,7 +757,7 @@ Default is "urn:amazonaws.sfc"
 ### Variables
 Used to specify data points or variables that will be available in the top-level folder
 
-**Type**: Map[String, VariableNodeConfiguration]
+**Type**: Map[String, [VariableNodeConfiguration](#variablenodeconfiguration)]
 
 
 
@@ -939,7 +939,7 @@ The value of the namespace index is set by the server when the model is built fr
 ### Variables
 Used to specify data points or variables that will be available in the  folder
 
-**Type**: Map[String, VariableNodeConfiguration]
+**Type**: Map[String, [VariableNodeConfiguration](#variablenodeconfiguration)]
 
 
 

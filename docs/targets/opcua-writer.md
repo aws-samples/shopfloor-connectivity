@@ -411,9 +411,6 @@ Possible values:
 - `SBYTE`
 - `STRING`
 - `STRUCT`
-- `UINT16`
-- `UINT32`
-- `UINT64`
 - `XML_ELEMENT`
 
 The '_' character in the type names can be omitted, so type `BYTE_STRING` equals to `BYTESTRING`
