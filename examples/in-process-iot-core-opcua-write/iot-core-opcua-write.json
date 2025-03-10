@@ -1,0 +1,100 @@
+{
+  "AWSVersion": "2022-04-02",
+  "Name": "Subscribe to IoT Core and write temperature value to local OPCUA Server",
+  "Version": 1,
+  "LogLevel": "Info",
+  "ElementNames": {
+    "Value": "value",
+    "Timestamp": "timestamp",
+    "Metadata": "metadata"
+  },
+  "Schedules": [
+    {
+      "Name": "IoTCoreToOPCUA",
+      "Interval": 1000,
+      "Description": "Read data of all OPCUA data types once per second and send to terminal",
+      "Active": true,
+      "TimestampLevel": "Both",
+      "Sources": {
+        "iot": [
+          "*"
+        ]
+      },
+      "Targets": [
+        "OPCUAWrite",
+        "#DebugTarget"
+      ]
+    }
+  ],
+  "Sources": {
+    "iot": {
+      "Name": "iot",
+      "ProtocolAdapter": "IoTCore",
+      "AdapterBroker": "default-broker",
+      "Channels": {
+        "temperature": {
+          "Name": "temperature",
+          "Topics": [
+            "temperature"
+          ]
+        }
+      }
+    }
+  },
+  "Targets": {
+    "DebugTarget": {
+      "Active": true,
+      "TargetType": "DEBUG-TARGET"
+    },
+    "OPCUAWrite": {
+      "TargetType": "OPCUA-WRITER-TARGET",
+      "Address": "opc.tcp://localhost",
+      "Path": "myopcua/server/",
+      "Port": "4840",
+      "Nodes": [
+        {
+          "NodeId": "ns=2;i=2",
+          "DataPath": "@.sources.iot.values.temperature.value.temperature"
+        }
+      ]
+    }
+  },
+  "TargetTypes": {
+    "DEBUG-TARGET": {
+      "JarFiles": [
+        "${SFC_DEPLOYMENT_DIR}/debug-target/lib"
+      ],
+      "FactoryClassName": "com.amazonaws.sfc.debugtarget.DebugTargetWriter"
+    },
+    "OPCUA-WRITER-TARGET": {
+      "JarFiles": [
+        "${SFC_DEPLOYMENT_DIR}/opcua-writer-target/lib"
+      ],
+      "FactoryClassName": "com.amazonaws.sfc.opcuawritetarget.OpcuaTargetWriter"
+    }
+  },
+  "AdapterTypes": {
+    "MQTT": {
+      "JarFiles": [
+        "${SFC_DEPLOYMENT_DIR}/mqtt/lib"
+      ],
+      "FactoryClassName": "com.amazonaws.sfc.mqtt.MqttAdapter"
+    }
+  },
+  "ProtocolAdapters": {
+    "IoTCore": {
+      "AdapterType": "MQTT",
+      "ReadMode": "KeepAll",
+      "Brokers": {
+        "default-broker": {
+          "EndPoint": "ssl://XXX-ats.iot.XXX.amazonaws.com",
+          "Port": 8883,
+          "Certificate": "${SFC_DEPLOYMENT_DIR}/certs/sfc.cert.pem",
+          "PrivateKey": "${SFC_DEPLOYMENT_DIR}/certs/sfc.private.key",
+          "RootCA": "${SFC_DEPLOYMENT_DIR}/certs/AmazonRootCA1.pem",
+          "ConnectionTimeout": 15
+        }
+      }
+    }
+  }
+}
