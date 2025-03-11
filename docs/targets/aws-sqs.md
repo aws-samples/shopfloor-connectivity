@@ -34,6 +34,7 @@ Requires IAM permission `sqs:SendMessageBatch` for the receiving queue.
 - [Interval](#interval)
 - [QueueUrl](#queueurl)
 - [Region](#region)
+- [Template](#template)
 
 ---
 ### BatchSize
@@ -85,6 +86,40 @@ The URL of the Amazon SQS queue where messages will be sent. This is the unique 
 The AWS Region identifier where the SQS queue is located, such as "us-east-1" or "eu-west-2". Specifies which regional endpoint to use when sending messages to the queue.
 
 **Type**: String
+
+---
+
+### Template
+
+Specifies the file path to an [Apache velocity](https://velocity.apache.org/)  template used for  [transforming the output data](../sfc-target-templates.md) target output data. This optional setting enables custom formatting of data before it is sent to the target. Available context variables include:
+
+- $schedule
+- $sources
+- $metadata
+- $serial
+- $timestamp
+- names specified in ElementNames configuration
+- $tab (for inserting tab characters)
+
+Pathname to file containing an [Apache velocity](https://velocity.apache.org/) template that can be applied to [transform the output data](../sfc-target-templates.md) of the target.
+
+The following [Velocity tools](https://velocity.apache.org/tools/3.1/tools-summary.html) can be used in the transformation template:
+
+- $datetool
+- $collection
+- $context
+- $math
+- $number
+
+Additional epoch timestamp values can be added to the data used for the transformation by setting the [TemplateEpochTimestamp](#templateepochtimestamp) property to true,
+
+For targets where the data does not require specific output format, the data is serialized as [JSON data](../sfc-data-format.md#sfc-output-data-schemas).
+
+**Type**: String
+
+---
+
+
 
 ### AwsSqsTargetConfiguration Schema
 

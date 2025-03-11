@@ -18,7 +18,7 @@ import java.util.*
 class MapStringToNumber(operand: Mapping?) : TransformationImpl<MapStringToNumber.Mapping>(operand) {
 
     // Do not rename Map and Default as these should match the case used for the JSON syntax
-    class Mapping(val Map: HashMap<String, Int>, val Default: Int = 0) : Validate {
+    class Mapping(val Map: Map<String, Int>, val Default: Int = 0) : Validate {
         override fun toString(): String {
             return "${Map.map { "\"${it.key}\":${it.value}" }}, Default=$Default)"
         }

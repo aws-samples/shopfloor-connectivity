@@ -23,7 +23,7 @@ class MapStringToNumberTest {
             "One" to 1,
             "Two" to 2,
             "Three" to 3
-        ) as HashMap<String, Int>,
+        ),
             Default = 0
         )
 
@@ -36,7 +36,7 @@ class MapStringToNumberTest {
         }
 
         Assertions.assertThrows(ConfigurationException::class.java) {
-            MapStringToNumber.create(MapStringToNumber.Mapping(Map = HashMap(), 0)).validate()
+            MapStringToNumber.create(MapStringToNumber.Mapping(Map = mapOf(), 0)).validate()
         }
     }
 
@@ -48,7 +48,7 @@ class MapStringToNumberTest {
                 "One" to 1,
                 "Two" to 2,
                 "Three" to 3
-            ) as HashMap<String, Int>,
+            ) ,
                 Default = 0
             )
         }
@@ -58,7 +58,7 @@ class MapStringToNumberTest {
                 "One" to 1,
                 "Two" to 2,
                 "Three" to 3
-            ) as HashMap<String, Int>)
+            ))
         }
 
         Assertions.assertThrows(ConfigurationException::class.java) {
@@ -79,7 +79,7 @@ class MapStringToNumberTest {
                     "Default": 1
                 }
             }"""
-        assertEquals(MapStringToNumber.create(MapStringToNumber.Mapping(Map = mapOf("One Hundred" to 100, "null" to 0) as HashMap, Default = 1)),
+        assertEquals(MapStringToNumber.create(MapStringToNumber.Mapping(Map = mapOf("One Hundred" to 100, "null" to 0), Default = 1)),
             MapStringToNumber.fromJson(Gson().fromJson(json, JsonObject::class.java)), "from $json")
     }
 

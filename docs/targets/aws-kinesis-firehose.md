@@ -32,6 +32,7 @@ Requires IAM permission `firehose:PutRecordBatch` for the delivery stream the da
 - [CredentialProviderClient](#credentialproviderclient)
 - [Region](#region)
 - [StreamName](#streamname)
+- [Template](#template)
 
 ---
 ### BatchSize
@@ -62,6 +63,40 @@ The Region property specifies the AWS Region identifier where the Kinesis Fireho
 The StreamName property specifies the name of the Kinesis Firehose delivery stream where data will be sent. This is the unique identifier of an existing Firehose delivery stream in your AWS account that will receive and process the data. The stream name must match an active delivery stream that has been previously created in the specified AWS Region.
 
 **Type**: String
+
+
+
+---
+
+### Template
+
+Specifies the file path to an [Apache velocity](https://velocity.apache.org/)  template used for  [transforming the output data](../sfc-target-templates.md) target output data. This optional setting enables custom formatting of data before it is sent to the target. Available context variables include:
+
+- $schedule
+- $sources
+- $metadata
+- $serial
+- $timestamp
+- names specified in ElementNames configuration
+- $tab (for inserting tab characters)
+
+Pathname to file containing an [Apache velocity](https://velocity.apache.org/) template that can be applied to [transform the output data](../sfc-target-templates.md) of the target.
+
+The following [Velocity tools](https://velocity.apache.org/tools/3.1/tools-summary.html) can be used in the transformation template:
+
+- $datetool
+- $collection
+- $context
+- $math
+- $number
+
+Additional epoch timestamp values can be added to the data used for the transformation by setting the [TemplateEpochTimestamp](#templateepochtimestamp) property to true,
+
+For targets where the data does not require specific output format, the data is serialized as [JSON data](../sfc-data-format.md#sfc-output-data-schemas).
+
+**Type**: String
+
+---
 
 ### AwsKinesisFirehoseTargetConfiguration Schema
 

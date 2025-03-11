@@ -37,6 +37,7 @@ Requires IAM permission `s3:putObject` to write to the configured bucket
 - [Interval](#interval)
 - [Prefix](#prefix)
 - [Region](#region)
+- [Template](#template)
 
 ---
 ### BucketName
@@ -142,6 +143,38 @@ Examples:
 - "ap-southeast-2" (Asia Pacific - Sydney)
 
 This setting is used to ensure the adapter connects to the correct regional endpoint for the S3 bucket. Choosing the appropriate region can help optimize latency, costs, and comply with data residency requirements.
+
+**Type**: String
+
+
+
+---
+
+### Template
+
+Specifies the file path to an [Apache velocity](https://velocity.apache.org/)  template used for  [transforming the output data](../sfc-target-templates.md) target output data. This optional setting enables custom formatting of data before it is sent to the target. Available context variables include:
+
+- $schedule
+- $sources
+- $metadata
+- $serial
+- $timestamp
+- names specified in ElementNames configuration
+- $tab (for inserting tab characters)
+
+Pathname to file containing an [Apache velocity](https://velocity.apache.org/) template that can be applied to [transform the output data](../sfc-target-templates.md) of the target.
+
+The following [Velocity tools](https://velocity.apache.org/tools/3.1/tools-summary.html) can be used in the transformation template:
+
+- $datetool
+- $collection
+- $context
+- $math
+- $number
+
+Additional epoch timestamp values can be added to the data used for the transformation by setting the [TemplateEpochTimestamp](#templateepochtimestamp) property to true,
+
+For targets where the data does not require specific output format, the data is serialized as [JSON data](../sfc-data-format.md#sfc-output-data-schemas).
 
 **Type**: String
 
