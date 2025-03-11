@@ -418,7 +418,7 @@ object GrpcValueFromNativeExt {
             is Float -> channelValue(arrayListOf(*value.map { it as Float }.toTypedArray<Float>()), ts)
             is Instant -> channelValue(arrayListOf(*value.map { it as Instant }.toTypedArray<Instant>()), ts)
             is Int -> channelValue(arrayListOf(*value.map { it as Int }.toTypedArray<Int>()), ts)
-            is Map<*, *> -> channelValue(arrayListOf(*value.map { it as LinkedHashMap<*, *> }.toTypedArray<LinkedHashMap<*, *>>()), ts)
+            is Map<*, *> -> channelValue(arrayListOf(*value.map { it as LinkedHashMap<*, *> }.toTypedArray<Map<*, *>>()), ts)
             is Long -> channelValue(arrayListOf(*value.map { it as Long }.toTypedArray<Long>()), ts)
             is Short -> channelValue(arrayListOf(*value.map { it as Short }.toTypedArray<Short>()), ts)
             is String -> channelValue(arrayListOf(*value.map { it as String }.toTypedArray<String>()), ts)
