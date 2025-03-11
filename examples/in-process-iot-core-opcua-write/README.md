@@ -67,7 +67,7 @@ Finally, download the [`Amazon Root CA`](https://www.amazontrust.com/repository/
 ```
 
 In order to write the data to both the OPCUA server and the console
-uncomment the DebugTarget by deleting the'#'.  
+uncomment the DebugTarget by deleting the '#'.  
 &nbsp;
 
 ## Run SFC from deployment directory

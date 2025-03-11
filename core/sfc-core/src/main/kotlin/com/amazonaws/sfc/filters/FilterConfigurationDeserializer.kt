@@ -24,7 +24,7 @@ open class FilterConfigurationDeserializer : JsonDeserializer<FilterConfiguratio
 
         // Get the operator
         val operator = o.getAsJsonPrimitive(CONFIG_FILTER_OPERATOR).asString
-            ?: throw IllegalStateException("FilterConfiguration operator name ${CONFIG_FILTER_OPERATOR} can not be null")
+            ?: throw IllegalStateException("FilterConfiguration operator name $CONFIG_FILTER_OPERATOR can not be null")
 
         // Get the value the operator is using for it's logic
         val operatorValue =

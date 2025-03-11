@@ -28,7 +28,7 @@ class CsvFileSourceConfiguration : BaseSourceConfiguration() {
     private fun validateCsvFileId() {
         ConfigurationException.check(
             !adapterCsvFile.isNullOrEmpty(),
-            "${CONFIG_CSV_FILE_ID} can not be empty",
+            "$CONFIG_CSV_FILE_ID can not be empty",
             CONFIG_CSV_FILE_ID,
             this
         )

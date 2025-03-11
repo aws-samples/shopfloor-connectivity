@@ -13,6 +13,6 @@ enum class ServerConnectionType {
 
     companion object {
         val validValues
-            get() = ServerConnectionType.values().copyOfRange(1, 4).map { it.toString() }
+            get() = ServerConnectionType.entries.toTypedArray().copyOfRange(1, 4).map { it.toString() }
     }
 }

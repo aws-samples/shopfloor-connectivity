@@ -161,7 +161,7 @@ IMPORTANT: The port numbers specified in the configuration must match with the p
 ```
 
 In order to write the data to both the MSK topic and the console
-uncomment the DebugTarget by deleting the'#'.  
+uncomment the DebugTarget by deleting the '#'.  
 
 ## MSK target section
 

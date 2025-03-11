@@ -98,7 +98,7 @@ in the profile (see OPCUA adapter documentation for details on how to configure 
 - __Inclusions__ (optional): This is a list of regular expressions which used to filter nodes. If this list is present 
 the node path must at least match one expression from this list to be included. The node path is a concatenation of the browse names from the 
 specified NodeId from which the provider browses down to, and including the tested node, concatenated with a '/' as separator. 
-Note that browse names can include spaces (which must be specified as "\s" in the regex and that special characters in the 
+Note that browse names can include spaces. which must be specified as "\s" in the regex and that special characters in the 
 regex like '\' must be escaped with an additional '\\' as to keep JSON syntax of the configuration valid.
 - __Exclusions__ (optional): This is a list of regular expressions which will be used to filter nodes. If this list is present
    the node is excluded if an expression in the list matches the node path. (see Inclusions for the definition of a node path)

@@ -17,7 +17,7 @@ import kotlin.time.toDuration
 interface ModbusHandler {
 
     /**
-     * Channel to pass requests to be send to the handler
+     * Channel to pass requests to be sent to the handler
      */
     val requests: SendChannel<Request>
 

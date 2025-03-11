@@ -379,17 +379,18 @@ the SFC can transform every individual value that is read from a protocol adapte
 standardize data values and types read from different devices to be delivered in a consistent way to the consuming
 target adapters. The SFC framework comes with a rich set of [transformation operators](./core/transformation-operator-configuration.md).
 
-A source configuration can be configured to compose structured values from selected individual from that source. Channels, containing structures values,
-can be configured to be decomposed into individual values in the output.
+A source configuration can be configured to [compose](./core/source-configuration.md#compose) structured values from selected individual from that source. Channels, containing structures values, can be configured to be [decomposed](./core/channel-configuration.md#decompose) into individual values in the output.
 
 The SFC core can also [aggregate](./core/aggregation-configuration.md) the data into batches and apply aggregation function to that data, which then can be
 sent instead of, or with the individual values. This can be used to reduce the data volume by sending only the output of
 selected aggregation functions or the number of data messages to the consuming targets. Additionally, transformations,
 as described above, can be applied to the aggregated data.
 
-The data is delivered to the target in a defined hierarchical structure. An additional, [template based, transformation](./sfc-target-templates.md),
+The data is delivered to the target in a defined hierarchical structure. An additional, [template based, transformation](./core/target-configuration.md#template),
 using Apache Velocity, can be configured for each target to select subsets, restructure or transform the data or
 transform it into formats like CSV, YAML or XML.
+
+For targets that don't require a specific format, the data is written as [JSON](./sfc-data-format.md#sfc-output-data-schemas) by default, unless a [template](./core/target-configuration.md#template) is specified for that target.
 
 
 

@@ -172,7 +172,7 @@ In order to write the data to both the S3 bucket and the console uncomment the D
 ]
 ```
 
-In order to write the data to both the S3 bucket and the console uncomment the DebugTarget by deleting the'#'.  
+In order to write the data to both the S3 bucket and the console uncomment the DebugTarget by deleting the '#'.  
 &nbsp;
 &nbsp;  
 

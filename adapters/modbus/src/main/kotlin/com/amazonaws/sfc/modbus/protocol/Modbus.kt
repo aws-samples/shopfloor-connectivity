@@ -282,7 +282,7 @@ object Modbus {
     val READ_TIMEOUT: Duration = 10000.toDuration(DurationUnit.MILLISECONDS)
 
     /**
-     * Reads and creates creates a response for the specified function code
+     * Reads and creates a response for the specified function code
      * @param functionCode UByte The function code
      * @param deviceID UByte The device ID
      * @param transactionID UShort? Transaction ID

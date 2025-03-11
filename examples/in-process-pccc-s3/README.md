@@ -40,7 +40,7 @@ ${SFC_DEPLOYMENT_DIR}
 ```
 
 In order to write the data to both the S3 bucket as well as the console
-uncomment the DebugTarget by deleting the'#'.  
+uncomment the DebugTarget by deleting the '#'.  
 &nbsp;
 &nbsp;  
 

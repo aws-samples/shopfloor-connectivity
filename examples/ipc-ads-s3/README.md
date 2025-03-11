@@ -141,7 +141,7 @@ IMPORTANT: The port numbers specified in the configuration must match with the p
 },
 ```
 
-In order to write the data to both the S3 bucket and the console uncomment the DebugTarget by deleting the’#’ an ensure the DebugServer service is started.
+In order to write the data to both the S3 bucket and the console uncomment the DebugTarget by deleting the ’#’ an ensure the DebugServer service is started.
 
 ## S3Target section
 
@@ -167,7 +167,7 @@ In order to write the data to both the S3 bucket and the console uncomment the D
 
 The `S3Target` is set up to write data to the specified bucket once every
 minute or when the data volume is 1MB in size. Zip Compression is
-enabled to reduce the size of the data which is send to and stored in
+enabled to reduce the size of the data which is sent to and stored in
 the S3 bucket, remove the "Compression" line or set to "None" to disable
 compression.
 

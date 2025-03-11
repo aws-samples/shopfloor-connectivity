@@ -57,7 +57,7 @@ class MqttHelper(private val mqttConnectionConfig: MqttConnectionOptions, privat
         log.info("Loading certificates from certificate file ${mqttConnectionConfig.certificate?.absolutePath} ")
         val certificateChain = certificateFactory.generateCertificates(mqttConnectionConfig.certificate?.inputStream())
         certificateChain.forEach { c ->
-            log.trace("Loaded certificate is ${c}")
+            log.trace("Loaded certificate is $c")
         }
 
         log.trace("Loading private key from ${mqttConnectionConfig.privateKey?.absolutePath}")

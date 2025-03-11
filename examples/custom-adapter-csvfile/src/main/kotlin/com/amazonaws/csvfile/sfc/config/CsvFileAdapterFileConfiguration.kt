@@ -33,7 +33,7 @@ class CsvFileAdapterFileConfiguration : Validate {
     private fun validateLinesToSkip() {
         ConfigurationException.check(
             (linesToSkip in 0..DEFAULT_SKIP_LIMIT),
-            "${CONFIG_LINES_TO_SKIP} " +
+            "$CONFIG_LINES_TO_SKIP " +
                     "must be be set to 0=<..<=${DEFAULT_SKIP_LIMIT};" +
                     "FYI: A skip limit of 1 skips the first row of the CSV file (useful for header skipping);" +
                     "A skip limit of 9 would skip the first 9 rows of the CSV",
@@ -50,7 +50,7 @@ class CsvFileAdapterFileConfiguration : Validate {
     private fun validateMaxRows() {
         ConfigurationException.check(
             (maxRowsPerRead in 1..DEFAULT_FETCH_LIMIT),
-            "${CONFIG_MAX_ROWS_PER_READ} " +
+            "$CONFIG_MAX_ROWS_PER_READ " +
                     "must be be set to 1=<..<=${DEFAULT_FETCH_LIMIT}; " +
                     "FYI: A value of 1 gets the column value of the last row of the CSV; " +
                     "A value of 100 will return an Array with the column values of the last 100 rows...",
@@ -64,7 +64,7 @@ class CsvFileAdapterFileConfiguration : Validate {
     private fun validateFileExists() {
         ConfigurationException.check(
             File(path).exists(),
-            "${CONFIG_FILE_PATH} not found",
+            "$CONFIG_FILE_PATH not found",
             CONFIG_FILE_PATH,
             this
         )
@@ -74,7 +74,7 @@ class CsvFileAdapterFileConfiguration : Validate {
     private fun validatePath() {
         ConfigurationException.check(
             !path.isNullOrEmpty(),
-            "${CONFIG_FILE_PATH} can not be empty",
+            "$CONFIG_FILE_PATH can not be empty",
             CONFIG_FILE_PATH,
             this
         )
@@ -85,7 +85,7 @@ class CsvFileAdapterFileConfiguration : Validate {
     private fun validateDelimiter() {
         ConfigurationException.check(
             !delimiter.isNullOrEmpty(),
-            "${CONFIG_DELIMITER} can not be empty",
+            "$CONFIG_DELIMITER can not be empty",
             CONFIG_DELIMITER,
             this
         )

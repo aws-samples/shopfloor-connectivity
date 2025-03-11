@@ -49,7 +49,7 @@ ${SFC_DEPLOYMENT_DIR}
 ```
 
 In order to write the data to both Sitewise and the console
-uncomment the DebugTarget by deleting the'#'.  
+uncomment the DebugTarget by deleting the '#'.  
 &nbsp;
 
 

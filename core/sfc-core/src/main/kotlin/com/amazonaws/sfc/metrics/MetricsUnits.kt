@@ -181,7 +181,7 @@ enum class MetricUnits {
 }
 
 val MetricUnits.serializedNames by lazy {
-    MetricUnits.values().associateWith { it.declaringJavaClass.getField(it.name).getDeclaredAnnotation(SerializedName::class.java).value }
+    MetricUnits.entries.associateWith { it.declaringJavaClass.getField(it.name).getDeclaredAnnotation(SerializedName::class.java).value }
 }
 
 val MetricUnits.serializedName

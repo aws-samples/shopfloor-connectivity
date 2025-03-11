@@ -38,11 +38,10 @@ We will also use the AWS IoT SiteWise Monitor feature to visualize near-real tim
    + [Create the AWS IoT SiteWise model and asset](#create-the-aws-iot-sitewise-model-and-asset)
    + [Access and prepare the Cloud9 of the SFC Component](#access-and-prepare-the-cloud9-of-the-sfc-component)
    + [Enable Data Ingestion from OPC-UA Server](#enable-data-ingestion-from-opc-ua-server)
-   + [Create a SiteWise Monitor Portal](#create-a-sitewise-monitor-portal)
    + [Visualize Data Near Real-Time](#visualize-data-near-real-time)
 - [Clean-up](#clean-up)
 
-### Prerequisites 
+### Prerequisites
 
 To conduct the workshop you will need the following tools/setup/knowledge:
 

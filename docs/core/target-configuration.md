@@ -119,6 +119,8 @@ The following [Velocity tools](https://velocity.apache.org/tools/3.1/tools-summa
 
 Additional epoch timestamp values can be added to the data used for the transformation by setting the [TemplateEpochTimestamp](#templateepochtimestamp) property to true,
 
+For targets where the data does not require specific output format, the data is serialized as [JSON data](../sfc-data-format.md#sfc-output-data-schemas).
+
 **Type**: String
 
 ---

@@ -1,7 +1,7 @@
 # SFC Example in process configuration for Mitsubishi/Melsec SLMP to Amazon S3
 
-[Examples](../../docs/examples/examples.md
-)
+[Examples](../../docs/examples/README.md)
+
 The file `in-process-slmp-s3.json` contains an example template for
 reading data from a Mitsubishi controller using SLMP and
 sending the data to an S3 bucket.
@@ -43,7 +43,7 @@ ${SFC_DEPLOYMENT_DIR}
 ```
 
 In order to write the data to both the S3 bucket and the console
-uncomment the DebugTarget by deleting the'#'.  
+uncomment the DebugTarget by deleting the '#'.  
 &nbsp;
 &nbsp;  
 
