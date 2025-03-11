@@ -22,6 +22,8 @@ Adapters
 - [OPCUA to SiteWise In-Process Example](../../examples/in-process-opcua-sitewise/README.md)
 - [OPCUA to SiteWise Edge In-Process Example](../../examples/in-process-opcua-sitewiseedge/README.md)
 
+- [IoT Core to OPCUA Write In-Process Example](../../examples/in-process-iot-core-opcua-write/README.md)
+
 - [CSV File Adapter Example](../../examples/custom-adapter-csvfile/README.md)
 
 Configuration
