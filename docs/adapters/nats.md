@@ -647,10 +647,11 @@ If a Password is configured then the Username must be configured as well.
 
 ---
 ### Tls
-While authentication restricts the number of clients that can connect, TLS can be employed to encrypt traffic between the client and server, verifying the server's identity. Furthermore, in the most secure version of TLS (NATS), the server can be configured to verify the client's identity, thereby authenticating it. Upon initiating TLS mode, a nats-server will mandate that all clients connect using TLS.
-Additionally, if configured to utilize TLS, client libraries will fail to establish connections to servers without TLS.
 
-**Type**: [CertificateConfiguration](../core/certificate-configuration.md)
+From the [NATS-docs](
+): *While authentication limits which clients can connect, TLS can be used to encrypt traffic between client/server and check the server's identity. Additionally - in the most secure version of TLS with NATS - the server can be configured to verify the client's identity, thus authenticating it. When started in TLS mode, a nats-server will require all clients to connect with TLS. Moreover, if configured to connect with TLS, client libraries will fail to connect to a server without TLS.*
+
+**Type**: [TlsConfiguration](../core/certificate-configuration.md)
 
 
 https://docs.nats.io/using-nats/developer/connecting/tls
@@ -669,12 +670,12 @@ https://docs.nats.io/using-nats/developer/connecting/token
 
 ---
 ### Url
-Server url
+Server URL(s) for connecting to the NATS server.
 
 **Type**: String
 
-The schema for the url can be "nats://", "tls://"  or "tls://". If the scheme is "tls:" then
-the "Tls" property for the serer must be set to specify the required key and certificates.
+The schema for the url can be `nats://` or `tls://`. If the scheme is "tls:" then
+the "Tls" property for the server **could** also be set to specify the required key and certificates - for establishing `mTLS` secured auth.
 
 Multiple urls can be configured for known all known servers as a comma separated list.
 
