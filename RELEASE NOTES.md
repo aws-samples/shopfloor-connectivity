@@ -1,5 +1,11 @@
 # Release Notes:
 
+## Version 1.8.8, 20 March 2025
+
+- Relaxed checking of TLS configuration for NATS adapter and target
+
+---
+
 ## Version 1.8.7, 11 March 2025
 
 - Extended datatype and conversions for OPCUA and OPCUA-Writer targets

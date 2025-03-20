@@ -69,7 +69,6 @@ class NatsServerConfiguration : Validate {
         get() = _credentialsFile
 
 
-
     // https://docs.nats.io/using-nats/developer/connecting/tls
     @SerializedName(CONFIG_TLS_SSL)
     private var _tslConfig: TlsConfiguration? = null
@@ -116,7 +115,7 @@ class NatsServerConfiguration : Validate {
     private fun checkRequiredSettings() {
 
         ConfigurationException.check(
-            (_username== null && _password == null) || (username != null && password != null),
+            (_username == null && _password == null) || (username != null && password != null),
             "When using $CONFIG_USERNAME and $CONFIG_PASSWORD, both must be set",
             "$CONFIG_USERNAME and $CONFIG_PASSWORD",
             this
@@ -125,7 +124,7 @@ class NatsServerConfiguration : Validate {
 
     }
 
-    fun validateUrl(){
+    fun validateUrl() {
 
         ConfigurationException.check(
             !_url.isNullOrEmpty(),
@@ -134,16 +133,12 @@ class NatsServerConfiguration : Validate {
             this
         )
 
-       _url!!.split(",").map { it.trim() }.forEach { u ->
-           val scheme = SCHEME_REGEX.find(u)?.groups?.get(1)?.value
-               if (NATS_VALID_PROTOCOLS.contains(scheme)== false) {
-                   throw ConfigurationException("$CONFIG_URL \"$_url\" is not a valid NATS server URL, valid protocols are $NATS_VALID_PROTOCOLS", CONFIG_URL, this)
-               }
-
-              if (scheme == NATS_TLS &&  _tslConfig == null){
-                  throw ConfigurationException("When using TLS, $CONFIG_TLS_SSL must be set", CONFIG_TLS_SSL, this)
-              }
-       }
+        _url!!.split(",").map { it.trim() }.forEach { u ->
+            val scheme = SCHEME_REGEX.find(u)?.groups?.get(1)?.value
+            if (NATS_VALID_PROTOCOLS.contains(scheme) == false) {
+                throw ConfigurationException("$CONFIG_URL \"$_url\" is not a valid NATS server URL, valid protocols are $NATS_VALID_PROTOCOLS", CONFIG_URL, this)
+            }
+        }
 
     }
 
