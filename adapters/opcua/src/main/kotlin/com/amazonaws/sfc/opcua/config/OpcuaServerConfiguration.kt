@@ -127,6 +127,7 @@ class OpcuaServerConfiguration : Validate {
         if (validated) return
         validateAddress()
         validatePort()
+        validateUsernamePassword()
         validateConnectionTimeout()
         validateWaitAfterConnectError()
         validateWaitAfterReadError()
@@ -144,6 +145,18 @@ class OpcuaServerConfiguration : Validate {
                 this
             )
         }
+    }
+
+    fun validateUsernamePassword(){
+
+        if (_username != null && _password != null) return
+        if (_username == null && _password == null) return
+        ConfigurationException.check(
+            false,
+            "Both $CONFIG_USERNAME and $CONFIG_PASSWORD must be set or omitted",
+            CONFIG_USERNAME,
+            this
+        )
     }
 
     private fun atLeastOneSecond(t: Duration) = t >= (1000.toDuration(DurationUnit.MILLISECONDS))
