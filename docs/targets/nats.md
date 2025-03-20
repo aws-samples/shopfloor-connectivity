@@ -374,9 +374,10 @@ If a Password is configured then the [Username](#username) must be configured as
 ### Tls
 TLS configuration settings for secure communication with the NATS server.
 
-While authentication limits which clients can connect, TLS can be used to encrypt traffic between client/server and check the server's identity. Additionally - in the most secure version of TLS with NATS - the server can be configured to verify the client's identity, thus authenticating it. When started in TLS mode, a nats-server will require all clients to connect with TLS. Moreover, if configured to connect with TLS, client libraries will fail to connect to a server without TLS.
+From the [NATS-docs](
+): *While authentication limits which clients can connect, TLS can be used to encrypt traffic between client/server and check the server's identity. Additionally - in the most secure version of TLS with NATS - the server can be configured to verify the client's identity, thus authenticating it. When started in TLS mode, a nats-server will require all clients to connect with TLS. Moreover, if configured to connect with TLS, client libraries will fail to connect to a server without TLS.*
 
-**Type**: [TlsConfiguration](../core/transformation-operator-configuration.md)
+**Type**: [TlsConfiguration](../core/certificate-configuration.md)
 
 
 https://docs.nats.io/using-nats/developer/connecting/tls
@@ -400,8 +401,8 @@ https://docs.nats.io/using-nats/developer/connecting/token
 ### Url
 Server URL(s) for connecting to the NATS server.
 
-Supports "nats://", "tls://" schemes. When using "tls://" scheme, the Tls property must be configured with required certificates and keys.
-**Usage** : Can specify multiple server URLs as a comma-separated list for connecting to multiple known servers.
+The schema for the url can be `nats://` or `tls://`. If the scheme is "tls:" then
+the "Tls" property for the server **could** also be set to specify the required key and certificates - for establishing `mTLS` secured auth.
 
 
 
