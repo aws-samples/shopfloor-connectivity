@@ -6,7 +6,7 @@ package com.amazonaws.simulation
 import com.amazonaws.sfc.simulator.config.SimulationConfiguration.Companion.CONFIG_STRUCT_PROPERTIES
 import com.amazonaws.sfc.simulator.simulations.InvalidSimulation
 import com.amazonaws.sfc.simulator.simulations.Simulation
-import com.amazonaws.sfc.simulator.simulations.createSimulationReader
+import com.amazonaws.sfc.simulator.simulations.SimulationDeserializer.Companion.createSimulationReader
 import com.google.gson.JsonObject
 
 class Structure(val struct : Map<String, Simulation>) : Simulation {

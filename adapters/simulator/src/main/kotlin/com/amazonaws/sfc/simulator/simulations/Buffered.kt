@@ -7,6 +7,7 @@ package com.amazonaws.sfc.simulator.simulations
 import com.amazonaws.sfc.simulator.config.SimulationConfiguration.Companion.CONFIG_INTERVAL
 import com.amazonaws.sfc.simulator.config.SimulationConfiguration.Companion.CONFIG_ITEM
 import com.amazonaws.sfc.simulator.config.SimulationConfiguration.Companion.DEFAULT_INTERVAL
+import com.amazonaws.sfc.simulator.simulations.SimulationDeserializer.Companion.createSimulationReader
 import com.amazonaws.sfc.simulator.simulations.SimulationDeserializer.Companion.getLong
 import com.google.gson.JsonObject
 import java.time.Instant

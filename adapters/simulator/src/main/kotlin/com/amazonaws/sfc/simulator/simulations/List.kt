@@ -5,6 +5,7 @@ package com.amazonaws.sfc.simulator.simulations
 
 import com.amazonaws.sfc.simulator.config.SimulationConfiguration.Companion.CONFIG_DATA_TYPE
 import com.amazonaws.sfc.simulator.config.SimulationConfiguration.Companion.CONFIG_ITEMS
+import com.amazonaws.sfc.simulator.simulations.SimulationDeserializer.Companion.createSimulationReader
 import com.amazonaws.sfc.simulator.simulations.SimulationHelper.asAnyType
 import com.google.gson.JsonObject
 import kotlin.Any

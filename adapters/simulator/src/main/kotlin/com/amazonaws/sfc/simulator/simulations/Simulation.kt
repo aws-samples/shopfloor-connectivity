@@ -4,7 +4,5 @@
 package com.amazonaws.sfc.simulator.simulations
 
 interface  Simulation {
-
     fun value(): Any?
-
 }

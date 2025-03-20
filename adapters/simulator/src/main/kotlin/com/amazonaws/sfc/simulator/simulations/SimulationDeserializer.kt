@@ -4,8 +4,9 @@
 
 package com.amazonaws.sfc.simulator.simulations
 
+import com.amazonaws.sfc.simulator.SimulationException
+import com.amazonaws.sfc.simulator.config.SimulationConfiguration.Companion.CONFIG_SIMULATION_TYPE
 import com.amazonaws.simulation.Random
-import com.amazonaws.simulation.SimulationException
 import com.amazonaws.simulation.Structure
 import com.google.gson.*
 import java.lang.reflect.InvocationTargetException
@@ -29,14 +30,14 @@ class SimulationDeserializer : JsonDeserializer<Simulation> {
 
     private fun simulationFromJsonObject(o: JsonObject): Simulation {
 
-        val simulationPrimitive = o.getAsJsonPrimitive(Simulation.Companion.CONFIG_SIMULATION_FUNCTION)
-        val simulation = simulationPrimitive?.asString ?: throw SimulationException("No ${Simulation.Companion.CONFIG_SIMULATION_FUNCTION} specified")
+        val simulationPrimitive = o.getAsJsonPrimitive(CONFIG_SIMULATION_TYPE)
+        val simulation = simulationPrimitive?.asString ?: return InvalidSimulation("Simulation","No $CONFIG_SIMULATION_TYPE specified")
 
-        val simulationData = knownSimulations[simulation.uppercase()] ?: throw SimulationException("Simulation \"$simulation\" is unknown, $o")
+        val simulationData = knownSimulations[simulation.uppercase()] ?: return InvalidSimulation("Simulation","$CONFIG_SIMULATION_TYPE \"$simulation\" is unknown, $o")
         return try {
             simulationData.createMethod.invoke(simulationData.companionInstance, o) as Simulation
         } catch (e: InvocationTargetException) {
-            throw SimulationException("Can not deserialize instance of simulations type \"$simulation\", ${e.targetException.message}, $o")
+            return InvalidSimulation(simulation,"Can not deserialize instance of simulations type \"$simulation\" from configuration, ${e.targetException.message}, $o")
         }
     }
 
@@ -171,10 +172,11 @@ class SimulationDeserializer : JsonDeserializer<Simulation> {
                 null
             }
         }
+
+        fun createSimulationReader(): Gson = GsonBuilder()
+            .registerTypeAdapter(Simulation::class.java, SimulationDeserializer())
+            .create()
     }
 
 }
 
-fun createSimulationReader(): Gson = GsonBuilder()
-    .registerTypeAdapter(Simulation::class.java, SimulationDeserializer())
-    .create()
