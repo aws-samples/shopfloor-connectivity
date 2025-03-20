@@ -30,6 +30,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import org.eclipse.milo.opcua.sdk.client.OpcUaClient
 import org.eclipse.milo.opcua.sdk.client.api.config.OpcUaClientConfigBuilder
+import org.eclipse.milo.opcua.sdk.client.api.identity.UsernameProvider
 import org.eclipse.milo.opcua.sdk.client.api.subscriptions.UaMonitoredItem
 import org.eclipse.milo.opcua.sdk.client.api.subscriptions.UaSubscription
 import org.eclipse.milo.opcua.sdk.client.api.subscriptions.UaSubscriptionManager
@@ -378,7 +379,10 @@ open class OpcuaSource(
             configBuilder.setConnectTimeout(UInteger.valueOf(opcuaServerConfiguration.connectTimeout.inWholeMilliseconds))
                 .setRequestTimeout(UInteger.valueOf(opcuaServerConfiguration.readTimeout.inWholeMilliseconds))
                 .setMessageLimits(messageLimits)
-                .setupClientSecurity()
+                .setupClientSecurity { dir ->
+                    log.info("Certificate or CRL Update to directory $dir, reconnecting client")
+                    resetClient()
+                }
                 .setupCertificateValidation { dir ->
                     log.info("Certificate or CRL Update to directory $dir, reconnecting client")
                     resetClient()
@@ -432,9 +436,11 @@ open class OpcuaSource(
             opcuaServerConfiguration.maxMessageSize
         )
 
-    private fun OpcUaClientConfigBuilder.setupClientSecurity(): OpcUaClientConfigBuilder {
+    private fun OpcUaClientConfigBuilder.setupClientSecurity(onUpdate: (String) -> Unit): OpcUaClientConfigBuilder {
 
         val log = logger.getCtxLoggers(className, "OpcUaClientConfigBuilder.setupClientSecurity")
+
+        setupClientUsernamePasswordAuthentication(onUpdate)
 
         if (opcuaServerConfiguration.securityPolicy == OpcuaSecurityPolicy.None) return this
 
@@ -488,6 +494,30 @@ open class OpcuaSource(
         }
 
         return this
+    }
+
+    private fun OpcUaClientConfigBuilder.setupClientUsernamePasswordAuthentication(onUpdate: (String) -> Unit, ) {
+        val log = logger.getCtxLoggers(className, "OpcUaClientConfigBuilder.setupUsernamePasswordAuthentication")
+        try {
+            if (opcuaServerConfiguration.username != null && opcuaServerConfiguration.password != null) {
+                val certificateValidationConfiguration = opcuaServerConfiguration.certificateValidationConfiguration
+                if (certificateValidationConfiguration != null) {
+                    var tlm = ClientTrustListManager(certificateValidationConfiguration.directory, logger) { dir ->
+                        log.info("Certificate or CLR update in directory \"$dir\"")
+                        onUpdate(dir.toString())
+                    }
+                    if (tlm.trustedCrls.isEmpty()){
+                        log.warning("There are no trusted certificates in ${tlm.trustedCertificatesDirectory}, when connection for the first time to a server fails with an error message \"the trustAnchors parameter must be non-empty\" move the rejected certificate for that server from  ${tlm.rejectedPath} into ${tlm.trustedCertificatesDirectory}")
+                    }
+                    val certificateValidator = DefaultClientCertificateValidator(tlm)
+                    this.setIdentityProvider(UsernameProvider(opcuaServerConfiguration.username, opcuaServerConfiguration.password, certificateValidator))
+                } else {
+                    this.setIdentityProvider(UsernameProvider(opcuaServerConfiguration.username, opcuaServerConfiguration.password))
+                }
+            }
+        } catch (e: Exception) {
+            log.errorEx("Error setting username and password for server of source  \"$sourceID\"", e)
+        }
     }
 
     private fun startCertificateExpiryChecker(certificate: X509Certificate?): Job? {

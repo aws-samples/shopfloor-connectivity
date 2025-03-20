@@ -5,6 +5,8 @@
 
 package com.amazonaws.sfc.opcua.config
 
+import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_PASSWORD
+import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_USERNAME
 import com.amazonaws.sfc.config.ConfigurationClass
 import com.amazonaws.sfc.config.ConfigurationException
 import com.amazonaws.sfc.config.Validate
@@ -98,6 +100,16 @@ class OpcuaServerConfiguration : Validate {
     private var _certificateValidationConfiguration: OpcuaCertificateValidationConfiguration? = null
     val certificateValidationConfiguration: OpcuaCertificateValidationConfiguration?
         get() = _certificateValidationConfiguration
+
+    @SerializedName(CONFIG_USERNAME)
+    private var _username: String? = null
+    val username: String?
+        get() = _username
+
+    @SerializedName(CONFIG_PASSWORD)
+    private var _password: String? = null
+    val password: String?
+        get() = _password
 
     val endPoint
         get() = listOf("${address}:${port}", path).joinToString(separator = "/")
@@ -242,6 +254,8 @@ class OpcuaServerConfiguration : Validate {
         fun create(address: String = default._address,
                    port: Int = default._port,
                    path: String = default._path,
+                   username : String? = default._username,
+                   password : String? = default._password,
                    connectTimeout: Long = default._connectTimeout,
                    readTimeout: Long = default._readTimeout,
                    serverProfile: String? = default._serverProfile,
@@ -259,6 +273,8 @@ class OpcuaServerConfiguration : Validate {
                 _address = address
                 _port = port
                 _path = path
+                _username = username
+                _password = password
                 _connectTimeout = connectTimeout
                 _readTimeout = readTimeout
                 _waitAfterConnectError = waitAfterConnectError

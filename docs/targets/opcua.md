@@ -426,7 +426,7 @@ Default is true
 
 ---
 ### ServerMessageSecurityModes
-Specifies the supported message security modes for the OPC UA server. [[1\]](https://docs.aws.amazon.com/iot-sitewise/latest/userguide/configure-opcua-source.html)
+Specifies the supported message security modes for the OPC UA server.
 
 Type: Array of Strings
 

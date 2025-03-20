@@ -1,5 +1,11 @@
 # Release Notes:
 
+## Version 1.8.9, 20 March 2025
+
+- [OPC UA protocol adapter](./docs/adapters/opcua.md#opcuaserverconfiguration) server configuration new  [Username](./docs/adapters/opcua.md#username)/[Password](./docs/adapters/opcua.md#password) authentication
+
+---
+
 ## Version 1.8.8, 20 March 2025
 
 - Relaxed checking of TLS configuration for NATS adapter and target

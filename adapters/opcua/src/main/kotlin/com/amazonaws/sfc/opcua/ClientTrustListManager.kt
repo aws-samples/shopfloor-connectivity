@@ -50,7 +50,7 @@ class ClientTrustListManager(baseDirectoryName: String, private val logger: Logg
 
     val trustedCertificatesDirectory by lazy { trustedCertificatePath }
 
-    private val rejectedPath = basePath.resolve(REJECTED_DIR_NAME).ensureExists()
+    val rejectedPath = basePath.resolve(REJECTED_DIR_NAME).ensureExists()
 
 
     override fun close() {

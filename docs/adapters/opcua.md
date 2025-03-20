@@ -197,7 +197,9 @@ If the certificate contains an ApplicationUri as an Alternative Subject Name, th
 
 *NOTE: The certificate used by the client must be trusted by the OPCUA server, for which the procedure depends on the used sever. As an example, when a ProSys OPCUA (simulation) server is used, an unknown certificate is rejected but stored on the server, where it can be manually marked through the UI as trusted.*
 
-The OPCUA adapter can also validate the certificate it receives from the OPCUA server. It will validate it using a set of know trusted certificates and issuers and certificate revocation lists (CRL). To enable the validation a CertificateValidation section must be present in the configuration. The Directory attribute in this section is set to the location where the certificates and revocation lists are stored in a number of subdirectories, which will be created by the adapter if these do not exist.
+The OPCUA adapter can also validate the certificate it receives from the OPCUA server. It will validate it using a set of know trusted certificates and issuers and certificate revocation lists (CRL). To enable the validation a CertificateValidation section must be present in the configuration. The Directory attribute in this section is set to the location where the certificates and revocation lists are stored in a number of subdirectories, which will be created by the adapter if these do not exist. 
+
+**In the event of an initial connection failure to a server, the corresponding certificate for that server must be manually transferred from the rejected directory to the trusted/certs directory.**
 
 ```sh
 [Configured directory name]
@@ -1037,6 +1039,8 @@ Required, an at least one property must be defined.
 
 The OpcuaServerConfiguration class defines the connection and security settings for an OPC UA server. This configuration can be referenced by OPC UA sources through their AdapterOpcuaServer attribute to establish communication with the server.
 
+When connecting to a server for the first time fails due to a certificate validation error or an error message indicating that *"the trustAnchors parameter must be non-empty,"* the server's certificate must be moved from the "rejected" subdirectory under the [directory](#directory) configured in the [CertificateValidation](#certificatevalidation) for the server to the "trusted/certs" directory.
+
 - [Schema](#opcuaserverconfiguration-schema)
 - [Examples](#opcuaserverconfiguration-examples)
 
@@ -1049,12 +1053,14 @@ The OpcuaServerConfiguration class defines the connection and security settings 
 - [MaxChunkCount](#maxchunkcount)
 - [MaxChunkSize](#maxchunksize)
 - [MaxMessageSize](#maxmessagesize)
+- [Password]()
 - [Path](#path)
 - [Port](#port)
 - [ReadBatchSize](#readbatchsize)
 - [ReadTimeout](#readtimeout)
 - [SecurityPolicy](#securitypolicy)
 - [ServerProfile](#serverprofile)
+- [Username](#username)
 - [WaitAfterConnectError](#waitafterconnecterror)
 - [WaitAfterReadError](#waitafterreaderror)
 
@@ -1141,6 +1147,14 @@ Minimum allowed value is 8196 (8KB)
 Maximum allowed value is 2,147,483,639 (MaxInt-8 is approximately 2048GB)
 
 ---
+
+### Password
+
+Password credential used for authentication with the OPC UA server. Username and password should not be included as clear text in the configuration. It is strongly recommended to use placeholders and use the SFC integration with the AWS secrets manager.
+
+**Type:** String
+
+---
 ### Path
 The Path property specifies the server path or name.
 
@@ -1199,6 +1213,14 @@ Default is None
 The ServerProfile property specifies the server profile to use from the adapters [ServerProfiles](#serverprofiles) section.
 
 **Type**: String
+
+---
+
+### Username
+
+Username credential used for authentication with the OPC UA server. Username and password should not be included as clear text in the configuration. It is strongly recommended to use placeholders and use the SFC integration with the AWS secrets manager.
+
+**Type:** String
 
 ---
 ### WaitAfterConnectError
