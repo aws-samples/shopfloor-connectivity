@@ -98,7 +98,7 @@ class SimulationConfiguration : SourceAdapterBaseConfiguration() {
 
 
     companion object {
-        const val SIMULATION_ADAPTER = "SIMULATION"
+        const val SIMULATION_ADAPTER = "SIMULATOR"
 
 
         const val CONFIG_ARRAY_SIZE = "Size"

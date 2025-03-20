@@ -2,9 +2,7 @@
 // SPDX-License-Identifier: MIT-0
 //
 
-
 package com.amazonaws.sfc.simulator
-
 
 import com.amazonaws.sfc.config.ConfigReader
 import com.amazonaws.sfc.data.*

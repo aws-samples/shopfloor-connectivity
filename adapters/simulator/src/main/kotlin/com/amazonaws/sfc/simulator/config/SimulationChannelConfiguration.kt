@@ -9,6 +9,7 @@ import com.amazonaws.sfc.config.ChannelConfiguration
 import com.amazonaws.sfc.config.ConfigurationClass
 import com.amazonaws.sfc.config.ConfigurationException
 import com.amazonaws.sfc.simulator.config.SimulationConfiguration.Companion.CONFIG_SIMULATION
+import com.amazonaws.sfc.simulator.config.SimulationConfiguration.Companion.CONFIG_SIMULATION_TYPE
 import com.amazonaws.sfc.simulator.simulations.InvalidSimulation
 import com.amazonaws.sfc.simulator.simulations.Simulation
 import com.google.gson.annotations.SerializedName
@@ -27,13 +28,12 @@ class SimulationChannelConfiguration : ChannelConfiguration() {
 
         ConfigurationException.check(
             _simulation!=null,
-            "Simulation $CONFIG_SIMULATION is not provided for channel",
+            "$CONFIG_SIMULATION_TYPE is not provided for channel",
             CONFIG_SIMULATION,
             this)
 
-        ConfigurationException.check(
-            _simulation !is InvalidSimulation,
-            "Simulation ${(_simulation as InvalidSimulation).simulationName} is not valid, ${(_simulation as InvalidSimulation).reason}",
+        if (_simulation is InvalidSimulation) throw ConfigurationException(
+            "$CONFIG_SIMULATION_TYPE \"${(_simulation as InvalidSimulation).simulationName}\" is not valid, ${(_simulation as InvalidSimulation).reason}",
             CONFIG_SIMULATION,
             this
         )

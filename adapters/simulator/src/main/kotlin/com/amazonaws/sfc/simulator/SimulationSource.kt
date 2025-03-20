@@ -34,12 +34,12 @@ class SimulationSource(private val sourceID: String,
     fun read(channels: List<String>?): Map<String, ChannelReadValue>? {
 
         val log = logger.getCtxLoggers(className, "read")
-
+        val channelsToRead = if (channels.isNullOrEmpty()) simulationSourceConfiguration.channels.keys else channels
         val start = DateTime.systemDateTime().toEpochMilli()
 
         val result = try {
             sequence {
-                channels?.forEach { channelName ->
+                channelsToRead.forEach { channelName ->
                     val value = simulationSourceConfiguration.channels[channelName]?.simulation?.value()
                     val readValue = if (value != null) {
                         val isBufferedValue = value is List<*> &&
