@@ -161,9 +161,9 @@ class NatsServerConfiguration : Validate {
         private const val CONFIG_CONNECT_RETRIES = "ConnectRetries"
         private const val CONNECT_RETRIES_DEFAULT = 3
 
-        private val NATS_TLS = "tls"
-        private val NATS_WEB_SOCKET = "ws"
-        private val NATS_NATS = "nats"
+        private const val NATS_TLS = "tls"
+        private const val NATS_WEB_SOCKET = "ws"
+        private const val NATS_NATS = "nats"
         private val NATS_VALID_PROTOCOLS = listOf(NATS_TLS, NATS_WEB_SOCKET, NATS_NATS)
         private val SCHEME_REGEX = "^([a-z]+)://".toRegex()
 

@@ -630,7 +630,7 @@ PLCs servers configured for this adapter. The PCCC source using the adapter must
 
 ```json
 {
-  "AdapterType": "PcccAdapterType",
+  "AdapterType": "PCCC",
   "Controllers": {
     "MainPLC": {
       "Address": "192.168.1.100",

@@ -22,7 +22,6 @@ In order to use this adapter as in [in-process](../sfc-running-adapters.md#runni
 
 
 
-
 **Configuration**
 
 
@@ -308,7 +307,7 @@ The AdapterOpcuaServer property specifies the server identifier for the OPC UA s
 
 The Channels property is a map of channel configurations, where each key is a unique channel identifier that maps to its corresponding channel settings
 
-**Type**: Map[String,OpcuaNodeChannelConfiguration]
+**Type**: Map[String,[OpcuaNodeChannelConfiguration](#opcuanodechannelconfiguration)
 
 At least 1 channel must be configured.
 
