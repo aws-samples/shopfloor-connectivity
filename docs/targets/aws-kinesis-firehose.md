@@ -11,7 +11,7 @@ In order to use this target as in [in-process](../sfc-running-targets.md#running
 "TargetTypes" :{
    "AWS-FIREHOSE": {
       "JarFiles" : ["<location of deployment>/aws-kinesis-firehose-target/lib"],
-      "FactoryClassName": "com.amazonaws.sfc.awsfirehose.AwsFirehoseTargetWriter"
+      "FactoryClassName": "com.amazonaws.sfc.awsfirehose.AwsKinesisFirehoseTargetWriter"
    }
 }
 ```
