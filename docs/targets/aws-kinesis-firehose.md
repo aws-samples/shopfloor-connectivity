@@ -1,7 +1,7 @@
 
 # AWS Kinesis Firehose Target
 
-[SFC Configuration](../core/sfc-configuration.md) > [Targets](../core/sfc-configuration.md#targets) >  [Target](../core/target-configuration.md) 
+[SFC Configuration](../core/sfc-configuration.md) > [Targets](../core/sfc-configuration.md#targets) >  [Target](../core/target-configuration.md)
 
 The Amazon [Kinesis Firehose](https://aws.amazon.com/firehose/) Target adapter for Shop Floor Connectivity facilitates data streaming from industrial devices to Amazon Kinesis Data Firehose. This adapter collects and transmits data to Kinesis Firehose delivery streams. The adapter supports batching and template-based transformations.
 
@@ -9,7 +9,7 @@ In order to use this target as in [in-process](../sfc-running-targets.md#running
 
 ```json
 "TargetTypes" :{
-   "AWS-IOT-FIREHOSE": {
+   "AWS-FIREHOSE": {
       "JarFiles" : ["<location of deployment>/aws-kinesis-firehose-target/lib"],
       "FactoryClassName": "com.amazonaws.sfc.awsfirehose.AwsFirehoseTargetWriter"
    }
