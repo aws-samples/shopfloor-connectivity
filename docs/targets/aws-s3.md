@@ -1,8 +1,8 @@
 # AWS S3 Target
 
-[SFC Configuration](../core/sfc-configuration.md) > [Targets](../core/sfc-configuration.md#targets) >  [Target](../core/target-configuration.md) 
+[SFC Configuration](../core/sfc-configuration.md) > [Targets](../core/sfc-configuration.md#targets) >  [Target](../core/target-configuration.md)
 
-The AWS [S3](https://aws.amazon.com/s3/) (Simple Storage Service) target adapter facilitates direct writing of industrial device data to Amazon S3 buckets via Shop Floor Connectivity. This adapter supports template-based transformations, configurable file prefixes, compression, and batching capabilities. 
+The AWS [S3](https://aws.amazon.com/s3/) (Simple Storage Service) target adapter facilitates direct writing of industrial device data to Amazon S3 buckets via Shop Floor Connectivity. This adapter supports template-based transformations, configurable file prefixes, compression, and batching capabilities.
 
 In order to use this target as in [in-process](../sfc-running-targets.md#running-targets-in-process) type target the type must be added to the [TargetTypes](../core/sfc-configuration.md#TargetTypes) section in the [SFC configuration file](../core/sfc-configuration.md).
 
@@ -10,7 +10,7 @@ In order to use this target as in [in-process](../sfc-running-targets.md#running
 "TargetTypes" :{
    "AWS-S3": {
       "JarFiles" : ["<location of deployment>/aws-s3-target/lib"],
-      "FactoryClassName": "com.amazonaws.sfc.s3.AwsS3TargetWriter"
+      "FactoryClassName": "com.amazonaws.sfc.awss3.AwsS3TargetWriter"
    }
 }
 ```
@@ -62,7 +62,7 @@ The bucketname must comply to the following rules:
 
 ---
 ### BufferSize
-Specifies the size threshold in megabytes (MB) that triggers a write operation to S3. When the buffer reaches this size, the adapter will write the accumulated data to an S3 object. This setting helps optimize storage efficiency and API calls by controlling the size of objects written to S3. A larger buffer size results in fewer but larger objects, while a smaller buffer size creates more frequent writes of smaller objects. 
+Specifies the size threshold in megabytes (MB) that triggers a write operation to S3. When the buffer reaches this size, the adapter will write the accumulated data to an S3 object. This setting helps optimize storage efficiency and API calls by controlling the size of objects written to S3. A larger buffer size results in fewer but larger objects, while a smaller buffer size creates more frequent writes of smaller objects.
 
 **Type**: Integer
 
@@ -116,7 +116,7 @@ If no CredentialProviderClient is configured the [AWS Java SDK credential provid
 ---
 
 ### Interval
-Specifies the time interval in seconds that triggers a write operation to S3. 
+Specifies the time interval in seconds that triggers a write operation to S3.
 
 The adapter writes data to S3 when either the [BufferSize](#buffersize) threshold is reached or this Interval period elapses, whichever occurs first. This ensures that data is written to S3 even during periods of low data volume.
 
@@ -130,7 +130,7 @@ Specifies a prefix that will be added to the beginning of all object keys create
 
 Optional. If not specified, objects will be created at the root level of the bucket.
 
-**Type**: 
+**Type**:
 
 ---
 ### Region
@@ -243,7 +243,7 @@ Configuration using CredentialProviderClient.
 
 ```json
 {
-  "TargetType" : "AWS-S3",    
+  "TargetType" : "AWS-S3",
   "BucketName": "your-bucket-name",
   "Region": "us-east-1",
   "BufferSize": 10,
@@ -259,7 +259,7 @@ Configuration using  default AWS SDK credential provider chain.
 
 ```json
 {
-  "TargetType" : "AWS-S3",     
+  "TargetType" : "AWS-S3",
   "BucketName": "your-bucket-name",
   "Region": "us-east-1",
   "BufferSize": 16,
