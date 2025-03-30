@@ -18,7 +18,7 @@ import kotlin.reflect.full.companionObjectInstance
 
 class SimulationDeserializer : JsonDeserializer<Simulation> {
 
-    data class OperatorCreateInstanceData(val name: String, val companionInstance: Any, val createMethod: Method)
+    data class SimulationCreateInstanceData(val name: String, val companionInstance: Any, val createMethod: Method)
 
     override fun deserialize(
         json: JsonElement?,
@@ -54,13 +54,13 @@ class SimulationDeserializer : JsonDeserializer<Simulation> {
                     throw SimulationException("Registering function $name, operator name \"$name\" is already used for simulations ${o.name}")
             } else {
                 knownSimulations[name] =
-                    OperatorCreateInstanceData(name, companionInstance, companionInstance::class.java.getDeclaredMethod("fromJson", JsonObject::class.java))
+                    SimulationCreateInstanceData(name, companionInstance, companionInstance::class.java.getDeclaredMethod("fromJson", JsonObject::class.java))
             }
 
         }
 
 
-        private val knownSimulations = mutableMapOf<String, OperatorCreateInstanceData>()
+        private val knownSimulations = mutableMapOf<String, SimulationCreateInstanceData>()
 
 
         init {
