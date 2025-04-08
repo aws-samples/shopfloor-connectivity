@@ -1400,7 +1400,7 @@ Integer values within the range of 0 to 100
 }
 ```
 
-<img style="float: left;" width=30%  src="./img/simulator/Sinus.png">
+<img style="float: left;" width=30%  src="./img/simulator/sinus.png.png">
 
 
 
@@ -1893,7 +1893,7 @@ Length of the interval period in milliseconds. The simulation will only return a
 
 ### Item
 
-The embedded simulation that generates values is queried for its value every time the Interval simulation is queried. However, it only returns its value after the specified [interval](#interval-2) period has elapsed.
+The embedded simulation that generates values is queried for its value every time the Interval simulation is queried. However, it only returns its value after the specified [interval](#interval-3) period has elapsed.
 
 **Type**: Simulation
 
