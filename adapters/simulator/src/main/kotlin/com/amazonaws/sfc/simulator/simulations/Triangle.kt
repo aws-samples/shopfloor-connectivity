@@ -17,7 +17,7 @@ import com.amazonaws.sfc.simulator.simulations.SimulationHelper.maxValueForType
 import com.amazonaws.sfc.simulator.simulations.SimulationHelper.minValueForType
 import com.google.gson.JsonObject
 
-class Triangle(val minValue: Double, val maxValue: Double, val cycleLength: Long?, val dataType: DataType, val arraySize: Int) : Simulation {
+class Triangle(val minValue: Double, val maxValue: Double, cycleLength: Long?, val dataType: DataType, val arraySize: Int) : Simulation {
 
     private val range = (maxValue - minValue) + 1
     private val startTime = System.currentTimeMillis()

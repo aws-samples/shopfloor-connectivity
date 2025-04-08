@@ -115,9 +115,6 @@ class OpcuaConfiguration : SourceAdapterBaseConfiguration() {
         const val CONFIG_PROPERTIES = "Properties"
         const val CONFIG_INHERITS_FROM = "Inherits"
 
-        const val CONFIG_CHANGED_DATA_CHANNEL_SIZE = "ChangedDataChannelSize"
-        const val CONFIG_CHANGED_DATA_CHANNEL_TIMEOUT = "ChangedDataChannelTimeout"
-
         const val CONFIG_RECEIVED_EVENTS_CHANNEL_SIZE = "ReceivedEventChannelSize"
         const val CONFIG_RECEIVED_EVENTS_CHANNEL_TIMEOUT = "ReceivedEventChannelTimeout"
 

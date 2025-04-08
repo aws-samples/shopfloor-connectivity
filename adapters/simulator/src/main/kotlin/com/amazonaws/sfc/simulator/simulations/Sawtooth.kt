@@ -17,7 +17,7 @@ import com.amazonaws.sfc.simulator.simulations.SimulationHelper.maxValueForType
 import com.amazonaws.sfc.simulator.simulations.SimulationHelper.minValueForType
 import com.google.gson.JsonObject
 
-class Sawtooth(val minValue: Double, val maxValue: Double, val dataType: DataType, val cycleLength: Long? = null, val arraySize: Int) : Simulation {
+class Sawtooth(val minValue: Double, val maxValue: Double, val dataType: DataType, cycleLength: Long? = null, val arraySize: Int) : Simulation {
 
     private val range = (maxValue - minValue) + 1
     private val startTime = System.currentTimeMillis()
