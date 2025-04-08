@@ -923,7 +923,7 @@ Returns values, or arrays of values, from a set of values configured for the sim
 
 - [DataType](#datatype-4)
 
-- [Random](#random-1)
+- [Random](#random-2)
 
 - [SimulationType](#simulationtype-4)
 
@@ -1218,7 +1218,7 @@ Integer values within the range of 0 (inclusive) and the 100 (inclusive).
 }
 ```
 
-<img style="float: left;" width=30%  src="./img/simulator/SawTooth.png">
+<img style="float: left;" width=30%  src="./img/simulator/Sawtooth.png">
 
 
 
@@ -1233,7 +1233,7 @@ Integer values within the range of 100 (inclusive) and the range of 200 (inclusi
 }
 ```
 
-<img style="float: left;" width=35%  src="./img/simulator/SawTooth-2.png">
+<img style="float: left;" width=35%  src="./img/simulator/Sawtooth-2.png">
 
 
 
@@ -1607,9 +1607,9 @@ Returns values using a triangle wave pattern, where values increase and decrease
 
 - [DataType](#datatype-8)
 
-- [Max](#max-5)
+- [Max](#max-6)
 
-- [Min](#min-5)
+- [Min](#min-6)
 
 - [SimulationType](#simulationtype-7)
 
@@ -1651,7 +1651,7 @@ Possible values are:
 
 ### Max
 
-Maximum value for the triangle wave generation. Must be greater than or equal to the [minimum](#min-5) value and must be compatible with the specified [data type](#datatype-7). The value represents the upper level of the square wave. The default value is 100.
+Maximum value for the triangle wave generation. Must be greater than or equal to the [minimum](#min-6) value and must be compatible with the specified [data type](#datatype-8). The value represents the upper level of the square wave. The default value is 100.
 
 **Type :**  Number
 
@@ -1659,7 +1659,7 @@ Maximum value for the triangle wave generation. Must be greater than or equal to
 
 ### Min
 
-Minimum value for the triangle wave generation. Must be less than or equal to the [maximum](#max-5) value and must be compatible with the specified [data type](#datatype-7). The value represents the lower level of the square wave. The default value is 0.
+Minimum value for the triangle wave generation. Must be less than or equal to the [maximum](#max-6) value and must be compatible with the specified [data type](#datatype-8). The value represents the lower level of the square wave. The default value is 0.
 
 **Type :**  Number
 
@@ -1970,6 +1970,8 @@ The List simulation contains multiple embedded simulations and returns their val
 - [SimulationType](#simulationtype-11)
 
 ---
+
+
 
 ### DataType
 
