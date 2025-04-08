@@ -15,7 +15,6 @@ val kotlinCoroutinesVersion = "1.6.2"
 val kotlinVersion = "1.9.0"
 val reflectionVersion = "1.6.0"
 val gsonVersion = "2.9.0"
-val ktorVersion = "2.3.10"
 
 
 plugins {
