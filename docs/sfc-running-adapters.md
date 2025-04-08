@@ -13,7 +13,7 @@ well as all required library files. The application tar file contains script fil
 and `bin/<adaptertype>.bat`) to launch the applications, and all required libraries (`/lib/*.jar`).
 
 | Protocol   | Application name | Main Class                                     |
-|------------|------------------|------------------------------------------------|
+| ---------- | ---------------- | ---------------------------------------------- |
 | ADS        | ads              | com.amazonaws.sfc.ads.AdsProtocolService       |
 | J1939      | J1939            | com.amazonaws.sfc.j1939.J1939ProtocolService   |
 | MQTT       | mqtt             | com.amazonaws.sfc.mqtt.MqttProtocolService     |
@@ -23,6 +23,7 @@ and `bin/<adaptertype>.bat`) to launch the applications, and all required librar
 | PCCC       | pccc             | com.amazonaws.sfc.pccc.PcccProtocolService     |
 | REST       | rest             | com.amazonaws.sfc.rest.RestProtocolService     |
 | S7         | s7               | com.amazonaws.sfc.s7.S7ProtocolService         |
+| SIMULATOR  | simulator        | com.amazonaws.sfc.simulator.SimularorService   |
 | SLMP       | slmp             | com.amazonaws.sfc.slmp.SlmpProtocolService     |
 | SNMP       | snmp             | com.amazonaws.sfc.snmp.SnmpProtocolService     |
 | SQL        | sql              | com.amazonaws.sfc.sql.SqlProtocolService       |
@@ -114,3 +115,6 @@ Used environment variable :
 
 
 ```
+
+
+

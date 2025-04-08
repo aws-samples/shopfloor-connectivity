@@ -1,11 +1,9 @@
 //  Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 //  SPDX-License-Identifier: MIT-0
 
-package com.amazonaws.simulation
+package com.amazonaws.sfc.simulator.simulations
 
-import com.amazonaws.sfc.simulator.config.SimulationConfiguration.Companion.CONFIG_STRUCT_PROPERTIES
-import com.amazonaws.sfc.simulator.simulations.InvalidSimulation
-import com.amazonaws.sfc.simulator.simulations.Simulation
+import com.amazonaws.sfc.simulator.config.SimulatorConfiguration.Companion.CONFIG_STRUCT_PROPERTIES
 import com.amazonaws.sfc.simulator.simulations.SimulationDeserializer.Companion.createSimulationReader
 import com.google.gson.JsonObject
 

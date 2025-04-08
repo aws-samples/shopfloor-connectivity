@@ -4,4 +4,4 @@
 
 package com.amazonaws.sfc.simulator
 
-class SimulationException( message : String) : Exception(message)
+class SimulatorException(message : String) : Exception(message)

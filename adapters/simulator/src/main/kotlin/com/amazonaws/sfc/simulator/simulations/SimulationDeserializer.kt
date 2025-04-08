@@ -4,10 +4,9 @@
 
 package com.amazonaws.sfc.simulator.simulations
 
-import com.amazonaws.sfc.simulator.SimulationException
-import com.amazonaws.sfc.simulator.config.SimulationConfiguration.Companion.CONFIG_SIMULATION_TYPE
+import com.amazonaws.sfc.simulator.SimulatorException
+import com.amazonaws.sfc.simulator.config.SimulatorConfiguration.Companion.CONFIG_SIMULATION_TYPE
 import com.amazonaws.simulation.Random
-import com.amazonaws.simulation.Structure
 import com.google.gson.*
 import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
@@ -51,7 +50,7 @@ class SimulationDeserializer : JsonDeserializer<Simulation> {
             val o = knownSimulations[name]
             if (o != null) {
                 if (o.name != name)
-                    throw SimulationException("Registering function $name, operator name \"$name\" is already used for simulations ${o.name}")
+                    throw SimulatorException("Registering function $name, operator name \"$name\" is already used for simulations ${o.name}")
             } else {
                 knownSimulations[name] =
                     SimulationCreateInstanceData(name, companionInstance, companionInstance::class.java.getDeclaredMethod("fromJson", JsonObject::class.java))

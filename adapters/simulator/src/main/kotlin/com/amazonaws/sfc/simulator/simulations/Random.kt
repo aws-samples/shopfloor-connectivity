@@ -3,10 +3,10 @@
 
 package com.amazonaws.simulation
 
-import com.amazonaws.sfc.simulator.config.SimulationConfiguration.Companion.CONFIG_ARRAY_SIZE
-import com.amazonaws.sfc.simulator.config.SimulationConfiguration.Companion.CONFIG_DATA_TYPE
-import com.amazonaws.sfc.simulator.config.SimulationConfiguration.Companion.CONFIG_MAX
-import com.amazonaws.sfc.simulator.config.SimulationConfiguration.Companion.CONFIG_MIN
+import com.amazonaws.sfc.simulator.config.SimulatorConfiguration.Companion.CONFIG_ARRAY_SIZE
+import com.amazonaws.sfc.simulator.config.SimulatorConfiguration.Companion.CONFIG_DATA_TYPE
+import com.amazonaws.sfc.simulator.config.SimulatorConfiguration.Companion.CONFIG_MAX
+import com.amazonaws.sfc.simulator.config.SimulatorConfiguration.Companion.CONFIG_MIN
 import com.amazonaws.sfc.simulator.simulations.DataType
 import com.amazonaws.sfc.simulator.simulations.InvalidSimulation
 import com.amazonaws.sfc.simulator.simulations.Simulation

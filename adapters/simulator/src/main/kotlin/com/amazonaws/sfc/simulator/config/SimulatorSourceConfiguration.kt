@@ -13,11 +13,11 @@ import com.amazonaws.sfc.config.ConfigurationException
 import com.google.gson.annotations.SerializedName
 
 @ConfigurationClass
-class SimulationSourceConfiguration : BaseSourceConfiguration() {
+class SimulatorSourceConfiguration : BaseSourceConfiguration() {
 
     @SerializedName(CONFIG_CHANNELS)
-    private var _channels = mapOf<String, SimulationChannelConfiguration>()
-    val channels: Map<String, SimulationChannelConfiguration>
+    private var _channels = mapOf<String, SimulatorChannelConfiguration>()
+    val channels: Map<String, SimulatorChannelConfiguration>
         get() = _channels.filter { !it.key.startsWith(BaseConfiguration.CONFIG_DISABLED_COMMENT) }
 
 
@@ -38,7 +38,7 @@ class SimulationSourceConfiguration : BaseSourceConfiguration() {
     private fun validateAtLeastOneChannel() =
         ConfigurationException.check(
             (channels.isNotEmpty()),
-            "Simulation source must have 1 or more channels",
+            "Simulator source must have 1 or more channels",
             CONFIG_CHANNELS,
             this
         )
@@ -46,14 +46,14 @@ class SimulationSourceConfiguration : BaseSourceConfiguration() {
     companion object {
 
 
-        private val default = SimulationSourceConfiguration()
+        private val default = SimulatorSourceConfiguration()
 
-        fun create(channels: Map<String, SimulationChannelConfiguration> = default._channels,
+        fun create(channels: Map<String, SimulatorChannelConfiguration> = default._channels,
                    name: String = default._name,
                    description: String = default._description,
-                   protocolAdapter: String? = default._protocolAdapterID): SimulationSourceConfiguration {
+                   protocolAdapter: String? = default._protocolAdapterID): SimulatorSourceConfiguration {
 
-            val instance = createSourceConfiguration<SimulationSourceConfiguration>(
+            val instance = createSourceConfiguration<SimulatorSourceConfiguration>(
                 name = name,
                 description = description,
                 protocolAdapter = protocolAdapter)

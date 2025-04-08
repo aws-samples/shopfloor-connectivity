@@ -13,11 +13,11 @@ import com.amazonaws.sfc.service.ServiceMain
 import kotlinx.coroutines.runBlocking
 
 
-class SimulatorProtocolService : ServiceMain() {
+class SimulatorService : ServiceMain() {
 
     override fun createServiceInstance(args: Array<String>, configuration: String, logger: Logger): Service? {
         return IpcAdapterService.createProtocolAdapterService(args, configuration, logger) { _adapterID: String, _configReader: ConfigReader, _logger: Logger ->
-            SimulationAdapter.createSimulationAdapter(_adapterID, _configReader, _logger)
+            SimulatorAdapter.createSimulatorAdapter(_adapterID, _configReader, _logger)
 
         }
     }
@@ -26,7 +26,7 @@ class SimulatorProtocolService : ServiceMain() {
         @JvmStatic
         @JvmName("main")
         fun main(args: Array<String>) = runBlocking {
-            SimulatorProtocolService().run(args)
+            SimulatorService().run(args)
         }
     }
 }

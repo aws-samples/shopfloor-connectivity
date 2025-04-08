@@ -25,7 +25,7 @@ class OpcuaConfiguration : SourceAdapterBaseConfiguration() {
     private var _sources = mapOf<String, OpcuaSourceConfiguration>()
 
     val sources: Map<String, OpcuaSourceConfiguration>
-        get() = _sources.filter { it.value.protocolAdapterID in protocolAdapters.keys }
+        get() = _sources.filter { it.value.protocolAdapterID in protocolAdapters.keys  }
 
 
     @SerializedName(CONFIG_PROTOCOL_ADAPTERS)

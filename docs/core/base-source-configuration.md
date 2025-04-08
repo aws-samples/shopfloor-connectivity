@@ -4,8 +4,8 @@
 
 The BaseSourceConfiguration serves as a foundational that defines common properties used by protocol adapter sources in the SFC  framework. It provides essential attributes like name, description, and protocol adapter identification that all source configurations share. Protocol-specific adapters inherit from this class and extend it with their own specialized configuration properties to support their unique protocol requirements
 
--[Schema](#schema)
--[Example](#example)
+- [Schema](#schema)
+- [Example](#example)
 
 **Properties:**
 

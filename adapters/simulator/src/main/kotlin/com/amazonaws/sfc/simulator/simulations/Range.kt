@@ -3,10 +3,10 @@
 
 package com.amazonaws.sfc.simulator.simulations
 
-import com.amazonaws.sfc.simulator.config.SimulationConfiguration.Companion.CONFIG_ARRAY_SIZE
-import com.amazonaws.sfc.simulator.config.SimulationConfiguration.Companion.CONFIG_DATA_TYPE
-import com.amazonaws.sfc.simulator.config.SimulationConfiguration.Companion.CONFIG_RANDOM
-import com.amazonaws.sfc.simulator.config.SimulationConfiguration.Companion.CONFIG_VALUES
+import com.amazonaws.sfc.simulator.config.SimulatorConfiguration.Companion.CONFIG_ARRAY_SIZE
+import com.amazonaws.sfc.simulator.config.SimulatorConfiguration.Companion.CONFIG_DATA_TYPE
+import com.amazonaws.sfc.simulator.config.SimulatorConfiguration.Companion.CONFIG_RANDOM
+import com.amazonaws.sfc.simulator.config.SimulatorConfiguration.Companion.CONFIG_VALUES
 import com.amazonaws.sfc.simulator.simulations.SimulationDeserializer.Companion.getInt
 import com.amazonaws.sfc.simulator.simulations.SimulationDeserializer.Companion.jsonToNative
 import com.amazonaws.sfc.simulator.simulations.SimulationHelper.asAnyType

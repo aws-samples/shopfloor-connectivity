@@ -10,23 +10,21 @@ import com.amazonaws.sfc.log.Logger
 import com.amazonaws.sfc.metrics.MetricDimensions
 import com.amazonaws.sfc.metrics.MetricUnits
 import com.amazonaws.sfc.metrics.MetricsCollector
-import com.amazonaws.sfc.simulator.config.SimulationSourceConfiguration
+import com.amazonaws.sfc.simulator.config.SimulatorSourceConfiguration
 import com.amazonaws.sfc.system.DateTime
-import io.burt.jmespath.Expression
 import java.io.Closeable
 import java.time.Instant
-import java.util.*
 
-class SimulationSource(private val sourceID: String,
-                       private val simulationSourceConfiguration: SimulationSourceConfiguration,
-                       private val metricsCollector: MetricsCollector?,
-                       adapterMetricDimensions: MetricDimensions?,
-                       private val logger: Logger) : Closeable {
+class SimulatorSource(private val sourceID: String,
+                      private val simulatorSourceConfiguration: SimulatorSourceConfiguration,
+                      private val metricsCollector: MetricsCollector?,
+                      adapterMetricDimensions: MetricDimensions?,
+                      private val logger: Logger) : Closeable {
 
     private val className = this::class.simpleName.toString()
 
 
-    private val protocolAdapterID = simulationSourceConfiguration.protocolAdapterID
+    private val protocolAdapterID = simulatorSourceConfiguration.protocolAdapterID
     private val sourceDimensions =
         mapOf(MetricsCollector.METRICS_DIMENSION_SOURCE to "$protocolAdapterID:$sourceID") + adapterMetricDimensions as Map<String, String>
 
@@ -34,13 +32,13 @@ class SimulationSource(private val sourceID: String,
     fun read(channels: List<String>?): Map<String, ChannelReadValue>? {
 
         val log = logger.getCtxLoggers(className, "read")
-        val channelsToRead = if (channels.isNullOrEmpty()) simulationSourceConfiguration.channels.keys else channels
+        val channelsToRead = if (channels.isNullOrEmpty()) simulatorSourceConfiguration.channels.keys else channels
         val start = DateTime.systemDateTime().toEpochMilli()
 
         val result = try {
             sequence {
                 channelsToRead.forEach { channelName ->
-                    val value = simulationSourceConfiguration.channels[channelName]?.simulation?.value()
+                    val value = simulatorSourceConfiguration.channels[channelName]?.simulation?.value()
                     val readValue = if (value != null) {
                         val isBufferedValue = value is List<*> &&
                                 value.isNotEmpty() &&

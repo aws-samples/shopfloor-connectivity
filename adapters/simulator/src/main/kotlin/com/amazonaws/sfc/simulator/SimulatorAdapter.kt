@@ -10,9 +10,9 @@ import com.amazonaws.sfc.log.Logger
 import com.amazonaws.sfc.metrics.*
 import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_DIMENSION_SOURCE
 import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_DIMENSION_SOURCE_CATEGORY_ADAPTER
-import com.amazonaws.sfc.simulator.config.SimulationAdapterConfiguration
-import com.amazonaws.sfc.simulator.config.SimulationConfiguration
-import com.amazonaws.sfc.simulator.config.SimulationSourceConfiguration
+import com.amazonaws.sfc.simulator.config.SimulatorAdapterConfiguration
+import com.amazonaws.sfc.simulator.config.SimulatorConfiguration
+import com.amazonaws.sfc.simulator.config.SimulatorSourceConfiguration
 import com.amazonaws.sfc.system.DateTime.systemDateTime
 import com.amazonaws.sfc.targets.TargetException
 import com.amazonaws.sfc.util.MemoryMonitor.Companion.getUsedMemoryMB
@@ -23,7 +23,7 @@ import kotlinx.coroutines.sync.withLock
 import kotlin.time.Duration
 
 
-class SimulationAdapter(private val adapterID: String, private val configuration: SimulationConfiguration, private val logger: Logger) : ProtocolAdapter {
+class SimulatorAdapter(private val adapterID: String, private val configuration: SimulatorConfiguration, private val logger: Logger) : ProtocolAdapter {
 
     private val className = this::class.java.simpleName
 
@@ -34,63 +34,63 @@ class SimulationAdapter(private val adapterID: String, private val configuration
     private val adapterMetricDimensions = mapOf(MetricsCollector.METRICS_DIMENSION_TYPE to className)
 
     private val sourceConfigurations
-        get() = configuration.sources.filter { it.value.protocolAdapterID in configuration.simulationProtocolAdapters.keys }
+        get() = configuration.sources.filter { it.value.protocolAdapterID in configuration.simulatorProtocolAdapters.keys }
 
 
-    private val simulationSources by lazy {
+    private val simulatorSources by lazy {
         sequence {
             sourceConfigurations.forEach { (sourceID) ->
-                val simulationSource = createSimulationSource(sourceID)
-                if (simulationSource != null) yield(sourceID to simulationSource)
+                val simulatorSource = createSimulatorSource(sourceID)
+                if (simulatorSource != null) yield(sourceID to simulatorSource)
             }
         }.toMap()
 
     }
 
 
-    private fun createSimulationSource(sourceID: String): SimulationSource? {
-        val log = logger.getCtxLoggers(className, "createSimulationSource")
+    private fun createSimulatorSource(sourceID: String): SimulatorSource? {
+        val log = logger.getCtxLoggers(className, "createSimulatorSource")
         return try {
 
-            val simulationSourceConfiguration = getSourceConfiguration(sourceID)
+            val simulatorSourceConfiguration = getSourceConfiguration(sourceID)
 
-            val source = SimulationSource(
+            val source = SimulatorSource(
                 sourceID = sourceID,
-                simulationSourceConfiguration = simulationSourceConfiguration,
+                simulatorSourceConfiguration = simulatorSourceConfiguration,
                 metricsCollector = metricsCollector,
                 adapterMetricDimensions = adapterMetricDimensions,
                 logger = logger
             )
-            log.info("Created simulations source for source \"$sourceID\"")
+            log.info("Created simulator source for source \"$sourceID\"")
             source
-        } catch (e: SimulationException) {
-            logger.getCtxErrorLog(className, "createSimulationSource")("Error creating Simulation source for source \"$sourceID\", ${e.message}")
+        } catch (e: SimulatorException) {
+            logger.getCtxErrorLog(className, "createSimulatorSource")("Error creating Simulator source for source \"$sourceID\", ${e.message}")
             null
         }
     }
 
 
-    private fun getSourceConfiguration(sourceID: String): SimulationSourceConfiguration {
+    private fun getSourceConfiguration(sourceID: String): SimulatorSourceConfiguration {
         return sourceConfigurations[sourceID]
-                ?: throw SimulationException(
-                    "\"$sourceID\" is not a valid Simulation source, " +
-                            "available Simulation sources are ${sourceConfigurations.keys}"
+                ?: throw SimulatorException(
+                    "\"$sourceID\" is not a valid Simulator source, " +
+                            "available Simulator sources are ${sourceConfigurations.keys}"
                 )
     }
 
-    private fun protocolAdapterForSource(sourceID: String): SimulationAdapterConfiguration {
+    private fun protocolAdapterForSource(sourceID: String): SimulatorAdapterConfiguration {
         val sourceConfig = getSourceConfiguration(sourceID)
-        return configuration.simulationProtocolAdapters[sourceConfig.protocolAdapterID]
-                ?: throw SimulationException(
-                    "\"${sourceConfig.protocolAdapterID}\" for source \"$sourceID\" is not a valid Simulation protocol adapter, " +
-                            "available Simulation protocol adapters are ${configuration.simulationProtocolAdapters.keys}"
+        return configuration.simulatorProtocolAdapters[sourceConfig.protocolAdapterID]
+                ?: throw SimulatorException(
+                    "\"${sourceConfig.protocolAdapterID}\" for source \"$sourceID\" is not a valid Simulator protocol adapter, " +
+                            "available Simulator protocol adapters are ${configuration.simulatorProtocolAdapters.keys}"
                 )
     }
 
 
 
     override val metricsCollector: MetricsCollector? by lazy {
-        val metricsConfigurations = configuration.simulationProtocolAdapters.map { it.key to (it.value.metrics ?: MetricsSourceConfiguration()) }.toMap()
+        val metricsConfigurations = configuration.simulatorProtocolAdapters.map { it.key to (it.value.metrics ?: MetricsSourceConfiguration()) }.toMap()
         if (configuration.isCollectingMetrics) {
             logger.metricsCollectorMethod = collectMetricsFromLogger
             MetricsCollector(
@@ -133,15 +133,15 @@ class SimulationAdapter(private val adapterID: String, private val configuration
         val protocolAdapterID = sourceConfiguration.protocolAdapterID
         val dimensions = mapOf(METRICS_DIMENSION_SOURCE to "$adapterID:$sourceID") + adapterMetricDimensions
 
-        val simulationSource = simulationSources[sourceID] ?: return SourceReadError("Invalid source configuration")
+        val simulatorSource = simulatorSources[sourceID] ?: return SourceReadError("Invalid source configuration")
 
         val start = systemDateTime().toEpochMilli()
 
         val sourceReadResult = try {
-            val simulationSourceReadData = simulationSource.read(channels) ?: emptyMap()
+            val simulatorSourceReadData = simulatorSource.read(channels) ?: emptyMap()
             val readDurationInMillis = (systemDateTime().toEpochMilli() - start).toDouble()
-            createMetrics(protocolAdapterID, dimensions, readDurationInMillis, simulationSourceReadData)
-            SourceReadSuccess(simulationSourceReadData, systemDateTime())
+            createMetrics(protocolAdapterID, dimensions, readDurationInMillis, simulatorSourceReadData)
+            SourceReadSuccess(simulatorSourceReadData, systemDateTime())
         } catch (e: Exception) {
             metricsCollector?.buildValueDataPoint(protocolAdapterID, MetricsCollector.METRICS_READ_ERRORS, 1.0, MetricUnits.COUNT, dimensions)
             SourceReadError(e.toString(), systemDateTime())
@@ -212,12 +212,12 @@ class SimulationAdapter(private val adapterID: String, private val configuration
             runBlocking {
                 createInstanceMutex.withLock {
                     if (adapter == null) {
-                        adapter = createSimulationAdapter(adapterID, configReader, logger)
+                        adapter = createSimulatorAdapter(adapterID, configReader, logger)
                     }
                 }
             }
 
-            val config = SimulatorAdapterConfigReader(configReader).getConfig<SimulationConfiguration>()
+            val config = SimulatorAdapterConfigReader(configReader).getConfig<SimulatorConfiguration>()
             val schedule = config.schedules.firstOrNull { it.name == scheduleName }
             val sourcesForAdapter = schedule?.sources?.filter { (config.sources[it.key]?.protocolAdapterID ?: "") == adapterID } ?: return null
 
@@ -238,16 +238,16 @@ class SimulationAdapter(private val adapterID: String, private val configuration
 
         private var adapter: ProtocolAdapter? = null
 
-        fun createSimulationAdapter(adapterID: String, configReader: ConfigReader, logger: Logger): ProtocolAdapter {
+        fun createSimulatorAdapter(adapterID: String, configReader: ConfigReader, logger: Logger): ProtocolAdapter {
 
-            val simulationAdapterConfigReader = SimulatorAdapterConfigReader(configReader)
+            val simulatorAdapterConfigReader = SimulatorAdapterConfigReader(configReader)
 
-            val config: SimulationConfiguration = try {
-                simulationAdapterConfigReader.getConfig()
+            val config: SimulatorConfiguration = try {
+                simulatorAdapterConfigReader.getConfig()
             } catch (e: Exception) {
                 throw TargetException("Error loading configuration: ${e.message}")
             }
-            return SimulationAdapter(adapterID, config, logger)
+            return SimulatorAdapter(adapterID, config, logger)
         }
 
 

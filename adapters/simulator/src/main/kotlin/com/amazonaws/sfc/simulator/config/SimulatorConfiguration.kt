@@ -15,19 +15,19 @@ import kotlin.time.DurationUnit
 import kotlin.time.toDuration
 
 @ConfigurationClass
-class SimulationConfiguration : SourceAdapterBaseConfiguration() {
+class SimulatorConfiguration : SourceAdapterBaseConfiguration() {
 
     @SerializedName(CONFIG_SOURCES)
-    private var _sources = mapOf<String, SimulationSourceConfiguration>()
+    private var _sources = mapOf<String, SimulatorSourceConfiguration>()
 
-    val sources: Map<String, SimulationSourceConfiguration>
-        get() = _sources.filter { it.value.protocolAdapterID in simulationProtocolAdapters.keys && it.value.protocolAdapterID == SIMULATION_ADAPTER }
+    val sources: Map<String, SimulatorSourceConfiguration>
+        get() = _sources.filter { it.value.protocolAdapterID in simulatorProtocolAdapters.keys }
 
     @SerializedName(CONFIG_PROTOCOL_ADAPTERS)
-    private var _protocolAdapters = mapOf<String, SimulationAdapterConfiguration>()
+    private var _protocolAdapters = mapOf<String, SimulatorAdapterConfiguration>()
 
-    val simulationProtocolAdapters: Map<String, SimulationAdapterConfiguration>
-        get() = _protocolAdapters.filter { it.value.protocolAdapterType == SIMULATION_ADAPTER }
+    val simulatorProtocolAdapters: Map<String, SimulatorAdapterConfiguration>
+        get() = _protocolAdapters.filter { it.value.protocolAdapterType == SIMULATOR_ADAPTER }
 
 
     @Throws(ConfigurationException::class)
@@ -42,7 +42,7 @@ class SimulationConfiguration : SourceAdapterBaseConfiguration() {
     }
 
     private fun validateAdapters() {
-        simulationProtocolAdapters.values.forEach { it.validate() }
+        simulatorProtocolAdapters.values.forEach { it.validate() }
     }
 
 
@@ -55,7 +55,7 @@ class SimulationConfiguration : SourceAdapterBaseConfiguration() {
     }
 
     private fun isSimulationSource(source: Map.Entry<String, ArrayList<String>>) =
-        simulationProtocolAdapters[sources[source.key]?.protocolAdapterID]?.protocolAdapterType == SIMULATION_ADAPTER
+        simulatorProtocolAdapters[sources[source.key]?.protocolAdapterID]?.protocolAdapterType == SIMULATOR_ADAPTER
 
     private fun validateScheduleInput(
         source: Map.Entry<String, ArrayList<String>>,
@@ -74,7 +74,7 @@ class SimulationConfiguration : SourceAdapterBaseConfiguration() {
 
     private fun validateInputChannels(
         sourceChannelMap: Map.Entry<String, ArrayList<String>>,
-        source: SimulationSourceConfiguration?,
+        source: SimulatorSourceConfiguration?,
         schedule: ScheduleConfiguration
     ) {
         sourceChannelMap.value.forEach { channel ->
@@ -98,7 +98,7 @@ class SimulationConfiguration : SourceAdapterBaseConfiguration() {
 
 
     companion object {
-        const val SIMULATION_ADAPTER = "SIMULATOR"
+        const val SIMULATOR_ADAPTER = "SIMULATOR"
 
 
         const val CONFIG_ARRAY_SIZE = "Size"
@@ -122,10 +122,10 @@ class SimulationConfiguration : SourceAdapterBaseConfiguration() {
         const val DEFAULT_CYCLE_LENGTH = 10 * 1000L
         const val DEFAULT_INTERVAL = 1000L
 
-        private val default = SimulationConfiguration()
+        private val default = SimulatorConfiguration()
 
-        fun create(sources: Map<String, SimulationSourceConfiguration> = default._sources,
-                   protocolAdapters: Map<String, SimulationAdapterConfiguration> = default._protocolAdapters,
+        fun create(sources: Map<String, SimulatorSourceConfiguration> = default._sources,
+                   protocolAdapters: Map<String, SimulatorAdapterConfiguration> = default._protocolAdapters,
                    name: String = default._name,
                    version: String = default._version,
                    awsVersion: String? = default._awsVersion,
@@ -142,9 +142,9 @@ class SimulationConfiguration : SourceAdapterBaseConfiguration() {
                    secretsManagerConfiguration: SecretsManagerConfiguration? = default._secretsManagerConfiguration,
                    monitorIncludedConfigFiles: Boolean = default._monitorIncludedConfigFiles,
                    monitorIncludedConfigFilesInterval: Duration = default._monitorIncludedConfigFilesInterval.toDuration(DurationUnit.SECONDS),
-                   templatesConfiguration: TemplatesConfiguration? = default._templates): SimulationConfiguration {
+                   templatesConfiguration: TemplatesConfiguration? = default._templates): SimulatorConfiguration {
 
-            val instance = createBaseConfiguration<SimulationConfiguration>(
+            val instance = createBaseConfiguration<SimulatorConfiguration>(
                 name = name,
                 version = version,
                 awsVersion = awsVersion,

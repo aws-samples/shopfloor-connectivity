@@ -38,6 +38,7 @@ Requires IAM `timestream:WriteRecords` permission for the configures table as we
 - [BatchSize](#batchsize)
 - [CredentialProviderClient](#credentialproviderclient)
 - [Database](#database)
+- [Endpoint](#endpoint)
 - [Interval](#interval)
 - [Records](#records)
 - [TableName](#tablename)
@@ -67,7 +68,18 @@ The name of the Amazon Timestream database where the time series data will be st
 **Type**: String
 
 ---
+### Endpoint
+
+The EndPoint property specifies the VPC endpoint URL used to access AWS services privately through AWS PrivateLink without requiring an internet gateway or NAT device. When not specified, the service's default public endpoint for the configured region will be used.
+
+https://docs.aws.amazon.com/vpc/latest/privatelink/aws-services-privatelink-support.html
+
+**Type:** String
+
+---
+
 ### Interval
+
 The time interval in milliseconds that triggers writing buffered records to Timestream, even if the [batch size](#batchsize) hasn't been reached. If not specified, records are only written when the [batch size](#batchsize) is reached. The interval cannot be less than 10 milliseconds.
 
 **Type**: Integer

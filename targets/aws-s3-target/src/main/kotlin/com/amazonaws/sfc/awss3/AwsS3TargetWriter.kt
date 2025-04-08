@@ -124,7 +124,10 @@ class AwsS3TargetWriter(
     }
 
     private fun buildPayload(targetData: TargetData): String =
-        if (transformation == null) targetData.toJson(config.elementNames,targetConfig.unquoteNumericJsonValues) else transformation!!.transform(targetData, config.elementNames, targetConfig.templateEpochTimestamp) ?: ""
+        if (transformation == null) targetData.toJson(config.elementNames, targetConfig.unquoteNumericJsonValues) else transformation!!.transform(
+            targetData,
+            config.elementNames,
+            targetConfig.templateEpochTimestamp) ?: ""
 
     private val writer = scope.launch("Writer") {
 
@@ -227,7 +230,7 @@ class AwsS3TargetWriter(
         runBlocking {
             metricsCollector?.put(
                 adapterID,
-                metricsCollector?.buildValueDataPoint(adapterID, MetricsCollector.METRICS_MEMORY, MemoryMonitor.getUsedMemoryMB().toDouble(),MetricUnits.MEGABYTES ),
+                metricsCollector?.buildValueDataPoint(adapterID, MetricsCollector.METRICS_MEMORY, MemoryMonitor.getUsedMemoryMB().toDouble(), MetricUnits.MEGABYTES),
                 metricsCollector?.buildValueDataPoint(adapterID, METRICS_WRITES, 1.0, MetricUnits.COUNT, metricDimensions),
                 metricsCollector?.buildValueDataPoint(adapterID, METRICS_MESSAGES, buffer.size.toDouble(), MetricUnits.COUNT, metricDimensions),
                 metricsCollector?.buildValueDataPoint(adapterID, METRICS_WRITE_DURATION, writeDurationInMillis, MetricUnits.MILLISECONDS, metricDimensions),
@@ -270,7 +273,8 @@ class AwsS3TargetWriter(
 
 
     private fun buildPutObjectRequest(): PutObjectRequest {
-        val request = PutObjectRequest.builder().bucket(targetConfig.bucketName).key(objectKey())
+        var key = objectKey()
+        val request = PutObjectRequest.builder().bucket(targetConfig.bucketName).key(key)
         if (targetConfig.contentType != null) {
             request.contentType(targetConfig.compressionType.mimeType)
         } else {
@@ -283,11 +287,22 @@ class AwsS3TargetWriter(
 
     private fun objectKey(): String {
         val now = systemCalendarUTC()
-        val key =
+        var key = if (targetConfig.objectKey.isNullOrEmpty()) {
             "${now.get(Calendar.YEAR)}/${now.get(Calendar.MONTH) + 1}/${now.get(Calendar.DAY_OF_MONTH)}/${now.get(Calendar.HOUR_OF_DAY)}/${now.get(Calendar.MINUTE)}/${UUID.randomUUID()}"
+        } else {
+            TemplateRenderer.render(targetConfig.objectKey!!)
+        }
+
+        if (!targetConfig.extension.isNullOrEmpty()) {
+            if (key.endsWith(".")) {
+                key = key.substringBeforeLast(".")
+            }
+            key = "${key}.${targetConfig.extension}"
+        }
+
+
         return if (targetConfig.prefix.isBlank()) key else "${targetConfig.prefix}/$key"
     }
-
 
     override suspend fun writeTargetData(targetData: TargetData) {
         targetDataChannel.submit(targetData, logger.getCtxLoggers("$className:writeTargetData"))

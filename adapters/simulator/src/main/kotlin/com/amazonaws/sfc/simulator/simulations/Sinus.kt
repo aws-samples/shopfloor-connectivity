@@ -4,13 +4,13 @@
 package com.amazonaws.sfc.simulator.simulations
 
 
-import com.amazonaws.sfc.simulator.config.SimulationConfiguration.Companion.CONFIG_ARRAY_SIZE
-import com.amazonaws.sfc.simulator.config.SimulationConfiguration.Companion.CONFIG_CYCLE_LENGTH
-import com.amazonaws.sfc.simulator.config.SimulationConfiguration.Companion.CONFIG_DATA_TYPE
-import com.amazonaws.sfc.simulator.config.SimulationConfiguration.Companion.CONFIG_MAX
-import com.amazonaws.sfc.simulator.config.SimulationConfiguration.Companion.CONFIG_MIN
-import com.amazonaws.sfc.simulator.config.SimulationConfiguration.Companion.CONFIG_SHIFT
-import com.amazonaws.sfc.simulator.config.SimulationConfiguration.Companion.DEFAULT_CYCLE_LENGTH
+import com.amazonaws.sfc.simulator.config.SimulatorConfiguration.Companion.CONFIG_ARRAY_SIZE
+import com.amazonaws.sfc.simulator.config.SimulatorConfiguration.Companion.CONFIG_CYCLE_LENGTH
+import com.amazonaws.sfc.simulator.config.SimulatorConfiguration.Companion.CONFIG_DATA_TYPE
+import com.amazonaws.sfc.simulator.config.SimulatorConfiguration.Companion.CONFIG_MAX
+import com.amazonaws.sfc.simulator.config.SimulatorConfiguration.Companion.CONFIG_MIN
+import com.amazonaws.sfc.simulator.config.SimulatorConfiguration.Companion.CONFIG_SHIFT
+import com.amazonaws.sfc.simulator.config.SimulatorConfiguration.Companion.DEFAULT_CYCLE_LENGTH
 import com.amazonaws.sfc.simulator.simulations.SimulationDeserializer.Companion.getDouble
 import com.amazonaws.sfc.simulator.simulations.SimulationDeserializer.Companion.getInt
 import com.amazonaws.sfc.simulator.simulations.SimulationDeserializer.Companion.getLong

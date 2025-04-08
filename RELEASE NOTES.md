@@ -1,5 +1,15 @@
 # Release Notes:
 
+
+
+## Version 1.9.0, 8 April 2025
+- New [Simulator Adapter](./docs/adapters/simulator.md), The Simulator Adapter is a special-purpose adapter that generates synthetic data using [configurable simulations](./docs/adapters/simulator.md#simulations) instead of reading data from physical industrial devices.
+- [AWS S3 target](./docs/targets/aws-s3.md) new [ObjectKey](./docs/targets/aws-s3.md#objectkey) and [Extension](./docs/targets/aws-s3.md#extension) configuration properties
+- [Endpoint](./docs/core/aws-service-configuration.md#endpoint) configuration of AWS service targets to override the default public service endpoint with a VPC private endpoint.
+- Adapter configuration optimizations
+
+---
+
 ## Version 1.8.9, 20 March 2025
 
 - [OPC UA protocol adapter](./docs/adapters/opcua.md#opcuaserverconfiguration) server configuration new  [Username](./docs/adapters/opcua.md#username)/[Password](./docs/adapters/opcua.md#password) authentication

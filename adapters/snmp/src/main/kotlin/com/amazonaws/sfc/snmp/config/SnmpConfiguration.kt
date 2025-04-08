@@ -18,7 +18,7 @@ class SnmpConfiguration : SourceAdapterBaseConfiguration() {
     private var _sources = mapOf<String, SnmpSourceConfiguration>()
 
     val snmpSources: Map<String, SnmpSourceConfiguration>
-        get() = _sources.filter { it.value.protocolAdapterID in snmpProtocolAdapters.keys }
+        get() = _sources.filter { it.value.protocolAdapterID in snmpProtocolAdapters.keys  }
 
     @SerializedName(CONFIG_PROTOCOL_ADAPTERS)
     private var _protocolAdapters = mapOf<String, SnmpAdapterConfiguration>()

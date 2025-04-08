@@ -21,7 +21,7 @@ class RestConfiguration : SourceAdapterBaseConfiguration() {
     private var _sources = mapOf<String, RestSourceConfiguration>()
 
     val sources: Map<String, RestSourceConfiguration>
-        get() = _sources.filter { it.value.protocolAdapterID in restProtocolAdapters.keys && it.value.protocolAdapterID == REST_ADAPTER }
+        get() = _sources.filter { it.value.protocolAdapterID in restProtocolAdapters.keys }
 
     @SerializedName(CONFIG_PROTOCOL_ADAPTERS)
     private var _protocolAdapters = mapOf<String, RestAdapterConfiguration>()

@@ -8,15 +8,15 @@ package com.amazonaws.sfc.simulator.config
 import com.amazonaws.sfc.config.ChannelConfiguration
 import com.amazonaws.sfc.config.ConfigurationClass
 import com.amazonaws.sfc.config.ConfigurationException
-import com.amazonaws.sfc.simulator.config.SimulationConfiguration.Companion.CONFIG_SIMULATION
-import com.amazonaws.sfc.simulator.config.SimulationConfiguration.Companion.CONFIG_SIMULATION_TYPE
+import com.amazonaws.sfc.simulator.config.SimulatorConfiguration.Companion.CONFIG_SIMULATION
+import com.amazonaws.sfc.simulator.config.SimulatorConfiguration.Companion.CONFIG_SIMULATION_TYPE
 import com.amazonaws.sfc.simulator.simulations.InvalidSimulation
 import com.amazonaws.sfc.simulator.simulations.Simulation
 import com.google.gson.annotations.SerializedName
 
 
 @ConfigurationClass
-class SimulationChannelConfiguration : ChannelConfiguration() {
+class SimulatorChannelConfiguration : ChannelConfiguration() {
 
 
     @SerializedName(CONFIG_SIMULATION)
@@ -29,12 +29,12 @@ class SimulationChannelConfiguration : ChannelConfiguration() {
         ConfigurationException.check(
             _simulation!=null,
             "$CONFIG_SIMULATION_TYPE is not provided for channel",
-            CONFIG_SIMULATION,
+            CONFIG_SIMULATION_TYPE,
             this)
 
         if (_simulation is InvalidSimulation) throw ConfigurationException(
             "$CONFIG_SIMULATION_TYPE \"${(_simulation as InvalidSimulation).simulationName}\" is not valid, ${(_simulation as InvalidSimulation).reason}",
-            CONFIG_SIMULATION,
+            CONFIG_SIMULATION_TYPE,
             this
         )
         validated = true
@@ -44,7 +44,7 @@ class SimulationChannelConfiguration : ChannelConfiguration() {
 
     companion object {
 
-        private val default = SimulationChannelConfiguration()
+        private val default = SimulatorChannelConfiguration()
 
         fun create(name: String? = default._name,
                    description: String = default._description,
@@ -53,9 +53,9 @@ class SimulationChannelConfiguration : ChannelConfiguration() {
                    metadata: Map<String, String> = default._metadata,
                    changeFilter: String? = default._changeFilterID,
                    valueFilter: String? = default._valueFilterID,
-                   conditionFilter: String? = default._conditionFilterID): SimulationChannelConfiguration {
+                   conditionFilter: String? = default._conditionFilterID): SimulatorChannelConfiguration {
 
-            val instance = createChannelConfiguration<SimulationChannelConfiguration>(
+            val instance = createChannelConfiguration<SimulatorChannelConfiguration>(
                 name = name,
                 description = description,
                 transformation = transformation,

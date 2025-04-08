@@ -10,10 +10,10 @@ import com.amazonaws.sfc.config.ProtocolAdapterConfiguration
 import com.amazonaws.sfc.config.Validate
 import com.amazonaws.sfc.metrics.MetricsSourceConfiguration
 
-import com.amazonaws.sfc.simulator.config.SimulationConfiguration.Companion.SIMULATION_ADAPTER
+import com.amazonaws.sfc.simulator.config.SimulatorConfiguration.Companion.SIMULATOR_ADAPTER
 
 @ConfigurationClass
-class SimulationAdapterConfiguration : ProtocolAdapterConfiguration(), Validate {
+class SimulatorAdapterConfiguration : ProtocolAdapterConfiguration(), Validate {
 
 
     @Throws(ConfigurationException::class)
@@ -26,15 +26,15 @@ class SimulationAdapterConfiguration : ProtocolAdapterConfiguration(), Validate 
 
     companion object {
 
-        private val default = SimulationAdapterConfiguration()
+        private val default = SimulatorAdapterConfiguration()
 
         fun create(description: String = default._description,
                    metrics: MetricsSourceConfiguration? = default._metrics,
-                   adapterServer: String? = default._protocolAdapterServer): SimulationAdapterConfiguration {
+                   adapterServer: String? = default._protocolAdapterServer): SimulatorAdapterConfiguration {
 
-            val instance = createAdapterConfiguration<SimulationAdapterConfiguration>(
+            val instance = createAdapterConfiguration<SimulatorAdapterConfiguration>(
                 description = description,
-                adapterType = SIMULATION_ADAPTER,
+                adapterType = SIMULATOR_ADAPTER,
                 metrics = metrics,
                 adapterServer = adapterServer)
 

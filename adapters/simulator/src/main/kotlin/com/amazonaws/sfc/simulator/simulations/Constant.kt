@@ -4,8 +4,8 @@
 package com.amazonaws.sfc.simulator.simulations
 
 
-import com.amazonaws.sfc.simulator.config.SimulationConfiguration.Companion.CONFIG_DATA_TYPE
-import com.amazonaws.sfc.simulator.config.SimulationConfiguration.Companion.CONFIG_VALUE
+import com.amazonaws.sfc.simulator.config.SimulatorConfiguration.Companion.CONFIG_DATA_TYPE
+import com.amazonaws.sfc.simulator.config.SimulatorConfiguration.Companion.CONFIG_VALUE
 
 import com.amazonaws.sfc.simulator.simulations.SimulationDeserializer.Companion.asDouble
 import com.amazonaws.sfc.simulator.simulations.SimulationDeserializer.Companion.jsonToNative

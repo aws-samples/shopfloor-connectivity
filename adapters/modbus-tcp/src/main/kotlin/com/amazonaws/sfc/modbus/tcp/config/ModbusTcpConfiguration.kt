@@ -37,7 +37,7 @@ open class ModbusTcpConfiguration : ModbusConfiguration() {
      * Configured Modbus sources
      */
     override val sources: Map<String, ModbusSourceConfiguration>
-        get() = _sources.filter { it.value.protocolAdapterID in modbusTcpAdapters.keys }
+        get() = _sources.filter { it.value.protocolAdapterID in modbusTcpAdapters.keys}
 
 
     /**
