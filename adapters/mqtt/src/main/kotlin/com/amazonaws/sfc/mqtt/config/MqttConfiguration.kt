@@ -20,7 +20,7 @@ class MqttConfiguration : SourceAdapterBaseConfiguration() {
     private var _sources = mapOf<String, MqttSourceConfiguration>()
 
     val sources: Map<String, MqttSourceConfiguration>
-        get() = _sources.filter { it.value.protocolAdapterID in mqttProtocolAdapters.keys }
+        get() = _sources.filter { it.value.protocolAdapterID in mqttProtocolAdapters.keys  }
 
     @SerializedName(CONFIG_PROTOCOL_ADAPTERS)
     private var _protocolAdapters = mapOf<String, MqttAdapterConfiguration>()

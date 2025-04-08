@@ -21,7 +21,7 @@ class S7Configuration : SourceAdapterBaseConfiguration() {
     private var _sources = mapOf<String, S7SourceConfiguration>()
 
     val sources: Map<String, S7SourceConfiguration>
-        get() = _sources.filter { it.value.protocolAdapterID in s7ProtocolAdapters.keys }
+        get() = _sources.filter { it.value.protocolAdapterID in s7ProtocolAdapters.keys  && s7ProtocolAdapters[it.value.protocolAdapterID]?.protocolAdapterType  == S7_ADAPTER }
 
     @SerializedName(CONFIG_PROTOCOL_ADAPTERS)
     private var _protocolAdapters = mapOf<String, S7AdapterConfiguration>()

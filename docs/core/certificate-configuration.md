@@ -6,8 +6,6 @@ The CertificateConfiguration class manages SSL/TLS certificate settings and vali
 
 - [Examples](#certificateconfiguration-examples)
 
-  
-
   **Properties:**
 
 - [Alias](#alias)

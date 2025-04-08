@@ -22,7 +22,7 @@ class AdsConfiguration : SourceAdapterBaseConfiguration() {
 
     val sources: Map<String, AdsSourceConfiguration>
         get() = _sources.filter {
-            it.value.protocolAdapterID in adsProtocolAdapters.keys && it.value.protocolAdapterID == ADS_ADAPTER
+            it.value.protocolAdapterID in adsProtocolAdapters.keys
         }
 
     @SerializedName(CONFIG_PROTOCOL_ADAPTERS)

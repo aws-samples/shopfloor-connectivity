@@ -21,7 +21,7 @@ class SqlConfiguration : SourceAdapterBaseConfiguration() {
     private var _sources = mapOf<String, SqlSourceConfiguration>()
 
     val sources: Map<String, SqlSourceConfiguration>
-        get() = _sources.filter { it.value.protocolAdapterID in sqlProtocolAdapters.keys && it.value.protocolAdapterID == SQL_ADAPTER }
+        get() = _sources.filter { it.value.protocolAdapterID in sqlProtocolAdapters.keys }
 
     @SerializedName(CONFIG_PROTOCOL_ADAPTERS)
     private var _protocolAdapters = mapOf<String, SqlAdapterConfiguration>()

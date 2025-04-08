@@ -10,7 +10,7 @@ import software.amazon.awssdk.services.timestreamwrite.model.WriteRecordsRequest
 import software.amazon.awssdk.services.timestreamwrite.model.WriteRecordsResponse
 
 /**
- * Abstraction of Timestream client for simulation and testing.
+ * Abstraction of Timestream client for simulations and testing.
  * Note that Timestream API requires permission to call timestream:DescribeEndpoints action
  */
 class AwsTimestreamClientWrapper(private val client: TimestreamWriteClient) : AwsTimestreamClient {

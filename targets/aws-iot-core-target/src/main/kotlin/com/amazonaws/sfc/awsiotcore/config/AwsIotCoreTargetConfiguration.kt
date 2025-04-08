@@ -6,6 +6,7 @@ package com.amazonaws.sfc.awsiotcore.config
 
 import com.amazonaws.sfc.awsiotcore.config.AwsIotCoreWriterConfiguration.Companion.AWS_IOT_CORE_TARGET
 import com.amazonaws.sfc.config.AwsServiceConfig
+import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_ENDPOINT
 import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_REGION
 import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_TARGETS
 import com.amazonaws.sfc.config.ConfigurationClass
@@ -55,6 +56,11 @@ class AwsIotCoreTargetConfiguration : AwsServiceConfig, TargetConfiguration() {
      */
     override val region: Region?
         get() = if (_region.isNullOrEmpty()) null else Region.of(_region!!.lowercase())
+
+    @SerializedName(CONFIG_ENDPOINT)
+    var _endPoint : String? = null
+    override val endpoint : String?
+        get() = _endPoint
 
     @SerializedName(CONFIG_RETAIN)
     private var _retain: Boolean = false
@@ -151,6 +157,7 @@ class AwsIotCoreTargetConfiguration : AwsServiceConfig, TargetConfiguration() {
 
         fun create(topicName: String? = default._topicName,
                    region: String? = default._region,
+                   endPoint : String? = default._endPoint,
                    retain: Boolean = default._retain,
                    description: String = default._description,
                    active: Boolean = default._active,
@@ -178,6 +185,7 @@ class AwsIotCoreTargetConfiguration : AwsServiceConfig, TargetConfiguration() {
                 _alternateTopicName = unmappedTopicName
                 _warnUnmappedTopicName = warnUnmappedTopicNameTemplate
                 _region = region
+                _endPoint = endPoint
                 _retain = retain
                 _batchCount = batchCount
                 _batchSize = batchSize

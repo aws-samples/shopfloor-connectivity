@@ -11,4 +11,6 @@ import software.amazon.awssdk.regions.Region
 interface AwsServiceConfig {
     val region: Region?
     val credentialProviderClient: String?
+    val endpoint: String?
+        get() = null
 }

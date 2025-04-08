@@ -8,6 +8,7 @@ package com.amazonaws.sfc.awssitewise.config
 import com.amazonaws.sfc.awssitewise.config.AwsSiteWiseWriterConfiguration.Companion.AWS_SITEWISE
 import com.amazonaws.sfc.config.AwsServiceConfig
 import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_BATCH_SIZE
+import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_ENDPOINT
 import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_INTERVAL
 import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_REGION
 import com.amazonaws.sfc.config.ConfigurationClass
@@ -48,6 +49,11 @@ class AwsSiteWiseTargetConfiguration : AwsServiceConfig, TargetConfiguration() {
 
     override val region: Region?
         get() = if (_region.isNullOrEmpty()) null else Region.of(_region!!.lowercase())
+
+    @SerializedName(CONFIG_ENDPOINT)
+    var _endPoint : String? = null
+    override val endpoint : String?
+        get() = _endPoint
 
     @SerializedName(CONFIG_BATCH_SIZE)
     private var _batchSize: Int = DEFAULT_BATCH_SIZE

@@ -1,4 +1,3 @@
-
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: MIT-0
 
@@ -7,6 +6,7 @@ package com.amazonaws.sfc.awss3.config
 
 import com.amazonaws.sfc.awss3.config.AwsS3WriterConfiguration.Companion.AWS_S3
 import com.amazonaws.sfc.config.AwsServiceConfig
+import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_ENDPOINT
 import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_INTERVAL
 import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_REGION
 import com.amazonaws.sfc.config.ConfigurationClass
@@ -42,6 +42,21 @@ class AwsS3TargetConfiguration : AwsServiceConfig, TargetConfiguration() {
      */
     val prefix: String
         get() = _prefix
+
+    @SerializedName(CONFIG_OBJECT_KEY)
+    var _objectKey: String? = null
+    val objectKey : String?
+        get() = _objectKey
+
+    @SerializedName(CONFIG_EXTENSION)
+    var _extension : String? = null
+    val extension : String?
+        get() = _extension?.substringAfterLast('.')
+
+    @SerializedName(CONFIG_ENDPOINT)
+    var _endPoint : String? = null
+    override val endpoint : String?
+        get() = _endPoint
 
     @SerializedName(CONFIG_REGION)
     private var _region: String? = null
@@ -102,8 +117,8 @@ class AwsS3TargetConfiguration : AwsServiceConfig, TargetConfiguration() {
     // validates bucket name
     private fun validateBucket() {
 
-       val (bucketIsValid, reason) = validateS3BucketName(_bucketName)
-        if (! bucketIsValid){
+        val (bucketIsValid, reason) = validateS3BucketName(_bucketName)
+        if (!bucketIsValid) {
             throw ConfigurationException(reason, CONFIG_BUCKET_NAME, this)
         }
     }
@@ -143,6 +158,8 @@ class AwsS3TargetConfiguration : AwsServiceConfig, TargetConfiguration() {
         private const val CONFIG_BUCKET_NAME = "BucketName"
         private const val CONFIG_PREFIX = "Prefix"
         private const val CONFIG_BUFFER_SIZE = "BufferSize"
+        private const val CONFIG_EXTENSION = "Extension"
+        private const val CONFIG_OBJECT_KEY = "ObjectKey"
         private const val DEFAULT_BUFFER_SIZE = 1
         private const val DEFAULT_INTERVAL = 60
 
@@ -152,7 +169,10 @@ class AwsS3TargetConfiguration : AwsServiceConfig, TargetConfiguration() {
         @Suppress("unused")
         fun create(bucketName: String? = default._bucketName,
                    prefix: String = default._prefix,
+                   objectKey : String? = default._objectKey,
+                   extension: String? = default._extension,
                    region: String? = default._region,
+                   endPoint : String? = default._endPoint,
                    bufferSize: Int = default._bufferSize,
                    interval: Int = default._interval,
                    description: String = default._description,
@@ -176,7 +196,10 @@ class AwsS3TargetConfiguration : AwsServiceConfig, TargetConfiguration() {
             with(instance) {
                 _bucketName = bucketName
                 _prefix = prefix
+                _objectKey = objectKey
+                _extension = extension
                 _region = region
+                _endPoint = endPoint
                 _bufferSize = bufferSize
                 _interval = interval
                 _compressionType = compressionType

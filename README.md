@@ -9,15 +9,16 @@ SFC extends and unifies data collection capabilities additionally to our existin
 
 [**Supported protocols:**](./docs/adapters/README.md)
 
+- [Allen-Bradley Rockwell PCCC](./docs/adapters/pccc.md)
 - [Beckhoff ADS](./docs/adapters/ads.md)
 - [J1939](./docs/adapters/j1939.md)
 - [MQTT](./docs/adapters/mqtt.md)
-- [Mitsubishi/Melsec SLMP](./docs/adapters/slmp.md)-
+- [Mitsubishi/Melsec SLMP](./docs/adapters/slmp.md)
 - [Modbus-TCP](./docs/adapters/modbus.md)
 - [NATS](./docs/adapters/nats.md)
 - [OPC-UA](./docs/adapters/opcua.md)
 - [REST](./docs/adapters/rest.md)
-- [Rockwell PCCC](./docs/adapters/pccc.md)
+- [Simulator](./docs/adapters/simulator.md)
 - [SNMP](./docs/adapters/snmp.md)
 - [SQL](./docs/adapters/sql.md)
 - [Siemens S7](./docs/adapters/s7.md)

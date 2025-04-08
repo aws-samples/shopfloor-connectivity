@@ -8,6 +8,7 @@ package com.amazonaws.sfc.awsfirehose.config
 import com.amazonaws.sfc.awsfirehose.config.AwsFirehoseWriterConfiguration.Companion.AWS_KINESIS_FIREHOSE
 import com.amazonaws.sfc.config.AwsServiceConfig
 import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_BATCH_SIZE
+import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_ENDPOINT
 import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_REGION
 import com.amazonaws.sfc.config.ConfigurationClass
 import com.amazonaws.sfc.config.ConfigurationException
@@ -39,6 +40,11 @@ class AwsKinesisFirehoseTargetConfiguration : AwsServiceConfig, TargetConfigurat
      */
     override val region: Region?
         get() = if (_region.isNullOrEmpty()) null else Region.of(_region!!.lowercase())
+
+    @SerializedName(CONFIG_ENDPOINT)
+    var _endPoint : String? = null
+    override val endpoint : String?
+        get() = _endPoint
 
     @SerializedName(CONFIG_BATCH_SIZE)
     private var _batchSize: Int = DEFAULT_BATCH_SIZE
@@ -106,6 +112,7 @@ class AwsKinesisFirehoseTargetConfiguration : AwsServiceConfig, TargetConfigurat
 
         fun create(streamName: String? = default._streamName,
                    region: String? = default._region,
+                   endPoint: String? = default._endPoint,
                    batchSize: Int = default._batchSize,
                    description: String = default._description,
                    active: Boolean = default._active,
@@ -126,6 +133,7 @@ class AwsKinesisFirehoseTargetConfiguration : AwsServiceConfig, TargetConfigurat
             with(instance) {
                 _streamName = streamName
                 _region = region
+                _endPoint = endPoint
                 _batchSize = batchSize
             }
             return instance

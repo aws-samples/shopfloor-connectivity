@@ -34,7 +34,9 @@ Requires IAM permission `s3:putObject` to write to the configured bucket
 - [Compression](#compression)
 - [ContentType](#contenttype)
 - [CredentialProviderClient](#credentialproviderclient)
+- [Extension](#extension)
 - [Interval](#interval)
+- [ObjectKey](#objectkey)
 - [Prefix](#prefix)
 - [Region](#region)
 - [Template](#template)
@@ -115,6 +117,26 @@ If no CredentialProviderClient is configured the [AWS Java SDK credential provid
 
 ---
 
+### Endpoint
+
+The EndPoint property specifies the VPC endpoint URL used to access AWS services privately through AWS PrivateLink without requiring an internet gateway or NAT device. When not specified, the service's default public endpoint for the configured region will be used.
+
+https://docs.aws.amazon.com/vpc/latest/privatelink/aws-services-privatelink-support.html
+
+**Type:** String
+
+---
+
+### Extension
+
+Extension for the Created S3 Objects
+
+Please note that the extension can also be included within the [ObjectKey](#objectkey) value.
+
+**Type:** String
+
+---
+
 ### Interval
 Specifies the time interval in seconds that triggers a write operation to S3.
 
@@ -123,6 +145,35 @@ The adapter writes data to S3 when either the [BufferSize](#buffersize) threshol
 **Type**: Integer
 
 Default is 60, maximum is 900
+
+---
+
+### ObjectKey
+
+Object key for the S3 object. This key can be a template in which the following placeholders can be utilized:
+
+- `%year%`, 4 digit numeric year value from UTC time
+- `%month%`, 2 digit numeric month value from UTC time
+- `%day%`, 2 digit numeric day value from UTC time
+- `%hour%`, 2 digit numeric hour value from UTC time
+- `%minute%`, 2 digit numeric minute value from UTC time
+- `%second%`, 2 digit numeric second value from UTC time
+- `%millisecond%`, 2 digit numeric millisecond value from UTC time
+- `%uuid%`, A UUID (Universally Unique Identifier) follows a standardized format consisting of 32 hexadecimal digits arranged in 5 groups, separated by hyphens. 
+
+**The rendered object key must be unique to prevent existing objects from being overwritten.**
+
+See https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-keys.html for guidelines for naming S3 objects.
+
+Example template
+
+`year=%year%/month=%month%/day=%day%/hour=%hour%/minute=%minute%/%uuid%.json`
+
+Please note that the template above also specifies a file extension. Alternatively, the [Extension](#extension) property can be used to specify an extension for an object.
+
+When the ObjectKey is not specified, the key of the object will have the value year/month/day/hour/minute/uuiud.
+
+**Type :** String
 
 ---
 ### Prefix
@@ -145,8 +196,6 @@ Examples:
 This setting is used to ensure the adapter connects to the correct regional endpoint for the S3 bucket. Choosing the appropriate region can help optimize latency, costs, and comply with data residency requirements.
 
 **Type**: String
-
-
 
 ---
 
@@ -217,9 +266,17 @@ For targets where the data does not require specific output format, the data is 
           "type": "string",
           "description": "The credential provider client name"
         },
+        "Extension":{
+          "type": "string",
+          "description": "Extension for S3 objets"
+        },
         "Interval": {
           "type": "integer",
           "description": "Interval in seconds between uploads"
+        },
+        "ObjectKey":{
+          "type" : "string",
+          "description" : "object key name template"
         },
         "Prefix": {
           "type": "string",

@@ -32,6 +32,7 @@ Required IAM permissions are `kafka-cluster:WriteDataIdempotently`, `kafka-clust
 - [BootstrapBrokers](#bootstrapbrokers)
 - [Compression](#compression)
 - [CredentialProviderClient](#credentialproviderclient)
+- [Endpoint](#endpoint)
 - [Headers](#headers)
 - [Interval](#interval)
 - [Key](#key)
@@ -105,7 +106,18 @@ If no CredentialProviderClient is configured the [AWS Java SDK credential provid
 
 ---
 
+### Endpoint
+
+The EndPoint property specifies the VPC endpoint URL used to access AWS services privately through AWS PrivateLink without requiring an internet gateway or NAT device. When not specified, the service's default public endpoint for the configured region will be used.
+
+https://docs.aws.amazon.com/vpc/latest/privatelink/aws-services-privatelink-support.html
+
+**Type:** String
+
+---
+
 ### Headers
+
 Map of headers set for written records.
 
 Allows setting custom key-value pairs as Kafka message headers. These headers are metadata that will be attached to each record written to the MSK cluster. Headers can be used for message filtering, routing, or carrying additional metadata alongside the message payload.

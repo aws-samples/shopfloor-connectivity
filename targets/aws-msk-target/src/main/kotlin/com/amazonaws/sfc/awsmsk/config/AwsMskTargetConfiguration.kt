@@ -9,6 +9,7 @@ package com.amazonaws.sfc.awsmsk.config
 import com.amazonaws.sfc.awsmsk.config.AwsMskWriterConfiguration.Companion.AWS_MSK_TARGET
 import com.amazonaws.sfc.config.AwsServiceConfig
 import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_BATCH_SIZE
+import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_ENDPOINT
 import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_INTERVAL
 import com.amazonaws.sfc.config.ConfigurationClass
 import com.amazonaws.sfc.config.ConfigurationException
@@ -28,6 +29,11 @@ class AwsMskTargetConfiguration : AwsServiceConfig, TargetConfiguration() {
     private var _bootstrapServers : ArrayList<String> = ArrayList()
     val bootstrapServers
         get() = _bootstrapServers
+
+    @SerializedName(CONFIG_ENDPOINT)
+    var _endPoint : String? = null
+    override val endpoint : String?
+        get() = _endPoint
 
 
     @SerializedName(CONFIG_TOPIC_NAME)
@@ -135,6 +141,7 @@ class AwsMskTargetConfiguration : AwsServiceConfig, TargetConfiguration() {
 
         fun create(topicName: String? = null,
                    bootstrapServers : ArrayList<String> = default._bootstrapServers,
+                   endpoint: String? = default._endPoint,
                    key : String? = default.key,
                    partition : Int? = default.partition,
                    batchSize: Int? = default._batchSize,
@@ -163,6 +170,7 @@ class AwsMskTargetConfiguration : AwsServiceConfig, TargetConfiguration() {
 
             with(instance) {
                 _topicName = topicName
+                _endPoint = endpoint
                 _bootstrapServers = bootstrapServers
                 _key = key
                 _partition = partition

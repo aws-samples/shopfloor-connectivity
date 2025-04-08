@@ -32,6 +32,7 @@ Requires IAM permission `kinesis:PutRecords` for the stream the data is sent to.
 - [Compression](#compression)
 - [CredentialProviderClient](#credentialproviderclient)
 - [Interval](#interval)
+- [Endpoint](#endpoint)
 - [Region](#region)
 - [StreamName](#streamname)
 - [Template](#template)
@@ -75,6 +76,18 @@ The Interval property defines a time-based trigger (in milliseconds) for sending
 **Type**: Integer
 
 Optional, if not set only [BatchSize](#batchsize) is used
+
+
+
+---
+
+### Endpoint
+
+The EndPoint property specifies the VPC endpoint URL used to access AWS services privately through AWS PrivateLink without requiring an internet gateway or NAT device. When not specified, the service's default public endpoint for the configured region will be used.
+
+https://docs.aws.amazon.com/vpc/latest/privatelink/aws-services-privatelink-support.html
+
+**Type:** String
 
 ---
 ### Region

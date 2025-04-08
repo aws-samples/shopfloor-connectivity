@@ -3,7 +3,7 @@
 
 The OPC Data Access (DA) adapter for SFC enables integration with legacy industrial automation systems by connecting to OPC DA servers. It allows reading and writing of real-time process data from devices and systems that support the classic OPC DA specification, commonly found in manufacturing and process control environments. The adapter supports browsing of available tags, synchronous and asynchronous data access, and handles data type conversions between OPC DA and SFC's internal format
 
-Due to the OPC DA dependency on Windfows DCOM this adapter can only be executed as an IPC server.
+Due to the OPC DA dependency on Windows DCOM this adapter can only be executed as an IPC server.
 
 ---
 - [OpcdaSourceConfiguration](#opcdasourceconfiguration)

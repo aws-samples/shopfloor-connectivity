@@ -264,6 +264,7 @@ open class BaseConfiguration : Validate, HasSecretsManager {
         const val CONFIG_DESCRIPTION = "Description"
         const val CONFIG_ELEMENT_NAMES = "ElementNames"
         const val CONFIG_ENABLED = "Enabled"
+        const val CONFIG_ENDPOINT = "Endpoint"
         const val CONFIG_LOG_LEVEL = "LogLevel"
         const val CONFIG_META_DATA = "Metadata"
         const val CONFIG_NAME = "Name"

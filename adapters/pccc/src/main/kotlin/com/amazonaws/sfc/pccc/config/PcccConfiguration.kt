@@ -22,7 +22,7 @@ class PcccConfiguration : SourceAdapterBaseConfiguration() {
 
     val sources: Map<String, PcccSourceConfiguration>
         get() = _sources.filter {
-            it.value.protocolAdapterID in pcccProtocolAdapters.keys && it.value.protocolAdapterID == PCCC_ADAPTER
+            it.value.protocolAdapterID in pcccProtocolAdapters.keys
         }
 
     @SerializedName(CONFIG_PROTOCOL_ADAPTERS)

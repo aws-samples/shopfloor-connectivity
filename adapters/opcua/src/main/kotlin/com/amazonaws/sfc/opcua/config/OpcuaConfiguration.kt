@@ -25,7 +25,7 @@ class OpcuaConfiguration : SourceAdapterBaseConfiguration() {
     private var _sources = mapOf<String, OpcuaSourceConfiguration>()
 
     val sources: Map<String, OpcuaSourceConfiguration>
-        get() = _sources.filter { it.value.protocolAdapterID in protocolAdapters.keys }
+        get() = _sources.filter { it.value.protocolAdapterID in protocolAdapters.keys  }
 
 
     @SerializedName(CONFIG_PROTOCOL_ADAPTERS)
@@ -114,9 +114,6 @@ class OpcuaConfiguration : SourceAdapterBaseConfiguration() {
         const val CONFIG_NODE_ID = "NodeId"
         const val CONFIG_PROPERTIES = "Properties"
         const val CONFIG_INHERITS_FROM = "Inherits"
-
-        const val CONFIG_CHANGED_DATA_CHANNEL_SIZE = "ChangedDataChannelSize"
-        const val CONFIG_CHANGED_DATA_CHANNEL_TIMEOUT = "ChangedDataChannelTimeout"
 
         const val CONFIG_RECEIVED_EVENTS_CHANNEL_SIZE = "ReceivedEventChannelSize"
         const val CONFIG_RECEIVED_EVENTS_CHANNEL_TIMEOUT = "ReceivedEventChannelTimeout"

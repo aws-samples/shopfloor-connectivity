@@ -7,6 +7,7 @@ package com.amazonaws.sfc.awslambda.config
 import com.amazonaws.sfc.awslambda.config.AwsLambdaWriterConfiguration.Companion.AWS_LAMBDA
 import com.amazonaws.sfc.config.AwsServiceConfig
 import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_BATCH_SIZE
+import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_ENDPOINT
 import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_INTERVAL
 import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_REGION
 import com.amazonaws.sfc.config.ConfigurationClass
@@ -53,6 +54,12 @@ class AwsLambdaTargetConfiguration : AwsServiceConfig, TargetConfiguration() {
      */
     override val region: Region?
         get() = if (_region.isNullOrEmpty()) null else Region.of(_region!!.lowercase())
+
+
+    @SerializedName(CONFIG_ENDPOINT)
+    var _endPoint : String? = null
+    override val endpoint : String?
+        get() = _endPoint
 
     @SerializedName(CONFIG_BATCH_SIZE)
     private var _batchSize: Int = DEFAULT_BATCH_SIZE
@@ -133,6 +140,7 @@ class AwsLambdaTargetConfiguration : AwsServiceConfig, TargetConfiguration() {
         fun create(functionName: String? = default._functionName,
                    qualifier: String? = default._qualifier,
                    region: String? = default._region,
+                   endpoint: String? = default._endPoint,
                    batchSize: Int = default._batchSize,
                    interval: Int? = default._interval,
                    description: String = default._description,
@@ -155,6 +163,7 @@ class AwsLambdaTargetConfiguration : AwsServiceConfig, TargetConfiguration() {
                 _functionName = functionName
                 _qualifier = qualifier
                 _region = region
+                _endPoint = endpoint
                 _batchSize = batchSize
                 _interval = interval
             }

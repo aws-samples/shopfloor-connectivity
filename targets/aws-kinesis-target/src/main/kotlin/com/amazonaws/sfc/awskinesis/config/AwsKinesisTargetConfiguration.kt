@@ -8,6 +8,7 @@ package com.amazonaws.sfc.awskinesis.config
 import com.amazonaws.sfc.awskinesis.config.AwsKinesisWriterConfiguration.Companion.AWS_KINESIS_TARGET
 import com.amazonaws.sfc.config.AwsServiceConfig
 import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_BATCH_SIZE
+import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_ENDPOINT
 import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_INTERVAL
 import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_REGION
 import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_TARGETS
@@ -45,6 +46,11 @@ class AwsKinesisTargetConfiguration : AwsServiceConfig, TargetConfiguration() {
      */
     override val region: Region?
         get() = if (_region.isNullOrEmpty()) null else Region.of(_region!!.lowercase())
+
+    @SerializedName(CONFIG_ENDPOINT)
+    var _endPoint : String? = null
+    override val endpoint : String?
+        get() = _endPoint
 
     @SerializedName(CONFIG_BATCH_SIZE)
     private var _batchSize: Int = DEFAULT_BATCH_SIZE
@@ -132,6 +138,7 @@ class AwsKinesisTargetConfiguration : AwsServiceConfig, TargetConfiguration() {
 
         fun create(streamName: String? = null,
                    region: String? = default._region,
+                   endpoint: String? = null,
                    batchSize: Int = default._batchSize,
                    interval: Int? = default._interval,
                    description: String = default._description,
@@ -154,6 +161,7 @@ class AwsKinesisTargetConfiguration : AwsServiceConfig, TargetConfiguration() {
             with(instance) {
                 _streamName = streamName
                 _region = region
+                _endPoint = endpoint
                 _batchSize = batchSize
                 _interval = interval
                 _description = description

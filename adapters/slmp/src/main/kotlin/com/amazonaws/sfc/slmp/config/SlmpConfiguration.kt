@@ -25,7 +25,7 @@ class SlmpConfiguration : SourceAdapterBaseConfiguration() {
 
     val sources: Map<String, SlmpSourceConfiguration>
         get() = _sources.filter {
-            it.value.protocolAdapterID in slmpProtocolAdapters.keys && it.value.protocolAdapterID == SLMP_ADAPTER
+            it.value.protocolAdapterID in slmpProtocolAdapters.keys
         }
 
     @SerializedName(CONFIG_PROTOCOL_ADAPTERS)

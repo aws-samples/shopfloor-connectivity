@@ -21,7 +21,7 @@ class J1939Configuration : SourceAdapterBaseConfiguration() {
     private var _sources = mapOf<String, J1939SourceConfiguration>()
 
     val sources: Map<String, J1939SourceConfiguration>
-        get() = _sources.filter { it.value.protocolAdapterID in j1939ProtocolAdapters.keys }
+        get() = _sources.filter { it.value.protocolAdapterID in j1939ProtocolAdapters.keys}
 
     @SerializedName(CONFIG_PROTOCOL_ADAPTERS)
     private var _protocolAdapters = mapOf<String, J1939AdapterConfiguration>()

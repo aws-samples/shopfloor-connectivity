@@ -21,7 +21,7 @@ class NatsConfiguration : SourceAdapterBaseConfiguration() {
     private var _sources = mapOf<String, NatsSourceConfiguration>()
 
     val sources: Map<String, NatsSourceConfiguration>
-        get() = _sources.filter { it.value.protocolAdapterID in natsProtocolAdapters.keys }
+        get() = _sources.filter { it.value.protocolAdapterID in natsProtocolAdapters.keys  }
 
     @SerializedName(CONFIG_PROTOCOL_ADAPTERS)
     private var _protocolAdapters = mapOf<String, NatsAdapterConfiguration>()
