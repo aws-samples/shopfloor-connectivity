@@ -43,9 +43,9 @@ Source configuration for the Simulator protocol adapter. This type extends the [
 
 ---
 ### Channels
-The channels of a simulator source hold the configuration for the [simulation](#simuations) that generates the simulation values. Each channel is represented as a map indexed by its channel identifier. Channels can be "commented out" by prefixing their identifier with a "#".
+The channels of a simulator source hold the configuration for the [simulation](#simulations) that generates the simulation values. Each channel is represented as a map indexed by its channel identifier. Channels can be "commented out" by prefixing their identifier with a "#".
 
-**Type**: Map[String,[SimalatorChannelConfiguration](#J1939channelconfiguration)]
+**Type**: Map[String,[SimalatorChannelConfiguration](#simulatorchannelconfiguration)]
 
 At least 1 channel must be configured.
 
@@ -131,7 +131,7 @@ At least 1 channel must be configured.
 
 The SimulatorChannelConfiguration type extends the [ChannelConfiguration](../core/channel-configuration.md) class with channel properties for the Simulator protocol adapter.
 
-- [Schema](#Jsimulatorchannelconfiguration-schema)
+- [Schema](#simulatorchannelconfiguration-schema)
 - [Examples](#simulatorchannelconfiguration-examples)
 
 **Properties:**
@@ -237,7 +237,7 @@ Defines a channel that utilizes the [random simulation](#random) algorithm to ge
 SimulatorAdapterConfiguration extents  the [AdapterConfiguration](../core/protocol-adapter-configuration.md) for the Simulator
 
 - [Schema](#simulatoradapterconfiguration-schema)
-- [Example](#Jsimulatoradapterconfiguration-example)
+- [Example](#simulatoradapterconfiguration-example)
 
 
 
@@ -266,7 +266,7 @@ SimulatorAdapterConfiguration extents  the [AdapterConfiguration](../core/protoc
 }
 ```
 
-[^top](#Jsimulator-configuration)
+[^top](#simulator-configuration)
 
 
 
@@ -315,7 +315,7 @@ There are two types of simulations:
 
 
 
-## Constant 
+## Constant
 
 The Constant simulation type of simulation returns a constant value or an array of values of a specific data type.
 
@@ -370,7 +370,7 @@ The return value of the simulation function must be of the specified type or com
 
 
 
-## Constant schema 
+## Constant schema
 
 ```json
 {
@@ -583,7 +583,7 @@ The amount to change by each time (defaults to 1)
 
 
 
-## Counter schema 
+## Counter schema
 
 ```json
 {
@@ -773,7 +773,7 @@ Random Simulation generates random values within a specified range. It requires 
 
 ### DataType
 
-The data type of the returned sinus value or the elements of an array, if applicable.
+The data type of the returned random value or the elements of an array, if applicable.
 
 Possible values are:
 
@@ -829,7 +829,7 @@ Controls output format:
 
 
 
-## Random schema 
+## Random schema
 
 ```json
 {
@@ -923,7 +923,7 @@ Returns values, or arrays of values, from a set of values configured for the sim
 
 - [DataType](#datatype-4)
 
-- [Random](#random-2)
+- [Random](#random-1)
 
 - [SimulationType](#simulationtype-4)
 
@@ -993,7 +993,7 @@ Type: Any value compatible with type specified by [DataType](#datatype-4)
 
 
 
-## Range schema 
+## Range schema
 
 ```json
 {
@@ -1105,7 +1105,7 @@ Length of a sawtooth cycle in milliseconds, representing the time taken for the 
 
 ### DataType
 
-The data type of the returned sinus value or the elements of an array, if applicable.
+The data type of the returned sawtooth value or the elements of an array, if applicable.
 
 Possible values are:
 
@@ -1157,7 +1157,7 @@ Controls output format:
 
 **Type:** Int
 
-## Sawtooth schema 
+## Sawtooth schema
 
 ```json
 {
@@ -1218,7 +1218,7 @@ Integer values within the range of 0 (inclusive) and the 100 (inclusive).
 }
 ```
 
-<img style="float: left;" width=30%  src="/Users/leeuwest/Desktop/SawTooth.png">
+<img style="float: left;" width=30%  src="./img/simulator/SawTooth.png">
 
 
 
@@ -1233,7 +1233,7 @@ Integer values within the range of 100 (inclusive) and the range of 200 (inclusi
 }
 ```
 
-<img style="float: left;" width=35%  src="/Users/leeuwest/Desktop/SawTooth-2.png">
+<img style="float: left;" width=35%  src="./img/simulator/SawTooth-2.png">
 
 
 
@@ -1299,7 +1299,7 @@ Possible values are:
 
 ### Max
 
-Maximum value (non-inclusive) for the sinus number generation. Must be greater than or equal to the [minimum](#min-4) value and must be compatible with the specified [data type](#datetype-6). The default value is 100.
+Maximum value (non-inclusive) for the sinus number generation. Must be greater than or equal to the [minimum](#min-4) value and must be compatible with the specified [data type](#datatype-6). The default value is 100.
 
 **Type :**  Number
 
@@ -1336,7 +1336,7 @@ Controls output format:
 
 The Shift property specifies the starting phase angle (in degrees) of the sine wave, accepting values between 0 and 360 degrees. This determines where in the sine wave cycle the simulation begins generating values. For example, a shift of 90 degrees would start the sine wave at its maximum value, while a shift of 180 degrees would start at zero but decreasing.
 
-## Sinus schema 
+## Sinus schema
 
 ```json
 {
@@ -1452,7 +1452,7 @@ Length of a square wave cycle in milliseconds, representing the time taken for o
 
 ### DataType
 
-The data type of the returned square value or the elements of an array, if applicable.
+The data type of the returned square  value or the elements of an array, if applicable.
 
 Possible values are:
 
@@ -1476,7 +1476,7 @@ Possible values are:
 
 ### Max
 
-Maximum value for the square wave generation. Must be greater than or equal to the [minimum](#min-5) value and must be compatible with the specified [data type](#datetype-7). The value represents the upper level of the square wave. The default value is 100.
+Maximum value for the square wave generation. Must be greater than or equal to the [minimum](#min-5) value and must be compatible with the specified [data type](#datatype-7). The value represents the upper level of the square wave. The default value is 100.
 
 **Type :**  Number
 
@@ -1605,7 +1605,7 @@ Returns values using a triangle wave pattern, where values increase and decrease
 
 - [CycleLength](#cyclelength-3)
 
-- [DataType](#datatype-7)
+- [DataType](#datatype-8)
 
 - [Max](#max-5)
 
@@ -1627,7 +1627,7 @@ Length of a square wave cycle in milliseconds, representing the time taken for o
 
 ### DataType
 
-The data type of the returned square value or the elements of an array, if applicable.
+The data type of the returned triangle value or the elements of an array, if applicable.
 
 Possible values are:
 
@@ -1651,7 +1651,7 @@ Possible values are:
 
 ### Max
 
-Maximum value for the triangle wave generation. Must be greater than or equal to the [minimum](#min-5) value and must be compatible with the specified [data type](#datetype-7). The value represents the upper level of the square wave. The default value is 100.
+Maximum value for the triangle wave generation. Must be greater than or equal to the [minimum](#min-5) value and must be compatible with the specified [data type](#datatype-7). The value represents the upper level of the square wave. The default value is 100.
 
 **Type :**  Number
 
@@ -1686,7 +1686,7 @@ Controls output format:
 
 
 
-## Triangle schema 
+## Triangle schema
 
 ```json
 {
@@ -1809,7 +1809,7 @@ Type of the simulation, value is "**Buffered**".
 
 ---
 
-## Buffered schema 
+## Buffered schema
 
 ```json
 {
@@ -1875,7 +1875,7 @@ The Interval simulation wraps another simulation and controls when its values ar
 
 - [Interval](#interval-3)
 
-- [Item](#item-2)
+- [Item](#item-1)
 
 - [SimulationType](#simulationtype-10)
 
@@ -1885,7 +1885,7 @@ The Interval simulation wraps another simulation and controls when its values ar
 
 ### Interval
 
-Length of the interval period in milliseconds. The simulation will only return a value from the [embedded simulation item](#item-2) after this time period has elapsed since the last returned value. The default value is 1000 milliseconds.
+Length of the interval period in milliseconds. The simulation will only return a value from the [embedded simulation item](#item-1) after this time period has elapsed since the last returned value. The default value is 1000 milliseconds.
 
 **Type:** Int
 
@@ -1893,7 +1893,7 @@ Length of the interval period in milliseconds. The simulation will only return a
 
 ### Item
 
-The embedded simulation that generates values is queried for its value every time the Interval simulation is queried. However, it only returns its value after the specified [interval](#interval-3) period has elapsed.
+The embedded simulation that generates values is queried for its value every time the Interval simulation is queried. However, it only returns its value after the specified [interval](#interval-2) period has elapsed.
 
 **Type**: Simulation
 
@@ -1907,7 +1907,7 @@ Type of the simulation, value is "**Interval**".
 
 ---
 
-## Interval schema 
+## Interval schema
 
 ```json
 {
@@ -1997,7 +1997,7 @@ Possible values are:
 
 ### Items
 
-A list of one or more embedded simulations that generate the values. The data type of each simulation must be the same as, or compatible with, the data type specified in the [DataType](#datatype-9) property of the List simulation.
+A list of one or more embedded simulations that generate the values. The data type of each simulation must be the same as, or compatible with, the data type specified in the [DataType](#datatype-8) property of the List simulation.
 
 **Type**:  List of  Simulation
 
@@ -2011,7 +2011,7 @@ Type of the simulation, value is "**List**".
 
 ---
 
-## List schema 
+## List schema
 
 ```json
 {
@@ -2081,7 +2081,7 @@ The Structure simulation organizes multiple [embedded simulations](#properties) 
 
 - [Properties](#properties)
 
-- [SimulationType](#simulationtype-12)
+- [SimulationType](#simulationtype-11)
 
 ---
 
@@ -2101,7 +2101,7 @@ Type of the simulation, value is "**Structure**".
 
 ---
 
-## Structure schema 
+## Structure schema
 
 ```json
 {
