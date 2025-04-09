@@ -1,6 +1,9 @@
 # Release Notes:
 
+## Version 1.9.1, 9 April 2025
+- Upgrade to AWS SDK 2.27.21
 
+---
 
 ## Version 1.9.0, 8 April 2025
 - New [Simulator Adapter](./docs/adapters/simulator.md), The Simulator Adapter is a special-purpose adapter that generates synthetic data using [configurable simulations](./docs/adapters/simulator.md#simulations) instead of reading data from physical industrial devices.
