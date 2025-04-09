@@ -16,7 +16,7 @@ val sfcCoreVersion = sfcRelease
 val sfcIpcVersion = sfcRelease
 val log4jVersion = "2.17.2"
 val pahoVersion = "1.2.5"
-val awsSdkVersion = "2.26.23"
+val awsSdkVersion = "2.27.21"
 
 plugins {
     id("sfc.kotlin-application-conventions")

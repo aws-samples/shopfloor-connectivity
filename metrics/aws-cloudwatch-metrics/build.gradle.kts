@@ -12,7 +12,7 @@ val sfcCoreVersion = version
 val sfcIpcVersion = version
 val kotlinCoroutinesVersion = "1.6.2"
 val kotlinVersion = "1.9.0"
-val awsSdkVersion = "2.26.23"
+val awsSdkVersion = "2.27.21"
 
 plugins {
     id("sfc.kotlin-application-conventions")
