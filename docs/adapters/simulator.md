@@ -644,7 +644,7 @@ Returned Values: 0, 1, 2, 3, 4, .... MAXINT
 ```json
 {
   "SimulationType" : "Counter",
-  "DataType" : Int
+  "DataType" : "Int"
 }
 ```
 
@@ -1400,7 +1400,7 @@ Integer values within the range of 0 to 100
 }
 ```
 
-<img style="float: left;" width=30%  src="./img/simulator/sinus.png.png">
+<img style="float: left;" width=30%  src="./img/simulator/Sinus.png">
 
 
 
@@ -1511,7 +1511,7 @@ Controls output format:
 
 
 
-## Square schema 
+## Square schema
 
 ```json
 {
