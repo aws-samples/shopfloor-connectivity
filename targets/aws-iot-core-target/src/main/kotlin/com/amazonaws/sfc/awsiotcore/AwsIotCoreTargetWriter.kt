@@ -55,7 +55,7 @@ import kotlin.time.measureTime
 /**
  * @property targetID String ID of the target
  * @property configReader configuration reader
- * @property logger Logger Logger to use for output
+ * @property logger to use for output
  * @see TargetWriter
  */
 class AwsIotCoreTargetWriter(
