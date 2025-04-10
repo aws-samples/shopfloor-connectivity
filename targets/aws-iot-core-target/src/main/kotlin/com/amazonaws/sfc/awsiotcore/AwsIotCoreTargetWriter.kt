@@ -292,7 +292,7 @@ class AwsIotCoreTargetWriter(
             try {
                 delay(targetConfig.batchInterval)
                 timerChannel.send(channel)
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 // no harm done, timer is just used to guard for timeouts
             }
         }
