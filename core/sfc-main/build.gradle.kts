@@ -13,6 +13,7 @@ val sfcIpcVersion = version
 val kotlinCoroutinesVersion = "1.6.2"
 val kotlinVersion = "1.9.0"
 val awsMskIamVersion = "1.1.6"
+val awsSdkVersion = "2.31.18"
 
 plugins {
     id("sfc.kotlin-application-conventions")
@@ -26,6 +27,9 @@ dependencies {
 
     // libraries required because of KAFKA class loading logic
     implementation("software.amazon.msk:aws-msk-iam-auth:$awsMskIamVersion")
+
+    // s3 libraries required for s3 libraries dependencies for in process deployment of S3 adapter
+    implementation("software.amazon.awssdk:s3:$awsSdkVersion")
 }
 
 application {

@@ -12,9 +12,8 @@ group = "com.amazonaws.sfc"
 version = rootProject.extra.get("sfc_release")!!
 
 val awsEncryptionSdkVersion = "2.4.0"
-val awsSdkApacheVersion = "2.20.3"
-val awsSdkCrtVersion = "0.16.14"
-val awsSdkVersion = "2.27.21"
+val awsSdkCrtVersion = "0.38.0"
+val awsSdkVersion = "2.31.18"
 val bouncyCastleVersion = "1.70"
 val commonsCliVersion = "1.5.0"
 val commonsCodecVersion = "1.15"
@@ -42,12 +41,14 @@ dependencies {
     implementation("commons-codec:commons-codec:$commonsCodecVersion")
     implementation("commons-io:commons-io:$commonsIoVersion")
     implementation("org.apache.commons:commons-math3:${commonsMathVersion}")
-    api("software.amazon.awssdk:secretsmanager:$awsSdkVersion")
+
     implementation("com.amazonaws:aws-encryption-sdk-java:$awsEncryptionSdkVersion")
     implementation("software.amazon.awssdk.crt:aws-crt:$awsSdkCrtVersion")
-    implementation("software.amazon.awssdk:apache-client:$awsSdkApacheVersion")
+    implementation("software.amazon.awssdk:apache-client:$awsSdkVersion")
     implementation("software.amazon.awssdk:auth:$awsSdkVersion")
     implementation("software.amazon.awssdk:aws-core:$awsSdkVersion")
+    api("software.amazon.awssdk:secretsmanager:$awsSdkVersion")
+
     implementation("org.bouncycastle:bcpkix-jdk15on:$bouncyCastleVersion")
     implementation("org.bouncycastle:bcprov-jdk15on:$bouncyCastleVersion")
     implementation("io.ktor:ktor-client-core:$ktorVersion")
