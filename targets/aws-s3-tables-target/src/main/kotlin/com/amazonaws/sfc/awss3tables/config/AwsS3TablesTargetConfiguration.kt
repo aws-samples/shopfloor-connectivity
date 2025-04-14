@@ -4,7 +4,7 @@
 
 package com.amazonaws.sfc.awss3tables.config
 
-import com.amazonaws.sfc.awss3tables.config.AwsS3TablesWriterConfiguration.Companion.AWS_S3
+import com.amazonaws.sfc.awss3tables.config.AwsS3TablesWriterConfiguration.Companion.AWS_S3_TABLES
 import com.amazonaws.sfc.config.AwsServiceConfig
 import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_ENDPOINT
 import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_INTERVAL
@@ -152,7 +152,7 @@ class AwsS3TablesTargetConfiguration : AwsServiceConfig, TargetConfiguration() {
             val instance = createTargetConfiguration<AwsS3TablesTargetConfiguration>(
                 description = description,
                 active = active,
-                targetType = AWS_S3,
+                targetType = AWS_S3_TABLES,
                 template = template,
                 targetServer = targetServer,
                 metrics = metrics,

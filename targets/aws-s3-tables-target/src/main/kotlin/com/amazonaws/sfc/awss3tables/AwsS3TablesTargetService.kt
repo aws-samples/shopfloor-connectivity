@@ -5,7 +5,8 @@
 
 package com.amazonaws.sfc.awss3tables
 
-import com.amazonaws.sfc.awss3tables.config.AwsS3TablesWriterConfiguration.Companion.AWS_S3
+
+import com.amazonaws.sfc.awss3tables.config.AwsS3TablesWriterConfiguration.Companion.AWS_S3_TABLES
 import com.amazonaws.sfc.ipc.IpcTargetServer.Companion.createIpcTargetServer
 import com.amazonaws.sfc.log.Logger
 import com.amazonaws.sfc.service.Service
@@ -15,7 +16,7 @@ import kotlinx.coroutines.runBlocking
 // S3 target IPC service
 class AwsS3TablesTargetService : ServiceMain() {
     override fun createServiceInstance(args: Array<String>, configuration: String, logger: Logger): Service? {
-        return createIpcTargetServer(args, configuration, AWS_S3, logger) { _configReader, _targetID, _logger, _resultHandler ->
+        return createIpcTargetServer(args, configuration, AWS_S3_TABLES, logger) { _configReader, _targetID, _logger, _resultHandler ->
             AwsS3TablesTargetWriter.Companion.newInstance(_configReader, _targetID, _logger, _resultHandler)
         }
     }

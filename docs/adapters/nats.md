@@ -6,7 +6,7 @@ The adapter supports both core NATS and NATS JetStream, allowing for both real-t
 
 This protocol adapter is particularly useful in microservices architectures where NATS serves as the messaging backbone, enabling SFC to participate in existing NATS-based ecosystems while maintaining its core functionality and message processing capabilities.
 
-In order to use this adapter as in [in-process](../sfc-running-adapters.md#running-protocol-adapters-in-process) type adapter the type must be added to the [AdapterTypes](../core/sfc-configuration.md#AdapterTypes) section in the [SFC configuration file](../core/sfc-configuration.md).
+In order to use this adapter as in [in-process](../sfc-running-adapters.md#running-protocol-adapters-in-process) type adapter the type must be added to the [AdapterTypes](../core/sfc-configuration.md#adaptertypes) section in the [SFC configuration file](../core/sfc-configuration.md).
 
 ```json
 "AdapterTypes" :{

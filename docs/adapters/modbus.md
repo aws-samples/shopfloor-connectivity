@@ -2,7 +2,7 @@
 
 The Modbus TCP protocol adapter enables communication with devices supporting the Modbus TCP protocol over TCP/IP networks. It supports standard Modbus functions for reading and writing coils, discrete inputs, holding registers, and input registers. Configure device connections using IP address and port, specify unit IDs, and define register addresses and data types for your channels. The adapter handles all protocol-specific details, making it easy to integrate Modbus device data into your SFC infrastructure.
 
-In order to use this adapter as an [in-process](file:///Applications/Typora.app/Contents/Resources/sfc-running-adapters.md#running-protocol-adapters-in-process) type adapter, the type must be added to the [AdapterTypes](file:///Applications/Typora.app/Contents/Resources/core/sfc-configuration.md#AdapterTypes) section in the [SFC configuration file](file:///Applications/Typora.app/Contents/Resources/core/sfc-configuration.md).
+In order to use this adapter as an [in-process](file:///Applications/Typora.app/Contents/Resources/sfc-running-adapters.md#running-protocol-adapters-in-process) type adapter, the type must be added to the [AdapterTypes](../core/sfc-configuration.md#adaptertypes) section in the [SFC configuration file](file:///Applications/Typora.app/Contents/Resources/core/sfc-configuration.md).
 
 ```json
 "AdapterTypes" :{

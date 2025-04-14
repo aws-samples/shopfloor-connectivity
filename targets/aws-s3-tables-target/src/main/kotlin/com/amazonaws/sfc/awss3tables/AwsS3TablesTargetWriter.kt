@@ -5,10 +5,15 @@
 package com.amazonaws.sfc.awss3tables
 
 
+import com.amazonaws.sfc.awsiot.AwsIoTCredentialSessionProvider
+import com.amazonaws.sfc.awsiot.AwsIotCredentialProviderClientConfiguration
 import com.amazonaws.sfc.awss3tables.config.AwsS3TablesTargetConfiguration
 import com.amazonaws.sfc.awss3tables.config.AwsS3TablesWriterConfiguration
-import com.amazonaws.sfc.awss3tables.config.AwsS3TablesWriterConfiguration.Companion.AWS_S3
+
+import com.amazonaws.sfc.awss3tables.config.AwsS3TablesWriterConfiguration.Companion.AWS_S3_TABLES
+import com.amazonaws.sfc.config.BaseConfiguration
 import com.amazonaws.sfc.config.ConfigReader
+import com.amazonaws.sfc.config.ConfigurationException
 import com.amazonaws.sfc.data.*
 import com.amazonaws.sfc.log.Logger
 import com.amazonaws.sfc.metrics.*
@@ -25,12 +30,27 @@ import com.amazonaws.sfc.targets.AwsServiceTargetClientHelper
 import com.amazonaws.sfc.targets.TargetDataChannel
 import com.amazonaws.sfc.targets.TargetException
 import com.amazonaws.sfc.util.*
+import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.plus
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.selects.select
+import org.apache.iceberg.CatalogProperties
 import software.amazon.awssdk.services.s3tables.S3TablesClient
+
+import org.apache.iceberg.catalog.Namespace
+import software.amazon.awssdk.auth.credentials.AwsCredentials
+import software.amazon.awssdk.auth.credentials.AwsSessionCredentials
+import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider
+import java.util.concurrent.locks.ReentrantLock
+import kotlin.collections.get
+import kotlin.concurrent.withLock
+import kotlin.time.DurationUnit
+import kotlin.time.toDuration
 
 
 // AWS S3 target
@@ -47,6 +67,31 @@ class AwsS3TablesTargetWriter(
         logger.getCtxInfoLog(className, "")(BuildConfig.toString())
     }
 
+    private val scope = buildScope(AWS_S3_TABLES)
+
+
+    // Mutex for r/w consistency credential elements
+    private val credentialsLock = ReentrantLock()
+    private var lastCredentials: AwsCredentials? = null
+
+    // Configuration loaded for the MSK target writer
+    private val s3TablesWriterConfig: AwsS3TablesWriterConfiguration by lazy {
+        try {
+            configReader.getConfig()
+        } catch (e: Exception) {
+            throw ConfigurationException("Could not load $AWS_S3_TABLES target configuration: ${e.message}", BaseConfiguration.CONFIG_TARGETS)
+        }
+    }
+
+
+    private val s3TablesTargetConfig: AwsS3TablesTargetConfiguration by lazy{
+             s3TablesWriterConfig.targets[targetID]
+                    ?: throw ConfigurationException(
+                        "Configuration for type $AWS_S3_TABLES for target with ID \"$targetID\" does not exist, existing targets are ${s3TablesWriterConfig.targets.keys}",
+                        BaseConfiguration.CONFIG_TARGETS
+                    )
+        }
+
     private val metricDimensions = mapOf(
         METRICS_DIMENSION_SOURCE to targetID,
         MetricsCollector.METRICS_DIMENSION_TYPE to className
@@ -62,24 +107,78 @@ class AwsS3TablesTargetWriter(
 
 
     private val targetConfig: AwsS3TablesTargetConfiguration by lazy {
-        clientHelper.targetConfig(config, targetID, AWS_S3)
+        clientHelper.targetConfig(config, targetID, AWS_S3_TABLES)
     }
+
+    private val credentialClientConfig: AwsIotCredentialProviderClientConfiguration? by lazy {
+        if (!s3TablesTargetConfig.credentialProviderClient.isNullOrEmpty()) {
+            val cc = s3TablesWriterConfig
+            cc.awsCredentialServiceClients[s3TablesTargetConfig.credentialProviderClient]
+                    ?: throw ConfigurationException(
+                        "Configuration for \"${s3TablesTargetConfig.credentialProviderClient}\" does not exist, configured clients are ${s3TablesWriterConfig.awsCredentialServiceClients.keys}",
+                        BaseConfiguration.CONFIG_CREDENTIAL_PROVIDER_CLIENT
+                    )
+        } else null
+    }
+
+    // Get the credentials provider, which can be the SFC provider using the AwsIot credentials service or the default SDK credentials chain
+    private val credentialsProvider by lazy {
+        val log = logger.getCtxLoggers(className, "credentialsProvider")
+        val config = credentialClientConfig
+        if (config == null) {
+            log.info("Using default AWS credentials provider")
+            DefaultCredentialsProvider.create()
+        } else {
+            log.info("Using SFC credential provider client ${s3TablesTargetConfig.credentialProviderClient}")
+            AwsIoTCredentialSessionProvider(credentialClientConfig, logger)
+        }
+    }
+
+    // Flag is set to true when the SFC credentials provider has set the credentials
+    private var credentialsInitialized = (credentialClientConfig == null)
+
+    // If using the SFC credentials provider this worker wil periodically resolve the temporary credentials
+    private val credentialsWorker = if (credentialsProvider is AwsIoTCredentialSessionProvider) scope.launch {
+        val log = logger.getCtxLoggers(className, "credentialsWorker")
+        while (isActive) {
+            try {
+                // resolve credentials, note that only when the existing credentials are no longer valid new one will be requested from the credentials service
+                val credentials = credentialsProvider.resolveCredentials()
+                if (lastCredentials == null || lastCredentials != credentials) {
+                    credentialsLock.withLock {
+                        credentialsInitialized = false
+                        lastCredentials = credentials
+                        System.setProperty("aws.accessKeyId", credentials.accessKeyId())
+                        System.setProperty("aws.secretKey", credentials.secretAccessKey())
+                        System.setProperty("aws.secretAccessKey", credentials.secretAccessKey())
+                        if (credentials is AwsSessionCredentials) {
+                            System.setProperty("aws.sessionToken", credentials.sessionToken())
+                        }
+                        credentialsInitialized = true
+                    }
+                }
+
+                delay(60.toDuration(DurationUnit.SECONDS))
+            } catch (e: Exception) {
+                if (e.isJobCancellationException)
+                    log.info("Credentials worker stopped")
+                else
+                    log.errorEx("Credentials worker error", e)
+            }
+        }
+    }
+    else null
 
     private val targetDataChannel = TargetDataChannel.create(targetConfig, "$className::targetDatChannel")
 
-    private val scope = buildScope("S3 Target")
+
     private val targetResults = if (resultHandler != null) TargetResultBufferedHelper(targetID, resultHandler, logger) else null
-    private val buffer = TargetDataBuffer(storeFullMessage = false)
+    private val buffer = TargetDataBuffer(storeFullMessage = true)
 
     private val config: AwsS3TablesWriterConfiguration
         get() {
-            return clientHelper.writerConfig(configReader, AWS_S3)
+            return clientHelper.writerConfig(configReader, AWS_S3_TABLES)
         }
-
-
-    private val transformation by lazy {
-        if (targetConfig.template != null) OutputTransformation(targetConfig.template!!, logger) else null
-    }
 
     private val metricsCollector: MetricsCollector? by lazy {
         val metricsConfiguration = config.targets[targetID]?.metrics ?: MetricsSourceConfiguration()
@@ -115,11 +214,7 @@ class AwsS3TablesTargetWriter(
         if (metricsCollector != null) InProcessMetricsProvider(metricsCollector!!, logger) else null
     }
 
-    private fun buildPayload(targetData: TargetData): String =
-        if (transformation == null) targetData.toJson(config.elementNames, targetConfig.unquoteNumericJsonValues) else transformation!!.transform(
-            targetData,
-            config.elementNames,
-            targetConfig.templateEpochTimestamp) ?: ""
+
 
     private val writer = scope.launch("Writer") {
 
@@ -132,10 +227,10 @@ class AwsS3TablesTargetWriter(
             try {
                 select {
                     targetDataChannel.onReceive { targetData ->
-                        val payload = buildPayload(targetData)
+               //         val payload = buildPayload(targetData)
 
                         targetResults?.add(targetData)
-                        buffer.add(targetData, payload)
+                        buffer.add(targetData, "")
 
                         loggers.trace("Received message, buffered items is ${buffer.size} with a total size of ${buffer.payloadSize.byteCountString}")
 
@@ -164,10 +259,22 @@ class AwsS3TablesTargetWriter(
 
     private fun flush() {
 
+
         val log = logger.getCtxLoggers(className, "flush")
         if (buffer.size == 0) {
             return
         }
+
+        val properties: MutableMap<String?, String?> = HashMap<String?, String?>()
+        properties.put(CatalogProperties.CATALOG_IMPL, "org.apache.iceberg.rest.RESTCatalog")
+        properties.put(CatalogProperties.URI, "https://s3tables.eu-west-1.amazonaws.com/iceberg")
+        properties.put(CatalogProperties.WAREHOUSE_LOCATION, "arn:aws:s3tables:eu-west-1:816487731748:bucket/sfc-table-bucket")
+        properties.put(CatalogProperties.FILE_IO_IMPL, "org.apache.iceberg.aws.s3.S3FileIO")
+        properties.put("rest.signing-name", "s3tables")
+        properties.put("rest.signing-region", "eu-west-1")
+        properties.put("rest.sigv4-enabled", "true")
+
+        val nameSpace = Namespace.of(targetConfig.namespace)
 
         val tableBucketName = targetConfig.tableBucketName
         log.trace("Writing data to bucket \"$tableBucketName\"")

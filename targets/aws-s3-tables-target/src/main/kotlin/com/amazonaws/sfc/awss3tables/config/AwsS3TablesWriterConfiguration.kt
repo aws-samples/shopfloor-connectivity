@@ -21,7 +21,7 @@ class AwsS3TablesWriterConfiguration : AwsServiceTargetsConfig<AwsS3TablesTarget
     @SerializedName(CONFIG_TARGETS)
     private var _targets: Map<String, AwsS3TablesTargetConfiguration> = emptyMap()
     override val targets: Map<String, AwsS3TablesTargetConfiguration>
-        get() = _targets.filter { (it.value.targetType == AWS_S3) }
+        get() = _targets.filter { (it.value.targetType == AWS_S3_TABLES) }
 
     @Throws(ConfigurationException::class)
     override fun validate() {
@@ -35,7 +35,7 @@ class AwsS3TablesWriterConfiguration : AwsServiceTargetsConfig<AwsS3TablesTarget
     }
 
     companion object {
-        const val AWS_S3 = "AWS-S3-TABLES"
+        const val AWS_S3_TABLES = "AWS-S3-TABLES"
         private val default = AwsS3TablesWriterConfiguration()
 
         fun create(targets: Map<String, AwsS3TablesTargetConfiguration> = default._targets,

@@ -2,7 +2,7 @@
 
 The REST protocol adapter in SFC enables polling data from HTTP endpoints using GET requests, where the adapter periodically fetches data from configured REST APIs and transforms the JSON responses into the SFC's internal data format. The adapter supports query parameters and authentication for secure API access.
 
-In order to use this adapter as in [in-process](../sfc-running-adapters.md#running-protocol-adapters-in-process) type adapter the type must be added to the [AdapterTypes](../core/sfc-configuration.md#AdapterTypes) section in the [SFC configuration file](../core/sfc-configuration.md).
+In order to use this adapter as in [in-process](../sfc-running-adapters.md#running-protocol-adapters-in-process) type adapter the type must be added to the [AdapterTypes](../core/sfc-configuration.md#adaptertypes) section in the [SFC configuration file](../core/sfc-configuration.md).
 
 ```json
 "AdapterTypes" :{
