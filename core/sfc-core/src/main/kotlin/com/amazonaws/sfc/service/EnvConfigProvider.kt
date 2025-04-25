@@ -15,6 +15,7 @@ import com.amazonaws.sfc.config.IncludeResolver.IncludeResolverException
 import com.amazonaws.sfc.config.IncludeResolver.urlRegex
 import com.amazonaws.sfc.data.JsonHelper.Companion.fromJsonExtended
 import com.amazonaws.sfc.log.Logger
+import com.amazonaws.sfc.service.EnvVariables.Companion.ENV_VARIABLE_CONFIG
 import com.amazonaws.sfc.util.ContentWatcher
 import com.amazonaws.sfc.util.FileWatcher
 import com.amazonaws.sfc.util.buildScope
@@ -103,11 +104,10 @@ class EnvConfigProvider(private val configText: String, private val configVerifi
 
         scope.launch(Dispatchers.IO) {
             try {
-                if (verifyConfig(configText!!)) {
+                if (verifyConfig(configText)) {
                     loggers.info("Sending initial configuration from env")
-                    if (configText != null) {
-                        configChannel.send(configText!!)
-                    }
+                    loggers.trace("config in env variable $ENV_VARIABLE_CONFIG is '$configText'")
+                    configChannel.send(configText)
                 }
             } catch (e: Exception) {
                 loggers.errorEx("Error in configuration provider watch environment", e)

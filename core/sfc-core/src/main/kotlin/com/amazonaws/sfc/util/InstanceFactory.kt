@@ -21,23 +21,26 @@ open class InstanceFactory<T>(private val config: InProcessConfiguration, privat
         val log = logger.getCtxLoggers(className, "classToLoad")
 
         if (config.jarFiles.isNullOrEmpty()) {
-            throw Exception("No jar files specified")
+            // TODO check how to deal with in process classes where we can load them from the same classpath
+            //throw Exception("No jar files specified")
+            // TODO where to get name of the config (e.g. DebugTarget)
+            log.info("no jar files specified for '$config'")
         } else {
             log.trace("Loading factory class name class $config.factoryClassName from ${config.jarFiles!!.joinToString()}")
         }
 
         val expandedJars = expandedJarList(config.jarFiles ?: emptyList())
         if (expandedJars.isEmpty()) {
-            throw Exception("No jar files to load from ${config.jarFiles!!.joinToString(",")}")
+            //throw Exception("No jar files to load from ${config.jarFiles!!.joinToString(",")}")
+            Class.forName(config.factoryClassName)
         } else {
             if (config.jarFiles != expandedJars) {
                 log.trace("configured jars expanded to ${expandedJars.joinToString()}")
             }
+            val classLoader = URLClassLoader(expandedJars.map { it.toURI().toURL() }.toTypedArray(), this::class.java.classLoader)
+
+            Class.forName(config.factoryClassName, true, classLoader)
         }
-
-        val classLoader = URLClassLoader(expandedJars.map { it.toURI().toURL() }.toTypedArray(), this::class.java.classLoader)
-
-        Class.forName(config.factoryClassName, true, classLoader)
     }
 
     // gets the method for the factory class that is calls to create new instances

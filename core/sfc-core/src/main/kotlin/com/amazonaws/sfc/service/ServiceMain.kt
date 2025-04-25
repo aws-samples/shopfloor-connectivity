@@ -139,9 +139,9 @@ abstract class ServiceMain {
             if (serviceInstance != null) logs.info("Created instance of service ${serviceInstance!!::class.java.simpleName}")
         } catch (e: SfcException) {
             logs.error("Error creating service instance ${e.message}")
-        }catch(e : ConfigurationException) {
+        } catch(e : ConfigurationException) {
             logs.error("Error creating service instance because of configuration error, ${e.message}")
-        }catch ( e : CommandLineOptionsException){
+        } catch ( e : CommandLineOptionsException){
             logs.error("Error creating service instance because of command line options error, ${e.message}")
         } catch (e: Exception) {
             logs.errorEx("Error creating service instance: ${e.message}", e)

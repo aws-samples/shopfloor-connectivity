@@ -7,6 +7,8 @@ package com.amazonaws.sfc.service
 
 import com.amazonaws.sfc.crypto.KeyHelpers
 import com.amazonaws.sfc.log.Logger
+import com.amazonaws.sfc.service.EnvVariables.Companion.ENV_VARIABLE_CONFIG
+import com.amazonaws.sfc.service.EnvVariables.Companion.ENV_VARIABLE_VERIFY_PUBLIC_KEY_FILE
 import org.apache.commons.cli.DefaultParser
 import org.apache.commons.cli.Options
 import java.io.File
@@ -49,7 +51,17 @@ object ConfigProviderFactory {
             }
 
             else -> {
-                null
+                val log = logger.getCtxLoggers(className, "createProvider")
+                log.info("Creating configuration provider of type ${ConfigProvider::class.java.simpleName}")
+                log.info("no command line config provided - try reading configuration from environment")
+                val envConfig : String? = System.getenv(ENV_VARIABLE_CONFIG)
+                if(envConfig != null) {
+                    val configVerificationKey = getConfigurationVerificationKeyFromEnv(logger)
+                    EnvConfigProvider(envConfig, configVerificationKey, logger)
+                } else {
+                    log.info("no environment configuration provided")
+                    null
+                }
             }
 
         }
@@ -77,4 +89,25 @@ object ConfigProviderFactory {
             }
     }
 
+    private fun getConfigurationVerificationKeyFromEnv(logger: Logger): PublicKey? {
+
+        val log = logger.getCtxLoggers(this::class.java.name, "getConfigurationVerificationKeyFromEnv")
+
+        try {
+            val configVerifyKey = System.getenv(ENV_VARIABLE_VERIFY_PUBLIC_KEY_FILE)
+            if (configVerifyKey != null) {
+                log.trace("Loading key from env variable ${ENV_VARIABLE_VERIFY_PUBLIC_KEY_FILE} to verify configuration")
+                return KeyHelpers.loadPublicKey(configVerifyKey.toByteArray())
+            } else {
+                log.trace("No config verification env key ${ENV_VARIABLE_VERIFY_PUBLIC_KEY_FILE}")
+                return null
+            }
+        } catch (e: Exception) {
+            log.errorEx(
+                "Error loading key from configuration verification env ${ENV_VARIABLE_VERIFY_PUBLIC_KEY_FILE}",
+                e
+            )
+            exitProcess((1))
+        }
+    }
 }
