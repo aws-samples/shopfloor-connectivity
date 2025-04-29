@@ -65,10 +65,9 @@ open class ConfigReader(val config: String, val allowUnresolved: Boolean = false
 
     // replaces environment variable placeholders in configuration
     @Suppress("UNCHECKED_CAST")
-    private fun processConfig(config1: String): String {
+    private fun processConfig(configString: String): String {
 
-
-        val configWithIncluded = includeFiles(config)
+        val configWithIncluded = includeFiles(configString)
 
         val configMap = fromJsonExtended(configWithIncluded, Map::class.java) as Map<String, Any>
         val useCachedResults = try {
@@ -213,6 +212,7 @@ open class ConfigReader(val config: String, val allowUnresolved: Boolean = false
             while(!done) {
                 s = includeFiles(s){includedItems.add("file:$it")}
                 val configMap = fromJsonExtended(s, Map::class.java)
+                @Suppress("UNCHECKED_CAST")
                 val resolved = IncludeResolver.resolve(configMap, fnResolved = { l -> includedItems.addAll(l) }) as Map<String,Any>
                 s = gsonPretty().toJson(resolved)
                 done = CONFIG_INCLUDE_FILE.containsMatchIn(s) == false

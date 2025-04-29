@@ -26,8 +26,7 @@ FileConfiguration extends the type  TargetConfiguration with specific configurat
 
 **Properties:**
 
-- [BufferCount](buffercount)
-
+- [BufferCount](#buffercount)
 - [BufferSize](#buffersize)
 - [Compression](#compression)
 - [Directory](#directory)
@@ -43,7 +42,7 @@ FileConfiguration extends the type  TargetConfiguration with specific configurat
 
 The maximum number of messages to accumulate in the buffer before triggering a batch publish to the MQTT topic. When this count is reached, all buffered messages are written to a file.
 
-Batching is triggered when any configured threshold (BatchCount, [BufferSize](#batchsize), or [Interval](#interval)) is reached
+Batching is triggered when any configured threshold (BufferCount, [BufferSize](#buffersize), or [Interval](#interval)) is reached
 
 ---
 

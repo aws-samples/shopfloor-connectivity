@@ -267,9 +267,9 @@ During configuration file processing, SFC provides the functionality to incorpor
 
 These statements can be categorized into two groups:
 
-\* [@inlude](#@include-statement): This statement enables the inclusion of data from an external file. The included data does not adhere to JSON syntax and can be utilized to replace either a JSON element or a single element value.
+\* [@include](#include-statement): This statement enables the inclusion of data from an external file. The included data does not adhere to JSON syntax and can be utilized to replace either a JSON element or a single element value.
 
-\* [@file, @http, @https](#@file-@http-@https-statements): These statements facilitate the inclusion of data from either an external file or the response obtained from an HTTP or HTTPS GET request. The included data must adhere to valid JSON syntax, and selective sections of the data can be inserted.
+\* [@file, @http, @https](#file-http-https-statements): These statements facilitate the inclusion of data from either an external file or the response obtained from an HTTP or HTTPS GET request. The included data must adhere to valid JSON syntax, and selective sections of the data can be inserted.
 
 Both groups may contain nested inclusion statements of both types within the included content.
 

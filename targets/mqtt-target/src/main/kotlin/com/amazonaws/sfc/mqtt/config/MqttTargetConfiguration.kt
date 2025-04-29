@@ -8,7 +8,6 @@ import com.amazonaws.sfc.config.ConfigurationClass
 import com.amazonaws.sfc.config.ConfigurationException
 import com.amazonaws.sfc.config.InProcessConfiguration
 import com.amazonaws.sfc.config.TargetConfiguration
-import com.amazonaws.sfc.config.Template
 import com.amazonaws.sfc.config.Validate
 import com.amazonaws.sfc.data.Compress.CONFIG_COMPRESS
 import com.amazonaws.sfc.data.CompressionType

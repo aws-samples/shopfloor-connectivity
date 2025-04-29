@@ -7,7 +7,6 @@ package com.amazonaws.sfc.j1939.config
 import com.amazonaws.sfc.config.ChannelConfiguration
 import com.amazonaws.sfc.config.ConfigurationClass
 import com.amazonaws.sfc.config.ConfigurationException
-import com.amazonaws.sfc.j1939.config.J1939AdapterConfiguration.Companion.CONFIG_READ_MODE
 import com.amazonaws.sfc.j1939.protocol.isNumeric
 import com.google.gson.annotations.SerializedName
 

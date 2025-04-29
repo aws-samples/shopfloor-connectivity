@@ -100,66 +100,6 @@ class J1939Decoder {
             return rawValue
         }
 
-        private fun extractRawValueY(signal: J1939Signal, payload: ByteArray): Float? {
-            var rawValue: Long = 0
-
-            // For J1939, both bytes and bits are indexed in reverse
-            // Convert start bit to account for reverse byte and bit ordering
-            val byteIndex = 7 - (signal.startBit / 8)  // Reverse byte indexing
-            val bitIndex = 7 - (signal.startBit % 8)    // Reverse bit indexing within byte
-
-            if (byteIndex >= payload.size) return null // Invalid start bit
-
-            when (signal.byteOrder) {
-                ByteOrder.INTEL -> {
-                    // Intel (little-endian) byte order
-                    var remainingBits = signal.length
-                    var currentByte = byteIndex
-                    var currentBit = bitIndex
-
-                    while (remainingBits > 0) {
-                        if (currentByte < 0) break
-
-                        val bitValue = (payload[currentByte].toInt() shr currentBit) and 1
-                        val shift = signal.length - remainingBits
-                        rawValue = rawValue or (bitValue.toLong() shl shift)
-
-                        currentBit--
-                        if (currentBit < 0) {
-                            currentBit = 7
-                            currentByte--
-                        }
-
-                        remainingBits--
-                    }
-                }
-
-                ByteOrder.MOTOROLA -> {
-                    // Motorola (big-endian) byte order
-                    var remainingBits = signal.length
-                    var currentByte = byteIndex
-                    var currentBit = bitIndex
-
-                    while (remainingBits > 0) {
-                        if (currentByte < 0) break
-
-                        val bitValue = (payload[currentByte].toInt() shr currentBit) and 1
-                        rawValue = (rawValue shl 1) or bitValue.toLong()
-
-                        currentBit--
-                        if (currentBit < 0) {
-                            currentBit = 7
-                            currentByte--
-                        }
-
-                        remainingBits--
-                    }
-                }
-            }
-
-            return rawValue.toFloat()
-        }
-
 
         const val FF = 0xFF.toByte()
         val FFFF = ByteArray(2) { FF }
@@ -178,10 +118,6 @@ class J1939Decoder {
             return result.toByte()
         }
 
-        fun reversePayload(bytes: ByteArray): ByteArray {
-            return bytes.reversed().map { reverseBits(it) }.toByteArray()
-
-        }
 
         fun bytesToLongLittleEndian(bytes: ByteArray): Long {
             var result = 0L

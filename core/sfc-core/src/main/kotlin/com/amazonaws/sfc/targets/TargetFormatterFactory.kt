@@ -8,10 +8,8 @@ import com.amazonaws.sfc.config.ConfigReader
 import com.amazonaws.sfc.config.InProcessConfiguration
 import com.amazonaws.sfc.config.TargetConfiguration
 import com.amazonaws.sfc.log.Logger
-import com.amazonaws.sfc.metrics.MetricsWriter
-import com.amazonaws.sfc.service.ConfigProvider
 import com.amazonaws.sfc.util.InstanceFactory
-import java.security.PublicKey
+
 
 class TargetFormatterFactory(config: InProcessConfiguration, private val logger: Logger) {
 

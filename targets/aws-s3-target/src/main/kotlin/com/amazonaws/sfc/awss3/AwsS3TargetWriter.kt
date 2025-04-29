@@ -9,7 +9,6 @@ import com.amazonaws.sfc.awss3.config.AwsS3TargetConfiguration
 import com.amazonaws.sfc.awss3.config.AwsS3WriterConfiguration
 import com.amazonaws.sfc.awss3.config.AwsS3WriterConfiguration.Companion.AWS_S3
 import com.amazonaws.sfc.config.ConfigReader
-import com.amazonaws.sfc.config.TargetConfiguration
 import com.amazonaws.sfc.data.*
 import com.amazonaws.sfc.log.Logger
 import com.amazonaws.sfc.metrics.*
@@ -270,7 +269,7 @@ class AwsS3TargetWriter(
     private fun CoroutineScope.timerJob() = launch("Timeout timer") {
         try {
             delay(targetConfig.interval.toLong())
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             // no harm done, timer is just used to guard for timeouts
         }
     }

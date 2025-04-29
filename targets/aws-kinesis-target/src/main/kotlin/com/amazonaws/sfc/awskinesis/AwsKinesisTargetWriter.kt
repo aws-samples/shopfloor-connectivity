@@ -219,7 +219,7 @@ class AwsKinesisTargetWriter(
 
             return@launch try {
                 delay(targetConfig.interval)
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 // no harm done, timer is just used to guard for timeouts
             }
         }
