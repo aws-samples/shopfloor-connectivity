@@ -263,10 +263,61 @@ When rendering the templates the SFC core will check for circular dependencies b
 
 ## Including configuration sections
 
-When processing a configuration file, SFC has the option to include sections from external sources. These sources can be external files or content retrieved from making a http get request. The content from the file of the http get response must be a valid JSON object.
+During configuration file processing, SFC provides the functionality to incorporate sections from external sources by employing statements that instruct the configuration reader to include data from either external files or the responses obtained from HTTP GET requests.
 
-In order to include configuration data from an external the file the syntax is **“@file:\<pathname of the file>”**.   For including data from a get request he syntax is **“@http://\<url>”** or **“@https://\<url>**”.
+These statements can be categorized into two groups:
+
+\* [@inlude](#@include-statement): This statement enables the inclusion of data from an external file. The included data does not adhere to JSON syntax and can be utilized to replace either a JSON element or a single element value.
+
+\* [@file, @http, @https](#@file-@http-@https-statements): These statements facilitate the inclusion of data from either an external file or the response obtained from an HTTP or HTTPS GET request. The included data must adhere to valid JSON syntax, and selective sections of the data can be inserted.
+
+Both groups may contain nested inclusion statements of both types within the included content.
+
+During configuration file processing, the following sequence is utilized:
+
+- @include statements and possible nested @include statements are processed in a depth-first order.
+
+- @file, @http, @https statements are processed in a depth-first order.
+
+As the content of each step may include new inclusion statements for statements of the other type, the sequence is repeated until the configuration file no longer contains inclusion statements from any type.
+
+
+
+### @include statement
+
+The SFC supports data inclusion from external files using the **@include** statement, which provides a syntax for replacing a complete JSON element or the value of an element. The choice between these two syntaxes depends on maintaining the validity of the JSON data in the configuration file.
+
+```json
+{
+  "@include" : "path to filename"
+}
+```
+
+or
+
+```json
+{
+  "elementname" : "@include:path to filename"
+}
+```
+
+When processing the @include statement in both syntaxes, the complete statement, including a potential trailing comma character, will be removed and replaced by the content of the specified file.
+
+Although the content of the file may not adhere to a valid JSON syntax, the result of including the file should still adhere to a valid JSON syntax.
+
+The included files may contain nested @include statements, which will be included in the configuration file, along with detection or circular references.
+
+
+
+### @file, @http, @https statements
+
+An alternative method include configuration data from an external the file the syntax is **“@file:\<pathname of the file>”**.  
+
+For including data from a get request he syntax is **“@http://\<url>”** or **“@https://\<url>**”. 
+
 After reading the content from the file or the get response SFC will replace the reference to the file or the url with this content.
+
+The main difference of the  @file, @http and @https staye ments with the **@include** is that the data read from the file of GET requests response payload must be a valid JSON syntax. Additionaly ithey offer the possibility or select sections from the JSON data to insert in the configuration file.
 
 Below is an example where the value of “AwsIoTClient” is read from a file named “aws-iot-client.json”.
 
@@ -310,8 +361,9 @@ SFC will cache the content included content, as long as it is not modified, for 
 ## Selective Inclusions
 
 Instead of including the complete content obtained from an included file or response of a service call it is also possible to select a subset of this content.
-In order to select a subset the filename or the url must be followed by a "@" and a valid <a href="https://jmespath.org/">JMESPath expression</a> that selects the section of the content to include.  Selectors allow
-to combine related configuration sections in a combined inclusion  content obtained from a file or a service call.
+In order to select a subset the filename or the url must be followed by a "@" and a valid <a href="https://jmespath.org/">JMESPath expression</a> that selects the section of the content to include.  Selectors allowto combine related configuration sections in a combined inclusion  content obtained from a file or a service call.
+
+**Selective inclusion is only feasible when utilizing the @file, @http, or @https inclusion statements for data inclusion.**
 
 The following included file "s3-inproc.json" contains two elements. The first element "S3TargetType" defined the type of the in-process S3 target. The second element "S3Target" defined the actual S3 target.
 

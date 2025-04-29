@@ -14,6 +14,8 @@ import com.amazonaws.sfc.j1939.config.*
 import com.amazonaws.sfc.j1939.config.J1939AdapterConfiguration.Companion.CONFIG_MAX_RETAIN_PERIOD
 import com.amazonaws.sfc.j1939.config.J1939AdapterConfiguration.Companion.CONFIG_MAX_RETAIN_SIZE
 import com.amazonaws.sfc.j1939.protocol.*
+import com.amazonaws.sfc.j1939.protocol.J1939Decoder.Companion.bytesToLongBigEndian
+import com.amazonaws.sfc.j1939.protocol.J1939Decoder.Companion.bytesToLongLittleEndian
 import com.amazonaws.sfc.log.Logger
 import com.amazonaws.sfc.metrics.*
 import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_DIMENSION_SOURCE
@@ -44,11 +46,12 @@ class J1939Adapter(
 
     private val className = this::class.simpleName.toString()
 
-    class Frame(val canId: Int, val data: ByteArray, val timestamp: Instant) {
+    class Frame(val canId: Int, val data: ByteArray, val timestamp: Instant, val canSocketName: String) {
         override fun toString(): String {
-            return "CanID ${canId.asHexString()}, Data [${data.asHexString()}] $timestamp"
+            return "CanID ${canId.asHexString()}, Data [${data.asHexString()}], socket $canSocketName, $timestamp"
         }
     }
+
 
     init {
         logger.getCtxInfoLog(className, "")(BuildConfig.toString())
@@ -67,13 +70,13 @@ class J1939Adapter(
     }
 
     // channel to send data changes to the coroutine that is handling these changes
-    private val receivedData = Channel<Frame>(
+    private val receivedDataFrames = Channel<Frame>(
         adapterConfiguration?.receivedDataChannelSize ?: J1939AdapterConfiguration.DEFAULT_RECEIVED_DATA_CHANNEL_SIZE
     )
 
     private val scope = buildScope("J1939 Protocol Handler")
 
-    private var waitUntil = systemDateTime()
+    private var waitUntilForCanSocket : MutableMap<String, Instant?> = sources.keys.associate { it to null }.toMutableMap()
 
     private fun pgnAsString(pgnId: UInt): String {
         val name = j1939Dbc?.pgnByPgnId(pgnId)?.name
@@ -176,16 +179,39 @@ class J1939Adapter(
             }
     }
 
-    private val canbusReader = if (adapterConfiguration != null) scope.launch {
+    private val canSocketsUsedBySources: List<String> =
+        if (adapterConfiguration != null) {
+            adapterConfiguration!!.canSockets.keys.filter{
+                it in sources.values.map { s -> s.adapterCanSocket }
+            }
+        } else emptyList()
 
-        val log = logger.getCtxLoggers(className, "canbusReader")
-        val adapterConfig = adapterConfiguration
+
+    private val readCanSocketTasks: List<Job> =
+        canSocketsUsedBySources.map { canSocketName ->
+            scope.launch {
+                readCanSocketTask(canSocketName)
+            }
+        }
+
+
+    private suspend fun readCanSocketTask(canSocketName: String) {
+
+        val log = logger.getCtxLoggers(className, "canbusReader-$canSocketName")
+
+        val canSocketConfig = adapterConfiguration?.canSockets?.get(canSocketName)
+        if (canSocketConfig == null){
+            log.error("Can socket $canSocketName is not configured for adapter $adapterID, configured can sockets are ${adapterConfiguration!!.canSockets.keys}")
+            return
+        }
+        val socketName = canSocketConfig.socketName
 
         var socket: RawCanSocket? = null
-        while (isActive && adapterConfig != null) {
+        while (scope.isActive && adapterConfiguration != null) {
             try {
 
-                log.trace("Opening socket \"${adapterConfig.canSocketName}\"}")
+                val socketName = socketName
+                log.trace("Opening socket \"$socketName\"}")
                 val readTimestamp = adapterConfiguration!!.readTimeStamp
                 socket = RawCanSocket()
                 socket.open()
@@ -194,34 +220,44 @@ class J1939Adapter(
                     socket.timestampEnabled = true
                 }
 
-                val canbusInterface = CanInterface(adapterConfiguration!!.canSocketName)
+                val canbusInterface = CanInterface(socketName)
                 socket.bind(canbusInterface)
 
-                while (isActive) {
+                while (scope.isActive) {
                     if (readTimestamp) {
                         val frame: TimestampedCanFrame = socket.receiveTimestampedFrom(canbusInterface)
-                        receivedData.send(Frame(frame.canId.id, frame.data, frame.timestamp))
+                        receivedDataFrames.send(Frame(frame.canId.id, frame.data, frame.timestamp, socketName))
                     } else {
                         val frame = socket.receiveFrom(canbusInterface)
-                        receivedData.send(Frame(frame.canId.id, frame.data, systemDateTime()))
+                        receivedDataFrames.send(Frame(frame.canId.id, frame.data, systemDateTime(), socketName))
                     }
                 }
             } catch (e: Exception) {
                 if (!e.isJobCancellationException) {
-                    waitUntil = Instant.ofEpochMilli(systemDateTime().toEpochMilli() + adapterConfiguration!!.waitAfterErrors.toLong(DurationUnit.MILLISECONDS))
-                    log.error("Error reading CAN socket ${adapterConfiguration!!.canSocketName}, paused reading for ${adapterConfiguration!!.waitAfterErrors} until $waitUntil, $e ")
-                    delay(waitUntil.toEpochMilli() - systemDateTime().toEpochMilli())
+
+                    val openingError = e.message?.contains(REGEX_PORT_NOT_FOUND) == true
+
+                    val waitPeriod = if (openingError) adapterConfiguration!!.waitAfterOpenErrors else adapterConfiguration!!.waitAfterReadErrors
+                    val waitUntil = Instant.ofEpochMilli(systemDateTime().toEpochMilli() + waitPeriod.toLong(DurationUnit.MILLISECONDS))
+                    waitUntilForCanSocket[canSocketName] = waitUntil
+
+                    if (openingError)
+                        log.info(("Could not find CAN socket\"${socketName}\", paused reading from ${socketName} for ${adapterConfiguration!!.waitAfterOpenErrors} until $waitUntil"))
+                    else
+                        log.error("Error reading from CAN socket \"${socketName}\", paused reading from ${socketName} for ${adapterConfiguration!!.waitAfterReadErrors} until $waitUntil, $e ")
+
+                    delay(waitUntilForCanSocket[canSocketName]!!.toEpochMilli() - systemDateTime().toEpochMilli())
                 }
             } finally {
                 socket?.close()
             }
         }
-    } else null
+    }
 
 
     private val receivedJ1939FrameHandler =
         scope.launch(context = Dispatchers.Default, name = "Receive J1939 Frame Handler") {
-            receivedPacketTask(receivedData, this)
+            receivedPacketTask(receivedDataFrames, this)
         }
 
     private suspend fun receivedPacketTask(channel: Channel<Frame>, scope: CoroutineScope) {
@@ -241,12 +277,16 @@ class J1939Adapter(
 
         val log = logger.getCtxLoggers(className, "read")
 
-        if (waitUntil.isAfter(systemDateTime())) {
-            log.trace("Waiting until $waitUntil for reading from adapter $adapterID")
+        val socketUsedBySource = socketUsedBySource(sourceID)
+        val waitUntilForSourceSocket = waitUntilForCanSocket[socketUsedBySource]
+
+
+        if (waitUntilForSourceSocket != null && waitUntilForSourceSocket.isAfter(systemDateTime())) {
+            log.trace("Waiting until $waitUntilForCanSocket for reading from adapter $adapterID")
             return SourceReadSuccess(emptyMap())
         } else {
             log.trace("Reading from adapter $adapterID continued")
-            waitUntil = systemDateTime()
+            if (socketUsedBySource != null ) waitUntilForCanSocket[socketUsedBySource] = systemDateTime()
         }
 
         val dimensions = mapOf(METRICS_DIMENSION_SOURCE to "$adapterID:$sourceID") + adapterMetricDimensions
@@ -271,6 +311,8 @@ class J1939Adapter(
 
         return SourceReadSuccess(d, systemDateTime())
     }
+
+    private fun socketUsedBySource(sourceID: String): String? = adapterConfiguration?.canSockets?.get(sources[sourceID]?.adapterCanSocket)?.socketName
 
 
     private fun createMetrics(
@@ -321,7 +363,7 @@ class J1939Adapter(
 
     override suspend fun stop(timeout: Duration) {
         scope.cancel()
-        canbusReader?.cancel()
+        readCanSocketTasks.forEach { it.cancel() }
         receivedJ1939FrameHandler.cancel()
 
         // clear data stores
@@ -330,7 +372,7 @@ class J1939Adapter(
         }
     }
 
-    private val sourceBroadCastData = mutableMapOf<UByte, ProtocolDataTransfer>()
+    private val sourceBroadCastData = mutableMapOf<Pair<String, UByte>, ProtocolDataTransfer>()
 
     private fun handleDataReceived(frame: Frame) {
 
@@ -352,7 +394,7 @@ class J1939Adapter(
             }
 
             else -> {
-                if (anySourceUsingPngFromAddress(pgnId, canFrameIdentifier.sourceAddress)) {
+                if (anySourceUsingPngFromAddress(pgnId, frame.canSocketName, canFrameIdentifier.sourceAddress)) {
                     handleSingleFrameData(canFrameIdentifier, frame)
                 } else {
                     if (j1939Dbc?.pgnByPgnId(pgnId) != null)
@@ -360,17 +402,18 @@ class J1939Adapter(
                             "Dropping PGN ${pgnAsString(pgnId)} frame as there is no source configured to read this PGN from source address ${addressAsString(canFrameIdentifier.sourceAddress)}"
                         )
                     else
-                        log.trace("Dropping PGN ${pgnAsString(pgnId)} frame as it a configured PGN in ${adapterConfiguration?.dbcFile?.absoluteFile?.name}")
+                        log.trace("Dropping PGN ${pgnAsString(pgnId)} frame as it is not a configured PGN in ${adapterConfiguration?.dbcFile?.absoluteFile?.name}")
                 }
             }
         }
     }
 
-    private fun anySourceUsingPngFromAddress(pgnId: UInt, sourceAddress: UByte): Boolean =
-        sourcesUsingPgnFromAddress(pgnId, sourceAddress).isNotEmpty()
+    private fun anySourceUsingPngFromAddress(pgnId: UInt, canSocketName: String, sourceAddress: UByte): Boolean =
+        sourcesUsingPgnFromSocketAndAddress(pgnId, canSocketName, sourceAddress).isNotEmpty()
 
-    private fun sourcesUsingPgnFromAddress(pgnId: UInt, sourceAddress: UByte): Map<String, J1939SourceConfiguration> {
-        return pgnSourcesMap[pgnId]?.filter { it.value.sourceAddress == sourceAddress || it.value.sourceAddress == null }
+    private fun sourcesUsingPgnFromSocketAndAddress(pgnId: UInt, socket: String, sourceAddress: UByte): Map<String, J1939SourceConfiguration> {
+        return pgnSourcesMap[pgnId]?.filter { (it.value.sourceAddress == sourceAddress || it.value.sourceAddress == null) &&
+                (adapterConfiguration?.canSockets?.get(it.value.adapterCanSocket)?.socketName == socket) }
                 ?: emptyMap()
     }
 
@@ -388,17 +431,98 @@ class J1939Adapter(
         }
 
         //   val data = payload.data.sliceArray(1..payload.data.size - 1)
-        log.trace("Received ${pgn.name} PGN from source address $sourceAddressStr\"data is [${frame.data.asHexString()}]")
+        log.trace("Received ${pgn.name} PGN from can socket ${frame.canSocketName}, source address $sourceAddressStr\"data is [${frame.data.asHexString()}]")
 
-        processPgnData(canFrameIdentifier.pgn, canFrameIdentifier.sourceAddress, frame.data)
+        processPgnData(canFrameIdentifier.pgn, frame.canSocketName, canFrameIdentifier.sourceAddress, frame.data, frame.timestamp)
 
     }
 
-    private fun processPgnData(pgnId: UInt, sourceAddress: UByte, data: ByteArray) {
+    fun extractBits(bytes: ByteArray, startBit: Int, length: Int): ByteArray {
+
+        val result = bytes.copyOf()
+
+        // Clear all bits in the result array
+        for (i in result.indices) {
+            result[i] = 0
+        }
+
+        // Process each bit in the specified range
+        for (bitIndex in startBit until startBit + length) {
+            val byteIndex = bitIndex / 8
+            if (byteIndex >= bytes.size) break
+            val bitPosition = 7 - (bitIndex % 8)
+
+            // Get the bit from source array
+            val bitValue = (bytes[byteIndex].toInt() shr bitPosition) and 1
+
+            // Set the bit in result array if it was 1
+            if (bitValue == 1) {
+                result[byteIndex] = (result[byteIndex].toInt() or (1 shl bitPosition)).toByte()
+            }
+        }
+
+        return result
+    }
+
+    fun extractBits(bytes: ByteArray, signals: List<J1939Signal>): ByteArray {
+
+        val result = bytes.copyOf()
+
+        // Clear all bits in the result array
+        for (i in result.indices) {
+            result[i] = 0
+        }
+
+        // Process each bit range
+        for (signal in signals) {
+            // Process each bit in the current range
+            for (bitIndex in signal.startBit until signal.startBit + signal.length) {
+                val byteIndex = bitIndex / 8
+                val bitPosition = 7 - (bitIndex % 8)
+
+                // Get the bit from source array
+                val bitValue = (bytes[byteIndex].toInt() shr bitPosition) and 1
+
+                // Set the bit in result array if it was 1
+                if (bitValue == 1) {
+                    result[byteIndex] = (result[byteIndex].toInt() or (1 shl bitPosition)).toByte()
+                }
+            }
+        }
+
+        return result
+    }
+
+
+
+    private fun processPgnData(pgnId: UInt, canSocketName: String, sourceAddress: UByte, data: ByteArray, timestamp: Instant) {
 
         val pgn = j1939Dbc?.pgnByPgnId(pgnId) ?: return
 
-        sourcesUsingPgnFromAddress(pgnId, sourceAddress).keys.forEach { sourceId ->
+        sourcesUsingPgnFromSocketAndAddress(pgnId, canSocketName, sourceAddress).keys.forEach { sourceId ->
+
+            val channel = getChannelForPgnID(sourceId, pgnId)
+            val channelID = channel?.first
+            val store = sourceDataStores[sourceId]
+            val rawFormat = (channel?.second?.rawFormat)?:sources[sourceId]?.rawFormat
+
+            if (rawFormat != null && channelID != null) {
+
+                val dataBits =  if (rawFormat.isMasked) {
+                    val channelSignals = (channelSpnMap[sourceId]?.get(channelID)?:emptyList())
+                    extractBits(data, channelSignals)
+                } else {
+                    data
+                }
+
+                val rawData: Any = when (rawFormat) {
+                    J1939RawFormat.BYTES, J1939RawFormat.BYTES_MASKED -> dataBits
+                    J1939RawFormat.LITTLE_ENDIAN, J1939RawFormat.LITTLE_ENDIAN_MASKED -> bytesToLongLittleEndian(dataBits)
+                    J1939RawFormat.BIG_ENDIAN, J1939RawFormat.BIG_ENDIAN_MASKED -> bytesToLongBigEndian(dataBits)
+                }
+                store?.add(channelID, ChannelReadValue(rawData, timestamp))
+                return
+            }
 
             channelSpnMap[sourceId]?.forEach { (channelId, channelSignals) ->
                 val pgnData = sequence {
@@ -416,32 +540,36 @@ class J1939Adapter(
                     } else {
                         pgnData
                     }
-                    val store = sourceDataStores[sourceId]
-                    store?.add(channelId, ChannelReadValue(channelValue, systemDateTime()))
-
+                    store?.add(channelId, ChannelReadValue(channelValue, timestamp))
                 }
             }
 
         }
     }
 
-    private fun handleTransportProtocolConnectionManagement(canFrameIdentifier: CanFrameIdentifier, payload: Frame) {
+    private fun getChannelForPgnID(sourceId: String, pgnId: UInt): Pair<String, J1939ChannelConfiguration>? {
+        val channelEntry = sources[sourceId]?.channels?.filter { pgnForChannel(it.key, it.value)?.pngId == pgnId }?.entries?.firstOrNull()
+        return channelEntry?.toPair()
+    }
+
+
+    private fun handleTransportProtocolConnectionManagement(canFrameIdentifier: CanFrameIdentifier, frame: Frame) {
         val log = logger.getCtxLoggers(className, "startTransportProtocolBroadcast")
-        if (isBroadCastAnnouncement(payload)) {
-            val bam = ProtocolDataTransfer.fromPayload(payload)
-            log.trace("Received Transport Protocol Broadcast BAM from source , $bam")
-            if (anySourceUsingPngFromAddress(bam.pgnId, canFrameIdentifier.sourceAddress)) {
-                sourceBroadCastData[canFrameIdentifier.sourceAddress] = bam
-                log.trace("Received Transport Protocol Broadcast BAM from source , $bam")
+        if (isBroadCastAnnouncement(frame)) {
+            val bam = ProtocolDataTransfer.fromPayload(frame)
+            log.trace("Received Transport Protocol Broadcast BAM from socket ${frame.canSocketName} source address , $bam")
+            if (anySourceUsingPngFromAddress(bam.pgnId, frame.canSocketName, canFrameIdentifier.sourceAddress)) {
+                sourceBroadCastData[frame.canSocketName to canFrameIdentifier.sourceAddress] = bam
+                log.trace("Received Transport Protocol Broadcast BAM from socket ${frame.canSocketName}, source address, $bam")
             } else {
                 bam.skip = true
                 log.trace(
-                    "Dropping transport protocol connection management frame, as there is no source configured to read this PGN ${pgnAsString(bam.pgnId)} from source address ${
+                    "Dropping transport protocol connection management frame, as there is no source configured to read this PGN ${pgnAsString(bam.pgnId)} from source address for socket ${frame.canSocketName}${
                         addressAsString(
                             canFrameIdentifier.sourceAddress)
                     }")
             }
-            sourceBroadCastData[canFrameIdentifier.sourceAddress] = bam
+            sourceBroadCastData[frame.canSocketName to canFrameIdentifier.sourceAddress] = bam
 
         }
     }
@@ -454,16 +582,16 @@ class J1939Adapter(
 
         val sourceAddress = canFrameIdentifier.sourceAddress
         val sourceAddressStr = addressAsString(sourceAddress)
-        val sourceTransportProtocolData = sourceBroadCastData[sourceAddress]
+        val sourceTransportProtocolData = sourceBroadCastData[frame.canSocketName to sourceAddress]
 
         if (sourceTransportProtocolData == null) {
-            log.trace("No active broadcast for source address $sourceAddressStr")
+            log.trace("No active broadcast for source address $sourceAddressStr from socket ${frame.canSocketName}")
             return
         }
 
         val packetNumber = frame.data[0].toInt()
         if (sourceTransportProtocolData.skip) {
-            log.trace("Dropping data transfer frame $packetNumber ${pgnAsString(canFrameIdentifier.pgn)} as PGN ${pgnAsString(sourceTransportProtocolData.pgnId)} is not used in a configured source from source address $sourceAddressStr")
+            log.trace("Dropping data transfer frame $packetNumber ${pgnAsString(canFrameIdentifier.pgn)} as PGN ${pgnAsString(sourceTransportProtocolData.pgnId)} is not used in a configured source from source address $sourceAddressStr from socket ${frame.canSocketName}")
             return
         }
 
@@ -479,18 +607,20 @@ class J1939Adapter(
             } catch (e: Exception) {
                 log.error("Error copying data into buffer")
             }
-            log.trace("Received data transfer packet $packetNumber from source address $sourceAddressStr), data is [${data.map { data.asHexString() }}]")
+            log.trace("Received data transfer packet $packetNumber from source address $sourceAddressStr) from socket ${frame.canSocketName}, data is [${data.map { data.asHexString() }}]")
         }
         sourceTransportProtocolData.receivedPackets += 1
 
         if (sourceTransportProtocolData.receivedPackets >= sourceTransportProtocolData.packets) {
-            handleCompletedTransportProrocolDataTrenasfer(canFrameIdentifier, sourceTransportProtocolData)
+            handleCompletedTransportProtocolDataTransfer(canFrameIdentifier, sourceTransportProtocolData, frame.canSocketName, frame.timestamp)
         }
     }
 
-    private fun handleCompletedTransportProrocolDataTrenasfer(
+    private fun handleCompletedTransportProtocolDataTransfer(
         canFrameIdentifier: CanFrameIdentifier,
-        sourceTransportProtocolData: ProtocolDataTransfer
+        sourceTransportProtocolData: ProtocolDataTransfer,
+        canSocket: String,
+        timestamp: Instant
     ) {
 
         val log = logger.getCtxLoggers(className, "completeOfTransportProtocolBroadcast")
@@ -517,8 +647,8 @@ class J1939Adapter(
 
         log.trace("Transport protocol data for PGN $pgnStr is ${data.asHexString()}")
 
-        processPgnData(sourceTransportProtocolData.pgnId, canFrameIdentifier.sourceAddress, data)
-        sourceBroadCastData.remove(sourceAddress)
+        processPgnData(sourceTransportProtocolData.pgnId, canSocket, canFrameIdentifier.sourceAddress, data, timestamp)
+        sourceBroadCastData.remove(canSocket to sourceAddress)
     }
 
 
@@ -591,6 +721,8 @@ class J1939Adapter(
 
         val TRANSPORT_PROTOCOL_CONNECTION_MANAGEMENT = 0xEC00.toUInt()
         val TRANSPORT_PROTOCOL_DATA_TRANSFER = 0xEB00.toUInt()
+
+        private val REGEX_PORT_NOT_FOUND = Regex("Could not find interface with name.+")
 
         @JvmStatic
         @Suppress("unused")
@@ -694,6 +826,8 @@ class J1939Adapter(
         override fun toString(): String {
             return "PGN=$pgnId(0x${pgnId.asHexString().trimStart('0')}), packets=$packets, size=$size"
         }
+
+
     }
 
 }

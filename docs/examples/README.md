@@ -3,12 +3,13 @@
 
 - [Quickstart Lab](../../README.md#quickstart-example)
 
-Greengrass
+**Greengrass**
+
 - [Greengrass SFC In-Process step-by-step Lab](../../examples/greengrass-in-process/README.md)
 - [Greengrass SFC IPC step-by-step Lab](../../examples/greengrass-ipc/README.md)
 
+**Adapters**
 
-Adapters
 - [Rockwell PCCC to S3 sample](../../examples/in-process-pccc-s3/README.md)
 - [Beckhoff ADS to S3 sample](../../examples/in-process-ads-s3/README.md)
 
@@ -26,7 +27,8 @@ Adapters
 
 - [CSV File Adapter Example](../../examples/custom-adapter-csvfile/README.md)
 
-Configuration
+**Configuration**
+
 - [Contextualization & Filter Demo](../../examples/opcua-to-iot-using-filters/README.md)
 - [Configuration Signing](../../examples/sign-sfc-config/README.md)
 - [Custom Config Provider Template](../../examples/custom-config-provider/README.md)
@@ -36,7 +38,7 @@ Configuration
 - [OPCUA Auto Discovery Configuration provider](../../examples/opcua-auto-discovery/README.md)
 - [YAML Custom Configuration Provider](../../examples/yaml-custom-config-provider/README.md)
 
-Other
+**Other**
 - [Generate Self-Signed test certificates](../../examples/test-certificates/README.md)
 - [Transformation Templates](../../examples/transformation-templates/README.md)
 

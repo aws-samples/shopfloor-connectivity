@@ -22,9 +22,7 @@ import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_WRITE_ERRORS
 import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_WRITE_SIZE
 import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_WRITE_SUCCESS
 import com.amazonaws.sfc.system.DateTime
-import com.amazonaws.sfc.targets.AwsServiceTargetClientHelper
-import com.amazonaws.sfc.targets.TargetDataChannel
-import com.amazonaws.sfc.targets.TargetException
+import com.amazonaws.sfc.targets.*
 import com.amazonaws.sfc.util.MemoryMonitor
 import com.amazonaws.sfc.util.canNotReachAwsService
 import com.amazonaws.sfc.util.isJobCancellationException
@@ -139,8 +137,15 @@ class AwsKinesisTargetWriter(
     // channel to pass messages to coroutine that sends data to the Kinesis stream
     private val targetDataChannel = TargetDataChannel.create(targetConfig, "$className:targetDataChannel")
 
+    private val formatter: TargetFormatter? by lazy {
+        TargetFormatterFactory.createTargetFormatter(configReader, targetID, targetConfig, logger)
+    }
+
+    private val customPayload = (formatter != null)
+
+
     // buffer for batching messages
-    private val buffer = newTargetDataBuffer(resultHandler)
+    private val buffer = newTargetDataBuffer(resultHandler, customPayload)
 
 
     // coroutine writing messages to stream
@@ -173,17 +178,41 @@ class AwsKinesisTargetWriter(
 
 
     private fun handleTargetData(targetData: TargetData) {
-        val payload = buildPayload(targetData)
+
+        val log = logger.getCtxLoggers(className, "handleTargetData")
+
+        val (messagePayload: String?, payloadSize: Int) = if (customPayload) {
+            val formattedItemSize = try {
+                formatter?.itemPayloadSize(targetData) ?: altSize(targetData)
+            } catch (e: Exception) {
+                log.errorEx("Error getting payload size using custom formatter", e)
+                altSize(targetData)
+            }
+            null to (formattedItemSize * 1.33).toInt() + 2
+        } else {
+            val stringPayload = buildPayload(targetData)
+            stringPayload to (stringPayload.length * 1.33).toInt() + 2
+        }
+
         // test if buffer (size) can hold message, if not first flush buffer
-        if (buffer.size + payload.length > KINESIS_MAX_BATCH_MSG_SIZE) {
+        if (buffer.payloadSize + payloadSize > KINESIS_MAX_BATCH_MSG_SIZE) {
             flush()
         }
-        buffer.add(targetData, payload)
+
+        if (customPayload) {
+            buffer.add(targetData, payloadSize)
+        } else {
+            buffer.add(targetData, messagePayload)
+        }
+
         // flush buffer if full
         if (targetData.noBuffering || buffer.size >= targetConfig.batchSize) {
             flush()
         }
     }
+
+    private fun altSize(targetData: TargetData): Int = if (targetConfig.batchSize != 0) 0 else targetData.toJson(config.elementNames, targetConfig.unquoteNumericJsonValues).length
+
 
     private fun CoroutineScope.timerJob(): Job {
         return launch("Timeout timer") {
@@ -199,7 +228,10 @@ class AwsKinesisTargetWriter(
     private val transformation by lazy { if (targetConfig.template != null) OutputTransformation(targetConfig.template!!, logger) else null }
 
     private fun buildPayload(targetData: TargetData): String =
-        if (transformation == null) targetData.toJson(config.elementNames, targetConfig.unquoteNumericJsonValues) else transformation!!.transform(targetData, config.elementNames, targetConfig.templateEpochTimestamp) ?: ""
+        if (transformation == null) targetData.toJson(config.elementNames, targetConfig.unquoteNumericJsonValues) else transformation!!.transform(
+            targetData,
+            config.elementNames,
+            targetConfig.templateEpochTimestamp) ?: ""
 
 
     // writes al buffered messages to the stream
@@ -219,6 +251,13 @@ class AwsKinesisTargetWriter(
 
         try {
             val request = buildRequest(streamName)
+
+            if (request.records().isEmpty()) {
+                log.error("No records to send to kinesis stream \"$streamName\"")
+                targetResults?.errorList(buffer.items)
+                return
+            }
+
             val resp = clientHelper.executeServiceCallWithRetries {
                 try {
                     val resp = kinesisClient.putRecords(request)
@@ -264,6 +303,7 @@ class AwsKinesisTargetWriter(
         } finally {
             buffer.clear()
         }
+
     }
 
     private fun createMetrics(
@@ -275,7 +315,7 @@ class AwsKinesisTargetWriter(
         runBlocking {
             metricsCollector?.put(
                 adapterID,
-                metricsCollector?.buildValueDataPoint(adapterID, MetricsCollector.METRICS_MEMORY, MemoryMonitor.getUsedMemoryMB().toDouble(),MetricUnits.MEGABYTES ),
+                metricsCollector?.buildValueDataPoint(adapterID, MetricsCollector.METRICS_MEMORY, MemoryMonitor.getUsedMemoryMB().toDouble(), MetricUnits.MEGABYTES),
                 metricsCollector?.buildValueDataPoint(adapterID, METRICS_WRITES, 1.0, MetricUnits.COUNT, metricDimensions),
                 metricsCollector?.buildValueDataPoint(adapterID, METRICS_MESSAGES, buffer.size.toDouble(), MetricUnits.COUNT, metricDimensions),
                 metricsCollector?.buildValueDataPoint(adapterID, METRICS_WRITE_DURATION, writeDurationInMillis, MetricUnits.MILLISECONDS, metricDimensions),
@@ -289,24 +329,55 @@ class AwsKinesisTargetWriter(
     private fun buildRequest(streamName: String?) =
         PutRecordsRequest.builder()
             .streamName(streamName)
-            .records(List(buffer.items.size) { i ->
-                PutRecordsRequestEntry.builder()
-                    .partitionKey("$i")
-                    .data(
-                        if (targetConfig.compressionType == CompressionType.NONE) {
-                            SdkBytes.fromUtf8String(buffer.payloads[i])
-                        } else {
-                            val compressedData = ByteArrayOutputStream(2048)
-                            Compress.compress(
-                                targetConfig.compressionType, buffer.payloads[i].byteInputStream(), compressedData, entryName = UUID.randomUUID()
-                                    .toString()
-                            )
-                            SdkBytes.fromByteArray(compressedData.toByteArray())
-                        }
-                    )
-                    .build()
-            })
+            .records(
+                if (customPayload) {
+                    buildCustomPayloadRecords()
+                } else {
+                    buildRecords()
+                })
             .build()
+
+    private fun buildRecords(): List<PutRecordsRequestEntry?> = List(buffer.items.size) { i ->
+        PutRecordsRequestEntry.builder()
+            .partitionKey("$i")
+            .data(
+                if (targetConfig.compressionType == CompressionType.NONE) {
+                    SdkBytes.fromUtf8String(buffer.payloads[i])
+                } else {
+                    val compressedData = ByteArrayOutputStream(2048)
+                    Compress.compress(targetConfig.compressionType, buffer.payloads[i].byteInputStream(), compressedData, entryName = UUID.randomUUID().toString())
+                    SdkBytes.fromByteArray(compressedData.toByteArray())
+                }
+            )
+            .build()
+    }
+
+    private fun buildCustomPayloadRecords(): List<PutRecordsRequestEntry> {
+        val log = logger.getCtxLoggers(className, "buildCustomPayloadRecords")
+
+        return sequence {
+
+            buffer.messages.forEach { targetData: TargetData ->
+                try {
+                    yield(SdkBytes.fromByteArray(formatter!!.apply(targetData)))
+                } catch (e: Exception) {
+                    log.error("Error formatting record target data, $e")
+                }
+            }
+        }.mapIndexed { i, bytes: SdkBytes ->
+            val data = if (targetConfig.compressionType == CompressionType.NONE) {
+                bytes
+            } else {
+                val compressedData = ByteArrayOutputStream(2048)
+                Compress.compress(targetConfig.compressionType, bytes.asInputStream(), compressedData, entryName = UUID.randomUUID().toString())
+                SdkBytes.fromByteArray(compressedData.toByteArray())
+            }
+            PutRecordsRequestEntry.builder()
+                .partitionKey("$i")
+                .data(data)
+                .build()
+        }.toList<PutRecordsRequestEntry>()
+    }
 
     private val config: AwsKinesisWriterConfiguration
         get() = clientHelper.writerConfig(configReader, AWS_KINESIS_TARGET)

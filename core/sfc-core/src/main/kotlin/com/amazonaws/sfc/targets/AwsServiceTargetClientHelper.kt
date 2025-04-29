@@ -61,4 +61,5 @@ class AwsServiceTargetClientHelper(
         return cf.targets[targetID]
                ?: throw ConfigurationException("Configuration for type $configType for target with ID \"$targetID\" does not exist, existing targets are ${cf.targets.keys}", CONFIG_TARGETS)
     }
+
 }

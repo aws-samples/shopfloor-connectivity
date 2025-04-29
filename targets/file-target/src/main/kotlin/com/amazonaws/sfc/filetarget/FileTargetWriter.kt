@@ -24,6 +24,8 @@ import com.amazonaws.sfc.system.DateTime.systemCalendar
 import com.amazonaws.sfc.system.DateTime.systemCalendarUTC
 import com.amazonaws.sfc.targets.TargetDataChannel
 import com.amazonaws.sfc.targets.TargetException
+import com.amazonaws.sfc.targets.TargetFormatter
+import com.amazonaws.sfc.targets.TargetFormatterFactory
 import com.amazonaws.sfc.util.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.selects.select
@@ -51,6 +53,12 @@ class FileTargetWriter(
         logger.getCtxInfoLog(className, "")(BuildConfig.toString())
     }
 
+    private val formatter: TargetFormatter? by lazy {
+        TargetFormatterFactory.createTargetFormatter(configReader, targetID,targetConfig, logger)
+    }
+
+    private val customPayload = (formatter != null)
+
     private val metricDimensions = mapOf(
         METRICS_DIMENSION_SOURCE to targetID,
         MetricsCollector.METRICS_DIMENSION_TYPE to className
@@ -58,13 +66,13 @@ class FileTargetWriter(
 
     private val targetConfig: FileTargetConfiguration
         get() = config.targets[targetID]
-            ?: throw TargetException("Configuration for type $FILE_TARGET for target with ID \"$targetID\" does not exist, existing targets are ${config.targets.keys}")
+                ?: throw TargetException("Configuration for type $FILE_TARGET for target with ID \"$targetID\" does not exist, existing targets are ${config.targets.keys}")
 
     private val transformation by lazy { if (targetConfig.template != null) OutputTransformation(targetConfig.template!!, logger) else null }
 
     private val targetDataChannel = TargetDataChannel.create(targetConfig, "$className:targetDataChannel")
 
-    private val buffer = TargetDataBuffer(storeFullMessage = false)
+    private val buffer = TargetDataBuffer(storeFullMessage = customPayload)
     private val targetResults = if (resultHandler != null) TargetResultBufferedHelper(targetID, resultHandler, logger) else null
 
     private val metricsCollector: MetricsCollector? by lazy {
@@ -114,18 +122,30 @@ class FileTargetWriter(
                 select {
                     targetDataChannel.onReceive { targetData ->
 
-                        val content = if (transformation == null)
-                            targetData.toJson(config.elementNames, targetConfig.unquoteNumericJsonValues)
-                        else
-                            transformation!!.transform(targetData, config.elementNames, targetConfig.templateEpochTimestamp) ?: ""
+                        if (customPayload) {
+                            val formattedItemSize = try {
+                                (formatter?.itemPayloadSize(targetData) ?: altSize(targetData))
+                            } catch (e: Exception) {
+                                log.errorEx("Error getting payload size using custom formatter", e)
+                                altSize(targetData)
+                            }
+                            buffer.add(targetData, formattedItemSize)
 
-                        buffer.add(targetData, content)
+                        } else {
 
-                        log.trace("Received message, buffered items is ${buffer.size} with a total size of ${buffer.payloadSize.byteCountString}")
+                            val content = if (transformation == null)
+                                targetData.toJson(config.elementNames, targetConfig.unquoteNumericJsonValues)
+                            else
+                                transformation!!.transform(targetData, config.elementNames, targetConfig.templateEpochTimestamp) ?: ""
+
+                            buffer.add(targetData, content)
+                        }
+
+                        log.trace("Received message, buffered items is ${buffer.size}${if (!customPayload) " with a total payload size of ${buffer.payloadSize.byteCountString}" else ""}")
 
                         // flush if reached buffer size
-                        if (buffer.payloadSize >= targetConfig.bufferSize) {
-                            log.trace("${targetConfig.bufferSize.byteCountString} buffer size reached, flushing buffer")
+                        if (buffer.payloadSize >= targetConfig.bufferSize || ((targetConfig.bufferCount != null) && buffer.size >= targetConfig.bufferCount!!)) {
+                            log.trace("${targetConfig.bufferSize.byteCountString} buffer size reached or buffer count, flushing buffer")
                             timer.cancel()
                             flush()
                             timer = timerJob()
@@ -144,6 +164,8 @@ class FileTargetWriter(
         }
 
     }
+
+    private fun altSize(targetData: TargetData): Int = if (targetConfig.bufferCount != null) 0 else targetData.toJson(config.elementNames, targetConfig.unquoteNumericJsonValues).length
 
     private fun CoroutineScope.timerJob() = launch("Timeout Timer") {
         try {
@@ -200,7 +222,7 @@ class FileTargetWriter(
         runBlocking {
             metricsCollector?.put(
                 adapterID,
-                metricsCollector?.buildValueDataPoint(adapterID, MetricsCollector.METRICS_MEMORY, MemoryMonitor.getUsedMemoryMB().toDouble(),MetricUnits.MEGABYTES ),
+                metricsCollector?.buildValueDataPoint(adapterID, MetricsCollector.METRICS_MEMORY, MemoryMonitor.getUsedMemoryMB().toDouble(), MetricUnits.MEGABYTES),
                 metricsCollector?.buildValueDataPoint(adapterID, METRICS_WRITES, 1.0, MetricUnits.COUNT, metricDimensions),
                 metricsCollector?.buildValueDataPoint(adapterID, METRICS_MESSAGES, buffer.size.toDouble(), MetricUnits.COUNT, metricDimensions),
                 metricsCollector?.buildValueDataPoint(adapterID, METRICS_WRITE_DURATION, writeDurationInMillis, MetricUnits.MILLISECONDS, metricDimensions),
@@ -249,26 +271,32 @@ class FileTargetWriter(
         )
 
         outputStream.use { f ->
-            val jsonFormatted = tc.json && transformation == null
-            if (jsonFormatted) {
-                f.write("[")
-            }
-            buffer.payloads.forEach { line ->
-                if (!firstLine) {
-                    if (jsonFormatted) {
-                        f.write(",")
-                    }
-                    if (jsonFormatted) f.newLine()
-                } else {
-                    firstLine = false
+
+            if (customPayload) {
+                f.write(formatter!!.apply(buffer.messages).map { it.toInt().toChar() }.toCharArray())
+            } else {
+                val jsonFormatted = tc.json && transformation == null
+                if (jsonFormatted) {
+                    f.write("[")
                 }
-                f.write(line)
+                buffer.payloads.forEach { line ->
+                    if (!firstLine) {
+                        if (jsonFormatted) {
+                            f.write(",")
+                        }
+                        if (jsonFormatted) f.newLine()
+                    } else {
+                        firstLine = false
+                    }
+                    f.write(line)
+                }
+                if (jsonFormatted) {
+                    f.write("]")
+                }
+                if (transformation == null) f.newLine()
             }
-            if (jsonFormatted) {
-                f.write("]")
-            }
-            if (transformation==null) f.newLine()
         }
+
     }
 
 

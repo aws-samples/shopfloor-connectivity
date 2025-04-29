@@ -8,6 +8,7 @@ package com.amazonaws.sfc.filetarget.config
 import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_INTERVAL
 import com.amazonaws.sfc.config.ConfigurationClass
 import com.amazonaws.sfc.config.ConfigurationException
+import com.amazonaws.sfc.config.InProcessConfiguration
 import com.amazonaws.sfc.config.TargetConfiguration
 import com.amazonaws.sfc.config.Validate
 import com.amazonaws.sfc.data.Compress.CONFIG_COMPRESS
@@ -54,6 +55,11 @@ class FileTargetConfiguration : TargetConfiguration(), Validate {
      */
     val bufferSize: Int
         get() = _bufferSize * 1024  // to KB
+
+    @SerializedName(CONFIG_BUFFER_COUNT)
+    var _bufferCount: Int?  = null
+    val bufferCount : Int?
+        get() = _bufferCount
 
     @SerializedName(CONFIG_INTERVAL)
     private var _interval: Int = DEFAULT_INTERVAL // in seconds
@@ -121,6 +127,7 @@ class FileTargetConfiguration : TargetConfiguration(), Validate {
         private const val CONFIG_JSON = "Json"
         private const val CONFIG_EXTENSION = "Extension"
         private const val CONFIG_BUFFER_SIZE = "BufferSize"
+        private const val CONFIG_BUFFER_COUNT = "BufferCount"
         private const val DEFAULT_BUFFER_SIZE = 16
         private const val DEFAULT_INTERVAL = 60
 
@@ -136,6 +143,7 @@ class FileTargetConfiguration : TargetConfiguration(), Validate {
                    description: String = default._description,
                    active: Boolean = default._active,
                    template: String? = default._template,
+                   formatter : InProcessConfiguration? = default._formatter,
                    targetServer: String? = default._server,
                    compressionType: CompressionType? = default._compressionType,
                    metrics: MetricsSourceConfiguration = default._metrics,
@@ -147,6 +155,7 @@ class FileTargetConfiguration : TargetConfiguration(), Validate {
                 template = template,
                 targetServer = targetServer,
                 metrics = metrics,
+                formatter = formatter,
                 credentialProviderClient = credentialProviderClient) as FileTargetConfiguration
 
             with(instance) {

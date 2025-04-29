@@ -26,9 +26,7 @@ import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_WRITE_DURATI
 import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_WRITE_ERRORS
 import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_WRITE_SIZE
 import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_WRITE_SUCCESS
-import com.amazonaws.sfc.targets.AwsServiceTargetClientHelper
-import com.amazonaws.sfc.targets.TargetDataChannel
-import com.amazonaws.sfc.targets.TargetException
+import com.amazonaws.sfc.targets.*
 import com.amazonaws.sfc.util.*
 import com.amazonaws.sfc.util.TemplateRenderer.containsPlaceHolders
 import com.amazonaws.sfc.util.TemplateRenderer.getPlaceHolders
@@ -44,6 +42,7 @@ import software.amazon.awssdk.services.iot.model.DescribeEndpointRequest
 import software.amazon.awssdk.services.iotdataplane.IotDataPlaneClient
 import software.amazon.awssdk.services.iotdataplane.IotDataPlaneClientBuilder
 import software.amazon.awssdk.services.iotdataplane.model.PublishRequest
+import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.net.URI
 import java.util.*
@@ -97,6 +96,13 @@ class AwsIotCoreTargetWriter(
             dataClientBuilder,
             logger
         )
+
+    private val formatter: TargetFormatter? by lazy {
+        TargetFormatterFactory.createTargetFormatter(configReader, targetID, targetConfig, logger)
+    }
+
+    private val customPayload = (formatter != null)
+
 
     // Channel to pass data to be sent to target to worker that does the actual sending
     private val targetDataChannel = TargetDataChannel.create(targetConfig, "$className:targetDataChannel")
@@ -185,6 +191,7 @@ class AwsIotCoreTargetWriter(
 
 
             log.info("AWS IoT Core writer for target \"$targetID\" publishing to topics in region ${targetConfig.region}")
+
             while (isActive) {
                 try {
                     select {
@@ -193,33 +200,48 @@ class AwsIotCoreTargetWriter(
                             targetResults?.add(targetData)
 
                             val topicMessages = mapTargetDataToTopics(targetData)
-                            if (topicMessages.size> 1){
+
+                            if (topicMessages.size > 1) {
                                 log.trace("Message ${targetData.serial} mapped to topics ${topicMessages.keys}")
                             }
 
-
                             topicMessages.forEach { (topic, topicTargetData) ->
-                                val topicBuffer = buffers.computeIfAbsent(topic) { TargetDataBuffer(storeFullMessage = false) }
+                                val topicBuffer = buffers.computeIfAbsent(topic) { TargetDataBuffer(storeFullMessage = customPayload) }
                                 val timer = timers.computeIfAbsent(topic) { createTimer(topic) }
 
-                                val messagePayload = buildPayload(topicTargetData)
+                                val (messagePayload: String?, payloadSize: Int) = if (customPayload) {
+                                    val formattedItemSize = try {
+                                        (formatter?.itemPayloadSize(targetData) ?: altSize(targetData))
+                                    } catch (e: Exception) {
+                                        log.errorEx("Error getting payload size using custom formatter", e)
+                                        altSize(targetData)
+                                    }
+                                    null to formattedItemSize
+                                } else {
+                                    val messagePayload = buildPayload(topicTargetData)
+                                    messagePayload to messagePayload.length
+                                }
 
-                                if (checkMessagePayloadSize(targetData, messagePayload.length, log)) {
-                                    if (exceedBufferOrMaxPayloadWhenBufferingMessage(topicBuffer, messagePayload)) {
+                                if (checkMessagePayloadSize(targetData, payloadSize, log)) {
+                                    if (exceedBufferOrMaxPayloadWhenBufferingMessage(topicBuffer, payloadSize)) {
                                         log.trace("Batch size of ${targetConfig.batchSize.byteCountString} or AWS IoT Core max payload ise of ${AWS_IOT_CORE_MAX_PAYLOAD_SIZE.byteCountString} reached")
                                         timers[topic] = writeBufferedMessages(topicBuffer, topic, timer)
                                     }
                                 }
 
-                                topicBuffer.add(targetData, messagePayload)
+                                if (customPayload) {
+                                    topicBuffer.add(targetData, payloadSize)
+                                } else {
+                                    topicBuffer.add(targetData, messagePayload)
+                                }
 
-                                log.trace("Received message, buffered items for topic \"$topic\" is ${topicBuffer.size} with a total size of ${topicBuffer.payloadSize.byteCountString}")
+
                                 if (targetData.noBuffering || !doesBatching || bufferReachedMaxSizeOrMessages(topicBuffer, topic, log)) {
                                     timers[topic] = writeBufferedMessages(topicBuffer, topic, timer)
                                 }
                             }
-
                         }
+
 
                         timerChannel.onReceive { topic ->
                             val topicBuffer = buffers[topic]
@@ -240,7 +262,8 @@ class AwsIotCoreTargetWriter(
                     } else {
                         targetResults?.errorBuffered()
                     }
-                    timers.keys.forEach { timers[it]?.cancel()
+                    timers.keys.forEach {
+                        timers[it]?.cancel()
                         timers[it] = createTimer(it)
                     }
                 }
@@ -257,6 +280,8 @@ class AwsIotCoreTargetWriter(
         }
     }
 
+    private fun altSize(targetData: TargetData): Int = if (targetConfig.batchCount != 0) 0 else targetData.toJson(config.elementNames, targetConfig.unquoteNumericJsonValues).length
+
 
     private fun checkMessagePayloadSize(targetData: TargetData, payloadSize: Int, log: Logger.ContextLogger): Boolean {
         if (usesCompression) return true
@@ -267,16 +292,16 @@ class AwsIotCoreTargetWriter(
         } else true
     }
 
-    private fun exceedBufferOrMaxPayloadWhenBufferingMessage(buffer: TargetDataBuffer, payload: String): Boolean {
+    private fun exceedBufferOrMaxPayloadWhenBufferingMessage(buffer: TargetDataBuffer, payloadSize: Int): Boolean {
         if (usesCompression) return false
-        val bufferedPayloadSizeWhenAddingMessage = payload.length + (2 + (buffer.size - 1)) + buffer.payloadSize
+        val bufferedPayloadSizeWhenAddingMessage = payloadSize + (2 + (buffer.size - 1)) + buffer.payloadSize
         val bufferSizeExceededWhenAddingMessage = (targetConfig.batchSize > 0) && (bufferedPayloadSizeWhenAddingMessage > targetConfig.batchSize)
         val maxPayloadSizeExceededWhenAddingMessage = bufferedPayloadSizeWhenAddingMessage > AWS_IOT_CORE_MAX_PAYLOAD_SIZE
         val reachedMaxSizeWhenAddingToBuffer = (bufferSizeExceededWhenAddingMessage || maxPayloadSizeExceededWhenAddingMessage)
         return reachedMaxSizeWhenAddingToBuffer
     }
 
-    private fun bufferReachedMaxSizeOrMessages(buffer : TargetDataBuffer, topic : String,log: Logger.ContextLogger): Boolean {
+    private fun bufferReachedMaxSizeOrMessages(buffer: TargetDataBuffer, topic: String, log: Logger.ContextLogger): Boolean {
 
         val reachedBufferCount = if (targetConfig.batchCount > 0) buffer.size >= targetConfig.batchCount else false
         if (reachedBufferCount) log.trace("${targetConfig.batchCount} batch count for topic $topic reached")
@@ -301,9 +326,12 @@ class AwsIotCoreTargetWriter(
     private val transformation by lazy { if (targetConfig.template != null) OutputTransformation(targetConfig.template!!, logger) else null }
 
     private fun buildPayload(targetData: TargetData): String =
-        if (transformation == null) targetData.toJson(config.elementNames, targetConfig.unquoteNumericJsonValues) else transformation!!.transform(targetData, config.elementNames, targetConfig.templateEpochTimestamp) ?: ""
+        if (transformation == null) targetData.toJson(config.elementNames, targetConfig.unquoteNumericJsonValues) else transformation!!.transform(
+            targetData,
+            config.elementNames,
+            targetConfig.templateEpochTimestamp) ?: ""
 
-    private fun writeBufferedMessages(buffer: TargetDataBuffer, topic : String, timer: Job) : Job {
+    private fun writeBufferedMessages(buffer: TargetDataBuffer, topic: String, timer: Job): Job {
         if (timer.isActive) timer.cancel()
 
         val log = logger.getCtxLoggers(className, "writeBufferedMessages")
@@ -311,40 +339,53 @@ class AwsIotCoreTargetWriter(
             return createTimer(topic)
         }
 
-        val (request, payloadSize) = buildRequest(buffer, topic)
+        val request = buildRequest(buffer, topic)
+        val payloadSize = request.payload().asByteArray().size
 
         return try {
-            if (payloadSize > AWS_IOT_CORE_MAX_PAYLOAD_SIZE) {
-                targetResults?.errorBuffered()
-                log.error("Size of MQTT payload for topic $topic is $payloadSize bytes, max payload size of AWS IoT core is $AWS_IOT_CORE_MAX_PAYLOAD_SIZE bytes, reduce or set $CONFIG_BATCH_SIZE, $CONFIG_BATCH_COUNT, $CONFIG_BATCH_INTERVAL for this target")
-                runBlocking { metricsCollector?.put(targetID, METRICS_WRITE_ERRORS, 1.0, MetricUnits.COUNT, metricDimensions) }
-                targetResults?.ackBuffered()
-                createTimer(topic)
-            } else {
-                val duration = measureTime {
 
-                    clientHelper.executeServiceCallWithRetries {
-                        try {
-                            log.trace("Publishing to topic $topic")
-                            val resp = iotDataPlaneClient.publish(request)
-                            log.trace("AWS IoT Core publish response ${resp.sdkHttpResponse().statusCode()}")
-                        } catch (e: AwsServiceException) {
-                            log.trace("AWS IoT Core publish error ${e.message}")
-                            // Check the exception, it will throw an AwsServiceRetryableException if the error is recoverable
-                            clientHelper.processServiceException(e)
-                            // Non recoverable service exceptions
-                            throw e
-                        }
-                    }
+            when {
+                (payloadSize == 0) -> {
+                    log.trace("No payload to publish to topic $topic")
+                    targetResults?.errorBuffered()
+                    buffer.clear()
+                    createTimer(topic)
                 }
 
-                val compressedStr = if (targetConfig.compressionType != CompressionType.NONE) " compressed " else " "
-                val itemStr = if (doesBatching) " containing ${buffer.size} items " else " "
-                log.trace("Published MQTT${compressedStr}message to topic \"$topic\" with size of ${payloadSize.byteCountString} ${itemStr}in $duration")
+                (payloadSize > AWS_IOT_CORE_MAX_PAYLOAD_SIZE) -> {
+                    targetResults?.errorBuffered()
+                    log.error("Size of MQTT payload for topic $topic is $payloadSize bytes, max payload size of AWS IoT core is $AWS_IOT_CORE_MAX_PAYLOAD_SIZE bytes, reduce or set $CONFIG_BATCH_SIZE, $CONFIG_BATCH_COUNT, $CONFIG_BATCH_INTERVAL for this target")
+                    runBlocking { metricsCollector?.put(targetID, METRICS_WRITE_ERRORS, 1.0, MetricUnits.COUNT, metricDimensions) }
+                    createTimer(topic)
+                }
 
-                createMetrics(targetID, metricDimensions, buffer.size, payloadSize, duration)
-                createTimer(topic)
+                else -> {
+                    val duration = measureTime {
+                        clientHelper.executeServiceCallWithRetries {
+                            try {
+                                log.trace("Publishing to topic $topic")
+                                val resp = iotDataPlaneClient.publish(request)
+                                log.trace("AWS IoT Core publish response ${resp.sdkHttpResponse().statusCode()}")
+                                targetResults?.ackBuffered()
+                            } catch (e: AwsServiceException) {
+                                log.trace("AWS IoT Core publish error ${e.message}")
+                                // Check the exception, it will throw an AwsServiceRetryableException if the error is recoverable
+                                clientHelper.processServiceException(e)
+                                // Non recoverable service exceptions
+                                throw e
+                            }
+                        }
+                    }
+
+                    val compressedStr = if (targetConfig.compressionType != CompressionType.NONE) " compressed " else " "
+                    val itemStr = if (doesBatching) " containing ${buffer.size} items " else " "
+                    log.trace("Published MQTT${compressedStr}message to topic \"$topic\" with size of ${payloadSize.byteCountString} ${itemStr}in $duration")
+
+                    createMetrics(targetID, metricDimensions, buffer.size, payloadSize, duration)
+                    createTimer(topic)
+                }
             }
+
         } catch (e: Exception) {
             val throttled = (e is SdkClientException && e.suppressedExceptions.any { (it.message ?: "").lowercase().contains("throttled") })
             val message = "Error writing to topic \"${targetConfig.topicNameTemplate}\", ${if (throttled) "throttled" else "${e.message}"}"
@@ -356,39 +397,51 @@ class AwsIotCoreTargetWriter(
         }
     }
 
-    private fun buildRequest(buffer : TargetDataBuffer, topic : String): Pair<PublishRequest, Int> {
+    private fun buildRequest(buffer: TargetDataBuffer, topic: String): PublishRequest {
 
         val builder = PublishRequest.builder()
         builder.topic(topic)
 
-        val payload = if (doesBatching)
-            if (targetConfig.arrayWhenBuffered)
-                buffer.payloads.joinToString(prefix = "[", postfix = "]", separator = ",") { it }
-            else
-                buffer.payloads.joinToString(separator = "") { it }
-        else
-            buffer.payloads.first()
+        val payload: SdkBytes? = if (customPayload) {
+            try {
+                val binaryPayload = formatter!!.apply(buffer.messages)
+                if (targetConfig.compressionType == CompressionType.NONE) {
+                    SdkBytes.fromByteArray(binaryPayload)
+                } else
+                    SdkBytes.fromByteArray(compressPayload(ByteArrayInputStream(binaryPayload), binaryPayload.size))
+            } catch (e: Exception) {
+                logger.getCtxErrorLog(className, "targetWriter")("Error executing custom formatter for target \"$targetID\", $e")
+                SdkBytes.fromByteArray(ByteArray(0))
+            }
 
-        return if (targetConfig.compressionType == CompressionType.NONE) {
-            builder.payload(SdkBytes.fromUtf8String(payload))
-            builder.retain(targetConfig.retain)
-            builder.build() to payload.length
         } else {
-            val compressedBytes = compressPayload(payload)
-            builder.payload(SdkBytes.fromByteArray(compressedBytes))
-            builder.retain(targetConfig.retain)
-            builder.build() to compressedBytes.size
+
+            val stringPayload = if (doesBatching)
+                if (targetConfig.arrayWhenBuffered)
+                    buffer.payloads.joinToString(prefix = "[", postfix = "]", separator = ",") { it }
+                else
+                    buffer.payloads.joinToString(separator = "") { it }
+            else
+                buffer.payloads.first()
+
+            if (targetConfig.compressionType == CompressionType.NONE)
+                SdkBytes.fromUtf8String(stringPayload)
+            else
+                SdkBytes.fromByteArray(compressPayload(stringPayload.byteInputStream(Charsets.UTF_8), stringPayload.length))
 
         }
+
+        builder.payload(payload)
+        builder.retain(targetConfig.retain)
+        return builder.build()
     }
 
-    private fun compressPayload(content: String): ByteArray {
-        val inputStream = content.byteInputStream(Charsets.UTF_8)
+    private fun compressPayload(content: ByteArrayInputStream, size: Int): ByteArray {
         val outputStream = ByteArrayOutputStream(2048)
-        Compress.compress(targetConfig.compressionType, inputStream, outputStream, entryName = "${UUID.randomUUID()}")
+        Compress.compress(targetConfig.compressionType, content, outputStream, entryName = "${UUID.randomUUID()}")
         val log = logger.getCtxLoggers(className, "compressContent")
         val compressedData = outputStream.toByteArray()
-        log.info("Used ${targetConfig.compressionType} compression to compress ${content.length.byteCountString} to ${compressedData.size.byteCountString} bytes, ${(100 - (compressedData.size.toFloat() / content.length.toFloat()) * 100).toInt()}% size reduction")
+        log.info("Used ${targetConfig.compressionType} compression to compress ${size.byteCountString} to ${compressedData.size.byteCountString} bytes, ${(100 - (compressedData.size.toFloat() / size.toFloat()) * 100).toInt()}% size reduction")
         return compressedData
     }
 

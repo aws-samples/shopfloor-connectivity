@@ -9,6 +9,7 @@ import com.amazonaws.sfc.awss3.config.AwsS3TargetConfiguration
 import com.amazonaws.sfc.awss3.config.AwsS3WriterConfiguration
 import com.amazonaws.sfc.awss3.config.AwsS3WriterConfiguration.Companion.AWS_S3
 import com.amazonaws.sfc.config.ConfigReader
+import com.amazonaws.sfc.config.TargetConfiguration
 import com.amazonaws.sfc.data.*
 import com.amazonaws.sfc.log.Logger
 import com.amazonaws.sfc.metrics.*
@@ -22,9 +23,7 @@ import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_WRITE_SIZE
 import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_WRITE_SUCCESS
 import com.amazonaws.sfc.system.DateTime
 import com.amazonaws.sfc.system.DateTime.systemCalendarUTC
-import com.amazonaws.sfc.targets.AwsServiceTargetClientHelper
-import com.amazonaws.sfc.targets.TargetDataChannel
-import com.amazonaws.sfc.targets.TargetException
+import com.amazonaws.sfc.targets.*
 import com.amazonaws.sfc.util.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
@@ -35,6 +34,7 @@ import software.amazon.awssdk.awscore.exception.AwsServiceException
 import software.amazon.awssdk.core.sync.RequestBody
 import software.amazon.awssdk.services.s3.S3Client
 import software.amazon.awssdk.services.s3.model.PutObjectRequest
+import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.util.*
 
@@ -73,11 +73,18 @@ class AwsS3TargetWriter(
         clientHelper.targetConfig(config, targetID, AWS_S3)
     }
 
+    private val formatter: TargetFormatter? by lazy {
+        TargetFormatterFactory.createTargetFormatter(configReader, targetID, targetConfig, logger)
+    }
+
+    private val customPayload = (formatter != null)
+
+
     private val targetDataChannel = TargetDataChannel.create(targetConfig, "$className::targetDatChannel")
 
     private val scope = buildScope("S3 Target")
     private val targetResults = if (resultHandler != null) TargetResultBufferedHelper(targetID, resultHandler, logger) else null
-    private val buffer = TargetDataBuffer(storeFullMessage = false)
+    private val buffer = TargetDataBuffer(storeFullMessage = customPayload)
 
     private val config: AwsS3WriterConfiguration
         get() {
@@ -123,7 +130,7 @@ class AwsS3TargetWriter(
         if (metricsCollector != null) InProcessMetricsProvider(metricsCollector!!, logger) else null
     }
 
-    private fun buildPayload(targetData: TargetData): String =
+    private fun buildStringPayload(targetData: TargetData): String =
         if (transformation == null) targetData.toJson(config.elementNames, targetConfig.unquoteNumericJsonValues) else transformation!!.transform(
             targetData,
             config.elementNames,
@@ -133,23 +140,40 @@ class AwsS3TargetWriter(
 
         var timer = timerJob()
 
-        val loggers = logger.getCtxLoggers(AwsS3TargetWriter::class.java.simpleName, "writer")
-        loggers.info("AWS S3 writer for target \"$targetID\" writing to S3 bucket \"${targetConfig.bucketName}\"  in region ${targetConfig.region}")
+        val log = logger.getCtxLoggers(AwsS3TargetWriter::class.java.simpleName, "writer")
+        log.info("AWS S3 writer for target \"$targetID\" writing to S3 bucket \"${targetConfig.bucketName}\"  in region ${targetConfig.region}")
 
         while (isActive) {
             try {
                 select {
                     targetDataChannel.onReceive { targetData ->
-                        val payload = buildPayload(targetData)
+
+                        val (payload: String?, payloadSize: Int) = if (customPayload) {
+                            val formattedItemSize = try {
+                                (formatter?.itemPayloadSize(targetData) ?: altSize(targetData))
+                            } catch (e: Exception) {
+                                log.errorEx("Error getting payload size using custom formatter", e)
+                                altSize(targetData)
+                            }
+                            null to formattedItemSize
+                        } else {
+                            val messagePayload = buildStringPayload(targetData)
+                            messagePayload to messagePayload.length
+                        }
 
                         targetResults?.add(targetData)
-                        buffer.add(targetData, payload)
 
-                        loggers.trace("Received message, buffered items is ${buffer.size} with a total size of ${buffer.payloadSize.byteCountString}")
+                        if (customPayload) {
+                            buffer.add(targetData, payloadSize)
+                        } else {
+                            buffer.add(targetData, payload)
+                        }
+
+                        log.trace("Received message, buffered items is ${buffer.size}${if (!customPayload) " with a total payload size of ${buffer.payloadSize.byteCountString}" else ""}")
 
                         // flush if reached buffer size
                         if (targetData.noBuffering || buffer.payloadSize >= targetConfig.bufferSize) {
-                            loggers.trace("${targetConfig.bufferSize.byteCountString}  buffer size reached, flushing buffer")
+                            log.trace("${targetConfig.bufferSize.byteCountString}  buffer size reached, flushing buffer")
                             timer.cancel()
                             flush()
                             timer = timerJob()
@@ -157,18 +181,21 @@ class AwsS3TargetWriter(
                         }
                     }
                     timer.onJoin {
-                        loggers.trace("${targetConfig.interval / 1000} seconds buffer interval reached, flushing buffer")
+                        log.trace("${targetConfig.interval / 1000} seconds buffer interval reached, flushing buffer")
                         flush()
                         timer = timerJob()
                     }
                 }
             } catch (e: Exception) {
                 if (!e.isJobCancellationException)
-                    loggers.errorEx("Error in writer", e)
+                    log.errorEx("Error in writer", e)
             }
         }
 
     }
+
+    private fun altSize(targetData: TargetData): Int = if (targetConfig.bufferSize != 0) 0 else targetData.toJson(config.elementNames, targetConfig.unquoteNumericJsonValues).length
+
 
     private fun flush() {
 
@@ -248,26 +275,42 @@ class AwsS3TargetWriter(
         }
     }
 
-    private fun buildContent(key: String): RequestBody {
-        val content = if (targetConfig.arrayWhenBuffered)
-            buffer.payloads.joinToString(prefix = "[", postfix = "]", separator = ",")
-        else
-            buffer.payloads.joinToString(separator = "")
+    private fun buildContent(key: String): RequestBody =
+        if (customPayload) {
+            RequestBody.fromBytes(
+                try {
+                    val binaryPayload = formatter!!.apply(buffer.messages)
+                    if (targetConfig.compressionType == CompressionType.NONE) {
+                        binaryPayload
+                    } else
+                        compressPayload(key, ByteArrayInputStream(binaryPayload), binaryPayload.size)
+                } catch (e: Exception) {
+                    logger.getCtxErrorLog(className, "targetWriter")("Error executing custom formatter for target \"$targetID\", $e")
+                    ByteArray(0)
+                })
+        } else {
+
+            val stringPayload = if (targetConfig.arrayWhenBuffered)
+                buffer.payloads.joinToString(prefix = "[", postfix = "]", separator = ",")
+            else
+                buffer.payloads.joinToString(separator = "")
 
 
-        return if (targetConfig.compressionType == CompressionType.NONE) RequestBody.fromString(content) else {
-            val compressedData = compressContent(content, key)
-            RequestBody.fromBytes(compressedData)
+            if (targetConfig.compressionType == CompressionType.NONE)
+                RequestBody.fromString(stringPayload)
+            else {
+                val compressedData = compressPayload(key, stringPayload.byteInputStream(), stringPayload.length)
+                RequestBody.fromBytes(compressedData)
+            }
         }
-    }
 
-    private fun compressContent(content: String, key: String): ByteArray {
-        val inputStream = content.byteInputStream(Charsets.UTF_8)
+
+    private fun compressPayload(key: String, content: ByteArrayInputStream, size: Int): ByteArray {
         val outputStream = ByteArrayOutputStream(2048)
-        Compress.compress(targetConfig.compressionType, inputStream, outputStream, entryName = key.split("/").last())
-        val info = logger.getCtxInfoLog(className, "buildContent")
+        Compress.compress(targetConfig.compressionType, content, outputStream, entryName = key.split("/").last())
+        val log = logger.getCtxLoggers(className, "compressContent")
         val compressedData = outputStream.toByteArray()
-        info("Used ${targetConfig.compressionType} compression to compress ${content.length.byteCountString} to ${compressedData.size.byteCountString} bytes, ${(100 - (compressedData.size.toFloat() / content.length.toFloat()) * 100).toInt()}% size reduction")
+        log.info("Used ${targetConfig.compressionType} compression to compress ${size.byteCountString} to ${compressedData.size.byteCountString} bytes, ${(100 - (compressedData.size.toFloat() / size.toFloat()) * 100).toInt()}% size reduction")
         return compressedData
     }
 

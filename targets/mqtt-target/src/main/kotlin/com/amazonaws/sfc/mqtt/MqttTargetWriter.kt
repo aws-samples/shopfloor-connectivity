@@ -29,6 +29,8 @@ import com.amazonaws.sfc.mqtt.config.MqttWriterConfiguration
 import com.amazonaws.sfc.mqtt.config.MqttWriterConfiguration.Companion.MQTT_TARGET
 import com.amazonaws.sfc.targets.TargetDataChannel
 import com.amazonaws.sfc.targets.TargetException
+import com.amazonaws.sfc.targets.TargetFormatter
+import com.amazonaws.sfc.targets.TargetFormatterFactory
 import com.amazonaws.sfc.util.*
 import com.amazonaws.sfc.util.TemplateRenderer.containsPlaceHolders
 import com.amazonaws.sfc.util.TemplateRenderer.getPlaceHolders
@@ -39,6 +41,7 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.selects.select
 import org.eclipse.paho.client.mqttv3.MqttClient
 import org.eclipse.paho.client.mqttv3.MqttMessage
+import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
@@ -72,6 +75,12 @@ class MqttTargetWriter(
     private val doesBatching by lazy { targetConfig.batchSize != 0 || targetConfig.batchCount != 0 || targetConfig.batchInterval != Duration.INFINITE }
     private val usesCompression = targetConfig.compressionType != CompressionType.NONE
 
+    private val formatter: TargetFormatter? by lazy {
+        TargetFormatterFactory.createTargetFormatter(configReader, targetID,targetConfig, logger)
+    }
+
+    private val customPayload = (formatter != null)
+
     private var _mqttClient: MqttClient? = null
     private suspend fun getClient(context: CoroutineContext): MqttClient {
 
@@ -81,7 +90,11 @@ class MqttTargetWriter(
         while (_mqttClient == null && context.isActive && retries < targetConfig.connectRetries) {
             try {
                 val mqttHelper = MqttHelper(targetConfig.mqttConnectionOptions, logger)
-                _mqttClient = mqttHelper.buildClient("${className}_${targetID}_${getHostName()}_${UUID.randomUUID()}")
+                val clientId = if (targetConfig.clientId.isEmpty())
+                    "${className}_${targetID}_${getHostName()}_${UUID.randomUUID()}"
+                else
+                    targetConfig.clientId
+                _mqttClient = mqttHelper.buildClient(clientId)
             } catch (e: Exception) {
                 logger.getCtxErrorLogEx(className, "mqttClient")("Error creating and connecting mqttClient", e)
             }
@@ -149,22 +162,37 @@ class MqttTargetWriter(
 
                             topicMessages.forEach { (topic, topicTargetData) ->
 
-                                val topicBuffer = buffers.computeIfAbsent(topic) { TargetDataBuffer(storeFullMessage = false) }
+                                val topicBuffer = buffers.computeIfAbsent(topic) { TargetDataBuffer(storeFullMessage = customPayload) }
                                 val timer = timers.computeIfAbsent(topic) { createTimer(topic) }
 
-                                val messagePayload = buildPayload(topicTargetData)
+                                val (messagePayload: String?, payloadSize: Int) = if (customPayload) {
+                                    val formattedItemSize = try {
+                                        (formatter?.itemPayloadSize(targetData) ?: altSize(topicTargetData))
+                                    } catch (e: Exception) {
+                                        log.errorEx("Error getting payload size using custom formatter", e)
+                                        altSize(topicTargetData)
+                                    }
+                                    null to formattedItemSize
+                                } else {
+                                    val messagePayload = buildPayload(topicTargetData)
+                                    messagePayload to messagePayload.length
+                                }
 
-                                if (checkMessagePayloadSize(targetData, messagePayload.length, log)) {
+                                if (checkMessagePayloadSize(targetData, payloadSize, log)) {
 
-                                    if (exceedBufferOrMaxPayloadWhenBufferingMessage(topicBuffer, messagePayload)) {
+                                    if (exceedBufferOrMaxPayloadWhenBufferingMessage(topicBuffer, payloadSize)) {
                                         log.trace("Batch size of ${targetConfig.batchSize.byteCountString}${if (targetConfig.maxPayloadSize != null) " or ${targetConfig.maxPayloadSize!!.byteCountString}" else ""} for topic $topic reached")
                                         timers[topic] = writeBufferedMessages(topicBuffer, topic, timer)
                                     }
 
-                                    topicBuffer.add(targetData, messagePayload)
+                                    if (customPayload) {
+                                        topicBuffer.add(targetData, payloadSize)
+                                    } else {
+                                        topicBuffer.add(targetData, messagePayload)
+                                    }
 
-                                    log.trace("Received message, buffered size for topic \"$topic\" is $topicBuffer.payloadSize.byteCountString}")
 
+                                    log.trace("Received message, buffered items for topic \"$topic\" is ${topicBuffer.size}${if (!customPayload) " with a total payload size of ${topicBuffer.payloadSize.byteCountString}" else ""}")
                                     if (targetData.noBuffering || !doesBatching || bufferReachedMaxSizeOrMessages(topicBuffer, topic, log)) {
                                         timers[topic] = writeBufferedMessages(topicBuffer, topic, timer)
                                     }
@@ -204,13 +232,15 @@ class MqttTargetWriter(
 
     }
 
+    private fun altSize(targetData: TargetData): Int = if (targetConfig.batchCount != 0) 0 else targetData.toJson(config.elementNames, targetConfig.unquoteNumericJsonValues).length
+
 
     private fun createTimer(channel: String): Job {
         return scope.launch {
             try {
                 delay(targetConfig.batchInterval)
                 timerChannel.send(channel)
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 // no harm done, timer is just used to guard for timeouts
             }
         }
@@ -237,9 +267,9 @@ class MqttTargetWriter(
         } else true
     }
 
-    private fun exceedBufferOrMaxPayloadWhenBufferingMessage(buffer: TargetDataBuffer, payload: String): Boolean {
+    private fun exceedBufferOrMaxPayloadWhenBufferingMessage(buffer: TargetDataBuffer, payloadSize: Int): Boolean {
         if (usesCompression) return false
-        val bufferedPayloadSizeWhenAddingMessage = payload.length + (2 + (buffer.size - 1)) + buffer.payloadSize
+        val bufferedPayloadSizeWhenAddingMessage = payloadSize + (2 + (buffer.size - 1)) + buffer.payloadSize
         val bufferSizeExceededWhenAddingMessage = (targetConfig.batchSize > 0) && (bufferedPayloadSizeWhenAddingMessage > targetConfig.batchSize)
         val maxPayloadSizeExceededWhenAddingMessage =
             targetConfig.maxPayloadSize != null && bufferedPayloadSizeWhenAddingMessage > targetConfig.maxPayloadSize!!
@@ -250,32 +280,50 @@ class MqttTargetWriter(
 
     private fun buildMqttMessage(buffer: TargetDataBuffer): MqttMessage {
         val message = MqttMessage()
-        val payload = if (doesBatching)
+
+        val payLoad: ByteArray = buildPayload(buffer)
+
+        message.payload = payLoad
+        message.isRetained = targetConfig.retain
+        message.qos = targetConfig.qos
+        return message
+    }
+
+    private fun buildPayload(buffer: TargetDataBuffer): ByteArray = if (customPayload) {
+        try {
+            val binaryPayload = formatter!!.apply(buffer.messages)
+            if (targetConfig.compressionType == CompressionType.NONE) {
+                binaryPayload
+            } else
+                compressPayload(ByteArrayInputStream(binaryPayload), binaryPayload.size)
+        } catch (e: Exception) {
+            logger.getCtxErrorLog(className, "targetWriter")("Error executing custom formatter for target \"$targetID\", $e")
+            ByteArray(0)
+        }
+    } else {
+        val stringPayload = if (doesBatching)
             if (targetConfig.arrayWhenBuffered)
                 buffer.payloads.joinToString(prefix = "[", postfix = "]", separator = ",") { it }
             else
                 buffer.payloads.joinToString(separator = "") { it }
         else
             buffer.payloads.first()
-        if (targetConfig.compressionType == CompressionType.NONE) {
-            message.payload = payload.toByteArray()
-        } else {
-            message.payload = compressPayload(payload)
 
+        if (targetConfig.compressionType == CompressionType.NONE) {
+            stringPayload.toByteArray()
+        } else {
+            compressPayload(stringPayload.byteInputStream(Charsets.UTF_8), stringPayload.length)
         }
-        message.isRetained = targetConfig.retain
-        message.qos = targetConfig.qos
-        return message
+
     }
 
 
-    private fun compressPayload(content: String): ByteArray {
-        val inputStream = content.byteInputStream(Charsets.UTF_8)
+    private fun compressPayload(content: ByteArrayInputStream, size: Int): ByteArray {
         val outputStream = ByteArrayOutputStream(2048)
-        Compress.compress(targetConfig.compressionType, inputStream, outputStream, entryName = "${UUID.randomUUID()}")
+        Compress.compress(targetConfig.compressionType, content, outputStream, entryName = "${UUID.randomUUID()}")
         val log = logger.getCtxLoggers(className, "compressContent")
         val compressedData = outputStream.toByteArray()
-        log.info("Used ${targetConfig.compressionType} compression to compress ${content.length.byteCountString} to ${compressedData.size.byteCountString} bytes, ${(100 - (compressedData.size.toFloat() / content.length.toFloat()) * 100).toInt()}% size reduction")
+        log.info("Used ${targetConfig.compressionType} compression to compress ${size.byteCountString} to ${compressedData.size.byteCountString} bytes, ${(100 - (compressedData.size.toFloat() / size.toFloat()) * 100).toInt()}% size reduction")
         return compressedData
     }
 
@@ -292,31 +340,41 @@ class MqttTargetWriter(
 
             val mqttMessage = buildMqttMessage(buffer)
 
-            if (targetConfig.maxPayloadSize != null && mqttMessage.payload.size > targetConfig.maxPayloadSize!!) {
-                log.error("Size of MQTT message ${mqttMessage.payload.size} bytes is beyond max payload size of  ${targetConfig.maxPayloadSize!!.byteCountString} for target, reduce or set $CONFIG_BATCH_SIZE, $CONFIG_BATCH_COUNT or $CONFIG_BATCH_INTERVAL for this target")
-                targetResults?.errorBuffered()
-                 metricsCollector?.put(targetID, METRICS_WRITE_ERRORS, 1.0, MetricUnits.COUNT, metricDimensions)
-                createTimer(topic)
+            return when {
 
-            } else {
-
-                val duration = measureTime {
-                    val client = runBlocking {
-                        getClient(coroutineContext)
-                    }
-
-                    withTimeout(targetConfig.publishTimeout) {
-                        client.publish(topic, mqttMessage)
-                    }
-
+                (mqttMessage.payload.size == 0) -> {
+                    log.trace("No payload to publish to topic $topic")
                     targetResults?.ackBuffered()
+                    buffer.clear()
+                    createTimer(topic)
                 }
-                val compressedStr = if (targetConfig.compressionType != CompressionType.NONE) " compressed " else " "
-                val itemStr = if (doesBatching) " containing ${buffer.size} items " else " "
-                log.trace("Published MQTT${compressedStr}message to topic\"$topic\" with size of ${mqttMessage.payload.size.byteCountString} ${itemStr}in $duration")
 
-                createMetrics(targetID, metricDimensions, buffer, mqttMessage.payload.size, duration)
-                createTimer(topic)
+                (targetConfig.maxPayloadSize != null && mqttMessage.payload.size > targetConfig.maxPayloadSize!!) -> {
+                    log.error("Size of MQTT message ${mqttMessage.payload.size} bytes is beyond max payload size of  ${targetConfig.maxPayloadSize!!.byteCountString} for target, reduce or set $CONFIG_BATCH_SIZE, $CONFIG_BATCH_COUNT or $CONFIG_BATCH_INTERVAL for this target")
+                    targetResults?.errorBuffered()
+                    metricsCollector?.put(targetID, METRICS_WRITE_ERRORS, 1.0, MetricUnits.COUNT, metricDimensions)
+                    createTimer(topic)
+                }
+
+                else -> {
+                    val duration = measureTime {
+                        val client = runBlocking {
+                            getClient(coroutineContext)
+                        }
+
+                        withTimeout(targetConfig.publishTimeout) {
+                            client.publish(topic, mqttMessage)
+                        }
+
+                        targetResults?.ackBuffered()
+                    }
+                    val compressedStr = if (targetConfig.compressionType != CompressionType.NONE) " compressed " else " "
+                    val itemStr = if (doesBatching) " containing ${buffer.size} items " else " "
+                    log.trace("Published MQTT${compressedStr}message to topic\"$topic\" with size of ${mqttMessage.payload.size.byteCountString} ${itemStr}in $duration")
+
+                    createMetrics(targetID, metricDimensions, buffer, mqttMessage.payload.size, duration)
+                    createTimer(topic)
+                }
             }
 
         } catch (e: Exception) {
@@ -372,7 +430,10 @@ class MqttTargetWriter(
     private val transformation by lazy { if (targetConfig.template != null) OutputTransformation(targetConfig.template!!, logger) else null }
 
     private fun buildPayload(targetData: TargetData): String =
-        if (transformation == null) targetData.toJson(config.elementNames, targetConfig.unquoteNumericJsonValues) else transformation!!.transform(targetData, config.elementNames, targetConfig.templateEpochTimestamp) ?: ""
+        if (transformation == null) targetData.toJson(config.elementNames, targetConfig.unquoteNumericJsonValues) else transformation!!.transform(
+            targetData,
+            config.elementNames,
+            targetConfig.templateEpochTimestamp) ?: ""
 
 
     private fun createMetrics(

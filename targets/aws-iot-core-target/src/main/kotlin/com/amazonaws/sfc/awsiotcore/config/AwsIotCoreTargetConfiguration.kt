@@ -11,6 +11,7 @@ import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_REGION
 import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_TARGETS
 import com.amazonaws.sfc.config.ConfigurationClass
 import com.amazonaws.sfc.config.ConfigurationException
+import com.amazonaws.sfc.config.InProcessConfiguration
 import com.amazonaws.sfc.config.TargetConfiguration
 import com.amazonaws.sfc.data.Compress
 import com.amazonaws.sfc.data.CompressionType
@@ -161,6 +162,7 @@ class AwsIotCoreTargetConfiguration : AwsServiceConfig, TargetConfiguration() {
                    retain: Boolean = default._retain,
                    description: String = default._description,
                    active: Boolean = default._active,
+                   formatter : InProcessConfiguration? = default._formatter,
                    template: String? = default._template,
                    unmappedTopicName: String? = default._alternateTopicName,
                    warnUnmappedTopicNameTemplate : Boolean = default._warnUnmappedTopicName,
@@ -178,6 +180,7 @@ class AwsIotCoreTargetConfiguration : AwsServiceConfig, TargetConfiguration() {
                 template = template,
                 targetServer = targetServer,
                 metrics = metrics,
+                formatter = formatter,
                 credentialProviderClient = credentialProviderClient) as AwsIotCoreTargetConfiguration
 
             with(instance) {

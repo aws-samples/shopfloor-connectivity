@@ -7,7 +7,9 @@ package com.amazonaws.sfc.j1939.config
 
 import com.amazonaws.sfc.awsiot.AwsIotCredentialProviderClientConfiguration
 import com.amazonaws.sfc.config.*
+import com.amazonaws.sfc.config.BaseSourceConfiguration.Companion.CONFIG_SOURCE_PROTOCOL_ADAPTER
 import com.amazonaws.sfc.config.ScheduleConfiguration.Companion.CONFIG_SCHEDULE_SOURCES
+import com.amazonaws.sfc.j1939.config.J1939SourceConfiguration.Companion.CONFIG_ADAPTER_CAN_SOCKET
 import com.amazonaws.sfc.log.LogLevel
 import com.google.gson.annotations.SerializedName
 import kotlin.time.Duration
@@ -21,7 +23,7 @@ class J1939Configuration : SourceAdapterBaseConfiguration() {
     private var _sources = mapOf<String, J1939SourceConfiguration>()
 
     val sources: Map<String, J1939SourceConfiguration>
-        get() = _sources.filter { it.value.protocolAdapterID in j1939ProtocolAdapters.keys}
+        get() = _sources.filter { it.value.protocolAdapterID in j1939ProtocolAdapters.keys }
 
     @SerializedName(CONFIG_PROTOCOL_ADAPTERS)
     private var _protocolAdapters = mapOf<String, J1939AdapterConfiguration>()
@@ -33,9 +35,10 @@ class J1939Configuration : SourceAdapterBaseConfiguration() {
     override fun validate() {
         if (validated) return
         super.validate()
+        j1939ProtocolAdapters.forEach { it.value.validate() }
         validateSchedules()
         validateAtLeastOneSource()
-        _protocolAdapters.values.forEach { it.validate() }
+        validateSourceSockets()
         validated = true
     }
 
@@ -44,6 +47,21 @@ class J1939Configuration : SourceAdapterBaseConfiguration() {
             schedule.sources.filter { isJ1939Source(it) }.forEach { source ->
                 validateScheduleInput(source, schedule)
             }
+        }
+    }
+
+    private fun validateSourceSockets() {
+        sources.forEach { (sourceID, sourceConfig) ->
+            val sourceAdapter = sourceConfig.protocolAdapterID
+            val adapter = j1939ProtocolAdapters[sourceAdapter] ?: throw ConfigurationException(
+                "J1939 source $sourceID has invalid protocol adapter $sourceAdapter, valid j1939 protocols adapters are ${j1939ProtocolAdapters.keys}",
+                CONFIG_SOURCE_PROTOCOL_ADAPTER,
+                this)
+            if (sourceConfig.adapterCanSocket !in adapter.canSockets.keys)
+                throw ConfigurationException(
+                    "J1939 source $sourceID $CONFIG_ADAPTER_CAN_SOCKET \"${sourceConfig.adapterCanSocket}\" is not configured for adapter ${sourceConfig.protocolAdapterID}, configured sockets are ${adapter.canSockets.keys}",
+                    CONFIG_ADAPTER_CAN_SOCKET,
+                    sourceConfig)
         }
     }
 
@@ -113,7 +131,7 @@ class J1939Configuration : SourceAdapterBaseConfiguration() {
             awsIotCredentialProviderClients: Map<String, AwsIotCredentialProviderClientConfiguration> = default._awsIoTCredentialProviderClients,
             secretsManagerConfiguration: SecretsManagerConfiguration? = default._secretsManagerConfiguration,
             monitorIncludedConfigFiles: Boolean = default._monitorIncludedConfigFiles,
-            monitorIncludedConfigFilesInterval : Duration = default._monitorIncludedConfigFilesInterval.toDuration(DurationUnit.SECONDS),
+            monitorIncludedConfigFilesInterval: Duration = default._monitorIncludedConfigFilesInterval.toDuration(DurationUnit.SECONDS),
             templates: TemplatesConfiguration?
         ): J1939Configuration {
 

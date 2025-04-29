@@ -1,4 +1,3 @@
-
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: MIT-0
 
@@ -14,6 +13,7 @@ import com.amazonaws.sfc.metrics.MetricsConfiguration
 import com.amazonaws.sfc.metrics.MetricsSourceConfiguration
 import com.google.gson.annotations.SerializedName
 import java.io.File
+import kotlin.collections.get
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration
 
@@ -60,6 +60,11 @@ open class TargetConfiguration : Validate {
     val template: File?
         get() = if (_template != null) _template?.let { File(it) } else null
 
+    @SerializedName(CONFIG_FORMATTER)
+    protected var _formatter: InProcessConfiguration? = null
+    val formatter: InProcessConfiguration?
+        get() = _formatter
+
     @SerializedName(CONFIG_TARGET_SERVER)
     @Suppress("PropertyName")
     protected var _server: String? = null
@@ -70,7 +75,7 @@ open class TargetConfiguration : Validate {
     /**
      * If true, unquote numeric values in JSON output
      */
-    val unquoteNumericJsonValues : Boolean
+    val unquoteNumericJsonValues: Boolean
         get() {
             return _unquoteNumericJsonValues
         }
@@ -143,6 +148,13 @@ open class TargetConfiguration : Validate {
         )
 
         ConfigurationException.check(
+            (listOf(_formatter != null, _template != null).filter { it }.size < 2),
+            "Only one of $CONFIG_FORMATTER or $CONFIG_TARGET_TEMPLATE can be specified",
+            "$CONFIG_FORMATTER, $CONFIG_TARGET_TEMPLATE",
+            this
+
+        )
+        ConfigurationException.check(
             (template == null || template!!.exists()),
             "Target transformation template $template does not exist",
             CONFIG_TARGET_TEMPLATE,
@@ -167,6 +179,8 @@ open class TargetConfiguration : Validate {
         const val DEFAULT_TARGET_ARRAY_WHEN_BUFFERED = true
 
         const val CONFIG_TEMPLATE_EPOC_TIMESTAMP = "TemplateEpochTimestamp"
+
+        const val CONFIG_FORMATTER = "Formatter"
 
         const val CONFIG_TARGET_SERVER = "TargetServer"
         fun create(description: String = "",
@@ -195,8 +209,9 @@ open class TargetConfiguration : Validate {
         protected inline fun <reified T : TargetConfiguration> createTargetConfiguration(description: String = "",
                                                                                          active: Boolean = true,
                                                                                          targetType: String? = null,
+                                                                                         formatter : InProcessConfiguration? = null,
                                                                                          template: String? = null,
-                                                                                         templateEpochTimestamp : Boolean = false,
+                                                                                         templateEpochTimestamp: Boolean = false,
                                                                                          targetServer: String? = null,
                                                                                          credentialProviderClient: String? = null,
                                                                                          metrics: MetricsSourceConfiguration = MetricsSourceConfiguration(),
@@ -211,6 +226,7 @@ open class TargetConfiguration : Validate {
                 _description = description
                 _active = active
                 _targetType = targetType
+                _formatter = formatter
                 _templateEpochTimestamp = templateEpochTimestamp
                 _template = template
                 _server = targetServer
@@ -221,6 +237,19 @@ open class TargetConfiguration : Validate {
 
             return instance
         }
+
+        fun targetConfig(configReader : ConfigReader, targetID : String) : String?? {
+            val configRaw = configReader.jsonConfigReader.fromJson(configReader.jsonConfig, Any::class.java) as Map<*, *>
+
+            @Suppress("UNCHECKED_CAST")
+            return try {
+                val targetConfig = ((configRaw as Map<*, *>?)?.get(CONFIG_TARGETS) as Map<*, *>?)?.get(targetID)
+                configReader.jsonConfigReader.toJson(targetConfig)
+            } catch (_: Exception) {
+                null
+            }
+        }
+
     }
 
 }

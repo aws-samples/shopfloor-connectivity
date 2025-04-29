@@ -18,6 +18,7 @@ import com.amazonaws.sfc.util.currentDirectory
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonSyntaxException
+import java.io.File
 
 
 /**
@@ -26,7 +27,7 @@ import com.google.gson.JsonSyntaxException
  */
 open class ConfigReader(val config: String, val allowUnresolved: Boolean = false, val secretsManager: SecretsManager? = null) {
 
-    val jsonConfig by lazy { processConfig() }
+    val jsonConfig by lazy { processConfig(config) }
 
     val usedSecrets = mutableMapOf<String, String>()
 
@@ -64,8 +65,12 @@ open class ConfigReader(val config: String, val allowUnresolved: Boolean = false
 
     // replaces environment variable placeholders in configuration
     @Suppress("UNCHECKED_CAST")
-    private fun processConfig(): String {
-        val configMap = fromJsonExtended(config, Map::class.java) as Map<String, Any>
+    private fun processConfig(config1: String): String {
+
+
+        val configWithIncluded = includeFiles(config)
+
+        val configMap = fromJsonExtended(configWithIncluded, Map::class.java) as Map<String, Any>
         val useCachedResults = try {
             (configMap[CONFIG_CACHE_URL_CONFIG_CACHE_RESULTS] as Boolean?) == true
         } catch (_: Throwable) {
@@ -76,13 +81,18 @@ open class ConfigReader(val config: String, val allowUnresolved: Boolean = false
         } catch (_: Throwable) {
             currentDirectory()
         }
-        IncludeResolver.cacheResults  = useCachedResults
+        IncludeResolver.cacheResults = useCachedResults
         IncludeResolver.cacheDirectory = cacheDirectory
         val included = IncludeResolver.resolve(configMap) as Map<String, Any>
         val resolved = TemplateResolver(CONFIG_TEMPLATES).resolve(included)
-        val configStr = gsonPretty().toJson(resolved)
+        var configStr = gsonPretty().toJson(resolved)
+        if (CONFIG_PLACEHOLDER_REGEX.find(configStr) != null){
+            configStr = processConfig(configStr)
+        }
         return setPlaceholders(configStr)
     }
+
+
 
     private fun setPlaceholders(inputStr: String): String {
         var outputStr = setEnvironmentValues(inputStr)
@@ -160,6 +170,8 @@ open class ConfigReader(val config: String, val allowUnresolved: Boolean = false
 
         private val CONFIG_PLACEHOLDER_REGEX = Regex(PLACEHOLDER_PATTERN)
         private val EXTERNAL_CONFIG_PLACEHOLDER_REGEX = Regex(PLACEHOLDER_PATTERN.replace("\\{", "\\{\\{").replace("}", "}}"))
+        private val CONFIG_INCLUDE = "@include"
+        private val CONFIG_INCLUDE_FILE = Regex(""""$CONFIG_INCLUDE"?\s*:\s*"?(.*)"\s*,?""")
 
         fun convertExternalPlaceholders(strIn: String): String {
             var strOut = strIn
@@ -194,10 +206,59 @@ open class ConfigReader(val config: String, val allowUnresolved: Boolean = false
         }
 
         fun getIncludedItems(configString: String): List<String> {
-            var includedItems = emptyList<String>()
-            val configMap = fromJsonExtended(configString, Map::class.java)
-            IncludeResolver.resolve(configMap, fnResolved = { l -> includedItems = l })
-            return includedItems
+            var s = configString
+            var includedItems = mutableSetOf<String>()
+            var done = false
+
+            while(!done) {
+                s = includeFiles(s){includedItems.add("file:$it")}
+                val configMap = fromJsonExtended(s, Map::class.java)
+                val resolved = IncludeResolver.resolve(configMap, fnResolved = { l -> includedItems.addAll(l) }) as Map<String,Any>
+                s = gsonPretty().toJson(resolved)
+                done = CONFIG_INCLUDE_FILE.containsMatchIn(s) == false
+            }
+            return includedItems.toList()
         }
+
+        private fun includeFiles(configString: String, trace: List<String> = emptyList<String>(),  fn : (s : String) -> Unit = {}) : String {
+
+            var s = configString
+
+            var match = CONFIG_INCLUDE_FILE.find(s)
+
+            while (match != null) {
+
+                val includedFileName = match.groups[1]?.value
+
+                if (includedFileName == null) throw ConfigurationException("${match.value} does not specify a file name", CONFIG_INCLUDE)
+
+                val includeFile = File(includedFileName)
+
+                fn(includedFileName)
+
+                if (includeFile.absolutePath in trace) throw ConfigurationException(
+                    "Recursive inclusion found for file ${includeFile.absolutePath}, ${trace.joinToString(separator = "->")}",
+                    CONFIG_INCLUDE)
+
+                if (!(includeFile.exists() && includeFile.canRead())) throw ConfigurationException("Included file \"${includeFile.absolutePath}\" does not exist or can not be read", CONFIG_INCLUDE)
+                try {
+                    val includedLines = includeFile.readText()
+                    val includedContent = if (includedLines.contains(CONFIG_INCLUDE)) {
+                        includeFiles(includedLines, trace + includeFile.absolutePath)
+                        includedLines
+                    } else
+                        includedLines
+
+
+                    s = s.replace(match.value, includedContent)
+                } catch (e: Exception) {
+                    throw ConfigurationException("Error reading included file \"${includeFile.absolutePath}\", $e", CONFIG_INCLUDE)
+                }
+
+                match = CONFIG_INCLUDE_FILE.find(s)
+            }
+            return s
+        }
+
     }
 }

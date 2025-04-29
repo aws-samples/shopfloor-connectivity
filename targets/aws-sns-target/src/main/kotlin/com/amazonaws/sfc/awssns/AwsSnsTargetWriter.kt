@@ -10,6 +10,8 @@ import com.amazonaws.sfc.awssns.config.AwsSnsWriterConfiguration
 import com.amazonaws.sfc.awssns.config.AwsSnsWriterConfiguration.Companion.AWS_SNS
 import com.amazonaws.sfc.config.ConfigReader
 import com.amazonaws.sfc.data.*
+import com.amazonaws.sfc.data.Compress.COMPRESSION_ELEMENT
+import com.amazonaws.sfc.data.Compress.PAYLOAD_ELEMENT
 import com.amazonaws.sfc.data.TargetDataBuffer.Companion.newTargetDataBuffer
 import com.amazonaws.sfc.log.Logger
 import com.amazonaws.sfc.metrics.*
@@ -25,6 +27,8 @@ import com.amazonaws.sfc.system.DateTime
 import com.amazonaws.sfc.targets.AwsServiceTargetClientHelper
 import com.amazonaws.sfc.targets.TargetDataChannel
 import com.amazonaws.sfc.targets.TargetException
+import com.amazonaws.sfc.targets.TargetFormatter
+import com.amazonaws.sfc.targets.TargetFormatterFactory
 import com.amazonaws.sfc.util.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.selects.select
@@ -32,7 +36,10 @@ import software.amazon.awssdk.awscore.exception.AwsServiceException
 import software.amazon.awssdk.services.sns.SnsClient
 import software.amazon.awssdk.services.sns.model.PublishBatchRequest
 import software.amazon.awssdk.services.sns.model.PublishBatchRequestEntry
+import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
 import java.util.*
+import kotlin.String
 
 /**
  * AWS SNS Target writer
@@ -133,8 +140,14 @@ class AwsSnsTargetWriter(
     // channel for passing messages to coroutine that sends messages to SNS queue
     private val targetDataChannel =TargetDataChannel.create(targetConfig, "$className:targetDataChannel")
 
+    private val formatter: TargetFormatter? by lazy {
+        TargetFormatterFactory.createTargetFormatter(configReader, targetID, targetConfig, logger)
+    }
+
+    private val customPayload = (formatter != null)
+
     // buffer for message batches
-    private val buffer = newTargetDataBuffer(resultHandler)
+    private val buffer = newTargetDataBuffer(resultHandler,customPayload)
 
     // coroutine that writes messages to queue
     private val writer = scope.launch("Writer") {
@@ -167,17 +180,35 @@ class AwsSnsTargetWriter(
     }
 
     private fun handleTargetData(targetData: TargetData) {
-        val payload = buildPayload(targetData)
 
-        if (payload.length > SNS_MAX_BATCH_MSG_SIZE) {
+        val log = logger.getCtxLoggers(className, "handleTargetData")
+
+        val (messagePayload: String?, payloadSize: Int) = if (customPayload) {
+            val formattedItemSize = try {
+                (formatter?.itemPayloadSize(targetData) ?: altSize(targetData))
+            } catch (e: Exception) {
+                log.errorEx("Error getting payload size using custom formatter", e)
+                altSize(targetData)
+            }
+            null to formattedItemSize
+        } else {
+            val messagePayload = buildPayload(targetData)
+            messagePayload to messagePayload.length
+        }
+
+      if (payloadSize > SNS_MAX_BATCH_MSG_SIZE) {
             logger.getCtxErrorLog(className, "handleTargetData")("Message with serial ${targetData.serial} exceeds max SNS message size")
             targetResults?.error(targetData)
         } else {
             // check for max message size
-            if (payload.length + buffer.payloadSize > SNS_MAX_BATCH_MSG_SIZE) {
+            if (payloadSize + buffer.payloadSize > SNS_MAX_BATCH_MSG_SIZE) {
                 flush()
             }
-            buffer.add(targetData, payload)
+            if (customPayload){
+                buffer.add(targetData, payloadSize )
+            } else {
+                buffer.add(targetData, messagePayload)
+            }
 
             // flush if buffer is full
             if (targetData.noBuffering || buffer.size >= targetConfig.batchSize) {
@@ -185,6 +216,10 @@ class AwsSnsTargetWriter(
             }
         }
     }
+
+
+    private fun altSize(targetData: TargetData): Int = if (targetConfig.batchSize != 0) 0 else targetData.toJson(config.elementNames, targetConfig.unquoteNumericJsonValues).length
+
 
 
     private fun CoroutineScope.timerJob(): Job {
@@ -296,24 +331,25 @@ class AwsSnsTargetWriter(
     // builds a batch send request for all buffered messages
     private fun buildPublishBatchRequestEntry(index: Int, serial: String?): PublishBatchRequestEntry {
 
-        val message = buffer.payloads[index]
+        val message = if (customPayload){
+             buildCustomEntry(index)
+        } else {
+            val message = buffer.payloads[index]
+            if (targetConfig.compressionType == CompressionType.NONE)
+                message
+            else {
+                val log = logger.getCtxInfoLog(className, "buildPublishBatchRequestEntry")
+
+                val compressedPayload = Compress.compressedDataPayload(targetConfig.compressionType, message, UUID.randomUUID().toString())
+                val reduction = (100 - (compressedPayload.length.toFloat() / message.length.toFloat()) * 100).toInt()
+                log("Used ${targetConfig.compressionType} compression to compress ${message.length.byteCountString} to ${compressedPayload.length.byteCountString}, $reduction% size reduction")
+                compressedPayload
+            }
+        }
 
         val builder = PublishBatchRequestEntry.builder()
-            .message(
-                if (targetConfig.compressionType == CompressionType.NONE)
-                    message
-                else {
-                    val log = logger.getCtxInfoLog(className, "buildPublishBatchRequestEntry")
-
-                    val compressedPayload = Compress.compressedDataPayload(targetConfig.compressionType, message, UUID.randomUUID().toString())
-                    val reduction = (100 - (compressedPayload.length.toFloat() / message.length.toFloat()) * 100).toInt()
-                    log("Used ${targetConfig.compressionType} compression to compress ${message.length.byteCountString} to ${compressedPayload.length.byteCountString}, $reduction% size reduction")
-                    compressedPayload
-                }
-
-            )
+            .message(message)
             .id(index.toString())
-
 
         if (targetConfig.serialAsMessageDeduplicationId)
             builder.messageDeduplicationId(serial)
@@ -329,6 +365,37 @@ class AwsSnsTargetWriter(
 
         return builder.build()
 
+    }
+
+
+    private fun buildCustomEntry(index: Int, ): String {
+        val log = logger.getCtxLoggers(className, "buildCustomMessageBody")
+        return try {
+            val targetData = buffer.messages[index]
+            val binaryPayload = formatter!!.apply(listOf(targetData))
+            if (targetConfig.compressionType == CompressionType.NONE) {
+                String(binaryPayload)
+            } else {
+                val compressedBinaryPayload = compressCustomPayload(binaryPayload)
+                val reduction = (100 - (compressedBinaryPayload.length.toFloat() / binaryPayload.size.toFloat()) * 100).toInt()
+                log.info("Used ${targetConfig.compressionType} compression to compress ${binaryPayload.size.byteCountString} to ${compressedBinaryPayload.length.byteCountString}, $reduction% size reduction")
+                compressedBinaryPayload
+            }
+        } catch (e: Exception) {
+            log.error("Error executing custom formatter for target \"$targetID\", $e")
+            ""
+        }
+    }
+
+    private fun compressCustomPayload(binaryPayload: ByteArray): String {
+        val compressed = ByteArrayOutputStream()
+        Compress.compress(targetConfig.compressionType, ByteArrayInputStream(binaryPayload), compressed, entryName = UUID.randomUUID().toString())
+
+        val compressedPayloadStr = JsonHelper.gsonExtended().toJson(
+            mapOf<String, String>(
+                COMPRESSION_ELEMENT to targetConfig.compressionType.name,
+                PAYLOAD_ELEMENT to Base64.getEncoder().encodeToString(compressed.toByteArray())))
+        return compressedPayloadStr
     }
 
     private val config: AwsSnsWriterConfiguration

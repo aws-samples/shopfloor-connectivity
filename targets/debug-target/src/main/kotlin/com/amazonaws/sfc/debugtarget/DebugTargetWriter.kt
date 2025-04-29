@@ -14,6 +14,8 @@ import com.amazonaws.sfc.metrics.*
 import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_DIMENSION_SOURCE
 import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_DIMENSION_SOURCE_CATEGORY_TARGET
 import com.amazonaws.sfc.targets.TargetException
+import com.amazonaws.sfc.targets.TargetFormatter
+import com.amazonaws.sfc.targets.TargetFormatterFactory
 import com.amazonaws.sfc.util.MemoryMonitor
 import kotlinx.coroutines.runBlocking
 import kotlin.time.Duration
@@ -46,6 +48,12 @@ class DebugTargetWriter(
 
     private val targetResults = if (resultHandler != null) TargetResultHelper(targetID, resultHandler, logger) else null
 
+    private val formatter: TargetFormatter? by lazy {
+        TargetFormatterFactory.createTargetFormatter(configReader, targetID, targetConfig, logger)
+    }
+
+    private val customPayload = (formatter != null)
+
     private val targetConfig: TargetConfiguration
         get() {
             if (_targetConfig == null) {
@@ -57,16 +65,17 @@ class DebugTargetWriter(
 
     private val config: DebugTargetsConfiguration by lazy { configReader.getConfig() }
 
+
     private fun getTargetConfig(targetID: String): TargetConfiguration {
         val writeConfiguration: DebugTargetsConfiguration = configReader.getConfig()
         // get target configuration
         return writeConfiguration.targets[targetID]
-            ?: throw TargetException("Configuration for type $DEBUG_TARGET for target with ID \"$targetID\" does not exist, existing targets are ${writeConfiguration.targets.keys}")
+                ?: throw TargetException("Configuration for type $DEBUG_TARGET for target with ID \"$targetID\" does not exist, existing targets are ${writeConfiguration.targets.keys}")
     }
 
     private val transformation by lazy { if (targetConfig.template != null) OutputTransformation(targetConfig.template!!, logger) else null }
 
-    private fun buildPayload(targetData: TargetData): String =
+    private fun buildStringPayload(targetData: TargetData): String =
         if (transformation == null)
             targetData.toJson(config.elementNames, targetConfig.unquoteNumericJsonValues)
         else
@@ -111,7 +120,12 @@ class DebugTargetWriter(
      * @param targetData TargetData
      */
     override suspend fun writeTargetData(targetData: TargetData) {
-        val data = buildPayload(targetData)
+
+        val data = if (customPayload) {
+            String(formatter!!.apply(targetData))
+        } else {
+            buildStringPayload(targetData)
+        }
 
         val duration = measureTime {
             output(data)

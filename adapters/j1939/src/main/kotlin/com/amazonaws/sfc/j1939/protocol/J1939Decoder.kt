@@ -160,92 +160,6 @@ class J1939Decoder {
             return rawValue.toFloat()
         }
 
-        private fun extractRawValueX(signal: J1939Signal, payload: ByteArray): Float? {
-            var rawValue: Long = 0
-
-            //   val payload = reversePayload(payloadIn)
-            // Calculate start byte and bit positions
-            val startByte = signal.startBit / 8
-            if (startByte >= payload.size) return null // Invalid start bit (past end of payload
-            //if (payload[startByte] == 0xFF.toByte()) return null
-
-            //val startBitInByte = signal.startBit % 8
-
-            when (signal.byteOrder) {
-                ByteOrder.INTEL -> {
-                    // Intel (little-endian) byte order
-                    var remainingBits = signal.length
-                    var currentBit = signal.startBit
-
-                    while (remainingBits > 0) {
-                        val byteIndex = currentBit / 8
-                        val bitIndex = currentBit % 8
-
-                        // Don't read past the payload
-                        if (byteIndex >= payload.size) break
-
-                        // Calculate how many bits to read from this byte
-                        val bitsToRead = minOf(8 - bitIndex, remainingBits)
-
-                        // Create a mask for the bits we want
-                        val mask = ((1L shl bitsToRead) - 1) shl bitIndex
-
-                        // Extract the bits and shift them to the right position
-                        val extractedBits = (payload[byteIndex].toInt() and mask.toInt()) shr bitIndex
-
-                        // Add the bits to our result
-                        val shift = signal.length - remainingBits
-                        rawValue = rawValue or (extractedBits.toLong() shl shift)
-
-                        remainingBits -= bitsToRead
-                        currentBit += bitsToRead
-                    }
-                }
-
-                ByteOrder.MOTOROLA -> {
-                    // Motorola (big-endian) byte order
-                    var remainingBits = signal.length
-                    var currentBit = signal.startBit
-
-                    while (remainingBits > 0) {
-                        val byteIndex = currentBit / 8
-                        val bitIndex = 7 - (currentBit % 8)  // Reverse bit order within byte
-
-                        // Don't read past the payload
-                        if (byteIndex >= payload.size) break
-
-                        // Calculate how many bits to read from this byte
-                        val bitsToRead = minOf(bitIndex + 1, remainingBits)
-
-                        // Create a mask for the bits we want
-                        val mask = ((1L shl bitsToRead) - 1) shl (bitIndex - bitsToRead + 1)
-
-                        // Extract the bits and shift them to the right position
-                        val extractedBits = (payload[byteIndex].toInt() and mask.toInt()) shr
-                                (bitIndex - bitsToRead + 1)
-
-                        // Add the bits to our result
-                        val shift = remainingBits - bitsToRead
-                        rawValue = rawValue or (extractedBits.toLong() shl shift)
-
-                        remainingBits -= bitsToRead
-                        currentBit += bitsToRead
-                    }
-                }
-            }
-
-            // Handle signed values
-            if (signal.valueType == ValueType.SIGNED) {
-                val signBit = 1L shl (signal.length - 1)
-                if (rawValue and signBit != 0L) {
-                    // If sign bit is set, extend the sign
-                    rawValue = rawValue or (-1L shl signal.length)
-                }
-            }
-
-            return rawValue.toFloat()
-        }
-
 
         const val FF = 0xFF.toByte()
         val FFFF = ByteArray(2) { FF }
@@ -267,6 +181,22 @@ class J1939Decoder {
         fun reversePayload(bytes: ByteArray): ByteArray {
             return bytes.reversed().map { reverseBits(it) }.toByteArray()
 
+        }
+
+        fun bytesToLongLittleEndian(bytes: ByteArray): Long {
+            var result = 0L
+            for (i in bytes.indices) {
+                result = result or ((bytes[i].toLong() and 0xFF) shl (8 * i))
+            }
+            return result
+        }
+
+        fun bytesToLongBigEndian(bytes: ByteArray): Long {
+            var result = 0L
+            for (i in bytes.indices) {
+                result = result or ((bytes[i].toLong() and 0xFF) shl (8 * (bytes.size - 1 - i)))
+            }
+            return result
         }
     }
 }

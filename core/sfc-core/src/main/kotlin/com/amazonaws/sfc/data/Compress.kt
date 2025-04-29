@@ -59,7 +59,7 @@ object Compress {
     const val CONFIG_COMPRESS = "Compression"
     const val CONTENT_TYPE = "ContentType"
 
-    private const val COMPRESSION_ELEMENT = "compression"
-    private const val PAYLOAD_ELEMENT = "payload"
+    const val COMPRESSION_ELEMENT = "compression"
+    const val PAYLOAD_ELEMENT = "payload"
 
 }

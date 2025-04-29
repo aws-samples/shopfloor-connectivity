@@ -25,17 +25,30 @@ FileConfiguration extends the type  TargetConfiguration with specific configurat
 - [Examples](#fileconfiguration-examples)
 
 **Properties:**
+
+- [BufferCount](buffercount)
+
 - [BufferSize](#buffersize)
 - [Compression](#compression)
 - [Directory](#directory)
 - [Extension](#extension)
+- [Formatter](#formatter)
 - [Interval](#interval)
 - [Json](#json)
 - [Template](#template)
 - [UtcTime](#utctime)
 
 ---
+### BufferCount
+
+The maximum number of messages to accumulate in the buffer before triggering a batch publish to the MQTT topic. When this count is reached, all buffered messages are written to a file.
+
+Batching is triggered when any configured threshold (BatchCount, [BufferSize](#batchsize), or [Interval](#interval)) is reached
+
+---
+
 ### BufferSize
+
 The size of the internal write buffer in kilobytes (KB) that determines when buffered data is flushed to the output file. When the buffer reaches this size, its contents are written to disk.
 
 **Type**: Int
@@ -67,6 +80,16 @@ The name of the output files in the directory will be yyyy/mm/dd/hh/mn/uuid.[ext
 The file extension to be used for output files. If no extension is specified, but the file is compressed, then the corresponding extension for the compression method is used. For compression types that support entry names (e.g., zip), the extension of the entry will be set to ".json" if the [Json](#json) field is true.
 
 **Type**: String
+
+---
+
+### Formatter
+
+Configuration allows for custom formatting of data written by a target. A [custom formatter](../sfc-extending.md#custom-formatters), implemented as a JVM class, converts a sequence of target data messages into a specific format and returns the formatted data as an array of bytes.
+
+When a formatter is used, a [template](#template) configured for that target is ignored.
+
+**Type:** [InProcessConfiguration](../core/in-process-configuration.md)
 
 ---
 ### Interval
@@ -111,6 +134,8 @@ The following [Velocity tools](https://velocity.apache.org/tools/3.1/tools-summa
 Additional epoch timestamp values can be added to the data used for the transformation by setting the [TemplateEpochTimestamp](../core/target-configuration.md#templateepochtimestamp) property to true,
 
 For targets where the data does not require specific output format, the data is serialized as [JSON data](../sfc-data-format.md#sfc-output-data-schemas).
+
+When a custom [formatter](#formatter) is configured for a target then this property is ignored.
 
 **Type**: String
 

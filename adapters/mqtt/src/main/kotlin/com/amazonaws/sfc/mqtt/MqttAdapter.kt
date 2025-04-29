@@ -23,6 +23,8 @@ import com.amazonaws.sfc.mqtt.config.MqttAdapterConfiguration.Companion.DEFAULT_
 import com.amazonaws.sfc.mqtt.config.MqttAdapterConfiguration.Companion.DEFAULT_RECEIVED_DATA_CHANNEL_TIMEOUT
 import com.amazonaws.sfc.system.DateTime
 import com.amazonaws.sfc.targets.TargetException
+import com.amazonaws.sfc.targets.TargetFormatter
+import com.amazonaws.sfc.targets.TargetFormatterFactory
 import com.amazonaws.sfc.util.LookupCacheHandler
 import com.amazonaws.sfc.util.MemoryMonitor.Companion.getUsedMemoryMB
 import com.amazonaws.sfc.util.buildScope
@@ -79,6 +81,7 @@ class MqttAdapter(private val adapterID: String, private val configuration: Mqtt
             client != null && client.isConnected
         }
     )
+
     private val adapterMetricDimensions = mapOf(MetricsCollector.METRICS_DIMENSION_TYPE to className)
 
     private val adapterConfiguration = configuration.mqttProtocolAdapters[adapterID]

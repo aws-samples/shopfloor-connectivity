@@ -25,7 +25,7 @@ import kotlin.time.toDuration
 @ConfigurationClass
 class AwsMskTargetConfiguration : AwsServiceConfig, TargetConfiguration() {
 
-    @SerializedName(CONFIG_BOOTSTRAP_SERVERS)
+    @SerializedName(CONFIG_BOOTSTRAP_BROKERS)
     private var _bootstrapServers : ArrayList<String> = ArrayList()
     val bootstrapServers
         get() = _bootstrapServers
@@ -103,11 +103,19 @@ class AwsMskTargetConfiguration : AwsServiceConfig, TargetConfiguration() {
         if (validated) return
 
         super.validate()
+        validateBootstrapServers()
         validateTopic()
         validateInterval()
         validated = true
 
     }
+
+    private fun validateBootstrapServers() =
+        ConfigurationException.check(
+            (_bootstrapServers.isNotEmpty()),
+            "$CONFIG_BOOTSTRAP_BROKERS for MSK topic must be specified",
+            CONFIG_BOOTSTRAP_BROKERS,
+            this)
 
     // Validates the interval
     private fun validateInterval() =
@@ -128,7 +136,7 @@ class AwsMskTargetConfiguration : AwsServiceConfig, TargetConfiguration() {
 
     companion object {
 
-        private const val CONFIG_BOOTSTRAP_SERVERS = "BootstrapBrokers"
+        private const val CONFIG_BOOTSTRAP_BROKERS = "BootstrapBrokers"
         private const val CONFIG_TOPIC_NAME = "TopicName"
         private const val CONFIG_KEY_VALUE = "Key"
         private const val CONFIG_PARTITION = "Partition"

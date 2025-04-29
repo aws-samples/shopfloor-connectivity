@@ -1,4 +1,3 @@
-
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: MIT-0
 
@@ -24,9 +23,20 @@ class TargetDataBuffer(private val storeFullMessage: Boolean) {
 
     private var _payloadSize = 0L
 
-    fun add(targetData: TargetData, payload: String) {
-        _payload.add(payload)
-        _payloadSize += payload.length
+    fun add(targetData: TargetData, payload: String?) {
+        if (payload != null && payload.isNotEmpty()) {
+            _payload.add(payload)
+            _payloadSize += payload.length.toLong()
+        }
+        if (storeFullMessage) {
+            _messages?.add(targetData)
+        } else {
+            _serials?.add(targetData.serial)
+        }
+    }
+
+    fun add(targetData: TargetData, payloadSize: Int) {
+        _payloadSize += payloadSize.toLong()
         if (storeFullMessage) {
             _messages?.add(targetData)
         } else {
@@ -47,7 +57,7 @@ class TargetDataBuffer(private val storeFullMessage: Boolean) {
         get() = _payloadSize
 
     val size
-        get() = _payload.size
+        get() = (if (storeFullMessage) _messages?.size else _serials?.size) ?: 0
 
     val payloads
         get() = _payload as List<String>
@@ -76,11 +86,11 @@ class TargetDataBuffer(private val storeFullMessage: Boolean) {
     }
 
     companion object {
-        fun newTargetDataBuffer(resultHandler: TargetResultHandler?): TargetDataBuffer {
+        fun newTargetDataBuffer(resultHandler: TargetResultHandler?, customPayLoad : Boolean): TargetDataBuffer {
             val saveFullMessage = if (resultHandler == null) false else {
                 resultHandler.returnedData?.returnAnyMessages
             }
-            return TargetDataBuffer(saveFullMessage ?: false)
+            return TargetDataBuffer(customPayLoad || (saveFullMessage == true))
         }
 
     }

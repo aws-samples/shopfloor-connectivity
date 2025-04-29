@@ -11,6 +11,7 @@ import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_INTERVAL
 import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_REGION
 import com.amazonaws.sfc.config.ConfigurationClass
 import com.amazonaws.sfc.config.ConfigurationException
+import com.amazonaws.sfc.config.InProcessConfiguration
 import com.amazonaws.sfc.config.TargetConfiguration
 import com.amazonaws.sfc.data.Compress.CONFIG_COMPRESS
 import com.amazonaws.sfc.data.Compress.CONTENT_TYPE
@@ -180,6 +181,7 @@ class AwsS3TargetConfiguration : AwsServiceConfig, TargetConfiguration() {
                    compressionType: CompressionType? = default._compressionType,
                    contentType: String? = default._contentType,
                    template: String? = default._template,
+                   formatter : InProcessConfiguration? = default._formatter,
                    targetServer: String? = default._server,
                    metrics: MetricsSourceConfiguration = default._metrics,
                    credentialProviderClient: String? = default._credentialProvideClient): AwsS3TargetConfiguration {
@@ -191,6 +193,7 @@ class AwsS3TargetConfiguration : AwsServiceConfig, TargetConfiguration() {
                 template = template,
                 targetServer = targetServer,
                 metrics = metrics,
+                formatter = formatter,
                 credentialProviderClient = credentialProviderClient) as AwsS3TargetConfiguration
 
             with(instance) {

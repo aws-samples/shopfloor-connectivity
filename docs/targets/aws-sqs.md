@@ -32,6 +32,7 @@ Requires IAM permission `sqs:SendMessageBatch` for the receiving queue.
 - [Compression](#compression)
 - [CredentialProviderClient](#credentialproviderclient)
 - [Endpoint](#endpoint)
+- [Formatter](#formatter)
 - [Interval](#interval)
 - [QueueUrl](#queueurl)
 - [Region](#region)
@@ -75,6 +76,16 @@ The EndPoint property specifies the VPC endpoint URL used to access AWS services
 https://docs.aws.amazon.com/vpc/latest/privatelink/aws-services-privatelink-support.html
 
 **Type:** String
+
+---
+
+### Formatter
+
+Configuration allows for custom formatting of data written by a target. A [custom formatter](../sfc-extending.md#custom-formatters), implemented as a JVM class, converts a sequence of target data messages into a specific format and returns the formatted data as an array of bytes.
+
+When a formatter is used, a [template](#template) configured for that target is ignored.
+
+**Type:** [InProcessConfiguration](../core/in-process-configuration.md)
 
 ---
 
@@ -125,6 +136,8 @@ The following [Velocity tools](https://velocity.apache.org/tools/3.1/tools-summa
 Additional epoch timestamp values can be added to the data used for the transformation by setting the [TemplateEpochTimestamp](../core/target-configuration.md#templateepochtimestamp) property to true,
 
 For targets where the data does not require specific output format, the data is serialized as [JSON data](../sfc-data-format.md#sfc-output-data-schemas).
+
+When a custom [formatter](#formatter) is configured for a target then this property is ignored.
 
 **Type**: String
 

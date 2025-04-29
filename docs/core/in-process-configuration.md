@@ -10,6 +10,8 @@
 
 [SFC Configuration](./sfc-configuration.md) > [ConfigProvider](./sfc-configuration.md#configprovider)
 
+[SFC Configuration](./sfc-configuration.md) > [Targets](./sfc-configuration.md#targets) > [Target](./target-configuration.md ) > [Formatter](./target-configuration.md#formatter)
+
 The InProcessConfiguration class defines settings for loading and instantiating Java components (like protocol adapters or targets) that run within the SFC process. It specifies the factory class responsible for creating component instances and the locations of required JAR files, supporting both individual JAR files and directories containing multiple JARs.
 
 - [Schema](#schema)

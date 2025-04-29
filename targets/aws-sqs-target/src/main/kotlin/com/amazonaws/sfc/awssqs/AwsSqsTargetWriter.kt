@@ -10,6 +10,8 @@ import com.amazonaws.sfc.awssqs.config.AwsSqsWriterConfiguration
 import com.amazonaws.sfc.awssqs.config.AwsSqsWriterConfiguration.Companion.AWS_SQS
 import com.amazonaws.sfc.config.ConfigReader
 import com.amazonaws.sfc.data.*
+import com.amazonaws.sfc.data.Compress.COMPRESSION_ELEMENT
+import com.amazonaws.sfc.data.Compress.PAYLOAD_ELEMENT
 import com.amazonaws.sfc.data.TargetDataBuffer.Companion.newTargetDataBuffer
 import com.amazonaws.sfc.log.Logger
 import com.amazonaws.sfc.metrics.*
@@ -22,9 +24,7 @@ import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_WRITE_ERRORS
 import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_WRITE_SIZE
 import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_WRITE_SUCCESS
 import com.amazonaws.sfc.system.DateTime
-import com.amazonaws.sfc.targets.AwsServiceTargetClientHelper
-import com.amazonaws.sfc.targets.TargetDataChannel
-import com.amazonaws.sfc.targets.TargetException
+import com.amazonaws.sfc.targets.*
 import com.amazonaws.sfc.util.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.selects.select
@@ -33,6 +33,8 @@ import software.amazon.awssdk.services.sqs.SqsClient
 import software.amazon.awssdk.services.sqs.model.SendMessageBatchRequest
 import software.amazon.awssdk.services.sqs.model.SendMessageBatchRequestEntry
 import software.amazon.awssdk.services.sqs.model.SendMessageBatchResponse
+import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
 import java.util.*
 
 /**
@@ -72,6 +74,13 @@ class AwsSqsTargetWriter(
 
     private val sqsClient: AwsSqsClient
         get() = AwsSqsClientWrapper(clientHelper.serviceClient as SqsClient)
+
+    private val formatter: TargetFormatter? by lazy {
+        TargetFormatterFactory.createTargetFormatter(configReader, targetID, targetConfig, logger)
+    }
+
+    private val customPayload = (formatter != null)
+
 
     private val metricsCollector: MetricsCollector? by lazy {
         val metricsConfiguration = config.targets[targetID]?.metrics ?: MetricsSourceConfiguration()
@@ -133,7 +142,7 @@ class AwsSqsTargetWriter(
 
 
     private val buffer by lazy {
-        newTargetDataBuffer(resultHandler)
+        newTargetDataBuffer(resultHandler, customPayload)
     }
 
 
@@ -169,29 +178,50 @@ class AwsSqsTargetWriter(
     }
 
     private fun handleTargetData(targetData: TargetData) {
+
+        val log = logger.getCtxLoggers(className, "handleTargetData")
         if (buffer.serials.contains(targetData.serial)) {
             flush()
             return
         }
 
-        val payload = buildPayload(targetData)
+        val (payload, payloadSize) = if (customPayload) {
+            val formattedItemSize = try {
+                (formatter?.itemPayloadSize(targetData) ?: altSize(targetData))
+            } catch (e: Exception) {
+                log.errorEx("Error getting payload size using custom formatter", e)
+                altSize(targetData)
+            }
+            null to formattedItemSize
+        } else {
+            val messagePayload = buildPayload(targetData)
+            messagePayload to messagePayload.length
+        }
 
-        if (payload.length > SQS_MAX_BATCH_MSG_SIZE) {
+        if (payloadSize > SQS_MAX_BATCH_MSG_SIZE) {
             logger.getCtxErrorLog(className, "sendTargetData")("Message exceeds max SQS message size")
             targetResults?.error(targetData)
             return
         }
 
         // check for max message size
-        if (payload.length + buffer.payloadSize > SQS_MAX_BATCH_MSG_SIZE) {
+        if (payloadSize + buffer.payloadSize > SQS_MAX_BATCH_MSG_SIZE) {
             flush()
         }
 
-        buffer.add(targetData, payload)
+        if (customPayload) {
+            buffer.add(targetData, payloadSize)
+        } else {
+            buffer.add(targetData, payload)
+        }
+
         if (targetData.noBuffering || buffer.size >= targetConfig.batchSize) {
             flush()
         }
     }
+
+    private fun altSize(targetData: TargetData): Int = if (targetConfig.batchSize != 0) 0 else targetData.toJson(config.elementNames, targetConfig.unquoteNumericJsonValues).length
+
 
     private fun CoroutineScope.timerJob(): Job {
         return launch(context = Dispatchers.Default, name = "Timeout timer") {
@@ -207,7 +237,11 @@ class AwsSqsTargetWriter(
     private val transformation by lazy { if (targetConfig.template != null) OutputTransformation(targetConfig.template!!, logger) else null }
 
     private fun buildPayload(targetData: TargetData): String =
-        if (transformation == null) targetData.toJson(config.elementNames, targetConfig.unquoteNumericJsonValues) else transformation!!.transform(targetData, config.elementNames, targetConfig.templateEpochTimestamp) ?: ""
+
+        if (transformation == null) targetData.toJson(config.elementNames, targetConfig.unquoteNumericJsonValues) else transformation!!.transform(
+            targetData,
+            config.elementNames,
+            targetConfig.templateEpochTimestamp) ?: ""
 
 
     // writes all buffered messages to SQS queue
@@ -221,7 +255,7 @@ class AwsSqsTargetWriter(
         }
 
         val queueUrl = targetConfig.queueUrl
-        log.trace("Sending ${buffer.payloads.size} data items to queue \"$queueUrl\", payload size is ${buffer.payloads.sumOf { it.length }.byteCountString}")
+        log.trace("Sending ${buffer.size} data items to queue \"$queueUrl\"${if(!customPayload) ", payload size is ${buffer.payloads.sumOf { it.length }.byteCountString}" else ""}")
 
         val start = DateTime.systemDateTime().toEpochMilli()
 
@@ -275,7 +309,7 @@ class AwsSqsTargetWriter(
         runBlocking {
             metricsCollector?.put(
                 adapterID,
-                metricsCollector?.buildValueDataPoint(adapterID, MetricsCollector.METRICS_MEMORY, MemoryMonitor.getUsedMemoryMB().toDouble(),MetricUnits.MEGABYTES ),
+                metricsCollector?.buildValueDataPoint(adapterID, MetricsCollector.METRICS_MEMORY, MemoryMonitor.getUsedMemoryMB().toDouble(), MetricUnits.MEGABYTES),
                 metricsCollector?.buildValueDataPoint(adapterID, METRICS_WRITES, 1.0, MetricUnits.COUNT, metricDimensions),
                 metricsCollector?.buildValueDataPoint(adapterID, METRICS_MESSAGES, buffer.size.toDouble(), MetricUnits.COUNT, metricDimensions),
                 metricsCollector?.buildValueDataPoint(adapterID, METRICS_WRITE_DURATION, writeDurationInMillis, MetricUnits.MILLISECONDS, metricDimensions),
@@ -323,17 +357,53 @@ class AwsSqsTargetWriter(
             .build()
 
     private fun buildMessageBody(index: Int): String {
-        val message = buffer.payloads[index]
-        return if (targetConfig.compressionType == CompressionType.NONE) message
-        else {
 
-            val log = logger.getCtxInfoLog(className, "buildPayload")
-            val compressedPayload = Compress.compressedDataPayload(targetConfig.compressionType, message, UUID.randomUUID().toString())
+        val log = logger.getCtxLoggers(className, "buildPayload")
 
-            val reduction = (100 - (compressedPayload.length.toFloat() / message.length.toFloat()) * 100).toInt()
-            log("Used ${targetConfig.compressionType} compression to compress ${message.length.byteCountString} to ${compressedPayload.length.byteCountString}, $reduction% size reduction")
-            compressedPayload
+        return if (customPayload) {
+            buildCustomMessageBody(index)
+        } else {
+            val stringPayload = buffer.payloads[index]
+            if (targetConfig.compressionType == CompressionType.NONE)
+                stringPayload
+
+            else {
+                val compressedPayload = Compress.compressedDataPayload(targetConfig.compressionType, stringPayload, UUID.randomUUID().toString())
+                val reduction = (100 - (compressedPayload.length.toFloat() / stringPayload.length.toFloat()) * 100).toInt()
+                log.info("Used ${targetConfig.compressionType} compression to compress ${stringPayload.length.byteCountString} to ${compressedPayload.length.byteCountString}, $reduction% size reduction")
+                compressedPayload
+            }
         }
+    }
+
+    private fun buildCustomMessageBody(index: Int, ): String {
+        val log = logger.getCtxLoggers(className, "buildCustomMessageBody")
+        return try {
+            val targetData = buffer.messages[index]
+            val binaryPayload = formatter!!.apply(listOf(targetData))
+            if (targetConfig.compressionType == CompressionType.NONE) {
+                String(binaryPayload)
+            } else {
+                val compressedBinaryPayload = compressCustomPayload(binaryPayload)
+                val reduction = (100 - (compressedBinaryPayload.length.toFloat() / binaryPayload.size.toFloat()) * 100).toInt()
+                log.info("Used ${targetConfig.compressionType} compression to compress ${binaryPayload.size.byteCountString} to ${compressedBinaryPayload.length.byteCountString}, $reduction% size reduction")
+                compressedBinaryPayload
+            }
+        } catch (e: Exception) {
+            log.error("Error executing custom formatter for target \"$targetID\", $e")
+            ""
+        }
+    }
+
+    private fun compressCustomPayload(binaryPayload: ByteArray): String {
+        val compressed = ByteArrayOutputStream()
+        Compress.compress(targetConfig.compressionType, ByteArrayInputStream(binaryPayload), compressed, entryName = UUID.randomUUID().toString())
+
+        val compressedPayloadStr = JsonHelper.gsonExtended().toJson(
+            mapOf<String, String>(
+                COMPRESSION_ELEMENT to targetConfig.compressionType.name,
+                PAYLOAD_ELEMENT to Base64.getEncoder().encodeToString(compressed.toByteArray())))
+        return compressedPayloadStr
     }
 
 

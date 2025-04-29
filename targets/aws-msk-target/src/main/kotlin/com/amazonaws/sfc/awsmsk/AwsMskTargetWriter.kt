@@ -29,6 +29,8 @@ import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_WRITE_SUCCES
 import com.amazonaws.sfc.system.DateTime
 import com.amazonaws.sfc.targets.TargetDataChannel
 import com.amazonaws.sfc.targets.TargetException
+import com.amazonaws.sfc.targets.TargetFormatter
+import com.amazonaws.sfc.targets.TargetFormatterFactory
 import com.amazonaws.sfc.util.getHostName
 import com.amazonaws.sfc.util.isJobCancellationException
 import com.amazonaws.sfc.util.launch
@@ -38,6 +40,7 @@ import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.clients.producer.RecordMetadata
+import org.apache.kafka.common.KafkaException
 import org.apache.kafka.common.config.SaslConfigs
 import org.apache.kafka.common.errors.TimeoutException
 import org.apache.kafka.common.header.Header
@@ -71,13 +74,22 @@ class AwsMskTargetWriter(
 
     private val scope = CoroutineScope(Dispatchers.IO) + CoroutineName("MSK Target")
 
+    // Configuration loaded for the MSK target writer
+    private val mskWriterConfig: AwsMskWriterConfiguration by lazy {
+        try {
+            configReader.getConfig()
+        } catch (e: Exception) {
+            throw ConfigurationException("Could not load $AWS_MSK_TARGET target configuration: ${e.message}", BaseConfiguration.CONFIG_TARGETS)
+        }
+    }
+
     // Configuration loaded for this MSK target
     private val mskTargetConfig: AwsMskTargetConfiguration by lazy {
         mskWriterConfig.targets[targetID]
-            ?: throw ConfigurationException(
-                "Configuration for type $AWS_MSK_TARGET for target with ID \"$targetID\" does not exist, existing targets are ${mskWriterConfig.targets.keys}",
-                BaseConfiguration.CONFIG_TARGETS
-            )
+                ?: throw ConfigurationException(
+                    "Configuration for type $AWS_MSK_TARGET for target with ID \"$targetID\" does not exist, existing targets are ${mskWriterConfig.targets.keys}",
+                    BaseConfiguration.CONFIG_TARGETS
+                )
     }
 
     // channel to pass messages to coroutine that sends data to the MSK topic
@@ -91,24 +103,15 @@ class AwsMskTargetWriter(
     private val credentialsLock = ReentrantLock()
     private var lastCredentials: AwsCredentials? = null
 
-    // Configuration loaded for the MSK target writer
-    private val mskWriterConfig: AwsMskWriterConfiguration by lazy {
-        try {
-            configReader.getConfig()
-        } catch (e: Exception) {
-            throw ConfigurationException("Could not load $AWS_MSK_TARGET target configuration: ${e.message}", BaseConfiguration.CONFIG_TARGETS)
-        }
-    }
-
 
     private val credentialClientConfig: AwsIotCredentialProviderClientConfiguration? by lazy {
         if (!mskTargetConfig.credentialProviderClient.isNullOrEmpty()) {
             val cc = mskWriterConfig
             cc.awsCredentialServiceClients[mskTargetConfig.credentialProviderClient]
-                ?: throw ConfigurationException(
-                    "Configuration for \"${mskTargetConfig.credentialProviderClient}\" does not exist, configured clients are ${mskWriterConfig.awsCredentialServiceClients.keys}",
-                    BaseConfiguration.CONFIG_CREDENTIAL_PROVIDER_CLIENT
-                )
+                    ?: throw ConfigurationException(
+                        "Configuration for \"${mskTargetConfig.credentialProviderClient}\" does not exist, configured clients are ${mskWriterConfig.awsCredentialServiceClients.keys}",
+                        BaseConfiguration.CONFIG_CREDENTIAL_PROVIDER_CLIENT
+                    )
         } else null
     }
 
@@ -200,6 +203,12 @@ class AwsMskTargetWriter(
         properties
     }
 
+    private val formatter: TargetFormatter? by lazy {
+        TargetFormatterFactory.createTargetFormatter(configReader, targetID, mskTargetConfig, logger)
+    }
+    private val customPayload = (formatter != null)
+
+
     private val producer: KafkaProducer<String, ByteArray> by lazy {
         KafkaProducer(providerProperties)
     }
@@ -288,6 +297,8 @@ class AwsMskTargetWriter(
                 } else {
                     waitForCredentialsInitializationFinished()
                 }
+            } catch (k: KafkaException) {
+                log.error("Error writing to MSK, ${k.cause}")
             } catch (e: Exception) {
                 if (!e.isJobCancellationException)
                     log.errorEx("Error writing to MSK", e)
@@ -303,7 +314,7 @@ class AwsMskTargetWriter(
                     delay(1.toDuration(DurationUnit.SECONDS))
                 }
             }
-        } catch (_ :  TimeoutCancellationException) {
+        } catch (_: TimeoutCancellationException) {
             logger.getCtxErrorLog(className, "waitForCredentialsInitializationFinished")("Timeout obtaining credentials")
         }
     }
@@ -313,11 +324,22 @@ class AwsMskTargetWriter(
 
         val log = logger.getCtxLoggers(className, "handleTargetData")
 
-        val payload = buildRecordPayload(targetData)
 
-        if (payload == null) {
-            log.error("Data transformation or serialization returned null")
-            return
+        val payload = if (customPayload) {
+            try {
+                formatter!!.apply(targetData)
+            } catch (e: Exception) {
+                log.error("Error applying formatter, $e")
+                return
+            }
+        } else {
+            val payload = buildRecordPayload(targetData)
+
+            if (payload == null) {
+                log.error("Data transformation or serialization returned null")
+                return
+            }
+            payload
         }
 
         val record = buildProducerRecord(targetData, payload)

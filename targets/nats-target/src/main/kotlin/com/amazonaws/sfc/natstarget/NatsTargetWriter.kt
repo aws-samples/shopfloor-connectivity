@@ -34,6 +34,8 @@ import com.amazonaws.sfc.natstarget.config.NatsWriterConfiguration
 import com.amazonaws.sfc.natstarget.config.NatsWriterConfiguration.Companion.NATS_TARGET
 import com.amazonaws.sfc.targets.TargetDataChannel
 import com.amazonaws.sfc.targets.TargetException
+import com.amazonaws.sfc.targets.TargetFormatter
+import com.amazonaws.sfc.targets.TargetFormatterFactory
 import com.amazonaws.sfc.util.*
 import com.amazonaws.sfc.util.TemplateRenderer.containsPlaceHolders
 import com.amazonaws.sfc.util.TemplateRenderer.getPlaceHolders
@@ -44,6 +46,7 @@ import io.nats.client.Options
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.selects.select
+import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.time.temporal.ChronoUnit
 import java.util.*
@@ -81,6 +84,14 @@ class NatsTargetWriter(
     private val usesCompression = targetConfig.compressionType != CompressionType.NONE
 
     private var _natsConnection: Connection? = null
+
+    private val formatter: TargetFormatter? by lazy {
+        TargetFormatterFactory.createTargetFormatter(configReader, targetID, targetConfig, logger)
+    }
+
+    private val customPayload = (formatter != null)
+
+
     private suspend fun getConnection(): Connection? {
 
         val log = logger.getCtxLoggers(className, "getClient")
@@ -108,12 +119,12 @@ class NatsTargetWriter(
                             builder.token(natsServerConfiguration.token!!.toCharArray())
                         }
 
-                        if (natsServerConfiguration.nkeyFile!=null) {
+                        if (natsServerConfiguration.nkeyFile != null) {
                             log.info("Using NKey authentication, using $CONFIG_NKEY_FILE \"${natsServerConfiguration.nkeyFile}")
                             builder.authHandler(NKeyAuthHandler(natsServerConfiguration.nkeyFile!!, logger))
                         }
 
-                        if (natsServerConfiguration.credentialsFile!=null) {
+                        if (natsServerConfiguration.credentialsFile != null) {
                             log.info("Using JWT authentication, using $CONFIG_CREDENTIALS_FILE \"${natsServerConfiguration.credentialsFile}")
                             builder.authHandler(Nats.credentials(natsServerConfiguration.credentialsFile!!))
                         }
@@ -155,7 +166,7 @@ class NatsTargetWriter(
     override suspend fun close() {
         try {
             targetContext.cancel()
-            _natsConnection?.drain(java.time.Duration.of(10, ChronoUnit.SECONDS ))
+            _natsConnection?.drain(java.time.Duration.of(10, ChronoUnit.SECONDS))
             _natsConnection?.close()
         } catch (e: Exception) {
             if (!e.isJobCancellationException) {
@@ -189,25 +200,40 @@ class NatsTargetWriter(
                             targetResults?.add(targetData)
 
                             val subjectMessages = mapTargetDataToSubjects(targetData)
-                            if (containsPlaceHolders(targetConfig.subjectName)){
+                            if (containsPlaceHolders(targetConfig.subjectName)) {
                                 log.trace("Message ${targetData.serial} mapped to subjects ${subjectMessages.keys}")
                             }
 
                             subjectMessages.forEach { (subject, subjectTargetData) ->
 
-                                val subjectBuffer = buffers.computeIfAbsent(subject) { TargetDataBuffer(storeFullMessage = false) }
+                                val subjectBuffer = buffers.computeIfAbsent(subject) { TargetDataBuffer(storeFullMessage = customPayload) }
                                 val timer = timers.computeIfAbsent(subject) { createTimer(subject) }
 
-                                val messagePayload = buildPayload(subjectTargetData)
+                                val (messagePayload: String?, payloadSize: Int) = if (customPayload) {
+                                    val formattedItemSize = try {
+                                        (formatter?.itemPayloadSize(targetData) ?: altSize(targetData))
+                                    } catch (e: Exception) {
+                                        log.errorEx("Error getting payload size using custom formatter", e)
+                                        altSize(targetData)
+                                    }
+                                    null to formattedItemSize
+                                } else {
+                                    val messagePayload = buildPayload(subjectTargetData)
+                                    messagePayload to messagePayload.length
+                                }
 
-                                if (checkMessagePayloadSize(targetData, messagePayload.length, log)) {
+                                if (checkMessagePayloadSize(targetData, payloadSize, log)) {
 
-                                    if (exceedBufferOrMaxPayloadWhenBufferingMessage(subjectBuffer, messagePayload)) {
+                                    if (exceedBufferOrMaxPayloadWhenBufferingMessage(subjectBuffer, payloadSize)) {
                                         log.trace("Batch size of ${targetConfig.batchSize.byteCountString}${if (targetConfig.maxPayloadSize != null) " or ${targetConfig.maxPayloadSize!!.byteCountString}" else ""} for subject $subject reached")
                                         timers[subject] = writeBufferedMessages(subjectBuffer, subject, timer)
                                     }
 
-                                    subjectBuffer.add(targetData, messagePayload)
+                                    if (customPayload) {
+                                        subjectBuffer.add(targetData, payloadSize)
+                                    } else {
+                                        subjectBuffer.add(targetData, messagePayload)
+                                    }
 
                                     log.trace("Received message, buffered size for subject \"$subject\"  is ${subjectBuffer.payloadSize.byteCountString}")
 
@@ -250,6 +276,8 @@ class NatsTargetWriter(
 
     }
 
+    private fun altSize(targetData: TargetData): Int = if (targetConfig.batchCount != 0) 0 else targetData.toJson(config.elementNames, targetConfig.unquoteNumericJsonValues).length
+
 
     private fun createTimer(channel: String): Job {
         return scope.launch {
@@ -283,9 +311,9 @@ class NatsTargetWriter(
         } else true
     }
 
-    private fun exceedBufferOrMaxPayloadWhenBufferingMessage(buffer: TargetDataBuffer, payload: String): Boolean {
+    private fun exceedBufferOrMaxPayloadWhenBufferingMessage(buffer: TargetDataBuffer, payloadSize: Int): Boolean {
         if (usesCompression) return false
-        val bufferedPayloadSizeWhenAddingMessage = payload.length + (2 + (buffer.size - 1)) + buffer.payloadSize
+        val bufferedPayloadSizeWhenAddingMessage = payloadSize + (2 + (buffer.size - 1)) + buffer.payloadSize
         val bufferSizeExceededWhenAddingMessage = (targetConfig.batchSize > 0) && (bufferedPayloadSizeWhenAddingMessage > targetConfig.batchSize)
         val maxPayloadSizeExceededWhenAddingMessage =
             targetConfig.maxPayloadSize != null && bufferedPayloadSizeWhenAddingMessage > targetConfig.maxPayloadSize!!
@@ -295,33 +323,45 @@ class NatsTargetWriter(
 
 
     private fun buildNatsMessage(buffer: TargetDataBuffer): ByteArray {
-
-        val payload = if (doesBatching)
-            if (targetConfig.arrayWhenBuffered)
-                buffer.payloads.joinToString(prefix = "[", postfix = "]", separator = ",") { it }
-            else
-                buffer.payloads.joinToString(separator = "") { it }
-        else
-            buffer.payloads.first()
-
-        return if (targetConfig.compressionType == CompressionType.NONE) {
-            payload.toByteArray()
+        return if (customPayload) {
+            try {
+                val binaryPayload = formatter!!.apply(buffer.messages)
+                if (targetConfig.compressionType == CompressionType.NONE) {
+                    binaryPayload
+                } else
+                    compressPayload(ByteArrayInputStream(binaryPayload), binaryPayload.size)
+            } catch (e: Exception) {
+                logger.getCtxErrorLog(className, "targetWriter")("Error executing custom formatter for target \"$targetID\", $e")
+                ByteArray(0)
+            }
         } else {
-            compressPayload(payload)
 
+            val stringPayload = if (doesBatching)
+                if (targetConfig.arrayWhenBuffered)
+                    buffer.payloads.joinToString(prefix = "[", postfix = "]", separator = ",") { it }
+                else
+                    buffer.payloads.joinToString(separator = "") { it }
+            else
+                buffer.payloads.first()
+
+            if (targetConfig.compressionType == CompressionType.NONE) {
+                stringPayload.toByteArray()
+            } else {
+                compressPayload(stringPayload.byteInputStream(Charsets.UTF_8), stringPayload.length)
+            }
         }
     }
 
 
-    private fun compressPayload(content: String): ByteArray {
-        val inputStream = content.byteInputStream(Charsets.UTF_8)
+    private fun compressPayload(content: ByteArrayInputStream, size: Int): ByteArray {
         val outputStream = ByteArrayOutputStream(2048)
-        Compress.compress(targetConfig.compressionType, inputStream, outputStream, entryName = "${UUID.randomUUID()}")
+        Compress.compress(targetConfig.compressionType, content, outputStream, entryName = "${UUID.randomUUID()}")
         val log = logger.getCtxLoggers(className, "compressContent")
         val compressedData = outputStream.toByteArray()
-        log.info("Used ${targetConfig.compressionType} compression to compress ${content.length.byteCountString} to ${compressedData.size.byteCountString} bytes, ${(100 - (compressedData.size.toFloat() / content.length.toFloat()) * 100).toInt()}% size reduction")
+        log.info("Used ${targetConfig.compressionType} compression to compress ${size.byteCountString} to ${compressedData.size.byteCountString} bytes, ${(100 - (compressedData.size.toFloat() / size.toFloat()) * 100).toInt()}% size reduction")
         return compressedData
     }
+
 
     private suspend fun writeBufferedMessages(buffer: TargetDataBuffer, subject: String, timer: Job): Job {
 
@@ -336,34 +376,44 @@ class NatsTargetWriter(
 
             val natsMessage = buildNatsMessage(buffer)
 
-            if (targetConfig.maxPayloadSize != null && natsMessage.size > targetConfig.maxPayloadSize!!) {
-                log.error("Size of NATS message ${natsMessage.size} bytes is beyond max payload size of  ${targetConfig.maxPayloadSize!!.byteCountString} for target, reduce or set $CONFIG_BATCH_SIZE, $CONFIG_BATCH_COUNT or $CONFIG_BATCH_INTERVAL for this target")
-                targetResults?.errorBuffered()
-                metricsCollector?.put(targetID, METRICS_WRITE_ERRORS, 1.0, MetricUnits.COUNT, metricDimensions)
-                createTimer(subject)
-
-            } else {
-
-                val duration = measureTime {
-                    val connection = getConnection()
-
-                    withTimeout(targetConfig.publishTimeout) {
-                        connection?.publish(subject, natsMessage)
-                    }
-
-                    targetResults?.ackBuffered()
+            when {
+                (natsMessage.isEmpty()) -> {
+                    log.trace("No payload to publish to topic $subject")
+                    targetResults?.errorBuffered()
+                    buffer.clear()
+                    createTimer(subject)
                 }
-                val compressedStr = if (targetConfig.compressionType != CompressionType.NONE) " compressed " else " "
-                val itemStr = if (doesBatching) " containing ${buffer.size} items " else " "
-                log.trace("Published NATS ${compressedStr}message to subject \"$subject\" with size of ${natsMessage.size.byteCountString} ${itemStr}in $duration")
 
-                createMetrics(targetID, metricDimensions, buffer, natsMessage.size, duration)
-                createTimer(subject)
+                (targetConfig.maxPayloadSize != null && natsMessage.size > targetConfig.maxPayloadSize!!) -> {
+                    log.error("Size of NATS message ${natsMessage.size} bytes is beyond max payload size of  ${targetConfig.maxPayloadSize!!.byteCountString} for target, reduce or set $CONFIG_BATCH_SIZE, $CONFIG_BATCH_COUNT or $CONFIG_BATCH_INTERVAL for this target")
+                    targetResults?.errorBuffered()
+                    metricsCollector?.put(targetID, METRICS_WRITE_ERRORS, 1.0, MetricUnits.COUNT, metricDimensions)
+                    createTimer(subject)
+                }
+
+                else -> {
+
+                    val duration = measureTime {
+                        val connection = getConnection()
+
+                        withTimeout(targetConfig.publishTimeout) {
+                            connection?.publish(subject, natsMessage)
+                        }
+                        targetResults?.ackBuffered()
+                    }
+                    val compressedStr = if (targetConfig.compressionType != CompressionType.NONE) " compressed " else " "
+                    val itemStr = if (doesBatching) " containing ${buffer.size} items " else " "
+                    log.trace("Published NATS ${compressedStr}message to subject \"$subject\" with size of ${natsMessage.size.byteCountString} ${itemStr}in $duration")
+
+                    createMetrics(targetID, metricDimensions, buffer, natsMessage.size, duration)
+                    createTimer(subject)
+                }
             }
+
 
         } catch (e: Exception) {
             if (!e.isJobCancellationException) {
-                 metricsCollector?.put(targetID, METRICS_WRITE_ERRORS, 1.0, MetricUnits.COUNT, metricDimensions)
+                metricsCollector?.put(targetID, METRICS_WRITE_ERRORS, 1.0, MetricUnits.COUNT, metricDimensions)
                 log.error("Error publishing to subject \"$subject\" for target \"$targetID\", ${e.message}, $e")
                 if (e is TimeoutCancellationException || _natsConnection == null) {
                     targetResults?.nackBuffered()
@@ -375,8 +425,8 @@ class NatsTargetWriter(
         } finally {
             buffer.clear()
         }
-
     }
+
 
     private val metricsCollector: MetricsCollector? by lazy {
         val metricsConfiguration = config.targets[targetID]?.metrics ?: MetricsSourceConfiguration()
@@ -414,7 +464,10 @@ class NatsTargetWriter(
     private val transformation by lazy { if (targetConfig.template != null) OutputTransformation(targetConfig.template!!, logger) else null }
 
     private fun buildPayload(targetData: TargetData): String =
-        if (transformation == null) targetData.toJson(config.elementNames, targetConfig.unquoteNumericJsonValues) else transformation!!.transform(targetData, config.elementNames, targetConfig.templateEpochTimestamp) ?: ""
+        if (transformation == null) targetData.toJson(config.elementNames, targetConfig.unquoteNumericJsonValues) else transformation!!.transform(
+            targetData,
+            config.elementNames,
+            targetConfig.templateEpochTimestamp) ?: ""
 
 
     private fun createMetrics(
@@ -425,33 +478,33 @@ class NatsTargetWriter(
         duration: Duration
     ) {
 
-            metricsCollector?.put(
+        metricsCollector?.put(
+            adapterID,
+            metricsCollector?.buildValueDataPoint(
                 adapterID,
-                metricsCollector?.buildValueDataPoint(
-                    adapterID,
-                    MetricsCollector.METRICS_MEMORY,
-                    MemoryMonitor.getUsedMemoryMB().toDouble(),
-                    MetricUnits.MEGABYTES
-                ),
-                metricsCollector?.buildValueDataPoint(
-                    adapterID,
-                    MetricsCollector.METRICS_MEMORY,
-                    MemoryMonitor.getUsedMemoryMB().toDouble(),
-                    MetricUnits.MEGABYTES
-                ),
-                metricsCollector?.buildValueDataPoint(adapterID, METRICS_WRITES, 1.0, MetricUnits.COUNT, metricDimensions),
-                metricsCollector?.buildValueDataPoint(adapterID, METRICS_BYTES_SEND, payloadSize.toDouble(), MetricUnits.COUNT, metricDimensions),
-                metricsCollector?.buildValueDataPoint(adapterID, METRICS_MESSAGES, buffer.size.toDouble(), MetricUnits.COUNT, metricDimensions),
-                metricsCollector?.buildValueDataPoint(
-                    adapterID,
-                    METRICS_WRITE_DURATION,
-                    duration.inWholeMilliseconds.toDouble(),
-                    MetricUnits.MILLISECONDS,
-                    metricDimensions
-                ),
-                metricsCollector?.buildValueDataPoint(adapterID, METRICS_WRITE_SUCCESS, 1.0, MetricUnits.COUNT, metricDimensions),
-                metricsCollector?.buildValueDataPoint(adapterID, METRICS_WRITE_SIZE, buffer.payloadSize.toDouble(), MetricUnits.BYTES, metricDimensions)
-            )
+                MetricsCollector.METRICS_MEMORY,
+                MemoryMonitor.getUsedMemoryMB().toDouble(),
+                MetricUnits.MEGABYTES
+            ),
+            metricsCollector?.buildValueDataPoint(
+                adapterID,
+                MetricsCollector.METRICS_MEMORY,
+                MemoryMonitor.getUsedMemoryMB().toDouble(),
+                MetricUnits.MEGABYTES
+            ),
+            metricsCollector?.buildValueDataPoint(adapterID, METRICS_WRITES, 1.0, MetricUnits.COUNT, metricDimensions),
+            metricsCollector?.buildValueDataPoint(adapterID, METRICS_BYTES_SEND, payloadSize.toDouble(), MetricUnits.COUNT, metricDimensions),
+            metricsCollector?.buildValueDataPoint(adapterID, METRICS_MESSAGES, buffer.size.toDouble(), MetricUnits.COUNT, metricDimensions),
+            metricsCollector?.buildValueDataPoint(
+                adapterID,
+                METRICS_WRITE_DURATION,
+                duration.inWholeMilliseconds.toDouble(),
+                MetricUnits.MILLISECONDS,
+                metricDimensions
+            ),
+            metricsCollector?.buildValueDataPoint(adapterID, METRICS_WRITE_SUCCESS, 1.0, MetricUnits.COUNT, metricDimensions),
+            metricsCollector?.buildValueDataPoint(adapterID, METRICS_WRITE_SIZE, buffer.payloadSize.toDouble(), MetricUnits.BYTES, metricDimensions)
+        )
     }
 
 
@@ -476,7 +529,7 @@ class NatsTargetWriter(
                 log.trace("$messageStr has unmapped placeholder(s) ${getPlaceHolders(subjectName)} in subject \"$subjectName\", using $CONFIG_SUBJECT_NAME \"${targetConfig.subjectName}\", using alternative $CONFIG_ALTERNATE_SUBJECT_NAME \"${targetConfig.alternateSubjectName}\"")
                 subjectName = TemplateRenderer.render(targetConfig.alternateSubjectName!!, targetData.schedule, sourceName, channel, targetID, channelMetadata)
                 if (containsPlaceHolders(subjectName)) {
-                    if (targetConfig.warnAlternateSubjectName  || logger.level == LogLevel.TRACE) log.warning("$messageStr has unmapped placeholder(s) ${getPlaceHolders(subjectName)} in subject \"$subjectName\", using $CONFIG_ALTERNATE_SUBJECT_NAME \"${targetConfig.alternateSubjectName}\"")
+                    if (targetConfig.warnAlternateSubjectName || logger.level == LogLevel.TRACE) log.warning("$messageStr has unmapped placeholder(s) ${getPlaceHolders(subjectName)} in subject \"$subjectName\", using $CONFIG_ALTERNATE_SUBJECT_NAME \"${targetConfig.alternateSubjectName}\"")
                     subjectName = ""
                 }
             } else {

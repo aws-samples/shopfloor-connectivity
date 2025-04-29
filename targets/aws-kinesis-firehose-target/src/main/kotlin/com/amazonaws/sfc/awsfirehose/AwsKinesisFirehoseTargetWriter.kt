@@ -22,9 +22,7 @@ import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_WRITE_ERRORS
 import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_WRITE_SIZE
 import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_WRITE_SUCCESS
 import com.amazonaws.sfc.system.DateTime
-import com.amazonaws.sfc.targets.AwsServiceTargetClientHelper
-import com.amazonaws.sfc.targets.TargetDataChannel
-import com.amazonaws.sfc.targets.TargetException
+import com.amazonaws.sfc.targets.*
 import com.amazonaws.sfc.util.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -35,7 +33,6 @@ import software.amazon.awssdk.core.SdkBytes
 import software.amazon.awssdk.services.firehose.FirehoseClient
 import software.amazon.awssdk.services.firehose.model.PutRecordBatchRequest
 import software.amazon.awssdk.services.firehose.model.Record
-import java.util.*
 
 /**
 
@@ -100,8 +97,15 @@ class AwsKinesisFirehoseTargetWriter(
     // Channel to pass message to coroutine that batches and sends messages to the stream
     private val targetDataChannel = TargetDataChannel.create(targetConfig, "$className:targetDataChannel")
 
+    private val formatter: TargetFormatter? by lazy {
+        TargetFormatterFactory.createTargetFormatter(configReader, targetID, targetConfig, logger)
+    }
+
+    private val customPayload = (formatter != null)
+
+
     // Message buffer
-    private val buffer = newTargetDataBuffer(resultHandler)
+    private val buffer = newTargetDataBuffer(resultHandler, customPayload)
 
 
     // Coroutine that sends the messages to the stream
@@ -116,35 +120,57 @@ class AwsKinesisFirehoseTargetWriter(
             }
         } catch (e: Exception) {
             if (!e.isJobCancellationException)
-                log.errorEx("Error in AWS Kinesis Firehose writer for target \"$targetID\" writing to stream \"${targetConfig.streamName}\" in region ${targetConfig.region} on target \"$targetID\"", e)
+                log.errorEx(
+                    "Error in AWS Kinesis Firehose writer for target \"$targetID\" writing to stream \"${targetConfig.streamName}\" in region ${targetConfig.region} on target \"$targetID\"",
+                    e)
         }
     }
 
     private val transformation by lazy { if (targetConfig.template != null) OutputTransformation(targetConfig.template!!, logger) else null }
 
     private fun buildPayload(targetData: TargetData): String =
-        if (transformation == null) targetData.toJson(config.elementNames,targetConfig.unquoteNumericJsonValues) else transformation!!.transform(targetData, config.elementNames, targetConfig.templateEpochTimestamp) ?: ""
+        if (transformation == null) targetData.toJson(config.elementNames, targetConfig.unquoteNumericJsonValues) else transformation!!.transform(
+            targetData,
+            config.elementNames,
+            targetConfig.templateEpochTimestamp) ?: ""
 
     // Send messages to stream
     private fun sendTargetData(targetData: TargetData) {
 
-        // build the base64 payload
-        val payload = buildPayload(targetData)
+        val log = logger.getCtxLoggers(className, "sendTargetData")
 
-        val base64Payload = Base64.getEncoder().encode(payload.toByteArray())
+        val (messagePayload: String?, payloadSize: Int) = if (customPayload) {
+            val formattedItemSize = try {
+                formatter?.itemPayloadSize(targetData) ?: altSize(targetData)
+            } catch (e: Exception) {
+                log.errorEx("Error getting payload size using custom formatter", e)
+                altSize(targetData)
+            }
+            null to (formattedItemSize * 1.33).toInt() + 2
+        } else {
+            val messagePayload = buildPayload(targetData)
+            messagePayload to (messagePayload.length * 1.33).toInt() + 2
+        }
 
         // test if buffer can hold additional payload, if not flush buffer
-        if (base64Payload.size + buffer.payloadSize > FIREHOSE_MAX_BATCH_MSG_SIZE) {
+        if (payloadSize + buffer.payloadSize > FIREHOSE_MAX_BATCH_MSG_SIZE) {
             flush()
         }
 
-        buffer.add(targetData, payload)
+        if (customPayload) {
+            buffer.add(targetData, payloadSize)
+        } else {
+            buffer.add(targetData, messagePayload)
+        }
 
         // flush if number of messages greater than configured batch size
         if (targetData.noBuffering || buffer.size >= targetConfig.batchSize) {
             flush()
         }
     }
+
+    private fun altSize(targetData: TargetData): Int = if (targetConfig.batchSize != 0) 0 else targetData.toJson(config.elementNames, targetConfig.unquoteNumericJsonValues).length
+
 
     // Send all messages in buffer to the stream
     private fun flush() {
@@ -158,10 +184,15 @@ class AwsKinesisFirehoseTargetWriter(
         log.trace("Sending ${buffer.size} records to kinesis firehose delivery stream \"$streamName\" on target \"$targetID\"")
 
         val start = DateTime.systemDateTime().toEpochMilli()
-
+        val request = buildRequest(streamName)
 
         try {
-            val request = buildRequest(streamName)
+
+            if (request.records().isEmpty()){
+                log.error("No records to send to kinesis firehose delivery stream \"$streamName\" on target \"$targetID\"")
+                targetResults?.errorList(buffer.items)
+                return
+            }
 
             val resp = clientHelper.executeServiceCallWithRetries {
                 try {
@@ -226,7 +257,7 @@ class AwsKinesisFirehoseTargetWriter(
         runBlocking {
             metricsCollector?.put(
                 adapterID,
-                metricsCollector?.buildValueDataPoint(adapterID, MetricsCollector.METRICS_MEMORY, MemoryMonitor.getUsedMemoryMB().toDouble(),MetricUnits.MEGABYTES ),
+                metricsCollector?.buildValueDataPoint(adapterID, MetricsCollector.METRICS_MEMORY, MemoryMonitor.getUsedMemoryMB().toDouble(), MetricUnits.MEGABYTES),
                 metricsCollector?.buildValueDataPoint(adapterID, METRICS_WRITES, 1.0, MetricUnits.COUNT, metricDimensions),
                 metricsCollector?.buildValueDataPoint(adapterID, METRICS_MESSAGES, buffer.size.toDouble(), MetricUnits.COUNT, metricDimensions),
                 metricsCollector?.buildValueDataPoint(adapterID, METRICS_WRITE_DURATION, writeDurationInMillis, MetricUnits.MILLISECONDS, metricDimensions),
@@ -238,15 +269,39 @@ class AwsKinesisFirehoseTargetWriter(
 
     // Builds send request for buffered messages
     private fun buildRequest(streamName: String?): PutRecordBatchRequest {
+
         val builder = PutRecordBatchRequest.builder()
         builder.deliveryStreamName(streamName)
         builder.records(
-            buffer.payloads.map {
-                Record.builder()
-                    .data(SdkBytes.fromUtf8String(it + "\n"))
-                    .build()
+            if (customPayload) {
+                buildCustomPayloadRecords()
+            } else {
+                buildRequestRecords()
             })
         return builder.build()
+    }
+
+    private fun buildRequestRecords(): List<Record?> = buffer.payloads.map { payload ->
+        Record.builder()
+            .data(SdkBytes.fromUtf8String(payload + "\n"))
+            .build()
+    }
+
+    private fun buildCustomPayloadRecords(): List<Record> {
+        val log = logger.getCtxLoggers(className, "buildCustomPayloadRecords")
+        return sequence {
+            buffer.messages.forEach { targetData: TargetData ->
+                try {
+                    yield(SdkBytes.fromByteArray(formatter!!.apply(targetData)))
+                } catch (e: Exception) {
+                    log.error("Error formatting record target data, $e")
+                }
+            }
+        }.map { bytes: SdkBytes ->
+            Record.builder()
+                .data(bytes)
+                .build()
+        }.toList<Record>()
     }
 
     private val config: AwsFirehoseWriterConfiguration

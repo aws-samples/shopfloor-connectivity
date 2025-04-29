@@ -6,7 +6,9 @@ package com.amazonaws.sfc.mqtt.config
 
 import com.amazonaws.sfc.config.ConfigurationClass
 import com.amazonaws.sfc.config.ConfigurationException
+import com.amazonaws.sfc.config.InProcessConfiguration
 import com.amazonaws.sfc.config.TargetConfiguration
+import com.amazonaws.sfc.config.Template
 import com.amazonaws.sfc.config.Validate
 import com.amazonaws.sfc.data.Compress.CONFIG_COMPRESS
 import com.amazonaws.sfc.data.CompressionType
@@ -118,6 +120,11 @@ class MqttTargetConfiguration : TargetConfiguration(), Validate {
     val password: String?
         get() = _password
 
+    @SerializedName(MqttConnectionOptions.CONFIG_MQTT_CLIENT_ID)
+    private var _clientId: String = ""
+    val clientId: String
+        get() = _clientId
+
     @SerializedName(CONFIG_CONNECT_TIMEOUT)
     private var _connectTimeout = DEFAULT_CONNECT_TIMEOUT
     val connectTimeout: Duration = _connectTimeout.toDuration(DurationUnit.SECONDS)
@@ -163,7 +170,7 @@ class MqttTargetConfiguration : TargetConfiguration(), Validate {
             privateKey = _privateKey,
             rootCA = _rootCA,
             sslServerCert = _sslServerCert,
-            connectTimeout = _connectTimeout
+            connectTimeout = _connectTimeout,
         )
     }
 
@@ -239,10 +246,13 @@ class MqttTargetConfiguration : TargetConfiguration(), Validate {
             rootCA: String? = default._rootCA,
             sslServerCert: String? = default._sslServerCert,
             connectTimeout: Int = default._connectTimeout,
+            formatter : InProcessConfiguration? = default._formatter,
+            template: String? = default._template,
             topicName: String? = default._topicNameTemplate,
             alternateTopicName: String? = default._alternateTopicName,
             warnAlternateTopicName : Boolean = default._warnAlternateTopicName,
             qos : Int = default._qos,
+            clientId : String = default._clientId,
             batchCount : Int? = default.batchCount,
             batchSize : Int? = default._batchSize,
             batchInterval : Int? = default._batchInterval,
@@ -266,7 +276,10 @@ class MqttTargetConfiguration : TargetConfiguration(), Validate {
                 _topicNameTemplate = topicName
                 _alternateTopicName = alternateTopicName
                 _warnAlternateTopicName = warnAlternateTopicName
+                _clientId = clientId
                 _qos = qos
+                _template = template
+                _formatter = formatter
                 _batchCount = batchCount
                 _batchSize= batchSize
                 _batchInterval= batchInterval

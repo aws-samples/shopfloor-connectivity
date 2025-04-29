@@ -21,11 +21,11 @@ import kotlin.time.toDuration
 @ConfigurationClass
 class J1939AdapterConfiguration : ProtocolAdapterConfiguration(), Validate {
 
-    @SerializedName(CONFIG_CANBUS_SOCKET)
-    private var _canSocketName : String? = null
+    @SerializedName(CONFIG_CANBUS_SOCKETS)
+    private var _canSockets : Map<String, J1939AdapterSocketConfiguration> = emptyMap<String, J1939AdapterSocketConfiguration>()
 
-    val canSocketName: String
-        get() = _canSocketName?:""
+    val canSockets:  Map<String, J1939AdapterSocketConfiguration>
+        get() = _canSockets
 
     @SerializedName(CONFIG_DBC_FILE)
     private var _dbcFile : String? = null
@@ -33,7 +33,7 @@ class J1939AdapterConfiguration : ProtocolAdapterConfiguration(), Validate {
         get() = if (_dbcFile != null) File(_dbcFile!!) else null
 
     @SerializedName(CONFIG_RECEIVED_DATA_CHANNEL_SIZE)
-    private val _receivedDataChannelSize = DEFAULT_RECEIVED_DATA_CHANNEL_SIZE
+    private var _receivedDataChannelSize = DEFAULT_RECEIVED_DATA_CHANNEL_SIZE
     val receivedDataChannelSize
         get() = _receivedDataChannelSize
 
@@ -48,20 +48,26 @@ class J1939AdapterConfiguration : ProtocolAdapterConfiguration(), Validate {
         get() = _readMode
 
     @SerializedName(CONFIG_MAX_RETAIN_SIZE)
-    private val _maxRetainSize : Int = DEFAULT_MAX_RETAIN_SIZE
+    private var _maxRetainSize : Int = DEFAULT_MAX_RETAIN_SIZE
     val maxRetainSize : Int
         get() = _maxRetainSize
 
     @SerializedName(CONFIG_MAX_RETAIN_PERIOD)
-    private val _maxRetainPeriod : Int = DEFAULT_MAX_RETAIN_PERIOD
+    private var _maxRetainPeriod : Int = DEFAULT_MAX_RETAIN_PERIOD
     val maxRetainPeriod : Int
         get() = _maxRetainPeriod
 
-    @SerializedName(CONFIG_WAIT_AFTER_ERROR)
-    private var _waitAfterErrors: Long = CONFIG_DEFAULT_WAIT_AFTER_ERROR
+    @SerializedName(CONFIG_WAIT_AFTER_READ_ERROR)
+    private var _waitAfterReadErrors: Long = CONFIG_DEFAULT_WAIT_AFTER_READ_ERROR
 
-    val waitAfterErrors: Duration
-        get() = _waitAfterErrors.toDuration(DurationUnit.MILLISECONDS)
+    val waitAfterReadErrors: Duration
+        get() = _waitAfterReadErrors.toDuration(DurationUnit.MILLISECONDS)
+
+    @SerializedName(CONFIG_WAIT_AFTER_OPEN_ERROR)
+    private var _waitAfterOpenErrors: Long = CONFIG_DEFAULT_WAIT_AFTER_OPEN_ERROR
+
+    val waitAfterOpenErrors: Duration
+        get() = _waitAfterOpenErrors.toDuration(DurationUnit.MILLISECONDS)
 
     @Throws(ConfigurationException::class)
     override fun validate() {
@@ -83,23 +89,25 @@ class J1939AdapterConfiguration : ProtocolAdapterConfiguration(), Validate {
 
     private fun validateCanSocketName() {
         ConfigurationException.check(
-            _canSocketName != null,
-            "$CONFIG_CANBUS_SOCKET must be specified",
-            CONFIG_CANBUS_SOCKET,
+            !_canSockets.isEmpty(),
+            "$CONFIG_CANBUS_SOCKETS must be specified and contain at least one item",
+            CONFIG_CANBUS_SOCKETS,
             this)
     }
 
     companion object {
-        const val CONFIG_CANBUS_SOCKET = "CanSocket"
+        const val CONFIG_CANBUS_SOCKETS = "CanSockets"
         const val CONFIG_RECEIVED_DATA_CHANNEL_SIZE = "ReceivedDataChannelSize"
         const val CONFIG_DBC_FILE = "DbcFile"
         const val CONFIG_READ_MODE = "ReadMode"
         const val CONFIG_MAX_RETAIN_SIZE ="MaxRetainSize"
         const val CONFIG_MAX_RETAIN_PERIOD ="MaxRetainPeriod"
         const val CONFIG_READ_TIMESTAMP = "ReadTimestamp"
-        const val CONFIG_WAIT_AFTER_ERROR = "WaitAfterError"
+        const val CONFIG_WAIT_AFTER_READ_ERROR = "WaitAfterReadError"
+        const val CONFIG_WAIT_AFTER_OPEN_ERROR = "WaitAfterOpenError"
 
-        const val CONFIG_DEFAULT_WAIT_AFTER_ERROR = 10000L
+        const val CONFIG_DEFAULT_WAIT_AFTER_READ_ERROR = 10000L
+        const val CONFIG_DEFAULT_WAIT_AFTER_OPEN_ERROR = 60000L
         const val DEFAULT_MAX_RETAIN_PERIOD = 1000 * 60 * 60
         const val DEFAULT_MAX_RETAIN_SIZE = 10000
 
@@ -107,7 +115,14 @@ class J1939AdapterConfiguration : ProtocolAdapterConfiguration(), Validate {
 
         private val default = J1939AdapterConfiguration()
 
-        fun create(canSocketName : String? = default._canSocketName,
+        fun create(canSockets :  Map<String, J1939AdapterSocketConfiguration> = default._canSockets,
+                   maxRetainSize : Int = default._maxRetainSize,
+                   maxRetainPeriod : Int = default._maxRetainPeriod,
+                   readTimeStamp : Boolean = default._readTimeStamp,
+                   waitAfterReadErrors : Long = default._waitAfterReadErrors,
+                   waitAfterOpenErrors : Long = default._waitAfterOpenErrors,
+                   dbcFile : String = default._dbcFile!!,
+                   receivedDataChannelSize : Int = default._receivedDataChannelSize,
                    description: String = default._description,
                    metrics: MetricsSourceConfiguration? = default._metrics,
                    readMode: J1939ReadMode = default._readMode,
@@ -120,8 +135,15 @@ class J1939AdapterConfiguration : ProtocolAdapterConfiguration(), Validate {
                 adapterServer = adapterServer)
 
             with(instance) {
-                _canSocketName = canSocketName
+                _canSockets = canSockets
                 _readMode = readMode
+                _dbcFile = dbcFile
+                _maxRetainSize = maxRetainSize
+                _maxRetainPeriod = maxRetainPeriod
+                _readTimeStamp = readTimeStamp
+                _waitAfterOpenErrors = waitAfterOpenErrors
+                _waitAfterReadErrors = waitAfterReadErrors
+                _receivedDataChannelSize = receivedDataChannelSize
             }
             return instance
         }

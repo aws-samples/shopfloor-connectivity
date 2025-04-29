@@ -34,9 +34,11 @@ Requires IAM permission `lambda:InvokeFunction` for the lambda function that is 
 - [Compression](#compression)
 - [CredentialProviderClient](#credentialproviderclient)
 - [Endpoint](#endpoint)
+- [Formatter](#formatter)
 - [FunctionName](#functionname)
 - [Interval](#interval)
 - [Qualifier](#qualifier)
+- [Template](#template)
 - [Region](#region)
 
 ---
@@ -90,6 +92,16 @@ https://docs.aws.amazon.com/vpc/latest/privatelink/aws-services-privatelink-supp
 **Type:** String
 
 ---
+
+### Formatter
+
+Configuration allows for custom formatting of data written by a target. A [custom formatter](../sfc-extending.md#custom-formatters), implemented as a JVM class, converts a sequence of target data messages into a specific format and returns the formatted data as an array of bytes.
+
+When a formatter is used, a [template](#template) configured for that target is ignored.
+
+**Type:** [InProcessConfiguration](../core/in-process-configuration.md)
+
+---
 ### FunctionName
 Name of the Lambda function
 
@@ -131,7 +143,40 @@ Version or alias of the Lambda function to invoke
 Default is "latest"
 
 ---
+### Template
+
+Specifies the file path to an [Apache velocity](https://velocity.apache.org/)  template used for  [transforming the output data](../sfc-target-templates.md) target output data. This optional setting enables custom formatting of data before it is sent to the target. Available context variables include:
+
+- $schedule
+- $sources
+- $metadata
+- $serial
+- $timestamp
+- names specified in ElementNames configuration
+- $tab (for inserting tab characters)
+
+Pathname to file containing an [Apache velocity](https://velocity.apache.org/) template that can be applied to [transform the output data](../sfc-target-templates.md) of the target.
+
+The following [Velocity tools](https://velocity.apache.org/tools/3.1/tools-summary.html) can be used in the transformation template:
+
+- $datetool
+- $collection
+- $context
+- $math
+- $number
+
+Additional epoch timestamp values can be added to the data used for the transformation by setting the [TemplateEpochTimestamp](../core/target-configuration.md#templateepochtimestamp) property to true,
+
+For targets where the data does not require specific output format, the data is serialized as [JSON data](../sfc-data-format.md#sfc-output-data-schemas).
+
+When a custom [formatter](#formatter) is configured for a target then this property is ignored.
+
+**Type**: String
+
+---
+
 ### Region
+
 AWS Region for Lambda service
 
 **Type** : String

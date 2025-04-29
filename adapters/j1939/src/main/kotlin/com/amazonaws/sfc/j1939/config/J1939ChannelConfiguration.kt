@@ -7,6 +7,7 @@ package com.amazonaws.sfc.j1939.config
 import com.amazonaws.sfc.config.ChannelConfiguration
 import com.amazonaws.sfc.config.ConfigurationClass
 import com.amazonaws.sfc.config.ConfigurationException
+import com.amazonaws.sfc.j1939.config.J1939AdapterConfiguration.Companion.CONFIG_READ_MODE
 import com.amazonaws.sfc.j1939.protocol.isNumeric
 import com.google.gson.annotations.SerializedName
 
@@ -23,15 +24,21 @@ class J1939ChannelConfiguration : ChannelConfiguration() {
     @SerializedName(value = CONFIG_SPN, alternate = [CONFIG_SPN_UPPERCASE])
     private var _spnList: String? = null
 
+
     val spnList: List<String>?
         get() = _spnList?.split(',')?.map { it.trim() }?.map{if (isNumeric(it))it.split('.').first() else it}
+
+    @SerializedName(CONFIG_RAW_FORMAT)
+    private var _rawFormat : J1939RawFormat? = null
+    val rawFormat: J1939RawFormat?
+        get() = _rawFormat
 
     override fun validate() {
         if (validated) return
         super.validate()
-        validatePgn()
         validated = true
     }
+
 
     private fun validatePgn() {
         ConfigurationException.check(
@@ -49,6 +56,8 @@ class J1939ChannelConfiguration : ChannelConfiguration() {
 
         private const val CONFIG_SPN = "Spn"
         private const val CONFIG_SPN_UPPERCASE = "SPN"
+
+        internal const val CONFIG_RAW_FORMAT = "RawFormat"
 
         private val default = J1939ChannelConfiguration()
 

@@ -324,7 +324,7 @@ class RouterTargetWriter(
                     false
                 }
             }
-        } catch (t: TimeoutCancellationException) {
+        } catch (_: TimeoutCancellationException) {
             log.trace("Timeout forwarding to target \"${targetID}\"")
             false
         } catch (e: Exception) {

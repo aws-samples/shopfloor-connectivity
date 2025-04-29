@@ -198,6 +198,7 @@ open class MqttConnectionOptions : Validate {
         const val CONFIG_MQTT_PASSWORD = "Password"
         const val CONFIG_MQTT_PORT = "Port"
         const val CONFIG_MQTT_VERIFY_HOSTNAME = "VerifyHostname"
+        const val CONFIG_MQTT_CLIENT_ID = "ClientId"
 
         // included as this was setting has been renamed to CONFIG_END_POINT
         const val CONFIG_BROKER_ADDRESS = "Address"

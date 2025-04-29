@@ -126,7 +126,7 @@ class AwsIotAnalyticsTargetWriter(
     private val targetDataChannel = TargetDataChannel.create(targetConfig, "$className:targetDataChannel")
 
     // buffer for message batches
-    private val buffer = newTargetDataBuffer(resultHandler)
+    private val buffer = newTargetDataBuffer(resultHandler, false)
 
 
     // coroutine that writes messages to channel

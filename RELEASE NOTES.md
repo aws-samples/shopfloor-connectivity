@@ -1,5 +1,16 @@
 # Release Notes:
 
+
+
+## Version 1.9.2, 17 April 2025
+
+- New: [Custom formatters ](./docs/sfc-extending.md#custom-formatters) for targets adapters, enabling the implementation of custom formatting. These formatters are implemented as JVM classes and process target data written by the adapter.
+- New: [@include](./docs/sfc-configuration.md#including-configuration-sections) statement to include data from external files into configuration file
+- New: [ClientId](./docs/targets/mqtt.md#clientid) configuration property for [MQTT target](./docs/targets/mqtt.md).
+- New: Support for reading multiple can sockets for [J13939 adapter](./docs/adapters/j1939.md#j1939adapterconfiguration)
+- New: Collecting data as [raw](./docs/adapters/j1939.md#rawformat) values for [J1939 adapter channels](./docs/adapters/j1939.md#j1939channelconfiguration)
+- New: [BufferCount](./docs/targets/file.md#buffercount) property for [File target](./docs/targets/file.md)
+
 ## Version 1.9.1, 10 April 2025
 
 - Upgrade to AWS SDK 2.31.18

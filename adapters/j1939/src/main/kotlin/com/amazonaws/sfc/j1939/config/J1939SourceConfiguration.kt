@@ -10,6 +10,7 @@ import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_CHANNELS
 import com.amazonaws.sfc.config.BaseSourceConfiguration
 import com.amazonaws.sfc.config.ConfigurationClass
 import com.amazonaws.sfc.config.ConfigurationException
+import com.amazonaws.sfc.j1939.config.J1939ChannelConfiguration.Companion.CONFIG_RAW_FORMAT
 import com.amazonaws.sfc.j1939.protocol.getUByte
 import com.google.gson.annotations.SerializedName
 
@@ -22,6 +23,11 @@ class J1939SourceConfiguration : BaseSourceConfiguration() {
         if (_sourceAddress == null) return@lazy null
         getUByte(_sourceAddress.toString())
     }
+
+    @SerializedName(CONFIG_ADAPTER_CAN_SOCKET)
+    private var _adapterCanSocket: String? = null
+    val adapterCanSocket: String?
+        get() = _adapterCanSocket
 
     @SerializedName(CONFIG_CHANNELS)
     private var _channels = mapOf<String, J1939ChannelConfiguration>()
@@ -51,6 +57,12 @@ class J1939SourceConfiguration : BaseSourceConfiguration() {
         validated = true
     }
 
+    @SerializedName(CONFIG_RAW_FORMAT)
+    private var _rawFormat : J1939RawFormat? = null
+    val rawFormat: J1939RawFormat?
+        get() = _rawFormat
+
+
 
     private fun validateAtLeastOneChannel() =
         ConfigurationException.check(
@@ -65,9 +77,11 @@ class J1939SourceConfiguration : BaseSourceConfiguration() {
         private val default = J1939SourceConfiguration()
 
         private const val CONFIG_SOURCE_ADDRESS = "SourceAddress"
+        const val CONFIG_ADAPTER_CAN_SOCKET = "AdapterCanSocket"
 
         fun create(sourceAddress : Any? = default._sourceAddress,
                    channels: Map<String, J1939ChannelConfiguration> = default._channels,
+                   rawFormat: J1939RawFormat? = default._rawFormat,
                    name: String = default._name,
                    description: String = default._description,
                    protocolAdapter: String? = default._protocolAdapterID): J1939SourceConfiguration {
@@ -80,6 +94,7 @@ class J1939SourceConfiguration : BaseSourceConfiguration() {
             with(instance) {
                 _sourceAddress = sourceAddress
                 _channels = channels
+                _rawFormat = rawFormat
             }
             return instance
         }
