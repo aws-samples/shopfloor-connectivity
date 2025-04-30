@@ -210,7 +210,6 @@ class J1939Adapter(
         while (scope.isActive && adapterConfiguration != null) {
             try {
 
-                val socketName = socketName
                 log.trace("Opening socket \"$socketName\"}")
                 val readTimestamp = adapterConfiguration!!.readTimeStamp
                 socket = RawCanSocket()
