@@ -1,8 +1,6 @@
 # Release Notes:
 
-
-
-## Version 1.9.2, 17 April 2025
+## Version 1.9.2, 30 April 2025
 
 - New: [Custom formatters ](./docs/sfc-extending.md#custom-formatters) for targets adapters, enabling the implementation of custom formatting. These formatters are implemented as JVM classes and process target data written by the adapter.
 - New: [@include](./docs/sfc-configuration.md#including-configuration-sections) statement to include data from external files into configuration file
