@@ -436,32 +436,6 @@ class J1939Adapter(
 
     }
 
-    fun extractBits(bytes: ByteArray, startBit: Int, length: Int): ByteArray {
-
-        val result = bytes.copyOf()
-
-        // Clear all bits in the result array
-        for (i in result.indices) {
-            result[i] = 0
-        }
-
-        // Process each bit in the specified range
-        for (bitIndex in startBit until startBit + length) {
-            val byteIndex = bitIndex / 8
-            if (byteIndex >= bytes.size) break
-            val bitPosition = 7 - (bitIndex % 8)
-
-            // Get the bit from source array
-            val bitValue = (bytes[byteIndex].toInt() shr bitPosition) and 1
-
-            // Set the bit in result array if it was 1
-            if (bitValue == 1) {
-                result[byteIndex] = (result[byteIndex].toInt() or (1 shl bitPosition)).toByte()
-            }
-        }
-
-        return result
-    }
 
     fun extractBits(bytes: ByteArray, signals: List<J1939Signal>): ByteArray {
 
@@ -604,7 +578,7 @@ class J1939Adapter(
                     data.size
                 )
             } catch (e: Exception) {
-                log.error("Error copying data into buffer")
+                log.error("Error copying data into buffer, $e")
             }
             log.trace("Received data transfer packet $packetNumber from source address $sourceAddressStr) from socket ${frame.canSocketName}, data is [${data.map { data.asHexString() }}]")
         }
@@ -697,7 +671,7 @@ class J1939Adapter(
                             } else {
                                 val signal = pgn.signals.find { it.name == spn.name }
                                 if (signal == null) {
-                                    errLog("SPN \"$it\" not found in PNG \"${pgn.name}\" (${pgn.canId}) for channel \"$channelName\", available channels are ${j1939Dbc?.spnListForPgn(pgn.canId)}")
+                                    errLog("SPN \"$it\" not found in PNG \"${pgn.name}\" (${pgn.canId}) for channel \"$channelName\", available channels are ${j1939Dbc.spnListForPgn(pgn.canId)}")
                                 } else yield(signal)
                             }
                         } else null
