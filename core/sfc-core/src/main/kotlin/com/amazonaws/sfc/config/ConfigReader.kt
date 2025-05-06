@@ -85,10 +85,9 @@ open class ConfigReader(val config: String, val allowUnresolved: Boolean = false
         val included = IncludeResolver.resolve(configMap) as Map<String, Any>
         val resolved = TemplateResolver(CONFIG_TEMPLATES).resolve(included)
         var configStr = gsonPretty().toJson(resolved)
-        if (CONFIG_PLACEHOLDER_REGEX.find(configStr) != null){
-            configStr = processConfig(configStr)
-        }
-        return setPlaceholders(configStr)
+        return if  (CONFIG_PLACEHOLDER_REGEX.find(configStr) != null)
+            setPlaceholders(configStr)
+        else configStr
     }
 
 
