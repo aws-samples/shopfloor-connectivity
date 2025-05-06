@@ -10,9 +10,18 @@ import software.amazon.awssdk.core.sync.RequestBody
 import software.amazon.awssdk.services.s3tables.S3TablesClient
 import software.amazon.awssdk.services.s3tables.model.GetTableRequest
 import software.amazon.awssdk.services.s3tables.model.GetTableResponse
-//
-//// Wrapper class to allow testing with mocked s3 tables client
-//class AwsS3TablesClientWrapper(private val client: S3TablesClient) : AwsS3TablesClient {
-//    override fun getTable(request: GetTableRequest, body: RequestBody): GetTableResponse = client.getTable(request)
+import software.amazon.awssdk.services.s3tables.model.ListNamespacesRequest
+import software.amazon.awssdk.services.s3tables.model.ListNamespacesResponse
+
+// Wrapper class to allow testing with mocked s3 tables client
+class AwsS3TablesClientWrapper(private val client: S3TablesClient) : AwsS3TablesClient {
+    //    override fun getTable(request: GetTableRequest, body: RequestBody): GetTableResponse = client.getTable(request)
 //    override fun close() = client.close()
-//}
+    override fun listNamespaces(listNamespaceRequest: ListNamespacesRequest): ListNamespacesResponse {
+        TODO("Not yet implemented")
+    }
+
+//    override fun getTable(request: GetTableRequest): GetTableResponse {
+//        TODO("Not yet implemented")
+//    }
+}

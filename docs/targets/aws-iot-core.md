@@ -39,6 +39,7 @@ Requires IAM permissions `iot:Connect`, `iot:DescribeEndpoint`, `iot:Publish` fo
 - [Compression](#compression)
 - [CredentialProviderClient](#credentialproviderclient)
 - [Endpoint](#endpoint)
+- [Formatter](#formatter)
 - [Region](#region)
 - [Retain](#retain)
 - [Template](#template)

@@ -16,7 +16,7 @@ Shop Floor Connectivity target connectors enable data transmission from industri
 
   Amazon Kinesis Data Firehose is a managed service for ingesting and delivering streaming data in real-time.
 
-- [**AWS Lambda **](./aws-lambda.md)
+- **[AWS Lambda ](./aws-lambda.md)**
 
   AWS Lambda is a serverless compute service that runs code in response to events and manages underlying resources.
 

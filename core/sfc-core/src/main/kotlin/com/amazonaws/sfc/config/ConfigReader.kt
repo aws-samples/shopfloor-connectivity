@@ -27,7 +27,7 @@ import java.io.File
  */
 open class ConfigReader(val config: String, val allowUnresolved: Boolean = false, val secretsManager: SecretsManager? = null) {
 
-    val jsonConfig by lazy { processConfig(config) }
+    val jsonConfig = processConfig(config)
 
     val usedSecrets = mutableMapOf<String, String>()
 
@@ -67,7 +67,7 @@ open class ConfigReader(val config: String, val allowUnresolved: Boolean = false
     @Suppress("UNCHECKED_CAST")
     private fun processConfig(configString: String): String {
 
-        val configWithIncluded = includeFiles(configString)
+        val configWithIncluded = includeFiles(configString).toString()
 
         val configMap = fromJsonExtended(configWithIncluded, Map::class.java) as Map<String, Any>
         val useCachedResults = try {

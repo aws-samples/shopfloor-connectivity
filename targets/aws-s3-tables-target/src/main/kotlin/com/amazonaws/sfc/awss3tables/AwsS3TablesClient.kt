@@ -9,11 +9,15 @@ import com.amazonaws.sfc.services.AwsServicePermissions
 import software.amazon.awssdk.core.sync.RequestBody
 import software.amazon.awssdk.services.s3tables.model.GetTableRequest
 import software.amazon.awssdk.services.s3tables.model.GetTableResponse
+import software.amazon.awssdk.services.s3tables.model.ListNamespacesRequest
+import software.amazon.awssdk.services.s3tables.model.ListNamespacesResponse
 
 
-//// Abstraction for testing with mock client
-//@AwsServicePermissions("s3tables", ["GetTable"])
-//interface AwsS3TablesClient {
+// Abstraction for testing with mock client
+@AwsServicePermissions("s3tables", ["ListNamespaces"])
+interface AwsS3TablesClient {
+    fun listNamespaces(listNamespaceRequest : ListNamespacesRequest): ListNamespacesResponse
+ //   fun getTable(request: GetTableRequest): GetTableResponse
 //    fun getTable(request: GetTableRequest, body: RequestBody): GetTableResponse
 //    fun close()
-//}
+}
