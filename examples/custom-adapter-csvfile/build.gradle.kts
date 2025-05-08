@@ -39,10 +39,11 @@ application {
 
 tasks.getByName<Zip>("distZip").enabled = false
 tasks.distTar {
-    project.version = ""
-    archiveBaseName = module
+    project.version = version
+    archiveBaseName = "${project.name}"
     compression = Compression.GZIP
     archiveExtension = "tar.gz"
+    archiveFileName = "${project.name}.tar.gz"
 }
 
 

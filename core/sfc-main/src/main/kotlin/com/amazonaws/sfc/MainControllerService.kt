@@ -18,6 +18,7 @@ import com.amazonaws.sfc.log.LogLevel
 import com.amazonaws.sfc.log.Logger
 import com.amazonaws.sfc.metrics.*
 import com.amazonaws.sfc.secrets.SecretsManager.Companion.createSecretsManager
+import com.amazonaws.sfc.service.EnvVariables.Companion.ENV_VARIABLE_CONFIG
 import com.amazonaws.sfc.service.HealthProbeService
 import com.amazonaws.sfc.service.Service
 import com.amazonaws.sfc.services.CommandLineOptionsException
@@ -387,15 +388,19 @@ class MainControllerService(
 
         val log = logger.getCtxLoggers(className, "createInProcessReader")
 
+        // TODO check how to deal with in process class loading
+        /*
         if (conf.jarFiles.isNullOrEmpty()) {
             log.error("No jar files configured to load in-process reader from")
             return null
-
         }
+        */
 
         // user factory to create an instance of the reader by dynamically loading the jar files for the configured reader
         log.info("Creating an in-process reader for adapter \"$adapterID\" of protocol adapter type ${configuration.protocolAdapters[adapterID]?.protocolAdapterType}")
-        log.trace("jar files for reader are ${conf.jarFiles!!.joinToString()}")
+        if (conf.jarFiles != null && conf.jarFiles!!.isNotEmpty()) {
+            log.trace("jar files for reader are ${conf.jarFiles!!.joinToString()}")
+        }
         val reader = try {
             sourceReaderFactory?.createInProcessReader(schedule.name, adapterID, logger)
         } catch (e: Exception) {
@@ -474,21 +479,49 @@ class MainControllerService(
             configuration: String,
             logger: Logger
         ): MainControllerService {
+            val log = logger.getCtxLoggers(this::class.java.simpleName, "createController")
 
-           val cmd = try {
-                ControllerCommandLineOptions(args)
-            } catch (e: Exception) {
-                logger.getCtxErrorLog(SFC_CORE, "createController")("Error parsing command line options: ${e.message ?: ""}")
-                throw CommandLineOptionsException("Error parsing command line options, ${e.message}")
+            log.trace("check if config was specified via environment variable - if so don't try to parse")
+            // TODO check via env config provider
+            val envConfig : String? = System.getenv(ENV_VARIABLE_CONFIG)
+            var envCmdLogLevel = LogLevel.INFO
+            var envCmdNoColor = false
+            if(envConfig == null) {
+                val cmd = try {
+                    ControllerCommandLineOptions(args)
+                } catch (e: Exception) {
+                    println("Hi Jan2")
+                    log.info("check if config was specified via environment variable - if so don't try to parse")
+                    val envConfig: String? = System.getenv(ENV_VARIABLE_CONFIG)
+                    if (envConfig != null) {
+                        log.info("config was specified via environment - check for loglevel and noColor")
+                        // TODO check loglevel and noColor
+                        ControllerCommandLineOptions(arrayOf<String>())
+                    } else {
+                        logger.getCtxErrorLog(
+                            SFC_CORE,
+                            "createController"
+                        )("Error parsing command line options: ${e.message ?: ""}")
+                        throw CommandLineOptionsException("Error parsing command line options, ${e.message}")
+                    }
+                }
+                if (cmd.logLevel != null) {
+                    envCmdLogLevel = cmd.logLevel!!
+                }
+                if (cmd.noColor) {
+                    envCmdNoColor = true
+                }
             }
+
+
 
             var configReader = createConfigReader(configuration, allowUnresolved = true, secretsManager = null)
             var controllerConfiguration: ControllerServiceConfiguration = configReader.getConfig()
 
-            val logLevel: LogLevel = cmd.logLevel ?: controllerConfiguration.logLevel
+            val logLevel: LogLevel = envCmdLogLevel ?: controllerConfiguration.logLevel
             logger.level = logLevel
 
-            logger.noColor = cmd.noColor
+            logger.noColor = envCmdNoColor
 
 
             val secretsManager = createSecretsManager(controllerConfiguration, logger)

@@ -1,0 +1,96 @@
+{
+  "RecipeFormatVersion": "2020-01-25",
+  "ComponentName": "com.amazonaws.sfc",
+  "ComponentVersion": "1.0.0",
+  "ComponentType": "aws.greengrass.generic",
+  "ComponentDescription": "SFC all in one",
+  "ComponentPublisher": "Me",
+  "ComponentConfiguration": {
+    "DefaultConfiguration": {
+      "SFC_CONFIG": {
+        "AWSVersion": "2022-04-02",
+        "Name": "MQTT writing to Debug",
+        "Version": 1,
+        "LogLevel": "Debug",
+        "Schedules": [
+          {
+            "Name": "DCSChangeSetpoint",
+            "Interval": 1000,
+            "Active": true,
+            "TimestampLevel": "Both",
+            "Sources": {
+              "MQTT": [
+                "*"
+              ]
+            },
+            "Targets": [
+              "DebugTarget"
+            ]
+          }
+        ],
+        "Sources": {
+          "MQTT": {
+            "Name": "MQTT",
+            "ProtocolAdapter": "MQTT",
+            "AdapterBroker": "local-mqtt-broker",
+            "Channels": {
+              "setpoint_x1": {
+                "Topics": [
+                  "setpoint/x1"
+                ]
+              }
+            }
+          }
+        },
+        "Targets": {
+          "DebugTarget": {
+            "TargetType": "DEBUG-TARGET"
+          }
+        },
+        "TargetTypes": {
+          "DEBUG-TARGET": {
+            "FactoryClassName": "com.amazonaws.sfc.debugtarget.DebugTargetWriter"
+          }
+        },
+        "AdapterTypes": {
+          "MQTT": {
+            "FactoryClassName": "com.amazonaws.sfc.mqtt.MqttAdapter"
+          }
+        },
+        "ProtocolAdapters": {
+          "MQTT": {
+            "AdapterType": "MQTT",
+            "Brokers": {
+              "local-mqtt-broker": {
+                "EndPoint": "tcp://127.0.0.1",
+                "Port": 1883
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "Manifests": [
+    {
+      "Platform": {
+        "os": "*",
+        "runtime": "*"
+      },
+      "Lifecycle": {
+        "Run": {
+          "RequiresPrivilege": true,
+          "Script": "java -jar {artifacts:path}/sfc-fatjar-1.8.9.jar -trace",
+          "Setenv": {
+            "SFC_CONFIG": "{configuration:/SFC_CONFIG}"
+          }
+        }
+      },
+      "Artifacts": [
+        {
+          "Uri": "s3://gg-sfc-vor-eu-central-1/sfc-fatjar-1.8.9.jar"
+        }
+      ]
+    }
+  ]
+}

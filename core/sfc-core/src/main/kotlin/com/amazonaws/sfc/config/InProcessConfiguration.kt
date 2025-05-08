@@ -39,12 +39,14 @@ class InProcessConfiguration private constructor(jars: List<String> = emptyList(
 
         if (validated) return
 
+        // TODO check how we deal with in same process loading
+        /*
         ConfigurationException.check(
             !jarFiles.isNullOrEmpty(),
             "$CONFIG_JAR_FILES can not be empty",
             CONFIG_JAR_FILES,
             this
-        )
+        )*/
 
         jarFiles?.forEach { jar ->
             ConfigurationException.check(
@@ -55,12 +57,15 @@ class InProcessConfiguration private constructor(jars: List<String> = emptyList(
             )
         }
 
+        // TODO as above
+        /*
         ConfigurationException.check(
             InstanceFactory.expandedJarList(jarFiles ?: emptyList()).isNotEmpty(),
             "No jar files to load from ${jarFiles?.joinToString(separator = ",")}",
             CONFIG_JAR_FILES,
             this
         )
+        */
 
         ConfigurationException.check(
             factoryClassName.isNotBlank(),
