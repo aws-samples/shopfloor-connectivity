@@ -81,4 +81,10 @@ It is possible to mix instances of in-process and IPC adapters and targets in a 
 <p align="center">
     <em>Fig. 9. SFC Mixed deployment options</em>
 
+## Single file deployments
+
+As an alternative deployment scenario for both in process as well as with IPC communication we have SFC also available
+as a single uber jar that contains all SFC code including dependencies. That helps 
+
+
 
