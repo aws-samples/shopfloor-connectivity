@@ -13,13 +13,3 @@ buildscript {
         set("sfc_release", version)
     }
 }
-
-tasks.register<Zip>("packageDistribution") {
-    archiveFileName.set("sfc-bundle.zip")
-    destinationDirectory.set(layout.buildDirectory.dir("distribution-bundle"))
-    from(layout.buildDirectory.dir("distribution"))
-}
-
-tasks.named("assemble") {
-    finalizedBy("packageDistribution")
-}

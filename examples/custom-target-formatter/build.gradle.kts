@@ -68,6 +68,6 @@ task("generateBuildConfig") {
 
 tasks.named("build") {
     dependsOn("generateBuildConfig")
-    finalizedBy("copyDist")
+    //finalizedBy("copyDist")
 }
 
