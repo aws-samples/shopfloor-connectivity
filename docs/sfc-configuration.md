@@ -451,14 +451,18 @@ In the architecture of the SFC core the [configuration method](./core/sfc-config
 plug-able providers read the configuration data from their specific source and method and provide the initial
 configuration and updates to an SFC service process, which can be the Service, a source service or a target service,
 as a channel of configuration versions. An SFC service process will receive the new configuration version and apply
-these to the internal service stance that will use these new settings without the need to restart the service.
+these to the internal service instance that will use these new settings without the need to restart the service.
 
 Service providers can read configuration data from files, by making service calls or listening to service requests.
 
-By default, the configuration is read from a configuration file which is specified by the -config command line parameter
+By default, the configuration is read from a configuration file which is specified by the `-config` command line parameter
 for all services. The ConfigFileServiceProvider, which is used for configuration files, will detect updates to the
 configuration file, or changes made to environment variables used in placeholders in the configuration file, and provide
 the updated configuration data to the service.
+
+If you don't specify the `-config` parameter SFC will check the environment variable `SFC_CONFIG` if it exists and holds
+a json configuration. This helps in environment where even default configuration is not passed as a file (e.g. in an AWS
+IoT Greengrass component) 
 
 [^top](#sfc-configuration)
 
