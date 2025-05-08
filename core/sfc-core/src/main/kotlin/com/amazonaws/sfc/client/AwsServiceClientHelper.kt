@@ -26,7 +26,7 @@ import java.net.URI
 
 // Internal exception class used to indicate that failed execution of a code block making the AWS
 // service calls should be retried.
-internal class AwsServiceRetryableException(message: String?) : Exception(message)
+class AwsServiceRetryableException(message: String?) : Exception(message)
 
 abstract class AwsServiceClientHelper(
     private val config: HasCredentialClients,
@@ -135,9 +135,9 @@ abstract class AwsServiceClientHelper(
 
 
     companion object {
-        private const val AWS_SERVICE_RETRIES = 5
-        private const val AWS_SERVICE_BACKOFF_MS = 500
-        private const val SFC_USER_AGENT_PREFIX = "AWS-SFC/"
+        const val AWS_SERVICE_RETRIES = 5
+        const val AWS_SERVICE_BACKOFF_MS = 500
+        const val SFC_USER_AGENT_PREFIX = "AWS-SFC/"
 
     }
 }

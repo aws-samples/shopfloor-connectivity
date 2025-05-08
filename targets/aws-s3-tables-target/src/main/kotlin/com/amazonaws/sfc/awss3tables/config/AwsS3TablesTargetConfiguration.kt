@@ -15,7 +15,6 @@ import com.amazonaws.sfc.config.TargetConfiguration
 import com.amazonaws.sfc.metrics.MetricsSourceConfiguration
 import com.google.gson.annotations.SerializedName
 import software.amazon.awssdk.regions.Region
-import software.amazon.awssdk.services.s3tables.S3TablesClient
 
 /**
  * AWS S3 Bucket target configuration
@@ -24,13 +23,13 @@ import software.amazon.awssdk.services.s3tables.S3TablesClient
 class AwsS3TablesTargetConfiguration : AwsServiceConfig, TargetConfiguration() {
     @SerializedName(CONFIG_TABLE_BUCKET_NAME)
     private var _tableBucketName: String? = null
-    val tableBucketName: String?
-        get() = _tableBucketName
+    val tableBucketName: String
+        get() = _tableBucketName ?: ""
 
 
     @SerializedName(CONFIG_ENDPOINT)
-    var _endPoint : String? = null
-    override val endpoint : String?
+    var _endPoint: String? = null
+    override val endpoint: String?
         get() = _endPoint
 
     @SerializedName(CONFIG_REGION)
@@ -41,13 +40,13 @@ class AwsS3TablesTargetConfiguration : AwsServiceConfig, TargetConfiguration() {
 
     @SerializedName(CONFIG_NAMESPACE)
     var _namespace: String? = null
-    val namespace: String?
-        get() = _namespace
+    val namespace: String
+        get() = _namespace?:""
 
     @SerializedName(CONFIG_TABLE_NAME)
     var _tableName: String? = null
-    val tableName: String?
-        get() = _tableName
+    val tableName: String
+        get() = _tableName ?:""
 
     @SerializedName(CONFIG_AUTO_CREATE)
     var _autoCreate: Boolean = true
@@ -76,8 +75,9 @@ class AwsS3TablesTargetConfiguration : AwsServiceConfig, TargetConfiguration() {
      */
     override fun validate() {
         if (validated) return
-
-        validateServiceRegion(_region)
+        validateServiceRegion()
+        validateNamespace()
+        validateTablename()
         validateBucket()
         validateBufferingInterval()
         validateBufferingSize()
@@ -90,9 +90,37 @@ class AwsS3TablesTargetConfiguration : AwsServiceConfig, TargetConfiguration() {
 
         val (bucketIsValid, reason) = validateS3BucketName(_tableBucketName)
         if (!bucketIsValid) {
-            throw ConfigurationException(reason, CONFIG_TABLE_BUCKET_NAME, this)
+            throw ConfigurationException("Invalid bucket name in ${CONFIG_TABLE_BUCKET_NAME}, $reason", CONFIG_TABLE_BUCKET_NAME, this)
         }
     }
+
+    private fun validateNamespace() {
+        ConfigurationException.check(
+            !(_namespace.isNullOrEmpty()),
+            "$CONFIG_NAMESPACE must be specified",
+            CONFIG_NAMESPACE,
+            this
+        )
+        val (namespaceIsValid, reason) = validateName(_namespace!!)
+        if (!namespaceIsValid) {
+            throw ConfigurationException("Invalid $CONFIG_NAMESPACE \"$_namespace\", $reason", CONFIG_NAMESPACE, this)
+        }
+    }
+
+    private fun validateTablename() {
+        ConfigurationException.check(
+            !(_tableName.isNullOrEmpty()),
+            "$CONFIG_TABLE_NAME must be specified",
+            CONFIG_TABLE_NAME,
+            this
+        )
+        val (namespaceIsValid, reason) = validateName(_namespace!!)
+        if (!namespaceIsValid) {
+            throw ConfigurationException("Invalid $CONFIG_TABLE_NAME \"$_tableName\", $reason", CONFIG_TABLE_NAME, this)
+        }
+    }
+
+
 
     // validates buffering interval
     private fun validateBufferingInterval() =
@@ -113,17 +141,29 @@ class AwsS3TablesTargetConfiguration : AwsServiceConfig, TargetConfiguration() {
         )
 
     // validates AWS region
-    private fun validateServiceRegion(_region: String?) {
+    private fun validateServiceRegion() {
+
         ConfigurationException.check(
             !(_region.isNullOrEmpty() && _endPoint.isNullOrEmpty()),
             "Either $CONFIG_REGION must be specified",
             CONFIG_REGION,
             this
         )
+
+        // check region, note that not all regions may support s3 tables
+        ConfigurationException.check(
+            try {
+                Region.regions().contains(Region.of(_region!!.lowercase()))
+            } catch (_: Exception) {
+                false
+            },
+            "Invalid $CONFIG_REGION \"$_region\"",
+            CONFIG_REGION,
+            this)
     }
 
     companion object {
-        private const val CONFIG_TABLE_BUCKET_NAME = "TableBucketName"
+        private const val CONFIG_TABLE_BUCKET_NAME = "TableBucket"
         private const val CONFIG_NAMESPACE = "Namespace"
         private const val CONFIG_BUFFER_SIZE = "BufferSize"
         private const val CONFIG_TABLE_NAME = "TableName"
@@ -133,13 +173,14 @@ class AwsS3TablesTargetConfiguration : AwsServiceConfig, TargetConfiguration() {
 
         private val default = AwsS3TablesTargetConfiguration()
 
+
         @Suppress("unused")
         fun create(tableBucketName: String? = default._tableBucketName,
                    region: String? = default._region,
                    namespace: String? = default._namespace,
                    tableName: String? = default._tableName,
                    autoCreate: Boolean = default._autoCreate,
-                   endPoint : String? = default._endPoint,
+                   endPoint: String? = default._endPoint,
                    bufferSize: Int = default._bufferSize,
                    interval: Int = default._interval,
                    description: String = default._description,
@@ -171,6 +212,7 @@ class AwsS3TablesTargetConfiguration : AwsServiceConfig, TargetConfiguration() {
             return instance
         }
     }
+
 
     fun validateS3BucketName(bucketName: String?): Pair<Boolean, String> {
         // Check if bucket name is null or empty
@@ -204,12 +246,6 @@ class AwsS3TablesTargetConfiguration : AwsServiceConfig, TargetConfiguration() {
             return Pair(false, "$CONFIG_TABLE_BUCKET_NAME must not contain two adjacent periods")
         }
 
-        // Check if formatted as IP address
-        val ipAddressPattern = "^\\d+\\.\\d+\\.\\d+\\.\\d+$".toRegex()
-        if (bucketName.matches(ipAddressPattern)) {
-            return Pair(false, "$CONFIG_TABLE_BUCKET_NAME must not be formatted as an IP address")
-        }
-
         // Check forbidden prefixes
         val forbiddenPrefixes = listOf("xn--", "sthree-", "amzn-s3-demo-")
         forbiddenPrefixes.forEach { prefix ->
@@ -219,11 +255,55 @@ class AwsS3TablesTargetConfiguration : AwsServiceConfig, TargetConfiguration() {
         }
 
         // Check forbidden suffixes
-        val forbiddenSuffixes = listOf("-s3alias", "--ol-s3", ".mrap", "--x-s3")
+        val forbiddenSuffixes = listOf("-s3alias", "--ol-s3", "--x-s3")
         forbiddenSuffixes.forEach { suffix ->
             if (bucketName.endsWith(suffix)) {
                 return Pair(false, "$CONFIG_TABLE_BUCKET_NAME must not end with the suffix '$suffix'")
             }
+        }
+
+        return Pair(true, "")
+    }
+
+
+    fun validateName(namespaceName: String): Pair<Boolean, String> {
+        // Check if namespace is reserved
+        if (namespaceName.equals("aws_s3_metadata", ignoreCase = true)) {
+            return Pair(false, "Namespace name 'aws_s3_metadata' is reserved and cannot be used")
+        }
+
+        // Check length (1-225 characters)
+        if (namespaceName.isEmpty() || namespaceName.length > 225) {
+            return Pair(false, "Namespace name must be between 1 and 225 characters long")
+        }
+
+        // Check if starts with underscore
+        if (namespaceName.startsWith('_')) {
+            return Pair(false, "Namespace name cannot start with an underscore")
+        }
+
+        // Check if starts with letter or number
+        if (!namespaceName[0].isLetterOrDigit()) {
+            return Pair(false, "Namespace name must begin with a letter or number")
+        }
+
+        // Check if ends with letter or number
+        if (!namespaceName.last().isLetterOrDigit()) {
+            return Pair(false, "Namespace name must end with a letter or number")
+        }
+
+        // Check for valid characters and forbidden characters
+        val containsInvalidChars = namespaceName.any { char ->
+            !char.isLowerCase() && !char.isDigit() && char != '_'
+        }
+
+        if (containsInvalidChars) {
+            return Pair(false, "Namespace name can only contain lowercase letters, numbers, and underscores")
+        }
+
+        // Check for hyphens and periods
+        if (namespaceName.contains('-') || namespaceName.contains('.')) {
+            return Pair(false, "Namespace name cannot contain hyphens or periods")
         }
 
         return Pair(true, "")
