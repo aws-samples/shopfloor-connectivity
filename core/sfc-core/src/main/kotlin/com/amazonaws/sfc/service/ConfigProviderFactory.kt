@@ -61,13 +61,10 @@ object ConfigProviderFactory {
                     EnvConfigProvider(envConfig, configVerificationKey, logger)
                 } else {
                     log.error("No environment configuration provided")
-                    // print command line help
-                    //Commandline.printhelp() // This is private
                     val helpFormatter = HelpFormatter()
                     helpFormatter.width = 132
                     helpFormatter.printHelp(" ", CommandLine.commonOptions())
-                    exitProcess(0)
-                    null
+                    exitProcess(1)
                 }
             }
 
