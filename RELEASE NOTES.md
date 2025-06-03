@@ -1,5 +1,11 @@
 # Release Notes:
 
+## version 1.9.4, 3 June 2025
+
+- [Specify the config via environment variables](./docs/sfc-running-core-process.md#additional-functionality-to-specify-the-config-via-environment-variables)
+- [Running the process from a single jar file](./docs/sfc-running-core-process.md#running-the-process-from-a-single-jar-file)
+
+---
 ## Version 1.9.3, 6 May 2025
 
 - Configuration reader bug fix
