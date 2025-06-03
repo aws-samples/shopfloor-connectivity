@@ -62,7 +62,7 @@ tasks.jar {
 
     isZip64 = true
 
-    archiveBaseName.set("sfc-fatjar")
+    archiveBaseName.set("sfc-uberjar")
 
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 
