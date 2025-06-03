@@ -226,6 +226,33 @@ class JsonHelper {
             return e
         }
 
+
+        fun forEachNode(key : String = "", node: Any?, trail: List<String> = emptyList(), fnFilter: (String, Any?, List<String>)->Boolean = { key: String, node: Any?, tail: List<String> -> true }, fnAction: (String, Any?, List<String>) -> Unit) {
+            when (node) {
+
+                is Map<*, *> -> {
+                    @Suppress("UNCHECKED_CAST")
+                    val mm = node as Map<String, Any>
+                    mm.mapNotNull { (key, item) ->
+                        val trail1 = trail + key
+                        key to forEachNode(key, item, trail1, fnFilter, fnAction)
+                    }.toMap()
+                }
+
+                is List<*>  -> {
+                    @Suppress("UNCHECKED_CAST")
+                    val list = if (node.isNotEmpty()) (node as MutableList<Any>) else mutableListOf()
+                    list.mapNotNull { item ->
+                        val trail1 = trail + key
+                        forEachNode(key, item, trail, fnFilter, fnAction)
+                    }
+                }
+                else ->  {
+                     if (fnFilter(key, node, trail) )fnAction(key, node, trail)
+                }
+            }
+        }
+
         fun forEachStringNode(node: Any?, trail: List<String> = emptyList(), fnFilter: (String?)->Boolean = {true}, fnAction: (String, List<String>) -> Pair<String, Any?>): Any? {
             return when (node) {
 
@@ -239,7 +266,7 @@ class JsonHelper {
 
                 is List<*> -> {
                     @Suppress("UNCHECKED_CAST")
-                    val list = (node as MutableList<Any>)
+                    val list = if (node.isNotEmpty()) (node as MutableList<Any>) else mutableListOf()
                     list.mapNotNull { item ->
                         forEachStringNode(item, trail, fnFilter, fnAction)
                     }

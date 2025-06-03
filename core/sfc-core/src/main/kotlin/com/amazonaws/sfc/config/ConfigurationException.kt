@@ -22,15 +22,12 @@ class ConfigurationException(message: String, val field: String, private val fau
 
         val f = if (faultItem != null)
             try {
-                if (faultItem !is String)
-                    gsonExtended().toJson(faultItem)
-                else
-                    faultItem
+                faultItem as? String ?: gsonExtended().toJson(faultItem)
             } catch (e: Throwable) {
                 faultItem
             }
         else
-            "null"
+            null
 
         return "$message, location = \"$field\" ${if (f != null) ",item = $f" else ""}"
     }

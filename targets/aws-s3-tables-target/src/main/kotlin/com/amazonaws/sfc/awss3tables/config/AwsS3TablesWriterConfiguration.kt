@@ -1,4 +1,3 @@
-
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: MIT-0
 
@@ -8,7 +7,9 @@ package com.amazonaws.sfc.awss3tables.config
 import com.amazonaws.sfc.awsiot.AwsIotCredentialProviderClientConfiguration
 import com.amazonaws.sfc.client.AwsServiceTargetsConfig
 import com.amazonaws.sfc.config.*
+import com.amazonaws.sfc.config.ChannelConfiguration.Companion.CONFIG_TRANSFORMATION
 import com.amazonaws.sfc.log.LogLevel
+import com.amazonaws.sfc.transformations.Transformation
 import com.google.gson.annotations.SerializedName
 import kotlin.time.Duration
 import kotlin.time.DurationUnit
@@ -23,6 +24,12 @@ class AwsS3TablesWriterConfiguration : AwsServiceTargetsConfig<AwsS3TablesTarget
     override val targets: Map<String, AwsS3TablesTargetConfiguration>
         get() = _targets.filter { (it.value.targetType == AWS_S3_TABLES) }
 
+    @SerializedName(CONFIG_TRANSFORMATIONS)
+    private var _transformations = mapOf<String, Transformation>()
+    val transformations: Map<String, Transformation>
+        get() = _transformations
+
+
     @Throws(ConfigurationException::class)
     override fun validate() {
 
@@ -31,7 +38,38 @@ class AwsS3TablesWriterConfiguration : AwsServiceTargetsConfig<AwsS3TablesTarget
         targets.forEach {
             it.value.validate()
         }
+
+        validateMappingTransformations()
+
         validated = true
+    }
+
+    private fun validateMappingTransformations() {
+        targets.forEach { (tableName, targetConfig) ->
+            targetConfig.tables.forEach { tableConfig ->
+                tableConfig.mappings.forEachIndexed { mappingIndex, tableMapping ->
+                    tableMapping.forEach { (fieldName, fieldMapping) ->
+                        if (fieldMapping.transformationID != null) {
+                            if (fieldMapping.transformationID !in _transformations.keys) {
+                                throw ConfigurationException(
+                                    "Transformation ${fieldMapping.transformationID} for table \"$tableName\", mapping $mappingIndex, field \"$fieldName\" not found in $CONFIG_TRANSFORMATIONS, configured transformations are ${transformations.keys}",
+                                    CONFIG_TRANSFORMATION,
+                                    "")
+                            }
+                            fieldMapping.subMappings.forEach { (subFieldName, subFieldMapping) ->
+                                if (subFieldMapping.transformationID !in _transformations.keys) {
+                                    throw ConfigurationException(
+                                        "Transformation ${subFieldMapping.transformationID} for table \"$tableName\", mapping $mappingIndex, sub-field \"$fieldName.$subFieldName\",  not found in $CONFIG_TRANSFORMATIONS, configured transformations are ${transformations.keys}",
+                                        CONFIG_TRANSFORMATION,
+                                        "")
+                                }
+                            }
+                        }
+                    }
+                }
+
+            }
+        }
     }
 
     companion object {
@@ -54,7 +92,7 @@ class AwsS3TablesWriterConfiguration : AwsServiceTargetsConfig<AwsS3TablesTarget
                    awsIotCredentialProviderClients: Map<String, AwsIotCredentialProviderClientConfiguration> = default._awsIoTCredentialProviderClients,
                    secretsManagerConfiguration: SecretsManagerConfiguration? = default._secretsManagerConfiguration,
                    monitorIncludedConfigFiles: Boolean = default._monitorIncludedConfigFiles,
-                   monitorIncludedConfigFilesInterval : Duration = default._monitorIncludedConfigFilesInterval.toDuration(DurationUnit.SECONDS),
+                   monitorIncludedConfigFilesInterval: Duration = default._monitorIncludedConfigFilesInterval.toDuration(DurationUnit.SECONDS),
                    templatesConfiguration: TemplatesConfiguration? = default._templates): AwsS3TablesWriterConfiguration {
 
             val instance = createBaseConfiguration<AwsS3TablesWriterConfiguration>(

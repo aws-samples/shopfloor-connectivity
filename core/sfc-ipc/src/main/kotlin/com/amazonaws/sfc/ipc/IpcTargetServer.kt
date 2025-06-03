@@ -292,10 +292,10 @@ class IpcTargetServer(
 
                 log.info("Target writer for target \"$targetID\" of type \"${targetConfiguration.targetType}\" created")
             } catch (e: TargetException) {
-                log.error(("Error initializing target from configuration \"${request.targetConfiguration}\", $e"))
+                log.error(("Error initializing target from configuration : $e${if (logger.level == LogLevel.TRACE)", \"${request.targetConfiguration}\"" else ""}"))
                 InitializeTargetResponse.newBuilder().setInitialized(false).setError(e.message).build()
             } catch (e: java.lang.Exception) {
-                log.errorEx("Error initializing target from configuration \"${request.targetConfiguration}\"", e)
+                log.errorEx("Error initializing target from configuration : $e${if (logger.level == LogLevel.TRACE)", \"${request.targetConfiguration}\"" else ""}", e)
                 InitializeTargetResponse.newBuilder().setInitialized(false).setError(e.message).build()
             }
 

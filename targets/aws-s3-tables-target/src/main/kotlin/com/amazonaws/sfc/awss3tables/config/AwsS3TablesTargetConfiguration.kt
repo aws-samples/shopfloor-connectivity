@@ -4,6 +4,7 @@
 
 package com.amazonaws.sfc.awss3tables.config
 
+import com.amazonaws.sfc.awss3tables.AwsS3TablesHelper.Companion.validateName
 import com.amazonaws.sfc.awss3tables.config.AwsS3TablesWriterConfiguration.Companion.AWS_S3_TABLES
 import com.amazonaws.sfc.config.AwsServiceConfig
 import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_ENDPOINT
@@ -15,17 +16,17 @@ import com.amazonaws.sfc.config.TargetConfiguration
 import com.amazonaws.sfc.metrics.MetricsSourceConfiguration
 import com.google.gson.annotations.SerializedName
 import software.amazon.awssdk.regions.Region
+import kotlin.time.Duration
+import kotlin.time.DurationUnit
+import kotlin.time.toDuration
 
-/**
- * AWS S3 Bucket target configuration
- */
+
 @ConfigurationClass
 class AwsS3TablesTargetConfiguration : AwsServiceConfig, TargetConfiguration() {
     @SerializedName(CONFIG_TABLE_BUCKET_NAME)
     private var _tableBucketName: String? = null
     val tableBucketName: String
         get() = _tableBucketName ?: ""
-
 
     @SerializedName(CONFIG_ENDPOINT)
     var _endPoint: String? = null
@@ -41,33 +42,32 @@ class AwsS3TablesTargetConfiguration : AwsServiceConfig, TargetConfiguration() {
     @SerializedName(CONFIG_NAMESPACE)
     var _namespace: String? = null
     val namespace: String
-        get() = _namespace?:""
+        get() = _namespace ?: ""
 
-    @SerializedName(CONFIG_TABLE_NAME)
-    var _tableName: String? = null
-    val tableName: String
-        get() = _tableName ?:""
+    @SerializedName(CONFIG_TABLES)
+    var _tables : List<TableConfiguration> =  emptyList()
+    val tables : List<TableConfiguration>
+        get() = _tables
+
 
     @SerializedName(CONFIG_AUTO_CREATE)
     var _autoCreate: Boolean = true
     val autoCreate: Boolean
         get() = _autoCreate
 
-    @SerializedName(CONFIG_BUFFER_SIZE)
-    private var _bufferSize: Int = DEFAULT_BUFFER_SIZE // in MB
+    @SerializedName(CONFIG_BUFFER_COUNT)
+    private var _bufferCount: Int = DEFAULT_BUFFER_COUNT
 
-    /**
-     * Batch size in bytes for writing data to S3 object
-     */
-    val bufferSize: Int
-        get() = _bufferSize * 1024 * 1024 // to MB
+
+    val bufferCount: Int
+        get() = _bufferCount
 
 
     @SerializedName(CONFIG_INTERVAL)
-    private var _interval: Int = DEFAULT_INTERVAL // in seconds
+    private var _interval: Int = DEFAULT_INTERVAL
+    val interval : Duration
+        get() = _interval.toDuration(DurationUnit.SECONDS)
 
-    val interval: Int
-        get() = _interval * 1000 // to milliseconds
 
     /**
      * Validates configuration
@@ -77,12 +77,22 @@ class AwsS3TablesTargetConfiguration : AwsServiceConfig, TargetConfiguration() {
         if (validated) return
         validateServiceRegion()
         validateNamespace()
-        validateTablename()
         validateBucket()
+        validateTables()
         validateBufferingInterval()
         validateBufferingSize()
         validated = true
 
+    }
+
+    private fun validateTables(){
+        ConfigurationException.check(
+            _tables.isNotEmpty(),
+            "At least one table must be specified",
+            CONFIG_TABLES,
+            this
+        )
+        tables.forEach { it.validate() }
     }
 
     // validates bucket name
@@ -107,18 +117,6 @@ class AwsS3TablesTargetConfiguration : AwsServiceConfig, TargetConfiguration() {
         }
     }
 
-    private fun validateTablename() {
-        ConfigurationException.check(
-            !(_tableName.isNullOrEmpty()),
-            "$CONFIG_TABLE_NAME must be specified",
-            CONFIG_TABLE_NAME,
-            this
-        )
-        val (namespaceIsValid, reason) = validateName(_namespace!!)
-        if (!namespaceIsValid) {
-            throw ConfigurationException("Invalid $CONFIG_TABLE_NAME \"$_tableName\", $reason", CONFIG_TABLE_NAME, this)
-        }
-    }
 
 
 
@@ -126,7 +124,7 @@ class AwsS3TablesTargetConfiguration : AwsServiceConfig, TargetConfiguration() {
     private fun validateBufferingInterval() =
         ConfigurationException.check(
             (_interval in 1..900),
-            "$CONFIG_INTERVAL must be in range 1..900 seconds",
+            "$CONFIG_INTERVAL must be in range 1..60 seconds",
             CONFIG_INTERVAL,
             this
         )
@@ -134,9 +132,9 @@ class AwsS3TablesTargetConfiguration : AwsServiceConfig, TargetConfiguration() {
     // validates buffering interval
     private fun validateBufferingSize() =
         ConfigurationException.check(
-            (_bufferSize in 1..128),
+            (_bufferCount in 1..128),
             "Buffer size must be in range 1..128 MB",
-            CONFIG_BUFFER_SIZE,
+            CONFIG_BUFFER_COUNT,
             this
         )
 
@@ -165,11 +163,12 @@ class AwsS3TablesTargetConfiguration : AwsServiceConfig, TargetConfiguration() {
     companion object {
         private const val CONFIG_TABLE_BUCKET_NAME = "TableBucket"
         private const val CONFIG_NAMESPACE = "Namespace"
-        private const val CONFIG_BUFFER_SIZE = "BufferSize"
-        private const val CONFIG_TABLE_NAME = "TableName"
-        private const val DEFAULT_BUFFER_SIZE = 1
-        private const val DEFAULT_INTERVAL = 10
-        private const val CONFIG_AUTO_CREATE = "AutoCreate"
+        private const val CONFIG_BUFFER_COUNT = "BufferCount"
+        private const val DEFAULT_BUFFER_COUNT = 50
+        private const val DEFAULT_INTERVAL = 10 * 1000
+        const val CONFIG_AUTO_CREATE = "AutoCreate"
+        private const val CONFIG_TABLES = "Tables"
+
 
         private val default = AwsS3TablesTargetConfiguration()
 
@@ -178,10 +177,10 @@ class AwsS3TablesTargetConfiguration : AwsServiceConfig, TargetConfiguration() {
         fun create(tableBucketName: String? = default._tableBucketName,
                    region: String? = default._region,
                    namespace: String? = default._namespace,
-                   tableName: String? = default._tableName,
+                   tables: List<TableConfiguration> = default._tables,
                    autoCreate: Boolean = default._autoCreate,
                    endPoint: String? = default._endPoint,
-                   bufferSize: Int = default._bufferSize,
+                   bufferSize: Int = default._bufferCount,
                    interval: Int = default._interval,
                    description: String = default._description,
                    active: Boolean = default._active,
@@ -203,10 +202,10 @@ class AwsS3TablesTargetConfiguration : AwsServiceConfig, TargetConfiguration() {
                 _tableBucketName = tableBucketName
                 _region = region
                 _endPoint = endPoint
-                _bufferSize = bufferSize
+                _bufferCount = bufferSize
                 _interval = interval
                 _namespace = namespace
-                _tableName = tableName
+                _tables = tables
                 _autoCreate = autoCreate
             }
             return instance
@@ -266,48 +265,6 @@ class AwsS3TablesTargetConfiguration : AwsServiceConfig, TargetConfiguration() {
     }
 
 
-    fun validateName(namespaceName: String): Pair<Boolean, String> {
-        // Check if namespace is reserved
-        if (namespaceName.equals("aws_s3_metadata", ignoreCase = true)) {
-            return Pair(false, "Namespace name 'aws_s3_metadata' is reserved and cannot be used")
-        }
-
-        // Check length (1-225 characters)
-        if (namespaceName.isEmpty() || namespaceName.length > 225) {
-            return Pair(false, "Namespace name must be between 1 and 225 characters long")
-        }
-
-        // Check if starts with underscore
-        if (namespaceName.startsWith('_')) {
-            return Pair(false, "Namespace name cannot start with an underscore")
-        }
-
-        // Check if starts with letter or number
-        if (!namespaceName[0].isLetterOrDigit()) {
-            return Pair(false, "Namespace name must begin with a letter or number")
-        }
-
-        // Check if ends with letter or number
-        if (!namespaceName.last().isLetterOrDigit()) {
-            return Pair(false, "Namespace name must end with a letter or number")
-        }
-
-        // Check for valid characters and forbidden characters
-        val containsInvalidChars = namespaceName.any { char ->
-            !char.isLowerCase() && !char.isDigit() && char != '_'
-        }
-
-        if (containsInvalidChars) {
-            return Pair(false, "Namespace name can only contain lowercase letters, numbers, and underscores")
-        }
-
-        // Check for hyphens and periods
-        if (namespaceName.contains('-') || namespaceName.contains('.')) {
-            return Pair(false, "Namespace name cannot contain hyphens or periods")
-        }
-
-        return Pair(true, "")
-    }
 
 
 }

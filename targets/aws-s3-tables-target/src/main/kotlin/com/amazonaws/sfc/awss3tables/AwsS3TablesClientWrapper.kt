@@ -15,6 +15,8 @@ import software.amazon.awssdk.services.s3tables.model.CreateTableBucketRequest
 import software.amazon.awssdk.services.s3tables.model.CreateTableBucketResponse
 import software.amazon.awssdk.services.s3tables.model.CreateTableRequest
 import software.amazon.awssdk.services.s3tables.model.CreateTableResponse
+import software.amazon.awssdk.services.s3tables.model.GetTableRequest
+import software.amazon.awssdk.services.s3tables.model.GetTableResponse
 import software.amazon.awssdk.services.s3tables.model.ListNamespacesRequest
 import software.amazon.awssdk.services.s3tables.model.ListNamespacesResponse
 import software.amazon.awssdk.services.s3tables.model.ListTableBucketsRequest
@@ -30,6 +32,7 @@ class AwsS3TablesClientWrapper(private val client: S3TablesClient) : AwsS3Tables
 
     override fun listTables(request: ListTablesRequest): ListTablesResponse = client.listTables(request)
     override fun listTableBuckets(request: ListTableBucketsRequest): ListTableBucketsResponse  = client.listTableBuckets(request)
+    override fun getTable(request: GetTableRequest): GetTableResponse =  client.getTable(request)
     override fun createTableBucket(request: CreateTableBucketRequest): CreateTableBucketResponse = client.createTableBucket(request)
     override fun createNamespace(request: CreateNamespaceRequest): CreateNamespaceResponse = client.createNamespace(request)
     override fun createTable(request: CreateTableRequest): CreateTableResponse = client.createTable(request)

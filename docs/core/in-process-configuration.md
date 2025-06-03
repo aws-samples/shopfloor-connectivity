@@ -30,10 +30,12 @@ The FactoryClassName property specifies the fully qualified name of the factory 
 
 ---
 ### JarFiles
-The JarFiles property is an array of strings that specifies the locations of JAR files containing target type implementations that the SFC core needs to load. The property accepts two types of path entries:
+The JarFiles property is an array of strings that specifies the locations of JAR files containing target type implementations that the SFC core requires to load. The property accepts two types of path entries:
 
 1. Direct JAR file paths - Paths pointing to specific JAR files
-2. Directory paths - Paths to directories containing JAR files. When a directory is specified, the system will automatically include all JAR files found in that directory.
+2. Directory paths - Paths to directories containing JAR files. When no directory other than  is specified, the system will automatically include all JAR files found in that directory.
+
+If there are no files or directories, the class will be loaded using the classpath.
 
 This property is optional and allows for flexible JAR file organization, whether you prefer specifying individual JAR files or grouping them in directories.
 
