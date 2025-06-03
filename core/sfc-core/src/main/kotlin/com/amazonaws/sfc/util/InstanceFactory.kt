@@ -21,17 +21,13 @@ open class InstanceFactory<T>(private val config: InProcessConfiguration, privat
         val log = logger.getCtxLoggers(className, "classToLoad")
 
         if (config.jarFiles.isNullOrEmpty()) {
-            // TODO check how to deal with in process classes where we can load them from the same classpath
-            //throw Exception("No jar files specified")
-            // TODO where to get name of the config (e.g. DebugTarget)
-            log.info("no jar files specified for '$config'")
+            log.trace("No jar files specified for '${config.factoryClassName}'")
         } else {
             log.trace("Loading factory class name class $config.factoryClassName from ${config.jarFiles!!.joinToString()}")
         }
 
         val expandedJars = expandedJarList(config.jarFiles ?: emptyList())
-        if (expandedJars.isEmpty()) {
-            //throw Exception("No jar files to load from ${config.jarFiles!!.joinToString(",")}")
+        if (expandedJars.isNotEmpty()) {
             Class.forName(config.factoryClassName)
         } else {
             if (config.jarFiles != expandedJars) {

@@ -35,7 +35,9 @@ The JarFiles property is an array of strings that specifies the locations of JAR
 1. Direct JAR file paths - Paths pointing to specific JAR files
 2. Directory paths - Paths to directories containing JAR files. When a directory is specified, the system will automatically include all JAR files found in that directory.
 
-This property is required and allows for flexible JAR file organization, whether you prefer specifying individual JAR files or grouping them in directories.
+This property is optional and allows for flexible JAR file organization, whether you prefer specifying individual JAR files or grouping them in directories.
+
+If `JarFiles' is not specified the current classpath is used to load the factory class and its dependencies.
 
 **Type**: String[]
 

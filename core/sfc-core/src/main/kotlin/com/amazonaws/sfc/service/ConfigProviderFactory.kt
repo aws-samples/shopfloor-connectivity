@@ -7,9 +7,10 @@ package com.amazonaws.sfc.service
 
 import com.amazonaws.sfc.crypto.KeyHelpers
 import com.amazonaws.sfc.log.Logger
-import com.amazonaws.sfc.service.EnvVariables.Companion.ENV_VARIABLE_CONFIG
-import com.amazonaws.sfc.service.EnvVariables.Companion.ENV_VARIABLE_VERIFY_PUBLIC_KEY_FILE
+import com.amazonaws.sfc.service.EnvConfigProvider.Companion.ENV_VARIABLE_CONFIG
+import com.amazonaws.sfc.service.EnvConfigProvider.Companion.ENV_VARIABLE_VERIFY_PUBLIC_KEY_FILE
 import org.apache.commons.cli.DefaultParser
+import org.apache.commons.cli.HelpFormatter
 import org.apache.commons.cli.Options
 import java.io.File
 import java.security.PublicKey
@@ -53,13 +54,19 @@ object ConfigProviderFactory {
             else -> {
                 val log = logger.getCtxLoggers(className, "createProvider")
                 log.info("Creating configuration provider of type ${ConfigProvider::class.java.simpleName}")
-                log.info("no command line config provided - try reading configuration from environment")
+                log.info("No command line config provided - try reading configuration from environment")
                 val envConfig : String? = System.getenv(ENV_VARIABLE_CONFIG)
                 if(envConfig != null) {
                     val configVerificationKey = getConfigurationVerificationKeyFromEnv(logger)
                     EnvConfigProvider(envConfig, configVerificationKey, logger)
                 } else {
-                    log.info("no environment configuration provided")
+                    log.error("No environment configuration provided")
+                    // print command line help
+                    //Commandline.printhelp() // This is private
+                    val helpFormatter = HelpFormatter()
+                    helpFormatter.width = 132
+                    helpFormatter.printHelp(" ", CommandLine.commonOptions())
+                    exitProcess(0)
                     null
                 }
             }

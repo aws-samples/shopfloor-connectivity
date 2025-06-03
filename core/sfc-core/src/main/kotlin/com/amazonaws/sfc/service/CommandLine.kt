@@ -23,7 +23,7 @@ abstract class CommandLine(val args: Array<String>) {
                 exitProcess(0)
             }
             return cmd
-        }catch ( e : Exception){
+        } catch ( e : Exception){
             println( "Command line error, $e\n")
             printHelp()
             exitProcess(1)

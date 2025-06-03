@@ -15,7 +15,6 @@ import com.amazonaws.sfc.config.IncludeResolver.IncludeResolverException
 import com.amazonaws.sfc.config.IncludeResolver.urlRegex
 import com.amazonaws.sfc.data.JsonHelper.Companion.fromJsonExtended
 import com.amazonaws.sfc.log.Logger
-import com.amazonaws.sfc.service.EnvVariables.Companion.ENV_VARIABLE_CONFIG
 import com.amazonaws.sfc.util.ContentWatcher
 import com.amazonaws.sfc.util.FileWatcher
 import com.amazonaws.sfc.util.buildScope
@@ -227,7 +226,8 @@ class EnvConfigProvider(private val configText: String, private val configVerifi
 
     companion object {
         const val CONFIG_CUSTOM_CONFIG_PROVIDER = "ConfigProvider"
-
+        const val ENV_VARIABLE_CONFIG = "SFC_CONFIG"
+        const val ENV_VARIABLE_VERIFY_PUBLIC_KEY_FILE = "SFC_CONFIG_VERIFY"
     }
 }
 
