@@ -22,7 +22,6 @@ open class InstanceFactory<T>(private val config: InProcessConfiguration, privat
         val log = logger.getCtxLoggers(className, "classToLoad")
 
         if (config.jarFiles.isNullOrEmpty()) {
-            log.trace("No jar files specified for '${config.factoryClassName}, using factory class from jar files in classpath'")
             if (logger.level == LogLevel.TRACE) {
                 val classloader = ClassLoader.getSystemClassLoader()
                 val urls =(classloader as URLClassLoader).urLs.map{url->url.file}
