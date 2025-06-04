@@ -10,7 +10,6 @@ import com.amazonaws.sfc.log.Logger
 import com.amazonaws.sfc.service.EnvConfigProvider.Companion.ENV_VARIABLE_CONFIG
 import com.amazonaws.sfc.service.EnvConfigProvider.Companion.ENV_VARIABLE_VERIFY_PUBLIC_KEY_FILE
 import org.apache.commons.cli.DefaultParser
-import org.apache.commons.cli.HelpFormatter
 import org.apache.commons.cli.Options
 import java.io.File
 import java.security.PublicKey
