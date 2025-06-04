@@ -23,6 +23,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.runBlocking
+import org.apache.commons.cli.HelpFormatter
 import kotlin.system.exitProcess
 
 /**
@@ -62,7 +63,7 @@ abstract class ServiceMain {
      * Runs the service as an application
      * @param args Array<String> Command line arguments
      */
-    open suspend fun run(args: Array<String>): Unit = coroutineScope {
+    open suspend fun run(args: Array<String>, needsConfig : Boolean = false): Unit = coroutineScope {
 
         // as config provider is not initiated here check if loglevel was provided on command line to
         // enable specification of the loglevel used by the configuration provider itself
@@ -84,6 +85,13 @@ abstract class ServiceMain {
             val configProvider = ConfigProviderFactory.createProvider(args, serviceLogger)
 
             if (configProvider == null) {
+                if (needsConfig) {
+                    logs.error("No configuration found from configuration file or environment variable")
+                    val helpFormatter = HelpFormatter()
+                    helpFormatter.width = 132
+                    helpFormatter.printHelp(" ", CommandLine.commonOptions())
+                    exitProcess(1)
+                }
                 memoryMonitor = MemoryMonitor(scope = this, logger = serviceLogger)
                 createAndRunServiceInstance(args, "{}")
             } else {

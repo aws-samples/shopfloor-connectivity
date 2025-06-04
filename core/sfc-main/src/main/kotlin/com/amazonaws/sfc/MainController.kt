@@ -27,7 +27,7 @@ class MainController : ServiceMain() {
         @JvmName("main")
         fun main(args: Array<String>): Unit = runBlocking {
             LoggerFactory.getLogger("")
-            MainController().run(args)
+            MainController().run(args, true)
 
         }
     }
