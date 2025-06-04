@@ -14,6 +14,7 @@ import com.amazonaws.sfc.log.LogWriter
 import com.amazonaws.sfc.log.Logger
 import com.amazonaws.sfc.log.Logger.Companion.createLogger
 import com.amazonaws.sfc.service.CommandLine.Companion.OPTION_NO_COLOR
+import com.amazonaws.sfc.service.EnvConfigProvider.Companion.ENV_VARIABLE_CONFIG
 import com.amazonaws.sfc.services.CommandLineOptionsException
 import com.amazonaws.sfc.util.MemoryMonitor
 import com.amazonaws.sfc.util.SfcException
@@ -63,7 +64,7 @@ abstract class ServiceMain {
      * Runs the service as an application
      * @param args Array<String> Command line arguments
      */
-    open suspend fun run(args: Array<String>, needsConfig : Boolean = false): Unit = coroutineScope {
+    open suspend fun run(args: Array<String>, needsConfig: Boolean = false): Unit = coroutineScope {
 
         // as config provider is not initiated here check if loglevel was provided on command line to
         // enable specification of the loglevel used by the configuration provider itself
@@ -72,7 +73,7 @@ abstract class ServiceMain {
             serviceLogger.level = logLevelFromArguments
         }
 
-        val noColor  = args.map { it.trimStart('-') }.contains(OPTION_NO_COLOR)
+        val noColor = args.map { it.trimStart('-') }.contains(OPTION_NO_COLOR)
         if (noColor) serviceLogger.noColor = true
 
         Logger.redirectLoggers(serviceLogger, className)
@@ -86,7 +87,7 @@ abstract class ServiceMain {
 
             if (configProvider == null) {
                 if (needsConfig) {
-                    logs.error("No configuration found from configuration file or environment variable")
+                    logs.error("No configuration found from configuration file or environment variable \"$ENV_VARIABLE_CONFIG\"")
                     val helpFormatter = HelpFormatter()
                     helpFormatter.width = 132
                     helpFormatter.printHelp(" ", CommandLine.commonOptions())
@@ -147,9 +148,9 @@ abstract class ServiceMain {
             if (serviceInstance != null) logs.info("Created instance of service ${serviceInstance!!::class.java.simpleName}")
         } catch (e: SfcException) {
             logs.error("Error creating service instance ${e.message}")
-        }catch(e : ConfigurationException) {
+        } catch (e: ConfigurationException) {
             logs.error("Error creating service instance because of configuration error, ${e.message}")
-        }catch ( e : CommandLineOptionsException){
+        } catch (e: CommandLineOptionsException) {
             logs.error("Error creating service instance because of command line options error, ${e.message}")
         } catch (e: Exception) {
             logs.errorEx("Error creating service instance: ${e.message}", e)
@@ -174,7 +175,11 @@ abstract class ServiceMain {
 
             serviceInstance?.blockUntilShutdown()
         } catch (e: Exception) {
-            serviceLogger.getCtxErrorLogEx(className, "runService")("Error running service", e)
+            if (e is ClassNotFoundException) {
+                serviceLogger.getCtxErrorLog(className, "runService")("Error running service, $e")
+            } else {
+                serviceLogger.getCtxErrorLogEx(className, "runService")("Error running service", e)
+            }
         }
 
     }

@@ -28,7 +28,7 @@ open class InstanceFactory<T>(private val config: InProcessConfiguration, privat
                 log.trace("No jar files specified for '${config.factoryClassName}, using factory class from classpath:  ${urls.joinToString()}")
             }
         } else {
-            log.trace("Loading factory class name class $config.factoryClassName from ${config.jarFiles!!.joinToString()}")
+            log.trace("Loading factory class name class ${config.factoryClassName} from ${config.jarFiles!!.joinToString()}")
         }
 
         val expandedJars = expandedJarList(config.jarFiles ?: emptyList())
