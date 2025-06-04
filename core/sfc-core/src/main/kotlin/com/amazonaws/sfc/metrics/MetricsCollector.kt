@@ -323,6 +323,7 @@ class MetricsCollector(
         const val METRICS_WRITES = "Writes"
         const val METRICS_MEMORY = "Memory"
         const val METRICS_VALUES_WRITTEN = "ValuesWritten"
+        const val METRICS_RECORDS_WRITTEN = "RecordsWritten"
 
         const val METRICS_DIMENSION_ADAPTER = "Adapter"
         const val METRICS_DIMENSION_SOURCE = "Source"

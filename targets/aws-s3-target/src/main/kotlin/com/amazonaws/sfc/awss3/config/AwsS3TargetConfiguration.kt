@@ -110,7 +110,6 @@ class AwsS3TargetConfiguration : AwsServiceConfig, TargetConfiguration() {
         validateServiceRegion(_region)
         validateBucket()
         validateBufferingInterval()
-        validateBufferingSize()
         validated = true
 
     }
@@ -133,14 +132,6 @@ class AwsS3TargetConfiguration : AwsServiceConfig, TargetConfiguration() {
             this
         )
 
-    // validates buffering interval
-    private fun validateBufferingSize() =
-        ConfigurationException.check(
-            (_bufferSize in 1..128),
-            "Buffer size must be in range 1..128 MB",
-            CONFIG_BUFFER_SIZE,
-            this
-        )
 
     // validates AWS region
     private fun validateServiceRegion(_region: String?) {

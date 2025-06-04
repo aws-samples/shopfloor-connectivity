@@ -79,8 +79,6 @@ class AwsS3TablesTargetConfiguration : AwsServiceConfig, TargetConfiguration() {
         validateNamespace()
         validateBucket()
         validateTables()
-        validateBufferingInterval()
-        validateBufferingSize()
         validated = true
 
     }
@@ -119,24 +117,6 @@ class AwsS3TablesTargetConfiguration : AwsServiceConfig, TargetConfiguration() {
 
 
 
-
-    // validates buffering interval
-    private fun validateBufferingInterval() =
-        ConfigurationException.check(
-            (_interval in 1..900),
-            "$CONFIG_INTERVAL must be in range 1..60 seconds",
-            CONFIG_INTERVAL,
-            this
-        )
-
-    // validates buffering interval
-    private fun validateBufferingSize() =
-        ConfigurationException.check(
-            (_bufferCount in 1..128),
-            "Buffer size must be in range 1..128 MB",
-            CONFIG_BUFFER_COUNT,
-            this
-        )
 
     // validates AWS region
     private fun validateServiceRegion() {

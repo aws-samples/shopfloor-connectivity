@@ -7,6 +7,7 @@ package com.amazonaws.sfc.awss3tables
 
 import com.amazonaws.sfc.awsiot.AwsIoTCredentialSessionProvider
 import com.amazonaws.sfc.awsiot.AwsIotCredentialProviderClientConfiguration
+import com.amazonaws.sfc.awss3tables.AwsS3TablesHelper.Companion.buildSchema
 import com.amazonaws.sfc.awss3tables.AwsS3TablesTypesHelper.from
 import com.amazonaws.sfc.awss3tables.config.*
 import com.amazonaws.sfc.awss3tables.config.AwsS3TablesTargetConfiguration.Companion.CONFIG_AUTO_CREATE
@@ -24,10 +25,15 @@ import com.amazonaws.sfc.log.Logger
 import com.amazonaws.sfc.metrics.*
 import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_DIMENSION_SOURCE
 import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_DIMENSION_SOURCE_CATEGORY_TARGET
-import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_WRITE_ERRORS
+import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_MESSAGES
+import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_RECORDS_WRITTEN
+import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_WRITES
+import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_WRITE_DURATION
+import com.amazonaws.sfc.metrics.MetricsCollector.Companion.METRICS_WRITE_SUCCESS
 import com.amazonaws.sfc.targets.TargetDataChannel
 import com.amazonaws.sfc.targets.TargetException
 import com.amazonaws.sfc.transformations.invoke
+import com.amazonaws.sfc.util.MemoryMonitor
 import com.amazonaws.sfc.util.buildScope
 import com.amazonaws.sfc.util.isJobCancellationException
 import com.amazonaws.sfc.util.launch
@@ -41,25 +47,22 @@ import org.apache.iceberg.Table
 import org.apache.iceberg.catalog.TableIdentifier
 import org.apache.iceberg.data.GenericRecord
 import org.apache.iceberg.data.parquet.GenericParquetWriter
+import org.apache.iceberg.io.DataWriter
 import org.apache.iceberg.parquet.Parquet
 import org.apache.iceberg.types.Type
-import org.apache.iceberg.types.Types
-import org.apache.iceberg.util.StructLikeMap
-import org.checkerframework.checker.units.qual.t
 import software.amazon.awssdk.auth.credentials.AwsCredentials
 import software.amazon.awssdk.auth.credentials.AwsSessionCredentials
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider
-import java.util.UUID
+import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
-import kotlin.system.exitProcess
+import kotlin.time.Duration
 import kotlin.time.DurationUnit
 import kotlin.time.measureTime
 import kotlin.time.toDuration
 
 
-// AWS S3 target
 class AwsS3TablesTargetWriter(
     private val targetID: String,
     private val configReader: ConfigReader,
@@ -74,6 +77,8 @@ class AwsS3TablesTargetWriter(
     }
 
     private val scope = buildScope(AWS_S3_TABLES)
+
+    var initialized = false
 
 
     private val credentialsLock = ReentrantLock()
@@ -107,9 +112,7 @@ class AwsS3TablesTargetWriter(
         // clientHelper.targetConfig(config, targetID, AWS_S3_TABLES)
     }
 
-    private val timers =
-        (targetConfiguration.tables.map { it.tableName to createTimer(it.tableName) }).toMap().toMutableMap()
-
+    private var timer = createTimer()
 
 
     val tablesHelper: AwsS3TablesHelper?
@@ -133,8 +136,6 @@ class AwsS3TablesTargetWriter(
             }
             return awsTablesHelperPrivate
         }
-
-
 
 
     private val credentialClientConfig: AwsIotCredentialProviderClientConfiguration? by lazy {
@@ -254,7 +255,7 @@ class AwsS3TablesTargetWriter(
         val tables = tablesHelper!!.listTablesForBucketName(targetConfiguration.tableBucketName)
 
         targetConfiguration.tables.forEach { tableConfiguration ->
-            val tableIdentifier = TableIdentifier.of(targetConfiguration.namespace,tableConfiguration.tableName)
+            val tableIdentifier = TableIdentifier.of(targetConfiguration.namespace, tableConfiguration.tableName)
             val t = if (tables.contains(tableIdentifier)) {
                 log.info("Table \"$tableIdentifier\" does exist")
                 tableIdentifier
@@ -276,7 +277,7 @@ class AwsS3TablesTargetWriter(
             val catalogTable = tablesHelper?.catalog?.loadTable(tableIdentifier)
             if (catalogTable == null) {
                 throw TargetException("Could not load table \"$tableIdentifier\"")
-            } else{
+            } else {
                 log.info("Schema for table \"$tableIdentifier\" is \n${catalogTable.schema()}")
                 if (catalogTable.spec().isPartitioned) {
                     log.info("Partition specification for \"$tableIdentifier\" is ${catalogTable.spec()}")
@@ -338,34 +339,24 @@ class AwsS3TablesTargetWriter(
         try {
             log.info("Setting up AWS S3 tables resources")
             setupAwsS3TablesResources()
+            initialized = true
         } catch (e: Exception) {
             log.error("Error setting up AWS  S3 Tables, $e")
-            exitProcess(1)
         }
 
         while (isActive) {
 
             try {
                 select {
-
-                    timerChannel.onReceive { tableName ->
-                        timers[tableName]?.cancel()
-
-                        val tableBuffer = buffers[tableName]
-
-                        if (tableBuffer != null) {
-                            if (tableBuffer.size > 0) {
-                                log.info("Table buffer interval of ${targetConfiguration.interval} reached buffer for table \"$tableName\"")
-                                writeBufferedMessages(tableBuffer, tableName)
-                            }
-                        }
-                        timers[tableName] = createTimer(tableName)
+                    timer.onJoin {
+                        timer.cancel()
+                        log.info("Buffer interval of ${targetConfiguration.interval} reached")
+                        writeBufferedMessages()
+                        timer = createTimer()
                     }
-
                     targetDataChannel.onReceive { targetData ->
                         processTargetData(targetData)
                     }
-
                 }
             } catch (e: Exception) {
                 if (!e.isJobCancellationException)
@@ -382,21 +373,25 @@ class AwsS3TablesTargetWriter(
 
         targetConfiguration.tables.forEach { table ->
 
-            val recordBuffer = buildRecords(table, targetData)
+            val recordCount = buildRecords(table, targetData)
+            val s = if (recordCount > 1) "s" else ""
+            log.trace("$recordCount record$s created for table \"${table.tableName}\"")
 
-            if (targetData.noBuffering || recordBuffer.size >= targetConfiguration.bufferCount) {
-                timers[table.tableName]?.cancel()
-                log.info("Buffer count ${targetConfiguration.bufferCount} reached for table \"${table.tableName}\"")
-                writeBufferedMessages(recordBuffer, table.tableName)
-                timers[table.tableName]= createTimer(table.tableName)
+            val totalBufferedRecords = buffers.values.sumOf { it.size }
+            if (targetData.noBuffering || totalBufferedRecords >= targetConfiguration.bufferCount) {
+                timer.cancel()
+                log.trace("Total buffer count $totalBufferedRecords")
+                writeBufferedMessages()
+                timer = createTimer()
             }
-
         }
     }
 
-    private fun buildRecords(table: TableConfiguration, targetData: TargetData): RecordBuffer {
+    private fun buildRecords(table: TableConfiguration, targetData: TargetData): Int {
 
         val log = logger.getCtxLoggers(className, "build")
+
+        val stats = mutableListOf<Pair<String, Int>>()
 
         val missingValues = mutableListOf<String>()
         val targetDataMap = targetData.toMap(writerConfiguration.elementNames, true)
@@ -427,7 +422,8 @@ class AwsS3TablesTargetWriter(
                                 val nestedValue = map(fieldMappings, field, targetDataMap, table, index, missingValues) // nested field values sequence
 
                                 if (nestedValue.isNotEmpty()) {
-                                    yield(field.name to nestedValue)
+                                    val rec = GenericRecord.create(buildSchema(field.subFields)).copy(nestedValue)
+                                    yield(field.name to rec)
 
                                     // no sub-fields for a non-optional struct fields
                                 } else if (!field.optional) missingValues.add(field.name)
@@ -447,13 +443,17 @@ class AwsS3TablesTargetWriter(
 
 
         val tableBuffer = buffers.computeIfAbsent(table.tableName) { RecordBuffer() }
+
+        var recordCount = 0
         recordsData.forEach { data ->
             val record = GenericRecord.create(table.catalogSchema).copy(data)
             // record = record.copy(data)
             log.trace("Created record $record")
             tableBuffer.addRecord(targetData.serial, record)
+            recordCount += 1
         }
-        return tableBuffer
+        log.trace("$tableBuffer records buffered for table \"${table.tableName}\"")
+        return recordCount
     }
 
     private fun map(fieldMappingsConfiguration: Map<String, FieldMappingConfiguration>,
@@ -489,17 +489,19 @@ class AwsS3TablesTargetWriter(
 
         // test if a value wat retrieved, keep list of null values for non-optional fields
         val fieldValue = if (queryValue != null) {
+            val value = if (fieldMappingConfiguration.transformationID == null) {
+                queryValue
+            } else {
+                applyTransformation(queryValue, fieldName, fieldMappingConfiguration.transformationID!!)
+            }
+            if (value == null) return null
 
-            val value = fieldType.from(queryValue)
-            if (value != null) {
-                if (fieldMappingConfiguration.transformationID == null) {
-                    value
-                } else {
-                    applyTransformation(value, fieldName, fieldMappingConfiguration.transformationID!!)
-                }
+            val fieldTypedValue = fieldType.from(value)
+            if (fieldTypedValue != null) {
+                fieldTypedValue
             } else {
                 val log = logger.getCtxLoggers(className, "getFieldValue")
-                log.warning("Value $queryValue:${typeStr(queryValue)} is not compatible with field type $fieldType for table \"$tableName\" mapping $index, field \"$fieldName\" in target $targetID")
+                log.warning("Value $value:${typeStr(value)} is not compatible with field type $fieldType for table \"$tableName\" mapping $index, field \"$fieldName\" in target $targetID")
                 null
             }
         } else null
@@ -534,127 +536,106 @@ class AwsS3TablesTargetWriter(
             typeStrSingle(a)
 
 
-    private fun createTimer(tableName: String): Job {
+    private fun createTimer(): Job {
         return scope.launch {
             try {
                 delay(targetConfiguration.interval)
-                timerChannel.send(tableName)
             } catch (_: Exception) {
                 // no harm done, timer is just used to guard for timeouts
             }
         }
     }
 
-    private suspend fun writeBufferedMessages(buffer: RecordBuffer, tableName: String) {
+    private suspend fun writeBufferedMessages() {
 
         val log = logger.getCtxLoggers(className, "writeBufferedMessages")
 
 
-        try {
+        var recordCount: Long = 0
+        var totalDuration: Duration = Duration.ZERO
 
+        if (!initialized) {
+            targetResults?.errorBuffered()
+            log.error("AWS S3 Tables target \"$targetID\" not initialized")
+        } else {
 
-            when {
+            buffers.forEach { tableName, tableBuffer ->
+                try {
 
-//                (mqttMessage.payload.size == 0) -> {
-//                    log.trace("No payload to publish to topic $tableName")
-//                    targetResults?.ackBuffered()
-//                    buffer.clear()
-//                    createTimer(tableName)
-//                }
+                    if (tableBuffer.size == 0) {
+                        log.trace("Nu buffered records for table \"$tableName\" to write")
+                    } else {
 
-//                (targetConfig.maxPayloadSize != null && mqttMessage.payload.size > targetConfig.maxPayloadSize!!) -> {
-//                    log.error("Size of MQTT message ${mqttMessage.payload.size} bytes is beyond max payload size of  ${targetConfig.maxPayloadSize!!.byteCountString} for target, reduce or set $CONFIG_BATCH_SIZE, $CONFIG_BATCH_COUNT or $CONFIG_BATCH_INTERVAL for this target")
-//                    targetResults?.errorBuffered()
-//                    metricsCollector?.put(targetID, METRICS_WRITE_ERRORS, 1.0, MetricUnits.COUNT, metricDimensions)
-//                    createTimer(tableName)
-//                }
+                        log.trace("Writing $tableBuffer buffered records for table \"$tableName\"")
 
-                else -> {
-                    val duration = measureTime {
+                        val catalogTable = catalogTables[TableIdentifier.of(targetConfiguration.namespace, tableName)]
 
-                        val table = catalogTables[TableIdentifier.of(targetConfiguration.namespace, tableName)]
-                        if (table != null){
-                            val filePath = "${table.location()}/${UUID.randomUUID()}"
-                            val file = table.io().newOutputFile(filePath)
+                        if (catalogTable != null) {
+                            val duration = measureTime {
 
-                            val partitionData = PartitionData(table.spec().partitionType())
-                            val firstRecord = buffer.items.first()
-                            table.spec().fields().forEachIndexed { i, f->
-                                val sourceValue = firstRecord.second.get(f.sourceId())
-                                val type =table.schema().columns().first{it.fieldId() == f.sourceId()}.type()
-                              val transformationValue = f.transform().bind(type ).apply { sourceValue }
-                                partitionData.set(i, transformationValue)
-                            }
-
-
-
-                            try {
-                                val writer = Parquet.writeData(file)
-                                    .schema(table.schema())
-                                    .createWriterFunc(GenericParquetWriter::buildWriter)
-                                    .overwrite()
-                                    .withSpec(if (table.spec().isPartitioned) table.spec() else PartitionSpec.unpartitioned())
-                                    .withPartition((partitionData))
-                                    .build<GenericRecord>()
-
-                                try{
-                                buffer.items.forEach { it ->
-                                    writer.write(it.second)
-                                }}catch (ee : Exception){
-                                    println("error writing $ee")
-                                }finally {
-                                    writer.close()
+                                val tableWriter = buildTableWriter(catalogTable, tableName)
+                                try {
+                                    tableBuffer.items.forEach { it -> tableWriter.write(it.second) }
+                                } finally {
+                                    tableWriter.close()
                                 }
-                                val dataFile: DataFile? = writer.toDataFile()
-                                table.newAppend().appendFile(dataFile).commit()
-
-                            }catch (e : Exception){
-                                log.errorEx("Error writing to file $filePath", e)
+                                val dataFile: DataFile? = tableWriter.toDataFile()
+                                catalogTable.newAppend().appendFile(dataFile).commit()
+                                recordCount += tableBuffer.size
                             }
 
-
-                        }
-
-
+                            log.info("Written ${tableBuffer.size} buffered records for table \"$tableName\" in $duration")
+                            totalDuration += duration
 
 
+                        } else throw TargetException("Table \"$tableName\" not found")
 
-
-
-//                        val client = runBlocking {
-//                            getClient(coroutineContext)
-//                        }
-//
-//                        withTimeout(targetConfig.publishTimeout) {
-//                            client.publish(tableName, mqttMessage)
-//                        }
-
-                        targetResults?.ackBuffered()
                     }
-//                    val compressedStr = if (targetConfig.compressionType != CompressionType.NONE) " compressed " else " "
-//                    val itemStr = if (doesBatching) " containing ${buffer.size} items " else " "
-//                    log.trace("Published MQTT${compressedStr}message to topic\"$tableName\" with size of ${mqttMessage.payload.size.byteCountString} ${itemStr}in $duration")
 
-                    //          createMetrics(targetID, metricDimensions, buffer, mqttMessage.payload.size, duration)
-
-                }
-            }
-
-        } catch (e: Exception) {
-            if (!e.isJobCancellationException) {
-                metricsCollector?.put(targetID, METRICS_WRITE_ERRORS, 1.0, MetricUnits.COUNT, metricDimensions)
-                log.errorEx("Error publishing to topic \"topic\" for target \"$targetID\", ${e.message}", e)
-                if (e is TimeoutCancellationException) {
-                    targetResults?.nackBuffered()
-                } else {
+                    tableBuffer.clear()
+                } catch (e: Exception) {
                     targetResults?.errorBuffered()
+                    if (writer.isActive) {
+                        log.error("Error writing buffered messages for table \"$tableName\", $e")
+                        runBlocking { metricsCollector?.put(targetID, MetricsCollector.METRICS_WRITE_ERRORS, 1.0, MetricUnits.COUNT, metricDimensions) }
+                    }
                 }
             }
-
-        } finally {
-            buffer.clear()
+            targetResults?.ackBuffered()
+            val messages = buffers.values.flatMap { it.serials }.toSet().size
+            createMetrics(targetID, metricDimensions, recordCount, messages, totalDuration.toDouble(DurationUnit.MILLISECONDS))
         }
 
+        buffers.values.forEach { it.clear() }
+    }
+
+
+    fun buildTableWriter(table: Table, tableName: String): DataWriter<GenericRecord?> {
+
+        val log = logger.getCtxLoggers(className, "buildTableWriter")
+
+        val filePath = "${table.location()}/${UUID.randomUUID()}"
+        val file = table.io().newOutputFile(filePath)
+
+        return try {
+            val builder = Parquet.writeData(file)
+                .schema(table.schema())
+                .createWriterFunc(GenericParquetWriter::buildWriter)
+                .overwrite()
+
+            if (table.spec().isPartitioned) {
+                builder.withSpec(table.spec())
+                builder.withPartition(PartitionData(table.spec().partitionType()))
+            } else {
+                builder.withSpec(PartitionSpec.unpartitioned())
+            }
+
+            builder.build<GenericRecord>()
+
+        } catch (e: Exception) {
+            log.error("Error building writer for table \"$tableName\" using filepath \"$filePath\" , e")
+            throw e
+        }
     }
 
     private fun searchValue(mapping: FieldMappingConfiguration, data: Any): Any? = try {
@@ -667,7 +648,6 @@ class AwsS3TablesTargetWriter(
         log("Error querying data with expression \"${mapping.valueQueryStr}\"", e)
         null
     }
-
 
     private fun applyTransformation(value: Any, name: String, transformationID: String): Any? {
         val log = logger.getCtxLoggers(className, "applyTransformation")
@@ -684,89 +664,23 @@ class AwsS3TablesTargetWriter(
         }
     }
 
-//    private fun flush() {
-//
-//
-//        val log = logger.getCtxLoggers(className, "flush")
-//        if (buffer.size == 0) {
-//            return
-//        }
-//
-//        val region = targetConfiguration.region.toString()
-//
-//        val properties: MutableMap<String?, String?> = HashMap<String?, String?>()
-//        properties.put(CatalogProperties.CATALOG_IMPL, "org.apache.iceberg.rest.RESTCatalog")
-//
-//        properties.put(CatalogProperties.URI, "https://s3tables.$region.amazonaws.com/iceberg")
-////        properties.put(CatalogProperties.WAREHOUSE_LOCATION, "arn:aws:s3tables:eu-west-1:816487731748:bucket/sfc-table-bucket")
-//        properties.put(CatalogProperties.WAREHOUSE_LOCATION, targetConfiguration.tableBucketName)
-//        properties.put(CatalogProperties.FILE_IO_IMPL, "org.apache.iceberg.aws.s3.S3FileIO")
-//        properties.put("rest.signing-name", "s3tables")
-//        properties.put("rest.signing-region", region)
-//        properties.put("rest.sigv4-enabled", "true")
-//
-//        val nameSpace = Namespace.of(targetConfiguration.namespace)
-//
-//        val tableBucketName = targetConfiguration.tableBucketName
-//        log.trace("Writing data to bucket \"$tableBucketName\"")
-//
-//        val start = DateTime.systemDateTime().toEpochMilli()
-//
-//        try {
-//
-////            val request = buildPutObjectRequest()
-////            val content = buildContent(request.key())
-////            val resp = clientHelper.executeServiceCallWithRetries {
-////                try {
-////                    log.info("Creating S3 object ${request.key()} containing ${content.optionalContentLength().get().byteCountString}")
-////                    val resp = s3Client.putObject(request, content)
-////                    targetResults?.ackBuffered()
-////
-////                    val writeDurationInMillis = (DateTime.systemDateTime().toEpochMilli() - start).toDouble()
-////                    createMetrics(targetID, metricDimensions, writeDurationInMillis)
-////
-////                    resp
-////                } catch (e: AwsServiceException) {
-////                    log.trace("S3 putObject error ${e.message}")
-////                    // Check the exception, it will throw an AwsServiceRetryableException if the error is recoverable
-////                    clientHelper.processServiceException(e)
-////                    // Non recoverable service exceptions
-////                    throw e
-////                }
-////            }
-////
-////            log.trace("S3 putObject result is ${resp.sdkHttpResponse()?.statusCode()}")
-//
-//        } catch (e: Exception) {
-//            log.errorEx("Error writing to bucket \"$tableBucketName\" for target \"$targetID\"", e)
-//            runBlocking { metricsCollector?.put(targetID, METRICS_WRITE_ERRORS, 1.0, MetricUnits.COUNT, metricDimensions) }
-//
-//            if (canNotReachAwsService(e)) {
-//                targetResults?.nackBuffered()
-//            } else {
-//                targetResults?.errorBuffered()
-//            }
-//        } finally {
-//            buffer.clear()
-//        }
-//    }
-
     private fun createMetrics(
         adapterID: String,
         metricDimensions: MetricDimensions,
+        recordCount: Long,
+        messages: Int,
         writeDurationInMillis: Double
     ) {
-
         runBlocking {
-//            metricsCollector?.put(
-//                adapterID,
-//                metricsCollector?.buildValueDataPoint(adapterID, MetricsCollector.METRICS_MEMORY, MemoryMonitor.getUsedMemoryMB().toDouble(), MetricUnits.MEGABYTES),
-//                metricsCollector?.buildValueDataPoint(adapterID, METRICS_WRITES, 1.0, MetricUnits.COUNT, metricDimensions),
-//                metricsCollector?.buildValueDataPoint(adapterID, METRICS_MESSAGES, buffer.size.toDouble(), MetricUnits.COUNT, metricDimensions),
-//                metricsCollector?.buildValueDataPoint(adapterID, METRICS_WRITE_DURATION, writeDurationInMillis, MetricUnits.MILLISECONDS, metricDimensions),
-//                metricsCollector?.buildValueDataPoint(adapterID, METRICS_WRITE_SUCCESS, 1.0, MetricUnits.COUNT, metricDimensions),
-//                metricsCollector?.buildValueDataPoint(adapterID, METRICS_WRITE_SIZE, buffer.payloadSize.toDouble(), MetricUnits.BYTES, metricDimensions)
-//            )
+            metricsCollector?.put(
+                adapterID,
+                metricsCollector?.buildValueDataPoint(adapterID, MetricsCollector.METRICS_MEMORY, MemoryMonitor.getUsedMemoryMB().toDouble(), MetricUnits.MEGABYTES),
+                metricsCollector?.buildValueDataPoint(adapterID, METRICS_WRITES, 1.0, MetricUnits.COUNT, metricDimensions),
+                metricsCollector?.buildValueDataPoint(adapterID, METRICS_MESSAGES, messages.toDouble(), MetricUnits.COUNT, metricDimensions),
+                metricsCollector?.buildValueDataPoint(adapterID, METRICS_WRITE_DURATION, writeDurationInMillis, MetricUnits.MILLISECONDS, metricDimensions),
+                metricsCollector?.buildValueDataPoint(adapterID, METRICS_WRITE_SUCCESS, 1.0, MetricUnits.COUNT, metricDimensions),
+                metricsCollector?.buildValueDataPoint(adapterID, METRICS_RECORDS_WRITTEN, recordCount.toDouble(), MetricUnits.BYTES, metricDimensions)
+            )
         }
     }
 
@@ -778,22 +692,14 @@ class AwsS3TablesTargetWriter(
         }
     }
 
-
     override suspend fun writeTargetData(targetData: TargetData) {
         targetDataChannel.submit(targetData, logger.getCtxLoggers("$className:writeTargetData"))
     }
 
     override suspend fun close() {
-        timers.values.forEach { timer ->
-            timer.cancel()
-        }
-        buffers.forEach { (tableName, buffer) ->
-            val tableBuffer = buffers[tableName]
-            if (tableBuffer != null && tableBuffer.size > 0) {
-                writeBufferedMessages(tableBuffer, tableName)
-            }
-        }
         writer.cancel()
+        timer.cancel()
+        writeBufferedMessages()
 
     }
 
@@ -808,15 +714,7 @@ class AwsS3TablesTargetWriter(
                 createParameters[3] as TargetResultHandler?
             )
 
-        /**
-         * Creates an instance of an AWS S3 writer from the passed configuration
-         * @param configReader ConfigReader Reads the configuration for the writer
-         * @see AwsS3TablesWriterConfiguration
-         * @param targetID String ID of the target
-         * @param logger Logger Logger for output
-         * @return TargetWriter
-         * @throws Exception
-         */
+
         @JvmStatic
         fun newInstance(configReader: ConfigReader, targetID: String, logger: Logger, resultHandler: TargetResultHandler?): TargetWriter {
             return try {

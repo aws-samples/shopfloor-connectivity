@@ -13,19 +13,19 @@ val kotlinCoroutinesVersion = "1.6.2"
 val kotlinVersion = "1.9.0"
 val sfcCoreVersion = sfcRelease
 val sfcIpcVersion = sfcRelease
-// Keep SDK version ar this value as version "2.26.23" used in other modules has a bug for the S3Client
 val awsSdkVersion = "2.29.30"
-var icebergVersion = "1.8.1"
+// need this version for jvm 1,8
+var icebergVersion = "1.6.1"
+var awcIcebergVersion = "1.9.0"
 var parquetVersion = "1.15.1"
 var parquetFormatsVersion = "2.11.0"
 var hadoopVersion = "3.4.1"
+var slf4jVersion = "2.0.17"
 
 plugins {
     id("sfc.kotlin-application-conventions")
     java
 }
-
-
 
 repositories {
     mavenCentral()
@@ -39,28 +39,29 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinCoroutinesVersion")
 
 
-    implementation("org.apache.iceberg", "iceberg-core", "1.6.1")
-    implementation("org.apache.iceberg", "iceberg-parquet", "1.6.1")
-    implementation("org.apache.iceberg", "iceberg-data", "1.6.1")
-    implementation("org.apache.iceberg", "iceberg-api", "1.6.1")
-    implementation("org.apache.iceberg", "iceberg-aws", "1.6.1")
-    implementation("org.apache.iceberg","iceberg-aws-bundle", "1.9.0")
+    implementation("org.apache.iceberg:iceberg-core:$icebergVersion")
+    implementation("org.apache.iceberg:iceberg-parquet:$icebergVersion")
+    implementation("org.apache.iceberg:iceberg-data:$icebergVersion")
+    implementation("org.apache.iceberg:iceberg-api:$icebergVersion")
+    implementation("org.apache.iceberg:iceberg-aws:$icebergVersion")
+    implementation("org.apache.iceberg:iceberg-aws-bundle:$awcIcebergVersion")
 
     implementation("software.amazon.awssdk:s3tables:$awsSdkVersion")
     implementation("software.amazon.awssdk:sts:$awsSdkVersion")
     implementation("software.amazon.awssdk:url-connection-client:$awsSdkVersion")
 
-    implementation("org.apache.parquet", "parquet-avro", "1.15.1")
-    implementation("org.apache.parquet", "parquet-column", "1.15.1")
-    implementation("org.apache.parquet", "parquet-common", "1.15.1")
-    implementation("org.apache.parquet", "parquet-encoding", "1.15.1")
-    implementation("org.apache.parquet", "parquet-format", "2.11.0")
-    implementation("org.apache.parquet", "parquet-hadoop", "1.15.1")
+    implementation("org.apache.parquet:parquet-avro:$parquetVersion")
+    implementation("org.apache.parquet:parquet-column:$parquetVersion")
+    implementation("org.apache.parquet:parquet-common:$parquetVersion")
+    implementation("org.apache.parquet:parquet-encoding:$parquetVersion")
 
-    implementation("org.apache.hadoop", "hadoop-common", "3.4.1")
-    implementation("org.apache.hadoop", "hadoop-client", "3.4.1")
+    implementation("org.apache.parquet:parquet-hadoop:$parquetVersion")
+    implementation("org.apache.parquet:parquet-format:$parquetFormatsVersion")
 
-    implementation("org.slf4j:slf4j-nop:2.0.17")
+    implementation("org.apache.hadoop:hadoop-common:$hadoopVersion")
+    implementation("org.apache.hadoop:hadoop-client:$hadoopVersion")
+
+    implementation("org.slf4j:slf4j-nop:$slf4jVersion")
     
 }
 
@@ -71,7 +72,7 @@ application {
 
 tasks.getByName<Zip>("distZip").enabled = false
 tasks.distTar {
-	project.version = ""
+    project.version = version
 	archiveBaseName = "${project.name}"
 	compression = Compression.GZIP
 	archiveExtension = "tar.gz"

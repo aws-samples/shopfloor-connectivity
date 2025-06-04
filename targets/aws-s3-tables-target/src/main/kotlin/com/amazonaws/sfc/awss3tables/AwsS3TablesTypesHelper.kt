@@ -7,6 +7,9 @@ package com.amazonaws.sfc.awss3tables
 import org.apache.iceberg.types.Type
 import org.apache.iceberg.types.Types
 import org.apache.iceberg.util.DateTimeUtil
+import java.math.BigDecimal
+import java.math.MathContext
+import java.math.RoundingMode
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.nio.charset.StandardCharsets
@@ -186,17 +189,15 @@ object AwsS3TablesTypesHelper {
             is Double -> value
             is String -> try {
                 java.lang.Double.parseDouble(value)
-            } catch (e: NumberFormatException) {
+            } catch (_: NumberFormatException) {
                 null
             }
-
             is Boolean -> if (value) 1.0 else 0.0
             is Char -> try {
                 java.lang.Double.parseDouble(value.toString())
             } catch (e: NumberFormatException) {
                 null
             }
-
             is Byte -> value.toDouble()
             is UByte -> value.toDouble()
             is Short -> value.toDouble()
@@ -220,11 +221,10 @@ object AwsS3TablesTypesHelper {
             is Float -> LocalDate.ofEpochDay(value.toLong())
             is Double -> LocalDate.ofEpochDay(value.toLong())
             is String -> try {
-                java.time.LocalDate.parse(value)
-            } catch (e: Exception) {
+                LocalDate.parse(value)
+            } catch (_: Exception) {
                 null
             }
-
             is Instant -> LocalDate.ofEpochDay(DateTimeUtil.daysFromInstant(value).toLong())
             else -> return null
         }
@@ -243,10 +243,9 @@ object AwsS3TablesTypesHelper {
             is Double -> LocalTime.ofSecondOfDay(value.toLong())
             is String -> try {
                 LocalTime.parse(value)
-            } catch (e: DateTimeParseException) {
+            } catch (_: DateTimeParseException) {
                 null
             }
-
             is Instant -> value.atZone(ZoneId.systemDefault()).toLocalTime()
             else -> return null
         }
@@ -272,10 +271,9 @@ object AwsS3TablesTypesHelper {
             is Double -> LocalDateTime.ofEpochSecond(value.toLong(), 0, ZoneOffset.UTC)
             is String -> try {
                 LocalDateTime.parse(value)
-            } catch (e: DateTimeParseException) {
+            } catch (_: DateTimeParseException) {
                 null
             }
-
             is Instant -> LocalDateTime.ofEpochSecond(value.epochSecond, 0, ZoneOffset.UTC)
             else -> return null
         }
@@ -293,10 +291,9 @@ object AwsS3TablesTypesHelper {
             is Double -> LocalDateTime.ofInstant(createInstantFromNanos(value.toLong()), ZoneOffset.UTC)
             is String -> try {
                 LocalDateTime.parse(value)
-            } catch (e: DateTimeParseException) {
+            } catch (_: DateTimeParseException) {
                 null
             }
-
             is Instant -> LocalDateTime.ofInstant(value, ZoneOffset.UTC)
             else -> return null
         }
@@ -316,10 +313,9 @@ object AwsS3TablesTypesHelper {
             is Double -> OffsetDateTime.ofInstant(createInstantFromNanos(value.toLong()), ZoneOffset.UTC)
             is String -> try {
                 OffsetDateTime.parse(value)
-            } catch (e: DateTimeParseException) {
+            } catch (_: DateTimeParseException) {
                 null
             }
-
             is Instant -> OffsetDateTime.ofInstant(value, ZoneOffset.UTC)
             else -> return null
         }
@@ -336,15 +332,14 @@ object AwsS3TablesTypesHelper {
             is Float -> DateTimeUtil.timestamptzFromMicros(Instant.ofEpochSecond(value.toLong()).toEpochMilli())
             is Double -> DateTimeUtil.timestamptzFromMicros(Instant.ofEpochSecond(value.toLong()).toEpochMilli())
             is String -> try {
-                java.time.OffsetDateTime.parse(value)
-            } catch (e: DateTimeParseException) {
+                OffsetDateTime.parse(value)
+            } catch (_: DateTimeParseException) {
                 null
             }
 
             is Instant -> DateTimeUtil.timestamptzFromMicros(value.toEpochMilli())
             else -> return null
         }
-
     }
 
     fun toUUID(value: Any?): UUID? {
@@ -354,7 +349,7 @@ object AwsS3TablesTypesHelper {
         return when (value) {
             is String -> try {
                 UUID.fromString(value)
-            } catch (e: IllegalArgumentException) {
+            } catch (_: IllegalArgumentException) {
                 null
             }
 
@@ -388,64 +383,65 @@ object AwsS3TablesTypesHelper {
     }
 
 
-    fun toFixed(value: Any?, precision: Int): Float? {
-
-        fun asFixed(value: Float): Float {
-            val factor = 10.0.pow(precision.toDouble()).toFloat()
-            return (value * factor).roundToInt() / factor
-        }
+    fun toFixed(value: Any?, precision: Int): ByteArray? {
 
         if (value == null) return null
 
-        return when (value) {
-            is Boolean -> if (value) 1.0.toFloat() else 0.0.toFloat()
-            is Byte -> value.toFloat()
-            is Short -> value.toFloat()
-            is UShort -> value.toFloat()
-            is Int -> value.toFloat()
-            is UInt -> value.toFloat()
-            is Long -> value.toFloat()
-            is ULong -> value.toFloat()
-            is Float -> asFixed(value)
-            is Double -> asFixed(value.toFloat())
-            is String -> try {
-                asFixed(java.lang.Float.parseFloat(value))
-            } catch (e: NumberFormatException) {
-                null
+        val fixedBytes = ByteBuffer.allocate(precision).order(ByteOrder.LITTLE_ENDIAN)
+
+        when (value) {
+            is Boolean -> fixedBytes
+                .putInt(if (value) 1 else 0)
+                .array()
+
+            is Byte -> {
+                fixedBytes.put(value)
+                repeat(precision - 1) {
+                    fixedBytes.put(0)
+                }
             }
 
+            is Short -> if (precision >= 2) fixedBytes.putShort(value) else return null
+            is UShort -> if (precision >= 2) fixedBytes.putShort(value.toShort()) else return null
+            is Int -> if (precision >= 4) fixedBytes.putInt(value) else return null
+            is UInt -> if (precision >= 4) fixedBytes.putInt(value.toInt()) else return null
+            is Long -> if (precision >= 8) fixedBytes.putLong(value) else return null
+            is ULong -> if (precision >= 8) fixedBytes.putLong(value.toLong()) else return null
+            is Float -> if (precision >= 4) fixedBytes.putFloat(value) else return null
+            is Double -> if (precision >= 8) fixedBytes.putDouble(value) else return null
+            is String -> if (precision >= value.length) fixedBytes.put(value.toByteArray(StandardCharsets.UTF_8)) else return null
             else -> null
         }
+        return fixedBytes.array()
     }
 
-    fun toDecimal(value: Any?, precision: Int, scale: Int): Double? {
+    fun toDecimal(value: Any?, precision: Int, scale: Int): BigDecimal? {
         if (value == null) return null
 
-        fun asDecimal(value: Double): Double? {
+        fun asBigDecimal(value: Double): BigDecimal {
 
-            val factor = 10.0.pow(scale)
-            val scaled = (value * factor).toLong()
-            return scaled / factor
+            return BigDecimal.valueOf(value)
+                .round(MathContext(precision, RoundingMode.HALF_UP))
+                .setScale(scale, RoundingMode.HALF_UP)
         }
 
 
         return when (value) {
-            is Boolean -> if (value) 1.0 else 0.0
-            is Byte -> asDecimal(value.toDouble())
-            is Short -> asDecimal(value.toDouble())
-            is UShort -> asDecimal(value.toDouble())
-            is Int -> asDecimal(value.toDouble())
-            is UInt -> asDecimal(value.toDouble())
-            is Long -> asDecimal(value.toDouble())
-            is ULong -> asDecimal(value.toDouble())
-            is Float -> asDecimal(value.toDouble())
-            is Double -> asDecimal(value)
+            is Boolean -> asBigDecimal(if (value) 1.0 else 0.0)
+            is Byte -> asBigDecimal(value.toDouble())
+            is Short -> asBigDecimal(value.toDouble())
+            is UShort -> asBigDecimal(value.toDouble())
+            is Int -> asBigDecimal(value.toDouble())
+            is UInt -> asBigDecimal(value.toDouble())
+            is Long -> asBigDecimal(value.toDouble())
+            is ULong -> asBigDecimal(value.toDouble())
+            is Float -> asBigDecimal(value.toDouble())
+            is Double -> asBigDecimal(value)
             is String -> try {
-                asDecimal(java.lang.Double.parseDouble(value))
+                asBigDecimal(java.lang.Double.parseDouble(value))
             } catch (e: NumberFormatException) {
                 null
             }
-
             else -> null
         }
     }
@@ -468,7 +464,6 @@ object AwsS3TablesTypesHelper {
                 null
             }
         }
-
     }
 
     fun toMap(keyType: Type, valueType: Type, value: Any?): Map<Any, Any>? {
@@ -483,11 +478,5 @@ object AwsS3TablesTypesHelper {
         } catch (_: Exception) {
             null
         }
-
-
     }
-
-
-
-
 }
