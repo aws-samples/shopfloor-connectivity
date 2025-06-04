@@ -54,7 +54,7 @@ object ConfigProviderFactory {
             else -> {
                 val log = logger.getCtxLoggers(className, "createProvider")
                 log.info("Creating configuration provider of type ${ConfigProvider::class.java.simpleName}")
-                log.info("No command line config provided - try reading configuration from environment")
+                log.info("No command line config provided - try reading configuration from environment variable \"$ENV_VARIABLE_CONFIG\"")
                 val envConfig : String? = System.getenv(ENV_VARIABLE_CONFIG)
                 if(envConfig != null) {
                     val configVerificationKey = getConfigurationVerificationKeyFromEnv(logger)
