@@ -1,5 +1,11 @@
 # Release Notes:
 
+## version 1.9.5, 4 June 2025
+
+- Bug fix for InstanceFactory classloader
+
+---
+
 ## version 1.9.4, 3 June 2025
 
 - [Specify the config via environment variables](./docs/sfc-running-core-process.md#additional-functionality-to-specify-the-config-via-environment-variables)
@@ -9,7 +15,7 @@
 ## Version 1.9.3, 6 May 2025
 
 - Configuration reader bug fix
-
+`
 ---
 
 ## Version 1.9.2, 30 April 2025
@@ -22,7 +28,7 @@
 - New: [BufferCount](./docs/targets/file.md#buffercount) property for [File target](./docs/targets/file.md)
 
 ## Version 1.9.1, 10 April 2025
-
+`
 - Upgrade to AWS SDK 2.31.18
 - Fixed version dependency for running S3 target as an in-process target
 

@@ -238,7 +238,7 @@ open class TargetConfiguration : Validate {
             return instance
         }
 
-        fun targetConfig(configReader : ConfigReader, targetID : String) : String?? {
+        fun targetConfig(configReader : ConfigReader, targetID : String) : String? {
             val configRaw = configReader.jsonConfigReader.fromJson(configReader.jsonConfig, Any::class.java) as Map<*, *>
 
             @Suppress("UNCHECKED_CAST")

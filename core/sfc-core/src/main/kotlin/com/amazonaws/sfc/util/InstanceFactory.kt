@@ -7,6 +7,7 @@ package com.amazonaws.sfc.util
 
 import com.amazonaws.sfc.config.InProcessConfiguration
 import com.amazonaws.sfc.data.ProtocolAdapterException
+import com.amazonaws.sfc.log.LogLevel
 import com.amazonaws.sfc.log.Logger
 import java.io.File
 import java.net.URLClassLoader
@@ -21,13 +22,18 @@ open class InstanceFactory<T>(private val config: InProcessConfiguration, privat
         val log = logger.getCtxLoggers(className, "classToLoad")
 
         if (config.jarFiles.isNullOrEmpty()) {
-            log.trace("No jar files specified for '${config.factoryClassName}'")
+            log.trace("No jar files specified for '${config.factoryClassName}, using factory class from jar files in classpath'")
+            if (logger.level == LogLevel.TRACE) {
+                val classloader = ClassLoader.getSystemClassLoader()
+                val urls =(classloader as URLClassLoader).urLs.map{url->url.file}
+                log.trace("No jar files specified for '${config.factoryClassName}, using factory class from classpath:  ${urls.joinToString()}")
+            }
         } else {
             log.trace("Loading factory class name class $config.factoryClassName from ${config.jarFiles!!.joinToString()}")
         }
 
         val expandedJars = expandedJarList(config.jarFiles ?: emptyList())
-        if (expandedJars.isNotEmpty()) {
+        if (expandedJars.isEmpty()) {
             Class.forName(config.factoryClassName)
         } else {
             if (config.jarFiles != expandedJars) {
