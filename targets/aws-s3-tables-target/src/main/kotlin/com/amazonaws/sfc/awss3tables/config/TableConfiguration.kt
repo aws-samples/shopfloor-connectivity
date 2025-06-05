@@ -28,6 +28,12 @@ class TableConfiguration : Validate{
     val schema: TableSchemaConfiguration
         get() = _schema
 
+    @SerializedName(CONFIG_PARTITION_OPTIMIZED)
+    var _partitionOptimized: Boolean = true
+    val partitionOptimized: Boolean
+        get() = _partitionOptimized
+
+
     val catalogSchema by lazy{
         buildSchema(schema)
     }
@@ -59,8 +65,8 @@ class TableConfiguration : Validate{
     private fun validateMappings() {
         if (_mappings.isEmpty()) throw ConfigurationException("No mappings specified", CONFIG_COLUMN_MAPPING, null)
         _mappings.forEach { mapping ->
-            mapping.forEach { (key, value) ->
-                value.validate()
+            mapping.values.forEach {
+                it.validate()
             }
         }
     }
@@ -106,5 +112,7 @@ class TableConfiguration : Validate{
         private const val CONFIG_TABLE_NAME = "TableName"
         private const val CONFIG_PARTITION = "Partition"
         private const val CONFIG_SCHEMA = "Schema"
+        private const val CONFIG_PARTITION_OPTIMIZED = "PartitionOptimization"
+
     }
 }

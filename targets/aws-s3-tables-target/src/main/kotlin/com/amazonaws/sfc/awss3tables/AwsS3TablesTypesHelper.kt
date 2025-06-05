@@ -410,7 +410,6 @@ object AwsS3TablesTypesHelper {
             is Float -> if (precision >= 4) fixedBytes.putFloat(value) else return null
             is Double -> if (precision >= 8) fixedBytes.putDouble(value) else return null
             is String -> if (precision >= value.length) fixedBytes.put(value.toByteArray(StandardCharsets.UTF_8)) else return null
-            else -> null
         }
         return fixedBytes.array()
     }

@@ -58,10 +58,8 @@ class AwsS3TablesTargetConfiguration : AwsServiceConfig, TargetConfiguration() {
     @SerializedName(CONFIG_BUFFER_COUNT)
     private var _bufferCount: Int = DEFAULT_BUFFER_COUNT
 
-
     val bufferCount: Int
         get() = _bufferCount
-
 
     @SerializedName(CONFIG_INTERVAL)
     private var _interval: Int = DEFAULT_INTERVAL

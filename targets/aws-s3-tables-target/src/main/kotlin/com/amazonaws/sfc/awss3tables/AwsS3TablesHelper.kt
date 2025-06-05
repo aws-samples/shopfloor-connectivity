@@ -188,8 +188,6 @@ class AwsS3TablesHelper(private val targetConfig: AwsS3TablesTargetConfiguration
     }
 
     fun createTableBucket(tableBucketName: String): String {
-        val log = logger.getCtxLoggers(className, "createTableBucket")
-
         val response: CreateTableBucketResponse = s3TablesClient.createTableBucket(CreateTableBucketRequest.builder().name(tableBucketName).build())
         val arn = response.arn()
         if (arn != null) tableArnBuffer[tableBucketName] = arn
@@ -214,10 +212,10 @@ class AwsS3TablesHelper(private val targetConfig: AwsS3TablesTargetConfiguration
     fun createTable(namespace: String, tableName: String, schema: List<FieldConfiguration>, partitionSpec: TablePartitionConfiguration?): org.apache.iceberg.catalog.TableIdentifier {
 
         val tableIdentifier = TableIdentifier.of(namespace, tableName)
-        val schema = buildSchema(schema)
+        val s = buildSchema(schema)
         if (partitionSpec?.transforms?.isNotEmpty() == true)
-            catalog?.createTable(tableIdentifier, schema, buildPartitionSpecification(schema, partitionSpec)) else
-            catalog?.createTable(tableIdentifier, schema)
+            catalog?.createTable(tableIdentifier, s, buildPartitionSpecification(s, partitionSpec)) else
+            catalog?.createTable(tableIdentifier, s)
         return tableIdentifier
 
     }

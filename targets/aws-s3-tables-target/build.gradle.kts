@@ -13,10 +13,11 @@ val kotlinCoroutinesVersion = "1.6.2"
 val kotlinVersion = "1.9.0"
 val sfcCoreVersion = sfcRelease
 val sfcIpcVersion = sfcRelease
+// need this one for S3 Tables version
 val awsSdkVersion = "2.29.30"
 // need this version for jvm 1,8
 var icebergVersion = "1.6.1"
-var awcIcebergVersion = "1.9.0"
+var awsIcebergVersion = "1.9.0"
 var parquetVersion = "1.15.1"
 var parquetFormatsVersion = "2.11.0"
 var hadoopVersion = "3.4.1"
@@ -44,11 +45,11 @@ dependencies {
     implementation("org.apache.iceberg:iceberg-data:$icebergVersion")
     implementation("org.apache.iceberg:iceberg-api:$icebergVersion")
     implementation("org.apache.iceberg:iceberg-aws:$icebergVersion")
-    implementation("org.apache.iceberg:iceberg-aws-bundle:$awcIcebergVersion")
+    implementation("org.apache.iceberg:iceberg-aws-bundle:$awsIcebergVersion")
 
-    implementation("software.amazon.awssdk:s3tables:$awsSdkVersion")
-    implementation("software.amazon.awssdk:sts:$awsSdkVersion")
-    implementation("software.amazon.awssdk:url-connection-client:$awsSdkVersion")
+    implementation("software.amazon.awssdk:s3tables:2.29.30")
+    implementation("software.amazon.awssdk:sts:2.29.30")
+    implementation("software.amazon.awssdk:url-connection-client:2.29.30")
 
     implementation("org.apache.parquet:parquet-avro:$parquetVersion")
     implementation("org.apache.parquet:parquet-column:$parquetVersion")
@@ -66,16 +67,17 @@ dependencies {
 }
 
 application {
-    mainClass.set("com.amazonaws.sfc.awss3.AwsS3TablesTargetService")
+    mainClass.set("com.amazonaws.sfc.awss3tables.AwsS3TablesTargetService")
     applicationName = project.name
 }
 
 tasks.getByName<Zip>("distZip").enabled = false
 tasks.distTar {
     project.version = version
-	archiveBaseName = "${project.name}"
-	compression = Compression.GZIP
-	archiveExtension = "tar.gz"
+    archiveBaseName = "${project.name}"
+    compression = Compression.GZIP
+    archiveExtension = "tar.gz"
+    archiveFileName = "${project.name}.tar.gz"
 }
 
 

@@ -46,6 +46,7 @@ import org.apache.iceberg.PartitionSpec
 import org.apache.iceberg.Table
 import org.apache.iceberg.catalog.TableIdentifier
 import org.apache.iceberg.data.GenericRecord
+import org.apache.iceberg.data.Record
 import org.apache.iceberg.data.parquet.GenericParquetWriter
 import org.apache.iceberg.io.DataWriter
 import org.apache.iceberg.parquet.Parquet
@@ -53,10 +54,14 @@ import org.apache.iceberg.types.Type
 import software.amazon.awssdk.auth.credentials.AwsCredentials
 import software.amazon.awssdk.auth.credentials.AwsSessionCredentials
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.OffsetDateTime
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
+import kotlin.math.abs
 import kotlin.time.Duration
 import kotlin.time.DurationUnit
 import kotlin.time.measureTime
@@ -256,14 +261,14 @@ class AwsS3TablesTargetWriter(
 
         targetConfiguration.tables.forEach { tableConfiguration ->
             val tableIdentifier = TableIdentifier.of(targetConfiguration.namespace, tableConfiguration.tableName)
-            val t = if (tables.contains(tableIdentifier)) {
+            if (tables.contains(tableIdentifier)) {
                 log.info("Table \"$tableIdentifier\" does exist")
                 tableIdentifier
             } else {
                 if (targetConfiguration.autoCreate) {
                     log.info("Table \"$tableIdentifier\" does not exist, creating")
                     try {
-                        val table = tablesHelper!!.createTable(targetConfiguration.namespace, tableConfiguration.tableName, tableConfiguration.schema, tableConfiguration.partition)
+                        tablesHelper!!.createTable(targetConfiguration.namespace, tableConfiguration.tableName, tableConfiguration.schema, tableConfiguration.partition)
                         log.info("Created table \"$tableIdentifier\" for bucket \"${targetConfiguration.tableBucketName}\"")
                     } catch (e: Exception) {
                         throw TargetException("Error creating table \"$tableIdentifier\" for bucket \"${targetConfiguration.tableBucketName}\", $e")
@@ -375,7 +380,7 @@ class AwsS3TablesTargetWriter(
 
             val recordCount = buildRecords(table, targetData)
             val s = if (recordCount > 1) "s" else ""
-            log.trace("$recordCount record$s created for table \"${table.tableName}\"")
+            log.trace("$recordCount record$s created from target data for table \"${table.tableName}\"")
 
             val totalBufferedRecords = buffers.values.sumOf { it.size }
             if (targetData.noBuffering || totalBufferedRecords >= targetConfiguration.bufferCount) {
@@ -390,8 +395,6 @@ class AwsS3TablesTargetWriter(
     private fun buildRecords(table: TableConfiguration, targetData: TargetData): Int {
 
         val log = logger.getCtxLoggers(className, "build")
-
-        val stats = mutableListOf<Pair<String, Int>>()
 
         val missingValues = mutableListOf<String>()
         val targetDataMap = targetData.toMap(writerConfiguration.elementNames, true)
@@ -452,7 +455,7 @@ class AwsS3TablesTargetWriter(
             tableBuffer.addRecord(targetData.serial, record)
             recordCount += 1
         }
-        log.trace("$tableBuffer records buffered for table \"${table.tableName}\"")
+        log.trace("${tableBuffer.size} records buffered for table \"${table.tableName}\"")
         return recordCount
     }
 
@@ -566,25 +569,28 @@ class AwsS3TablesTargetWriter(
                         log.trace("Nu buffered records for table \"$tableName\" to write")
                     } else {
 
-                        log.trace("Writing $tableBuffer buffered records for table \"$tableName\"")
+                        log.trace("Writing ${tableBuffer.records.size} buffered records for table \"$tableName\"")
 
                         val catalogTable = catalogTables[TableIdentifier.of(targetConfiguration.namespace, tableName)]
+
+                        var partitionedWrites = 0
 
                         if (catalogTable != null) {
                             val duration = measureTime {
 
-                                val tableWriter = buildTableWriter(catalogTable, tableName)
-                                try {
-                                    tableBuffer.items.forEach { it -> tableWriter.write(it.second) }
-                                } finally {
-                                    tableWriter.close()
+                                if (catalogTable.spec().isPartitioned) {
+                                    val partitionedRecords = buildPartitionRecordSets(tableName,tableBuffer.records, catalogTable)
+                                    partitionedWrites = partitionedRecords?.keys?.size ?: 0
+                                    partitionedRecords?.forEach { (partitionData, records) ->
+                                        recordCount += writeRecords(catalogTable, records, partitionData)
+                                    }
+                                } else {
+                                    recordCount += writeRecords(catalogTable, tableBuffer.records)
                                 }
-                                val dataFile: DataFile? = tableWriter.toDataFile()
-                                catalogTable.newAppend().appendFile(dataFile).commit()
-                                recordCount += tableBuffer.size
                             }
 
-                            log.info("Written ${tableBuffer.size} buffered records for table \"$tableName\" in $duration")
+                            val s = if (partitionedWrites > 1) " in $partitionedWrites partition optimized writes" else ""
+                            log.info("Written ${tableBuffer.size} buffered records for table \"$tableName\"$s in $duration")
                             totalDuration += duration
 
 
@@ -609,8 +615,120 @@ class AwsS3TablesTargetWriter(
         buffers.values.forEach { it.clear() }
     }
 
+    private fun writeRecords(
+        catalogTable: Table,
+        records: List<GenericRecord>,
+        partitionData: PartitionData? = null): Int {
 
-    fun buildTableWriter(table: Table, tableName: String): DataWriter<GenericRecord?> {
+        if (records.isEmpty()) return 0
+
+        val log = logger.getCtxLoggers(className, "writeRecords")
+
+        val s = if (records.size == 1) "" else "s"
+        if (partitionData != null)
+            log.trace("Writing ${records.size} record$s for table \"${catalogTable.name()}\" with partition data $partitionData")
+        else
+            log.trace("Writing ${records.size} record$s for table \"${catalogTable.name()}\"")
+
+        val tableWriter = buildTableWriter(catalogTable, partitionData)
+        try {
+            records.forEach { record -> tableWriter.write(record) }
+        } finally {
+            tableWriter.close()
+        }
+
+        val dataFile: DataFile? = tableWriter.toDataFile()
+        catalogTable.newAppend().appendFile(dataFile).commit()
+        return records.size
+
+    }
+
+    fun buildPartitionData(record: Record, table: Table): PartitionData {
+        val spec: PartitionSpec = table.spec()
+        val schema = table.schema()
+        val partitionData = PartitionData(spec.partitionType())
+
+        spec.fields().forEachIndexed { index, field ->
+            val sourceId = field.sourceId()
+            val source = schema.findField(sourceId)
+            val sourceValue = record.getField(source.name())
+
+            val transform = PartitionTransform.of(field.transform().toString(), source.name())
+
+            when (transform) {
+                PartitionTransform.IDENTITY -> partitionData.set(index, sourceValue)
+
+                PartitionTransform.YEAR -> {
+                    when (sourceValue) {
+                        is Int -> partitionData.set(index, sourceValue)
+                        is Long -> partitionData.set(index, sourceValue.toInt())
+                        is Float -> partitionData.set(index, sourceValue.toInt())
+                        is Double -> partitionData.set(index, sourceValue.toInt())
+                        is LocalDate -> partitionData.set(index, sourceValue.year)
+                        is OffsetDateTime -> partitionData.set(index, sourceValue.year)
+                        is LocalDateTime -> partitionData.set(index, sourceValue.year)
+                    }
+                }
+
+                PartitionTransform.MONTH -> {
+                    when (sourceValue) {
+                        is Int -> partitionData.set(index, sourceValue)
+                        is Long -> partitionData.set(index, sourceValue.toInt())
+                        is Float -> partitionData.set(index, sourceValue.toInt())
+                        is Double -> partitionData.set(index, sourceValue.toInt())
+                        is LocalDate -> partitionData.set(index, sourceValue.monthValue)
+                        is OffsetDateTime -> partitionData.set(index, sourceValue.monthValue)
+                        is LocalDateTime -> partitionData.set(index, sourceValue.monthValue)
+
+                    }
+                }
+
+                PartitionTransform.DAY -> {
+                    when (sourceValue) {
+                        is Int -> partitionData.set(index, sourceValue)
+                        is Long -> partitionData.set(index, sourceValue.toInt())
+                        is Float -> partitionData.set(index, sourceValue.toInt())
+                        is Double -> partitionData.set(index, sourceValue.toInt())
+                        is LocalDate -> partitionData.set(index, sourceValue.dayOfMonth)
+                        is OffsetDateTime -> partitionData.set(index, sourceValue.dayOfMonth)
+                        is LocalDateTime -> partitionData.set(index, sourceValue.dayOfMonth)
+                    }
+                }
+
+                PartitionTransform.HOUR -> {
+                    when (sourceValue) {
+                        is Int -> partitionData.set(index, sourceValue)
+                        is Long -> partitionData.set(index, sourceValue.toInt())
+                        is Float -> partitionData.set(index, sourceValue.toInt())
+                        is Double -> partitionData.set(index, sourceValue.toInt())
+                        is OffsetDateTime -> partitionData.set(index, sourceValue.hour)
+                        is LocalDateTime -> {
+                            partitionData.set(index, sourceValue.hour)
+                        }
+                    }
+                }
+
+                PartitionTransform.BUCKET -> {
+                    val numBuckets = transform.param as Int
+                    val hashCode = sourceValue.hashCode()
+                    val bucketValue = abs(hashCode % numBuckets)
+                    partitionData.set(index, bucketValue)
+                }
+
+                PartitionTransform.TRUNCATE -> {
+                    val stringValue = sourceValue.toString()
+                    val width = transform.param as Int
+                    partitionData.set(index, stringValue.take(width))
+                }
+
+            }
+
+        }
+
+        return partitionData
+    }
+
+    fun buildTableWriter(table: Table, partitionData: PartitionData? = null): DataWriter<GenericRecord?> {
 
         val log = logger.getCtxLoggers(className, "buildTableWriter")
 
@@ -623,9 +741,9 @@ class AwsS3TablesTargetWriter(
                 .createWriterFunc(GenericParquetWriter::buildWriter)
                 .overwrite()
 
-            if (table.spec().isPartitioned) {
+            if (table.spec().isPartitioned && partitionData != null) {
                 builder.withSpec(table.spec())
-                builder.withPartition(PartitionData(table.spec().partitionType()))
+                builder.withPartition(partitionData)
             } else {
                 builder.withSpec(PartitionSpec.unpartitioned())
             }
@@ -633,8 +751,24 @@ class AwsS3TablesTargetWriter(
             builder.build<GenericRecord>()
 
         } catch (e: Exception) {
-            log.error("Error building writer for table \"$tableName\" using filepath \"$filePath\" , e")
+            log.error("Error building writer for table \"${table.name()}\" using filepath \"$filePath\" , e")
             throw e
+        }
+    }
+
+    private fun buildPartitionRecordSets(tableName: String,
+                                         recordsForTable: List<GenericRecord>,
+                                         table: Table): Map<PartitionData, List<GenericRecord>>? {
+
+
+        val optimizePartitioning = targetConfiguration.tables.find { it.tableName == tableName }?.partitionOptimized ?: false
+        return if (optimizePartitioning) {
+            recordsForTable.map { rec ->
+                rec to buildPartitionData(rec, table)
+            }.groupBy { it.second }.map { group -> group.key to group.value.map { it.first } }.toMap()
+        } else {
+            val firstRecord = recordsForTable.first()
+            mapOf(buildPartitionData(firstRecord, table) to recordsForTable)
         }
     }
 

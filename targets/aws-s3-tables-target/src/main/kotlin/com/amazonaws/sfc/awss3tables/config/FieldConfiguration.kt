@@ -20,7 +20,7 @@ import org.apache.iceberg.types.Types.MapType.ofRequired
 import org.apache.iceberg.types.Types.fromPrimitiveString
 
 @ConfigurationClass
-class FieldConfiguration(idInit: Int? = null) : Validate {
+class FieldConfiguration() : Validate {
 
     var _id: Int = 0
     val id: Int
@@ -90,12 +90,11 @@ class FieldConfiguration(idInit: Int? = null) : Validate {
         const val CONFIG_COLUMN_TYPE = "Type"
         private const val CONFIG_COLUMN_OPTIONAL = "Optional"
         const val CONFIG_COLUMN_MAPPING = "Mapping"
-
-        private val default = FieldConfiguration(0)
+        private val default = FieldConfiguration()
 
         fun create(
             name: String = default.name,
-            type: org.apache.iceberg.types.Type?? = default._type,
+            type: org.apache.iceberg.types.Type? = default._type,
             optional: Boolean = default.optional): FieldConfiguration {
             val instance = FieldConfiguration()
 

@@ -227,7 +227,7 @@ class JsonHelper {
         }
 
 
-        fun forEachNode(key : String = "", node: Any?, trail: List<String> = emptyList(), fnFilter: (String, Any?, List<String>)->Boolean = { key: String, node: Any?, tail: List<String> -> true }, fnAction: (String, Any?, List<String>) -> Unit) {
+        fun forEachNode(key : String = "", node: Any?, trail: List<String> = emptyList(), fnFilter: (String, Any?, List<String>)->Boolean = { _: String, _: Any?, _: List<String> -> true }, fnAction: (String, Any?, List<String>) -> Unit) {
             when (node) {
 
                 is Map<*, *> -> {

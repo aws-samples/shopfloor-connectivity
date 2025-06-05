@@ -14,6 +14,14 @@ val kotlinCoroutinesVersion = "1.6.2"
 val kotlinVersion = "1.9.0"
 val awsMskIamVersion = "1.1.6"
 val awsSdkVersion = "2.31.18"
+val awsSdkVersion2 = "2.29.30"
+var icebergVersion = "1.6.1"
+
+var awsIcebergVersion = "1.9.0"
+var parquetVersion = "1.15.1"
+var parquetFormatsVersion = "2.11.0"
+var hadoopVersion = "3.4.1"
+var slf4jVersion = "2.0.17"
 
 plugins {
     id("sfc.kotlin-application-conventions")
@@ -29,7 +37,13 @@ dependencies {
     implementation("software.amazon.msk:aws-msk-iam-auth:$awsMskIamVersion")
 
     // s3 libraries required for s3 libraries dependencies for in process deployment of S3 adapter
-    implementation("software.amazon.awssdk:s3:$awsSdkVersion")
+    implementation("software.amazon.awssdk:s3:$awsSdkVersion2")
+
+    // s3Tables libraries required for s3Tables libraries dependencies for in process deployment of S3Tables adapter
+    implementation("org.apache.iceberg:iceberg-aws:${icebergVersion}")
+    implementation("software.amazon.awssdk:s3tables:$awsSdkVersion2")
+
+    implementation("org.slf4j:slf4j-nop:${slf4jVersion}")
 }
 
 application {

@@ -13,7 +13,8 @@ val kotlinCoroutinesVersion = "1.6.2"
 val kotlinVersion = "1.9.0"
 val sfcCoreVersion = sfcRelease
 val sfcIpcVersion = sfcRelease
-val awsSdkVersion = "2.31.18"
+val awsSdkVersion2 = "2.29.30"
+
 
 plugins {
     id("sfc.kotlin-application-conventions")
@@ -26,7 +27,7 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinCoroutinesVersion")
 
-    implementation("software.amazon.awssdk:s3:$awsSdkVersion")
+    implementation("software.amazon.awssdk:s3:$awsSdkVersion2")
 
 }
 

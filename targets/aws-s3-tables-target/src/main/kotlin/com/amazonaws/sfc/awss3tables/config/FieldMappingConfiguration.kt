@@ -85,8 +85,8 @@ class FieldMappingConfiguration : Validate {
         if (_valueQuery.isNotEmpty()) throw ConfigurationException("Sub mappings can not be used with value query", CONFIG_COLUMN_MAPPING, this)
         if (_transformationID != null) throw ConfigurationException("Sub mappings can not be used with transformation", CONFIG_COLUMN_MAPPING, this)
 
-        _subMappings!!.forEach { (key, value) ->
-            value.validate()
+        _subMappings!!.values.forEach {
+            it.validate()
         }
     }
 
