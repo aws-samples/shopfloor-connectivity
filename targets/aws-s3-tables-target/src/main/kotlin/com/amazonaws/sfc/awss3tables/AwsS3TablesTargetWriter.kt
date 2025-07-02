@@ -14,12 +14,14 @@ import com.amazonaws.sfc.awss3tables.config.AwsS3TablesTargetConfiguration.Compa
 import com.amazonaws.sfc.awss3tables.config.AwsS3TablesWriterConfiguration.Companion.AWS_S3_TABLES
 import com.amazonaws.sfc.config.BaseConfiguration
 import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_TARGETS
+import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_VALUE_FILTER
 import com.amazonaws.sfc.config.ConfigReader
 import com.amazonaws.sfc.config.ConfigurationException
 import com.amazonaws.sfc.data.TargetData
 import com.amazonaws.sfc.data.TargetResultBufferedHelper
 import com.amazonaws.sfc.data.TargetResultHandler
 import com.amazonaws.sfc.data.TargetWriter
+import com.amazonaws.sfc.filters.ValueFiltersCache
 import com.amazonaws.sfc.log.LogLevel
 import com.amazonaws.sfc.log.Logger
 import com.amazonaws.sfc.metrics.*
@@ -109,6 +111,7 @@ class AwsS3TablesTargetWriter(
         }
     }
 
+
     private val targetConfiguration: AwsS3TablesTargetConfiguration by lazy {
         writerConfiguration.targets[targetID]
                 ?: throw ConfigurationException(
@@ -119,6 +122,7 @@ class AwsS3TablesTargetWriter(
 
     private var timer = createTimer()
 
+    private val valueFilters = ValueFiltersCache(writerConfiguration.valueFilters)
 
     val tablesHelper: AwsS3TablesHelper?
         get() {
@@ -212,9 +216,6 @@ class AwsS3TablesTargetWriter(
 
     private val buffers = ConcurrentHashMap<String, RecordBuffer>()// TargetDataBuffer(storeFullMessage = false)
 
-    private val timerChannel = Channel<String>(capacity = targetConfiguration.tables.count())
-
-
     private val metricsCollector: MetricsCollector? by lazy {
         val metricsConfiguration = writerConfiguration.targets[targetID]?.metrics ?: MetricsSourceConfiguration()
         if (writerConfiguration.isCollectingMetrics) {
@@ -263,7 +264,6 @@ class AwsS3TablesTargetWriter(
             val tableIdentifier = TableIdentifier.of(targetConfiguration.namespace, tableConfiguration.tableName)
             if (tables.contains(tableIdentifier)) {
                 log.info("Table \"$tableIdentifier\" does exist")
-                tableIdentifier
             } else {
                 if (targetConfiguration.autoCreate) {
                     log.info("Table \"$tableIdentifier\" does not exist, creating")
@@ -371,7 +371,7 @@ class AwsS3TablesTargetWriter(
 
     }
 
-    private suspend fun processTargetData(targetData: TargetData) {
+    private fun processTargetData(targetData: TargetData) {
 
         val log = logger.getCtxLoggers(className, "processTargetData")
         targetResults?.add(targetData)
@@ -402,27 +402,37 @@ class AwsS3TablesTargetWriter(
         val recordsData = sequence {
 
             // a table can have multiple values to generate multiple records for a targetData value
-            table.mappings.forEachIndexed { index, fieldMappings ->
+            table.mappings.forEachIndexed { tableMappingIndex, tableMapping: Map<String, ColumnMappingConfiguration> ->
 
-                // get thet data for a record for each mapping
+                val filteredByValueFilter = mutableListOf<Pair<String, Any>>()
+                // get thet data for a record for each tableMapping
                 val mappedRecordData = sequence {
 
                     // get value for every field in the schema of the table
                     table.schema.forEach { field ->
 
-                        // get the mapping for the field
-                        val fieldMapping = fieldMappings[field.name]
+                        // get the tableMapping for the field
+                        val fieldMapping = tableMapping[field.name]
                         if (fieldMapping != null) {
 
                             // get the value for the field
                             if (fieldMapping.subMappings.isEmpty()) {
                                 // native, list or map values
-                                val fieldValue = if (field.type != null) getFieldValue(targetDataMap, fieldMapping, table.tableName, field.name, field.type!!, index) else null
+
+                                val fieldValue = if (field.type != null) getFieldValue(targetDataMap, fieldMapping, table.tableName, field.name, field.type!!, tableMappingIndex) else null
+                                if (fieldValue != null && fieldMapping.valueFilterID != null) {
+                                    val valueFilter = valueFilters[fieldMapping.valueFilterID!!]
+                                    if (valueFilter != null && (!valueFilter.apply(fieldValue))) {
+                                        filteredByValueFilter.add(field.name to fieldValue)
+                                    }
+                                }
+
                                 if (fieldValue != null) yield(field.name to fieldValue)
                                 else if (!field.optional) missingValues.add(field.name)
+
                             } else {
                                 // field is a struct value with sub-fields
-                                val nestedValue = map(fieldMappings, field, targetDataMap, table, index, missingValues) // nested field values sequence
+                                val nestedValue = mapNestedValue(tableMapping, field, targetDataMap, table, tableMappingIndex, missingValues, filteredByValueFilter) // nested field values sequence
 
                                 if (nestedValue.isNotEmpty()) {
                                     val rec = GenericRecord.create(buildSchema(field.subFields)).copy(nestedValue)
@@ -436,11 +446,25 @@ class AwsS3TablesTargetWriter(
                     } // table schema fields
                 }.toMap()  // mapped records sequence
 
-                if (missingValues.isEmpty()) yield(mappedRecordData)
-                else {
-                    val s = if (missingValues.size > 1) "s" else ""
-                    log.warning("Missing required value$s for table \"${table.tableName}\" mapping $index, field$s ${missingValues.joinToString { "\"$it\"" }} in target ${targetID}")
+                when {
+                    (filteredByValueFilter.isNotEmpty()) -> {
+                        val s = if (filteredByValueFilter.size > 1) "s" else ""
+                        log.trace("Table \"${table.tableName}\", tableMapping $tableMappingIndex, filtered out by $CONFIG_VALUE_FILTER$s for field$s [${filteredByValueFilter.joinToString(separator = ", ") { "\"${it.first}\" => \"${it.second}\"" }}] in target $targetID")
+                    }
+
+                    (missingValues.isNotEmpty()) -> {
+                        val s = if (missingValues.size > 1) "s" else ""
+                        val message =
+                            "Missing required value$s for table \"${table.tableName}\" tableMapping $tableMappingIndex, field$s ${missingValues.joinToString { "\"$it\"" }} in target $targetID"
+                        if (targetConfiguration.warnIfValueMissing)
+                            log.warning(message)
+                        else
+                            log.trace(message)
+                    }
+
+                    else -> yield(mappedRecordData)
                 }
+
             } // mappings
         }.toList()
 
@@ -459,13 +483,14 @@ class AwsS3TablesTargetWriter(
         return recordCount
     }
 
-    private fun map(fieldMappingsConfiguration: Map<String, FieldMappingConfiguration>,
-                    field: FieldConfiguration,
-                    targetDataMap: Map<String, Any>,
-                    table: TableConfiguration,
-                    index: Int,
-                    missingValues: MutableList<String>): Map<String, Any> = sequence {
-        val fieldMapping = fieldMappingsConfiguration[field.name]
+    private fun mapNestedValue(tableMappingConfiguration: Map<String, ColumnMappingConfiguration>,
+                               field: ColumnConfiguration,
+                               targetDataMap: Map<String, Any>,
+                               table: TableConfiguration,
+                               index: Int,
+                               missingValues: MutableList<String>,
+                               filteredOutByFields: MutableList<Pair<String, Any>>): Map<String, Any> = sequence {
+        val fieldMapping = tableMappingConfiguration[field.name]
         // for all sub-fields from the schema for the structured fields
         field.subFields.forEach { subField ->
 
@@ -475,6 +500,10 @@ class AwsS3TablesTargetWriter(
                 getFieldValue(targetDataMap, subFieldMapping, table.tableName, "${field.name}.${subField.name}", subField.type!!, index)
             else null
 
+            if (subFieldValue != null && subFieldMapping?.valueFilterID != null) {
+                val valueFilter = valueFilters[subFieldMapping.valueFilterID!!]
+                if (valueFilter != null && (!valueFilter.apply(subFieldValue))) filteredOutByFields.add("${field.name}.${subField.name}" to subFieldValue)
+            }
             if (subFieldValue != null) yield(subField.name to subFieldValue)
             else if (!field.optional) missingValues.add("${field.name}.${subField.name}")
 
@@ -482,20 +511,20 @@ class AwsS3TablesTargetWriter(
     }.toMap()
 
     private fun getFieldValue(targetDataMap: Map<String, Any>,
-                              fieldMappingConfiguration: FieldMappingConfiguration,
+                              columnMappingConfiguration: ColumnMappingConfiguration,
                               tableName: String,
                               fieldName: String,
                               fieldType: Type,
                               index: Int): Any? {
 
-        val queryValue = getValue(targetDataMap, fieldMappingConfiguration, tableName, fieldName)
+        val queryValue = getValue(targetDataMap, columnMappingConfiguration, tableName, fieldName)
 
         // test if a value wat retrieved, keep list of null values for non-optional fields
         val fieldValue = if (queryValue != null) {
-            val value = if (fieldMappingConfiguration.transformationID == null) {
+            val value = if (columnMappingConfiguration.transformationID == null) {
                 queryValue
             } else {
-                applyTransformation(queryValue, fieldName, fieldMappingConfiguration.transformationID!!)
+                applyTransformation(queryValue, fieldName, columnMappingConfiguration.transformationID!!)
             }
             if (value == null) return null
 
@@ -512,7 +541,7 @@ class AwsS3TablesTargetWriter(
     }
 
     private fun getValue(targetDataMap: Map<String, Any>,
-                         mapping: FieldMappingConfiguration,
+                         mapping: ColumnMappingConfiguration,
                          tableName: String,
                          fieldName: String): Any? {
 
@@ -549,7 +578,7 @@ class AwsS3TablesTargetWriter(
         }
     }
 
-    private suspend fun writeBufferedMessages() {
+    private  fun writeBufferedMessages() {
 
         val log = logger.getCtxLoggers(className, "writeBufferedMessages")
 
@@ -579,7 +608,7 @@ class AwsS3TablesTargetWriter(
                             val duration = measureTime {
 
                                 if (catalogTable.spec().isPartitioned) {
-                                    val partitionedRecords = buildPartitionRecordSets(tableName,tableBuffer.records, catalogTable)
+                                    val partitionedRecords = buildPartitionRecordSets(tableName, tableBuffer.records, catalogTable)
                                     partitionedWrites = partitionedRecords?.keys?.size ?: 0
                                     partitionedRecords?.forEach { (partitionData, records) ->
                                         recordCount += writeRecords(catalogTable, records, partitionData)
@@ -772,7 +801,7 @@ class AwsS3TablesTargetWriter(
         }
     }
 
-    private fun searchValue(mapping: FieldMappingConfiguration, data: Any): Any? = try {
+    private fun searchValue(mapping: ColumnMappingConfiguration, data: Any): Any? = try {
         @Suppress("UNCHECKED_CAST")
         mapping.valueQuery?.search(data as Map<String, Any>)
     } catch (_: NullPointerException) {
@@ -805,26 +834,18 @@ class AwsS3TablesTargetWriter(
         messages: Int,
         writeDurationInMillis: Double
     ) {
-        runBlocking {
-            metricsCollector?.put(
-                adapterID,
-                metricsCollector?.buildValueDataPoint(adapterID, MetricsCollector.METRICS_MEMORY, MemoryMonitor.getUsedMemoryMB().toDouble(), MetricUnits.MEGABYTES),
-                metricsCollector?.buildValueDataPoint(adapterID, METRICS_WRITES, 1.0, MetricUnits.COUNT, metricDimensions),
-                metricsCollector?.buildValueDataPoint(adapterID, METRICS_MESSAGES, messages.toDouble(), MetricUnits.COUNT, metricDimensions),
-                metricsCollector?.buildValueDataPoint(adapterID, METRICS_WRITE_DURATION, writeDurationInMillis, MetricUnits.MILLISECONDS, metricDimensions),
-                metricsCollector?.buildValueDataPoint(adapterID, METRICS_WRITE_SUCCESS, 1.0, MetricUnits.COUNT, metricDimensions),
-                metricsCollector?.buildValueDataPoint(adapterID, METRICS_RECORDS_WRITTEN, recordCount.toDouble(), MetricUnits.BYTES, metricDimensions)
-            )
-        }
+        metricsCollector?.put(
+            adapterID,
+            metricsCollector?.buildValueDataPoint(adapterID, MetricsCollector.METRICS_MEMORY, MemoryMonitor.getUsedMemoryMB().toDouble(), MetricUnits.MEGABYTES),
+            metricsCollector?.buildValueDataPoint(adapterID, METRICS_WRITES, 1.0, MetricUnits.COUNT, metricDimensions),
+            metricsCollector?.buildValueDataPoint(adapterID, METRICS_MESSAGES, messages.toDouble(), MetricUnits.COUNT, metricDimensions),
+            metricsCollector?.buildValueDataPoint(adapterID, METRICS_WRITE_DURATION, writeDurationInMillis, MetricUnits.MILLISECONDS, metricDimensions),
+            metricsCollector?.buildValueDataPoint(adapterID, METRICS_WRITE_SUCCESS, 1.0, MetricUnits.COUNT, metricDimensions),
+            metricsCollector?.buildValueDataPoint(adapterID, METRICS_RECORDS_WRITTEN, recordCount.toDouble(), MetricUnits.BYTES, metricDimensions)
+        )
+
     }
 
-    private fun CoroutineScope.timerJob() = launch("Timeout timer") {
-        try {
-            delay(targetConfiguration.interval)
-        } catch (e: Exception) {
-            // no harm done, timer is just used to guard for timeouts
-        }
-    }
 
     override suspend fun writeTargetData(targetData: TargetData) {
         targetDataChannel.submit(targetData, logger.getCtxLoggers("$className:writeTargetData"))
@@ -833,6 +854,7 @@ class AwsS3TablesTargetWriter(
     override suspend fun close() {
         writer.cancel()
         timer.cancel()
+        credentialsWorker?.cancel()
         writeBufferedMessages()
 
     }

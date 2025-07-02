@@ -8,6 +8,7 @@ import com.amazonaws.sfc.awsiot.AwsIotCredentialProviderClientConfiguration
 import com.amazonaws.sfc.client.AwsServiceTargetsConfig
 import com.amazonaws.sfc.config.*
 import com.amazonaws.sfc.config.ChannelConfiguration.Companion.CONFIG_TRANSFORMATION
+import com.amazonaws.sfc.filters.ValueFilterConfiguration
 import com.amazonaws.sfc.log.LogLevel
 import com.amazonaws.sfc.transformations.Transformation
 import com.google.gson.annotations.SerializedName
@@ -28,6 +29,16 @@ class AwsS3TablesWriterConfiguration : AwsServiceTargetsConfig<AwsS3TablesTarget
     private var _transformations = mapOf<String, Transformation>()
     val transformations: Map<String, Transformation>
         get() = _transformations
+
+    @SerializedName(CONFIG_VALUE_FILTERS)
+    private var _valueFilters = mapOf<String, ValueFilterConfiguration>()
+
+    /**
+     * All configured Value  filters
+     */
+    val valueFilters: Map<String, ValueFilterConfiguration>
+        get() = _valueFilters
+
 
 
     @Throws(ConfigurationException::class)

@@ -4,7 +4,8 @@
 
 package com.amazonaws.sfc.awss3tables.config
 
-import com.amazonaws.sfc.awss3tables.config.FieldConfiguration.Companion.CONFIG_COLUMN_MAPPING
+import com.amazonaws.sfc.awss3tables.config.ColumnConfiguration.Companion.CONFIG_COLUMN_MAPPING
+import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_VALUE_FILTER
 import com.amazonaws.sfc.config.ChannelConfiguration.Companion.CONFIG_TRANSFORMATION
 import com.amazonaws.sfc.config.ConfigurationClass
 import com.amazonaws.sfc.config.ConfigurationException
@@ -15,7 +16,7 @@ import com.google.gson.annotations.SerializedName
 import io.burt.jmespath.Expression
 
 @ConfigurationClass
-class FieldMappingConfiguration : Validate {
+class ColumnMappingConfiguration : Validate {
 
     @SerializedName(CONFIG_VALUE_QUERY)
     private var _valueQuery: String = ""
@@ -39,11 +40,16 @@ class FieldMappingConfiguration : Validate {
         }
 
     //  @SerializedName(CONFIG_COLUMN_MAPPING)
-    private var _subMappings: Map<String, FieldMappingConfiguration>? = null
-    val subMappings: Map<String, FieldMappingConfiguration>
+    private var _subMappings: Map<String, ColumnMappingConfiguration>? = null
+    val subMappings: Map<String, ColumnMappingConfiguration>
         get() {
             return _subMappings ?: emptyMap()
         }
+
+    @SerializedName(CONFIG_VALUE_FILTER)
+    private var _valueFilterID : String? = null
+    val valueFilterID : String?
+        get() = _valueFilterID
 
 
     fun getExpression(path: String?): Expression<Any>? {
@@ -122,11 +128,11 @@ class FieldMappingConfiguration : Validate {
 
         private const val CONFIG_VALUE_QUERY = "ValueQuery"
 
-        private val default = FieldMappingConfiguration()
+        private val default = ColumnMappingConfiguration()
 
         fun create(valueQuery: String = default._valueQuery,
-                   transformation: String? = default._transformationID): FieldMappingConfiguration {
-            val instance = FieldMappingConfiguration()
+                   transformation: String? = default._transformationID): ColumnMappingConfiguration {
+            val instance = ColumnMappingConfiguration()
 
             with(instance) {
                 _valueQuery = valueQuery
@@ -135,23 +141,14 @@ class FieldMappingConfiguration : Validate {
             return instance
         }
 
-        fun fromMap(map: Map<*, *>): FieldMappingConfiguration {
-            val instance = FieldMappingConfiguration()
 
-            with(instance) {
-                _valueQuery = map[CONFIG_VALUE_QUERY].toString()
-                _transformationID = map[CONFIG_TRANSFORMATION]?.toString()
-            }
-            return instance
-        }
-
-        fun fromJson(jsonObject: JsonObject?): FieldMappingConfiguration? {
+        fun fromJson(jsonObject: JsonObject?): ColumnMappingConfiguration? {
 
             if (jsonObject == null) return null
 
             if (jsonObject.isJsonObject) {
                 return if (jsonObject.has(CONFIG_COLUMN_MAPPING)) {
-                    buildSubMappinfg(jsonObject)
+                    buildSubMapping(jsonObject)
                 } else {
                     buildMapping(jsonObject)
                 }
@@ -162,9 +159,9 @@ class FieldMappingConfiguration : Validate {
 
         }
 
-        private fun buildMapping(jsonObject: JsonObject): FieldMappingConfiguration {
-            val instance = FieldMappingConfiguration()
-            val jsonQuery = jsonObject.get(CONFIG_VALUE_QUERY) ?: throw ConfigurationException("${CONFIG_VALUE_QUERY} must be set", CONFIG_VALUE_QUERY, jsonObject.toString())
+        private fun buildMapping(jsonObject: JsonObject): ColumnMappingConfiguration {
+            val instance = ColumnMappingConfiguration()
+            val jsonQuery = jsonObject.get(CONFIG_VALUE_QUERY) ?: throw ConfigurationException("$CONFIG_VALUE_QUERY must be set", CONFIG_VALUE_QUERY, jsonObject.toString())
             instance._valueQuery = if (jsonQuery.isJsonPrimitive) {
                 jsonQuery.asString
             } else throw ConfigurationException("$CONFIG_VALUE_QUERY must be a string", CONFIG_VALUE_QUERY, jsonQuery.toString())
@@ -173,15 +170,25 @@ class FieldMappingConfiguration : Validate {
                 instance._transformationID = if (jsonTransformation.isJsonPrimitive) {
                     jsonTransformation.asString
                 } else throw ConfigurationException(
-                    "${CONFIG_TRANSFORMATION} must be a string",
+                    "$CONFIG_TRANSFORMATION must be a string",
                     CONFIG_TRANSFORMATION,
+                    jsonObject.toString())
+            }
+
+            val jsonValueFilterID = jsonObject.get(CONFIG_VALUE_FILTER)
+            if (jsonValueFilterID != null) {
+                instance._valueFilterID = if (jsonTransformation.isJsonPrimitive) {
+                    jsonValueFilterID.asString
+                } else throw ConfigurationException(
+                    "$CONFIG_VALUE_FILTER must be a string",
+                    CONFIG_VALUE_FILTER,
                     jsonObject.toString())
             }
             return instance
         }
 
-        private fun buildSubMappinfg(jsonObject: JsonObject): FieldMappingConfiguration {
-            val instance = FieldMappingConfiguration()
+        private fun buildSubMapping(jsonObject: JsonObject): ColumnMappingConfiguration {
+            val instance = ColumnMappingConfiguration()
             val jsonMapping = jsonObject.get(CONFIG_COLUMN_MAPPING).asJsonObject
             if (jsonMapping.isJsonObject) {
                 instance._subMappings = sequence {
@@ -202,19 +209,5 @@ class FieldMappingConfiguration : Validate {
             return instance
         }
 
-        private fun FieldMappingConfiguration.buildMapping(jsonObject: JsonObject) {
-            val jsonQuery = jsonObject.get(CONFIG_VALUE_QUERY) ?: throw ConfigurationException("$CONFIG_VALUE_QUERY must be set", CONFIG_VALUE_QUERY, jsonObject.toString())
-
-            _valueQuery = if (jsonQuery.isJsonPrimitive) {
-                jsonQuery.asString
-            } else throw ConfigurationException("$CONFIG_VALUE_QUERY must be a string", CONFIG_VALUE_QUERY, jsonQuery.toString())
-
-            val jsonTransformation = jsonObject.get(CONFIG_TRANSFORMATION)
-            if (jsonTransformation != null) {
-                _transformationID = if (jsonTransformation.isJsonPrimitive) {
-                    jsonTransformation.asString
-                } else throw ConfigurationException("$CONFIG_TRANSFORMATION must be a string", CONFIG_TRANSFORMATION, jsonObject.toString())
-            }
-        }
     }
 }

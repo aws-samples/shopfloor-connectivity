@@ -5,7 +5,6 @@
 package com.amazonaws.sfc.awss3tables.config
 
 import com.amazonaws.sfc.awss3tables.AwsS3TablesHelper.Companion.validateName
-import com.amazonaws.sfc.awss3tables.config.AwsS3TablesWriterConfiguration.Companion.AWS_S3_TABLES
 import com.amazonaws.sfc.config.AwsServiceConfig
 import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_ENDPOINT
 import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_INTERVAL
@@ -54,6 +53,11 @@ class AwsS3TablesTargetConfiguration : AwsServiceConfig, TargetConfiguration() {
     var _autoCreate: Boolean = true
     val autoCreate: Boolean
         get() = _autoCreate
+
+    @SerializedName(CONFIG_WARN_IF_VALUE_MISSING)
+    var _warnIfValueMissing: Boolean = true
+    val warnIfValueMissing: Boolean
+        get() = _warnIfValueMissing
 
     @SerializedName(CONFIG_BUFFER_COUNT)
     private var _bufferCount: Int = DEFAULT_BUFFER_COUNT
@@ -142,16 +146,16 @@ class AwsS3TablesTargetConfiguration : AwsServiceConfig, TargetConfiguration() {
         private const val CONFIG_TABLE_BUCKET_NAME = "TableBucket"
         private const val CONFIG_NAMESPACE = "Namespace"
         private const val CONFIG_BUFFER_COUNT = "BufferCount"
-        private const val DEFAULT_BUFFER_COUNT = 50
+        private const val DEFAULT_BUFFER_COUNT = 100
         private const val DEFAULT_INTERVAL = 10 * 1000
         const val CONFIG_AUTO_CREATE = "AutoCreate"
         private const val CONFIG_TABLES = "Tables"
+        private const val CONFIG_WARN_IF_VALUE_MISSING = "WarnIfValueMissing"
 
 
         private val default = AwsS3TablesTargetConfiguration()
 
 
-        @Suppress("unused")
         fun create(tableBucketName: String? = default._tableBucketName,
                    region: String? = default._region,
                    namespace: String? = default._namespace,
@@ -162,7 +166,7 @@ class AwsS3TablesTargetConfiguration : AwsServiceConfig, TargetConfiguration() {
                    interval: Int = default._interval,
                    description: String = default._description,
                    active: Boolean = default._active,
-                   template: String? = default._template,
+                   warnIfValueMissing: Boolean = default._warnIfValueMissing,
                    targetServer: String? = default._server,
                    metrics: MetricsSourceConfiguration = default._metrics,
                    credentialProviderClient: String? = default._credentialProvideClient): AwsS3TablesTargetConfiguration {
@@ -170,8 +174,6 @@ class AwsS3TablesTargetConfiguration : AwsServiceConfig, TargetConfiguration() {
             val instance = createTargetConfiguration<AwsS3TablesTargetConfiguration>(
                 description = description,
                 active = active,
-                targetType = AWS_S3_TABLES,
-                template = template,
                 targetServer = targetServer,
                 metrics = metrics,
                 credentialProviderClient = credentialProviderClient) as AwsS3TablesTargetConfiguration
@@ -185,6 +187,7 @@ class AwsS3TablesTargetConfiguration : AwsServiceConfig, TargetConfiguration() {
                 _namespace = namespace
                 _tables = tables
                 _autoCreate = autoCreate
+                _warnIfValueMissing = warnIfValueMissing
             }
             return instance
         }

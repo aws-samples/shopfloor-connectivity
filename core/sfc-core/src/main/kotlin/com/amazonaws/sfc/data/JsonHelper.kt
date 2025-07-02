@@ -243,7 +243,6 @@ class JsonHelper {
                     @Suppress("UNCHECKED_CAST")
                     val list = if (node.isNotEmpty()) (node as MutableList<Any>) else mutableListOf()
                     list.mapNotNull { item ->
-                        val trail1 = trail + key
                         forEachNode(key, item, trail, fnFilter, fnAction)
                     }
                 }

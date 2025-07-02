@@ -9,13 +9,13 @@ import com.google.gson.JsonDeserializer
 import com.google.gson.JsonElement
 import java.lang.reflect.Type
 
-class FieldMappingDeserializer(): JsonDeserializer<FieldMappingConfiguration> {
+class ColumnMappingDeserializer(): JsonDeserializer<ColumnMappingConfiguration> {
 
-        override fun deserialize(json: JsonElement?, typeOfT: Type?, context: JsonDeserializationContext?): FieldMappingConfiguration? {
+        override fun deserialize(json: JsonElement?, typeOfT: Type?, context: JsonDeserializationContext?): ColumnMappingConfiguration? {
 
             return if (json == null || json.isJsonNull || !json.isJsonObject)
                 null
             else
-                FieldMappingConfiguration.fromJson(json.asJsonObject)
+                ColumnMappingConfiguration.fromJson(json.asJsonObject)
         }
     }

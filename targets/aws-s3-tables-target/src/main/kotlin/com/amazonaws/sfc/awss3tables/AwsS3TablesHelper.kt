@@ -7,7 +7,7 @@ package com.amazonaws.sfc.awss3tables
 
 import com.amazonaws.sfc.awss3tables.config.AwsS3TablesTargetConfiguration
 import com.amazonaws.sfc.awss3tables.config.AwsS3TablesWriterConfiguration.Companion.AWS_S3_TABLES
-import com.amazonaws.sfc.awss3tables.config.FieldConfiguration
+import com.amazonaws.sfc.awss3tables.config.ColumnConfiguration
 import com.amazonaws.sfc.awss3tables.config.PartitionTransform
 import com.amazonaws.sfc.awss3tables.config.TablePartitionConfiguration
 import com.amazonaws.sfc.client.AwsServiceClientHelper.Companion.AWS_SERVICE_BACKOFF_MS
@@ -91,7 +91,7 @@ class AwsS3TablesHelper(private val targetConfig: AwsS3TablesTargetConfiguration
 
         log.trace("Creating iceberg catalog for bucket $tableBucketName in region $region")
 
-        val properties: MutableMap<String?, String?> = HashMap<String?, String?>()
+        val properties: MutableMap<String?, String?> = HashMap()
         properties.put(CatalogProperties.CATALOG_IMPL, "org.apache.iceberg.rest.RESTCatalog")
         properties.put(CatalogProperties.URI, "https://s3tables.$region.amazonaws.com/iceberg")
         properties.put(CatalogProperties.WAREHOUSE_LOCATION, "$tableBucketArn")
@@ -118,7 +118,7 @@ class AwsS3TablesHelper(private val targetConfig: AwsS3TablesTargetConfiguration
         return executeServiceCallWithRetries {
             try {
                 val response: ListNamespacesResponse = s3TablesClient.listNamespaces(ListNamespacesRequest.builder().tableBucketARN(tableBucketArn).build())
-                response.namespaces().flatMap { it.namespace().map { it.toString() } }.toSet()
+                response.namespaces().flatMap { it.namespace().map { ns -> ns.toString() } }.toSet()
             } catch (e: AwsServiceException) {
                 log.error("S3Tables:listNamespaces error ${e.message}")
                 processServiceException(e)
@@ -209,7 +209,7 @@ class AwsS3TablesHelper(private val targetConfig: AwsS3TablesTargetConfiguration
     }
 
 
-    fun createTable(namespace: String, tableName: String, schema: List<FieldConfiguration>, partitionSpec: TablePartitionConfiguration?): org.apache.iceberg.catalog.TableIdentifier {
+    fun createTable(namespace: String, tableName: String, schema: List<ColumnConfiguration>, partitionSpec: TablePartitionConfiguration?): org.apache.iceberg.catalog.TableIdentifier {
 
         val tableIdentifier = TableIdentifier.of(namespace, tableName)
         val s = buildSchema(schema)
@@ -269,15 +269,10 @@ class AwsS3TablesHelper(private val targetConfig: AwsS3TablesTargetConfiguration
 
         private val tableArnBuffer = mutableMapOf<String, String>()
 
-        fun bucketNameFromArn(arn: String): String {
-            val match = S3_TABLES_BUCKET_ARN_REGEX.matchEntire(arn)
-            return match?.groupValues?.get(1) ?: ""
-        }
-
         private var id: AtomicInteger = AtomicInteger(0)
         fun nextId(): Int = id.incrementAndGet()
 
-        fun buildSchema(fields: List<FieldConfiguration>): org.apache.iceberg.Schema {
+        fun buildSchema(fields: List<ColumnConfiguration>): org.apache.iceberg.Schema {
             return Schema(fields.map { it.field })
 
         }

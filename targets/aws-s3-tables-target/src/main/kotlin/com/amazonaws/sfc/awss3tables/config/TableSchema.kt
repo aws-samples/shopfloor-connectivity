@@ -4,5 +4,5 @@
 
 package com.amazonaws.sfc.awss3tables.config
 
-typealias TableSchemaConfiguration = List<FieldConfiguration>
+typealias TableSchemaConfiguration = List<ColumnConfiguration>
 

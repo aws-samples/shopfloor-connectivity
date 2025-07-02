@@ -7,10 +7,14 @@ package com.amazonaws.sfc.ipc
 import com.amazonaws.sfc.config.*
 import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_AWS_IOT_CREDENTIAL_PROVIDER_CLIENTS
 import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_AWS_VERSION
+import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_CONDITION_FILTER
+import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_CONDITION_FILTERS
 import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_TARGETS
 import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_TARGET_SERVERS
 import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_TARGET_TYPES
 import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_TRANSFORMATIONS
+import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_VALUE_FILTER
+import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_VALUE_FILTERS
 import com.amazonaws.sfc.config.ChannelConfiguration.Companion.CONFIG_TRANSFORMATION
 import com.amazonaws.sfc.config.ConfigReader.Companion.convertExternalPlaceholders
 import com.amazonaws.sfc.config.SecretsManagerConfiguration.Companion.CONFIG_CLOUD_SECRETS
@@ -164,29 +168,35 @@ class IpcTargetWriter(private val targetID: String,
         }
     }
 
-
-    private fun getTargetTransformations(map: Map<*, *>): Set<String> {
+    private fun getTargetConfigItems(itemName : String, map: Map<*, *>): Set<String> {
 
         val transformations = mutableSetOf<String>()
         map.forEach { (k, v) ->
             when {
-                ((k as String) == CONFIG_TRANSFORMATION && v != null && v is String) ->
+                ((k as String) == itemName && v != null && v is String) ->
                     transformations.add(v)
 
                 (v is List<*>) ->{
-                    transformations.addAll(getTargetTransformations(v.mapIndexed { i, j ->
+                    transformations.addAll(getTargetConfigItems(itemName, v.mapIndexed { i, j ->
                         i.toString() to j
                     }.toMap()))
 
                 }
 
                 else -> if (v is Map<*, *>) {
-                    transformations.addAll(getTargetTransformations( v))
+                    transformations.addAll(getTargetConfigItems(itemName, v))
                 }
             }
         }
         return transformations
     }
+
+    private fun getTargetTransformations(map: Map<*, *>): Set<String> = getTargetConfigItems(CONFIG_TRANSFORMATION, map)
+
+    private fun getTargetValueFilters(map: Map<*, *>): Set<String> = getTargetConfigItems(CONFIG_VALUE_FILTER, map)
+
+    private fun getTargetConditionFilters(map: Map<*, *>): Set<String> = getTargetConfigItems(CONFIG_CONDITION_FILTER, map)
+
 
 
     // Extracts the sections required for the target
@@ -214,13 +224,20 @@ class IpcTargetWriter(private val targetID: String,
         val usedTargetIDs = usedTargets(targetID, emptySet(), configuration)
 
         // Include targets
-        val allTransformations = (configurationMap[CONFIG_TRANSFORMATIONS]?: emptyMap<Any,Any>()) as Map<*,*>
+
         outputConfig[CONFIG_TARGETS] = usedTargetIDs.map { targetId ->
             // include transformations used in target
              @Suppress("UNCHECKED_CAST")
              val target = targetsMap[targetId] as MutableMap<String,Any>
-             val targetTransformations = getTargetTransformations(configurationMap[CONFIG_TARGETS] as Map<*,*>).filter { allTransformations.keys.contains(it) }
+
+             val allTransformations = (configurationMap[CONFIG_TRANSFORMATIONS]?: emptyMap<Any,Any>()) as Map<*,*>
+             val targetTransformations = getTargetTransformations(targetsMap).filter { allTransformations.keys.contains(it) }
              if (targetTransformations.isNotEmpty()) outputConfig[CONFIG_TRANSFORMATIONS] = allTransformations.filter { it.key in targetTransformations }
+
+            val allValueFilters = (configurationMap[CONFIG_VALUE_FILTERS]?: emptyMap<Any,Any>()) as Map<*,*>
+            val targetValueFilters = getTargetValueFilters(targetsMap).filter{ allValueFilters.keys.contains(it)}
+            if (targetValueFilters.isNotEmpty()) outputConfig[CONFIG_VALUE_FILTERS] = allValueFilters.filter { it.key in targetValueFilters }
+
              targetId  to target
         }.toMap()
 
@@ -381,7 +398,7 @@ class IpcTargetWriter(private val targetID: String,
             }
         }
 
-        if (ex != null) throw ex as Throwable
+        if (ex != null) throw (ex as Throwable)
     }
 
     override val isInitialized: Boolean

@@ -16,8 +16,6 @@ import java.nio.charset.StandardCharsets
 import java.time.*
 import java.time.format.DateTimeParseException
 import java.util.*
-import kotlin.math.pow
-import kotlin.math.roundToInt
 
 object AwsS3TablesTypesHelper {
 
@@ -280,6 +278,7 @@ object AwsS3TablesTypesHelper {
 
     }
 
+    // not used for iceberg version 1.6.1
     fun toTimestampNanoWithoutZone(value: Any?): LocalDateTime? {
 
         if (value == null) return null
@@ -322,6 +321,7 @@ object AwsS3TablesTypesHelper {
 
     }
 
+    // not used for iceberg version 1.6.1
     fun toTimestampNanoWithZone(value: Any?): OffsetDateTime? {
 
         if (value == null) return null

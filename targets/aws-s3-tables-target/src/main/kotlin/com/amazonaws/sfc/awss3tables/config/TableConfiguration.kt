@@ -7,7 +7,7 @@ package com.amazonaws.sfc.awss3tables.config
 import com.amazonaws.sfc.awss3tables.AwsS3TablesHelper.Companion.buildPartitionSpecification
 import com.amazonaws.sfc.awss3tables.AwsS3TablesHelper.Companion.buildSchema
 import com.amazonaws.sfc.awss3tables.AwsS3TablesHelper.Companion.validateName
-import com.amazonaws.sfc.awss3tables.config.FieldConfiguration.Companion.CONFIG_COLUMN_MAPPING
+import com.amazonaws.sfc.awss3tables.config.ColumnConfiguration.Companion.CONFIG_COLUMN_MAPPING
 import com.amazonaws.sfc.config.ConfigurationException
 import com.amazonaws.sfc.config.Validate
 import com.google.gson.annotations.SerializedName
@@ -46,8 +46,8 @@ class TableConfiguration : Validate{
         }
 
     @SerializedName(CONFIG_COLUMN_MAPPING)
-    private var _mappings: List<Map<String,FieldMappingConfiguration>> = emptyList()
-    val mappings:List<Map<String,FieldMappingConfiguration>>
+    private var _mappings: List<Map<String, ColumnMappingConfiguration>> = emptyList()
+    val mappings: List<Map<String, ColumnMappingConfiguration>>
         get() = _mappings
 
     override fun validate() {
@@ -57,19 +57,22 @@ class TableConfiguration : Validate{
         validatePartition()
         validateMappings()
 
-
         validated = true
 
     }
 
     private fun validateMappings() {
-        if (_mappings.isEmpty()) throw ConfigurationException("No mappings specified", CONFIG_COLUMN_MAPPING, null)
+        ConfigurationException.check(
+            !_mappings.isEmpty(),
+            "$CONFIG_COLUMN_MAPPING can not be empty",
+            CONFIG_COLUMN_MAPPING,
+            null
+        )
         _mappings.forEach { mapping ->
-            mapping.values.forEach {
-                it.validate()
-            }
+            mapping.values.forEach { fieldConfig -> fieldConfig.validate() }
         }
     }
+
 
     private fun validateTableName() {
         ConfigurationException.check(

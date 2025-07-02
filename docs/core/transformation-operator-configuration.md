@@ -104,7 +104,7 @@ Calculates the absolute value of a number.
 
 ```json
 {
-"Operator": "Abs"
+    "Operator": "Abs"
 }
 ```
 
@@ -119,8 +119,8 @@ Bitwise and of value and parameter.
 
 ```json
 {
-"Operator": "And",
- "Operand": 0xFF
+   "Operator": "And",
+    "Operand": 0xFF
 }
 ```
 
@@ -136,7 +136,7 @@ Computes the arc length, returning an angle in the range from 0.0 to π radians.
 
 ```json
 {
-"Operator": "Arc"
+   "Operator": "Arc"
 }
 ```
 
@@ -168,7 +168,7 @@ Returns item from an array at the specified index.
 ```json
 {
 	"Operator": "AtIndex",
-  "Operand" : 0
+    "Operand" : 0
 }
 ```
 
@@ -182,7 +182,7 @@ Computes the arc; the returned value is an angle in the range from - π/2 to  π
 
 ```json
 {
-"Operator": "Atan"
+   "Operator": "Atan"
 }
 ```
 
@@ -196,7 +196,7 @@ Converts Boolean value to a number. False value returns 0, True value returns 1
 
 ```json
 {
-"Operator": "BoolToNumber"
+   "Operator": "BoolToNumber"
 }
 ```
 
@@ -210,7 +210,7 @@ Converts array of 8 bytes to a float value (Big-Endian)
 
 ```json
 {
-"Operator": "BytesToDoubleBE"
+   "Operator": "BytesToDoubleBE"
 }
 ```
 

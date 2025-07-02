@@ -26,7 +26,11 @@ Shop Floor Connectivity target connectors enable data transmission from industri
 
 - **[AWS S3](./aws-s3.md)**
 
-  Amazon S3 is a highly scalable object storage service .
+  Amazon S3 is a highly scalable object storage service.
+
+- **[AWS S3-Tables](./aws-s3-tables.md)**
+
+  AWS S3 Tables is a storage class optimized for analytics workloads that provides Apache Iceberg table format support.
 
 - **[AWS SiteWise](./aws-sitewise.md)**
 

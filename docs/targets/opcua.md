@@ -1569,8 +1569,6 @@ JMESPath expression used to extract the value from the target data structure.
 
 The value must be a valid JMESPath query https://jmespath.org.
 
-e.g. @.sources..values..value
-
 Note that if the source or channel name contains non-alphanumeric characters, then these elements must be quoted.
 The quoted characters must be escaped with a \ character in the JSON configuration.
 

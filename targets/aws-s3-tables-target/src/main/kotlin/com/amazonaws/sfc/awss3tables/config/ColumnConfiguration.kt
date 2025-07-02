@@ -20,7 +20,7 @@ import org.apache.iceberg.types.Types.MapType.ofRequired
 import org.apache.iceberg.types.Types.fromPrimitiveString
 
 @ConfigurationClass
-class FieldConfiguration() : Validate {
+class ColumnConfiguration() : Validate {
 
     var _id: Int = 0
     val id: Int
@@ -89,14 +89,14 @@ class FieldConfiguration() : Validate {
         private const val CONFIG_COLUMN_NAME = "Name"
         const val CONFIG_COLUMN_TYPE = "Type"
         private const val CONFIG_COLUMN_OPTIONAL = "Optional"
-        const val CONFIG_COLUMN_MAPPING = "Mapping"
-        private val default = FieldConfiguration()
+        const val CONFIG_COLUMN_MAPPING = "Mappings"
+        private val default = ColumnConfiguration()
 
         fun create(
             name: String = default.name,
             type: org.apache.iceberg.types.Type? = default._type,
-            optional: Boolean = default.optional): FieldConfiguration {
-            val instance = FieldConfiguration()
+            optional: Boolean = default.optional): ColumnConfiguration {
+            val instance = ColumnConfiguration()
 
             with(instance) {
                 _name = name
@@ -107,8 +107,8 @@ class FieldConfiguration() : Validate {
             return instance
         }
 
-        fun fromJson(jsonObject: JsonObject): FieldConfiguration {
-            val instance = FieldConfiguration()
+        fun fromJson(jsonObject: JsonObject): ColumnConfiguration {
+            val instance = ColumnConfiguration()
             with(instance) {
 
                 _id = AwsS3TablesHelper.nextId()
@@ -147,7 +147,7 @@ class FieldConfiguration() : Validate {
 
         }
 
-        private fun FieldConfiguration.buildStructField(jsonType: JsonElement): Types.NestedField? {
+        private fun ColumnConfiguration.buildStructField(jsonType: JsonElement): Types.NestedField? {
 
             _subFields = sequence {
                 (jsonType as JsonArray).map {
@@ -166,14 +166,14 @@ class FieldConfiguration() : Validate {
             return buildField()
         }
 
-        private fun FieldConfiguration.buildPrimitiveField(jsonType: JsonElement): Types.NestedField? = try {
+        private fun ColumnConfiguration.buildPrimitiveField(jsonType: JsonElement): Types.NestedField? = try {
             _type = fromPrimitiveString(jsonType.asString.lowercase())
             buildField()
         } catch (e: Exception) {
             throw ConfigurationException("Unsupported $CONFIG_COLUMN_TYPE : \"${jsonType.asString}\". $e", CONFIG_COLUMN_TYPE, jsonType.asString)
         }
 
-        private fun FieldConfiguration.buildMapField(jsonType: JsonElement): Types.NestedField? {
+        private fun ColumnConfiguration.buildMapField(jsonType: JsonElement): Types.NestedField? {
             val match = REGEX_MAP.find(jsonType.asString)!!
             val keyType = fromPrimitiveString(match.groupValues[1])
             val valueType = fromPrimitiveString(match.groupValues[2])
@@ -187,7 +187,7 @@ class FieldConfiguration() : Validate {
             return buildField()
         }
 
-        private fun FieldConfiguration.buildListField(jsonType: JsonElement): Types.NestedField? {
+        private fun ColumnConfiguration.buildListField(jsonType: JsonElement): Types.NestedField? {
             val match = REGEX_LIST.find(jsonType.asString)
             val elementType = fromPrimitiveString(match!!.groupValues[1].lowercase())
             val elementId = AwsS3TablesHelper.nextId()
@@ -200,7 +200,7 @@ class FieldConfiguration() : Validate {
             return buildField()
         }
 
-        private fun FieldConfiguration.buildField(): Types.NestedField? = if (optional) {
+        private fun ColumnConfiguration.buildField(): Types.NestedField? = if (optional) {
             Types.NestedField.optional(_id, name, type)
         } else {
             Types.NestedField.required(_id, name, type)
