@@ -222,8 +222,6 @@ class AwsS3TablesHelper(private val targetConfig: AwsS3TablesTargetConfiguration
 
     companion object {
 
-        private val S3_TABLES_BUCKET_ARN_REGEX = Regex("""^arn:aws:s3tables:[a-z]+-[a-z]+-\d:\d{12}:bucket/(.+)$""")
-
         fun validateName(name: String): Pair<Boolean, String> {
             // Check if namespace is reserved
             if (name.equals("aws_s3_metadata", ignoreCase = true)) {

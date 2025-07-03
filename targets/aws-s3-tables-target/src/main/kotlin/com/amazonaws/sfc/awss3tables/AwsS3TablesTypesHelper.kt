@@ -89,14 +89,14 @@ object AwsS3TablesTypesHelper {
             is Double -> return value.toInt()
             is String -> try {
                 Integer.decode(value)
-            } catch (e: NumberFormatException) {
+            } catch (_: NumberFormatException) {
                 null
             }
 
             is Boolean -> return if (value) 1 else 0
             is Char -> try {
                 Integer.decode(value.toString())
-            } catch (e: NumberFormatException) {
+            } catch (_: NumberFormatException) {
                 null
             }
 
@@ -121,14 +121,14 @@ object AwsS3TablesTypesHelper {
             is Double -> return value.toLong()
             is String -> try {
                 java.lang.Long.decode(value)
-            } catch (e: NumberFormatException) {
+            } catch (_: NumberFormatException) {
                 null
             }
 
             is Boolean -> return if (value) 1 else 0
             is Char -> try {
                 java.lang.Long.decode(value.toString())
-            } catch (e: NumberFormatException) {
+            } catch (_: NumberFormatException) {
                 null
             }
 
@@ -154,14 +154,14 @@ object AwsS3TablesTypesHelper {
             is Double -> value.toFloat()
             is String -> try {
                 java.lang.Float.parseFloat(value)
-            } catch (e: NumberFormatException) {
+            } catch (_: NumberFormatException) {
                 null
             }
 
             is Boolean -> if (value) 1.0f else 0.0f
             is Char -> try {
                 java.lang.Float.parseFloat(value.toString())
-            } catch (e: NumberFormatException) {
+            } catch (_: NumberFormatException) {
                 null
             }
 
@@ -193,7 +193,7 @@ object AwsS3TablesTypesHelper {
             is Boolean -> if (value) 1.0 else 0.0
             is Char -> try {
                 java.lang.Double.parseDouble(value.toString())
-            } catch (e: NumberFormatException) {
+            } catch (_: NumberFormatException) {
                 null
             }
             is Byte -> value.toDouble()
@@ -438,7 +438,7 @@ object AwsS3TablesTypesHelper {
             is Double -> asBigDecimal(value)
             is String -> try {
                 asBigDecimal(java.lang.Double.parseDouble(value))
-            } catch (e: NumberFormatException) {
+            } catch (_: NumberFormatException) {
                 null
             }
             else -> null

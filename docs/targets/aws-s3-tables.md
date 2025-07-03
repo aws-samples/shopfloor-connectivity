@@ -25,7 +25,7 @@ In order to use this target as in [in-process](../sfc-running-targets.md#running
 - [AwsS3TablesTargetConfiguration](#awss3tablestargetconfiguration)
 - [TableConfiguration](#tableconfiguration)
 - [ColumnConfiguration](#columnconfiguration)
-- [ColumnMappingConfiguration](columnMappingconfiguration)
+- [ColumnMappingConfiguration](#columnmappingconfiguration)
 
 ---
 

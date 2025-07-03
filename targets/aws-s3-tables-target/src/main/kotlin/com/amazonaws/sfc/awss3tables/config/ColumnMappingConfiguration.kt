@@ -61,7 +61,7 @@ class ColumnMappingConfiguration : Validate {
         if (!cachedJmespathQueries.containsKey(p)) {
             cachedJmespathQueries[p] = try {
                 jmespath.compile(if (p.startsWith("@.")) p else "@.$p")
-            } catch (e: Throwable) {
+            } catch (_: Throwable) {
                 null
             }
         }
