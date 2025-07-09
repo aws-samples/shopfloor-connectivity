@@ -594,7 +594,7 @@ Default is true
 ### Type
 A required field that specifies the data type of the column using valid Iceberg type specifications. Supports primitive types (boolean, int, long, float, double, decimal, date, time, timestamp, timestamptz, string, uuid, fixed, binary), complex types including list for arrays, map<keyType,valueType> for key-value pairs, and struct types defined as arrays of nested field configurations. The type specification must be compatible with Iceberg's type system and is validated during configuration processing. For parameterized types, use syntax like fixed[16] for fixed-length binary or decimal(10,2) for decimal with precision and scale. This type definition directly maps to the underlying Iceberg table schema and determines how data is stored and queried.
 
-For more info on darta types see https://iceberg.apache.org/spec/#primitive-types.
+For more info on data types see https://iceberg.apache.org/spec/#primitive-types.
 
 **Type**: String
 

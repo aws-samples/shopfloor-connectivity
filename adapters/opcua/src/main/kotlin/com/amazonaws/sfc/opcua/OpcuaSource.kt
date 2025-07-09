@@ -17,7 +17,6 @@ import com.amazonaws.sfc.opcua.FilterHelper.Companion.UNKNOWN_EVENT_TYPE
 import com.amazonaws.sfc.opcua.config.*
 import com.amazonaws.sfc.opcua.config.OpcuaAdapterConfiguration.Companion.CONFIG_EVENT_MAX_RETAIN_PERIOD
 import com.amazonaws.sfc.opcua.config.OpcuaAdapterConfiguration.Companion.CONFIG_EVENT_MAX_RETAIN_SIZE
-import com.amazonaws.sfc.opcua.config.OpcuaServerConfiguration.Companion.CONFIG_USER_TOKEN_TYPE
 import com.amazonaws.sfc.system.DateTime
 import com.amazonaws.sfc.system.DateTime.add
 import com.amazonaws.sfc.system.DateTime.systemDateTime
@@ -41,7 +40,6 @@ import org.eclipse.milo.opcua.stack.core.Identifiers
 import org.eclipse.milo.opcua.stack.core.StatusCodes
 import org.eclipse.milo.opcua.stack.core.UaException
 import org.eclipse.milo.opcua.stack.core.channel.MessageLimits
-import org.eclipse.milo.opcua.stack.core.security.SecurityPolicy
 import org.eclipse.milo.opcua.stack.core.serialization.SerializationContext
 import org.eclipse.milo.opcua.stack.core.types.builtin.*
 import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UInteger

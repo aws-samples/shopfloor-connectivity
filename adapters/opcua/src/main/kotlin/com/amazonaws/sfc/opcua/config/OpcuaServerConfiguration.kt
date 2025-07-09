@@ -285,12 +285,9 @@ class OpcuaServerConfiguration : Validate {
         private const val CONFIG_MAX_CHUNK_SIZE = "MaxChunkSize"
         private const val CONFIG_MAX_CHUNK_COUNT = "MaxChunkCount"
         const val CONFIG_CERTIFICATE = "Certificate"
-        private const val CONFIG_SECURITY_MODE = "SecurityMode"
         private const val CONFIG_SECURITY_POLICY = "SecurityPolicy"
         private const val CONFIG_CERTIFICATE_VALIDATION = "CertificateValidation"
         const val CONFIG_SERVER_PROFILE = "ServerProfile"
-        const val CONFIG_USER_TOKEN_TYPE = "UserTokenType"
-
 
         private val default = OpcuaServerConfiguration()
 

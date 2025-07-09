@@ -1230,7 +1230,7 @@ This authentication method is mutually exclusive with [username](#username)/[pas
 
 Username credential used for authentication with the OPC UA server. Username and password should not be included as clear text in the configuration. It is strongly recommended to use placeholders and use the SFC integration with the AWS secrets manager.
 
-Username and [UserCertificateFile](#usercertificatefile) are mutally exclusive.
+Username and [UserCertificateFile](#usercertificate) are mutally exclusive.
 
 **Type:** String
 
