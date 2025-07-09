@@ -33,6 +33,7 @@ SFC extends and unifies data collection capabilities additionally to our existin
 - [AWS Lambda](./docs/targets/aws-lambda.md)
 - [AWS MSK](./docs/targets/aws-msk.md)
 - [AWS S3](./docs/targets/aws-s3.md)
+- [AWS S3 Tables](./docs/targets/aws-s3-tables.md)
 - [AWS SNS](./docs/targets/aws-sns.md)
 - [AWS SQS](./docs/targets/aws-sqs.md)
 - [AWS Timestream](./docs/targets/aws-timestream.md)

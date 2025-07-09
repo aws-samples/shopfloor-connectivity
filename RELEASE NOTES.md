@@ -1,5 +1,12 @@
 # Release Notes:
 
+## version 1.10.0, 9 July 2025
+
+- New: [AWS S3 Tables target](./docs/targets/aws-s3-tables.md)
+- New OPCUA source adapter [user certificate](./docs/adapters/opcua.md#usercertificate) authentication
+
+---
+
 ## version 1.9.5, 4 June 2025
 
 - Bug fix for InstanceFactory classloader
