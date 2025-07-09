@@ -1,4 +1,3 @@
-
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: MIT-0
 
@@ -7,6 +6,7 @@ package com.amazonaws.sfc.opcua.config
 
 import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_PASSWORD
 import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_USERNAME
+import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_USER_CERTIFICATE
 import com.amazonaws.sfc.config.ConfigurationClass
 import com.amazonaws.sfc.config.ConfigurationException
 import com.amazonaws.sfc.config.Validate
@@ -111,6 +111,11 @@ class OpcuaServerConfiguration : Validate {
     val password: String?
         get() = _password
 
+    @SerializedName(CONFIG_USER_CERTIFICATE)
+    private var _userCertificateConfiguration: CertificateConfiguration? = null
+    val userCertificateConfiguration: CertificateConfiguration?
+        get() = _userCertificateConfiguration
+
     val endPoint
         get() = listOf("${address}:${port}", path).joinToString(separator = "/")
 
@@ -128,11 +133,13 @@ class OpcuaServerConfiguration : Validate {
         validateAddress()
         validatePort()
         validateUsernamePassword()
+        validateUserCertificate()
         validateConnectionTimeout()
         validateWaitAfterConnectError()
         validateWaitAfterReadError()
         validateMessageLimits()
         validateCertificateForPolicy()
+
         validated = true
     }
 
@@ -147,7 +154,7 @@ class OpcuaServerConfiguration : Validate {
         }
     }
 
-    fun validateUsernamePassword(){
+    fun validateUsernamePassword() {
 
         if (_username != null && _password != null) return
         if (_username == null && _password == null) return
@@ -157,7 +164,28 @@ class OpcuaServerConfiguration : Validate {
             CONFIG_USERNAME,
             this
         )
+
+        ConfigurationException.check(
+            _userCertificateConfiguration == null,
+            "$CONFIG_USERNAME can not be used when $CONFIG_USER_CERTIFICATE is set",
+            CONFIG_USERNAME,
+            this
+        )
     }
+
+    fun validateUserCertificate() {
+
+        if (_userCertificateConfiguration == null) return
+
+
+        ConfigurationException.check(
+            _username == null,
+            "$CONFIG_USER_CERTIFICATE can not be used when $CONFIG_USERNAME is set",
+            CONFIG_USER_CERTIFICATE,
+            this
+        )
+    }
+
 
     private fun atLeastOneSecond(t: Duration) = t >= (1000.toDuration(DurationUnit.MILLISECONDS))
 
@@ -256,10 +284,12 @@ class OpcuaServerConfiguration : Validate {
         private const val CONFIG_MAX_MESSAGE_SIZE = "MaxMessageSize"
         private const val CONFIG_MAX_CHUNK_SIZE = "MaxChunkSize"
         private const val CONFIG_MAX_CHUNK_COUNT = "MaxChunkCount"
-        private const val CONFIG_CERTIFICATE = "Certificate"
+        const val CONFIG_CERTIFICATE = "Certificate"
+        private const val CONFIG_SECURITY_MODE = "SecurityMode"
         private const val CONFIG_SECURITY_POLICY = "SecurityPolicy"
         private const val CONFIG_CERTIFICATE_VALIDATION = "CertificateValidation"
         const val CONFIG_SERVER_PROFILE = "ServerProfile"
+        const val CONFIG_USER_TOKEN_TYPE = "UserTokenType"
 
 
         private val default = OpcuaServerConfiguration()
@@ -267,8 +297,8 @@ class OpcuaServerConfiguration : Validate {
         fun create(address: String = default._address,
                    port: Int = default._port,
                    path: String = default._path,
-                   username : String? = default._username,
-                   password : String? = default._password,
+                   username: String? = default._username,
+                   password: String? = default._password,
                    connectTimeout: Long = default._connectTimeout,
                    readTimeout: Long = default._readTimeout,
                    serverProfile: String? = default._serverProfile,

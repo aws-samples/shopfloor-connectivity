@@ -4,10 +4,9 @@
 
 package com.amazonaws.sfc.opcua
 
-import com.amazonaws.sfc.crypto.CertificateFormat
-import com.amazonaws.sfc.crypto.CertificateHelper
-import com.amazonaws.sfc.crypto.PkcsCertificateHelper
-import com.amazonaws.sfc.crypto.subjectAlternativeApplicationUri
+import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_USERNAME
+import com.amazonaws.sfc.config.BaseConfiguration.Companion.CONFIG_USER_CERTIFICATE
+import com.amazonaws.sfc.crypto.*
 import com.amazonaws.sfc.data.*
 import com.amazonaws.sfc.log.Logger
 import com.amazonaws.sfc.metrics.MetricDimensions
@@ -18,6 +17,7 @@ import com.amazonaws.sfc.opcua.FilterHelper.Companion.UNKNOWN_EVENT_TYPE
 import com.amazonaws.sfc.opcua.config.*
 import com.amazonaws.sfc.opcua.config.OpcuaAdapterConfiguration.Companion.CONFIG_EVENT_MAX_RETAIN_PERIOD
 import com.amazonaws.sfc.opcua.config.OpcuaAdapterConfiguration.Companion.CONFIG_EVENT_MAX_RETAIN_SIZE
+import com.amazonaws.sfc.opcua.config.OpcuaServerConfiguration.Companion.CONFIG_USER_TOKEN_TYPE
 import com.amazonaws.sfc.system.DateTime
 import com.amazonaws.sfc.system.DateTime.add
 import com.amazonaws.sfc.system.DateTime.systemDateTime
@@ -31,6 +31,7 @@ import kotlinx.coroutines.sync.withLock
 import org.eclipse.milo.opcua.sdk.client.OpcUaClient
 import org.eclipse.milo.opcua.sdk.client.api.config.OpcUaClientConfigBuilder
 import org.eclipse.milo.opcua.sdk.client.api.identity.UsernameProvider
+import org.eclipse.milo.opcua.sdk.client.api.identity.X509IdentityProvider
 import org.eclipse.milo.opcua.sdk.client.api.subscriptions.UaMonitoredItem
 import org.eclipse.milo.opcua.sdk.client.api.subscriptions.UaSubscription
 import org.eclipse.milo.opcua.sdk.client.api.subscriptions.UaSubscriptionManager
@@ -40,6 +41,7 @@ import org.eclipse.milo.opcua.stack.core.Identifiers
 import org.eclipse.milo.opcua.stack.core.StatusCodes
 import org.eclipse.milo.opcua.stack.core.UaException
 import org.eclipse.milo.opcua.stack.core.channel.MessageLimits
+import org.eclipse.milo.opcua.stack.core.security.SecurityPolicy
 import org.eclipse.milo.opcua.stack.core.serialization.SerializationContext
 import org.eclipse.milo.opcua.stack.core.types.builtin.*
 import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UInteger
@@ -49,6 +51,7 @@ import org.eclipse.milo.opcua.stack.core.types.structured.*
 import org.eclipse.milo.opcua.stack.core.util.EndpointUtil
 import sun.security.x509.X509CertImpl
 import java.net.URI
+import java.security.KeyPair
 import java.security.cert.X509Certificate
 import java.time.Instant
 import java.time.Period
@@ -59,6 +62,7 @@ import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.io.path.Path
 import kotlin.io.path.exists
+import kotlin.jvm.optionals.getOrNull
 import kotlin.time.Duration
 import kotlin.time.DurationUnit
 import kotlin.time.measureTime
@@ -168,6 +172,7 @@ open class OpcuaSource(
     private var _opcuaClient: OpcUaClient? = null
 
     private var certificateExpiryChecker: Job? = null
+    private var userCertificateExpiryChecker: Job? = null
 
     // opcua client used to interact with server
     private val client
@@ -332,6 +337,16 @@ open class OpcuaSource(
     // store for values changes for a monitored data node
     private val dataValueChangesStore = if (inSubscriptionReadingMode) SourceDataValuesStore<ChannelReadValue>() else null
 
+    private fun EndpointDescription.asString(): String =
+        "${this.endpointUrl}: " +
+                "Security policy: \"${(this.securityPolicyUri ?: "None").split("#").last()}\", " +
+                "Security mode: \"${this.securityMode.name}\", " +
+                "User token types:[ ${
+                    this.userIdentityTokens.joinToString { u ->
+                        "\"${u.tokenType.name}:${(u.securityPolicyUri ?: "None").split("#").last()}\""
+                    }
+                }]"
+
 
     // *** Event Subscriptions ***
 
@@ -354,6 +369,7 @@ open class OpcuaSource(
         }
     } else null
 
+
     // creates the client to communicate with the server the source is reading from
     private fun createOpcuaClient(): OpcUaClient? {
 
@@ -361,16 +377,43 @@ open class OpcuaSource(
 
         log.info("Creating client for source \"$sourceID\", on ${opcuaServerConfiguration.endPoint}")
 
-        // implementing this the hard way in order to extend with authentication methods later easier
         val securityPolicy = opcuaServerConfiguration.securityPolicy
-        val userTokenType = UserTokenType.Anonymous
 
+        val predicateUserToken = when {
+
+            (opcuaServerConfiguration.userCertificateConfiguration != null) -> {
+                log.trace("Using user token type \"${UserTokenType.Certificate}\" as $CONFIG_USER_CERTIFICATE is set to select server endpoints")
+                UserTokenType.Certificate
+            }
+
+            (opcuaServerConfiguration.username != null) -> {
+                log.trace("Using user token type \"${UserTokenType.UserName}\" as $CONFIG_USERNAME is set to select server endpoints")
+                UserTokenType.UserName
+            }
+
+            else -> {
+                log.trace("Using user token type \"${UserTokenType.Anonymous}\" as no user token type, user certificate or username is configured, to select server endpoints")
+                UserTokenType.Anonymous
+            }
+        }
+
+        log.info("Fetching all available endpoints for server \"${opcuaServerConfiguration.endPoint}\", using user token type $predicateUserToken to select endpoint for OPCUA client")
+
+        var predicateIndex = 0
 
         val predicate =
             { e: EndpointDescription ->
+
+                log.trace("Evaluating endpoint: [$predicateIndex] ${e.asString()}")
+
+                predicateIndex += 1
+
                 securityPolicy.policy.uri == e.securityPolicyUri &&
+                 //       (configuredSecurityMode == null || configuredSecurityMode.mode == e.securityMode) &&
                         Arrays.stream(e.userIdentityTokens)
-                            .anyMatch { p: UserTokenPolicy -> p.tokenType == userTokenType }
+                            .anyMatch { p: UserTokenPolicy ->
+                                p.tokenType == predicateUserToken
+                            }
             }
 
 
@@ -378,6 +421,7 @@ open class OpcuaSource(
         val clientConfig = { configBuilder: OpcUaClientConfigBuilder ->
             configBuilder.setConnectTimeout(UInteger.valueOf(opcuaServerConfiguration.connectTimeout.inWholeMilliseconds))
                 .setRequestTimeout(UInteger.valueOf(opcuaServerConfiguration.readTimeout.inWholeMilliseconds))
+
                 .setMessageLimits(messageLimits)
                 .setupClientSecurity { dir ->
                     log.info("Certificate or CRL Update to directory $dir, reconnecting client")
@@ -397,10 +441,24 @@ open class OpcuaSource(
             OpcUaClient.create(
                 opcuaServerConfiguration.endPoint,
                 { endpoints: List<EndpointDescription> ->
-                    endpoints.stream()
+
+                    if (endpoints.isEmpty())
+                        log.error("No endpoints could be retrieved from server")
+                    else
+                        log.trace("${endpoints.size} available endpoints:\n\t${endpoints.mapIndexed { i, e -> i to e }.joinToString(separator = "\n\t") { "[${it.first}] ${it.second.asString()}" }}")
+
+                    val selectedEndpoint = endpoints.stream()
                         .filter(predicate)
                         .map { endpoint -> EndpointUtil.updateUrl(endpoint, host) }
                         .findFirst()
+
+                    if (selectedEndpoint.getOrNull() != null)
+                        log.info("Using endpoint ${selectedEndpoint.get().asString()}")
+                    else
+                        log.error("No endpoint found for source \"$sourceID\" using user token type \"$predicateUserToken\" to select endpoint for OPCUA client")
+
+                    selectedEndpoint
+
                 }, clientConfig
             )
 
@@ -421,11 +479,47 @@ open class OpcuaSource(
                 metricsCollector?.put(protocolAdapterID, MetricsCollector.METRICS_CONNECTIONS, 1.0, MetricUnits.COUNT, dimensions)
                 opcuaClient
             } catch (e: Exception) {
-                log.errorEx("Error connecting at ${opcuaServerConfiguration.endPoint} for source \"$sourceID\"", e)
+                log.error("Error connecting at ${opcuaServerConfiguration.endPoint} for source \"$sourceID\", $e")
                 metricsCollector?.put(protocolAdapterID, MetricsCollector.METRICS_CONNECTION_ERRORS, 1.0, MetricUnits.COUNT, dimensions)
                 null
             }
         } else null
+
+    }
+
+    private fun getUserCertificateAndKeyPair(): Pair<X509Certificate, KeyPair>? {
+
+        val log = logger.getCtxLoggers(className, "getUserCertificateKeyPair")
+
+        val userCertificateConfiguration = opcuaServerConfiguration.userCertificateConfiguration
+
+        if (userCertificateConfiguration == null) return null
+
+
+        if (userCertificateConfiguration.format == CertificateFormat.Unknown) {
+            log.error("Type of user certificate could not be determined from filename of format configuration")
+            return null
+        }
+
+        if (userCertificateConfiguration.format != userCertificateConfiguration.certificateFileFormatFromName()) {
+            log.warning("User certificate type from filename does possibly not match with specified format")
+        }
+
+        log.trace("User certificate is of format ${userCertificateConfiguration.format}")
+
+        val certificateHelper = when (userCertificateConfiguration.format) {
+            CertificateFormat.Pkcs12 -> PkcsCertificateHelper(userCertificateConfiguration, logger)
+            else -> CertificateHelper(userCertificateConfiguration, logger)
+        }
+
+        val (userCertificate, userKeyPair) = certificateHelper.getCertificateAndKeyPair()
+        userCertificateExpiryChecker = startUserCertificateExpiryChecker(userCertificate)
+
+        if (userCertificate == null || userKeyPair == null) return null
+        log.trace("User certificate is $userCertificate")
+        log.trace("User keypair is $userKeyPair")
+
+        return userCertificate to userKeyPair
 
     }
 
@@ -440,6 +534,7 @@ open class OpcuaSource(
 
         val log = logger.getCtxLoggers(className, "OpcUaClientConfigBuilder.setupClientSecurity")
 
+        setupClientCertificateAuthentication()
         setupClientUsernamePasswordAuthentication(onUpdate)
 
         if (opcuaServerConfiguration.securityPolicy == OpcuaSecurityPolicy.None) return this
@@ -496,17 +591,17 @@ open class OpcuaSource(
         return this
     }
 
-    private fun OpcUaClientConfigBuilder.setupClientUsernamePasswordAuthentication(onUpdate: (String) -> Unit, ) {
+    private fun OpcUaClientConfigBuilder.setupClientUsernamePasswordAuthentication(onUpdate: (String) -> Unit) {
         val log = logger.getCtxLoggers(className, "OpcUaClientConfigBuilder.setupUsernamePasswordAuthentication")
         try {
             if (opcuaServerConfiguration.username != null && opcuaServerConfiguration.password != null) {
                 val certificateValidationConfiguration = opcuaServerConfiguration.certificateValidationConfiguration
                 if (certificateValidationConfiguration != null) {
-                    var tlm = ClientTrustListManager(certificateValidationConfiguration.directory, logger) { dir ->
+                    val tlm = ClientTrustListManager(certificateValidationConfiguration.directory, logger) { dir ->
                         log.info("Certificate or CLR update in directory \"$dir\"")
                         onUpdate(dir.toString())
                     }
-                    if (tlm.trustedCrls.isEmpty()){
+                    if (tlm.trustedCrls.isEmpty()) {
                         log.warning("There are no trusted certificates in ${tlm.trustedCertificatesDirectory}, when connection for the first time to a server fails with an error message \"the trustAnchors parameter must be non-empty\" move the rejected certificate for that server from  ${tlm.rejectedPath} into ${tlm.trustedCertificatesDirectory}")
                     }
                     val certificateValidator = DefaultClientCertificateValidator(tlm)
@@ -520,35 +615,55 @@ open class OpcuaSource(
         }
     }
 
-    private fun startCertificateExpiryChecker(certificate: X509Certificate?): Job? {
+    private fun OpcUaClientConfigBuilder.setupClientCertificateAuthentication() {
+        val log = logger.getCtxLoggers(className, "OpcUaClientConfigBuilder.setupClientCertificateAuthentication")
+        try {
+            if (opcuaServerConfiguration.userCertificateConfiguration != null) {
+                val userCertificateAndKeyPair = getUserCertificateAndKeyPair()
+                if (userCertificateAndKeyPair != null) {
+                    this.setIdentityProvider(X509IdentityProvider(userCertificateAndKeyPair.first, userCertificateAndKeyPair.second.private))
+                }
+            }
+        } catch (e: Exception) {
+            log.errorEx("Error setting client certificate authentication server of source  \"$sourceID\"", e)
+        }
+    }
 
-        val certificateConfiguration = opcuaServerConfiguration.certificateConfiguration
-        val expirationWarningPeriod = certificateConfiguration?.expirationWarningPeriod ?: 0
+    private fun startCertificateExpiryChecker(certificate: X509Certificate?): Job? =
+        startCertificateChecker("OPCUA security", certificate, opcuaServerConfiguration.certificateConfiguration, certificateExpiryChecker)
 
-        if (certificate == null || certificateConfiguration == null || expirationWarningPeriod <= 0) {
-            certificateExpiryChecker?.cancel()
+    private fun startUserCertificateExpiryChecker(certificate: X509Certificate?): Job? =
+        startCertificateChecker("User Authentication", certificate, opcuaServerConfiguration.userCertificateConfiguration, userCertificateExpiryChecker)
+
+
+    private fun startCertificateChecker(checkedCertificateType: String, certificate: X509Certificate?, certificateConfiguration: CertificateConfiguration?, checkerJob: Job?): Job? {
+
+        if (certificate == null || certificateConfiguration == null || certificateConfiguration.expirationWarningPeriod <= 0) {
+            checkerJob?.cancel()
             return null
         }
+        val expirationWarningPeriod = certificateConfiguration.expirationWarningPeriod
 
-        return sourceScope.launch("OPCUA Certificate Expiry Watcher", Dispatchers.IO) {
+
+        return sourceScope.launch("OPCUA Certificate Expiry Watcher for $checkedCertificateType certificate", Dispatchers.IO) {
 
             try {
                 while (isActive) {
 
                     val now = systemDateUTC()
                     if (certificate.notAfter <= now.add(Period.ofDays(expirationWarningPeriod * -1))) {
-                        val ctxLog = logger.getCtxLoggers(className, "Check Certificate Expiration")
+                        val ctxLog = logger.getCtxLoggers(className, "Check $checkedCertificateType Certificate Expiration")
                         if (certificate.notAfter >= now) {
                             ctxLog.error("Certificate expired at ${certificate.notAfter}")
                         } else {
                             val daysBetween = ChronoUnit.DAYS.between(certificate.notAfter.toInstant(), now.toInstant())
-                            ctxLog.warning("Certificate will expire in $daysBetween days at ${certificate.notAfter}")
+                            ctxLog.warning("$checkedCertificateType certificate $certificate will expire in $daysBetween days at ${certificate.notAfter}")
                         }
                     }
                     DateTime.delayUntilNextMidnightUTC()
                 }
             } catch (e: Exception) {
-                logger.getCtxErrorLogEx(className, "startCertificateExpiryChecker")("Error while checking certificate expiration", e)
+                logger.getCtxErrorLogEx(className, "startCertificateExpiryChecker")("Error while checking $checkedCertificateType certificate expiration", e)
             }
         }
 
@@ -865,6 +980,7 @@ open class OpcuaSource(
     fun close() {
         connectionWatchdog?.cancel()
         certificateExpiryChecker?.cancel()
+        userCertificateExpiryChecker?.cancel()
         _opcuaClient?.disconnect()
     }
 

@@ -24,7 +24,7 @@ class OpcuaCertificateValidationOptions {
 
     @SerializedName(CONFIG_KEY_USAGE_END)
     private var _keyUsageEndEntity: Boolean = true
-    val keyUsageEndEntit: Boolean
+    val keyUsageEndEntity: Boolean
         get() = _keyUsageEndEntity
 
     @SerializedName(CONFIG_EXT_KEY_USAGE_END)
@@ -53,7 +53,7 @@ class OpcuaCertificateValidationOptions {
             val set = mutableSetOf<ValidationCheck>()
             if (hostOrIP) set.add(ValidationCheck.HOSTNAME)
             if (validity) set.add(ValidationCheck.VALIDITY)
-            if (keyUsageEndEntit) set.add(ValidationCheck.KEY_USAGE_END_ENTITY)
+            if (keyUsageEndEntity) set.add(ValidationCheck.KEY_USAGE_END_ENTITY)
             if (extKeyUsageEndEntity) set.add(ValidationCheck.EXTENDED_KEY_USAGE_END_ENTITY)
             if (keyUsageIssuer) set.add(ValidationCheck.KEY_USAGE_ISSUER)
             if (revocation) set.add(ValidationCheck.REVOCATION)
@@ -104,7 +104,7 @@ class OpcuaCertificateValidationOptions {
     }
 
     override fun toString(): String {
-        return "($CONFIG_HOST_OR_IP=$hostOrIP, $CONFIG_VALIDITY=$validity, $CONFIG_KEY_USAGE_END=$keyUsageEndEntit, $CONFIG_EXT_KEY_USAGE_END=$extKeyUsageEndEntity, $CONFIG_KEY_USAGE_ISSUER=$keyUsageIssuer, $CONFIG_REVOCATION=$revocation, $CONFIG_APPLICATION_URI=$applicationUri)"
+        return "($CONFIG_HOST_OR_IP=$hostOrIP, $CONFIG_VALIDITY=$validity, $CONFIG_KEY_USAGE_END=$keyUsageEndEntity, $CONFIG_EXT_KEY_USAGE_END=$extKeyUsageEndEntity, $CONFIG_KEY_USAGE_ISSUER=$keyUsageIssuer, $CONFIG_REVOCATION=$revocation, $CONFIG_APPLICATION_URI=$applicationUri)"
     }
 
 }

@@ -144,7 +144,7 @@ class OpcuaDataTypesConverter(private val context: SerializationContext? = null)
         fun isStructuredValue(value: Any?): Boolean {
             if (isSimpleValueType(value)) return false
             if (value is Array<*>) {
-                return ((value.size > 0) && isStructuredValue(value[0]))
+                return ((value.isNotEmpty()) && isStructuredValue(value[0]))
             }
             return true
         }

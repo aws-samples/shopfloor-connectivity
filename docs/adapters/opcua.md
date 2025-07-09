@@ -256,20 +256,20 @@ Example of OPCUA server configuration using Basic256Sha256 security profile for 
         "Revocation": true,
         "ApplicationUri": true
       }
-    }
-  },
-  "Certificate": {
-    "CertificateFile": "/etc/certificates/certificate.pem",
-    "PrivateKeyFile": "/etc/certificates/ /private-key.pem",
-    "ExpirationWarningPeriod": 30,
-    "SelfSignedCertificate": {
-      "CommonName": "OPCUA-CONNECTOR",
-      "Organization": "AWS",
-      "OrganizationalUnit": "AIP",
-      "LocalityName": "AMS",
-      "StateName": "NH",
-      "CountryCode": "NL",
-      "ValidPeriodDays": 365
+    },
+    "Certificate": {
+      "CertificateFile": "/etc/certificates/certificate.pem",
+      "PrivateKeyFile": "/etc/certificates/ /private-key.pem",
+      "ExpirationWarningPeriod": 30,
+      "SelfSignedCertificate": {
+        "CommonName": "OPCUA-CONNECTOR",
+        "Organization": "AWS",
+        "OrganizationalUnit": "AIP",
+        "LocalityName": "AMS",
+        "StateName": "NH",
+        "CountryCode": "NL",
+        "ValidPeriodDays": 365
+      }
     }
   }
 
@@ -1059,6 +1059,7 @@ When connecting to a server for the first time fails due to a certificate valida
 - [ReadTimeout](#readtimeout)
 - [SecurityPolicy](#securitypolicy)
 - [ServerProfile](#serverprofile)
+- [UserCertificate](#usercertificate)
 - [Username](#username)
 - [WaitAfterConnectError](#waitafterconnecterror)
 - [WaitAfterReadError](#waitafterreaderror)
@@ -1215,9 +1216,21 @@ The ServerProfile property specifies the server profile to use from the adapters
 
 ---
 
+### UserCertificate
+
+A certificate configuration object that defines the X.509 certificate and private key used for certificate-based client authentication with the OPC UA server. This configuration includes the certificate file path, private key file path, certificate format (PEM, PKCS12, etc.), and optional password for encrypted private keys. The certificate represents the client's identity . The certificate configuration must contain valid certificate and private key files that are accessible and properly formatted for OPC UA client authentication.
+
+This authentication method is mutually exclusive with [username](#username)/[password](#password) authentication.
+
+**Type**: [CertificateConfiguration](../core/certificate-configuration.md)
+
+---
+
 ### Username
 
 Username credential used for authentication with the OPC UA server. Username and password should not be included as clear text in the configuration. It is strongly recommended to use placeholders and use the SFC integration with the AWS secrets manager.
+
+Username and [UserCertificateFile](#usercertificatefile) are mutally exclusive.
 
 **Type:** String
 
@@ -1306,6 +1319,10 @@ Default is 10000, the minimum value is 1000
     "WaitAfterConnectError": {
       "type": "integer",
       "description": "Wait time after a connection error in milliseconds"
+    },
+    "UserCertificate": {
+      "$ref": "#/definitions/CertificateConfiguration",
+      "description": "Certificate configuration for user authentication"
     },
     "WaitAfterReadError": {
       "type": "integer",
