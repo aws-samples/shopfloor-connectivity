@@ -33,7 +33,7 @@ In order to use this target as in [in-process](../sfc-running-targets.md#running
 
 [SFC Configuration](../core/sfc-configuration.md) > [Targets](../core/sfc-configuration.md#targets) >  [Target](../core/target-configuration.md) 
 
-AwsS3TablesTargetConfiguration extends the type TargetConfiguration with specific configuration data for sending data to a Timestream table. The Targets configuration element can contain entries of this type; the TargetType of these entries must be set to **"AWS-S3-TABLES"**.
+AwsS3TablesTargetConfiguration extends the type TargetConfiguration with specific configuration data for sending data to S3 tables. The Targets configuration element can contain entries of this type; the TargetType of these entries must be set to **"AWS-S3-TABLES"**.
 
 Requires IAM permissions:
 
