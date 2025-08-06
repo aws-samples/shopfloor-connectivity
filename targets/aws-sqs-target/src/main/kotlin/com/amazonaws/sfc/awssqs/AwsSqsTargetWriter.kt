@@ -413,7 +413,7 @@ class AwsSqsTargetWriter(
         }
 
     companion object {
-        const val SQS_MAX_BATCH_MSG_SIZE = 1024 * 256
+        const val SQS_MAX_BATCH_MSG_SIZE = 1024 * 1024
 
         @JvmStatic
         @Suppress("unused")

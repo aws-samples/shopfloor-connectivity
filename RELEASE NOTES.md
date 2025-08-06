@@ -1,5 +1,10 @@
 # Release Notes:
 
+## version 1.10.1, 6 Aug 2025
+
+- Updated the [maximum size limit for messages in SQS](https://aws.amazon.com/about-aws/whats-new/2025/08/amazon-sqs-max-payload-size-1mib/) target to 1GB,
+
+---
 ## version 1.10.0, 9 July 2025
 
 - New: [AWS S3 Tables target](./docs/targets/aws-s3-tables.md)
