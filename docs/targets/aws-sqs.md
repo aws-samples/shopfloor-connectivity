@@ -40,7 +40,7 @@ Requires IAM permission `sqs:SendMessageBatch` for the receiving queue.
 
 ---
 ### BatchSize
-Number of output messages to combine in a single SendMessageBatch API call. The data will be written to the SQS queue before reaching the specified batch size if the maximum payload size (256 KB) would be exceeded. 
+Number of output messages to combine in a single SendMessageBatch API call. The data will be written to the SQS queue before reaching the specified batch size if the maximum payload size (1 MB) is exceeded. 
 
 **Type**: Integer
 
@@ -133,7 +133,7 @@ The following [Velocity tools](https://velocity.apache.org/tools/3.1/tools-summa
 - $math
 - $number
 
-Additional epoch timestamp values can be added to the data used for the transformation by setting the [TemplateEpochTimestamp](../core/target-configuration.md#templateepochtimestamp) property to true,
+Additional epoch timestamp values can be added to the data used for the transformation by setting the [TemplateEpochTimestamp](../core/target-configuration.md#templateepochtimestamp) property to true.
 
 For targets where the data does not require specific output format, the data is serialized as [JSON data](../sfc-data-format.md#sfc-output-data-schemas).
 
