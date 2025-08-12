@@ -1,8 +1,15 @@
 # Release Notes:
 
+## version 1.10.3, 12  Aug 2025
+
+- Restored creation of the sfc deployment bundle
+
+---
+
 ## version 1.10.2, 11  Aug 2025
 
 - Documentation update
+
 ---
 
 ## version 1.10.1, 6 Aug 2025
